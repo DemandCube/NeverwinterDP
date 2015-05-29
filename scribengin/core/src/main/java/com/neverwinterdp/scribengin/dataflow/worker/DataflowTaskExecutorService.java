@@ -19,7 +19,7 @@ import com.neverwinterdp.scribengin.dataflow.DataflowContainer;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
-import com.neverwinterdp.util.LoggerFactory;
+import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMDescriptor;
 
 @Singleton
@@ -46,6 +46,7 @@ public class DataflowTaskExecutorService {
     logger.info("Start onInit()");
     Node workerNode = dflRegistry.getWorkerNode(vmDescriptor.getId()) ;
     notifier = new Notifier(dflRegistry.getRegistry(),  workerNode.getPath() + "/notification", "dataflow-executor-service");
+    notifier.initRegistry();
     
     dataflowTaskEventListener = new DataflowWorkerEventListenter(dflRegistry);
     dataflowDescriptor = dflRegistry.getDataflowDescriptor();

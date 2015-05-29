@@ -71,6 +71,7 @@ public class DataflowCommandStartStopResumeTest extends DataflowCommandTest {
         count++ ;
         notifier = 
             new Notifier(registry, "/scribengin/tests/dataflow-start-top-resume/notification", "simulation-" + (count + 1));
+        notifier.initRegistry();
         notifier.info("wait-before-stop", "Wait " + sleepBeforeStop + "ms before stop the dataflow");
         if(sleepBeforeStop > 0) Thread.sleep(sleepBeforeStop);
         try {

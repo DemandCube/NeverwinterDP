@@ -26,7 +26,7 @@ public class VMConfig {
       return null;
     }
   }
-
+  
   @Parameter(names = "--name", description = "The registry partition or table")
   private String              name;
   

@@ -52,16 +52,29 @@ public class TaskRegistry<T>{
     this.path     = path;
     this.taskDescriptorType = taskDescriptorType;
     
-    this.tasksRootNode = registry.createIfNotExist(path) ;
-    this.tasksListNode = tasksRootNode.createDescendantIfNotExists( TASK_LIST_PATH); 
-    this.tasksAvailableNode = tasksRootNode.createDescendantIfNotExists(AVAILABLE_PATH);
-    this.tasksAssignedNode = tasksRootNode.createDescendantIfNotExists(ASSIGNED_PATH);
-    this.tasksAssignedHeartbeatNode = tasksRootNode.createDescendantIfNotExists(ASSIGNED_HEARTBEAT_PATH);
-    this.tasksFinishedNode = tasksRootNode.createDescendantIfNotExists(FINISHED_PATH);
-    this.tasksLockNode = tasksRootNode.createDescendantIfNotExists(LOCK_PATH);
+    tasksRootNode = registry.get(path) ;
+    tasksListNode = tasksRootNode.getDescendant(TASK_LIST_PATH); 
+    tasksAvailableNode = tasksRootNode.getDescendant(AVAILABLE_PATH);
+    tasksAssignedNode = tasksRootNode.getDescendant(ASSIGNED_PATH);
+    tasksAssignedHeartbeatNode = tasksRootNode.getDescendant(ASSIGNED_HEARTBEAT_PATH);
+    tasksFinishedNode = tasksRootNode.getDescendant(FINISHED_PATH);
+    tasksLockNode = tasksRootNode.getDescendant(LOCK_PATH);
     
     taskExecutionNotifier = new Notifier(registry, path + "/" + NOTIFICATIONS_PATH, "task-execution");
     taskCoordinationNotifier = new Notifier(registry, path + "/" + NOTIFICATIONS_PATH, "task-coordination");
+  }
+  
+  public void initRegistry() throws RegistryException {
+    tasksRootNode.createIfNotExists() ;
+    tasksListNode.createIfNotExists(); 
+    tasksAvailableNode.createIfNotExists();
+    tasksAssignedNode.createIfNotExists();
+    tasksAssignedHeartbeatNode.createIfNotExists();
+    tasksFinishedNode.createIfNotExists();
+    tasksLockNode.createIfNotExists();
+    
+    taskExecutionNotifier.initRegistry();
+    taskCoordinationNotifier.initRegistry();
   }
   
   public Registry getRegistry() { return registry; }

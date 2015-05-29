@@ -2,8 +2,11 @@ package com.neverwinterdp.scribengin.dataflow;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -28,6 +31,7 @@ import com.neverwinterdp.vm.VMDescriptor;
 
 @Singleton
 public class DataflowRegistry {
+  
   final static public String MASTER_EVENT_PATH      = "event/master" ;
   final static public String WORKER_EVENT_PATH      = "event/worker" ;
   final static public String FAILURE_EVENT_PATH     = "event/failure" ;
@@ -60,7 +64,10 @@ public class DataflowRegistry {
   @Inject
   private VMDescriptor       vmDescriptor;
   
-  private Node               status;
+  private ConfigurationRegistry  configuration ;
+  
+  private Node               masterLeaderNode;
+  private Node               statusNode;
 
   private Node               workerEventNode;
   private Node               failureEventNode;
@@ -87,28 +94,55 @@ public class DataflowRegistry {
   
   @Inject
   public void onInit() throws Exception {
-    registry.createIfNotExist(dataflowPath + "/" + MASTER_LEADER_PATH);
+    configuration = new ConfigurationRegistry(dataflowPath);
+    masterLeaderNode = registry.get(dataflowPath + "/" + MASTER_LEADER_PATH);
+    
     String taskPath = dataflowPath + "/tasks";
     taskRegistry = new TaskRegistry<DataflowTaskDescriptor>(registry, taskPath, DataflowTaskDescriptor.class);
     
-    status = registry.createIfNotExist(dataflowPath + "/status");
+    statusNode = registry.get(dataflowPath + "/status");
     
-    masterEventNode  = registry.createIfNotExist(dataflowPath + "/" + MASTER_EVENT_PATH);
-    workerEventNode  = registry.createIfNotExist(dataflowPath + "/" + WORKER_EVENT_PATH);
-    failureEventNode = registry.createIfNotExist(dataflowPath + "/" + FAILURE_EVENT_PATH);
+    masterEventNode  = registry.get(dataflowPath + "/" + MASTER_EVENT_PATH);
+    workerEventNode  = registry.get(dataflowPath + "/" + WORKER_EVENT_PATH);
+    failureEventNode = registry.get(dataflowPath + "/" + FAILURE_EVENT_PATH);
     
-    activeActivitiesNode = registry.createIfNotExist(dataflowPath + "/" + ACTIVITIES_PATH);
+    activeActivitiesNode = registry.get(dataflowPath + "/" + ACTIVITIES_PATH);
     
-    allWorkers = registry.createIfNotExist(dataflowPath + "/" + ALL_WORKERS_PATH);
-    activeWorkers = registry.createIfNotExist(dataflowPath + "/" + ACTIVE_WORKERS_PATH);
-    historyWorkers = registry.createIfNotExist(dataflowPath + "/" + HISTORY_WORKERS_PATH);
+    allWorkers = registry.get(dataflowPath + "/" + ALL_WORKERS_PATH);
+    activeWorkers = registry.get(dataflowPath + "/" + ACTIVE_WORKERS_PATH);
+    historyWorkers = registry.get(dataflowPath + "/" + HISTORY_WORKERS_PATH);
     
     String notificationPath = getDataflowNotificationsPath() ;
     dataflowTaskNotifier = new Notifier(registry, notificationPath, "dataflow-tasks");
     dataflowWorkerNotifier = new Notifier(registry, notificationPath, "dataflow-workers");
   }
   
+  public void initRegistry() throws Exception {
+    DataflowDescriptor dataflowDescriptor = getDataflowDescriptor() ;
+    
+    configuration.initRegistry(dataflowDescriptor);
+    
+    masterLeaderNode.createIfNotExists();
+    
+    statusNode.createIfNotExists();
+    
+    masterEventNode.createIfNotExists();
+    workerEventNode.createIfNotExists();
+    failureEventNode.createIfNotExists();
+    
+    activeActivitiesNode.createIfNotExists();
+    
+    allWorkers.createIfNotExists();
+    activeWorkers.createIfNotExists();
+    historyWorkers.createIfNotExists();
+    
+    dataflowTaskNotifier.initRegistry();
+    dataflowWorkerNotifier.initRegistry();
+  }
+  
   public String getDataflowPath() { return this.dataflowPath ; }
+  
+  public ConfigurationRegistry getConfiguration() { return this.configuration ; }
   
   public String getDataflowNotificationsPath() { return this.dataflowPath  + "/" + NOTIFICATIONS_PATH; }
   
@@ -172,14 +206,14 @@ public class DataflowRegistry {
     executor.setData(descriptor);
   }
   
-  public Node getStatusNode() { return this.status ; }
+  public Node getStatusNode() { return this.statusNode ; }
   
   public DataflowLifecycleStatus getStatus() throws RegistryException {
-    return status.getDataAs(DataflowLifecycleStatus.class) ;
+    return statusNode.getDataAs(DataflowLifecycleStatus.class) ;
   }
   
   public void setStatus(DataflowLifecycleStatus event) throws RegistryException {
-    status.setData(event);
+    statusNode.setData(event);
   }
   
   public <T> void broadcastWorkerEvent(T event) throws RegistryException {
@@ -341,5 +375,32 @@ public class DataflowRegistry {
     multiGet.shutdown();
     multiGet.waitForAllGet(30000);
     return multiGet.getResults();
+  }
+  
+  public class ConfigurationRegistry {
+    private Node configurationNode ;
+    private Node logNode ;
+    
+    public ConfigurationRegistry(String dataflowPath) throws RegistryException {
+      this.configurationNode = registry.get(dataflowPath + "/configuration") ;
+      this.logNode = configurationNode.getChild("log") ;
+    }
+    
+    public void initRegistry(DataflowDescriptor dataflowDescriptor) throws RegistryException {
+      logNode.createIfNotExists();
+    }
+    
+    public String getLogPath() { return logNode.getPath() ;}
+    
+    public Map<String, String> getLog() throws RegistryException {
+      byte[] data = logNode.getData();
+      if(data == null) return new HashMap<String, String>();
+      TypeReference<Map<String, String>> typeRef = new TypeReference<Map<String, String>>() {};
+      return JSONSerializer.INSTANCE.fromBytes(data, typeRef ) ;
+    }
+    
+    public void setLog(Map<String, String> conf) throws RegistryException {
+      logNode.setData(conf);
+    }
   }
 }

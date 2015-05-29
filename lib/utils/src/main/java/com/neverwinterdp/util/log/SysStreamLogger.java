@@ -1,4 +1,4 @@
-package com.neverwinterdp.util;
+package com.neverwinterdp.util.log;
 
 import java.io.IOException;
 import java.io.PrintStream;

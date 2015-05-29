@@ -12,7 +12,7 @@ import com.mycila.guice.ext.closeable.CloseableModule;
 import com.mycila.guice.ext.jsr250.Jsr250Module;
 import com.neverwinterdp.module.AppModule;
 import com.neverwinterdp.module.MycilaJmxModuleExt;
-import com.neverwinterdp.util.LoggerFactory;
+import com.neverwinterdp.util.log.LoggerFactory;
 
 public class Main {
   static public void main(String[] args) throws Exception {

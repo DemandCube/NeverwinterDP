@@ -22,7 +22,7 @@ import com.neverwinterdp.scribengin.dataflow.activity.DataflowStopActivityBuilde
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
 import com.neverwinterdp.scribengin.storage.sink.SinkFactory;
 import com.neverwinterdp.scribengin.storage.source.SourceFactory;
-import com.neverwinterdp.util.LoggerFactory;
+import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
 
@@ -80,6 +80,7 @@ public class DataflowService {
   }
   
   public void run() throws Exception {
+    dataflowRegistry.initRegistry();
     dataflowWorkerMonitor = new DataflowWorkerMonitor(dataflowRegistry, activityService);
     dataflowRegistry.setStatus(DataflowLifecycleStatus.INIT);
     masterEventListener = new DataflowTaskMasterEventListenter(dataflowRegistry);

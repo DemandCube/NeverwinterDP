@@ -19,7 +19,7 @@ import com.neverwinterdp.module.MycilaJmxModuleExt;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.scribengin.dataflow.DataflowContainer;
-import com.neverwinterdp.util.LoggerFactory;
+import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;

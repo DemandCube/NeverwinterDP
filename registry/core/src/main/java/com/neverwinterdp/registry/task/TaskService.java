@@ -7,7 +7,7 @@ import com.neverwinterdp.registry.RegistryException;
 
 public class TaskService<T>{
   private TaskRegistry<T> taskRegistry ;
-  private TaskWatcher<T> taskWatcher ;
+  private TaskWatcher<T>  taskWatcher ;
 
   public TaskService() { }
   
@@ -23,9 +23,10 @@ public class TaskService<T>{
     init(new TaskRegistry<T>(registry, path, taskDescriptorType));
   }
   
-  protected void init(TaskRegistry<T> taskRegistry) throws RegistryException {
-    this.taskRegistry = taskRegistry;
-    taskWatcher = new TaskWatcher<T>(taskRegistry) ;
+  protected void init(TaskRegistry<T> taskReg) throws RegistryException {
+    taskRegistry = taskReg;
+    taskReg.initRegistry();
+    taskWatcher = new TaskWatcher<T>(taskReg) ;
   }
   
   @PreDestroy

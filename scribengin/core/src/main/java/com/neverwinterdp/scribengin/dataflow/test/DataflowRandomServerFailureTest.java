@@ -62,6 +62,7 @@ public class DataflowRandomServerFailureTest extends DataflowCommandTest {
       while(!error && simulationCount < maxFailure && dflClient.getStatus() == DataflowLifecycleStatus.RUNNING) {
         Notifier notifier = 
           new Notifier(registry, "/scribengin/tests/dataflow-random-server-kill/notification", "simulation-" + ((simulationCount + 1)));
+        notifier.initRegistry();
         ExecuteLog executeLog = failureSimulator[0].terminate(dflClient, notifier);
         if(executeLog != null) {
           executeLogs.add(executeLog);

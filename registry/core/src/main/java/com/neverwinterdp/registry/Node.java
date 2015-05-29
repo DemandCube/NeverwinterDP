@@ -51,6 +51,10 @@ public class Node {
     registry.create(path, data, mode);
   }
   
+  public void createIfNotExists() throws RegistryException {
+    registry.createIfNotExist(path);
+  }
+  
   public byte[] getData() throws RegistryException { 
     return registry.getData(path); 
   }

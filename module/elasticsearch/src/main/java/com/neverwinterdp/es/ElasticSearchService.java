@@ -14,7 +14,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.util.JSONSerializer;
-import com.neverwinterdp.util.LoggerFactory;
+import com.neverwinterdp.util.log.LoggerFactory;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com

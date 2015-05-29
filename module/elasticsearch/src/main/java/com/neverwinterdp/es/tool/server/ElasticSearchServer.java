@@ -17,7 +17,7 @@ import com.neverwinterdp.es.ElasticSearchService;
 import com.neverwinterdp.module.AppModule;
 import com.neverwinterdp.module.MycilaJmxModuleExt;
 import com.neverwinterdp.tool.server.Server;
-import com.neverwinterdp.util.LoggerFactory;
+import com.neverwinterdp.util.log.LoggerFactory;
 
 public class ElasticSearchServer implements Server {
   private String nodeName ;

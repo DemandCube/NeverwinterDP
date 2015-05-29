@@ -44,7 +44,11 @@ public class Notifier {
   }
   
   protected void init(Registry registry, String path, String name) throws RegistryException {
-    eventsNode = registry.createIfNotExist(path + "/" + name + "-events") ;
+    eventsNode = registry.get(path + "/" + name + "-events") ;
+  }
+  
+  public void initRegistry() throws RegistryException {
+    eventsNode.createIfNotExists(); ;
   }
   
   public void info(String name, String mesg) throws RegistryException {
