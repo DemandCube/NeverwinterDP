@@ -2,6 +2,7 @@ package com.neverwinterdp.util.log;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.PropertyConfigurator;
@@ -36,5 +37,11 @@ public class LoggerFactory {
   
   static public void log4jConfigure(Properties props) throws Exception {
     PropertyConfigurator.configure(props);
+  }
+  
+  static public void log4jConfigure(Map<String, String> props) throws Exception {
+    Properties properties = new Properties() ;
+    properties.putAll(props);
+    PropertyConfigurator.configure(properties);
   }
 }
