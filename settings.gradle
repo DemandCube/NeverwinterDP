@@ -1,0 +1,23 @@
+include 'lib/utils'
+include 'lib/yara'
+include 'lib/buffer'
+
+include 'module/commons'
+include 'module/elasticsearch'
+include 'module/kafka'
+
+include 'registry/core'
+include 'registry/vm'
+
+include 'scribengin/core'
+include 'scribengin/dataflow/hdfs'
+include 'scribengin/dataflow/kafka'
+include 'scribengin/release'
+
+include 'client/swingui'
+
+include 'jvmagent/bootstrap'
+include 'jvmagent/registry'
+include 'jvmagent/DemoApp'
+
+
