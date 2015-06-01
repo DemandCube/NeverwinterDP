@@ -97,7 +97,7 @@ public class LoggerConfig {
     String  name        = "file";
 
     @Parameter(names = "--log-file-path", required = true, description = "The path of the log file")
-    String  filePath    = "build/logs/vm.log";
+    String  filePath    = "logs/vm.log";
 
     @Parameter(names = "--log-file-max-size-in-mb", description = "The maximum size of the log file")
     int     maxSizeInMb = 5;
@@ -142,13 +142,13 @@ public class LoggerConfig {
   
   static public class ESAppender {
     @Parameter(names = "--log-es-enable", description = "Enable or not the log file")
-    boolean        enable    = false;
+    boolean        enable    = true;
 
     @Parameter(names = "--log-es-name", description = "The name of the log es appender")
     private String name      = "es";
 
     @Parameter(names = "--log-es-connects", description = "The name of the log file appender")
-    private String connects  = "127.0.0.1:9300";
+    private String connects  = "elasticsearch-1:9300";
 
     @Parameter(names = "--log-es-buffer-dir", description = "The buffer directory")
     private String bufferDir = "data/buffer/log4j";
