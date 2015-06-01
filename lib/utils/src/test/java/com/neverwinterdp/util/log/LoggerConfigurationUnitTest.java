@@ -10,7 +10,7 @@ import com.neverwinterdp.util.JSONSerializer;
 public class LoggerConfigurationUnitTest {
   @Test
   public void test() throws Exception {
-    LoggerConfiguration conf = new LoggerConfiguration() ;
+    LoggerConfig conf = new LoggerConfig() ;
     conf.createFileAppender("file", "build/test.log") ;
     conf.createESAppender("es", "127.0.0.1:90300", "build/bufferDir", "log4j");
     conf.createLogger("rootLogger", "INFO", "file");

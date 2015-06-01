@@ -6,7 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neverwinterdp.util.text.StringUtil;
 
-public class LoggerConfiguration {
+public class LoggerConfig {
   
   private Map<String, Logger>       loggers       = new LinkedHashMap<String, Logger>();
   private Map<String, FileAppender> fileAppenders = new LinkedHashMap<String, FileAppender>();
@@ -34,24 +34,11 @@ public class LoggerConfiguration {
   public Map<String, String> getLog4jConfiguration() {
     Map<String, String> props = new LinkedHashMap<String, String>();
     for (FileAppender sel : fileAppenders.values()) {
-      String prefix = "log4j.appender." + sel.getName();
-      props.put(prefix,             "org.apache.log4j.RollingFileAppender");
-      props.put(prefix + ".layout", "org.apache.log4j.PatternLayout");
-      props.put(prefix + ".layout.ConversionPattern", "%-4r [%t] %-5p %c %x - %m%n");
-      props.put(prefix + ".File", sel.getFilePath());
-      props.put(prefix + ".MaxFileSize", sel.getMaxSizeInMb() + "MB");
-      props.put(prefix + ".MaxBackupIndex", sel.getMaxBackup() + "");
+      sel.addLog4jConfig(props);
     }
     
     for (ESAppender sel : esAppenders.values()) {
-      String prefix = "log4j.appender." + sel.getName();
-      props.put(prefix, "com.neverwinterdp.es.log4j.ElasticSearchAppender");
-      props.put(prefix + ".layout", "org.apache.log4j.PatternLayout");
-      props.put(prefix + ".layout.ConversionPattern", "%-4r [%t] %-5p %c %x - %m%n");
-
-      props.put(prefix + ".connects", sel.getConnects());
-      props.put(prefix + ".indexName", sel.getIndexName());
-      props.put(prefix + ".queueBufferDir", sel.getBufferDir());
+      sel.addLog4jConfig(props);
     }
     
     for(Logger sel : loggers.values()) {
@@ -122,6 +109,17 @@ public class LoggerConfiguration {
       this.indexName = indexName;
       return this;
     }
+    
+    public void addLog4jConfig(Map<String, String> props) {
+      String prefix = "log4j.appender." + name;
+      props.put(prefix, "com.neverwinterdp.es.log4j.ElasticSearchAppender");
+      props.put(prefix + ".layout", "org.apache.log4j.PatternLayout");
+      props.put(prefix + ".layout.ConversionPattern", "%-4r [%t] %-5p %c %x - %m%n");
+
+      props.put(prefix + ".connects", connects);
+      props.put(prefix + ".indexName", indexName);
+      props.put(prefix + ".queueBufferDir", bufferDir);
+    }
   }
   
   static public class FileAppender {
@@ -161,6 +159,17 @@ public class LoggerConfiguration {
     public FileAppender setMaxBackup(int maxBackup) { 
       this.maxBackup = maxBackup; 
       return this ;
+    }
+    
+    public void addLog4jConfig(Map<String, String> props) {
+      String prefix = "log4j.appender." + name;
+      props.put(prefix,   "org.apache.log4j.RollingFileAppender");
+      props.put(prefix + ".layout", "org.apache.log4j.PatternLayout");
+      props.put(prefix + ".layout.ConversionPattern", "%-4r [%t] %-5p %c %x - %m%n");
+      props.put(prefix + ".File", filePath);
+      props.put(prefix + ".MaxFileSize", maxSizeInMb + "MB");
+      props.put(prefix + ".MaxBackupIndex", maxBackup + "");
+      
     }
   }
 }

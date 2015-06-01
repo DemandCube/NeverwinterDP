@@ -29,42 +29,45 @@ public class VMConfig {
   
   @Parameter(names = "--name", description = "The registry partition or table")
   private String              name;
-  
+
   @Parameter(names = "--role", description = "The VM roles")
-  private List<String>        roles = new ArrayList<String>();
-  
+  private List<String>        roles            = new ArrayList<String>();
+
   @Parameter(names = "--cpu-cores", description = "The request number of cpu cores")
-  private int                 requestCpuCores = 1;
+  private int                 requestCpuCores  = 1;
   @Parameter(names = "--memory", description = "The request amount of memory in MB")
-  private int                 requestMemory   = 128;
-  
+  private int                 requestMemory    = 128;
+
   @Parameter(names = "--app-home", description = "App Home")
-  private String appHome;
-  
+  private String              appHome;
+
   @DynamicParameter(names = "--vm-resource:", description = "The resources for the vm")
-  private Map<String, String> vmResources  = new LinkedHashMap<String, String>();
-  
+  private Map<String, String> vmResources      = new LinkedHashMap<String, String>();
+
   @ParametersDelegate
-  private RegistryConfig      registryConfig = new RegistryConfig();
-  
-  @Parameter(names = "--self-registration", 
-             description = "Self create the registation entry in the registry, for master node")
+  private RegistryConfig      registryConfig   = new RegistryConfig();
+
+  @Parameter(names = "--self-registration",
+      description = "Self create the registation entry in the registry, for master node")
   private boolean             selfRegistration = false;
-  
+
   @Parameter(names = "--vm-application", description = "The vm application class")
   private String              vmApplication;
 
   @DynamicParameter(names = "--prop:", description = "The application configuration properties")
-  private Map<String, String> properties   = new HashMap<String, String>();
-  
+  private Map<String, String> properties       = new HashMap<String, String>();
+
   @DynamicParameter(names = "--hadoop:", description = "The application configuration properties")
-  private HadoopProperties hadoopProperties   = new HadoopProperties();
-  
+  private HadoopProperties    hadoopProperties = new HadoopProperties();
+
   @Parameter(names = "--description", description = "Description")
   private String              description;
-  
+
   @Parameter(names = "--environment", description = "Environement YARN, YARN_MINICLUSTER, JVM")
-  private Environment  environment = Environment.JVM;
+  private Environment         environment      = Environment.JVM;
+
+  @ParametersDelegate
+  private LoggerConfig        loggerConfig     = new LoggerConfig();
   
   public String getName() { return name; }
   public VMConfig setName(String name) { 
@@ -178,6 +181,11 @@ public class VMConfig {
     return this;
   }
   
+  public LoggerConfig getLoggerConfig() { return loggerConfig; }
+  public void setLoggerConfig(LoggerConfig loggerConfig) {
+    this.loggerConfig = loggerConfig;
+  }
+  
   public String buildCommand() {
     StringBuilder b = new StringBuilder() ;
     b.append("java ").append(" -Xmx" + requestMemory + "m ").append(VM.class.getName()) ;
@@ -229,5 +237,7 @@ public class VMConfig {
     for(Map.Entry<String, String> entry : hadoopProperties.entrySet()) {
       b.append(" --hadoop:").append(entry.getKey()).append("=").append(entry.getValue()) ;
     }
+    
+    b.append(loggerConfig.buildParameters());
   }
 }

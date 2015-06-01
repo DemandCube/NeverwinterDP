@@ -18,7 +18,7 @@ import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.util.JSONSerializer;
-import com.neverwinterdp.util.log.LoggerConfiguration;
+import com.neverwinterdp.util.log.LoggerConfig;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMApp.TerminateEvent;
 import com.neverwinterdp.vm.command.VMCommandWatcher;
@@ -213,11 +213,7 @@ public class VM {
     VMConfig vmConfig = new VMConfig();
     new JCommander(vmConfig, args);
     
-    LoggerConfiguration conf = new LoggerConfiguration() ;
-    conf.createFileAppender("file", "logs/" + vmConfig.getName() + "-vm.log") ;
-    conf.createESAppender("es", "elasticsearch-1:9300", "data/buffer/log4j", "log4j");
-    conf.createLogger("rootLogger", "INFO", "file", "es");
-    Map<String, String> log4jProps = conf.getLog4jConfiguration() ;
+    Map<String, String> log4jProps = vmConfig.getLoggerConfig().getLog4jConfiguration() ;
     LoggerFactory.log4jConfigure(log4jProps);
     
     VM vm = new VM(vmConfig);
