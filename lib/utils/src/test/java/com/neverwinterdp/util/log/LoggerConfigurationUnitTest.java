@@ -12,6 +12,7 @@ public class LoggerConfigurationUnitTest {
   public void test() throws Exception {
     LoggerConfiguration conf = new LoggerConfiguration() ;
     conf.createFileAppender("file", "build/test.log") ;
+    conf.createESAppender("es", "127.0.0.1:90300", "build/bufferDir", "log4j");
     conf.createLogger("rootLogger", "INFO", "file");
     Map<String, String> log4jProps = conf.getLog4jConfiguration() ;
     System.out.println(JSONSerializer.INSTANCE.toString(log4jProps));

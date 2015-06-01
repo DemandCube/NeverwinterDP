@@ -47,7 +47,8 @@ public class VMConfig {
   @ParametersDelegate
   private RegistryConfig      registryConfig = new RegistryConfig();
   
-  @Parameter(names = "--self-registration", description = "Self create the registation entry in the registry, for master node")
+  @Parameter(names = "--self-registration", 
+             description = "Self create the registation entry in the registry, for master node")
   private boolean             selfRegistration = false;
   
   @Parameter(names = "--vm-application", description = "The vm application class")
