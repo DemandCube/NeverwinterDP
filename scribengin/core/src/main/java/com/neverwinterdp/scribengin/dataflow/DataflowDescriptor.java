@@ -4,17 +4,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
+import com.neverwinterdp.vm.LoggerConfig;
 
 public class DataflowDescriptor {
   private String                         id  ;
   private String                         name;
   private String                         dataflowAppHome;
-  private StorageDescriptor              storageDescriptor;
+  private StorageDescriptor              sourceDescriptor;
   private Map<String, StorageDescriptor> sinkDescriptors;
   private int                            numberOfWorkers            =  1;
   private int                            numberOfExecutorsPerWorker =  1;
   private long                           taskMaxExecuteTime         = -1;
   private String                         scribe;
+  private LoggerConfig                   loggerConfig = new LoggerConfig();
 
   public String getId() { return id; }
   public void setId(String id)  { this.id = id; }
@@ -25,8 +27,8 @@ public class DataflowDescriptor {
   public String getDataflowAppHome() { return dataflowAppHome; }
   public void setDataflowAppHome(String dataflowAppHome) { this.dataflowAppHome = dataflowAppHome;  }
 
-  public StorageDescriptor getSourceDescriptor() { return storageDescriptor;}
-  public void setSourceDescriptor(StorageDescriptor storageDescriptor) { this.storageDescriptor = storageDescriptor;}
+  public StorageDescriptor getSourceDescriptor() { return sourceDescriptor;}
+  public void setSourceDescriptor(StorageDescriptor sourceDescriptor) { this.sourceDescriptor = sourceDescriptor;}
 
   public void addSinkDescriptor(String name, StorageDescriptor descriptor) {
     if(sinkDescriptors == null) sinkDescriptors = new HashMap<String, StorageDescriptor>();
@@ -53,4 +55,7 @@ public class DataflowDescriptor {
   
   public String getScribe() { return scribe; }
   public void setScribe(String scribe) { this.scribe = scribe; }
+  
+  public LoggerConfig getLoggerConfig() { return loggerConfig; }
+  public void setLoggerConfig(LoggerConfig loggerConfig) { this.loggerConfig = loggerConfig; }
 }

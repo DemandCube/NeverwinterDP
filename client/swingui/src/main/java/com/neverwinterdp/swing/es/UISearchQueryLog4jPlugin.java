@@ -13,7 +13,7 @@ import org.jdesktop.swingx.JXTable;
 
 import com.neverwinterdp.es.ESClient;
 import com.neverwinterdp.es.ESObjectClient;
-import com.neverwinterdp.es.log4j.Log4jRecord;
+import com.neverwinterdp.util.log.Log4jRecord;
 import com.neverwinterdp.util.text.DateUtil;
 
 @SuppressWarnings("serial")

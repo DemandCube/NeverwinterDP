@@ -1,4 +1,4 @@
-package com.neverwinterdp.es.log4j;
+package com.neverwinterdp.util.log;
 
 import java.io.Serializable;
 
@@ -8,12 +8,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neverwinterdp.util.ExceptionUtil;
 
 public class Log4jRecord implements Serializable {
-  private long   timestamp;
-  private String threadName ;
-  private String loggerName;
-  private String level;
-  private String message;
-  private String stacktrace ;
+  private long     timestamp;
+  private String   threadName;
+  private String   loggerName;
+  private String   level;
+  private String   message;
+  private String   stacktrace;
+  private String[] tag;
 
   public Log4jRecord() {
   }
@@ -51,4 +52,7 @@ public class Log4jRecord implements Serializable {
 
   public String getStacktrace() { return stacktrace; }
   public void setStacktrace(String stacktrace) { this.stacktrace = stacktrace; }
+
+  public String[] getTag() { return tag; }
+  public void setTag(String[] tag) { this.tag = tag; }
 }

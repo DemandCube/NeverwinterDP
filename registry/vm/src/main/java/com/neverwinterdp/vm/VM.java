@@ -18,7 +18,6 @@ import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.util.JSONSerializer;
-import com.neverwinterdp.util.log.LoggerConfig;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMApp.TerminateEvent;
 import com.neverwinterdp.vm.command.VMCommandWatcher;

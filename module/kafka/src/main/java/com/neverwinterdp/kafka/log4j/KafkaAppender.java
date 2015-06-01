@@ -1,21 +1,21 @@
-package com.neverwinterdp.es.log4j;
+package com.neverwinterdp.kafka.log4j;
 
 import java.io.IOException;
 
+import org.apache.kafka.common.KafkaException;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
-import org.elasticsearch.ElasticsearchException;
 
 import com.neverwinterdp.buffer.chronicle.MultiSegmentQueue;
 import com.neverwinterdp.buffer.chronicle.Segment;
-import com.neverwinterdp.es.ESClient;
-import com.neverwinterdp.es.ESObjectClient;
+import com.neverwinterdp.kafka.producer.AckKafkaWriter;
+import com.neverwinterdp.kafka.producer.KafkaWriter;
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.log.Log4jRecord;
-import com.neverwinterdp.util.text.StringUtil;
 
-public class ElasticSearchAppender extends AppenderSkeleton {
-  private String[] connect ;
-  private String   indexName ;
+public class KafkaAppender extends AppenderSkeleton {
+  private String   connects ;
+  private String   topic ;
   private String   queueBufferDir;
   private int      queueMaxSizePerSegment = 100000;
   private boolean  queueError = false ;
@@ -31,7 +31,7 @@ public class ElasticSearchAppender extends AppenderSkeleton {
   }
 
   public void activateOptions() {
-    System.out.println("ElasticSearchAppender: Start Activate Elasticsearch log4j appender");
+    System.out.println("KafkaAppender: Start Activate Kafka log4j appender");
     try {
       queue = new MultiSegmentQueue<Log4jRecord>(queueBufferDir, queueMaxSizePerSegment) ;
     } catch (Exception e) {
@@ -41,16 +41,14 @@ public class ElasticSearchAppender extends AppenderSkeleton {
     forwardThread = new DeamonThread(); 
     forwardThread.setDaemon(true);
     forwardThread.start() ;
-    System.out.println("ElasticSearchAppender: Finish Activate Elasticsearch log4j appender");
+    System.out.println("KafkaAppender: Finish Activate Kafka log4j appender");
   }
 
-  public void setConnects(String connects) {
-    this.connect = StringUtil.toStringArray(connects) ;
-  }
+  public void setConnects(String connects) { this.connects = connects ; }
   
   
-  public void setIndexName(String indexName) {
-    this.indexName = indexName ;
+  public void setTopic(String topic) {
+    this.topic = topic ;
   }
  
   public void setQueueBufferDir(String queueBufferDir) { this.queueBufferDir = queueBufferDir; }
@@ -73,25 +71,16 @@ public class ElasticSearchAppender extends AppenderSkeleton {
   }
   
   public class DeamonThread extends Thread {
-    private ESObjectClient<Log4jRecord> esLog4jRecordClient ;
-    private boolean elasticsearchError = false ;
+    private KafkaWriter kafkaWriter;
+    private boolean kafkaError = false ;
     private boolean exit = false ;
     
     boolean init() {
       try {
-        esLog4jRecordClient = new ESObjectClient<Log4jRecord>(new ESClient(connect), indexName, Log4jRecord.class) ;
-        esLog4jRecordClient.getESClient().waitForConnected(60 * 60 * 60) ;
+        kafkaWriter = new AckKafkaWriter("log4j", connects) ;
       } catch(Exception ex) {
         ex.printStackTrace();
         return false ;
-      }
-
-      try {
-        if (!esLog4jRecordClient.isCreated()) {
-          esLog4jRecordClient.createIndexWith(null, null);
-        }
-      } catch(Exception ex) {
-        ex.printStackTrace();
       }
       return true ;
     }
@@ -99,21 +88,23 @@ public class ElasticSearchAppender extends AppenderSkeleton {
     public void forward() {
       while(true) {
         try {
-          if(elasticsearchError) {
+          if(kafkaError) {
             Thread.sleep(60 * 1000);
-            elasticsearchError = false ;
+            kafkaWriter.reconnect();
+            kafkaError = false ;
           }
           Segment<Log4jRecord> segment = null ;
           while((segment = queue.nextReadSegment(15000)) != null) {
             segment.open();
             while(segment.hasNext()) {
               Log4jRecord record = segment.nextObject() ;
-              esLog4jRecordClient.put(record, record.getId());
+              String json = JSONSerializer.INSTANCE.toString(record);
+              kafkaWriter.send(topic, json, 60 * 1000);;
             }
             queue.commitReadSegment(segment);
           }
-        } catch(ElasticsearchException ex) {
-          elasticsearchError = true ;
+        } catch(KafkaException ex) {
+          kafkaError = true ;
         } catch (InterruptedException e) {
           return ;
         } catch(Exception ex) {
@@ -124,7 +115,11 @@ public class ElasticSearchAppender extends AppenderSkeleton {
     }
     
     void shutdown() {
-      esLog4jRecordClient.close() ;
+      try {
+        kafkaWriter.close() ;
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
       if(exit) {
         try {
           if(queue != null) queue.close();

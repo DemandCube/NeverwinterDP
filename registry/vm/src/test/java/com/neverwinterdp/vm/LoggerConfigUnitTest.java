@@ -1,4 +1,4 @@
-package com.neverwinterdp.util.log;
+package com.neverwinterdp.vm;
 
 import java.util.Map;
 
@@ -6,14 +6,15 @@ import org.junit.Test;
 import org.slf4j.Logger;
 
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.util.log.LoggerFactory;
 
-public class LoggerConfigurationUnitTest {
+public class LoggerConfigUnitTest {
   @Test
   public void test() throws Exception {
     LoggerConfig conf = new LoggerConfig() ;
-    conf.createFileAppender("file", "build/test.log") ;
-    conf.createESAppender("es", "127.0.0.1:90300", "build/bufferDir", "log4j");
-    conf.createLogger("rootLogger", "INFO", "file");
+    conf.getEsAppender().setEnable(false);
+    conf.getFileAppender().setFilePath("build/test-log.log");
+    conf.getConsoleAppender().setEnable(true);
     Map<String, String> log4jProps = conf.getLog4jConfiguration() ;
     System.out.println(JSONSerializer.INSTANCE.toString(log4jProps));
     

@@ -27,9 +27,9 @@ import org.jdesktop.swingx.decorator.HighlighterFactory;
 
 import com.neverwinterdp.es.ESClient;
 import com.neverwinterdp.es.ESObjectClient;
-import com.neverwinterdp.es.log4j.Log4jRecord;
 import com.neverwinterdp.swing.util.MessageUtil;
 import com.neverwinterdp.swing.widget.BeanBindingJTextField;
+import com.neverwinterdp.util.log.Log4jRecord;
 
 @SuppressWarnings("serial")
 public class UISearchQuery extends JPanel {

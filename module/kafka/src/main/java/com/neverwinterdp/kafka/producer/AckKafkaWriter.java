@@ -13,8 +13,6 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.neverwinterdp.util.JSONSerializer;
-
 /**
  * @author Tuan Nguyen
  * @email tuan08@gmail.com
@@ -66,7 +64,7 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
     producer.send(record, ackCallback);
   }
   
-  public void send(String topic, int partition, byte[] key, byte[] message, Callback callback, long timeout) throws Exception {
+  public void send(String topic, int partition, byte[] key, byte[] message, Callback callback, long timeout) throws Exception  {
     ProducerRecord<byte[], byte[]> record = new ProducerRecord<byte[], byte[]>(topic, partition, key, message);
     long id = idTracker.incrementAndGet();
     WaittingAckProducerRecord<byte[], byte[]> ackRecord = new WaittingAckProducerRecord<byte[], byte[]>(id, record, callback);

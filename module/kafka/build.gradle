@@ -9,6 +9,8 @@ eclipse {
 }
 
 dependencies {
+  compile project(':lib/buffer')
+  compile project(':lib/yara')
   compile project(':module/commons')
   compile project(':registry/core')
 
