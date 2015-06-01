@@ -108,8 +108,22 @@ dependencies {
   scribenginDeployJars group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '3.2'
   scribenginDeployJars group: 'org.xerial.snappy', name: 'snappy-java', version: '1.1.1.6'
   scribenginDeployJars group: 'joda-time', name: 'joda-time', version: '2.7'
+
   scribenginDeployJars group: 'net.openhft', name: 'chronicle', version: '3.2.2'
+  scribenginDeployJars group: 'net.openhft', name: 'compiler', version: '2.2.0'
+  scribenginDeployJars group: 'net.openhft', name: 'lang', version: '6.4.6'
   scribenginDeployJars group: 'org.elasticsearch', name: 'elasticsearch', version: '1.2.2'
+
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-core', version: '4.8.1'
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-analyzers-common', version: '4.8.1'
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-queries', version: '4.8.1'
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-join', version: '4.8.1'
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-queryparser', version: '4.8.1'
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-sandbox', version: '4.8.1'
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-highlighter', version: '4.8.1'
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-memory', version: '4.8.1'
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-suggest', version: '4.8.1'
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-codecs', version: '4.8.1'
 
   scribenginDeployJars group: 'org.slf4j', name: 'slf4j-api', version: '1.7.6'
   scribenginDeployJars group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
