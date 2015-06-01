@@ -24,10 +24,18 @@ public class LoggerConfig {
   @ParametersDelegate
   ESAppender esAppender = new ESAppender() ;
 
-  public FileAppender getFileAppender() { return this.fileAppender; }
-  
-  public ESAppender getESAppender() { return this.esAppender; }
-  
+  public String getLogLevel() {  return logLevel; }
+  public void setLogLevel(String logLevel) { this.logLevel = logLevel; }
+
+  public ConsoleAppender getConsoleAppender() { return consoleAppender; }
+  public void setConsoleAppender(ConsoleAppender consoleAppender) { this.consoleAppender = consoleAppender; }
+
+  public FileAppender getFileAppender() { return fileAppender; }
+  public void setFileAppender(FileAppender fileAppender) { this.fileAppender = fileAppender; }
+
+  public ESAppender getEsAppender() { return esAppender; }
+  public void setEsAppender(ESAppender esAppender) { this.esAppender = esAppender; }
+
   @JsonIgnore
   public Map<String, String> getLog4jConfiguration() {
     Map<String, String> props = new LinkedHashMap<String, String>();
@@ -64,6 +72,9 @@ public class LoggerConfig {
     @Parameter(names = "--log-console-enable", description = "Enable or not the console log")
     boolean enable      = false;
 
+    public boolean isEnable() { return enable; }
+    public void setEnable(boolean enable) {  this.enable = enable; }
+
     void addLog4jConfig(Map<String, String> props) {
       props.put("log4j.appender.console", "org.apache.log4j.ConsoleAppender");
       props.put("log4j.appender.console.layout", "org.apache.log4j.PatternLayout");
@@ -93,6 +104,21 @@ public class LoggerConfig {
 
     @Parameter(names = "--log-file-max-backup", description = "The maximum number of the backup log file")
     int     maxBackup   = 5;
+
+    public boolean isEnable() { return enable; }
+    public void setEnable(boolean enable) { this.enable = enable; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getFilePath() { return filePath; }
+    public void setFilePath(String filePath) { this.filePath = filePath; }
+
+    public int getMaxSizeInMb() { return maxSizeInMb; }
+    public void setMaxSizeInMb(int maxSizeInMb) { this.maxSizeInMb = maxSizeInMb; }
+
+    public int getMaxBackup() { return maxBackup; }
+    public void setMaxBackup(int maxBackup) { this.maxBackup = maxBackup; }
 
     public void addLog4jConfig(Map<String, String> props) {
       String prefix = "log4j.appender." + name;
@@ -130,6 +156,21 @@ public class LoggerConfig {
     @Parameter(names = "--log-es-index-name", description = "The name of the log index")
     private String indexName = "log4j";
     
+    public boolean isEnable() { return enable; }
+    public void setEnable(boolean enable) { this.enable = enable; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getConnects() { return connects; }
+    public void setConnects(String connects) { this.connects = connects; }
+
+    public String getBufferDir() { return bufferDir; }
+    public void setBufferDir(String bufferDir) { this.bufferDir = bufferDir;}
+
+    public String getIndexName() { return indexName; }
+    public void setIndexName(String indexName) { this.indexName = indexName; }
+
     public void addLog4jConfig(Map<String, String> props) {
       String prefix = "log4j.appender." + name;
       props.put(prefix, "com.neverwinterdp.es.log4j.ElasticSearchAppender");
