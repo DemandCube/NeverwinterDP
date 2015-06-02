@@ -31,7 +31,7 @@
 
 * You run into a problem , you describe the problem with your input data, the root exception that you encounter
 
-Which way do you think you have the chance to get a help.
+  Which way do you think you have the chance to get a help.
 
 5. The final goal is to work efficient , produce a good quality code. The goal of the task tracker is to help to manage and communicate. If you think that you enter more tasks into the task trackers and it look like that you are more productive since you can solve more tasks. But what if I say the more tasks you enter the more bad works you have , as you task has more bugs and you have to fix , rework... The final good code you have is the one who review , who find the problem for you or suggest a solution. What do you think.
 
