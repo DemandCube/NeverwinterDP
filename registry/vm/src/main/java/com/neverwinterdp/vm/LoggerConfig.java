@@ -23,6 +23,9 @@ public class LoggerConfig {
   
   @ParametersDelegate
   ESAppender esAppender = new ESAppender() ;
+  
+  @ParametersDelegate
+  KafkaAppender kafkaAppender = new KafkaAppender() ;
 
   public String getLogLevel() {  return logLevel; }
   public void setLogLevel(String logLevel) { this.logLevel = logLevel; }
@@ -36,6 +39,9 @@ public class LoggerConfig {
   public ESAppender getEsAppender() { return esAppender; }
   public void setEsAppender(ESAppender esAppender) { this.esAppender = esAppender; }
 
+  public KafkaAppender getKafkaAppender() { return kafkaAppender; }
+  public void setKafkappender(KafkaAppender kafkaAppender) { this.kafkaAppender = kafkaAppender; }
+  
   @JsonIgnore
   public Map<String, String> getLog4jConfiguration() {
     Map<String, String> props = new LinkedHashMap<String, String>();
@@ -151,7 +157,7 @@ public class LoggerConfig {
     private String connects  = "elasticsearch-1:9300";
 
     @Parameter(names = "--log-es-buffer-dir", description = "The buffer directory")
-    private String bufferDir = "data/buffer/log4j";
+    private String bufferDir = "data/buffer/es/log4j";
 
     @Parameter(names = "--log-es-index-name", description = "The name of the log index")
     private String indexName = "log4j";
@@ -189,6 +195,58 @@ public class LoggerConfig {
       b.append(" --log-es-connects ").append(connects);
       b.append(" --log-es-buffer-dir ").append(bufferDir);
       b.append(" --log-es-index-name ").append(indexName);
+    }
+  }
+  
+  static public class KafkaAppender {
+    @Parameter(names = "--log-kafka-enable", description = "Enable or not the kafka log")
+    boolean        enable    = true;
+
+    @Parameter(names = "--log-kafka-name", description = "The name of the kafka log appender")
+    private String name      = "kafka";
+
+    @Parameter(names = "--log-kafka-connects", description = "The kafka connects")
+    private String connects  = "kafka-1:9020, kafka-2:9020, kafka-3:9020";
+
+    @Parameter(names = "--log-kafka-buffer-dir", description = "The buffer directory")
+    private String bufferDir = "data/buffer/kafka/log4j";
+
+    @Parameter(names = "--log-kafka-topic", description = "The name of the topic")
+    private String topic = "log4j";
+    
+    public boolean isEnable() { return enable; }
+    public void setEnable(boolean enable) { this.enable = enable; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getConnects() { return connects; }
+    public void setConnects(String connects) { this.connects = connects; }
+
+    public String getBufferDir() { return bufferDir; }
+    public void setBufferDir(String bufferDir) { this.bufferDir = bufferDir;}
+
+    public String getTopic() { return topic; }
+    public void setTopic(String topic) { this.topic = topic; }
+
+    public void addLog4jConfig(Map<String, String> props) {
+      String prefix = "log4j.appender." + name;
+      props.put(prefix, "com.neverwinterdp.kafka.log4j.KafkaAppender");
+      props.put(prefix + ".layout", "org.apache.log4j.PatternLayout");
+      props.put(prefix + ".layout.ConversionPattern", "%-4r [%t] %-5p %c %x - %m%n");
+
+      props.put(prefix + ".connects", connects);
+      props.put(prefix + ".topic", topic);
+      props.put(prefix + ".queueBufferDir", bufferDir);
+    }
+    
+    void buildParameters(StringBuilder b) {
+      if(!enable) return ;
+      b.append(" --log-es-enable ");
+      b.append(" --log-es-name ").append(name);
+      b.append(" --log-es-connects ").append(connects);
+      b.append(" --log-es-buffer-dir ").append(bufferDir);
+      b.append(" --log-es-index-name ").append(topic);
     }
   }
 }
