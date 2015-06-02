@@ -27,9 +27,9 @@
 
 4. When you encounter a problem and you need to ask, you have to understand that problem, collect all the information such log message , exception. Describe your problem with the collect data as short and easy to understan as possible. Let take an example:
 
-You run into a problem and you post the question say that you run the unit test xyz fail with 1M log file and ask for help.
+* You run into a problem and you post the question say that you run the unit test xyz fail with 1M log file and ask for help.
 
-You run into a problem , you describe the problem with your input data, the root exception that you encounter
+* You run into a problem , you describe the problem with your input data, the root exception that you encounter
 
 Which way do you think you have the chance to get a help.
 
