@@ -6,7 +6,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.JLabel;
@@ -25,6 +27,7 @@ import org.jdesktop.swingx.decorator.HighlighterFactory;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.activity.Activity;
+import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.swing.UILifecycle;
 import com.neverwinterdp.swing.scribengin.ScribenginCluster;
@@ -90,13 +93,14 @@ public class UIActivityView extends SpringLayoutGridJPanel implements UILifecycl
       addRow(infoPanel);
       return new ArrayList<ActivityAndSteps>();
     }
-    for (String id : registry.getChildren(activityPath + "/all")) {
+    LinkedHashMap<String, Activity> activitiesMap = ActivityRegistry.getActivitiesMap(registry, activityPath, "all");
+    for (Map.Entry<String, Activity> entry : activitiesMap.entrySet()){
+      String path = entry.getKey();
       activities.add(
           new ActivityAndSteps(
-              registry.getDataAs(activityPath + "/all/" + id, Activity.class),
-              registry.getChildrenAs(activityPath + "/all/" + id + "/activity-steps", ActivityStep.class)
+              entry.getValue(),
+              ActivityRegistry.getActivitySteps(registry, path + "/activity-steps")
           ));
-
     }
     return activities;
   }
