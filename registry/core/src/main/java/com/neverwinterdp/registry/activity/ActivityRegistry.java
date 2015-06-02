@@ -1,8 +1,10 @@
 package com.neverwinterdp.registry.activity;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.neverwinterdp.registry.MultiDataGet;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
@@ -43,11 +45,34 @@ public class ActivityRegistry {
     return allNode.getChildrenAs(Activity.class) ;
   }
   
+  static public List<Activity> getActivities(Registry registry, String path) throws RegistryException {
+    return ActivityRegistry.getMultiDataGetResult(registry, path + "/all", Activity.class);
+  }
+  
+  static public <T> List<T> getMultiDataGetResult(Registry registry, String path, Class<T> type) throws RegistryException {
+    MultiDataGet<T> multiGet = registry.createMultiDataGet(type);
+    multiGet.getChildren(path);
+    multiGet.shutdown();
+    multiGet.waitForAllGet(30000);
+    return multiGet.getResults();
+  }
+  
+  static public List<ActivityStep> getActivitySteps(Registry registry, String path) throws RegistryException {
+    return ActivityRegistry.getMultiDataGetResult(registry, path, ActivityStep.class);
+  }
+  
+  static public LinkedHashMap<String, Activity> getActivitiesMap(Registry registry, String path, String nodeType) throws RegistryException {
+    MultiDataGet<Activity> multiGet = registry.createMultiDataGet(Activity.class);
+  	multiGet.getChildren(path + "/" + nodeType);
+  	multiGet.shutdown();
+  	multiGet.waitForAllGet(30000);
+  	return multiGet.getResultsMap();
+  }
+  
   public List<Activity> getActiveActivities() throws RegistryException {
     List<String> children = activeNode.getChildren() ;
     return allNode.getSelectChildrenAs(children, Activity.class);
   }
-  
   
   public List<Activity> getHistoryActivities() throws RegistryException {
     List<String> children = historyNode.getChildren() ;
