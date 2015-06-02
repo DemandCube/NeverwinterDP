@@ -61,6 +61,7 @@ public class ActivityRegistry {
     return ActivityRegistry.getMultiDataGetResult(registry, path, ActivityStep.class);
   }
   
+  //TODO: convert tab to spaces. Configure your eclipse correctly
   static public LinkedHashMap<String, Activity> getActivitiesMap(Registry registry, String path, String nodeType) throws RegistryException {
     MultiDataGet<Activity> multiGet = registry.createMultiDataGet(Activity.class);
   	multiGet.getChildren(path + "/" + nodeType);

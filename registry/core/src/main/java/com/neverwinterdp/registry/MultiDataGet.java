@@ -20,8 +20,9 @@ public interface MultiDataGet<T> {
   
   public void shutdown() ;
   
-  public List<T>          getResults() ;
+  public List<T>  getResults();
   
+  //TODO: remove this code
   public LinkedHashMap<String, T> getResultsMap() ;
   
   public List<DataGet<T>> getDataGetResults() ;
