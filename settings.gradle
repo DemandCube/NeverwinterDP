@@ -11,6 +11,7 @@ include 'registry/vm'
 
 include 'scribengin/core'
 include 'scribengin/dataflow/hdfs'
+include 'scribengin/dataflow/log-sample'
 include 'scribengin/release'
 
 include 'client/swingui'

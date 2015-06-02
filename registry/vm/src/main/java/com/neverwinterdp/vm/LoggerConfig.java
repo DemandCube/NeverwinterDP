@@ -60,6 +60,11 @@ public class LoggerConfig {
       appenders.add(esAppender.name) ;
     }
     
+    if(kafkaAppender.enable) {
+      kafkaAppender.addLog4jConfig(props);
+      appenders.add(kafkaAppender.name) ;
+    }
+    
     if(appenders.size() > 0) {
       props.put("log4j.rootLogger",  logLevel + "," + StringUtil.join(appenders, ","));
     }
@@ -71,6 +76,7 @@ public class LoggerConfig {
     consoleAppender.buildParameters(b);
     fileAppender.buildParameters(b);
     esAppender.buildParameters(b);
+    kafkaAppender.buildParameters(b);
     return b.toString() ;
   }
 
@@ -126,6 +132,11 @@ public class LoggerConfig {
     public int getMaxBackup() { return maxBackup; }
     public void setMaxBackup(int maxBackup) { this.maxBackup = maxBackup; }
 
+    public void initLocalEnvironment() {
+      setEnable(true);
+      filePath    = "build/logs/vm.log";
+    }
+    
     public void addLog4jConfig(Map<String, String> props) {
       String prefix = "log4j.appender." + name;
       props.put(prefix,   "org.apache.log4j.RollingFileAppender");
@@ -177,6 +188,12 @@ public class LoggerConfig {
     public String getIndexName() { return indexName; }
     public void setIndexName(String indexName) { this.indexName = indexName; }
 
+    public void initLocalEnvironment() {
+      setEnable(true);
+      connects  = "127.0.0.1:9300";
+      bufferDir = "build/data/buffer/es/log4j";
+    }
+    
     public void addLog4jConfig(Map<String, String> props) {
       String prefix = "log4j.appender." + name;
       props.put(prefix, "com.neverwinterdp.es.log4j.ElasticSearchAppender");
@@ -206,7 +223,7 @@ public class LoggerConfig {
     private String name      = "kafka";
 
     @Parameter(names = "--log-kafka-connects", description = "The kafka connects")
-    private String connects  = "kafka-1:9020, kafka-2:9020, kafka-3:9020";
+    private String connects  = "kafka-1:9092, kafka-2:9092, kafka-3:9092";
 
     @Parameter(names = "--log-kafka-buffer-dir", description = "The buffer directory")
     private String bufferDir = "data/buffer/kafka/log4j";
@@ -229,6 +246,12 @@ public class LoggerConfig {
     public String getTopic() { return topic; }
     public void setTopic(String topic) { this.topic = topic; }
 
+    public void initLocalEnvironment() {
+      setEnable(true);
+      connects  = "127.0.0.1:9092";
+      bufferDir = "build/data/buffer/kafka/log4j";
+    }
+    
     public void addLog4jConfig(Map<String, String> props) {
       String prefix = "log4j.appender." + name;
       props.put(prefix, "com.neverwinterdp.kafka.log4j.KafkaAppender");
@@ -242,11 +265,11 @@ public class LoggerConfig {
     
     void buildParameters(StringBuilder b) {
       if(!enable) return ;
-      b.append(" --log-es-enable ");
-      b.append(" --log-es-name ").append(name);
-      b.append(" --log-es-connects ").append(connects);
-      b.append(" --log-es-buffer-dir ").append(bufferDir);
-      b.append(" --log-es-index-name ").append(topic);
+      b.append(" --log-kafka-enable ");
+      b.append(" --log-kafka-name ").append(name);
+      b.append(" --log-kafka-connects ").append(connects);
+      b.append(" --log-kafka-buffer-dir ").append(bufferDir);
+      b.append(" --log-kafka-topic ").append(topic);
     }
   }
 }

@@ -65,7 +65,9 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
   }
   
   public void send(String topic, int partition, byte[] key, byte[] message, Callback callback, long timeout) throws Exception  {
-    ProducerRecord<byte[], byte[]> record = new ProducerRecord<byte[], byte[]>(topic, partition, key, message);
+    Integer partitionId = null ;
+    if(partition >= 0) partitionId = new Integer(partition) ;
+    ProducerRecord<byte[], byte[]> record = new ProducerRecord<byte[], byte[]>(topic, partitionId, key, message);
     long id = idTracker.incrementAndGet();
     WaittingAckProducerRecord<byte[], byte[]> ackRecord = new WaittingAckProducerRecord<byte[], byte[]>(id, record, callback);
     waittingAckBuffer.add(ackRecord, timeout);

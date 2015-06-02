@@ -74,6 +74,14 @@ public class KafkaPartitionReader {
     nextMessageSet();
     return getCurrentMessagePayload();
   }
+
+  public Message nextMessage() throws Exception {
+    if(currentMessageSetIterator == null) nextMessageSet();
+    Message message = getCurrentMessage();
+    if(message != null) return message;
+    nextMessageSet();
+    return getCurrentMessage();
+  }
   
   public <T> T nextAs(Class<T> type) throws Exception {
     byte[] data = next();
@@ -101,18 +109,25 @@ public class KafkaPartitionReader {
   }
   
   byte[] getCurrentMessagePayload() {
+    Message message = getCurrentMessage() ;
+    if(message == null) return null ;
+    ByteBuffer payload = message.payload();
+    byte[] bytes = new byte[payload.limit()];
+    payload.get(bytes);
+    return bytes;
+  }
+ 
+  Message getCurrentMessage() {
     while(currentMessageSetIterator.hasNext()) {
       MessageAndOffset messageAndOffset = currentMessageSetIterator.next();
       if (messageAndOffset.offset() < currentOffset) continue; //old offset, ignore
       Message message = messageAndOffset.message();
-      ByteBuffer payload = message.payload();
-      byte[] bytes = new byte[payload.limit()];
-      payload.get(bytes);
       currentOffset = messageAndOffset.nextOffset();
-      return bytes;
+      return message;
     }
     return null;
   }
+ 
   
   void nextMessageSet() throws Exception {
     FetchRequest req = 

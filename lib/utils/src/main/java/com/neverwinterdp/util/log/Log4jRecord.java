@@ -1,6 +1,7 @@
 package com.neverwinterdp.util.log;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import org.apache.log4j.spi.LoggingEvent;
 
@@ -38,6 +39,9 @@ public class Log4jRecord implements Serializable {
   public long getTimestamp() { return timestamp; }
   public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 
+  public Date getCreatedTime() { return new Date(timestamp) ; }
+  public void setCreatedTime(Date timestamp) {  }
+  
   public String getThreadName() { return threadName; }
   public void setThreadName(String threadName) { this.threadName = threadName; }
 
