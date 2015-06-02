@@ -3,6 +3,7 @@ package com.neverwinterdp.registry.zk;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.zookeeper.AsyncCallback;
 import org.apache.zookeeper.KeeperException;
@@ -80,6 +81,15 @@ public class ZookeeperMultiDataGet<T> implements MultiDataGet<T>, AsyncCallback.
       holder.add(sel.getData()) ;
     }
     return holder ;
+  }
+  
+  @Override
+  public LinkedHashMap<String, T> getResultsMap() {
+    LinkedHashMap<String, T> holder = new LinkedHashMap<String, T>();
+    for (Map.Entry<String, DataGet<T>> entry : results.entrySet()) {
+      holder.put(entry.getKey(), entry.getValue().getData());
+    }
+    return holder;
   }
   
   @Override
