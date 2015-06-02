@@ -21,7 +21,7 @@
 
 ##Rule 1##
 
-When you work with a large project code, you should classify the code into different category like util , core api , service, debug , ui... If  you can identify the code and classify the code, you will see that util , core , api, service... usually are the critical code and you should be alert when modify the critical code. You can ask , discuss with the other before you change the core code. On the other hand , the core code usually should be well thought and support what you need. So if you look for a solution by add a feature or modify the core code for what you need, usually will be a bad solution or the one who develop the core code is a bad designer or developer. There is always a reason that the designer do not include a feature or expose some data to you. The reason in most case relate to performance and security.
+When you work with a large project code, you should classify the code into different category like util , core api , service, debug , ui... If  you can identify the code and classify the code, you will see that util , core , api, service... usually are the critical code and you should be alert when modify the critical code. You can ask , discuss with the other before you change the core code. On the other hand , the core code usually should be well thought and support what you need. So if you look for a solution by add a feature or modify the core code for what you need, usually will be a bad solution or the one who develop the core code is a bad designer or developer. There is always a reason that the designer do not include a feature or expose some data to you. The reason in most case relate to performance and security or even there is a better way than your way
 
 ##Rule 2##
 
