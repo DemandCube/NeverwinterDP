@@ -86,8 +86,7 @@ public class ZookeeperMultiDataGet<T> implements MultiDataGet<T>, AsyncCallback.
   @Override
   public LinkedHashMap<String, T> getResultsMap() {
     LinkedHashMap<String, T> holder = new LinkedHashMap<String, T>();
-    for (Map.Entry<String, DataGet<T>> entry : results.entrySet())
-    {
+    for (Map.Entry<String, DataGet<T>> entry : results.entrySet()) {
       holder.put(entry.getKey(), entry.getValue().getData());
     }
     return holder;
