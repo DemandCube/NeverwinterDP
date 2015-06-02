@@ -10,7 +10,5 @@ public abstract class ScribeAbstract {
   
   public ScribeState getState() { return this.state; }
   
-  public void setState(ScribeState newState){
-    this.state = newState;
-  }
+  public void setState(ScribeState newState) { this.state = newState; }
 }

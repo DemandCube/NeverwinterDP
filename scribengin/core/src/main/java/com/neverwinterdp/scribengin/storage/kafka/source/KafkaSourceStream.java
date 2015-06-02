@@ -28,6 +28,11 @@ public class KafkaSourceStream implements SourceStream {
 
   @Override
   public SourceStreamReader getReader(String name) throws Exception {
-    return new KafkaSourceStreamReader(descriptor, partitionMetadata);
+    String readerType = descriptor.attribute("reader") ;
+    if("raw".equalsIgnoreCase(readerType)) {
+      return new RawKafkaSourceStreamReader(descriptor, partitionMetadata); 
+    } else {
+      return new KafkaSourceStreamReader(descriptor, partitionMetadata);
+    }
   }
 }

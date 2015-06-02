@@ -18,10 +18,7 @@ public class KafkaSource implements Source {
   private Map<Integer, KafkaSourceStream> sourceStreams = new HashMap<Integer, KafkaSourceStream>();
   
   public KafkaSource(String name, String zkConnect, String topic) throws Exception {
-    StorageDescriptor descriptor = new StorageDescriptor("kafka");
-    descriptor.attribute("dataflowName", name);
-    descriptor.attribute("topic", topic);
-    descriptor.attribute("zk.connect", zkConnect);
+    StorageDescriptor descriptor = createStorageDescriptor(name, topic, zkConnect, null);
     init(descriptor);
   }
   
@@ -64,5 +61,18 @@ public class KafkaSource implements Source {
   }
   
   public void close() throws Exception {
+  }
+  
+  static public StorageDescriptor createStorageDescriptor(String name, String topic, String zkConnect, String reader) {
+    StorageDescriptor descriptor = new StorageDescriptor("kafka");
+    descriptor.attribute("dataflowName", name);
+    descriptor.attribute("topic", topic);
+    descriptor.attribute("zk.connect", zkConnect);
+    if(reader != null) {
+      descriptor.attribute("reader", reader);
+    } else {
+      descriptor.attribute("reader", "record");
+    }
+    return descriptor;
   }
 }

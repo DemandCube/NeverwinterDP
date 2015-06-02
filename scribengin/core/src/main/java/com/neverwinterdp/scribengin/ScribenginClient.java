@@ -125,7 +125,7 @@ public class ScribenginClient {
       dflDescriptor.setDataflowAppHome(dataflowAppHome);
       getVMClient().uploadApp(localDataflowHome, dataflowAppHome);
     }
-    h1("Submit the dataflow " + dflDescriptor.getName());
+    h1("Submit the dataflow " + dflDescriptor.getId());
     VMClient vmClient = getVMClient();
     
     DataflowWaitingEventListener waitingEventListener = new DataflowWaitingEventListener(vmClient.getRegistry());

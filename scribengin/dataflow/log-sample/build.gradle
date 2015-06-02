@@ -1,0 +1,15 @@
+archivesBaseName = 'scribengin.dataflow.log-sample'
+
+eclipse {
+  project {
+    name = 'scribengin.dataflow.log-sample'
+  }
+}
+
+dependencies {
+  compile project(':registry/core')
+  compile project(':registry/vm')
+  compile project(':scribengin/core')
+  compile project(':module/elasticsearch')
+  compile project(':module/kafka')
+}

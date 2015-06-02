@@ -1,6 +1,9 @@
 package com.neverwinterdp.scribengin.storage.kafka.source;
 
+import java.nio.ByteBuffer;
+
 import kafka.javaapi.PartitionMetadata;
+import kafka.message.Message;
 
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.scribengin.Record;
@@ -8,12 +11,12 @@ import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
 
-public class KafkaSourceStreamReader implements SourceStreamReader {
+public class RawKafkaSourceStreamReader implements SourceStreamReader {
   private StreamDescriptor descriptor;
   private KafkaPartitionReader partitionReader ;
   private CommitPoint lastCommitInfo ;
   
-  public KafkaSourceStreamReader(StreamDescriptor descriptor, PartitionMetadata partitionMetadata) {
+  public RawKafkaSourceStreamReader(StreamDescriptor descriptor, PartitionMetadata partitionMetadata) {
     this.descriptor = descriptor;
     this.partitionReader = 
         new KafkaPartitionReader(descriptor.attribute("dataflowName"), descriptor.attribute("zk.connect"), descriptor.attribute("topic"), partitionMetadata);
@@ -24,7 +27,17 @@ public class KafkaSourceStreamReader implements SourceStreamReader {
 
   @Override
   public Record next() throws Exception {
-    return partitionReader.nextAs(Record.class);
+    Message message = partitionReader.nextMessage() ;
+    if(message == null) return null ;
+    ByteBuffer payload = message.payload();
+    byte[] messageBytes = new byte[payload.limit()];
+    payload.get(messageBytes);
+    
+    ByteBuffer key = message.key();
+    byte[] keyBytes = new byte[key.limit()];
+    key.get(keyBytes);
+    Record record = new Record(new String(keyBytes), messageBytes) ;
+    return record;
   }
 
   @Override
