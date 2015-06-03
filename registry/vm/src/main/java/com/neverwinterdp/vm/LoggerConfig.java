@@ -223,7 +223,7 @@ public class LoggerConfig {
     private String name      = "kafka";
 
     @Parameter(names = "--log-kafka-connects", description = "The kafka connects")
-    private String connects  = "kafka-1:9092, kafka-2:9092, kafka-3:9092";
+    private String connects  = "kafka-1:9092,kafka-2:9092,kafka-3:9092";
 
     @Parameter(names = "--log-kafka-buffer-dir", description = "The buffer directory")
     private String bufferDir = "data/buffer/kafka/log4j";
