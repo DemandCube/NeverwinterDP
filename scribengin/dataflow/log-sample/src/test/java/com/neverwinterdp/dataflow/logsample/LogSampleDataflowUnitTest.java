@@ -9,9 +9,12 @@ import org.slf4j.Logger;
 
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
+import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowWaitingEventListener;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.IOUtil;
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.LoggerConfig;
 
@@ -41,10 +44,10 @@ public class LogSampleDataflowUnitTest {
     clusterBuilder.startScribenginMasters();
     shell = new ScribenginShell(clusterBuilder.getVMClusterBuilder().getVMClient());
     
-//    Logger logger = new LoggerFactory("TEST").getLogger(getClass()) ;
-//    logger.info("This is an info message test");
-//    logger.warn("This is a warn message test");
-//    logger.error("This is an error message test");
+    Logger logger = new LoggerFactory("TEST").getLogger(getClass()) ;
+    logger.info("This is an info message test");
+    logger.warn("This is a warn message test");
+    logger.error("This is an error message test");
   }
   
   @After
@@ -55,8 +58,16 @@ public class LogSampleDataflowUnitTest {
   @Test
   public void testLogSampleDataflow() throws Exception {
     Thread.sleep(5000);
-    LogSampleDataflowBuilder builder = new LogSampleDataflowBuilder(shell.getScribenginClient());
-    DataflowWaitingEventListener listener = builder.submit();
+    
+    //LogSampleDataflowBuilder builder = new LogSampleDataflowBuilder(shell.getScribenginClient());
+    //DataflowWaitingEventListener listener = builder.submit();
+    
+    String dflDescriptorJson = IOUtil.getFileContentAsString("src/app/conf/dataflow.json") ;
+    System.out.println("Dataflow Configuration: ");
+    System.out.println(dflDescriptorJson);
+    DataflowDescriptor dflDescriptor = JSONSerializer.INSTANCE.fromString(dflDescriptorJson, DataflowDescriptor.class) ;
+    
+    DataflowWaitingEventListener listener = shell.getScribenginClient().submit(dflDescriptor);
     try { 
       listener.getWaitingNodeEventListener().waitForEvents(60 * 1000);
     } catch(Exception ex) {

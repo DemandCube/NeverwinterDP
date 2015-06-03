@@ -1,5 +1,10 @@
 archivesBaseName = 'scribengin.release'
 
+project.ext {
+  elasticsearchVersion = "1.5.2"
+  luceneVersion = "4.10.4"
+}
+
 eclipse {
   project {
     name = 'scribengin.release'
@@ -112,18 +117,18 @@ dependencies {
   scribenginDeployJars group: 'net.openhft', name: 'chronicle', version: '3.2.2'
   scribenginDeployJars group: 'net.openhft', name: 'compiler', version: '2.2.0'
   scribenginDeployJars group: 'net.openhft', name: 'lang', version: '6.4.6'
-  scribenginDeployJars group: 'org.elasticsearch', name: 'elasticsearch', version: '1.2.2'
+  scribenginDeployJars group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
 
-  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-core', version: '4.8.1'
-  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-analyzers-common', version: '4.8.1'
-  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-queries', version: '4.8.1'
-  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-join', version: '4.8.1'
-  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-queryparser', version: '4.8.1'
-  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-sandbox', version: '4.8.1'
-  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-highlighter', version: '4.8.1'
-  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-memory', version: '4.8.1'
-  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-suggest', version: '4.8.1'
-  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-codecs', version: '4.8.1'
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-core', version: luceneVersion
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-analyzers-common', version: luceneVersion
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-queries', version: luceneVersion
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-join', version: luceneVersion
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-queryparser', version: luceneVersion
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-sandbox', version: luceneVersion
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-highlighter', version: luceneVersion
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-memory', version: luceneVersion
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-suggest', version: luceneVersion
+  scribenginDeployJars group: 'org.apache.lucene', name: 'lucene-codecs', version: luceneVersion
 
   scribenginDeployJars group: 'org.slf4j', name: 'slf4j-api', version: '1.7.6'
   scribenginDeployJars group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
