@@ -1,7 +1,6 @@
 package com.neverwinterdp.registry.activity;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.neverwinterdp.registry.MultiDataGet;
@@ -45,29 +44,20 @@ public class ActivityRegistry {
     return allNode.getChildrenAs(Activity.class) ;
   }
   
-  static public List<Activity> getActivities(Registry registry, String path) throws RegistryException {
-    return ActivityRegistry.getMultiDataGetResult(registry, path + "/all", Activity.class);
-  }
-  
-  static public <T> List<T> getMultiDataGetResult(Registry registry, String path, Class<T> type) throws RegistryException {
-    MultiDataGet<T> multiGet = registry.createMultiDataGet(type);
-    multiGet.getChildren(path);
+  static public List<Activity> getActivities(Registry registry, List<String> paths) throws RegistryException {
+    MultiDataGet<Activity> multiGet = registry.createMultiDataGet(Activity.class);
+    multiGet.get(paths);
     multiGet.shutdown();
     multiGet.waitForAllGet(30000);
     return multiGet.getResults();
   }
   
   static public List<ActivityStep> getActivitySteps(Registry registry, String path) throws RegistryException {
-    return ActivityRegistry.getMultiDataGetResult(registry, path, ActivityStep.class);
-  }
-  
-  //TODO: convert tab to spaces. Configure your eclipse correctly
-  static public LinkedHashMap<String, Activity> getActivitiesMap(Registry registry, String path, String nodeType) throws RegistryException {
-    MultiDataGet<Activity> multiGet = registry.createMultiDataGet(Activity.class);
-  	multiGet.getChildren(path + "/" + nodeType);
-  	multiGet.shutdown();
-  	multiGet.waitForAllGet(30000);
-  	return multiGet.getResultsMap();
+    MultiDataGet<ActivityStep> multiGet = registry.createMultiDataGet(ActivityStep.class);
+    multiGet.getChildren(path);
+    multiGet.shutdown();
+    multiGet.waitForAllGet(30000);
+    return multiGet.getResults();
   }
   
   public List<Activity> getActiveActivities() throws RegistryException {
