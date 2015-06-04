@@ -13,8 +13,6 @@ import org.junit.Test;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
-import com.neverwinterdp.scribengin.storage.s3.S3Client;
-import com.neverwinterdp.scribengin.storage.s3.S3ObjectWriter;
 import com.neverwinterdp.util.IOUtil;
 
 public class S3ClientExperimentTest {

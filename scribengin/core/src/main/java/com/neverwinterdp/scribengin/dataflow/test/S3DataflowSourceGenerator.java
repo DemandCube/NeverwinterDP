@@ -35,13 +35,9 @@ public class S3DataflowSourceGenerator extends DataflowSourceGenerator {
     s3Client = new S3Client();
     s3Client.onInit();
     
-    if (s3Client.hasBucket(sourceLocation)) {
-      s3Client.deleteBucket(sourceLocation, true);
-    }
-    s3Client.createBucket(sourceLocation);
     //TODO improve this. We want maybe 1000 records per file
-    numOfRecordsPerFile = Math.min(1000, maxRecordsPerStream); 
-    numOfFilesPerFolder = maxRecordsPerStream/numOfRecordsPerFile;
+    numOfRecordsPerFile = Math.min(1000, maxRecordsPerStream);
+    numOfFilesPerFolder = maxRecordsPerStream / numOfRecordsPerFile;
   }
 
   @Override

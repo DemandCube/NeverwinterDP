@@ -17,6 +17,7 @@ import com.neverwinterdp.tool.message.MessageExtractor;
 import com.neverwinterdp.tool.message.MessageTracker;
 
 public class S3DataflowSinkValidator extends DataflowSinkValidator {
+
   private S3Client     s3Client;
   private MessageTracker messageTracker;
   private Stopwatch stopwatch = Stopwatch.createUnstarted();

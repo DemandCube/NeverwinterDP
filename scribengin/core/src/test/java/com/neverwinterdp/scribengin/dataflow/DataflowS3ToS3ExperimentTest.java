@@ -114,12 +114,14 @@ public class DataflowS3ToS3ExperimentTest {
                 " --executor-per-worker 1" +
                 " --duration 90000" +
                 " --task-max-execute-time 100000" +
+                " --source-auto-create-bucket"+
                 " --source-location " + bucketName +
                 " --source-name " + folderPath +
                 " --source-num-of-stream " + numStreams +
                 " --source-max-records-per-stream 1000" +
                 " --sink-location " + bucketName +
                 " --sink-name " + folderPath +
+                " --sink-auto-delete-bucket"+
                 " --print-dataflow-info -1" +
                 " --debug-dataflow-task true" +
                 " --debug-dataflow-worker true" +
