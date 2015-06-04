@@ -17,10 +17,10 @@ public class S3DataflowTest extends DataflowTest {
 
   final static public String TEST_NAME = "s3-to-s3";
 
-  @Parameter(names = "----source-auto-create-bucket", description = "Enable auto creating a bucket")
+  @Parameter(names = "--source-auto-create-bucket", description = "Enable auto creating a bucket")
   protected boolean sourceAutoCreateBucket = false;
 
-  @Parameter(names = "----sink-auto-delete-bucket", description = "Enable auto deleting a bucket")
+  @Parameter(names = "--sink-auto-delete-bucket", description = "Enable auto deleting a bucket")
   protected boolean sinkAutoDeleteBucket = false;
 
   protected void doRun(ScribenginShell shell) throws Exception {
