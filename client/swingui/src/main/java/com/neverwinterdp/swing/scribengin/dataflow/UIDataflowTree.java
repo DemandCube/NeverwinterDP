@@ -1,8 +1,8 @@
 package com.neverwinterdp.swing.scribengin.dataflow;
 
 import com.neverwinterdp.scribengin.service.ScribenginService;
+import com.neverwinterdp.swing.registry.UIActivitiesView;
 import com.neverwinterdp.swing.registry.UIActivityStepsView;
-import com.neverwinterdp.swing.registry.UIActivityView;
 import com.neverwinterdp.swing.registry.UINotificationView;
 import com.neverwinterdp.swing.registry.UIRegistryNodeView;
 import com.neverwinterdp.swing.registry.UIRegistryTree;
@@ -60,15 +60,11 @@ public class UIDataflowTree extends UIRegistryTree {
       view.addView("Tasks",      new UIDataflowTaskView(dataflowRootPath), false) ;
       view.addView("Workers",    new UIDataflowWorkerView(dataflowRootPath + "/workers"), false) ;
     } else if(activityNodeMatcher.matches(node)) {
-      String activitiesRootPath = getActivitiesRootPath(node.getNodePath());
-      view.addView("Activity Steps", new UIActivityStepsView(activitiesRootPath, node.getNodeName()), false) ;
+      view.addView("Activity Steps", new UIActivityStepsView(node.getNodePath(), node.getNodeName()), false) ;
     } else if(activityListMatcher.matches(node)) {
-      String activitiesRootPath = getActivitiesRootPath(node.getNodePath());
-      System.out.println("on custom list activities node: " + activitiesRootPath);
-      view.addView("Activities", new UIActivityView(activitiesRootPath), false) ;
+      view.addView("Activities", new UIActivitiesView(node.getNodePath()), false) ;
     } else if(activityQueueMatcher.matches(node)) {
-      String activitiesRootPath = getActivitiesRootPath(node.getNodePath());
-      view.addView("Queue Activities", new UIActivityView(activitiesRootPath), false) ;
+      view.addView("Queue Activities", new UIActivitiesView(node.getNodePath()), false) ;
     } else  if(notificationNodeMatcher.matches(node)) {
       view.addView("Notifications", new UINotificationView(node.getNodePath()), false) ;
     }
@@ -82,10 +78,5 @@ public class UIDataflowTree extends UIRegistryTree {
       node.setAllowsChildren(false);
     }
     return node ;
-  }
-
-  private String getActivitiesRootPath(String path) {
-    int idx = path.lastIndexOf("/activities") ;
-    return path.substring(0, idx + "/activities".length());
   }
 }
