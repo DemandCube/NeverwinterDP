@@ -44,7 +44,11 @@ abstract public class WaitingNodeEventListener {
   }
   
   public <T> void add(String path, T expectData) throws Exception {
-    add(path, expectData, null);
+    add(path, null, new Object[] {expectData});
+  }
+  
+  synchronized public <T> void add(String path, String desc, T expectData) throws Exception {
+    add(path, desc, new Object[] {expectData}) ;
   }
   
   /**
@@ -53,8 +57,9 @@ abstract public class WaitingNodeEventListener {
    * @param expectData
    * @throws Exception
    */
-  synchronized public <T> void add(String path, T expectData, String desc) throws Exception {
-    DataChangeNodeWatcher<T> watcher = new DataChangeNodeWatcher<T>(path, (Class<T>)expectData.getClass(), expectData, desc);
+  synchronized public <T> void add(String path, String desc, T[] expectData) throws Exception {
+    DataChangeNodeWatcher<T> watcher = 
+        new DataChangeNodeWatcher<T>(path, (Class<T>)expectData[0].getClass(), expectData, desc);
     watcherQueue.addLast(watcher);
     registryListener.watch(path, watcher, true);
     waitingNodeEventCount++;
@@ -69,6 +74,10 @@ abstract public class WaitingNodeEventListener {
    * @throws Exception
    */
   public <T> void add(String path, T expectData, String desc, boolean checkBeforeWatch) throws Exception {
+    add(path, new Object[] {expectData }, desc, checkBeforeWatch);
+  }
+  
+  public <T> void add(String path, T[] expectData, String desc, boolean checkBeforeWatch) throws Exception {
     //TODO: The flag to check the data before register the watcher is a temporary fix and it not a perfect solution.
     //In the cluster , it can happen that an event is produced before a client or another process can watch or listen for
     //the event. The current fix is try to check the data is already matches the expect data before watching for the data
@@ -77,10 +86,12 @@ abstract public class WaitingNodeEventListener {
     //as expected.
     Registry registry = registryListener.getRegistry() ;
     if(checkBeforeWatch && registry.exists(path)) {
-      T data = (T) registry.getDataAs(path, expectData.getClass());
-      if(expectData.equals(data)) return;
+      for(T sel : expectData) {
+        T data = (T) registry.getDataAs(path, sel.getClass());
+        if(sel.equals(data)) return;
+      }
     }
-    add(path, expectData, desc);
+    add(path, desc, expectData);
   }
   
   public <T> void addCreate(String path, String desc, boolean checkBeforeWatch) throws Exception {
@@ -191,9 +202,9 @@ abstract public class WaitingNodeEventListener {
   
   class DataChangeNodeWatcher<T> extends WaitingNodeEventWatcher {
     private Class<T> dataType ;
-    private T        expectData ;
+    private T[]      expectData ;
     
-    DataChangeNodeWatcher(String path, Class<T> dataType, T expectData, String desc) {
+    DataChangeNodeWatcher(String path, Class<T> dataType, T[] expectData, String desc) {
       this.path = path ;
       this.dataType = dataType;
       this.expectData = expectData ;
@@ -204,9 +215,11 @@ abstract public class WaitingNodeEventListener {
     public void onEvent(NodeEvent event) throws Exception {
       if(event.getType() == NodeEvent.Type.CREATE || event.getType() == NodeEvent.Type.MODIFY) {
         T data = registryListener.getRegistry().getDataAs(event.getPath(), dataType) ;
-        if(expectData.equals(data)) {
-          onDetectNodeEvent(this, event);
-          setComplete();
+        for(T sel : expectData) {
+          if(sel.equals(data)) {
+            onDetectNodeEvent(this, event);
+            setComplete();
+          }
         }
       } else if(event.getType() == NodeEvent.Type.DELETE) {
         setComplete();

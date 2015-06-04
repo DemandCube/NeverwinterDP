@@ -7,12 +7,12 @@ import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSource;
 import com.neverwinterdp.util.JSONSerializer;
 
-public class LogSampleDataflowBuilder {
+public class LogSplitterDataflowBuilder {
   private int numOfWorkers = 2;
   private int numOfExecutorPerWorker = 2;
   private ScribenginClient scribenginClient;
   
-  public LogSampleDataflowBuilder(ScribenginClient scribenginClient) {
+  public LogSplitterDataflowBuilder(ScribenginClient scribenginClient) {
     this.scribenginClient = scribenginClient;
   }
 
@@ -30,7 +30,7 @@ public class LogSampleDataflowBuilder {
     dflDescriptor.setName("log-sample-dataflow");
     dflDescriptor.setNumberOfWorkers(numOfWorkers);
     dflDescriptor.setNumberOfExecutorsPerWorker(numOfExecutorPerWorker);
-    dflDescriptor.setScribe(LogSampleDataProcessor.class.getName());
+    dflDescriptor.setScribe(LogSplitter.class.getName());
     
     StorageDescriptor source = 
         KafkaSource.createStorageDescriptor("LogSampleDataflow", "log4j", "127.0.0.1:2181", "raw");

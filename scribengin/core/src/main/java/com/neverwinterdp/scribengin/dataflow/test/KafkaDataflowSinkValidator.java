@@ -7,6 +7,7 @@ import com.neverwinterdp.kafka.tool.KafkaTopicReport;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowTestReport.DataflowSinkValidatorReport;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
+import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSource;
 
 public class KafkaDataflowSinkValidator extends DataflowSinkValidator {
   private KafkaMessageCheckTool kafkaMessageCheckTool;
@@ -14,10 +15,8 @@ public class KafkaDataflowSinkValidator extends DataflowSinkValidator {
   
   @Override
   public StorageDescriptor getSinkDescriptor() {
-    StorageDescriptor sink = new StorageDescriptor("KAFKA");
-    sink.attribute("dataflowName", "KafkaDataflowSinkValidator");
-    sink.attribute("topic", sinkName);
-    sink.attribute("zk.connect", zkConnect);
+    StorageDescriptor sink = 
+      KafkaSource.createStorageDescriptor("KafkaDataflowSinkValidator", sinkName, zkConnect, null);
     return sink;
   }
 

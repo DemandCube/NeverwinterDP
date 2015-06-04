@@ -7,16 +7,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
+import com.neverwinterdp.scribengin.dataflow.chain.DataflowChainConfig;
+import com.neverwinterdp.scribengin.dataflow.chain.OrderDataflowChainSubmitter;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowCommandStartStopResumeTest;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowRandomServerFailureTest;
 import com.neverwinterdp.scribengin.dataflow.test.HDFSDataflowTest;
 import com.neverwinterdp.scribengin.dataflow.test.KafkaDataflowTest;
 import com.neverwinterdp.swing.scribengin.ScribenginCluster;
+import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.IOUtil;
+import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.util.log.LoggerFactory;
+import com.neverwinterdp.vm.LoggerConfig;
 
 public class DataflowTestRunner extends Thread {
   private String label;
   private String description ;
-  private List<ShellCommandRunner> shellCommandRunners = new ArrayList<>();
+  private List<Runnable> runables = new ArrayList<>();
 
   public DataflowTestRunner(String label, String desc) {
     this.label = label; 
@@ -28,13 +35,17 @@ public class DataflowTestRunner extends Thread {
   public String getDescription() { return this.description ; }
 
   public void add(ScribenginShell shell, String command) {
-    shellCommandRunners.add(new ShellCommandRunner(shell, command)) ;
+    runables.add(new ShellCommandRunner(shell, command)) ;
+  }
+  
+  public void add(Runnable runnable) {
+    runables.add(runnable) ;
   }
 
   public void run() {
-    ExecutorService service =  Executors.newFixedThreadPool(shellCommandRunners.size());
-    for(int i = 0; i < shellCommandRunners.size(); i++) {
-      ShellCommandRunner sel = shellCommandRunners.get(i);
+    ExecutorService service =  Executors.newFixedThreadPool(runables.size());
+    for(int i = 0; i < runables.size(); i++) {
+      Runnable sel = runables.get(i);
       service.submit(sel);
     }
     service.shutdown();
@@ -64,7 +75,6 @@ public class DataflowTestRunner extends Thread {
   }
 
   static public class DataflowKafkaToKakaTestRunner extends DataflowTestRunner {
-
     public DataflowKafkaToKakaTestRunner() {
       super("Kafka To Kafka Dataflow Test", "Kafka To Kafka Dataflow Test");
       ScribenginShell shell = ScribenginCluster.getCurrentInstance().getScribenginShell() ;
@@ -190,6 +200,29 @@ public class DataflowTestRunner extends Thread {
           " --dump-registry" +
           " --print-dataflow-info -1";
       add(shell, dataflowKafkaToKafkaCommand);
+    }
+  }
+  
+  static public class LogSampleTestRunner extends DataflowTestRunner {
+
+    public LogSampleTestRunner() {
+      super("Log Sample Test", "Log Sample Test");
+      final ScribenginShell shell = ScribenginCluster.getCurrentInstance().getScribenginShell();
+      Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+          try {
+            String json = IOUtil.getFileContentAsString("../../scribengin/dataflow/log-sample/src/app/conf/log-dataflow-chain.json") ;
+            DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
+            OrderDataflowChainSubmitter submitter = new OrderDataflowChainSubmitter(shell.getScribenginClient());
+            submitter.submit(null, config, 10000);
+            Thread.sleep(45000);
+          } catch(Exception ex) {
+            ex.printStackTrace();
+          }
+        }
+      };
+      add(runnable);
     }
   }
 }

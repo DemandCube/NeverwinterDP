@@ -55,7 +55,14 @@ public class UIDataflowTests extends GridLayoutPanel implements UILifecycle {
       }
     };
     
-    addCells(kafkaToKafkaTest, hdfsToHdfsTest, dataflowServerFailureTest, dataflowStartStopResumeTest);
+    Action logSampleTest = new AbstractAction("Log Sample Test") {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        new DataflowTestRunner.LogSampleTestRunner().start();
+      }
+    };
+    
+    addCells(kafkaToKafkaTest, hdfsToHdfsTest, dataflowServerFailureTest, dataflowStartStopResumeTest, logSampleTest);
     makeGrid(1);
   }
 

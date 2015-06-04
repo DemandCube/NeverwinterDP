@@ -45,9 +45,7 @@ public class ScribenginClient {
 
   public Registry getRegistry() { return this.vmClient.getRegistry(); }
   
-  public VMClient getVMClient() { 
- //   System.err.println("vmclient "+ vmClient);
-    return this.vmClient ; }
+  public VMClient getVMClient() { return this.vmClient; }
   
   public VMDescriptor getScribenginMaster() throws RegistryException {
     Node node = vmClient.getRegistry().getRef(ScribenginService.LEADER_PATH);
@@ -129,10 +127,6 @@ public class ScribenginClient {
     VMClient vmClient = getVMClient();
     
     DataflowWaitingEventListener waitingEventListener = new DataflowWaitingEventListener(vmClient.getRegistry());
-    waitingEventListener.waitDataflowLeader(
-        format("Expect %s-master-1 as the leader", 
-        dflDescriptor.getId()), dflDescriptor,  
-        format("%s-master-0000000001", dflDescriptor.getId()));
     waitingEventListener.waitDataflowStatus("Expect dataflow init status", dflDescriptor, DataflowLifecycleStatus.INIT);
     waitingEventListener.waitDataflowStatus("Expect dataflow running status", dflDescriptor, DataflowLifecycleStatus.RUNNING);
     waitingEventListener.waitDataflowStatus("Expect dataflow terminated status", dflDescriptor, DataflowLifecycleStatus.TERMINATED);

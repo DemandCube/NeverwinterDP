@@ -48,6 +48,12 @@ public class DataflowTaskContext {
     sinkContext.assignedSinkStreamWriter.append(record);
   }
 
+  public String[] getAvailableSinks() {
+    String[] name = new String[sinkContexts.size()] ;
+    sinkContexts.keySet().toArray(name) ;
+    return name ;
+  }
+  
   public void write(String sinkName, Record record) throws Exception {
     SinkContext sinkContext = sinkContexts.get(sinkName);
     sinkContext.assignedSinkStreamWriter.append(record);

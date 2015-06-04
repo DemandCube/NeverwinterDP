@@ -156,6 +156,7 @@ public class UIDataflowTaskView extends SpringLayoutGridJPanel implements UILife
     }
 
     public DataflowTaskDescriptor getDataflowTaskDescriptorAt(int selectedRow) {
+      if(selectedRow < 0) return null ;
       return taskDescriptors.get(selectedRow);
     }
 

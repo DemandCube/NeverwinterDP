@@ -13,6 +13,9 @@ import org.jdesktop.swingx.JXMultiSplitPane;
 import org.jdesktop.swingx.MultiSplitLayout;
 
 import com.neverwinterdp.swing.console.UIShellConsole;
+import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.log.LoggerFactory;
+import com.neverwinterdp.vm.LoggerConfig;
 
 @SuppressWarnings("serial")
 public class UIMain extends JPanel {
@@ -69,6 +72,16 @@ public class UIMain extends JPanel {
    * main method allows us to run as a standalone demo.
    */
   public static void main(String[] args) throws Exception {
+    FileUtil.removeIfExist("build/data", false);
+    FileUtil.removeIfExist("build/logs", false);
+    LoggerConfig loggerConfig = new LoggerConfig() ;
+    
+    loggerConfig.getConsoleAppender().setEnable(true);
+    loggerConfig.getFileAppender().initLocalEnvironment();
+    loggerConfig.getEsAppender().initLocalEnvironment();
+    loggerConfig.getKafkaAppender().initLocalEnvironment();
+    LoggerFactory.log4jConfigure(loggerConfig.getLog4jConfiguration());
+    
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {

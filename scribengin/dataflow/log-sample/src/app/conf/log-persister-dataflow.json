@@ -6,14 +6,13 @@
   "numberOfWorkers" : 2,
   "numberOfExecutorsPerWorker" : 2,
   "taskMaxExecuteTime" : -1,
-  "scribe" : "com.neverwinterdp.dataflow.logsample.LogSampleDataProcessor",
+  "scribe" : "com.neverwinterdp.dataflow.logsample.LogPersister",
 
   "sourceDescriptor" : {
-    "topic" : "log4j",
+    "topic" : "log4j.info",
     "zk.connect" : "127.0.0.1:2181",
-    "reader" : "raw",
     "type" : "kafka",
-    "dataflowName" : "LogSampleDataflow"
+    "dataflowName" : "InfoLogPeristerDataflow"
   },
 
   "sinkDescriptors" : {
@@ -22,7 +21,7 @@
       "zk.connect" : "127.0.0.1:2181",
       "reader" : "record",
       "type" : "kafka",
-      "dataflowName" : "LogSampleDataflow"
+      "dataflowName" : "LogSplitterDataflow"
     },
 
     "error" : {
@@ -30,15 +29,7 @@
       "zk.connect" : "127.0.0.1:2181",
       "reader" : "record",
       "type" : "kafka",
-      "dataflowName" : "LogSampleDataflow"
-    },
-
-    "info" : {
-      "topic" : "log4j.info",
-      "zk.connect" : "127.0.0.1:2181",
-      "reader" : "record",
-      "type" : "kafka",
-      "dataflowName" : "LogSampleDataflow"
+      "dataflowName" : "LogSplitterDataflow"
     }
   },
 

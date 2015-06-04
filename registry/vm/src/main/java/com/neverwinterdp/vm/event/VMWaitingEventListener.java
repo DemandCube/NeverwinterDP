@@ -20,12 +20,12 @@ public class VMWaitingEventListener {
   public WaitingOrderNodeEventListener getWaitingNodeEventListener() { return waitingEventListeners; }
   
   public void waitVMServiceStatus(String desc, VMService.Status status) throws Exception {
-    waitingEventListeners.add(VMService.MASTER_PATH + "/status", status, desc);
+    waitingEventListeners.add(VMService.MASTER_PATH + "/status", desc, status);
   }
   
   public void waitVMStatus(String desc, String vmName, VMStatus vmStatus) throws Exception {
     String path = VMService.getVMStatusPath(vmName);
-    waitingEventListeners.add(path, vmStatus, desc);
+    waitingEventListeners.add(path, desc, vmStatus);
   }
   
   public void waitHeartbeat(String desc, String vmName, boolean connected) throws Exception {

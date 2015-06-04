@@ -5,6 +5,7 @@ import com.neverwinterdp.kafka.tool.KafkaTopicReport;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowTestReport.DataflowSourceGeneratorReport;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
+import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSource;
 
 public class KafkaDataflowSourceGenerator extends DataflowSourceGenerator {
   private KafkaMessageSendTool sendTool;
@@ -49,11 +50,8 @@ public class KafkaDataflowSourceGenerator extends DataflowSourceGenerator {
   
   @Override
   public StorageDescriptor getSourceDescriptor() {
-    StorageDescriptor sourceDescriptor = new StorageDescriptor("kafka");
-    //TODO(Tuan) shouldnt this be the value of --dataflow-name
-    sourceDescriptor.attribute("dataflowName", "KafkaDataflowSourceGenerator");
-    sourceDescriptor.attribute("topic", sourceName);
-    sourceDescriptor.attribute("zk.connect", zkConnect);
+    StorageDescriptor sourceDescriptor = 
+        KafkaSource.createStorageDescriptor("KafkaDataflowSourceGenerator", sourceName, zkConnect, null);
     return sourceDescriptor;
   }
 

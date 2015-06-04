@@ -16,11 +16,11 @@ public class KafkaSourceStreamReader implements SourceStreamReader {
   public KafkaSourceStreamReader(StreamDescriptor descriptor, PartitionMetadata partitionMetadata) {
     this.descriptor = descriptor;
     this.partitionReader = 
-        new KafkaPartitionReader(descriptor.attribute("dataflowName"), descriptor.attribute("zk.connect"), descriptor.attribute("topic"), partitionMetadata);
+        new KafkaPartitionReader(descriptor.attribute("name"), descriptor.attribute("zk.connect"), descriptor.attribute("topic"), partitionMetadata);
   }
   
   @Override
-  public String getName() { return descriptor.attribute("dataflowName"); }
+  public String getName() { return descriptor.attribute("name"); }
 
   @Override
   public Record next() throws Exception {

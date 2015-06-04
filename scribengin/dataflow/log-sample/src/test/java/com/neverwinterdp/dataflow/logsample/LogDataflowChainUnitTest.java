@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
-import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.event.DataflowWaitingEventListener;
+import com.neverwinterdp.scribengin.dataflow.chain.DataflowChainConfig;
+import com.neverwinterdp.scribengin.dataflow.chain.OrderDataflowChainSubmitter;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 import com.neverwinterdp.util.FileUtil;
 import com.neverwinterdp.util.IOUtil;
@@ -18,7 +18,7 @@ import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.LoggerConfig;
 
-public class LogSampleDataflowUnitTest {
+public class LogDataflowChainUnitTest {
   
   protected ScribenginClusterBuilder clusterBuilder ;
   protected ScribenginShell shell;
@@ -56,23 +56,27 @@ public class LogSampleDataflowUnitTest {
   }
   
   @Test
-  public void testLogSampleDataflow() throws Exception {
+  public void test() throws Exception {
     Thread.sleep(5000);
     
-    //LogSampleDataflowBuilder builder = new LogSampleDataflowBuilder(shell.getScribenginClient());
-    //DataflowWaitingEventListener listener = builder.submit();
-    
-    String dflDescriptorJson = IOUtil.getFileContentAsString("src/app/conf/dataflow.json") ;
-    System.out.println("Dataflow Configuration: ");
-    System.out.println(dflDescriptorJson);
-    DataflowDescriptor dflDescriptor = JSONSerializer.INSTANCE.fromString(dflDescriptorJson, DataflowDescriptor.class) ;
-    
-    DataflowWaitingEventListener listener = shell.getScribenginClient().submit(dflDescriptor);
-    try { 
-      listener.getWaitingNodeEventListener().waitForEvents(60 * 1000);
-    } catch(Exception ex) {
-      ex.printStackTrace();
+    String json = IOUtil.getFileContentAsString("src/app/conf/log-dataflow-chain.json") ;
+    DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
+    OrderDataflowChainSubmitter submitter = new OrderDataflowChainSubmitter(shell.getScribenginClient());
+    submitter.submit(null, config, 10000);
+    Thread.sleep(15000);
+  }
+  
+  public class LogGenerator extends Thread {
+    public void run() {
+      Logger logger = new LoggerFactory("[TEST]").getLogger("LogGenerator");
+      try {
+        for(int i = 0; i < 100; i++) {
+          logger.info("this is a test " + i);
+          Thread.sleep(100);
+        }
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
     }
-    System.out.println(listener.getTabularFormaterEventLogInfo().getFormatText()); 
   }
 }

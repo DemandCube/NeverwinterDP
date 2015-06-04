@@ -62,7 +62,7 @@ public class DataflowResumeActivityBuilder extends ActivityBuilder {
       for(int i = 0; i < workers.size(); i++) {
         Node workerNode = dflRegistry.getWorkerNode(workers.get(i)) ;
         String path = workerNode.getPath() + "/status" ;
-        waitingListener.add(path, DataflowWorkerStatus.RUNNING, "Expect the RUNNING status for worker " + workers.get(i));
+        waitingListener.add(path, "Expect the RUNNING status for worker " + workers.get(i), DataflowWorkerStatus.RUNNING);
       }
       
       dflRegistry.broadcastWorkerEvent(DataflowEvent.RESUME);

@@ -80,7 +80,7 @@ public class DataflowPauseActivityBuilder extends ActivityBuilder {
       for(int i = 0; i < activeWorkers.size(); i++) {
         Node workerNode = dflRegistry.getWorkerNode(activeWorkers.get(i));
         String path = workerNode.getPath() + "/status" ;
-        waitingListener.add(path, DataflowWorkerStatus.PAUSE, "Wait for status PAUSE on " + activeWorkers.get(i));
+        waitingListener.add(path, "Wait for status PAUSE on " + activeWorkers.get(i), DataflowWorkerStatus.PAUSE);
       }
       
       dflRegistry.broadcastWorkerEvent(DataflowEvent.PAUSE);

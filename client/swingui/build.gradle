@@ -17,7 +17,9 @@ test {
 
 dependencies {
   compile project(':module/elasticsearch')
+  compile project(':module/kafka')
   compile project(':scribengin/core')
+  compile project(':scribengin/dataflow/log-sample')
 
   compile group: 'org.swinglabs.swingx', name: 'swingx-all', version: '1.6.5'
   compile group: 'org.jdesktop.bsaf', name: 'bsaf', version: '1.9'

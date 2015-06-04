@@ -1,0 +1,44 @@
+{
+  "name" : "log-splitter-dataflow",
+
+  "numberOfWorkers" : 2,
+  "numberOfExecutorsPerWorker" : 2,
+  "taskMaxExecuteTime" : -1,
+  "scribe" : "com.neverwinterdp.dataflow.logsample.LogSplitter",
+
+  "sourceDescriptor" : {
+    "type" : "kafka", "topic" : "log4j", "zk.connect" : "127.0.0.1:2181", "reader" : "raw", "name" : "LogSplitterDataflow"
+  },
+
+  "sinkDescriptors" : {
+    "warn" : {
+      "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "127.0.0.1:2181", "name" : "LogSplitterDataflow"
+    },
+
+    "error" : {
+      "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "127.0.0.1:2181", "name" : "LogSplitterDataflow"
+    },
+
+    "info" : {
+      "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "127.0.0.1:2181", "name" : "LogSplitterDataflow"
+    }
+  },
+
+  "loggerConfig" : {
+    "logLevel" : "INFO ",
+    "consoleAppender" : { "enable" : false },
+
+    "fileAppender" : {
+      "enable" : true, "name" : "file", "filePath" : "logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5
+    },
+    
+    "esAppender" : {
+      "enable" : true, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "data/buffer/es/log4j", "indexName" : "log4j"
+    },
+
+    "kafkaAppender" : {
+      "enable" : true, "name" : "kafka", "connects" : "kafka-1:9092, kafka-2:9092, kafka-3:9092", "bufferDir" : "data/buffer/kafka/log4j", "topic" : "log4j"
+    }
+  }
+}
+

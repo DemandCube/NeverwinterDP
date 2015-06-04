@@ -20,6 +20,6 @@ public class DataflowWaitingEventListener extends VMWaitingEventListener {
   
   public void waitDataflowStatus(String desc, DataflowDescriptor descriptor, DataflowLifecycleStatus status) throws Exception {
     String dataflowStatusPath = ScribenginService.getDataflowStatusPath(descriptor.getId());
-    waitingEventListeners.add(dataflowStatusPath, status, desc);
+    waitingEventListeners.add(dataflowStatusPath, desc, status);
   }
 }
