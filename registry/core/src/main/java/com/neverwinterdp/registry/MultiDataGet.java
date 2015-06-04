@@ -1,6 +1,5 @@
 package com.neverwinterdp.registry;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 
 public interface MultiDataGet<T> {
@@ -21,9 +20,6 @@ public interface MultiDataGet<T> {
   public void shutdown() ;
   
   public List<T>  getResults();
-  
-  //TODO: remove this code
-  public LinkedHashMap<String, T> getResultsMap() ;
   
   public List<DataGet<T>> getDataGetResults() ;
   

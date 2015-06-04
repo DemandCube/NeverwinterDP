@@ -12,6 +12,7 @@ import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 
 import com.neverwinterdp.registry.Registry;
+import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.swing.UILifecycle;
 import com.neverwinterdp.swing.scribengin.ScribenginCluster;
@@ -23,12 +24,15 @@ import com.neverwinterdp.swing.widget.SpringLayoutGridJPanel;
 @SuppressWarnings("serial")
 public class UIActivityStepsView extends JPanel implements UILifecycle {
   private String  activitiesRootPath ;
-  private String  activityId ;
+  private String  activityNodeName ;
   
-  public UIActivityStepsView(String activitiesPath, String activityId) {
+  public UIActivityStepsView(String activityNodePath, String activityNodeName) {
     setLayout(new BorderLayout()) ;
-    this.activitiesRootPath = activitiesPath ;
-    this.activityId = activityId ;
+    this.activitiesRootPath = activityNodePath.substring(0, activityNodePath.lastIndexOf("/activities") + "/activities".length());
+    this.activityNodeName = activityNodeName ;
+  }
+  public UIActivityStepsView() {
+    setLayout(new BorderLayout()) ;
   }
 
   @Override
@@ -41,15 +45,16 @@ public class UIActivityStepsView extends JPanel implements UILifecycle {
   
   @Override
   public void onActivate() throws Exception {
+    refresh(activitiesRootPath + "/all/" + activityNodeName + "/activity-steps");
+  }
+  
+  public void refresh(String path) throws Exception{ 
     removeAll() ;
     Registry registry = ScribenginCluster.getCurrentInstance().getRegistry();
     if(registry == null || !registry.isConnect()) {
       add(new JLabel("No Registry Connection"), BorderLayout.CENTER);
     }
-    System.err.println("rootpath "+ activitiesRootPath);
-    System.err.println("activity id "+ activityId);
-    List<ActivityStep> activitySteps = 
-      registry.getChildrenAs(activitiesRootPath + "/all/" + activityId + "/activity-steps", ActivityStep.class);
+    List<ActivityStep> activitySteps = ActivityRegistry.getActivitySteps(registry, path);
     
     JXTaskPaneContainer tpc = new JXTaskPaneContainer();
     
@@ -61,8 +66,8 @@ public class UIActivityStepsView extends JPanel implements UILifecycle {
     }
     
     add(new JScrollPane(tpc), BorderLayout.CENTER) ;
+    revalidate();
   }
-  
   @Override
   public void onDeactivate() throws Exception {
     removeAll() ;
