@@ -10,6 +10,8 @@ public class WaittingAckProducerRecordHolder<K, V> {
 
   public int size() { return buffer.size(); }
   
+  public void clear() { buffer.clear(); }
+  
   public List<WaittingAckProducerRecord<K,V>> getNeedToResendRecords() {
     List<WaittingAckProducerRecord<K,V>> holder = new ArrayList<WaittingAckProducerRecord<K,V>>();
     synchronized(buffer) {

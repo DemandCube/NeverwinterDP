@@ -32,6 +32,7 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
   protected DataflowSubmitter doSubmit(ScribenginClient client, String dataflowHome, DataflowDescriptor descriptor) throws Exception {
     DataflowSubmitter submitter = new DataflowSubmitter(client, dataflowHome, descriptor) ;
     submitter.submit();
+    submitter.waitForRunning(30000);
     return submitter;
   }
   

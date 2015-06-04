@@ -36,9 +36,12 @@ public class ESClient {
   private String[] address;
 
   public ESClient(String[] address) {
+    this("neverwinterdp", address);
+  }
+  
+  public ESClient(String clusterName, String[] address) {
     this.address = address;
-    Settings settings =
-        ImmutableSettings.settingsBuilder().put("cluster.name", "neverwinterdp").build();
+    Settings settings = ImmutableSettings.settingsBuilder().put("cluster.name", clusterName).build();
     client = new TransportClient(settings);
     for (String selAddr : address) {
       int port = 9300;

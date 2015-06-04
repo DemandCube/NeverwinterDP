@@ -17,7 +17,7 @@ import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.tool.VMClusterBuilder;
 
 public class EmbededVMClusterBuilder extends VMClusterBuilder {
-  private String baseDir = "./build/data";
+  private String baseDir = "./build/cluster";
   protected KafkaCluster kafkaCluster;
   
   public EmbededVMClusterBuilder() throws RegistryException {

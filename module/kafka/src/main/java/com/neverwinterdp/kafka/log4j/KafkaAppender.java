@@ -23,6 +23,12 @@ public class KafkaAppender extends AppenderSkeleton {
   
   private DeamonThread forwardThread ;
   
+  public void init(String connects, String topic, String queueBufferDir) {
+    this.connects = connects;
+    this.topic = topic;
+    this.queueBufferDir = queueBufferDir;
+  }
+  
   public void close() {
     if(forwardThread != null) {
       forwardThread.exit = true ;
@@ -61,7 +67,10 @@ public class KafkaAppender extends AppenderSkeleton {
 
   protected void append(LoggingEvent event) {
     if(queueError) return ;
-    Log4jRecord record = new Log4jRecord(event) ;
+    append(new Log4jRecord(event)) ;
+  }
+  
+  public void append(Log4jRecord record) {
     try {
       queue.writeObject(record) ;
     } catch (Exception e) {
@@ -71,21 +80,12 @@ public class KafkaAppender extends AppenderSkeleton {
   }
   
   public class DeamonThread extends Thread {
-    private KafkaWriter kafkaWriter;
+    private AckKafkaWriter kafkaWriter;
     private boolean kafkaError = false ;
     private boolean exit = false ;
     
-    boolean init() {
-      try {
-        kafkaWriter = new AckKafkaWriter("log4j", connects) ;
-      } catch(Exception ex) {
-        ex.printStackTrace();
-        return false ;
-      }
-      return true ;
-    }
-    
     public void forward() {
+      kafkaWriter = new AckKafkaWriter(topic, connects) ;
       while(true) {
         try {
           if(kafkaError) {
@@ -99,12 +99,15 @@ public class KafkaAppender extends AppenderSkeleton {
             while(segment.hasNext()) {
               Log4jRecord record = segment.nextObject() ;
               String json = JSONSerializer.INSTANCE.toString(record);
-              kafkaWriter.send(topic, json, 60 * 1000);;
+              kafkaWriter.send(topic, json, 30 * 1000);
             }
+            kafkaWriter.waitForAcks(60 * 1000);
             queue.commitReadSegment(segment);
           }
         } catch(KafkaException ex) {
           kafkaError = true ;
+          kafkaWriter.foceClose();
+          System.out.println("Kafka Error: " + ex.getMessage());
         } catch (InterruptedException e) {
           return ;
         } catch(Exception ex) {
@@ -130,7 +133,6 @@ public class KafkaAppender extends AppenderSkeleton {
     }
     
     public void run() {
-      if(!init()) return ;
       forward() ;
       shutdown() ;
     }

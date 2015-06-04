@@ -16,12 +16,19 @@ import com.neverwinterdp.util.text.StringUtil;
 public class ElasticSearchAppender extends AppenderSkeleton {
   private String[] connect ;
   private String   indexName ;
+  
   private String   queueBufferDir;
   private int      queueMaxSizePerSegment = 100000;
-  private boolean  queueError = false ;
   private MultiSegmentQueue<Log4jRecord> queue ; 
+  private boolean  queueError = false ;
   
   private DeamonThread forwardThread ;
+
+  public void init(String[] connect, String indexName, String queueBufferDir) {
+    this.connect = connect;
+    this.indexName = indexName;
+    this.queueBufferDir = queueBufferDir;
+  }
   
   public void close() {
     if(forwardThread != null) {
@@ -29,7 +36,7 @@ public class ElasticSearchAppender extends AppenderSkeleton {
       forwardThread.interrupt() ; 
     }
   }
-
+  
   public void activateOptions() {
     System.out.println("ElasticSearchAppender: Start Activate Elasticsearch log4j appender");
     try {
@@ -80,18 +87,13 @@ public class ElasticSearchAppender extends AppenderSkeleton {
     boolean init() {
       try {
         esLog4jRecordClient = new ESObjectClient<Log4jRecord>(new ESClient(connect), indexName, Log4jRecord.class) ;
-        esLog4jRecordClient.getESClient().waitForConnected(60 * 60 * 60) ;
-      } catch(Exception ex) {
-        ex.printStackTrace();
-        return false ;
-      }
-
-      try {
-        if (!esLog4jRecordClient.isCreated()) {
+        esLog4jRecordClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
+        if(!esLog4jRecordClient.isCreated()) {
           esLog4jRecordClient.createIndexWith(null, null);
         }
       } catch(Exception ex) {
         ex.printStackTrace();
+        return false ;
       }
       return true ;
     }

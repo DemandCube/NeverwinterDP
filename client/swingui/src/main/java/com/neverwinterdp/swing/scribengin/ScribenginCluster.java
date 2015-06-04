@@ -2,7 +2,6 @@ package com.neverwinterdp.swing.scribengin;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
-import com.neverwinterdp.scribengin.dataflow.test.KafkaDataflowTest;
 import com.neverwinterdp.vm.client.VMClient;
 
 abstract public class ScribenginCluster {

@@ -28,7 +28,6 @@ public class LogDataflowChainUnitTest {
     FileUtil.removeIfExist("build/data", false);
     FileUtil.removeIfExist("build/logs", false);
     LoggerConfig loggerConfig = new LoggerConfig() ;
-    
     loggerConfig.getConsoleAppender().setEnable(false);
     loggerConfig.getFileAppender().initLocalEnvironment();
     loggerConfig.getEsAppender().initLocalEnvironment();
@@ -64,10 +63,12 @@ public class LogDataflowChainUnitTest {
     DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
     OrderDataflowChainSubmitter submitter = 
         new OrderDataflowChainSubmitter(shell.getScribenginClient(), null, config);
-    submitter.submit(10000);
-    submitter.waitForTerminated(30000);
+    submitter.submit(30000);
+    submitter.waitForTerminated(60000);
     shell.execute("dataflow info --dataflow-id log-splitter-dataflow-1") ;
-    shell.execute("dataflow info --dataflow-id info-log-persister-dataflow-1") ;
+    shell.execute("dataflow info --dataflow-id info-log-persister-dataflow-info") ;
+    shell.execute("dataflow info --dataflow-id info-log-persister-dataflow-warn") ;
+    shell.execute("dataflow info --dataflow-id info-log-persister-dataflow-error") ;
   }
   
   public class LogGenerator extends Thread {
@@ -75,8 +76,10 @@ public class LogDataflowChainUnitTest {
       Logger logger = new LoggerFactory("[TEST]").getLogger("LogGenerator");
       try {
         for(int i = 0; i < 1000; i++) {
-          logger.info("this is a test " + i);
-          Thread.sleep(10);
+          logger.info("this is an info " + i);
+          logger.warn("this is a warning " + i);
+          logger.error("this is an error " + i);
+          Thread.sleep(5);
         }
       } catch (InterruptedException e) {
         e.printStackTrace();

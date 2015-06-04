@@ -48,7 +48,7 @@
     },
 
     {
-      "id" : "info-log-persister-dataflow-1",
+      "id" : "info-log-persister-dataflow-info",
       "name" : "info-log-persister-dataflow",
       "numberOfWorkers" : 2,
       "numberOfExecutorsPerWorker" : 2,
@@ -61,6 +61,74 @@
       "sinkDescriptors" : {
         "hdfs" : {
           "type" : "HDFS", "location" : "build/hdfs/info"
+        }
+      },
+      "loggerConfig" : {
+        "logLevel" : "INFO ",
+        "consoleAppender" : { "enable" : false },
+
+        "fileAppender" : { 
+          "enable" : true, "name" : "file", "filePath" : "logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
+        },
+        
+        "esAppender" : { 
+          "enable" : true, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "data/buffer/es/log4j", "indexName" : "log4j" 
+        },
+        
+        "kafkaAppender" : {
+          "enable" : true, "name" : "kafka", "connects" : "kafka-1:9092,kafka-2:9092,kafka-3:9092", "bufferDir" : "data/buffer/kafka/log4j", "topic" : "log4j"
+        }
+      }
+    },
+
+    {
+      "id" : "info-log-persister-dataflow-warn",
+      "name" : "info-log-persister-dataflow",
+      "numberOfWorkers" : 2,
+      "numberOfExecutorsPerWorker" : 2,
+      "taskMaxExecuteTime" : -1,
+      "scribe" : "com.neverwinterdp.dataflow.logsample.LogPerister",
+
+      "sourceDescriptor" : {
+        "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "127.0.0.1:2181", "reader" : "record", "name" : "LogSampleDataflow"
+      },
+      "sinkDescriptors" : {
+        "hdfs" : {
+          "type" : "HDFS", "location" : "build/hdfs/warn"
+        }
+      },
+      "loggerConfig" : {
+        "logLevel" : "INFO ",
+        "consoleAppender" : { "enable" : false },
+
+        "fileAppender" : { 
+          "enable" : true, "name" : "file", "filePath" : "logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
+        },
+        
+        "esAppender" : { 
+          "enable" : true, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "data/buffer/es/log4j", "indexName" : "log4j" 
+        },
+        
+        "kafkaAppender" : {
+          "enable" : true, "name" : "kafka", "connects" : "kafka-1:9092,kafka-2:9092,kafka-3:9092", "bufferDir" : "data/buffer/kafka/log4j", "topic" : "log4j"
+        }
+      }
+    },
+
+    {
+      "id" : "info-log-persister-dataflow-error",
+      "name" : "info-log-persister-dataflow",
+      "numberOfWorkers" : 2,
+      "numberOfExecutorsPerWorker" : 2,
+      "taskMaxExecuteTime" : -1,
+      "scribe" : "com.neverwinterdp.dataflow.logsample.LogPerister",
+
+      "sourceDescriptor" : {
+        "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "127.0.0.1:2181", "reader" : "record", "name" : "LogSampleDataflow"
+      },
+      "sinkDescriptors" : {
+        "hdfs" : {
+          "type" : "HDFS", "location" : "build/hdfs/error"
         }
       },
       "loggerConfig" : {

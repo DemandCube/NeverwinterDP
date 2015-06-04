@@ -7,8 +7,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,11 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
     kafkaProps.put("bootstrap.servers", kafkaBrokerUrls);
     kafkaProps.put("value.serializer", ByteArraySerializer.class.getName());
     kafkaProps.put("key.serializer",   ByteArraySerializer.class.getName());
+    //kafkaProps.setProperty(ProducerConfig.METADATA_FETCH_TIMEOUT_CONFIG, "300");
+    //kafkaProps.setProperty(ProducerConfig.TIMEOUT_CONFIG, "300");
+    kafkaProps.setProperty(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, "10000");
+    kafkaProps.setProperty(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, "10000");
+
     if (props != null) {
       kafkaProps.putAll(props);
     }
@@ -94,11 +101,35 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
     producer.close(); 
   }
   
+  public void waitForAcks(long timeout)  throws KafkaException {
+    try {
+      int waitTime = 0;
+      while(waitTime < timeout && waittingAckBuffer.size() > 0) {
+        Thread.sleep(100);
+        waitTime += 100;
+      }
+    } catch (InterruptedException e) {
+    }
+    if(waittingAckBuffer.size() > 0) {
+      throw new KafkaException("There are still " + waittingAckBuffer.size() + " messages in the waiting list") ;
+    }
+  }
+  
   public void close() throws InterruptedException { 
     if(resendThread != null && resendThread.isAlive()) {
       resendThread.waitForTermination(60000);
     }
     producer.close(); 
+    producer = null ;
+  }
+  
+  public void foceClose() { 
+    if(resendThread != null && resendThread.isAlive()) {
+      resendThread.interrupt();
+    }
+    waittingAckBuffer.clear();
+    producer.close(); 
+    producer = null ;
   }
   
   public class ResendThread extends Thread {
