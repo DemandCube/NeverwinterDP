@@ -1,25 +1,46 @@
 package com.neverwinterdp.scribengin.dataflow.chain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
 
 public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
-
-  public OrderDataflowChainSubmitter(ScribenginClient scribenginClient) {
-    super(scribenginClient);
+  private List<DataflowSubmitter> submitters = new ArrayList<>();
+  
+  public OrderDataflowChainSubmitter(ScribenginClient client, String dataflowHome, DataflowChainConfig config) {
+    super(client, dataflowHome, config);
   }
   
-  public void submit(String dataflowHome, DataflowChainConfig config, long timeout) throws Exception {
+  public void submit(long timeout) throws Exception {
     long stopTime = System.currentTimeMillis() + timeout;
-    long remainTime = timeout ;
+    long remainTime = timeout;
     for(DataflowDescriptor sel : config.getDescriptors()) {
-      DataflowSubmitter submitter = new DataflowSubmitter(scribenginClient, dataflowHome, sel) ;
-      submitter.submitAndWaitForRunningStatus(remainTime);
+      DataflowSubmitter submitter = doSubmit(client, dataflowHome, sel) ;
+      submitter.submit();
+      submitter.waitForRunning(remainTime);
+      submitters.add(submitter);
       remainTime = stopTime - System.currentTimeMillis();
       if(remainTime < 0) {
         throw new InterruptedException("Cannot finish to submit within " + timeout + "ms") ;
       }
+    }
+  }
+  
+  protected DataflowSubmitter doSubmit(ScribenginClient client, String dataflowHome, DataflowDescriptor descriptor) throws Exception {
+    DataflowSubmitter submitter = new DataflowSubmitter(client, dataflowHome, descriptor) ;
+    submitter.submit();
+    return submitter;
+  }
+  
+  public void waitForTerminated(long timeout) throws Exception {
+    long stopTime = System.currentTimeMillis() + timeout;
+    long remainTime = timeout;
+    for(DataflowSubmitter submitter : submitters) {
+      submitter.waitForTerminated(remainTime);
+      remainTime = stopTime - System.currentTimeMillis();
     }
   }
 }

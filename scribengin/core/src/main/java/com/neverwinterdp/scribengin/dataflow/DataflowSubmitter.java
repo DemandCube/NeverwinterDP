@@ -8,6 +8,7 @@ import com.neverwinterdp.registry.event.WaitingOrderNodeEventListener;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.service.ScribenginService;
 import com.neverwinterdp.scribengin.service.VMScribenginServiceCommand;
+import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.vm.client.VMClient;
@@ -25,23 +26,7 @@ public class DataflowSubmitter {
     this.dflDescriptor     = dflDescriptor;
   }
 
-  public void submit(long timeout) throws Exception {
-    submit(false, false, false, timeout) ;
-  }
-  
-  public void submitAndWaitForInitStatus(long timeout) throws Exception {
-    submit(true, false, false, timeout) ;
-  }
-  
-  public void submitAndWaitForRunningStatus(long timeout) throws Exception {
-    submit(true, true, false, timeout) ;
-  }
-  
-  public void submitAndWaitForTerminatedStatus(long timeout) throws Exception {
-    submit(true, true, true, timeout) ;
-  }
-
-  void submit(boolean waitForInit, boolean waitForRunning, boolean waitForTerminated, long timeout) throws Exception {
+  public void submit() throws Exception {
     Registry registry = scribenginClient.getRegistry();
     VMClient vmClient = scribenginClient.getVMClient() ;
     if(dflDescriptor.getId() == null) {
@@ -57,32 +42,30 @@ public class DataflowSubmitter {
     }
     h1("Submit the dataflow " + dflDescriptor.getId());
     
-    WaitingOrderNodeEventListener eventListener = new WaitingOrderNodeEventListener(registry);
-    if(waitForInit) {
-      waitDataflowStatus(eventListener, "Expect dataflow init status", dflDescriptor, DataflowLifecycleStatus.INIT);
-    }
-    if(waitForRunning) {
-      waitDataflowStatus(eventListener, "Expect dataflow running status", dflDescriptor, DataflowLifecycleStatus.RUNNING);
-    }
-    if(waitForTerminated) {
-      waitDataflowStatus(eventListener, "Expect dataflow terminated status", dflDescriptor, DataflowLifecycleStatus.TERMINATED);
-    }
     VMDescriptor scribenginMaster = scribenginClient.getScribenginMaster();
     Command deployCmd = new VMScribenginServiceCommand.DataflowDeployCommand(dflDescriptor) ;
     CommandResult<Boolean> result = (CommandResult<Boolean>)vmClient.execute(scribenginMaster, deployCmd);
-    
-    try { 
-      eventListener.waitForEvents(timeout);
-    } catch(Exception ex) {
-      registry.get("/scribengin/dataflow/all/info-log-persister-dataflow-1").dump(System.out);
-      throw ex; 
-    } finally {
-      System.out.println(eventListener.getTabularFormaterEventLogInfo().getFormatText()); 
-    }
   }
   
-  public void waitDataflowStatus(WaitingOrderNodeEventListener listener, String desc, DataflowDescriptor descriptor, DataflowLifecycleStatus status) throws Exception {
-    String dataflowStatusPath = ScribenginService.getDataflowStatusPath(descriptor.getId());
-    listener.add(dataflowStatusPath, desc, status);
+  public void waitForStatus(long timeout, DataflowLifecycleStatus[] status) throws Exception {
+    WaitingOrderNodeEventListener eventListener = new WaitingOrderNodeEventListener(scribenginClient.getRegistry());
+    String dataflowStatusPath = ScribenginService.getDataflowStatusPath(dflDescriptor.getId());
+    String mesg = "Wait for one of the dataflow status " + StringUtil.join(status, ",");
+    eventListener.add(dataflowStatusPath, status, mesg, true);
+    eventListener.waitForEvents(timeout);
+  }
+  
+  public void waitForRunning(long timeout) throws Exception {
+    DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
+      DataflowLifecycleStatus.RUNNING, DataflowLifecycleStatus.TERMINATED
+    };
+    waitForStatus(timeout, status) ;
+  }
+  
+  public void waitForTerminated(long timeout) throws Exception {
+    DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
+      DataflowLifecycleStatus.TERMINATED
+    };
+    waitForStatus(timeout, status) ;
   }
 }

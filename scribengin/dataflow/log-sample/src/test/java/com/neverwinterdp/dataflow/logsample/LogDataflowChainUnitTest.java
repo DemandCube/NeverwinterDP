@@ -57,22 +57,26 @@ public class LogDataflowChainUnitTest {
   
   @Test
   public void test() throws Exception {
+    new LogGenerator().start();
     Thread.sleep(5000);
     
     String json = IOUtil.getFileContentAsString("src/app/conf/log-dataflow-chain.json") ;
     DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
-    OrderDataflowChainSubmitter submitter = new OrderDataflowChainSubmitter(shell.getScribenginClient());
-    submitter.submit(null, config, 10000);
-    Thread.sleep(15000);
+    OrderDataflowChainSubmitter submitter = 
+        new OrderDataflowChainSubmitter(shell.getScribenginClient(), null, config);
+    submitter.submit(10000);
+    submitter.waitForTerminated(30000);
+    shell.execute("dataflow info --dataflow-id log-splitter-dataflow-1") ;
+    shell.execute("dataflow info --dataflow-id info-log-persister-dataflow-1") ;
   }
   
   public class LogGenerator extends Thread {
     public void run() {
       Logger logger = new LoggerFactory("[TEST]").getLogger("LogGenerator");
       try {
-        for(int i = 0; i < 100; i++) {
+        for(int i = 0; i < 1000; i++) {
           logger.info("this is a test " + i);
-          Thread.sleep(100);
+          Thread.sleep(10);
         }
       } catch (InterruptedException e) {
         e.printStackTrace();

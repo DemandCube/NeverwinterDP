@@ -214,8 +214,9 @@ public class DataflowTestRunner extends Thread {
           try {
             String json = IOUtil.getFileContentAsString("../../scribengin/dataflow/log-sample/src/app/conf/log-dataflow-chain.json") ;
             DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
-            OrderDataflowChainSubmitter submitter = new OrderDataflowChainSubmitter(shell.getScribenginClient());
-            submitter.submit(null, config, 10000);
+            OrderDataflowChainSubmitter submitter = 
+                new OrderDataflowChainSubmitter(shell.getScribenginClient(), null, config);
+            submitter.submit(10000);
             Thread.sleep(45000);
           } catch(Exception ex) {
             ex.printStackTrace();
