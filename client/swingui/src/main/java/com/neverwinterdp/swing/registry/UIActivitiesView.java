@@ -34,8 +34,8 @@ import com.neverwinterdp.swing.widget.SpringLayoutGridJPanel;
 @SuppressWarnings("serial")
 public class UIActivitiesView extends SpringLayoutGridJPanel implements UILifecycle {
 
-  private String              activityPath;
-  private UIActivityStepsView activityStepsView;
+  private String         activityPath;
+  private UIActivityView activityView;
 
   public UIActivitiesView(String activityPath) {
     this.activityPath = activityPath;
@@ -66,9 +66,9 @@ public class UIActivitiesView extends SpringLayoutGridJPanel implements UILifecy
       addRow(toolbar);
 
       DataflowActivityJXTable activityListTable = new DataflowActivityJXTable(activityPath);
-      activityStepsView = new UIActivityStepsView();
+      activityView = new UIActivityView();
       JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(
-          activityListTable), new JScrollPane(activityStepsView));
+          activityListTable), new JScrollPane(activityView));
       splitPane.setOneTouchExpandable(true);
       splitPane.setDividerLocation(150);
 
@@ -100,7 +100,7 @@ public class UIActivitiesView extends SpringLayoutGridJPanel implements UILifecy
           String rootPath = activityPath.substring(0, activityPath.lastIndexOf("/"));
           String path = rootPath + "/all/" + activity.getId() + "/activity-steps";
           try {
-            activityStepsView.refresh(path);
+            activityView.refresh(rootPath, activity.getId());
           } catch (Exception exp) {
             MessageUtil.handleError(exp);
           }

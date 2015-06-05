@@ -1,47 +1,39 @@
 package com.neverwinterdp.swing.registry;
 
-import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.swing.AbstractAction;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
-import javax.swing.ListSelectionModel;
-import javax.swing.table.DefaultTableModel;
 
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
+import org.jdesktop.swingx.JXTaskPane;
+import org.jdesktop.swingx.JXTaskPaneContainer;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.activity.Activity;
-import com.neverwinterdp.registry.activity.ActivityRegistry;
-import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.swing.UILifecycle;
 import com.neverwinterdp.swing.scribengin.ScribenginCluster;
+import com.neverwinterdp.swing.util.MessageUtil;
 import com.neverwinterdp.swing.widget.SpringLayoutGridJPanel;
 
 @SuppressWarnings("serial")
 public class UIActivityView extends SpringLayoutGridJPanel implements UILifecycle {
-  private String activityPath;
-  private DataflowActivityJXTable activityTable;
-  private DataflowActivityInfoPanel activityInfo;
+  private String             activitiesRootPath;
+  private String             activityNodeName;
+  private ActivityInfoPanel  activityInfoPanel;
+  private ActivityStepsPanel activityStepsPanel;
 
-  //This should take a nodepath to filter the type of activity?
-  public UIActivityView(String activityPath) {
-    this.activityPath = activityPath;
+  // This should take a nodepath to filter the type of activity?
+  public UIActivityView(String activityNodePath, String activityNodeName) {
+    this.activitiesRootPath = activityNodePath.substring(0,
+        activityNodePath.lastIndexOf("/activities") + "/activities".length());
+    this.activityNodeName = activityNodeName;
+  }
+
+  public UIActivityView() {
+
   }
 
   @Override
@@ -54,6 +46,15 @@ public class UIActivityView extends SpringLayoutGridJPanel implements UILifecycl
 
   @Override
   public void onActivate() throws Exception {
+    refresh(activitiesRootPath, activityNodeName);
+  }
+
+  @Override
+  public void onDeactivate() throws Exception {
+    clear();
+  }
+
+  public void refresh(String activitiesRootPath, String activityNodeName) throws RegistryException {
     clear();
     Registry registry = ScribenginCluster.getCurrentInstance().getRegistry();
     if (registry == null) {
@@ -66,169 +67,78 @@ public class UIActivityView extends SpringLayoutGridJPanel implements UILifecycl
         public void actionPerformed(ActionEvent e) {
         }
       });
-      addRow(toolbar);
 
-      activityTable = new DataflowActivityJXTable(getActivities(registry));
-      activityInfo = new DataflowActivityInfoPanel();
-      JSplitPane splitPane =
-          new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(activityTable), new JScrollPane(activityInfo));
-      splitPane.setOneTouchExpandable(true);
-      splitPane.setDividerLocation(150);
+      JXTaskPaneContainer tpc = new JXTaskPaneContainer();
 
-      addRow(splitPane);
+      // adding ActivityInfoPanel into JXTaskPaneContainer
+      activityInfoPanel = new ActivityInfoPanel();
+      tpc.add(getJXTaskPane(activityInfoPanel, "Activity Info", false));
+
+      // adding ActivityStepsPanel into JXTaskPaneContainer
+      activityStepsPanel = new ActivityStepsPanel();
+      tpc.add(getJXTaskPane(activityStepsPanel, "Activity Steps", true));
+
+      addRow(new JScrollPane(tpc));
+      String activityPath = activitiesRootPath + "/all/" + activityNodeName;
+      Activity activity = registry.getDataAs(activityPath, Activity.class);
+      activityInfoPanel.update(activity);
+      activityStepsPanel.update(activitiesRootPath, activityNodeName);
     }
+    revalidate();
     makeCompactGrid();
   }
 
-  @Override
-  public void onDeactivate() throws Exception {
-    clear();
+  private JXTaskPane getJXTaskPane(Component obj, String name, boolean collapsed) {
+    JXTaskPane jxTaskPane = new JXTaskPane(name);
+    jxTaskPane.setName(name);
+    jxTaskPane.setCollapsed(collapsed);
+    jxTaskPane.add(obj);
+    return jxTaskPane;
   }
 
-  protected List<ActivityAndSteps> getActivities(Registry registry) throws RegistryException {
-    List<ActivityAndSteps> activities = new ArrayList<>();
-    if (!registry.exists(activityPath + "/all")) {
-      JPanel infoPanel = new JPanel();
-      infoPanel.add(new JLabel("Path: " + activityPath + "/all does not exist!"));
-      addRow(infoPanel);
-      return new ArrayList<ActivityAndSteps>();
-    }
-    LinkedHashMap<String, Activity> activitiesMap = new LinkedHashMap<>();//ActivityRegistry.getActivitiesMap(registry, activityPath, "all");
-    for (Map.Entry<String, Activity> entry : activitiesMap.entrySet()){
-      String path = entry.getKey();
-      activities.add(
-          new ActivityAndSteps(
-              entry.getValue(),
-              ActivityRegistry.getActivitySteps(registry, path + "/activity-steps")
-          ));
-    }
-    return activities;
-  }
-
-  public class DataflowActivityJXTable extends JXTable {
-    public DataflowActivityJXTable(List<ActivityAndSteps> activitiesAndSteps) throws Exception {
-      setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-      DataflowActivityTableModel model = new DataflowActivityTableModel(activitiesAndSteps);
-      setModel(model);
-      model.loadData();
-
-      setVisibleRowCount(30);
-      setVisibleColumnCount(8);
-      setHorizontalScrollEnabled(true);
-      setColumnControlVisible(true);
-      addMouseListener(new MouseAdapter() {
-        public void mouseClicked(MouseEvent e) {
-          DataflowActivityTableModel model = (DataflowActivityTableModel) getModel();
-          ActivityAndSteps selectedAcivityAndSteps = model.getActivityAndStepsAt(getSelectedRow());
-          activityInfo.updateActivityInfo(selectedAcivityAndSteps);
-        }
-      });
-      setHighlighters(HighlighterFactory.createSimpleStriping());
-      addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW, Color.BLACK, Color.WHITE));
-    }
-  }
-
-  public class DataflowActivityInfoPanel extends SpringLayoutGridJPanel {
-    public DataflowActivityInfoPanel() {
-      updateActivityInfo(null);
+  class ActivityInfoPanel extends SpringLayoutGridJPanel {
+    public ActivityInfoPanel(Activity activity) {
+      update(activity);
     }
 
-    public void updateActivityInfo(ActivityAndSteps activityAndSteps) {
-      String indent = "    ";
+    public ActivityInfoPanel() {
+    }
+
+    public void update(Activity activity) {
       clear();
-      createBorder("Dataflow Activity Info");
-      if (activityAndSteps == null) {
+      if (activity == null) {
         addRow("Select one of the activities above to view its details. ");
       } else {
-        addRow("Activity:",indent, indent);
-        addRow(indent, "Activity id: ", activityAndSteps.getId());
-        addRow(indent, "Description", activityAndSteps.activity.getDescription());
-        addRow(indent, "Step builder: ", activityAndSteps.activity.getActivityStepBuilder());
-        addRow(indent, "Coordinator", activityAndSteps.activity.getCoordinator());
-        addRow(indent, "Type: ", activityAndSteps.activity.getType());
-        addRow("Activity Steps:",indent, indent);
-        for (ActivityStep sinkStream : activityAndSteps.getActivitySteps()) {
-          addRow(indent, "Description: ", sinkStream.getDescription());
-          addRow(indent, "Activity Type: ", sinkStream.getType());
-          addRow(indent, "Status: ", sinkStream.getStatus().toString());
-          addRow(indent,indent,indent);
-        }
+        addRow("Activity id: ", activity.getId());
+        addRow("Description", activity.getDescription());
+        addRow("Step builder: ", activity.getActivityStepBuilder());
+        addRow("Coordinator", activity.getCoordinator());
+        addRow("Type: ", activity.getType());
       }
       makeCompactGrid();
       revalidate();
     }
   }
 
-  static class DataflowActivityTableModel extends DefaultTableModel {
-    static String[] COLUMNS = { "Id", "description", "type" };
-
-    List<ActivityAndSteps> activityAndSteps;
-
-    public DataflowActivityTableModel(List<ActivityAndSteps> activityAndSteps) {
-      super(COLUMNS, 0);
-      this.activityAndSteps = activityAndSteps;
-      Collections.sort(this.activityAndSteps);
+  class ActivityStepsPanel extends SpringLayoutGridJPanel {
+    public ActivityStepsPanel(String activitiesRootPath, String activityNodeName) {
+      update(activitiesRootPath, activityNodeName);
     }
 
-    public ActivityAndSteps getActivityAndStepsAt(int selectedRow) {
-      return activityAndSteps.get(selectedRow);
+    public ActivityStepsPanel() {
     }
 
-    void loadData() throws Exception {
-      for (ActivityAndSteps act : activityAndSteps) {
-        Activity activity = act.getActivity();
-        Object[] cells = {
-            activity.getId(), activity.getDescription(), activity.getType() };
-        addRow(cells);
+    public void update(String activitiesRootPath, String activityNodeName) {
+      UIActivityStepsView activityStepsView = new UIActivityStepsView();
+      addRow(new JScrollPane(activityStepsView));
+      try {
+        activityStepsView.refresh(activitiesRootPath + "/all/" + activityNodeName
+            + "/activity-steps");
+      } catch (Exception e) {
+        MessageUtil.handleError(e);
       }
+      makeCompactGrid();
     }
   }
 
-  //just a helper
-  public class ActivityAndSteps implements Comparable<ActivityAndSteps> {
-    private Activity activity;
-    private List<ActivityStep> activitySteps;
-
-    public ActivityAndSteps(Activity activity, List<ActivityStep> activitySteps) {
-      super();
-      this.activity = activity;
-      this.activitySteps = activitySteps;
-    }
-
-    public Activity getActivity() {
-      return activity;
-    }
-
-    public void setActivity(Activity activity) {
-      this.activity = activity;
-    }
-
-    public List<ActivityStep> getActivitySteps() {
-      return activitySteps;
-    }
-
-    public void setActivitySteps(List<ActivityStep> activitySteps) {
-      this.activitySteps = activitySteps;
-    }
-
-    public String getId() {
-      return activity.getId();
-    }
-
-    @Override
-    public String toString() {
-      StringBuilder builder = new StringBuilder();
-      builder.append("ActivityAndSteps [activity=");
-      builder.append(activity);
-      builder.append(", activitySteps=");
-      builder.append(activitySteps);
-      builder.append("]");
-      return builder.toString();
-    }
-
-    @Override
-    public int compareTo(ActivityAndSteps other) {
-      return this.getActivity().getId().compareToIgnoreCase(other.getActivity().getId());
-    }
-  }
 }
