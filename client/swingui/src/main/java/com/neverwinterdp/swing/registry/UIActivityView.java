@@ -93,7 +93,7 @@ public class UIActivityView extends SpringLayoutGridJPanel implements UILifecycl
       addRow(infoPanel);
       return new ArrayList<ActivityAndSteps>();
     }
-    LinkedHashMap<String, Activity> activitiesMap = ActivityRegistry.getActivitiesMap(registry, activityPath, "all");
+    LinkedHashMap<String, Activity> activitiesMap = new LinkedHashMap<>();//ActivityRegistry.getActivitiesMap(registry, activityPath, "all");
     for (Map.Entry<String, Activity> entry : activitiesMap.entrySet()){
       String path = entry.getKey();
       activities.add(
