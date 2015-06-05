@@ -2,6 +2,7 @@ package com.neverwinterdp.scribengin.storage.es.sink;
 
 import java.util.LinkedHashMap;
 
+import com.neverwinterdp.es.ESObjectClient;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.es.ESStorage;
@@ -24,6 +25,11 @@ public class ESSink implements Sink {
   
   private void init(ESStorage storage) throws Exception {
     this.storage = storage;
+    ESObjectClient<Object> esObjClient = storage.getESObjectClient();
+    if(!esObjClient.isCreated()) {
+      esObjClient.createIndexWith(null, null);
+    }
+    esObjClient.close();
   }
   
   @Override

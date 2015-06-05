@@ -13,11 +13,10 @@ public class ESStreamWriter implements SinkStreamWriter {
   StreamDescriptor descriptor;
   ESObjectClient<Object> esObjClient;
   
-  public ESStreamWriter(StreamDescriptor descriptor) {
+  public ESStreamWriter(StreamDescriptor descriptor) throws Exception {
     this.storage = new ESStorage(descriptor);
     this.descriptor = descriptor;
-    esObjClient =
-        new ESObjectClient<Object>(new ESClient(storage.getAddress()), storage.getIndexName(), storage.getMappingType()) ;
+    esObjClient = storage.getESObjectClient();
   }
   
   @Override

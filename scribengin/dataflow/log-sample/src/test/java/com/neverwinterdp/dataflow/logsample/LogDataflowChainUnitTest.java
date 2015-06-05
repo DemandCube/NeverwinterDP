@@ -1,6 +1,10 @@
 package com.neverwinterdp.dataflow.logsample;
 
 
+import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
+
+import org.elasticsearch.node.Node;
+import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -20,17 +24,21 @@ import com.neverwinterdp.vm.LoggerConfig;
 
 public class LogDataflowChainUnitTest {
   
-  protected ScribenginClusterBuilder clusterBuilder ;
-  protected ScribenginShell shell;
-
+  ScribenginClusterBuilder clusterBuilder ;
+  Node esNode ;
+  ScribenginShell shell;
+  
   @BeforeClass
   static public void init() throws Exception {
     FileUtil.removeIfExist("build/data", false);
     FileUtil.removeIfExist("build/logs", false);
+    FileUtil.removeIfExist("build/elasticsearch", false);
+    FileUtil.removeIfExist("build/buffer", false);
+    
     LoggerConfig loggerConfig = new LoggerConfig() ;
     loggerConfig.getConsoleAppender().setEnable(false);
     loggerConfig.getFileAppender().initLocalEnvironment();
-    loggerConfig.getEsAppender().initLocalEnvironment();
+    //loggerConfig.getEsAppender().initLocalEnvironment();
     loggerConfig.getKafkaAppender().initLocalEnvironment();
     LoggerFactory.log4jConfigure(loggerConfig.getLog4jConfiguration());
   }
@@ -41,6 +49,15 @@ public class LogDataflowChainUnitTest {
     clusterBuilder.clean(); 
     clusterBuilder.startVMMasters();
     clusterBuilder.startScribenginMasters();
+    
+    
+    NodeBuilder nb = nodeBuilder();
+    nb.getSettings().put("cluster.name",       "neverwinterdp");
+    nb.getSettings().put("path.data",          "build/elasticsearch/data");
+    nb.getSettings().put("node.name",          "elasticsearch-1");
+    nb.getSettings().put("transport.tcp.port", "9300");
+    esNode = nb.node();
+    
     shell = new ScribenginShell(clusterBuilder.getVMClusterBuilder().getVMClient());
     
     Logger logger = new LoggerFactory("TEST").getLogger(getClass()) ;
@@ -52,12 +69,13 @@ public class LogDataflowChainUnitTest {
   @After
   public void teardown() throws Exception {
     clusterBuilder.shutdown();
+    esNode.close();
   }
   
   @Test
   public void test() throws Exception {
     new LogGenerator().start();
-    Thread.sleep(5000);
+    Thread.sleep(15000);
     
     String json = IOUtil.getFileContentAsString("src/app/conf/log-dataflow-chain.json") ;
     DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);

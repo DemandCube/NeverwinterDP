@@ -19,5 +19,7 @@ public class ESSinkStream implements SinkStream {
   }
 
   @Override
-  public SinkStreamWriter getWriter() throws Exception { return new ESStreamWriter(descriptor); }
+  public SinkStreamWriter getWriter() throws Exception { 
+    return new ESStreamWriter(descriptor); 
+  }
 }

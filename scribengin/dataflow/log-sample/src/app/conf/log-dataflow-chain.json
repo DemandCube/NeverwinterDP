@@ -38,11 +38,11 @@
         },
         
         "esAppender" : {
-          "enable" : true, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "data/buffer/es/log4j", "indexName" : "log4j"
+          "enable" : true, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "build/data/buffer/es/log4j", "indexName" : "log4j"
         },
 
         "kafkaAppender" : {
-          "enable" : true, "name" : "kafka", "connects" : "kafka-1:9092, kafka-2:9092, kafka-3:9092", "bufferDir" : "data/buffer/kafka/log4j", "topic" : "log4j"
+          "enable" : true, "name" : "kafka", "connects" : "kafka-1:9092, kafka-2:9092, kafka-3:9092", "bufferDir" : "build/data/buffer/kafka/log4j", "topic" : "log4j"
         }
       }
     },
@@ -61,6 +61,11 @@
       "sinkDescriptors" : {
         "hdfs" : {
           "type" : "HDFS", "location" : "build/hdfs/info"
+        },
+
+        "elasticsearch" : {
+          "type" : "elasticsearch", 
+          "address" : "127.0.0.1:9300", "indexName": "dataflow_log_sample", "mappingType": "com.neverwinterdp.util.log.Log4jRecord"
         }
       },
       "loggerConfig" : {
@@ -72,11 +77,11 @@
         },
         
         "esAppender" : { 
-          "enable" : true, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "data/buffer/es/log4j", "indexName" : "log4j" 
+          "enable" : true, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "build/data/buffer/es/log4j", "indexName" : "log4j" 
         },
         
         "kafkaAppender" : {
-          "enable" : true, "name" : "kafka", "connects" : "kafka-1:9092,kafka-2:9092,kafka-3:9092", "bufferDir" : "data/buffer/kafka/log4j", "topic" : "log4j"
+          "enable" : true, "name" : "kafka", "connects" : "kafka-1:9092,kafka-2:9092,kafka-3:9092", "bufferDir" : "build/data/buffer/kafka/log4j", "topic" : "log4j"
         }
       }
     },
@@ -106,11 +111,11 @@
         },
         
         "esAppender" : { 
-          "enable" : true, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "data/buffer/es/log4j", "indexName" : "log4j" 
+          "enable" : true, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "build/data/buffer/es/log4j", "indexName" : "log4j" 
         },
         
         "kafkaAppender" : {
-          "enable" : true, "name" : "kafka", "connects" : "kafka-1:9092,kafka-2:9092,kafka-3:9092", "bufferDir" : "data/buffer/kafka/log4j", "topic" : "log4j"
+          "enable" : true, "name" : "kafka", "connects" : "kafka-1:9092,kafka-2:9092,kafka-3:9092", "bufferDir" : "build/data/buffer/kafka/log4j", "topic" : "log4j"
         }
       }
     },
@@ -140,11 +145,11 @@
         },
         
         "esAppender" : { 
-          "enable" : true, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "data/buffer/es/log4j", "indexName" : "log4j" 
+          "enable" : true, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "build/data/buffer/es/log4j", "indexName" : "log4j" 
         },
         
         "kafkaAppender" : {
-          "enable" : true, "name" : "kafka", "connects" : "kafka-1:9092,kafka-2:9092,kafka-3:9092", "bufferDir" : "data/buffer/kafka/log4j", "topic" : "log4j"
+          "enable" : true, "name" : "kafka", "connects" : "kafka-1:9092,kafka-2:9092,kafka-3:9092", "bufferDir" : "build/data/buffer/kafka/log4j", "topic" : "log4j"
         }
       }
     }

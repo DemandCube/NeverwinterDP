@@ -1,7 +1,10 @@
 package com.neverwinterdp.scribengin.storage.es;
 
+import com.neverwinterdp.es.ESClient;
+import com.neverwinterdp.es.ESObjectClient;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.text.StringUtil;
 
 public class ESStorage {
@@ -36,6 +39,11 @@ public class ESStorage {
     return descriptor;
   }
   
+  public ESObjectClient<Object> getESObjectClient() {
+    ESObjectClient<Object> esObjClient = new ESObjectClient<Object>(new ESClient(address), indexName, mappingType) ;
+    return esObjClient;
+  }
+
   StorageDescriptor toStorageDesciptor() {
     StorageDescriptor descriptor = new StorageDescriptor("elasticsearch") ;
     descriptor.attribute("address", StringUtil.joinStringArray(address)) ;
