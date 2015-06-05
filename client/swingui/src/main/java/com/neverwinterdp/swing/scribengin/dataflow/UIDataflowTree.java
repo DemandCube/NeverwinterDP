@@ -2,7 +2,7 @@ package com.neverwinterdp.swing.scribengin.dataflow;
 
 import com.neverwinterdp.scribengin.service.ScribenginService;
 import com.neverwinterdp.swing.registry.UIActivitiesView;
-import com.neverwinterdp.swing.registry.UIActivityStepsView;
+import com.neverwinterdp.swing.registry.UIActivityView;
 import com.neverwinterdp.swing.registry.UINotificationView;
 import com.neverwinterdp.swing.registry.UIRegistryNodeView;
 import com.neverwinterdp.swing.registry.UIRegistryTree;
@@ -60,7 +60,7 @@ public class UIDataflowTree extends UIRegistryTree {
       view.addView("Tasks",      new UIDataflowTaskView(dataflowRootPath), false) ;
       view.addView("Workers",    new UIDataflowWorkerView(dataflowRootPath + "/workers"), false) ;
     } else if(activityNodeMatcher.matches(node)) {
-      view.addView("Activity Steps", new UIActivityStepsView(node.getNodePath(), node.getNodeName()), false) ;
+      view.addView("Activity", new UIActivityView(node.getNodePath(), node.getNodeName()), false) ;
     } else if(activityListMatcher.matches(node)) {
       view.addView("Activities", new UIActivitiesView(node.getNodePath()), false) ;
     } else if(activityQueueMatcher.matches(node)) {
