@@ -69,7 +69,7 @@ public class UIActivityStepsView extends JPanel implements UILifecycle {
     removeAll();
     JXTaskPaneContainer tpc = new JXTaskPaneContainer();
     for (ActivityStep step : activitySteps) {
-      JXTaskPane stepPane = new JXTaskPane(step.getId());
+      JXTaskPane stepPane = new JXTaskPane(step.getId() + " - " + step.getStatus());
       stepPane.setName(step.getId());
       stepPane.add(new ActivityStepInfo(step));
       tpc.add(stepPane);
