@@ -4,8 +4,6 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.es.log4j.ElasticSearchAppender;

@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.es.sink.ESSink;
 import com.neverwinterdp.scribengin.storage.hdfs.sink.HDFSSink;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
@@ -31,23 +32,25 @@ public class SinkFactory {
   }
 
   public Sink create(StorageDescriptor descriptor) throws Exception {
-    if("hdfs".equalsIgnoreCase(descriptor.getType())) {
-         return new HDFSSink(fs, descriptor);
-    } else if("kafka".equalsIgnoreCase(descriptor.getType())) {
+    if ("hdfs".equalsIgnoreCase(descriptor.getType())) {
+      return new HDFSSink(fs, descriptor);
+    } else if ("kafka".equalsIgnoreCase(descriptor.getType())) {
       return new KafkaSink(descriptor);
-    }else if("s3".equalsIgnoreCase(descriptor.getType())) {  
-       return new S3Sink(s3Client, descriptor);
+    } else if ("s3".equalsIgnoreCase(descriptor.getType())) {
+      return new S3Sink(s3Client, descriptor);
+    } else if ("elasticsearch".equalsIgnoreCase(descriptor.getType())) {
+      return new ESSink(descriptor);
     }
     throw new Exception("Unknown sink type " + descriptor.getType());
   }
   
   public Sink create(StreamDescriptor descriptor) throws Exception {
-    if("hdfs".equalsIgnoreCase(descriptor.getType())) {
+    if ("hdfs".equalsIgnoreCase(descriptor.getType())) {
       return new HDFSSink(fs, descriptor);
-    } else if("kafka".equalsIgnoreCase(descriptor.getType())) {
+    } else if ("kafka".equalsIgnoreCase(descriptor.getType())) {
       return new KafkaSink(descriptor);
-    }else if("s3".equalsIgnoreCase(descriptor.getType())) { 
-         return new S3Sink(s3Client,descriptor);
+    } else if ("s3".equalsIgnoreCase(descriptor.getType())) {
+      return new S3Sink(s3Client, descriptor);
     }
     throw new Exception("Unknown sink type " + descriptor.getType());
   }
