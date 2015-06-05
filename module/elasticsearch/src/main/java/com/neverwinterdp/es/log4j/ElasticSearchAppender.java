@@ -10,6 +10,7 @@ import com.neverwinterdp.buffer.chronicle.MultiSegmentQueue;
 import com.neverwinterdp.buffer.chronicle.Segment;
 import com.neverwinterdp.es.ESClient;
 import com.neverwinterdp.es.ESObjectClient;
+import com.neverwinterdp.util.IOUtil;
 import com.neverwinterdp.util.log.Log4jRecord;
 import com.neverwinterdp.util.text.StringUtil;
 
@@ -89,7 +90,9 @@ public class ElasticSearchAppender extends AppenderSkeleton {
         esLog4jRecordClient = new ESObjectClient<Log4jRecord>(new ESClient(connect), indexName, Log4jRecord.class) ;
         esLog4jRecordClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
         if(!esLog4jRecordClient.isCreated()) {
-          esLog4jRecordClient.createIndexWith(null, null);
+          String settingJson = IOUtil.getResourceAsString("Log4jRecord.setting.json", "UTF-8");
+          String mappingJson = IOUtil.getResourceAsString("Log4jRecord.mapping.json", "UTF-8");
+          esLog4jRecordClient.createIndexWith(settingJson, mappingJson);
         }
       } catch(Exception ex) {
         ex.printStackTrace();

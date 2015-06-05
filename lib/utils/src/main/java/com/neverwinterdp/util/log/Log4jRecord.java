@@ -5,11 +5,13 @@ import java.util.Date;
 
 import org.apache.log4j.spi.LoggingEvent;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neverwinterdp.util.ExceptionUtil;
 
 public class Log4jRecord implements Serializable {
-  private long     timestamp;
+  @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
+  private Date     timestamp;
   private String   threadName;
   private String   loggerName;
   private String   level;
@@ -21,7 +23,7 @@ public class Log4jRecord implements Serializable {
   }
 
   public Log4jRecord(LoggingEvent event) {
-    this.timestamp = event.getTimeStamp();
+    this.timestamp = new Date(event.getTimeStamp());
     this.threadName = event.getThreadName() ;
     this.loggerName = event.getLoggerName();
     this.level = event.getLevel().toString();
@@ -36,12 +38,9 @@ public class Log4jRecord implements Serializable {
     return this.loggerName + "-"  + this.timestamp + "-" + message.hashCode() ;
   }
   
-  public long getTimestamp() { return timestamp; }
-  public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+  public Date getTimestamp() { return timestamp; }
+  public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
 
-  public Date getCreatedTime() { return new Date(timestamp) ; }
-  public void setCreatedTime(Date timestamp) {  }
-  
   public String getThreadName() { return threadName; }
   public void setThreadName(String threadName) { this.threadName = threadName; }
 
