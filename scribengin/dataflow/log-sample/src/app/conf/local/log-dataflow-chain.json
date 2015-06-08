@@ -12,20 +12,20 @@
       "scribe" : "com.neverwinterdp.dataflow.logsample.LogSplitter",
 
       "sourceDescriptor" : {
-        "type" : "kafka", "topic" : "log4j", "zk.connect" : "zookeeper-1:2181", "reader" : "raw", "name" : "LogSplitterDataflow"
+        "type" : "kafka", "topic" : "log4j", "zk.connect" : "127.0.0.1:2181", "reader" : "raw", "name" : "LogSplitterDataflow"
       },
 
       "sinkDescriptors" : {
         "warn" : {
-          "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "zookeeper-1:2181", "name" : "LogSplitterDataflow"
+          "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "127.0.0.1:2181", "name" : "LogSplitterDataflow"
         },
 
         "error" : {
-          "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "zookeeper-1:2181", "name" : "LogSplitterDataflow"
+          "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "127.0.0.1:2181", "name" : "LogSplitterDataflow"
         },
 
         "info" : {
-          "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "zookeeper-1:2181", "name" : "LogSplitterDataflow"
+          "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "127.0.0.1:2181", "name" : "LogSplitterDataflow"
         }
       },
 
@@ -56,7 +56,7 @@
       "scribe" : "com.neverwinterdp.dataflow.logsample.LogPerister",
 
       "sourceDescriptor" : {
-        "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "zookeeper-1:2181", "reader" : "record", "name" : "LogSampleDataflow"
+        "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "127.0.0.1:2181", "reader" : "record", "name" : "LogSampleDataflow"
       },
       "sinkDescriptors" : {
         "hdfs" : {
@@ -65,7 +65,7 @@
 
         "elasticsearch" : {
           "type" : "elasticsearch", 
-          "address" : "elasticsearch-1:9300", "indexName": "dataflow_log_sample", "mappingType": "com.neverwinterdp.util.log.Log4jRecord"
+          "address" : "127.0.0.1:9300", "indexName": "dataflow_log_sample", "mappingType": "com.neverwinterdp.util.log.Log4jRecord"
         }
       },
       "loggerConfig" : {
@@ -95,7 +95,7 @@
       "scribe" : "com.neverwinterdp.dataflow.logsample.LogPerister",
 
       "sourceDescriptor" : {
-        "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "zookeeper-1:2181", "reader" : "record", "name" : "LogSampleDataflow"
+        "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "127.0.0.1:2181", "reader" : "record", "name" : "LogSampleDataflow"
       },
       "sinkDescriptors" : {
         "hdfs" : {
@@ -129,7 +129,7 @@
       "scribe" : "com.neverwinterdp.dataflow.logsample.LogPerister",
 
       "sourceDescriptor" : {
-        "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "zookeeper-1:2181", "reader" : "record", "name" : "LogSampleDataflow"
+        "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "127.0.0.1:2181", "reader" : "record", "name" : "LogSampleDataflow"
       },
       "sinkDescriptors" : {
         "hdfs" : {
