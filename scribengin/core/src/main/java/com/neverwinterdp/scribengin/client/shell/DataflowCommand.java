@@ -10,8 +10,11 @@ import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskReport;
+import com.neverwinterdp.scribengin.dataflow.chain.DataflowChainConfig;
+import com.neverwinterdp.scribengin.dataflow.chain.OrderDataflowChainSubmitter;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowWaitingEventListener;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorDescriptor;
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.vm.client.shell.Command;
 import com.neverwinterdp.vm.client.shell.CommandInput;
@@ -111,8 +114,11 @@ public class DataflowCommand extends Command {
   }
   
   static public class Submit extends SubCommand {
-    @Parameter(names = "--descriptor", required = true, description = "The dataflow descriptor path in the json format")
-    private String descriptor ;
+    @Parameter(names = "--dataflow-config",  description = "The dataflow descriptor path in the json format")
+    private String dataflowConfig ;
+    
+    @Parameter(names = "--dataflow-chain-config",  description = "The dataflow descriptor path in the json format")
+    private String dataflowChainConfig ;
     
     @Parameter(names = "--deploy", description = "The dataflow path to deploy")
     private String dataflowPath ;
@@ -120,27 +126,42 @@ public class DataflowCommand extends Command {
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
       ScribenginShell scribenginShell = (ScribenginShell) shell;
-      ScribenginClient scribenginClient= scribenginShell.getScribenginClient();
-      try {
-        String dataflowJson = IOUtil.getFileContentAsString(descriptor) ;
-        System.out.println("Dataflow JSON:");
-        System.out.println(dataflowJson);
-        DataflowWaitingEventListener eventListener = scribenginClient.submit(dataflowPath, dataflowJson);
-        System.out.println("Submited.................");
-        eventListener.waitForEvents(60000); 
-        System.out.println("Finish wait for event..........");
-      } catch(Exception ex) {
-        ex.printStackTrace();
-      } finally {
-        Thread.sleep(3000);
-        shell.execute("vm info");
-        shell.execute("registry dump --path /");
+      if(dataflowConfig != null) {
+        submitDataflow(scribenginShell) ;
+      } else if(dataflowChainConfig != null) {
+        submitDataflowChain(scribenginShell) ;
+      } else {
+        shell.console().println("Error: Expect the dataflow config or dataflow chain config file");
       }
+      
     }
 
-    @Override
-    public String getDescription() {
-      return "submit a dataflow";
+    void submitDataflow(ScribenginShell shell) throws Exception {
+      ScribenginClient scribenginClient= shell.getScribenginClient();
+      String dataflowJson = IOUtil.getFileContentAsString(dataflowConfig) ;
+      shell.console().println("Dataflow JSON:");
+      shell.console().println(dataflowJson);
+      DataflowWaitingEventListener eventListener = scribenginClient.submit(dataflowPath, dataflowJson);
+      shell.console().println("Submited");
+      eventListener.waitForEvents(60000); 
+      shell.console().println("Finish wait for event!");
+    } 
+    
+    void submitDataflowChain(ScribenginShell shell) throws Exception {
+      shell.console().println("Submit:");
+      shell.console().println("  dataflow chain config: " + dataflowChainConfig);
+      shell.console().println("  dataflow local home:"    + dataflowPath);
+      String json = IOUtil.getFileContentAsString(dataflowChainConfig) ;
+      DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
+      OrderDataflowChainSubmitter submitter = 
+          new OrderDataflowChainSubmitter(shell.getScribenginClient(), dataflowPath, config);
+      submitter.submit(45000);
+      shell.console().println("Submited");
+      submitter.waitForTerminated(90000);
+      shell.console().println("Finish wait for terminated!");
     }
+    
+    @Override
+    public String getDescription() { return "submit a dataflow"; }
   }
 }
