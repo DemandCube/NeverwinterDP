@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.neverwinterdp.util.IOUtil;
+import com.neverwinterdp.util.io.IOUtil;
 
 public class MetricRegistryUnitTest {
   @Test

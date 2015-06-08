@@ -6,7 +6,7 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 
-public class DetailThreadInfo implements Serializable{
+public class DetailThreadInfo implements Serializable {
   private String threadStartedCount;
   private String threadPeakCount;
   private String threadCount;

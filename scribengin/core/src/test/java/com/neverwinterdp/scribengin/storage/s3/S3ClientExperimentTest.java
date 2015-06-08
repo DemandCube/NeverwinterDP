@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
-import com.neverwinterdp.util.IOUtil;
+import com.neverwinterdp.util.io.IOUtil;
 
 public class S3ClientExperimentTest {
   static public String BUCKET_NAME = "s3-client-integration-test-" + UUID.randomUUID();

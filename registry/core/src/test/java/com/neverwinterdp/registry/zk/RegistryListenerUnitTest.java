@@ -12,7 +12,7 @@ import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.event.NodeWatcher;
 import com.neverwinterdp.registry.event.RegistryListener;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.zk.tool.server.EmbededZKServer;
 
 public class RegistryListenerUnitTest {

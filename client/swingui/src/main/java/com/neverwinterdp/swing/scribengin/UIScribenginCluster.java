@@ -17,7 +17,7 @@ import com.neverwinterdp.swing.util.MessageUtil;
 import com.neverwinterdp.swing.widget.BeanBindingJComboBox;
 import com.neverwinterdp.swing.widget.BeanBindingJTextField;
 import com.neverwinterdp.swing.widget.SpringLayoutGridJPanel;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.LoggerConfig;
 

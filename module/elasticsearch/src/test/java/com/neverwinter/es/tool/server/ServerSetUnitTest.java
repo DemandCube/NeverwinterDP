@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import com.neverwinterdp.es.ESClient;
 import com.neverwinterdp.es.tool.server.ElasticSearchServer;
 import com.neverwinterdp.es.tool.server.EmbededElasticSearchServerSet;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 
 public class ServerSetUnitTest {
   

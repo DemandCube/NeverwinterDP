@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.neverwinterdp.util.text.DateUtil;
-import com.neverwinterdp.util.text.NumberFormatter;
 
 
 public class JVMInfo implements Serializable {
@@ -15,19 +14,19 @@ public class JVMInfo implements Serializable {
   private String upTime ;
   
   private MemoryInfo memoryInfo;
-  private ArrayList<GarbageCollectorInfo> garbageCollectorInfo ;
+  private ArrayList<GCInfo> gCInfo ;
   private AppInfo appInfo;
   
   public JVMInfo() {
-    this.startTime = DateUtil.asCompactDateTime(ManagementFactory.getRuntimeMXBean().getStartTime()) ;
-    this.upTime = NumberFormatter.milliTimeAsHumanReadable(ManagementFactory.getRuntimeMXBean().getUptime()) ;
+    startTime = DateUtil.asCompactDateTime(ManagementFactory.getRuntimeMXBean().getStartTime()) ;
+    upTime = DateUtil.timeMillisToHumanReadable(ManagementFactory.getRuntimeMXBean().getUptime()) ;
     memoryInfo = new MemoryInfo();
     
     List<GarbageCollectorMXBean> gcbeans = ManagementFactory.getGarbageCollectorMXBeans() ; 
-    garbageCollectorInfo = new ArrayList<GarbageCollectorInfo>();
+    gCInfo = new ArrayList<GCInfo>();
     for(int i = 0; i < gcbeans.size(); i++) {
       GarbageCollectorMXBean gcbean = gcbeans.get(i) ;
-      garbageCollectorInfo.add(new GarbageCollectorInfo(gcbean));
+      gCInfo.add(new GCInfo(gcbean));
     }
     
     appInfo = new AppInfo();
@@ -39,8 +38,8 @@ public class JVMInfo implements Serializable {
   
   public MemoryInfo getMemoryInfo() { return memoryInfo;}
 
-  public ArrayList<GarbageCollectorInfo> getGarbageCollectorInfo() { 
-    return garbageCollectorInfo; 
+  public ArrayList<GCInfo> getGarbageCollectorInfo() { 
+    return gCInfo; 
   }
 
   public AppInfo getThreadInfo() { return appInfo; }

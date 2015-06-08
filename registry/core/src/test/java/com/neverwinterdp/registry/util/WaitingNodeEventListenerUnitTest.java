@@ -23,7 +23,7 @@ import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.event.NodeEventMatcher;
 import com.neverwinterdp.registry.event.WaitingOrderNodeEventListener;
 import com.neverwinterdp.registry.zk.RegistryImpl;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.zk.tool.server.EmbededZKServer;
 
 public class WaitingNodeEventListenerUnitTest {

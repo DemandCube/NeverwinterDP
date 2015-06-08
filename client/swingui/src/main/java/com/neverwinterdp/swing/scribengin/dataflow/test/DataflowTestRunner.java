@@ -14,8 +14,8 @@ import com.neverwinterdp.scribengin.dataflow.test.DataflowRandomServerFailureTes
 import com.neverwinterdp.scribengin.dataflow.test.HDFSDataflowTest;
 import com.neverwinterdp.scribengin.dataflow.test.KafkaDataflowTest;
 import com.neverwinterdp.swing.scribengin.ScribenginCluster;
-import com.neverwinterdp.util.IOUtil;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.util.io.IOUtil;
 
 public class DataflowTestRunner extends Thread {
   private String label;

@@ -7,7 +7,7 @@ import org.elasticsearch.node.NodeBuilder;
 import org.junit.Test;
 
 import com.neverwinterdp.es.log4j.ElasticSearchAppender;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 
 /**
  * $Author: Tuan Nguyen$

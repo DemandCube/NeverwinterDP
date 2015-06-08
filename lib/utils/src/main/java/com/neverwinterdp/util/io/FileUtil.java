@@ -1,4 +1,4 @@
-package com.neverwinterdp.util;
+package com.neverwinterdp.util.io;
 
 import java.io.File;
 import java.io.FileFilter;

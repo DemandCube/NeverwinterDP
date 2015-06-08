@@ -13,7 +13,7 @@ import org.jdesktop.swingx.JXMultiSplitPane;
 import org.jdesktop.swingx.MultiSplitLayout;
 
 import com.neverwinterdp.swing.console.UIShellConsole;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.LoggerConfig;
 

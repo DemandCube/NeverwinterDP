@@ -1,5 +1,6 @@
 package com.neverwinterdp.util.text;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -12,6 +13,7 @@ public class DateUtil {
   final static public SimpleDateFormat COMPACT_DATE_TIME = new SimpleDateFormat("dd/MM/yyyy@HH:mm:ss")  ;
   final static public SimpleDateFormat COMPACT_DATE_ID = new SimpleDateFormat("yyyyMMdd")  ;
   final static public SimpleDateFormat COMPACT_DATE_TIME_ID = new SimpleDateFormat("yyyyMMddHHmmss") ;
+  final static public DecimalFormat    NUMBER_FORMATER = new DecimalFormat("#.00");
   
   static public String asCompactDate(long time) {
     if(time <= 0) return "N/A";
@@ -67,5 +69,26 @@ public class DateUtil {
   static public String currentDatePath(String basePath) {
     String backupTime = basePath + "/" + COMPACT_DATE_ID.format(new Date());
     return backupTime ;
+  }
+  
+  static public String timeMillisToHumanReadable(long number) {
+    if (number > (60 * 60 * 1000l)) {
+      return NUMBER_FORMATER.format((double) number / (60 * 60 * 1000l)) + " h";
+    } else if (number > 60 * 1000l) {
+      return NUMBER_FORMATER.format((double) number / (60 * 1000l)) + " m";
+    } else if (number > 1000l) {
+      return NUMBER_FORMATER.format((double) number / 1000l) + " s";
+    } else {
+      return number + " ms";
+    }
+  }
+
+  static public String timeNanoToHumanReadable(long number) {
+    if (number > 1000000l) {
+      long milli = number / 1000000l;
+      return timeMillisToHumanReadable(milli);
+    } else {
+      return number + " ns";
+    }
   }
 }

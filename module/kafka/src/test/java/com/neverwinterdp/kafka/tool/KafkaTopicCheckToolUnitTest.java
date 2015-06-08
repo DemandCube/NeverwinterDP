@@ -5,7 +5,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 
 public class KafkaTopicCheckToolUnitTest {
   static {

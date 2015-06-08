@@ -12,7 +12,7 @@ import com.neverwinterdp.scribengin.storage.hdfs.HDFSSourceGenerator;
 import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSource;
 import com.neverwinterdp.scribengin.storage.source.SourceStream;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
 /**

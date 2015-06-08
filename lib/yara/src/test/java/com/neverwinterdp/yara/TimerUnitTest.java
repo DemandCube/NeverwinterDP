@@ -6,8 +6,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 import com.codahale.metrics.Snapshot;
-import com.neverwinterdp.util.IOUtil;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.util.io.IOUtil;
 
 public class TimerUnitTest {
   @Test

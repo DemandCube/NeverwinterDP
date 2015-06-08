@@ -8,7 +8,7 @@ import net.openhft.chronicle.IndexedChronicle;
 
 import org.junit.Test;
 
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 
 public class IndexedChronicleUnitTest {
   @Test

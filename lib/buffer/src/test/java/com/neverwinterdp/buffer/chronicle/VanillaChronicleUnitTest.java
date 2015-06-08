@@ -15,7 +15,7 @@ import net.openhft.chronicle.VanillaChronicleConfig;
 
 import org.junit.Test;
 
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 
 public class VanillaChronicleUnitTest {
   @Test

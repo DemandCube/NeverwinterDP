@@ -7,7 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import com.neverwinterdp.util.IOUtil;
+import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
 public class QDigestUnitTest {

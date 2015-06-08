@@ -14,7 +14,7 @@ import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.dataflow.test.S3DataflowTest;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.vm.tool.VMClusterBuilder;
 
 public class DataflowS3ToS3ExperimentTest {

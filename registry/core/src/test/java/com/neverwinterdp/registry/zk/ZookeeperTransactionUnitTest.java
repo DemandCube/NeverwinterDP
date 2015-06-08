@@ -17,7 +17,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.zk.tool.server.EmbededZKServer;
 
 public class ZookeeperTransactionUnitTest {

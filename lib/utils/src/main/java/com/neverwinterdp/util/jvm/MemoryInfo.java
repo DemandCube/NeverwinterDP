@@ -5,7 +5,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 
-import com.neverwinterdp.util.text.NumberFormatter;
+import com.neverwinterdp.util.text.ByteUtil;
 
 public class MemoryInfo implements Serializable {
   private String init ;
@@ -16,12 +16,10 @@ public class MemoryInfo implements Serializable {
   public MemoryInfo() {
     MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
     MemoryUsage memory = mbean.getHeapMemoryUsage() ;
-    
-    init = NumberFormatter.byteFormatAsHumanReadable(memory.getInit()) ;
-    max = NumberFormatter.byteFormatAsHumanReadable(memory.getMax()) ;
-    use = NumberFormatter.byteFormatAsHumanReadable(memory.getUsed()) ;
-    committed = NumberFormatter.byteFormatAsHumanReadable(memory.getCommitted()) ;
-    
+    init = ByteUtil.byteToHumanReadable(memory.getInit()) ;
+    max = ByteUtil.byteToHumanReadable(memory.getMax()) ;
+    use = ByteUtil.byteToHumanReadable(memory.getUsed()) ;
+    committed = ByteUtil.byteToHumanReadable(memory.getCommitted()) ;
   }
 
   public String getInit() { return init; }

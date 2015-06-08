@@ -11,7 +11,7 @@ import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.dataflow.test.HDFSDataflowTest;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.vm.tool.VMClusterBuilder;
 
 public class DataflowHdfsToHdfsUnitTest {

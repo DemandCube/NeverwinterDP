@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.junit.Test;
 
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.log.Log4jRecord;
 
 public class KafkaAppenderUnitTest {

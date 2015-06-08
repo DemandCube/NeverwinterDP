@@ -26,8 +26,8 @@ import org.junit.Test;
 
 import com.neverwinterdp.es.ESClient;
 import com.neverwinterdp.es.ESObjectClient;
-import com.neverwinterdp.util.FileUtil;
-import com.neverwinterdp.util.IOUtil;
+import com.neverwinterdp.util.io.FileUtil;
+import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.text.DateUtil;
 
 /**

@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.neverwinterdp.kafka.producer.DefaultKafkaWriter;
 import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 
 public class KafkaPartitionReaderUnitTest {
   static {

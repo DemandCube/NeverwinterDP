@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.neverwinterdp.tool.server.Server;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.zk.tool.server.EmbededZKServerSet;
 
 public class KafkaCluster {

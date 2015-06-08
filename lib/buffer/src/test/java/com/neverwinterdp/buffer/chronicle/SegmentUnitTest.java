@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import com.neverwinterdp.buffer.chronicle.JavaSerializer;
 import com.neverwinterdp.buffer.chronicle.Segment;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.yara.MetricPrinter;
 import com.neverwinterdp.yara.MetricRegistry;
 import com.neverwinterdp.yara.Timer;

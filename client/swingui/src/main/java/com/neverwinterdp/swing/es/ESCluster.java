@@ -6,7 +6,7 @@ import java.util.Map;
 import com.neverwinterdp.es.ESClient;
 import com.neverwinterdp.es.tool.server.EmbededElasticSearchServerSet;
 import com.neverwinterdp.swing.util.MessageUtil;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 
 public class ESCluster {
   final static ESCluster singleton = new ESCluster() ;

@@ -12,8 +12,8 @@ import com.neverwinterdp.scribengin.Record;
 import com.neverwinterdp.scribengin.storage.es.sink.ESSink;
 import com.neverwinterdp.scribengin.storage.sink.SinkStream;
 import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
-import com.neverwinterdp.util.FileUtil;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.log.Log4jRecord;
 
 public class ESSinkUnitTest {

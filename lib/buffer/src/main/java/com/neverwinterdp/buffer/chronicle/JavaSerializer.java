@@ -2,7 +2,7 @@ package com.neverwinterdp.buffer.chronicle;
 
 import java.io.IOException;
 
-import com.neverwinterdp.util.IOUtil;
+import com.neverwinterdp.util.io.IOUtil;
 
 public class JavaSerializer<T> implements Serializer<T> {
   public byte[] toBytes(T object) {

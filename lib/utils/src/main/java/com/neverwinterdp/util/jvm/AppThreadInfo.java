@@ -3,7 +3,7 @@ package com.neverwinterdp.util.jvm;
 import java.io.Serializable;
 import java.lang.management.ThreadInfo;
 
-public class AppThreadInfo implements Serializable{
+public class AppThreadInfo implements Serializable {
   private String threadName;
   private String threadId;
   private String threadBlockCount;
@@ -15,7 +15,7 @@ public class AppThreadInfo implements Serializable{
   private String threadUserTime;
   private String threadStackTrace;
   
-  public AppThreadInfo() {} 
+  public AppThreadInfo() { } 
   
   public AppThreadInfo(ThreadInfo tinfo) {
     threadName = tinfo.getThreadName();

@@ -5,7 +5,7 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.util.LinkedList;
 
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.yara.MetricRegistry;
 import com.neverwinterdp.yara.Timer;
 

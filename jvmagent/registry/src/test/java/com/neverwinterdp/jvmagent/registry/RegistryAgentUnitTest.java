@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.zk.RegistryImpl;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.zk.tool.server.EmbededZKServer;
 
 public class RegistryAgentUnitTest {

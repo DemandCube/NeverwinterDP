@@ -1,7 +1,7 @@
 package com.neverwinterdp.vm.tool;
 
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.util.FileUtil;
+import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.vm.client.LocalVMClient;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.zk.tool.server.EmbededZKServer;
