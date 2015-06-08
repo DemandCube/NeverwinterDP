@@ -125,6 +125,10 @@ public class DataflowCommand extends Command {
     @Parameter(names = "--deploy", description = "The dataflow path to deploy")
     private String dataflowPath ;
     
+    @Parameter(names = "--wait-for-running-timeout", description = "The dataflow path to deploy")
+    private long waitForRunningTimeout = 120000;
+    
+    
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
       ScribenginShell scribenginShell = (ScribenginShell) shell;
@@ -147,7 +151,7 @@ public class DataflowCommand extends Command {
       shell.console().println(dataflowJson);
       submitter.submit();
       shell.console().println("Submited");
-      submitter.waitForRunning(60000);
+      submitter.waitForRunning(waitForRunningTimeout);
       shell.console().println("Finished waiting for the dataflow running status");
     } 
     
@@ -159,7 +163,7 @@ public class DataflowCommand extends Command {
       DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
       OrderDataflowChainSubmitter submitter = 
           new OrderDataflowChainSubmitter(shell.getScribenginClient(), dataflowPath, config);
-      submitter.submit(60000);
+      submitter.submit(waitForRunningTimeout);
     }
     
     @Override
