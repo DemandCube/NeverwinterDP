@@ -35,7 +35,7 @@ public class DateUtil {
     return COMPACT_DATE_TIME.format(new Date(time)) ;
   }
   
-  static public String asCompactDateTIME(Date time) {
+  static public String asCompactDateTime(Date time) {
   	return COMPACT_DATE_TIME.format(time) ;
   }
   

@@ -1,5 +1,7 @@
 package com.neverwinterdp.kafka.log4j;
 
+import java.util.Date;
+
 import org.junit.Test;
 
 import com.neverwinterdp.util.FileUtil;
@@ -18,7 +20,7 @@ public class KafkaAppenderUnitTest {
     appender.activateOptions();
     for(int i = 0; i < 5; i++) {
       Log4jRecord record = new Log4jRecord() ;
-      record.setTimestamp(System.currentTimeMillis());
+      record.setTimestamp(new Date(System.currentTimeMillis()));
       record.setLevel("INFO");
       record.setMessage("message " + i);
       appender.append(record);
