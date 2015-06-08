@@ -40,7 +40,7 @@ public class Log4jRecord implements Serializable {
   
   public Date getTimestamp() { return timestamp; }
   public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
-  public void setTimestamp(long timestamp) { this.timestamp = new Date(timestamp); }
+  public void withTimestamp(long timestamp) { this.timestamp = new Date(timestamp); }
   
   public String getThreadName() { return threadName; }
   public void setThreadName(String threadName) { this.threadName = threadName; }

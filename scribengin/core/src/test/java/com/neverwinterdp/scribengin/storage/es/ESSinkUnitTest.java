@@ -43,7 +43,7 @@ public class ESSinkUnitTest {
     SinkStreamWriter writer = stream.getWriter();
     for(int i = 0; i < 10; i++) {
       Log4jRecord log4jRec = new Log4jRecord() ;
-      log4jRec.setTimestamp(System.currentTimeMillis());
+      log4jRec.withTimestamp(System.currentTimeMillis());
       log4jRec.setLevel("INFO");
       log4jRec.setMessage("message " + i);
       Record record = new Record("key-" + i, JSONSerializer.INSTANCE.toBytes(log4jRec));
