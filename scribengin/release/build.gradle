@@ -50,6 +50,7 @@ configurations.all {
 dependencies {
   compile project(':scribengin/core')
   compile project(':scribengin/dataflow/hdfs')
+  compile project(':scribengin/dataflow/log-sample')
 
   compile group: 'junit', name: 'junit', version: '4.11'
 
@@ -157,8 +158,10 @@ task release (dependsOn: 'build') << {
   doReleaseJvmagent("${releaseDir}/jvmagent");
 
   def hdfsDataflowLibs = [ "scribengin.dataflow.hdfs" ] ;
-  def descriptor = "src/dataflows/hdfs/dataflow.json" ;
-  doReleaseDataflow("hdfs", "${releaseDir}", hdfsDataflowLibs, descriptor);
+  doReleaseDataflow("hdfs", "${releaseDir}", hdfsDataflowLibs, "../dataflow//hdfs/src/app");
+
+  def logSampleDataflowLibs = [ "scribengin.dataflow.log-sample" ] ;
+  doReleaseDataflow("log-sample", "${releaseDir}", logSampleDataflowLibs, "../dataflow/log-sample/src/app");
 }
 
 def doReleaseJvmagent(String releaseDir){
@@ -220,7 +223,7 @@ def doReleaseScribengin(String releaseDir) {
   }
 }
 
-def doReleaseDataflow(String name, String releaseDir, def libs, descriptor) {
+def doReleaseDataflow(String name, String releaseDir, def libs, dataflowHome) {
   println "\n\n"
   println "*************************************************"
   println "Build release for the dataflow ${name}"
@@ -238,7 +241,7 @@ def doReleaseDataflow(String name, String releaseDir, def libs, descriptor) {
   }
 
   copy {
-    from descriptor
+    from dataflowHome
       into "${releaseDir}/dataflows/${name}"
   }
 }
