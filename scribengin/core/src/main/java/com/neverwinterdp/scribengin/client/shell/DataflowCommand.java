@@ -7,7 +7,9 @@ import com.neverwinterdp.registry.activity.Activity;
 import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.scribengin.ScribenginClient;
+import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskReport;
 import com.neverwinterdp.scribengin.dataflow.chain.DataflowChainConfig;
@@ -137,14 +139,16 @@ public class DataflowCommand extends Command {
     }
 
     void submitDataflow(ScribenginShell shell) throws Exception {
-      ScribenginClient scribenginClient= shell.getScribenginClient();
+      ScribenginClient client = shell.getScribenginClient();
       String dataflowJson = IOUtil.getFileContentAsString(dataflowConfig) ;
+      DataflowDescriptor config = JSONSerializer.INSTANCE.fromString(dataflowJson, DataflowDescriptor.class);
+      DataflowSubmitter submitter = new DataflowSubmitter(client, dataflowPath, config);
       shell.console().println("Dataflow JSON:");
       shell.console().println(dataflowJson);
-      DataflowWaitingEventListener eventListener = scribenginClient.submit(dataflowPath, dataflowJson);
+      submitter.submit();
       shell.console().println("Submited");
-      eventListener.waitForEvents(60000); 
-      shell.console().println("Finish wait for event!");
+      submitter.waitForRunning(60000);
+      shell.console().println("Finished waiting for the dataflow running status");
     } 
     
     void submitDataflowChain(ScribenginShell shell) throws Exception {
@@ -155,10 +159,7 @@ public class DataflowCommand extends Command {
       DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
       OrderDataflowChainSubmitter submitter = 
           new OrderDataflowChainSubmitter(shell.getScribenginClient(), dataflowPath, config);
-      submitter.submit(45000);
-      shell.console().println("Submited");
-      submitter.waitForTerminated(90000);
-      shell.console().println("Finish wait for terminated!");
+      submitter.submit(60000);
     }
     
     @Override
