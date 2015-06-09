@@ -8,8 +8,9 @@ import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
 public class GCInfo {
-  private String name;
   private Date   timestamp;
+  private String host;
+  private String name;
   private long collectionCount;
   private long collectionTime;
   private String poolNames;
@@ -17,19 +18,22 @@ public class GCInfo {
   public GCInfo() { }
   
   public GCInfo(GarbageCollectorMXBean gcbean) {
-    name = gcbean.getName();
     timestamp = new Date(System.currentTimeMillis()) ;
+    name = gcbean.getName();
     collectionCount = gcbean.getCollectionCount();
     collectionTime =  gcbean.getCollectionTime();
     poolNames = StringUtil.joinStringArray(gcbean.getMemoryPoolNames(), "|");
   }
   
-  public String getName() { return name; }
-  public void setName(String name) { this.name = name;}
-
   public Date getTimestamp() { return timestamp; }
   public void setTimestamp(Date timestamp) {  this.timestamp = timestamp; }
+  
+  public String getHost() { return host; }
+  public void setHost(String host) { this.host = host; }
 
+  public String getName() { return name; }
+  public void setName(String name) { this.name = name;}
+  
   public long getCollectionCount() { return collectionCount; }
   public void setCollectionCount(long collectionCount) { this.collectionCount = collectionCount; }
 
@@ -40,12 +44,13 @@ public class GCInfo {
   public void setPoolNames(String poolNames) { this.poolNames = poolNames; }
   
   static public String getFormattedText(GCInfo ... gcInfo) {
-    String[] header = {"Name", "Timestamp", "Collection Count", "Collection Time", "Pool Names"} ;
+    String[] header = {"Name","Host", "Timestamp", "Collection Count", "Collection Time", "Pool Names"} ;
     TabularFormater formatter = new TabularFormater(header) ;
     for(GCInfo sel : gcInfo) {
       formatter.addRow(
-          sel.getName(), 
           DateUtil.asCompactDateTime(sel.getTimestamp()),
+          sel.getHost(),
+          sel.getName(), 
           sel.getCollectionCount(), 
           DateUtil.timeMillisToHumanReadable(sel.getCollectionTime()), 
           sel.getPoolNames());

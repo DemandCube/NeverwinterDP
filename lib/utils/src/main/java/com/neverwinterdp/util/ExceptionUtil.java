@@ -12,4 +12,12 @@ public class ExceptionUtil {
     pwriter.close(); 
     return swriter.toString() ;
   }
+  
+  static public String toString(StackTraceElement[] elements) {
+    String result = "";
+    for(StackTraceElement element : elements) {
+      result += "      " + element.toString() + "\n" ;
+    }
+    return result;
+  }
 }

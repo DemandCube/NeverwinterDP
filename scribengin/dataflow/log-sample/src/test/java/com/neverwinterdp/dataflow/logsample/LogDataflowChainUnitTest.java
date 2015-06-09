@@ -77,7 +77,7 @@ public class LogDataflowChainUnitTest {
     new LogGenerator().start();
     Thread.sleep(15000);
     
-    String json = IOUtil.getFileContentAsString("src/app/conf/log-dataflow-chain.json") ;
+    String json = IOUtil.getFileContentAsString("src/app/conf/local/log-dataflow-chain.json") ;
     DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
     OrderDataflowChainSubmitter submitter = 
         new OrderDataflowChainSubmitter(shell.getScribenginClient(), null, config);
