@@ -14,7 +14,7 @@ import java.util.List;
 
 import com.sun.management.OperatingSystemMXBean;
 
-public class OSService {
+public class OSManagement {
   public MemoryInfo[] getMemoryInfo() {
     MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
     MemoryInfo heapMemory = new MemoryInfo("Heap Memory", mbean.getHeapMemoryUsage());
