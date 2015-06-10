@@ -1,16 +1,20 @@
 package com.neverwinterdp.os;
 
+import java.io.Serializable;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neverwinterdp.util.ExceptionUtil;
 import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
-public class DetailThreadInfo {
+@SuppressWarnings("serial")
+public class DetailThreadInfo implements Serializable {
+  @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp ;
-  private String host ;
+  private String host = "unknown";
   private long   id;
   private String name;
   private String state;
@@ -37,7 +41,11 @@ public class DetailThreadInfo {
     userTime    = mbean.getThreadUserTime(id);
     stackTrace  = ExceptionUtil.toString(tinfo.getStackTrace());
   }
-
+  
+  public String uniqueId() { 
+    return "host=" + host + ",thread=" + id + ",timestamp=" + DateUtil.asCompactDateTimeId(timestamp); 
+  }
+  
   public Date getTimestamp() { return timestamp; }
   public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
   

@@ -1,4 +1,4 @@
-package com.neverwinter.es;
+package com.neverwinterdp.es;
 
 import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;

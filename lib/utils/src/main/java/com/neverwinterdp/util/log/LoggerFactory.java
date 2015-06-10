@@ -8,6 +8,8 @@ import java.util.Properties;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 
+import com.neverwinterdp.util.text.StringUtil;
+
 public class LoggerFactory {
   private String prefix ;
   
@@ -43,5 +45,14 @@ public class LoggerFactory {
     Properties properties = new Properties() ;
     properties.putAll(props);
     PropertyConfigurator.configure(properties);
+  }
+  
+  static public void log4jUseConsoleOutputConfig(String logLevel) throws Exception {
+    Properties props = new Properties() ;
+    props.put("log4j.appender.console", "org.apache.log4j.ConsoleAppender");
+    props.put("log4j.appender.console.layout", "org.apache.log4j.PatternLayout");
+    props.put("log4j.appender.console.layout.ConversionPattern", "%d [%t] %-5p %c %x - %m%n");
+    props.put("log4j.rootLogger",  logLevel + ", console");
+    PropertyConfigurator.configure(props);
   }
 }

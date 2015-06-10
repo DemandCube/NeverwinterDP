@@ -1,14 +1,18 @@
 package com.neverwinterdp.os;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.FileStore;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neverwinterdp.util.text.ByteUtil;
 import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
-public class FileStoreInfo {
+@SuppressWarnings("serial")
+public class FileStoreInfo implements Serializable {
+  @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp ;
   private String host;
   private String name ;

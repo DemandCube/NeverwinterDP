@@ -8,6 +8,7 @@ project.ext {
 eclipse {
   project {
     name = 'module.elasticsearch'
+    linkedResource name: 'src-main-resources', type: '2', locationUri: 'src/main/resources'
   }
 }
 

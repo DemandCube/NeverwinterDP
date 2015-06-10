@@ -1,13 +1,17 @@
 package com.neverwinterdp.os;
 
+import java.io.Serializable;
 import java.lang.management.MemoryUsage;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neverwinterdp.util.text.ByteUtil;
 import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
-public class MemoryInfo {
+@SuppressWarnings("serial")
+public class MemoryInfo implements Serializable {
+  @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp ;
   private String host;
   private String name;

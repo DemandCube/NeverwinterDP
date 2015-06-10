@@ -1,12 +1,16 @@
 package com.neverwinterdp.os;
 
+import java.io.Serializable;
 import java.lang.management.ThreadMXBean;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
-public class ThreadCountInfo {
+@SuppressWarnings("serial")
+public class ThreadCountInfo implements Serializable {
+  @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date  timestamp ;
   private String host;
   private long threadStartedCount;

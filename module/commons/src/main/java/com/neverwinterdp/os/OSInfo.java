@@ -1,13 +1,17 @@
 package com.neverwinterdp.os;
 
+import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neverwinterdp.util.text.ByteUtil;
 import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
 
-public class OSInfo {
+@SuppressWarnings("serial")
+public class OSInfo implements Serializable {
+  @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp;
   private String host ;
   private String name;
@@ -33,12 +37,16 @@ public class OSInfo {
     freePhysicalMemorySize = osMBean.getFreePhysicalMemorySize() ;
     freeSwapSpaceSize      = osMBean.getFreeSwapSpaceSize() ;
   }
-
-  public String getHost() { return host; }
-  public void setHost(String host) { this.host = host; }
-
+  
+  public String uniqueId() { 
+    return "host=" + host + ",timestamp=" + DateUtil.asCompactDateTimeId(timestamp); 
+  }
+  
   public Date getTimestamp() { return timestamp; }
   public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
+  
+  public String getHost() { return host; }
+  public void setHost(String host) { this.host = host; }
 
   public String getName() { return name; }
   public void setName(String name) { this.name = name; }

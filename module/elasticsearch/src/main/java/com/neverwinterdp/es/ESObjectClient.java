@@ -59,12 +59,11 @@ public class ESObjectClient<T> {
     BulkRequestBuilder bulkRequest = esclient.client.prepareBulk();
     byte[] data = JSONSerializer.INSTANCE.toBytes(idoc);
     bulkRequest.add(
-        esclient.client.prepareIndex(index, mappingType.getSimpleName(), id).
-            setSource(data)
-        );
+      esclient.client.prepareIndex(index, mappingType.getSimpleName(), id).setSource(data)
+    );
     BulkResponse bulkResponse = bulkRequest.execute().actionGet();
     if (bulkResponse.hasFailures()) {
-      throw new ElasticsearchException("The operation has been failed!!!");
+      throw new ElasticsearchException("The operation has been failed!\n" + bulkResponse.buildFailureMessage());
     }
   }
 

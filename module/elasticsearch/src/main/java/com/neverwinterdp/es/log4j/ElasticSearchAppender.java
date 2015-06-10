@@ -90,8 +90,11 @@ public class ElasticSearchAppender extends AppenderSkeleton {
         esLog4jRecordClient = new ESObjectClient<Log4jRecord>(new ESClient(connect), indexName, Log4jRecord.class) ;
         esLog4jRecordClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
         if(!esLog4jRecordClient.isCreated()) {
-          String settingJson = IOUtil.getResourceAsString("Log4jRecord.setting.json", "UTF-8");
-          String mappingJson = IOUtil.getResourceAsString("Log4jRecord.mapping.json", "UTF-8");
+          String settingUrl = Log4jRecord.class.getName().replace('.', '/') + ".setting.json";
+          String mappingUrl = Log4jRecord.class.getName().replace('.', '/') + ".mapping.json";
+          
+          String settingJson = IOUtil.getResourceAsString(settingUrl, "UTF-8");
+          String mappingJson = IOUtil.getResourceAsString(mappingUrl, "UTF-8");
           esLog4jRecordClient.createIndexWith(settingJson, mappingJson);
         }
       } catch(Exception ex) {

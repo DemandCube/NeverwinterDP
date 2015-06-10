@@ -12,8 +12,10 @@ import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.inject.Singleton;
 import com.sun.management.OperatingSystemMXBean;
 
+@Singleton
 public class OSManagement {
   public MemoryInfo[] getMemoryInfo() {
     MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();

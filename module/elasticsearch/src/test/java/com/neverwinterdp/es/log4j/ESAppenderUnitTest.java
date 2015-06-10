@@ -1,18 +1,25 @@
-package com.neverwinter.es.log4j;
+package com.neverwinterdp.es.log4j;
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.es.log4j.ElasticSearchAppender;
 import com.neverwinterdp.util.io.FileUtil;
+import com.neverwinterdp.util.log.LoggerFactory;
 
 /**
  * $Author: Tuan Nguyen$
  **/
 public class ESAppenderUnitTest {
+  @Before
+  public void setup() throws Exception {
+    LoggerFactory.log4jUseConsoleOutputConfig("INFO");
+  }
+  
   @Test
   public void test() throws Exception {
     ElasticSearchAppender appender = new ElasticSearchAppender();
