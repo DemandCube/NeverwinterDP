@@ -17,6 +17,7 @@ public class AppModule extends AbstractModule {
   
   final protected void configure() {
     configure(properties) ;
+    //TODO: replace this code by module configuration
     try {
       for(Map.Entry<String, String> entry : properties.entrySet()) {
         String key = entry.getKey();

@@ -32,6 +32,10 @@ public class MemoryInfo implements Serializable {
     committed = mUsage.getCommitted() ;
   }
 
+  public String uniqueId() { 
+    return "host=" + host + ",timestamp=" + DateUtil.asCompactDateTimeId(timestamp); 
+  }
+  
   public Date getTimestamp() { return this.timestamp; }
   public void setTimestamp(Date timestamp) { this.timestamp  = timestamp;}
   

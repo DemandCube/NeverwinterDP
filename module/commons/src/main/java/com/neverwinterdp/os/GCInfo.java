@@ -29,6 +29,10 @@ public class GCInfo implements Serializable {
     poolNames = StringUtil.joinStringArray(gcbean.getMemoryPoolNames(), "|");
   }
   
+  public String uniqueId() { 
+    return "host=" + host + ",timestamp=" + DateUtil.asCompactDateTimeId(timestamp); 
+  }
+  
   public Date getTimestamp() { return timestamp; }
   public void setTimestamp(Date timestamp) {  this.timestamp = timestamp; }
   

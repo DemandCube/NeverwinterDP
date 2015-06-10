@@ -61,7 +61,6 @@ public class ObjectLogger<T> {
         if(!esObjectClient.isCreated()) {
           String settingUrl = objectType.getName().replace('.', '/') + ".setting.json";
           String mappingUrl = objectType.getName().replace('.', '/') + ".mapping.json";
-          
           String settingJson = IOUtil.getResourceAsString(settingUrl, "UTF-8");
           String mappingJson = IOUtil.getResourceAsString(mappingUrl, "UTF-8");
           esObjectClient.createIndexWith(settingJson, mappingJson);

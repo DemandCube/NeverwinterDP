@@ -11,8 +11,10 @@ import com.google.inject.Stage;
 import com.mycila.guice.ext.closeable.CloseableInjector;
 import com.mycila.guice.ext.closeable.CloseableModule;
 import com.mycila.guice.ext.jsr250.Jsr250Module;
+import com.neverwinterdp.es.log.OSMonitorLoggerService;
 import com.neverwinterdp.module.AppModule;
 import com.neverwinterdp.module.MycilaJmxModuleExt;
+import com.neverwinterdp.os.RuntimeEnv;
 import com.neverwinterdp.registry.RefNode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
@@ -70,6 +72,7 @@ public class VMScribenginServiceApp extends VMApp {
           protected void configure(Map<String, String> properties) {
             bindInstance(RegistryConfig.class, registry.getRegistryConfig());
             try {
+              bindInstance(RuntimeEnv.class, getVM().getRuntimeEnv());
               bindInstance(LoggerFactory.class, getVM().getLoggerFactory());
               bindType(Registry.class, registry.getClass().getName());
               bindInstance(VMConfig.class, getVM().getDescriptor().getVmConfig());
@@ -85,6 +88,10 @@ public class VMScribenginServiceApp extends VMApp {
           module
         };
         appContainer = Guice.createInjector(Stage.PRODUCTION, modules);
+        
+        //TODO: fix to use module
+        appContainer.getInstance(OSMonitorLoggerService.class);
+        
         scribenginService = appContainer.getInstance(ScribenginService.class);
         RefNode refNode = new RefNode() ;
         refNode.setPath(getVM().getDescriptor().getRegistryPath());

@@ -1,0 +1,9 @@
+{
+  "ThreadCountInfo": {
+    "properties" : {
+      "timestamp" : { 
+        "type" : "date", "format" : "dd/MM/yyyy HH:mm:ss" 
+      } 
+    }
+  }
+}

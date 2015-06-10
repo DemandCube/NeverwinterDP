@@ -30,6 +30,10 @@ public class FileStoreInfo implements Serializable {
     available = store.getUsableSpace();
   } 
   
+  public String uniqueId() { 
+    return "host=" + host + ",timestamp=" + DateUtil.asCompactDateTimeId(timestamp); 
+  }
+  
   public Date getTimestamp() { return timestamp; }
   public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
 

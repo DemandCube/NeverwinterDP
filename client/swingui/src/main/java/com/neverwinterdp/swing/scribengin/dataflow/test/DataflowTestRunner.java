@@ -213,7 +213,7 @@ public class DataflowTestRunner extends Thread {
             DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
             OrderDataflowChainSubmitter submitter = 
                 new OrderDataflowChainSubmitter(shell.getScribenginClient(), null, config);
-            submitter.submit(10000);
+            submitter.submit(20000);
             Thread.sleep(45000);
           } catch(Exception ex) {
             ex.printStackTrace();

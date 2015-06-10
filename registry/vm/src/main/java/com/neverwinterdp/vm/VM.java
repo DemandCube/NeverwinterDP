@@ -1,5 +1,7 @@
 package com.neverwinterdp.vm;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +16,7 @@ import com.mycila.guice.ext.closeable.CloseableInjector;
 import com.mycila.guice.ext.closeable.CloseableModule;
 import com.mycila.guice.ext.jsr250.Jsr250Module;
 import com.neverwinterdp.module.AppModule;
+import com.neverwinterdp.os.RuntimeEnv;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.RegistryException;
@@ -38,12 +41,12 @@ public class VM {
 
   private Injector               vmContainer;
   private VMRegistry             vmRegistry;
+  private RuntimeEnv             runtimeEnv;
   private VMApplicationRunner    vmApplicationRunner;
   
   public VM(VMConfig vmConfig) throws Exception {
     loggerFactory = new LoggerFactory("[" + vmConfig.getName() + "][NeverwinterDP] ") ;
     logger = loggerFactory.getLogger(VM.class) ;
-    
     
     logger.info("Create VM with VMConfig:");
     logger.info(JSONSerializer.INSTANCE.toString(vmConfig));
@@ -58,7 +61,7 @@ public class VM {
     } else {
       descriptor = vmRegistry.getVMDescriptor();
     }
-    
+    runtimeEnv = createRuntimeEnv(vmConfig);
     init();
   }
   
@@ -68,13 +71,25 @@ public class VM {
     descriptor = vmDescriptor ;
     vmContainer = createVMContainer(vmDescriptor.getVmConfig());
     vmRegistry = vmContainer.getInstance(VMRegistry.class);
-    
+    runtimeEnv = createRuntimeEnv(vmDescriptor.getVmConfig());
     init();
   }
   
   public LoggerFactory getLoggerFactory() { return this.loggerFactory; }
   
   public Injector getVMContainer() { return this.vmContainer ; }
+  
+  public RuntimeEnv getRuntimeEnv() { return this.runtimeEnv ; }
+  
+  private RuntimeEnv createRuntimeEnv(VMConfig vmConfig)  {
+    String serverName = "unknown";
+    try {
+      serverName = InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+    }
+    RuntimeEnv env    = new RuntimeEnv(serverName, vmConfig.getName(), null);
+    return env;
+  }
   
   private Injector createVMContainer(final VMConfig vmConfig) {
     logger.info("Start createVMContainer(...)");

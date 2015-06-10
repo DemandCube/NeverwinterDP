@@ -10,7 +10,14 @@ public class ObjectLoggerService {
   private Map<String, ObjectLogger<?>> loggers = new HashMap<String, ObjectLogger<?>>();
   private FlushThread flushThread ;
   
+  public ObjectLoggerService() {
+  }
+  
   public ObjectLoggerService(String[] connect, String bufferBaseDir, int queueMaxSizePerSegment) throws Exception {
+    init(connect, bufferBaseDir, queueMaxSizePerSegment);
+  }
+  
+  protected void init(String[] connect, String bufferBaseDir, int queueMaxSizePerSegment) throws Exception {
     this.connect = connect;
     this.bufferBaseDir = bufferBaseDir ;
     this.queueMaxSizePerSegment = queueMaxSizePerSegment;

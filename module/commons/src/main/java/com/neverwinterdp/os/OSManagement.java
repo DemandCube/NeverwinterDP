@@ -12,15 +12,27 @@ import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.sun.management.OperatingSystemMXBean;
 
 @Singleton
 public class OSManagement {
+  @Inject
+  private RuntimeEnv runtimeEnv ;
+  
+  public OSManagement() { }
+  
+  public OSManagement(RuntimeEnv runtimeEnv) { 
+    this.runtimeEnv = runtimeEnv ;
+  }
+  
   public MemoryInfo[] getMemoryInfo() {
     MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
     MemoryInfo heapMemory = new MemoryInfo("Heap Memory", mbean.getHeapMemoryUsage());
+    heapMemory.setHost(runtimeEnv.getVMName());
     MemoryInfo nonHeapMemory = new MemoryInfo("Non Heap Memory", mbean.getNonHeapMemoryUsage());
+    nonHeapMemory.setHost(runtimeEnv.getVMName());
     return new MemoryInfo[] { heapMemory, nonHeapMemory } ;
   }
   
@@ -30,35 +42,49 @@ public class OSManagement {
     for(int i = 0; i < gcbeans.size(); i++) {
       GarbageCollectorMXBean gcbean = gcbeans.get(i) ;
       gcInfo[i] = new GCInfo(gcbean);
+      gcInfo[i].setHost(runtimeEnv.getVMName());
     }
     return gcInfo;
   }
   
   public ThreadCountInfo getThreadCountInfo() { 
-    return new ThreadCountInfo(ManagementFactory.getThreadMXBean()); 
+    ThreadCountInfo threadCountInfo = new ThreadCountInfo(ManagementFactory.getThreadMXBean()); 
+    threadCountInfo.setHost(runtimeEnv.getVMName());
+    return threadCountInfo;
   }
   
   public DetailThreadInfo[] getDetailThreadInfo() {
     ThreadMXBean mbean = ManagementFactory.getThreadMXBean() ;
     long[] tid = mbean.getAllThreadIds() ;
-    DetailThreadInfo[] detailThreadInfo = new DetailThreadInfo[tid.length] ;
+    List<DetailThreadInfo> holder = new ArrayList<>();
     for(int i = 0; i < tid.length; i++) {
       ThreadInfo tinfo = mbean.getThreadInfo(tid[i], 10) ;
-      detailThreadInfo[i] = new DetailThreadInfo(mbean, tinfo) ;
+      if(tinfo == null) continue ;
+      DetailThreadInfo info = new DetailThreadInfo(mbean, tinfo) ;
+      info.setHost(runtimeEnv.getVMName());
+      holder.add(info);
     }
-    return detailThreadInfo;
+    DetailThreadInfo[] detailThreadInfo = new DetailThreadInfo[holder.size()] ;
+    return holder.toArray(detailThreadInfo);
   }
   
-  public FileStoreInfo[] getFileStoreInfo() throws IOException {
+  public FileStoreInfo[] getFileStoreInfo() {
     FileSystem fs = FileSystems.getDefault();
     List<FileStoreInfo> fsStoreInfo = new ArrayList<>();
     for (FileStore store: fs.getFileStores()) {
-      fsStoreInfo.add(new FileStoreInfo(store));
+      try {
+        FileStoreInfo info = new FileStoreInfo(store);
+        info.setHost(runtimeEnv.getVMName());
+        fsStoreInfo.add(info);
+      } catch (IOException e) {
+      }
     }
     return fsStoreInfo.toArray(new FileStoreInfo[fsStoreInfo.size()]);
   }
   
   public OSInfo getOSInfo() {
-    return new OSInfo(ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class));
+    OSInfo osInfo = new OSInfo(ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class));
+    osInfo.setHost(runtimeEnv.getVMName());
+    return osInfo;
   }
 }

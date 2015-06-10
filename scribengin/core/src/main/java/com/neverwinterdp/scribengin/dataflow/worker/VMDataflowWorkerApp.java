@@ -14,8 +14,10 @@ import com.google.inject.Stage;
 import com.mycila.guice.ext.closeable.CloseableInjector;
 import com.mycila.guice.ext.closeable.CloseableModule;
 import com.mycila.guice.ext.jsr250.Jsr250Module;
+import com.neverwinterdp.es.log.OSMonitorLoggerService;
 import com.neverwinterdp.module.AppModule;
 import com.neverwinterdp.module.MycilaJmxModuleExt;
+import com.neverwinterdp.os.RuntimeEnv;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.scribengin.dataflow.DataflowContainer;
@@ -40,6 +42,7 @@ public class VMDataflowWorkerApp extends VMApp {
     AppModule module = new AppModule(vmConfig.getProperties()) {
       @Override
       protected void configure(Map<String, String> properties) {
+        bindInstance(RuntimeEnv.class, getVM().getRuntimeEnv());
         bindInstance(MetricRegistry.class, new MetricRegistry(vmConfig.getName()));
         bindInstance(LoggerFactory.class, getVM().getLoggerFactory());
         Registry registry = getVM().getVMRegistry().getRegistry();
@@ -85,6 +88,8 @@ public class VMDataflowWorkerApp extends VMApp {
         }
       }
     });
+    //TODO: fix to use module
+    container.getInstance(OSMonitorLoggerService.class);
     try {
       dataflowTaskExecutorService.start();
       dataflowTaskExecutorService.waitForTerminated(500);
