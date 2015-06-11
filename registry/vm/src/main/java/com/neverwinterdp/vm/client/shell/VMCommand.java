@@ -94,6 +94,7 @@ public class VMCommand extends Command {
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
       VMClient vmClient = shell.getVMClient();
       VMSubmitter submitter = new VMSubmitter(vmClient, appHome, new VMConfig(cmdInput.getRemainArgs()));
+      submitter.submit();
       submitter.waitForRunning(90000);;
       shell.console().print(submitter.getFormattedResult());
     }
