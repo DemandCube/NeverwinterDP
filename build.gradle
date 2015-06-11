@@ -22,7 +22,7 @@ subprojects {
       downloadSources=true
     }
   }
-
+  
   eclipse.classpath.defaultOutputDir = file( 'build/classes' )
 
   group = 'com.neverwinterdp'

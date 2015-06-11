@@ -8,17 +8,18 @@ eclipse {
   }
 }
 
+project.ext {
+  releaseDir = "${buildDir}/release"
+}
 
 dependencies {
   compile project(':registry/vm')
 }
 
-task release (dependsOn: 'build') << {
-  def releaseDir = "${buildDir}/release"
-
+task release(dependsOn: 'build') << {
   println "\n\n"
   println "*************************************************"
-  println "Build release for the  ${name}"
+  println "Build release for ${name} and deploy to ${releaseDir}"
   println "*************************************************"
 
   copy {

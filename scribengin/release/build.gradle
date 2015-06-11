@@ -3,6 +3,7 @@ archivesBaseName = 'scribengin.release'
 project.ext {
   elasticsearchVersion = "1.5.2"
   luceneVersion = "4.10.4"
+  releaseDir = "${buildDir}/release"
 }
 
 eclipse {
@@ -127,7 +128,7 @@ dependencies {
   scribenginDeployJars group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
 
   /*************************jvmagent runtime deploy jars***************************/
-  scribenginDeployJars project(':lib/utils')
+
   compile project(':registry/core')
   compile project(':jvmagent/bootstrap')
   jvmagentDeployJars project(':registry/vm')
@@ -145,15 +146,8 @@ dependencies {
 }
 
 task release (dependsOn: 'build') << {
-  def releaseDir = "${buildDir}/release"
-  doReleaseScribengin("${releaseDir}/scribengin");
+  doReleaseScribengin();
   doReleaseJvmagent("${releaseDir}/jvmagent");
-
-  def hdfsDataflowLibs = [ "scribengin.dataflow.hdfs" ] ;
-  doReleaseDataflow("hdfs", "${releaseDir}", hdfsDataflowLibs, "../dataflow//hdfs/src/app");
-
-  def logSampleDataflowLibs = [ "scribengin.dataflow.log-sample" ] ;
-  doReleaseDataflow("log-sample", "${releaseDir}", logSampleDataflowLibs, "../dataflow/log-sample/src/app");
 }
 
 def doReleaseJvmagent(String releaseDir){
@@ -181,7 +175,6 @@ def doReleaseJvmagent(String releaseDir){
     into "${releaseDir}/libs"
   }
 
-  println "Copy and override app"
   copy {
     from "src/app"
     into "${releaseDir}"
@@ -189,58 +182,31 @@ def doReleaseJvmagent(String releaseDir){
 
 }
 
-def doReleaseScribengin(String releaseDir) {
+def doReleaseScribengin() {
   println "\n\n"
   println "*************************************************"
-  println "Build release VMMaster ${releaseDir}"
+  println "Build release scribengin to ${releaseDir}"
   println "*************************************************"
+  
+  def scribenginReleaseDir = "${releaseDir}/scribengin" 
 
-  println "Copy the dependency library"
+  println "Copy the scribengin dependency library"
   configurations.scribenginDeployJars.each { File file -> 
     copy {
       from file
-      into "${releaseDir}/libs"
+      into "${scribenginReleaseDir}/libs"
     }
   }
 
+  println "Copy the scribengin library"
   copy {
     from "${buildDir}/libs"
-    into "${releaseDir}/libs"
+    into "${scribenginReleaseDir}/libs"
   }
 
-  println "Copy and override app"
+  println "Copy the scribengin home resources"
   copy {
     from "src/app"
-    into "${releaseDir}"
+    into "${scribenginReleaseDir}"
   }
-}
-
-def doReleaseDataflow(String name, String releaseDir, def libs, dataflowHome) {
-  println "\n\n"
-  println "*************************************************"
-  println "Build release for the dataflow ${name}"
-  println "*************************************************"
-
-  println "Copy the dependency library"
-  configurations.compile.each { File file -> 
-    if(isIn(libs, file)) {
-      println "  Copy $file.name to ${releaseDir}/dataflows/${name}/libs"
-      copy {
-        from file
-        into "${releaseDir}/dataflows/${name}/libs"
-      }
-    }
-  }
-
-  copy {
-    from dataflowHome
-      into "${releaseDir}/dataflows/${name}"
-  }
-}
-
-def isIn(set, File file) {
-  for(item in set) {
-    if(file.name.startsWith(item)) return true ;
-  }
-  return false ;
 }

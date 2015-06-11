@@ -11,15 +11,16 @@ repositories {
   mavenCentral()
 }
 
-test {
-  exclude '**'
-}
-
-dependencies {
-  compile project(':scribengin/release')
-}
-
 task release(dependsOn: 'build') << {
-  project(':scribengin/release').release.execute()
+  def projects = [
+    ':registry/vm-sample',
+    ':scribengin/release',
+    ':scribengin/dataflow/log-sample'
+  ] ;
 
+  projects.each { sel ->
+    def selProject = project(sel);
+    selProject.releaseDir =  "${buildDir}/release/neverwinterdp";
+    selProject.release.execute()
+  }
 }
