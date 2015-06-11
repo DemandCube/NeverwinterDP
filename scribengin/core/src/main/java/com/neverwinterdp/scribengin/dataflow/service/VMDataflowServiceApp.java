@@ -103,7 +103,7 @@ public class VMDataflowServiceApp extends VMApp {
         appContainer = Guice.createInjector(Stage.PRODUCTION, modules);
         
         //TODO: fix to use module
-        //appContainer.getInstance(OSMonitorLoggerService.class);
+        appContainer.getInstance(OSMonitorLoggerService.class);
         
         dataflowService = appContainer.getInstance(DataflowService.class);
         serviceRunnerThread = new ServiceRunnerThread(dataflowService);
