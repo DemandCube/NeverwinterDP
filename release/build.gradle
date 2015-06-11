@@ -1,0 +1,25 @@
+archivesBaseName = 'release'
+
+eclipse {
+  project {
+    name = 'release'
+  }
+}
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+test {
+  exclude '**'
+}
+
+dependencies {
+  compile project(':scribengin/release')
+}
+
+task release(dependsOn: 'build') << {
+  project(':scribengin/release').release.execute()
+
+}
