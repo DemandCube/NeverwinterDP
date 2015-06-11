@@ -1,0 +1,34 @@
+apply plugin: 'maven-publish'
+
+archivesBaseName = 'registry.vm-sample'
+
+eclipse {
+  project {
+    name = 'registry.vm-sample'
+  }
+}
+
+
+dependencies {
+  compile project(':registry/vm')
+}
+
+task release (dependsOn: 'build') << {
+  def releaseDir = "${buildDir}/release"
+
+  println "\n\n"
+  println "*************************************************"
+  println "Build release for the  ${name}"
+  println "*************************************************"
+
+  copy {
+    from "${buildDir}/libs"
+    into "${releaseDir}/vm-sample/libs"
+  }
+
+  def appHome = "src/app";
+  copy {
+    from appHome
+      into "${releaseDir}/vm-sample"
+  }
+}

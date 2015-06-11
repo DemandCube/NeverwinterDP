@@ -58,9 +58,9 @@ public class VMManagerAppUnitTest {
 
   @After
   public void teardown() throws Exception {
+    vmCluster.shutdown();
     miniYarnCluster.stop();
     miniYarnCluster.close();
-    vmCluster.shutdown();
   }
 
   @Test

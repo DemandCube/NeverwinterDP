@@ -38,7 +38,7 @@ public class ShellMain {
     hadoopProps.put("yarn.resourcemanager.address", hadoopMaster + ":8032");
     hadoopProps.put("fs.defaultFS", "hdfs://" + hadoopMaster +":9000");
     
-    YarnVMClient vmClient = new YarnVMClient(registry, VMConfig.Environment.YARN, hadoopProps) ;
+    YarnVMClient vmClient = new YarnVMClient(registry, VMConfig.ClusterEnvironment.YARN, hadoopProps) ;
     ScribenginShell shell = new ScribenginShell(vmClient) ;
     shell.attribute(HadoopProperties.class, hadoopProps);
     shell.execute(args);

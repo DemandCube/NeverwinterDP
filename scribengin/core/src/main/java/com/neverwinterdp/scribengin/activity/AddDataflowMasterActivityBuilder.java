@@ -92,7 +92,7 @@ public class AddDataflowMasterActivityBuilder extends ActivityBuilder {
         dfVMConfig.setAppHome(dataflowAppHome);
         dfVMConfig.addVMResource("dataflow.libs", dataflowAppHome + "/libs");
       }
-      dfVMConfig.setEnvironment(vmConfig.getEnvironment());
+      dfVMConfig.setClusterEnvironment(vmConfig.getClusterEnvironment());
       dfVMConfig.setName(descriptor.getId() + "-master-" + step.attribute("master.id"));
       dfVMConfig.setRoles(Arrays.asList("dataflow-master"));
       dfVMConfig.setRegistryConfig(registry.getRegistryConfig());

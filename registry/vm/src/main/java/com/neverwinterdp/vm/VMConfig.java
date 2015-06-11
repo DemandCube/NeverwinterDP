@@ -10,17 +10,18 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 
 import com.beust.jcommander.DynamicParameter;
+import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.util.text.StringUtil;
 
 public class VMConfig {
-  public enum Environment {
+  public enum ClusterEnvironment {
     YARN, YARN_MINICLUSTER, JVM;
     
-    public static Environment fromString(String code) {
-      for(Environment output : Environment.values()) {
+    public static ClusterEnvironment fromString(String code) {
+      for(ClusterEnvironment output : ClusterEnvironment.values()) {
         if(output.toString().equalsIgnoreCase(code)) return output;
       }
       return null;
@@ -64,10 +65,16 @@ public class VMConfig {
   private String              description;
 
   @Parameter(names = "--environment", description = "Environement YARN, YARN_MINICLUSTER, JVM")
-  private Environment         environment      = Environment.JVM;
+  private ClusterEnvironment         clusterEnvironment      = ClusterEnvironment.JVM;
 
   @ParametersDelegate
   private LoggerConfig        loggerConfig     = new LoggerConfig();
+  
+  public VMConfig() {} 
+  
+  public VMConfig(String[] args) {
+    new JCommander(this, args);
+  }
   
   public String getName() { return name; }
   public VMConfig setName(String name) { 
@@ -175,9 +182,9 @@ public class VMConfig {
     return this;
   }
   
-  public Environment getEnvironment() { return this.environment; }
-  public VMConfig setEnvironment(Environment env) { 
-    this.environment = env; 
+  public ClusterEnvironment getClusterEnvironment() { return this.clusterEnvironment; }
+  public VMConfig setClusterEnvironment(ClusterEnvironment env) { 
+    this.clusterEnvironment = env; 
     return this;
   }
   
@@ -228,7 +235,7 @@ public class VMConfig {
     b.append(" --registry-db-domain ").append(registryConfig.getDbDomain()) ;
     b.append(" --registry-implementation ").append(registryConfig.getRegistryImplementation()) ;
     
-    b.append(" --environment ").append(environment) ;
+    b.append(" --environment ").append(clusterEnvironment) ;
     
     for(Map.Entry<String, String> entry : properties.entrySet()) {
       b.append(" --prop:").append(entry.getKey()).append("=").append(entry.getValue()) ;

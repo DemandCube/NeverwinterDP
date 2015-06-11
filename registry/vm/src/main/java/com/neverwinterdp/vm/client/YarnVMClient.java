@@ -18,11 +18,11 @@ import com.neverwinterdp.vm.service.VMServicePlugin;
 public class YarnVMClient extends VMClient {
   private HadoopProperties hadoopProperties ;
   private Configuration conf ;
-  private VMConfig.Environment yarnEnv = VMConfig.Environment.YARN_MINICLUSTER ;
+  private VMConfig.ClusterEnvironment yarnEnv = VMConfig.ClusterEnvironment.YARN_MINICLUSTER ;
   private String localAppHome = ".";
   private String dfsAppHome = "/VM" ;
   
-  public YarnVMClient(Registry registry, VMConfig.Environment yarnEnv, HadoopProperties hadoopProps) {
+  public YarnVMClient(Registry registry, VMConfig.ClusterEnvironment yarnEnv, HadoopProperties hadoopProps) {
     super(registry);
     this.yarnEnv = yarnEnv;
     this.hadoopProperties = hadoopProps;
@@ -66,7 +66,7 @@ public class YarnVMClient extends VMClient {
   }
   
   public void configureEnvironment(VMConfig vmConfig) {
-    vmConfig.setEnvironment(yarnEnv);
+    vmConfig.setClusterEnvironment(yarnEnv);
     vmConfig.getHadoopProperties().putAll(hadoopProperties);
   }
   

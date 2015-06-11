@@ -57,9 +57,9 @@ public class AppClient {
         amContainer.setLocalResources(new VMResources(conf, vmConfig));
       }
       
-      System.out.println("Setup the classpath for ApplicationMaster, environment = " + vmConfig.getEnvironment()) ;
+      System.out.println("Setup the classpath for ApplicationMaster, environment = " + vmConfig.getClusterEnvironment()) ;
       Map<String, String> appMasterEnv = new HashMap<String, String>();
-      boolean jvmEnv = vmConfig.getEnvironment() != VMConfig.Environment.YARN;
+      boolean jvmEnv = vmConfig.getClusterEnvironment() != VMConfig.ClusterEnvironment.YARN;
       Util.setupAppMasterEnv(jvmEnv , conf, appMasterEnv);
       amContainer.setEnvironment(appMasterEnv);
 

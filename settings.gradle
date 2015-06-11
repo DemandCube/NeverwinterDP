@@ -8,6 +8,7 @@ include 'module/kafka'
 
 include 'registry/core'
 include 'registry/vm'
+include 'registry/vm-sample'
 
 include 'scribengin/core'
 include 'scribengin/dataflow/hdfs'

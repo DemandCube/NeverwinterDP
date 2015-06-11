@@ -82,7 +82,7 @@ public class AddWorkerActivityBuilder extends ActivityBuilder {
 
       VMConfig vmConfig = new VMConfig();
       vmConfig.
-      setEnvironment(service.getVMConfig().getEnvironment()).
+      setClusterEnvironment(service.getVMConfig().getClusterEnvironment()).
       setName(dflDescriptor.getId() + "-worker-" + step.attribute("worker.id")).
       addRoles("dataflow-worker").
       setRegistryConfig(registryConfig).

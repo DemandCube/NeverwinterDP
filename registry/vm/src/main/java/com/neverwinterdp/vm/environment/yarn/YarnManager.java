@@ -140,7 +140,7 @@ public class YarnManager {
       ctx.setLocalResources(vmResources);
     }
     Map<String, String> appEnv = new HashMap<String, String>();
-    boolean miniClusterEnv = vmConfig.getEnvironment() == VMConfig.Environment.YARN_MINICLUSTER;
+    boolean miniClusterEnv = vmConfig.getClusterEnvironment() == VMConfig.ClusterEnvironment.YARN_MINICLUSTER;
     setupAppClasspath(miniClusterEnv , conf, appEnv);
     ctx.setEnvironment(appEnv);
     

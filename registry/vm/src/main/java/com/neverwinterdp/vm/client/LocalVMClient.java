@@ -34,7 +34,7 @@ public class LocalVMClient extends VMClient {
   }
   
   public void configureEnvironment(VMConfig vmConfig) {
-    vmConfig.setEnvironment(VMConfig.Environment.JVM);
+    vmConfig.setClusterEnvironment(VMConfig.ClusterEnvironment.JVM);
   }
 
 }

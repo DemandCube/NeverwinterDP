@@ -130,8 +130,7 @@ public class VMManagerAppUnitTest  {
       "--vm-application", VMDummyApp.class.getName()
     };
     
-    VMConfig vmConfig = new VMConfig() ;
-    new JCommander(vmConfig, args);
+    VMConfig vmConfig = new VMConfig(args) ;
     CommandResult<?> result = vmClient.execute(masterVMDescriptor, new VMServiceCommand.Allocate(vmConfig));
     Assert.assertNull(result.getErrorStacktrace());
     VMDescriptor vmDescriptor = result.getResultAs(VMDescriptor.class);

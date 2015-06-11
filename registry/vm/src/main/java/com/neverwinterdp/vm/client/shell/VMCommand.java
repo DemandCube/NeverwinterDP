@@ -2,17 +2,22 @@ package com.neverwinterdp.vm.client.shell;
 
 import java.util.Map;
 
+import com.beust.jcommander.Parameter;
 import com.neverwinterdp.util.text.TabularFormater;
+import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.vm.client.VMClient;
+import com.neverwinterdp.vm.command.CommandResult;
+import com.neverwinterdp.vm.service.VMServiceCommand;
 import com.neverwinterdp.vm.tool.VMClusterBuilder;
 import com.neverwinterdp.vm.util.VMRegistryFormatter;
 
 public class VMCommand extends Command {
   public VMCommand() {
-    add("start", Start.class) ;
+    add("start",    Start.class) ;
     add("shutdown", Shutdown.class) ;
-    add("info", Info.class) ;
+    add("info",     Info.class) ;
+    add("submit",   Submit.class) ;
   }
   
   static public class Start extends SubCommand {
@@ -49,8 +54,8 @@ public class VMCommand extends Command {
       shell.console().h1("VM Info");
       VMRegistryFormatter regFormatter = new VMRegistryFormatter(null);
       
-      TabularFormater tabFormatter = new TabularFormater("Name", "Hostname", "Description", "Memory",
-                                                         "CPU Cores", "Stored Path", "Roles");
+      TabularFormater tabFormatter = 
+          new TabularFormater("Name", "Hostname", "Description", "Memory", "CPU Cores", "Stored Path", "Roles");
       
       
       shell.console().println("Running VM:");
@@ -63,8 +68,8 @@ public class VMCommand extends Command {
       }
       shell.console().println(tabFormatter.getFormatText());
       
-      tabFormatter = new TabularFormater("Name", "Hostname", "Description", "Memory",
-          "CPU Cores", "Stored Path", "Roles");
+      tabFormatter = 
+          new TabularFormater("Name", "Hostname", "Description", "Memory", "CPU Cores", "Stored Path", "Roles");
       shell.console().println("History VM:");
       for(VMDescriptor desc : vmClient.getHistoryVMDescriptors()){
         Map<String,String> data = regFormatter.getFormattedMap(desc);
@@ -81,9 +86,34 @@ public class VMCommand extends Command {
       return "print out info about running and history vms";
     }
   }
+  
+  static public class Submit extends SubCommand {
+    @Parameter(names = "--app-home", description = "The path to application home to upload ")
+    private String appHome ;
+    
+    @Override
+    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
+      System.err.println("app home = " + appHome);
+      VMClient vmClient = shell.getVMClient();
+      VMDescriptor masterVMDescriptor = vmClient.getMasterVMDescriptor();
+      String[] args = cmdInput.getRemainArgs() ;
+      VMConfig vmConfig = new VMConfig(args) ;
+      CommandResult<?> result = vmClient.execute(masterVMDescriptor, new VMServiceCommand.Allocate(vmConfig));
+      VMDescriptor vmDescriptor = result.getResultAs(VMDescriptor.class);
+      TabularFormater formater = new TabularFormater("VM", "") ;
+      formater.addRow("VM ID",         vmDescriptor.getId());
+      formater.addRow("CPU Cores",     vmDescriptor.getCpuCores());
+      formater.addRow("Memory",        vmDescriptor.getMemory());
+      formater.addRow("Registry Path", vmDescriptor.getRegistryPath());
+      shell.console().print(formater.getFormattedText());
+    }
+    
+    @Override
+    public String getDescription() {
+      return "Submit a request to run a vm application";
+    }
+  }
 
   @Override
-  public String getDescription() {
-    return "Commands related to VM instances.";
-  }
+  public String getDescription() { return "Commands related to VM instances."; }
 }

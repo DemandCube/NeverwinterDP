@@ -13,6 +13,7 @@ public class LoggerConfigUnitTest {
   public void test() throws Exception {
     LoggerConfig conf = new LoggerConfig() ;
     conf.getEsAppender().setEnable(false);
+    conf.getKafkaAppender().setEnable(false);
     conf.getFileAppender().setFilePath("build/test-log.log");
     conf.getConsoleAppender().setEnable(true);
     Map<String, String> log4jProps = conf.getLog4jConfiguration() ;

@@ -50,8 +50,8 @@ public class VMDataflowWorkerApp extends VMApp {
         bindType(Registry.class, registry.getClass());
         bindInstance(VMDescriptor.class, getVM().getDescriptor());
         try {
-          VMConfig.Environment env = vmConfig.getEnvironment();
-          if(env == VMConfig.Environment.YARN || env == VMConfig.Environment.YARN_MINICLUSTER) {
+          VMConfig.ClusterEnvironment env = vmConfig.getClusterEnvironment();
+          if(env == VMConfig.ClusterEnvironment.YARN || env == VMConfig.ClusterEnvironment.YARN_MINICLUSTER) {
             YarnConfiguration conf = new YarnConfiguration();
             vmConfig.overrideHadoopConfiguration(conf);
             bindInstance(FileSystem.class, FileSystem.get(conf));

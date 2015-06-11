@@ -108,7 +108,7 @@ public class LoggerConfig {
     @Parameter(names = "--log-file-name", description = "The name of the log file appender")
     String  name        = "file";
 
-    @Parameter(names = "--log-file-path", required = true, description = "The path of the log file")
+    @Parameter(names = "--log-file-path", description = "The path of the log file")
     String  filePath    = "logs/vm.log";
 
     @Parameter(names = "--log-file-max-size-in-mb", description = "The maximum size of the log file")

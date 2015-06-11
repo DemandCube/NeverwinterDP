@@ -81,7 +81,6 @@ public class ScribenginService {
     return true;
   }
   
-  //TODO: use transaction
   public void moveToHistory(DataflowDescriptor descriptor) throws Exception {
     Transaction transaction = registry.getTransaction();
     transaction.createChild(dataflowsHistoryNode, descriptor.getId(), NodeCreateMode.PERSISTENT);
