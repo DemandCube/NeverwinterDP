@@ -48,8 +48,8 @@
     },
 
     {
-      "id" : "info-log-persister-dataflow-info",
-      "name" : "info-log-persister-dataflow",
+      "id" :   "log-persister-dataflow-info",
+      "name" : "log-persister-dataflow",
       "numberOfWorkers" : 2,
       "numberOfExecutorsPerWorker" : 2,
       "taskMaxExecuteTime" : -1,
@@ -87,8 +87,8 @@
     },
 
     {
-      "id" : "info-log-persister-dataflow-warn",
-      "name" : "info-log-persister-dataflow",
+      "id" :   "log-persister-dataflow-warn",
+      "name" : "log-persister-dataflow",
       "numberOfWorkers" : 2,
       "numberOfExecutorsPerWorker" : 2,
       "taskMaxExecuteTime" : -1,
@@ -100,6 +100,11 @@
       "sinkDescriptors" : {
         "hdfs" : {
           "type" : "HDFS", "location" : "build/hdfs/warn"
+        },
+
+        "elasticsearch" : {
+          "type" : "elasticsearch", 
+          "address" : "elasticsearch-1:9300", "indexName": "dataflow_log_sample", "mappingType": "com.neverwinterdp.util.log.Log4jRecord"
         }
       },
       "loggerConfig" : {
@@ -121,8 +126,8 @@
     },
 
     {
-      "id" : "info-log-persister-dataflow-error",
-      "name" : "info-log-persister-dataflow",
+      "id" :   "log-persister-dataflow-error",
+      "name" : "log-persister-dataflow",
       "numberOfWorkers" : 2,
       "numberOfExecutorsPerWorker" : 2,
       "taskMaxExecuteTime" : -1,
