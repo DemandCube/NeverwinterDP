@@ -89,7 +89,7 @@ public class VMDataflowWorkerApp extends VMApp {
       }
     });
     //TODO: fix to use module
-    container.getInstance(OSMonitorLoggerService.class);
+    //container.getInstance(OSMonitorLoggerService.class);
     try {
       dataflowTaskExecutorService.start();
       dataflowTaskExecutorService.waitForTerminated(500);
