@@ -29,12 +29,14 @@ public class VMSampleAppUnitTest  {
   public void testMaster() throws Exception {
     VMClient vmClient = vmCluster.getVMClient();
     Shell shell = new Shell(vmClient) ;
-    shell.execute(
+    String command =
       "vm submit " +
+      "  --app-home /opt/scribengin/vm-sample" +
       "  --name vm-dummy-1 --role vm-dummy" +
       "  --registry-connect 127.0.0.1:2181 --registry-db-domain /NeverwinterDP --registry-implementation " + RegistryImpl.class.getName() +
-      "  --vm-application " + VMSampleApp.class.getName()
-    );
+      "  --vm-application " + VMSampleApp.class.getName();
+    System.err.println(command);
+    shell.execute(command);
     Thread.sleep(10000);
   }
 }
