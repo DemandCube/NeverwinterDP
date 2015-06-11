@@ -61,7 +61,7 @@ public class OSMonitorLoggerService extends ObjectLoggerService {
 
           ThreadCountInfo threadCountInfo = osManagement.getThreadCountInfo();
           log(threadCountInfo.uniqueId(), threadCountInfo);
-          Thread.sleep(10000);
+          Thread.sleep(30000);
         }
       } catch (InterruptedException e) {
       }
