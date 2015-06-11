@@ -90,7 +90,7 @@ public class VMScribenginServiceApp extends VMApp {
         appContainer = Guice.createInjector(Stage.PRODUCTION, modules);
         
         //TODO: fix to use module
-        //appContainer.getInstance(OSMonitorLoggerService.class);
+        appContainer.getInstance(OSMonitorLoggerService.class);
         
         scribenginService = appContainer.getInstance(ScribenginService.class);
         RefNode refNode = new RefNode() ;
