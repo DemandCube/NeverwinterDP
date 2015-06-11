@@ -40,7 +40,7 @@ public class DataflowSubmitter {
       dflDescriptor.setDataflowAppHome(dataflowAppHome);
       vmClient.uploadApp(localDataflowHome, dataflowAppHome);
     }
-    h1("Submit the dataflow " + dflDescriptor.getId());
+    h1("Submit The Dataflow " + dflDescriptor.getId());
     
     VMDescriptor scribenginMaster = scribenginClient.getScribenginMaster();
     Command deployCmd = new VMScribenginServiceCommand.DataflowDeployCommand(dflDescriptor) ;

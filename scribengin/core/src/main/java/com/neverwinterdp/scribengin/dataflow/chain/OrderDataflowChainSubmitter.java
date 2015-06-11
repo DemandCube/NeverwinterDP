@@ -19,8 +19,6 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
     long remainTime = timeout;
     for(DataflowDescriptor sel : config.getDescriptors()) {
       DataflowSubmitter submitter = doSubmit(client, dataflowHome, sel) ;
-      submitter.submit();
-      submitter.waitForRunning(remainTime);
       submitters.add(submitter);
       remainTime = stopTime - System.currentTimeMillis();
       if(remainTime < 0) {
