@@ -46,14 +46,7 @@ public class DataflowTaskRegistryDetailedFormater extends NodeFormatter {
       taskFt.addRow("  Process Count", dflTaskReport.getProcessCount());
       taskFt.addRow("  Commit Process Count", dflTaskReport.getCommitProcessCount());
       taskFt.addRow("Worker", "");
-
-      if(status != TaskStatus.SUSPENDED && status != TaskStatus.TERMINATED) {
-        taskFt.addRow("  Status", "FAILED");
-      } else if(status == TaskStatus.TERMINATED) {
-        taskFt.addRow("  Status", "FINISHED");
-      } else{
-        taskFt.addRow("  Status", status);
-      }
+      taskFt.addRow("  Status", status);
       b.append(taskFt.getFormatText());
       
       Node taskDescriptorsNode = taskDescriptorNode.getParentNode();

@@ -12,6 +12,7 @@ abstract public class DataflowChainSubmitter {
   protected String dataflowHome;
   protected DataflowChainConfig config;
   private List<DataflowSubmitter> submitters = new ArrayList<>();
+  private boolean enableDataflowTaskDebugger = false;
 
   public DataflowChainSubmitter(ScribenginClient client, String dataflowHome, DataflowChainConfig config) {
     this.client = client;
@@ -38,6 +39,17 @@ abstract public class DataflowChainSubmitter {
     for(DataflowSubmitter submitter : submitters) {
       submitter.waitForTerminated(remainTime);
       remainTime = stopTime - System.currentTimeMillis();
+    }
+  }
+  
+  public DataflowChainSubmitter enableDataflowTaskDebugger() throws Exception {
+    enableDataflowTaskDebugger = true;
+    return this ;
+  }
+  
+  protected void setupDebugger(DataflowSubmitter submitter) throws Exception {
+    if(enableDataflowTaskDebugger) {
+      submitter.enableDataflowTaskDebugger(System.out);
     }
   }
   

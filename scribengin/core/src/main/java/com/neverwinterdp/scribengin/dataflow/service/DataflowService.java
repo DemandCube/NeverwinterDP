@@ -80,6 +80,7 @@ public class DataflowService {
   }
   
   public void run() throws Exception {
+    System.err.println("Before DataflowService:run()");
     dataflowRegistry.initRegistry();
     dataflowWorkerMonitor = new DataflowWorkerMonitor(dataflowRegistry, activityService);
     dataflowRegistry.setStatus(DataflowLifecycleStatus.INIT);
@@ -91,13 +92,19 @@ public class DataflowService {
     
     activityService.queue(new DataflowInitActivityBuilder().build());
     activityService.queue(new DataflowRunActivityBuilder().build());
+    System.err.println("After DataflowService:run()");
   }
   
   
   public void waitForTermination(Thread waitForTerminationThread) throws Exception {
     this.waitForTerminationThread = waitForTerminationThread ;
+    System.err.println("Before dataflowTaskMonitor.waitForAllTaskFinish();");
     dataflowTaskMonitor.waitForAllTaskFinish();
+    System.err.println("After dataflowTaskMonitor.waitForAllTaskFinish();");
+    
+    System.err.println("Before dataflowWorkerMonitor.waitForAllWorkerTerminated();");
     dataflowWorkerMonitor.waitForAllWorkerTerminated();
+    System.err.println("After dataflowWorkerMonitor.waitForAllWorkerTerminated();");
     //finish
     dataflowRegistry.setStatus(DataflowLifecycleStatus.FINISH);
   }

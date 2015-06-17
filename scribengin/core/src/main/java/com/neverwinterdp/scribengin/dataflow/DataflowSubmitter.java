@@ -6,8 +6,10 @@ import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.SequenceIdTracker;
 import com.neverwinterdp.registry.event.WaitingOrderNodeEventListener;
 import com.neverwinterdp.scribengin.ScribenginClient;
+import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.service.ScribenginService;
 import com.neverwinterdp.scribengin.service.VMScribenginServiceCommand;
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
@@ -41,7 +43,7 @@ public class DataflowSubmitter {
       vmClient.uploadApp(localDataflowHome, dataflowAppHome);
     }
     h1("Submit The Dataflow " + dflDescriptor.getId());
-    
+    System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor)) ;
     VMDescriptor scribenginMaster = scribenginClient.getScribenginMaster();
     Command deployCmd = new VMScribenginServiceCommand.DataflowDeployCommand(dflDescriptor) ;
     CommandResult<Boolean> result = (CommandResult<Boolean>)vmClient.execute(scribenginMaster, deployCmd);
@@ -67,5 +69,27 @@ public class DataflowSubmitter {
       DataflowLifecycleStatus.TERMINATED
     };
     waitForStatus(timeout, status) ;
+  }
+  
+  public DataflowSubmitter enableDataflowTaskDebugger(Appendable out) throws Exception {
+    scribenginClient.getDataflowTaskDebugger(out, dflDescriptor, true);
+    return this ;
+  }
+  
+  public DataflowSubmitter enableAllDebugger(Appendable out) throws Exception {
+    scribenginClient.getDataflowTaskDebugger(System.out, dflDescriptor, false);
+    
+    scribenginClient.getDataflowVMDebugger(System.out, dflDescriptor, true);
+    scribenginClient.getDataflowVMDebugger(System.out, dflDescriptor, false);
+    
+    scribenginClient.getDataflowActivityDebugger(System.out, dflDescriptor, true);
+    scribenginClient.getDataflowActivityDebugger(System.out, dflDescriptor, false);
+    return this ;
+  }
+  
+  
+  public void dumpDataflowRegistry(Appendable out) throws Exception {
+    String dataflowStatusPath = ScribenginService.getDataflowPath(dflDescriptor.getId());
+    scribenginClient.getRegistry().get(dataflowStatusPath).dump(out);
   }
 }

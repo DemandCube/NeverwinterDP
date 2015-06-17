@@ -19,8 +19,13 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
   public void submit(long timeout) throws Exception {
     long stopTime = System.currentTimeMillis() + timeout;
     long remainTime = timeout;
+    boolean first = true ;
     for(DataflowDescriptor sel : config.getDescriptors()) {
       DataflowSubmitter submitter = doSubmit(client, dataflowHome, sel) ;
+      if(first) {
+        Thread.sleep(5000);
+        first = false;
+      }
       submitters.add(submitter);
       remainTime = stopTime - System.currentTimeMillis();
       if(remainTime < 0) {
@@ -33,7 +38,8 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
     try {
       DataflowSubmitter submitter = new DataflowSubmitter(client, dataflowHome, descriptor) ;
       submitter.submit();
-      submitter.waitForRunning(45000);
+      setupDebugger(submitter);
+      submitter.waitForRunning(25000);
       return submitter;
     } catch(Exception ex ) {
       Node dataflowNode = client.getRegistry().get(ScribenginService.getDataflowPath(descriptor.getId()));
@@ -46,7 +52,12 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
     long stopTime = System.currentTimeMillis() + timeout;
     long remainTime = timeout;
     for(DataflowSubmitter submitter : submitters) {
-      submitter.waitForTerminated(remainTime);
+      try {
+        submitter.waitForTerminated(remainTime);
+      } catch(Exception ex) {
+        submitter.dumpDataflowRegistry(System.err);
+        throw ex;
+      }
       remainTime = stopTime - System.currentTimeMillis();
     }
   }

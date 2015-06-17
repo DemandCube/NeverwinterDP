@@ -89,12 +89,12 @@ public class KafkaAppender extends AppenderSkeleton {
       while(true) {
         try {
           if(kafkaError) {
-            Thread.sleep(60 * 1000);
+            Thread.sleep(5000);
             kafkaWriter.reconnect();
             kafkaError = false ;
           }
           Segment<Log4jRecord> segment = null ;
-          while((segment = queue.nextReadSegment(15000)) != null) {
+          while((segment = queue.nextReadSegment(5000)) != null) {
             segment.open();
             while(segment.hasNext()) {
               Log4jRecord record = segment.nextObject() ;

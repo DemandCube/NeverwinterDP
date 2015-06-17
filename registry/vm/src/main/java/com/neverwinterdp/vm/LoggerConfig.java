@@ -168,7 +168,7 @@ public class LoggerConfig {
     private String connects  = "elasticsearch-1:9300";
 
     @Parameter(names = "--log-es-buffer-dir", description = "The buffer directory")
-    private String bufferDir = "data/buffer/es/log4j";
+    private String bufferDir = "build/data/buffer/es/log4j";
 
     @Parameter(names = "--log-es-index-name", description = "The name of the log index")
     private String indexName = "log4j";

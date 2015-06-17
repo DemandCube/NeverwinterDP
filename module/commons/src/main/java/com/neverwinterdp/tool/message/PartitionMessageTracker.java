@@ -19,9 +19,7 @@ public class PartitionMessageTracker {
     this.partition = partition;
   }
 
-  public int getLogCount() {
-    return this.logCount;
-  }
+  public int getLogCount() { return this.logCount; }
 
   public int getDuplicatedCount() {
     //sum of duplicates in all maps

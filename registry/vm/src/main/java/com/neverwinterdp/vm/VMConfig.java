@@ -142,9 +142,28 @@ public class VMConfig {
   }
   
   public VMConfig addProperty(String name, String value) {
-    if(properties == null) properties = new HashMap<String, String>();
     properties.put(name, value);
     return this;
+  }
+  
+  public String getProperty(String name) { return properties.get(name); }
+  
+  public int getPropertyAsInt(String name, int defaultVal) { 
+    String val = properties.get(name); 
+    return val == null ? defaultVal : Integer.parseInt(val);
+  }
+  
+  public VMConfig addProperty(String name, int value) {
+    return addProperty(name, Integer.toString(value));
+  }
+  
+  public boolean getPropertyAsBoolean(String name, boolean defaultVal) { 
+    String val = properties.get(name); 
+    return val == null ? defaultVal : Boolean.parseBoolean(val);
+  }
+  
+  public VMConfig addProperty(String name, boolean value) {
+    return addProperty(name, Boolean.toString(value));
   }
   
   public HadoopProperties getHadoopProperties() { return hadoopProperties; }

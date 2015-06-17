@@ -209,7 +209,7 @@ public class DataflowTestRunner extends Thread {
         @Override
         public void run() {
           try {
-            String json = IOUtil.getFileContentAsString("../../scribengin/dataflow/log-sample/src/app/conf/log-dataflow-chain.json") ;
+            String json = IOUtil.getFileContentAsString("../../scribengin/dataflow/log-sample/src/app/conf/local/log-dataflow-chain.json") ;
             DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
             OrderDataflowChainSubmitter submitter = 
                 new OrderDataflowChainSubmitter(shell.getScribenginClient(), null, config);

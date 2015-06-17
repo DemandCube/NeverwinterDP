@@ -92,6 +92,12 @@ public class HDFSSinkStreamWriter implements SinkStreamWriter {
     return buffer;
   }
   
+  public String toString() {
+    StringBuilder b = new StringBuilder() ;
+    b.append("location=").append(location).append(", buffer location = ").append(this.bufferLocation);
+    return b.toString() ;
+  }
+  
   class SinkBuffer {
     private int  index;
     private Path writingPath;

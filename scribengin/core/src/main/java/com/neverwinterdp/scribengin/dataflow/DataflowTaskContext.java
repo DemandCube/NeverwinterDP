@@ -48,17 +48,21 @@ public class DataflowTaskContext {
     sinkContext.assignedSinkStreamWriter.append(record);
   }
 
+  public void write(String sinkName, Record record) throws Exception {
+    SinkContext sinkContext = sinkContexts.get(sinkName);
+    sinkContext.assignedSinkStreamWriter.append(record);
+  }
+  
   public String[] getAvailableSinks() {
     String[] name = new String[sinkContexts.size()] ;
     sinkContexts.keySet().toArray(name) ;
     return name ;
   }
   
-  public void write(String sinkName, Record record) throws Exception {
-    SinkContext sinkContext = sinkContexts.get(sinkName);
-    sinkContext.assignedSinkStreamWriter.append(record);
+  public SinkContext getSinkContext(String name) {
+    return sinkContexts.get(name) ;
   }
-
+  
   private void prepareCommit() throws Exception {
     sourceContext.assignedSourceStreamReader.prepareCommit();
     Iterator<SinkContext> i = sinkContexts.values().iterator();
@@ -177,5 +181,17 @@ public class DataflowTaskContext {
     public void close() throws Exception {
       assignedSinkStreamWriter.close();
     }
+    
+    public StreamDescriptor getStreamDescriptor() { return this.assignedSinkStream.getDescriptor() ;}
+    
+    public String toString() {
+      StringBuilder b = new StringBuilder();
+      b.append("Sink:\n").
+        append("  Type = ").append(sink.getDescriptor().getType()).
+        append("  Stream Id = ").append(assignedSinkStream.getDescriptor().getId()).
+        append("  Location = ").append(assignedSinkStream.getDescriptor().getLocation());
+      return b.toString();
+    }
+    
   }
 }

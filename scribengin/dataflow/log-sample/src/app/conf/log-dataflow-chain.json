@@ -9,7 +9,7 @@
       "numberOfWorkers" : 2,
       "numberOfExecutorsPerWorker" : 2,
       "taskMaxExecuteTime" : -1,
-      "scribe" : "com.neverwinterdp.dataflow.logsample.LogSplitter",
+      "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessageSplitter",
 
       "sourceDescriptor" : {
         "type" : "kafka", "topic" : "log4j", "zk.connect" : "zookeeper-1:2181", "reader" : "raw", "name" : "LogSplitterDataflow"
@@ -53,7 +53,7 @@
       "numberOfWorkers" : 2,
       "numberOfExecutorsPerWorker" : 2,
       "taskMaxExecuteTime" : -1,
-      "scribe" : "com.neverwinterdp.dataflow.logsample.LogPerister",
+      "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessagePerister",
 
       "sourceDescriptor" : {
         "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "zookeeper-1:2181", "reader" : "record", "name" : "LogSampleDataflow"
@@ -92,7 +92,7 @@
       "numberOfWorkers" : 2,
       "numberOfExecutorsPerWorker" : 2,
       "taskMaxExecuteTime" : -1,
-      "scribe" : "com.neverwinterdp.dataflow.logsample.LogPerister",
+      "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessagePerister",
 
       "sourceDescriptor" : {
         "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "zookeeper-1:2181", "reader" : "record", "name" : "LogSampleDataflow"
@@ -131,7 +131,7 @@
       "numberOfWorkers" : 2,
       "numberOfExecutorsPerWorker" : 2,
       "taskMaxExecuteTime" : -1,
-      "scribe" : "com.neverwinterdp.dataflow.logsample.LogPerister",
+      "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessagePerister",
 
       "sourceDescriptor" : {
         "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "zookeeper-1:2181", "reader" : "record", "name" : "LogSampleDataflow"

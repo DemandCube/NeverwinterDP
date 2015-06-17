@@ -6,9 +6,21 @@ import com.neverwinterdp.scribengin.scribe.ScribeAbstract;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.log.Log4jRecord;
 
-public class LogSplitter extends ScribeAbstract {
+public class LogMessageSplitter extends ScribeAbstract {
+  int count = 0;
   public void process(Record record, DataflowTaskContext ctx) throws Exception {
     Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(record.getData(), Log4jRecord.class) ;
-    ctx.write(log4jRec.getLevel().toLowerCase(), record);
+    if(log4jRec.getLoggerName().indexOf("LogSample") >= 0) {
+      //Extract the log message that generate by the tool
+      String level = log4jRec.getLevel().toLowerCase();
+      ctx.write(level, record);
+    } else {
+      //Write to default sink
+      ctx.append(record);
+    }
+    count++ ;
+    if(count > 0 && count % 100 == 0) {
+      ctx.commit();
+    }
   }
 }

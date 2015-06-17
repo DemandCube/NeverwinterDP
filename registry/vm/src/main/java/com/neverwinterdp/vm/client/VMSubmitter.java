@@ -32,6 +32,10 @@ public class VMSubmitter {
       vmClient.uploadApp(appHome, remoteAppHome);
     }
     CommandResult<?> result = vmClient.execute(masterVMDescriptor, new VMServiceCommand.Allocate(vmConfig));
+    if(result.getErrorStacktrace() != null) {
+      System.err.println(result.getErrorStacktrace());
+      throw new Exception() ;
+    }
     vmDescriptor = result.getResultAs(VMDescriptor.class);
     return vmDescriptor ;
   }

@@ -4,7 +4,7 @@
   "numberOfWorkers" : 2,
   "numberOfExecutorsPerWorker" : 2,
   "taskMaxExecuteTime" : -1,
-  "scribe" : "com.neverwinterdp.dataflow.logsample.LogSplitter",
+  "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessageSplitter",
 
   "sourceDescriptor" : {
     "type" : "kafka", "topic" : "log4j", "zk.connect" : "zookeeper-1:2181", "reader" : "raw", "name" : "LogSplitterDataflow"
