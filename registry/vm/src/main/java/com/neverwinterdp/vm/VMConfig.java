@@ -157,6 +157,15 @@ public class VMConfig {
     return addProperty(name, Integer.toString(value));
   }
   
+  public long getPropertyAsLong(String name, long defaultVal) { 
+    String val = properties.get(name); 
+    return val == null ? defaultVal : Long.parseLong(val);
+  }
+  
+  public VMConfig addProperty(String name, long value) {
+    return addProperty(name, Long.toString(value));
+  }
+  
   public boolean getPropertyAsBoolean(String name, boolean defaultVal) { 
     String val = properties.get(name); 
     return val == null ? defaultVal : Boolean.parseBoolean(val);

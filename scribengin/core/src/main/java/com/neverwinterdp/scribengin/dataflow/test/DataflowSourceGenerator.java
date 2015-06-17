@@ -70,19 +70,23 @@ abstract public class DataflowSourceGenerator implements Runnable {
     MessageGenerator defaultMessageGenerator = new MessageGenerator.DefaultMessageGenerator() ;
     static public AtomicLong idTracker = new AtomicLong() ;
     
-    public byte[] nextMessage(int partition, int messageSize) {
+    public byte[] nextMessage(String partition, int messageSize) {
       return JSONSerializer.INSTANCE.toBytes(nextRecord(partition, messageSize));
     }
     
-    public Record nextRecord(int partition, int messageSize) {
+    public Record nextRecord(String partition, int messageSize) {
       byte[] messagePayload = defaultMessageGenerator.nextMessage(partition, messageSize);
       String key = "partition=" + partition + ",id=" + idTracker.getAndIncrement();
       return new Record(key, messagePayload);
     }
-
+    
     @Override
-    public Map<Integer, AtomicInteger> getMessageTrackers() {
-      return defaultMessageGenerator.getMessageTrackers();
+    public int getCurrentSequenceId(String partition) {
+      return defaultMessageGenerator.getCurrentSequenceId(partition);
     }
+    
+    @Override
+    public Map<String, AtomicInteger> getMessageTrackers() { return defaultMessageGenerator.getMessageTrackers(); }
+
   }
 }

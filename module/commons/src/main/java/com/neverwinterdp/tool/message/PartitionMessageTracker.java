@@ -10,12 +10,16 @@ import java.util.Set;
 import com.neverwinterdp.util.text.TabularFormater;
 
 public class PartitionMessageTracker {
-  private int partition;
+  private String partition;
   private int logCount;
   private List<SequenceMap> map = new ArrayList<>();
   private int idealSequenceMapSize = 100;
 
   public PartitionMessageTracker(int partition) {
+    this.partition = Integer.toString(partition);
+  }
+  
+  public PartitionMessageTracker(String partition) {
     this.partition = partition;
   }
 
@@ -65,10 +69,10 @@ public class PartitionMessageTracker {
     return map;
   }
 
-  public int getPartition() {
-    return this.partition;
-  }
+  public String getPartition() { return this.partition; }
 
+  public int getPartitionAsInt() { return Integer.parseInt(partition); }
+  
   public void setIdealSequenceMapSize(int size) {
     this.idealSequenceMapSize = size;
   }

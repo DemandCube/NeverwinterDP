@@ -8,23 +8,29 @@ import com.neverwinterdp.util.JSONSerializer;
 
 public interface MessageGenerator {
   
-  public byte[] nextMessage(int partition, int messageSize);
+  public byte[] nextMessage(String partition, int messageSize);
   
   //TODO remove after testing
-  public Map<Integer, AtomicInteger> getMessageTrackers();
+  public Map<String, AtomicInteger> getMessageTrackers();
   
+  public int getCurrentSequenceId(String partition);
   
   static public class DefaultMessageGenerator implements MessageGenerator {
-    private Map<Integer, AtomicInteger> idTrackers = new HashMap<>() ;
+    private Map<String, AtomicInteger> idTrackers = new HashMap<>() ;
     
     @Override
-    public byte[] nextMessage(int partition, int messageSize) {
+    public byte[] nextMessage(String partition, int messageSize) {
       AtomicInteger idTracker = getIdTracker(partition) ;
       Message message = new Message(partition, idTracker.incrementAndGet(), messageSize) ;
       return JSONSerializer.INSTANCE.toBytes(message) ;
     }
     
-    AtomicInteger getIdTracker(int partition) {
+    public int getCurrentSequenceId(String partition) {
+      AtomicInteger idTracker = getIdTracker(partition) ;
+      return idTracker.get() + 1;
+    }
+    
+    AtomicInteger getIdTracker(String partition) {
       AtomicInteger idTracker = idTrackers.get(partition) ;
       if(idTracker != null) return idTracker; 
       synchronized(idTrackers) {
@@ -37,8 +43,6 @@ public interface MessageGenerator {
     }
 
     @Override
-    public Map<Integer, AtomicInteger> getMessageTrackers() {
-      return idTrackers;
-    }
+    public Map<String, AtomicInteger> getMessageTrackers() { return idTrackers; }
   };
 }

@@ -16,7 +16,7 @@ import com.neverwinterdp.tool.message.PartitionMessageTracker.SequenceMap;
 import com.neverwinterdp.util.text.TabularFormater;
 
 public class MessageTracker {
-  private TreeMap<Integer, PartitionMessageTracker> partitions = new TreeMap<>();
+  private TreeMap<String, PartitionMessageTracker> partitions = new TreeMap<>();
 
   synchronized public int getLogCount() {
     int logCount = 0;
@@ -47,15 +47,17 @@ public class MessageTracker {
   }
 
   public void log(int partition, int trackId) {
+    log(Integer.toString(partition), trackId);
+  }
+  
+  public void log(String partition, int trackId) {
     PartitionMessageTracker partitionTracker = getPartitionMessageTracker(partition, true);
     partitionTracker.log(trackId);
   }
 
-  public TreeMap<Integer, PartitionMessageTracker> getPartitionMessageTrackers() {
-    return partitions;
-  }
+  public TreeMap<String, PartitionMessageTracker> getPartitionMessageTrackers() { return partitions; }
 
-  public void setPartitions(TreeMap<Integer, PartitionMessageTracker> partitions) {
+  public void setPartitions(TreeMap<String, PartitionMessageTracker> partitions) {
     this.partitions = partitions;
   }
 
@@ -63,7 +65,7 @@ public class MessageTracker {
     return partitions.get(partition);
   }
 
-  PartitionMessageTracker getPartitionMessageTracker(int partition, boolean create) {
+  PartitionMessageTracker getPartitionMessageTracker(String partition, boolean create) {
     PartitionMessageTracker partitionTracker = partitions.get(partition);
     if (partitionTracker != null)
       return partitionTracker;
@@ -74,7 +76,7 @@ public class MessageTracker {
       if (partitionTracker != null)
         return partitionTracker;
       partitionTracker = new PartitionMessageTracker(partition);
-      partitions.put(partition, partitionTracker);
+      partitions.put(partitionTracker.getPartition(), partitionTracker);
       return partitionTracker;
     }
   }
@@ -93,8 +95,8 @@ public class MessageTracker {
     TabularFormater formater = new TabularFormater(header);
     formater.setTitle("Message Tracker");
     
-    for (Map.Entry<Integer, PartitionMessageTracker> entry : partitions.entrySet()) {
-      int partition = entry.getKey();
+    for (Map.Entry<String, PartitionMessageTracker> entry : partitions.entrySet()) {
+      String partition = entry.getKey();
       formater.addRow("    " + partition, "", "", "", "");
       PartitionMessageTracker partitionTracker = entry.getValue();
       List<SequenceMap> map = partitionTracker.getSequenceMap() ;
@@ -122,8 +124,8 @@ public class MessageTracker {
     int testNum = 0;
     optimize();
     // a test per partition
-    for (Map.Entry<Integer, PartitionMessageTracker> entry : partitions.entrySet()) {
-      int partition = entry.getKey();
+    for (Map.Entry<String, PartitionMessageTracker> entry : partitions.entrySet()) {
+      String partition = entry.getKey();
       PartitionMessageTracker partitionTracker = entry.getValue();
 
       testSet.addTestResult(newTestResult(++testNum,

@@ -10,6 +10,7 @@ import com.neverwinterdp.scribengin.dataflow.chain.OrderDataflowChainSubmitter;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.vm.VMConfig;
+import com.neverwinterdp.vm.client.GroupVMSubmitter;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.client.VMSubmitter;
 
@@ -27,16 +28,19 @@ public class LogSampleRunner {
   }
   
   public void submitVMLogGeneratorApp() throws Exception {
-    VMConfig vmConfig = new VMConfig() ;
-    vmConfig.setRegistryConfig(config.registryConfig);
-    vmConfig.setName("log-generator");
-    vmConfig.addRoles("log-generator");
-    vmConfig.setVmApplication(VMLogMessageGeneratorApp.class.getName());
-    vmConfig.addProperty("num-of-message", config.logGeneratorNumOfMessage);
-    vmConfig.addProperty("message-size", config.logGeneratorMessageSize);
-    VMSubmitter vmSubmitter = new VMSubmitter(shell.getVMClient(), config.appHome, vmConfig);
-    vmSubmitter.submit();
-    vmSubmitter.waitForRunning(30000);
+    GroupVMSubmitter groupVMSubmitter = new GroupVMSubmitter(shell.getVMClient());
+    for(int i = 0; i < config.logGeneratorNumOfVM; i++) {
+      VMConfig vmConfig = new VMConfig();
+      vmConfig.setRegistryConfig(config.registryConfig);
+      vmConfig.setName("vm-log-generator-" + (i + 1));
+      vmConfig.addRoles("vm-log-generator");
+      vmConfig.setVmApplication(VMLogMessageGeneratorApp.class.getName());
+      vmConfig.addProperty("num-of-executor", config.logGeneratorNumOfExecutorPerVm);
+      vmConfig.addProperty("num-of-message-per-executor", config.logGeneratorNumOfMessagePerExecutor);
+      vmConfig.addProperty("message-size", config.logGeneratorMessageSize);
+      groupVMSubmitter.add(config.appHome, vmConfig);
+    }
+    groupVMSubmitter.submitAndWaitForRunning(45000);
   }
   
   public VMSubmitter submitVMLogValidatorApp() throws Exception {
@@ -44,6 +48,10 @@ public class LogSampleRunner {
     vmConfig.setRegistryConfig(config.registryConfig);
     vmConfig.setName("log-validator");
     vmConfig.addRoles("log-validator");
+    vmConfig.addProperty("num-of-executor", config.logValidatorNumOfExecutorPerVM);
+    vmConfig.addProperty("wait-for-message-timeout", config.logValidatorWaitForMessageTimeout);
+    vmConfig.addProperty("wait-for-termination", config.logValidatorWaitForTermination);
+    vmConfig.addProperty("validate-topic", config.logValidatorValidateTopic);
     vmConfig.setVmApplication(VMLogMessageValidatorApp.class.getName());
     VMSubmitter vmSubmitter = new VMSubmitter(shell.getVMClient(), config.appHome, vmConfig);
     vmSubmitter.submit();
@@ -72,6 +80,6 @@ public class LogSampleRunner {
     runner.submitVMLogGeneratorApp();
     Thread.sleep(35000);
     runner.submitLogSampleDataflowChain();
-    runner.submitVMLogValidatorApp().waitForTerminated(15000);;
+    runner.submitVMLogValidatorApp().waitForTerminated(30000);;
   }
 }

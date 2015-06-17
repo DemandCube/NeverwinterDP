@@ -78,7 +78,7 @@ public class S3DataflowSourceGenerator extends DataflowSourceGenerator {
 
   void generateStream(Sink sink) throws Exception {
     SinkStream stream = sink.newStream();
-    int partition = stream.getDescriptor().getId();
+    String partition = Integer.toString(stream.getDescriptor().getId());
     SinkStreamWriter writer = stream.getWriter();
     for (int i = 0; i < numOfFilesPerFolder; i++) {
       for (int j = 0; j < numOfRecordsPerFile; j++) {

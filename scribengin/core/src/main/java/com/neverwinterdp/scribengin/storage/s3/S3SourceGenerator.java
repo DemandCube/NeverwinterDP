@@ -39,7 +39,8 @@ public class S3SourceGenerator {
     SinkStreamWriter writer = stream.getWriter();
     for (int i = 0; i < numOfBufferPerStream; i++) {
       for (int j = 0; j < numOfRecordPerBuffer; j++) {
-        writer.append(recordGenerator.nextRecord(i, 2));
+        String partition = Integer.toString(i);
+        writer.append(recordGenerator.nextRecord(partition, 2));
       }
       writer.commit();
     }

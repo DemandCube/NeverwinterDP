@@ -97,7 +97,7 @@ public class KafkaMessageSendTool implements Runnable {
 
     System.out.println();
     System.out.println("Counts from the messageGenerator.");
-    for (Entry<Integer, AtomicInteger> entry : messageGenerator.getMessageTrackers().entrySet()) {
+    for (Entry<String, AtomicInteger> entry : messageGenerator.getMessageTrackers().entrySet()) {
       System.out.println("Partition " + entry.getKey() + " count " + entry.getValue().get());
     }
     
@@ -200,7 +200,8 @@ public class KafkaMessageSendTool implements Runnable {
         while (!terminated) {
           //System.err.println("Partition id: "+Integer.toString(metadata.partitionId())+" - Write count: "+Integer.toString(writeCount));
           byte[] key = ("p:" + metadata.partitionId() + ":" + writeCount).getBytes();
-          byte[] message = messageGenerator.nextMessage(metadata.partitionId(), topicConfig.producerConfig.messageSize) ;
+          String partition = Integer.toString(metadata.partitionId());
+          byte[] message = messageGenerator.nextMessage(partition, topicConfig.producerConfig.messageSize) ;
           writer.send(topicConfig.topic, metadata.partitionId(), key, message, failedCountCallback, topicConfig.producerConfig.sendTimeout);
    //     System.err.println("write ");
           writeCount++;

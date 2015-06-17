@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
@@ -20,21 +21,30 @@ import kafka.message.MessageAndMetadata;
  */
 public class KafkaMessageConsumerConnector  {
   private ExecutorService executorService ;
+  private Properties connectorProps;
   private  ConsumerConnector consumer;
   private Map<String, TopicMessageConsumers> topicConsumers = new ConcurrentHashMap<String, TopicMessageConsumers>();
   
   public KafkaMessageConsumerConnector(String group, String zkConnectUrls) {
-    Properties props = new Properties();
-    props.put("group.id", group);
-    props.put("zookeeper.connect", zkConnectUrls);
-    props.put("zookeeper.session.timeout.ms", "3000");
-    props.put("zookeeper.sync.time.ms", "200");
-    props.put("auto.commit.interval.ms", "1000");
-    props.put("auto.commit.enable", "true");
-    props.put("auto.offset.reset", "smallest");
-    
-    ConsumerConfig config = new ConsumerConfig(props);
+    connectorProps = new Properties();
+    connectorProps.put("group.id", group);
+    connectorProps.put("zookeeper.connect", zkConnectUrls);
+    connectorProps.put("zookeeper.session.timeout.ms", "3000");
+    connectorProps.put("zookeeper.sync.time.ms", "200");
+    connectorProps.put("auto.commit.interval.ms", "1000");
+    connectorProps.put("auto.commit.enable", "true");
+    connectorProps.put("auto.offset.reset", "smallest");
+  }
+  
+  public KafkaMessageConsumerConnector withConsumerTimeoutMs(long timeout) {
+    connectorProps.put("consumer.timeout.ms", Long.toString(timeout));
+    return this;
+  }
+  
+  public KafkaMessageConsumerConnector connect() {
+    ConsumerConfig config = new ConsumerConfig(connectorProps);
     consumer = kafka.consumer.Consumer.createJavaConsumerConnector(config);
+    return this;
   }
 
   public void consume(String topic, MessageConsumerHandler handler, int numOfThreads) throws IOException {
@@ -59,6 +69,7 @@ public class KafkaMessageConsumerConnector  {
       }
       topicConsumers.put(topic[k], new TopicMessageConsumers(topic[k], consumer)) ;
     }
+    executorService.shutdown();
   }
   
   synchronized public void remove(String topic) {
@@ -67,6 +78,10 @@ public class KafkaMessageConsumerConnector  {
       topicConsumers.remove(topic) ;
       topicConsumer.terminate(); 
     }
+  }
+  
+  public void awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+    executorService.awaitTermination(timeout, unit) ;
   }
   
   public void close() {
@@ -86,20 +101,20 @@ public class KafkaMessageConsumerConnector  {
       this.stream = stream;
     }
 
-    public void setTerminate() {
-      this.terminate = true ;
-      
-    }
+    public void setTerminate() { this.terminate = true ; }
     
     public void run() {
       ConsumerIterator<byte[], byte[]> it = stream.iterator();
-      while (true) {
-        if(terminate) return ;
-        boolean hasNext = it.hasNext() ;
-        if(!hasNext) break ;
-        
-        MessageAndMetadata<byte[], byte[]> data = it.next() ;
-        handler.onMessage(topic, data.key(), data.message()) ;
+      try {
+        while (true) {
+          if(terminate) return ;
+          boolean hasNext = it.hasNext();
+          if(!hasNext) break ;
+
+          MessageAndMetadata<byte[], byte[]> data = it.next() ;
+          handler.onMessage(topic, data.key(), data.message()) ;
+        }
+      } catch(kafka.consumer.ConsumerTimeoutException ex) {
       }
     }
   }

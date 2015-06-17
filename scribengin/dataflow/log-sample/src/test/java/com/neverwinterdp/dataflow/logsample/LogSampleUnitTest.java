@@ -64,7 +64,16 @@ public class LogSampleUnitTest  {
       "--registry-connect", "127.0.0.1:2181",
       "--registry-db-domain", "/NeverwinterDP",
       "--registry-implementation", RegistryImpl.class.getName(),
-      "--log-generator-num-of-message", "3000",
+      
+      "--log-generator-num-of-vm", "2",
+      "--log-generator-num-of-executor-per-vm", "2",
+      "--log-generator-num-of-message-per-executor", "3000",
+      "--log-generator-message-size", "128",
+      
+      "--log-validator-num-of-executor-per-vm", "3",
+      "--log-validator-wait-for-message-timeout", "5000",
+      "--log-validator-wait-for-termination", "30000",
+      
       "--debug-dataflow-task"
     } ;
     LogSampleRunner.main(args);
