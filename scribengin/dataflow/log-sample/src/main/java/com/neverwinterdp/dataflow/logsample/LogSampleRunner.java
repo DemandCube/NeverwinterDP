@@ -85,8 +85,8 @@ public class LogSampleRunner {
     if(config.dataflowTaskDebug) {
       submitter.enableDataflowTaskDebugger();
     }
-    submitter.submit(45000);
-    submitter.waitForTerminated(45000);
+    submitter.submit(config.dataflowWaitForSubmitTimeout);
+    submitter.waitForTerminated(config.dataflowWaitForTerminationTimeout);
   }
   
   static public void main(String[] args) throws Exception {

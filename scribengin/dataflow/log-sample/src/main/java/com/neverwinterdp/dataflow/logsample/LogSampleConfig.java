@@ -43,7 +43,13 @@ public class LogSampleConfig {
 
   @Parameter(names = "--dataflow-descriptor", description = "Debug the dataflow task!")
   String dataflowDescriptor = "src/app/conf/local/log-dataflow-chain.json";
-  
+ 
+  @Parameter(names = "--dataflow-wait-for-submit-timeout", description = "Debug the dataflow task!")
+  long dataflowWaitForSubmitTimeout = 45000;
+ 
+  @Parameter(names = "--dataflow-wait-for-termination-timeout", description = "Debug the dataflow task!")
+  long dataflowWaitForTerminationTimeout = 45000;
+ 
   @Parameter(names = "--dataflow-task-debug", description = "Debug the dataflow task!")
   boolean dataflowTaskDebug = false;
 }
