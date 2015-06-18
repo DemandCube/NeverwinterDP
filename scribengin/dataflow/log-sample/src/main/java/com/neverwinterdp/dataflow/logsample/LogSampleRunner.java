@@ -9,10 +9,12 @@ import com.neverwinterdp.scribengin.dataflow.chain.DataflowChainConfig;
 import com.neverwinterdp.scribengin.dataflow.chain.OrderDataflowChainSubmitter;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.IOUtil;
+import com.neverwinterdp.vm.HadoopProperties;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.client.GroupVMSubmitter;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.client.VMSubmitter;
+import com.neverwinterdp.vm.client.YarnVMClient;
 
 public class LogSampleRunner {
   LogSampleConfig config ;
@@ -23,7 +25,17 @@ public class LogSampleRunner {
     new JCommander(config, args);
     Registry registry = config.registryConfig.newInstance();
     registry.connect();
-    VMClient vmClient = new VMClient(registry);
+    
+    VMClient vmClient = null;
+    if(config.dfsAppHome != null) {
+      String hadoopMaster = System.getProperty("shell.hadoop-master");
+      HadoopProperties hadoopProps = new HadoopProperties() ;
+      hadoopProps.put("yarn.resourcemanager.address", hadoopMaster + ":8032");
+      hadoopProps.put("fs.defaultFS", "hdfs://" + hadoopMaster +":9000");
+      vmClient = new YarnVMClient(registry, VMConfig.ClusterEnvironment.YARN, hadoopProps) ;
+    } else {
+      vmClient = new VMClient(registry);
+    }
     shell = new ScribenginShell(vmClient);
   }
   
