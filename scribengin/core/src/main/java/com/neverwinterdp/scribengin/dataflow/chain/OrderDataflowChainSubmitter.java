@@ -42,8 +42,12 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
       submitter.waitForRunning(25000);
       return submitter;
     } catch(Exception ex ) {
-      Node dataflowNode = client.getRegistry().get(ScribenginService.getDataflowPath(descriptor.getId()));
-      dataflowNode.dump(System.err);
+      try {
+        Node dataflowNode = client.getRegistry().get(ScribenginService.getDataflowPath(descriptor.getId()));
+        dataflowNode.dump(System.err);
+      } catch(Exception dumpError) {
+        dumpError.printStackTrace();
+      }
       throw ex ;
     }
   }
