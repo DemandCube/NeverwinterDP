@@ -1,5 +1,6 @@
 package com.neverwinterdp.vm.environment.yarn;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -91,7 +92,7 @@ public class AppClient {
     hadoopProperties.overrideConfiguration(hdfsConf);
     FileSystem fs = FileSystem.get(hdfsConf);
     DistributedFileSystem dfs = (DistributedFileSystem)fs;
-    Path appHomePath = new Path(localAppHome) ;
+    Path appHomePath = new Path(new File(localAppHome).getAbsolutePath()) ;
     Path appHomeSharePath = new Path(dfsAppHome) ;
     if(dfs.exists(appHomeSharePath)) {
       dfs.delete(appHomeSharePath, true) ;
