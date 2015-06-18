@@ -81,7 +81,7 @@ public class LogSampleRunner {
     String json = IOUtil.getFileContentAsString(config.dataflowDescriptor) ;
     DataflowChainConfig dflChainconfig = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
     OrderDataflowChainSubmitter submitter = 
-        new OrderDataflowChainSubmitter(shell.getScribenginClient(), null, dflChainconfig);
+        new OrderDataflowChainSubmitter(shell.getScribenginClient(), config.dfsAppHome, dflChainconfig);
     if(config.dataflowTaskDebug) {
       submitter.enableDataflowTaskDebugger();
     }

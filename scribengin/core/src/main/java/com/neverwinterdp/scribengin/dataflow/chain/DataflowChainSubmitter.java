@@ -9,14 +9,14 @@ import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
 
 abstract public class DataflowChainSubmitter {
   protected ScribenginClient client;
-  protected String dataflowHome;
+  protected String dfsDataflowHome;
   protected DataflowChainConfig config;
   private List<DataflowSubmitter> submitters = new ArrayList<>();
   private boolean enableDataflowTaskDebugger = false;
 
-  public DataflowChainSubmitter(ScribenginClient client, String dataflowHome, DataflowChainConfig config) {
+  public DataflowChainSubmitter(ScribenginClient client, String dfsDataflowHome, DataflowChainConfig config) {
     this.client = client;
-    this.dataflowHome = dataflowHome ;
+    this.dfsDataflowHome = dfsDataflowHome ;
     this.config = config ;
   }
   
@@ -24,7 +24,7 @@ abstract public class DataflowChainSubmitter {
     long stopTime = System.currentTimeMillis() + timeout;
     long remainTime = timeout;
     for(DataflowDescriptor sel : config.getDescriptors()) {
-      DataflowSubmitter submitter = doSubmit(client, dataflowHome, sel) ;
+      DataflowSubmitter submitter = doSubmit(client, dfsDataflowHome, sel) ;
       submitters.add(submitter);
       remainTime = stopTime - System.currentTimeMillis();
       if(remainTime < 0) {

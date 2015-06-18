@@ -12,8 +12,8 @@ import com.neverwinterdp.scribengin.service.ScribenginService;
 public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
   private List<DataflowSubmitter> submitters = new ArrayList<>();
   
-  public OrderDataflowChainSubmitter(ScribenginClient client, String dataflowHome, DataflowChainConfig config) {
-    super(client, dataflowHome, config);
+  public OrderDataflowChainSubmitter(ScribenginClient client, String dfsDataflowHome, DataflowChainConfig config) {
+    super(client, dfsDataflowHome, config);
   }
   
   public void submit(long timeout) throws Exception {
@@ -21,7 +21,7 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
     long remainTime = timeout;
     boolean first = true ;
     for(DataflowDescriptor sel : config.getDescriptors()) {
-      DataflowSubmitter submitter = doSubmit(client, dataflowHome, sel) ;
+      DataflowSubmitter submitter = doSubmit(client, dfsDataflowHome, sel) ;
       if(first) {
         Thread.sleep(5000);
         first = false;
