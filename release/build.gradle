@@ -23,4 +23,8 @@ task release(dependsOn: 'build') << {
     selProject.releaseDir =  "${buildDir}/release/neverwinterdp";
     selProject.release.execute()
   }
+
+  def esProject = project(':module/elasticsearch');
+  esProject.releaseDir =  "${buildDir}/release";
+  esProject.release.execute()
 }
