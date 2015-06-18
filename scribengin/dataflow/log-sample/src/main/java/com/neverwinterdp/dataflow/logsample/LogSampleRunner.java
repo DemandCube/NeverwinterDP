@@ -79,6 +79,7 @@ public class LogSampleRunner {
   
   static public void main(String[] args) throws Exception {
     LogSampleRunner runner = new LogSampleRunner(args);
+    runner.uploadApp();
     runner.submitVMLogGeneratorApp();
     Thread.sleep(35000);
     runner.submitLogSampleDataflowChain();
