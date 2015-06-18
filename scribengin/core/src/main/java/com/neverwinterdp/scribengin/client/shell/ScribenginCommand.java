@@ -23,7 +23,7 @@ public class ScribenginCommand extends Command {
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
       VMClient vmClient = shell.getVMClient();
-      ScribenginClusterBuilder clusterBuilder = new ScribenginClusterBuilder(new VMClusterBuilder(vmClient));
+      ScribenginClusterBuilder clusterBuilder = new ScribenginClusterBuilder(new VMClusterBuilder(null, vmClient));
       clusterBuilder.startScribenginMasters();
     }
 
