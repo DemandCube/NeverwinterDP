@@ -13,24 +13,37 @@ import com.neverwinterdp.vm.service.VMServiceCommand;
 public class VMSubmitter {
   private VMClient     vmClient;
   private VMConfig     vmConfig;
-  private String       appHome;
+  private String       dfsAppHome;
+  private String       uploadAppHome ;
   private VMDescriptor vmDescriptor;
-
-  public VMSubmitter(VMClient vmClient, String appHome, VMConfig vmConfig) {
+  
+  public VMSubmitter(VMClient vmClient, String dfsAppHome, VMConfig vmConfig) {
     this.vmClient = vmClient;
-    this.appHome  = appHome;
+    this.dfsAppHome  = dfsAppHome;
     this.vmConfig = vmConfig ;
   }
   
+  
+  public VMSubmitter setUploadAppHome(String dir) {
+    uploadAppHome = dir;
+    return this;
+  }
+  
+  
   public VMDescriptor submit() throws Exception {
-    VMDescriptor masterVMDescriptor = vmClient.getMasterVMDescriptor();
-    if(appHome != null) {
-      String remoteAppHome = VMClient.APPLICATIONS + "/" + vmConfig.getName();
-      vmConfig.setAppHome(remoteAppHome);
-      vmConfig.addVMResource("vm.libs", remoteAppHome + "/libs");
-      vmConfig.addVMResource("vm.config", remoteAppHome + "/config");
-      vmClient.uploadApp(appHome, remoteAppHome);
+    if(uploadAppHome != null) {
+      if(dfsAppHome == null) {
+        String name = uploadAppHome.substring(uploadAppHome.lastIndexOf('/') + 1);
+        dfsAppHome = VMClient.APPLICATIONS + "/"  + name;
+      }
+      vmClient.uploadApp(uploadAppHome, dfsAppHome);
     }
+    
+    VMDescriptor masterVMDescriptor = vmClient.getMasterVMDescriptor();
+    vmConfig.setAppHome(dfsAppHome);
+    vmConfig.addVMResource("vm.libs", dfsAppHome + "/libs");
+    vmConfig.addVMResource("vm.config", dfsAppHome + "/config");
+    vmClient.uploadApp(dfsAppHome, dfsAppHome);
     CommandResult<?> result = vmClient.execute(masterVMDescriptor, new VMServiceCommand.Allocate(vmConfig));
     if(result.getErrorStacktrace() != null) {
       System.err.println(result.getErrorStacktrace());

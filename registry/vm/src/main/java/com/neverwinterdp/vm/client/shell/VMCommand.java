@@ -87,13 +87,18 @@ public class VMCommand extends Command {
   }
   
   static public class Submit extends SubCommand {
-    @Parameter(names = "--app-home", description = "The path to application home to upload ")
-    private String appHome ;
+    @Parameter(names = "--upload-app", description = "The path to application home to upload ")
+    private String uploadAppHome ;
+    
+    @Parameter(names = "--dfs-app-home", description = "The path to application home to upload ")
+    private String dfsAppHome ;
+    
     
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
       VMClient vmClient = shell.getVMClient();
-      VMSubmitter submitter = new VMSubmitter(vmClient, appHome, new VMConfig(cmdInput.getRemainArgs()));
+      VMSubmitter submitter = new VMSubmitter(vmClient, dfsAppHome, new VMConfig(cmdInput.getRemainArgs()));
+      if(uploadAppHome != null) submitter.setUploadAppHome(uploadAppHome);
       submitter.submit();
       submitter.waitForRunning(90000);;
       shell.console().print(submitter.getFormattedResult());
