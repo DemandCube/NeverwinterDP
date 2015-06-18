@@ -23,7 +23,7 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
     for(DataflowDescriptor sel : config.getDescriptors()) {
       DataflowSubmitter submitter = doSubmit(client, dfsDataflowHome, sel) ;
       if(first) {
-        Thread.sleep(25000);
+        Thread.sleep(30000);
         first = false;
       }
       submitters.add(submitter);
