@@ -43,7 +43,6 @@ public class VMSubmitter {
     vmConfig.setAppHome(dfsAppHome);
     vmConfig.addVMResource("vm.libs", dfsAppHome + "/libs");
     vmConfig.addVMResource("vm.config", dfsAppHome + "/config");
-    vmClient.uploadApp(dfsAppHome, dfsAppHome);
     CommandResult<?> result = vmClient.execute(masterVMDescriptor, new VMServiceCommand.Allocate(vmConfig));
     if(result.getErrorStacktrace() != null) {
       System.err.println(result.getErrorStacktrace());
