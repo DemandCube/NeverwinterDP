@@ -3,6 +3,7 @@ archivesBaseName = 'module.elasticsearch'
 project.ext {
   elasticsearchVersion = "1.5.2"
   luceneVersion = "4.10.4"
+  releaseDir = "${buildDir}/release"
 }
 
 eclipse {
@@ -69,11 +70,6 @@ dependencies {
 }
 
 task release (dependsOn: 'build') << {
-  def releaseDir = "${buildDir}/release"
-  doReleaseES("${releaseDir}/elasticsearch");
-}
-
-def doReleaseES(String releaseDir) {
   println "\n\n"
   println "*************************************************"
   println "Build release elasticsearch ${releaseDir}"
@@ -83,18 +79,18 @@ def doReleaseES(String releaseDir) {
   configurations.esDeployJars.each { File file -> 
     copy {
       from file
-      into "${releaseDir}/libs"
+      into "${releaseDir}/elasticsearch/libs"
     }
   }
 
   copy {
     from "${buildDir}/libs"
-    into "${releaseDir}/libs"
+    into "${releaseDir}/elasticsearch/libs"
   }
 
   println "Copy and override app"
   copy {
     from "src/app"
-    into "${releaseDir}"
+    into "${releaseDir}/elasticsearch"
   }
 }
