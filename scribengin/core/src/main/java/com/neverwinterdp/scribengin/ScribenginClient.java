@@ -119,9 +119,9 @@ public class ScribenginClient {
     if(localDataflowHome != null) {
       VMDescriptor vmMaster = getVMClient().getMasterVMDescriptor();
       VMConfig vmConfig = vmMaster.getVmConfig();
-      String dataflowAppHome = vmConfig.getAppHome() + "/dataflows/" + dflDescriptor.getName();
-      dflDescriptor.setDataflowAppHome(dataflowAppHome);
-      getVMClient().uploadApp(localDataflowHome, dataflowAppHome);
+      String remoteDataflowAppHome = vmConfig.getAppHome() + "/dataflows/" + dflDescriptor.getName();
+      dflDescriptor.setDataflowAppHome(remoteDataflowAppHome);
+      getVMClient().uploadApp(localDataflowHome, remoteDataflowAppHome);
     }
     h1("Submit the dataflow " + dflDescriptor.getId());
     VMClient vmClient = getVMClient();
@@ -135,10 +135,6 @@ public class ScribenginClient {
     Command deployCmd = new VMScribenginServiceCommand.DataflowDeployCommand(dflDescriptor) ;
     CommandResult<Boolean> result = (CommandResult<Boolean>)vmClient.execute(scribenginMaster, deployCmd);
     return waitingEventListener;
-  }
-  
-  private String format(String tmpl, Object ... args) {
-    return String.format(tmpl, args) ;
   }
   
   public VMDescriptor createVMScribenginMaster(VMClient vmClient, String name) throws Exception {

@@ -100,9 +100,7 @@ public class VMCommand extends Command {
     }
     
     @Override
-    public String getDescription() {
-      return "Submit a request to run a vm application";
-    }
+    public String getDescription() { return "Submit a request to run a vm application"; }
   }
 
   @Override

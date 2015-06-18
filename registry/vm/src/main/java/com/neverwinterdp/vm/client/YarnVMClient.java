@@ -20,7 +20,6 @@ public class YarnVMClient extends VMClient {
   private Configuration conf ;
   private VMConfig.ClusterEnvironment yarnEnv = VMConfig.ClusterEnvironment.YARN_MINICLUSTER ;
   private String localAppHome = ".";
-  private String dfsAppHome = "/VM" ;
   
   public YarnVMClient(Registry registry, VMConfig.ClusterEnvironment yarnEnv, HadoopProperties hadoopProps) {
     super(registry);
@@ -38,10 +37,6 @@ public class YarnVMClient extends VMClient {
     this.conf = conf ;
   }
   
-  public void setDFSAppHome(String home) { this.dfsAppHome = home; }
-  
-  public void setLocalAppHome(String home) { this.localAppHome = home; }
-  
   @Override
   public void createVMMaster(String name) throws Exception {
     VMConfig vmConfig = new VMConfig() ;
@@ -58,10 +53,12 @@ public class YarnVMClient extends VMClient {
     for(Map.Entry<String, String> entry : hadoopProperties.entrySet()) {
       yarnConf.set(entry.getKey(), entry.getValue());
     }
-    appClient.uploadApp(localAppHome, dfsAppHome);
-    vmConfig.setAppHome(dfsAppHome);
-    vmConfig.addVMResource("dfs-app-lib", dfsAppHome + "/libs");
-    vmConfig.addVMResource("dfs-app-conf", dfsAppHome + "/conf");
+    String remoteAppHome = VMClient.APPLICATIONS + "/vm-master";
+    appClient.uploadApp(localAppHome, remoteAppHome);
+    
+    vmConfig.setAppHome(remoteAppHome);
+    vmConfig.addVMResource("dfs-app-lib",  remoteAppHome + "/libs");
+    vmConfig.addVMResource("dfs-app-conf", remoteAppHome + "/conf");
     appClient.run(vmConfig, yarnConf);
   }
   

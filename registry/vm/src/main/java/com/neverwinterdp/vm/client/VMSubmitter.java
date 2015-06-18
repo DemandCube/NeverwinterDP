@@ -25,7 +25,7 @@ public class VMSubmitter {
   public VMDescriptor submit() throws Exception {
     VMDescriptor masterVMDescriptor = vmClient.getMasterVMDescriptor();
     if(appHome != null) {
-      String remoteAppHome = "/VM/apps/" + vmConfig.getName();
+      String remoteAppHome = VMClient.APPLICATIONS + "/" + vmConfig.getName();
       vmConfig.setAppHome(remoteAppHome);
       vmConfig.addVMResource("vm.libs", remoteAppHome + "/libs");
       vmConfig.addVMResource("vm.config", remoteAppHome + "/config");

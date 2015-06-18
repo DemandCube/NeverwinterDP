@@ -28,6 +28,8 @@ import com.neverwinterdp.vm.service.VMServiceCommand;
 
 @JmxBean("role=vm-client, type=VMClient, name=VMClient")
 public class VMClient {
+  final static String APPLICATIONS = "/applications";
+  
   private Registry registry;
   private long     waitForResultTimeout = 30000;
 
