@@ -6,7 +6,6 @@ import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.SequenceIdTracker;
 import com.neverwinterdp.registry.event.WaitingOrderNodeEventListener;
 import com.neverwinterdp.scribengin.ScribenginClient;
-import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.service.ScribenginService;
 import com.neverwinterdp.scribengin.service.VMScribenginServiceCommand;
 import com.neverwinterdp.util.JSONSerializer;
@@ -19,12 +18,12 @@ import com.neverwinterdp.vm.command.CommandResult;
 
 public class DataflowSubmitter {
   private ScribenginClient   scribenginClient;
-  private String             localDataflowHome;
+  private String             dfsDataflowHome;
   private DataflowDescriptor dflDescriptor;
 
-  public DataflowSubmitter(ScribenginClient scribenginClient, String localDataflowHome, DataflowDescriptor dflDescriptor) {
+  public DataflowSubmitter(ScribenginClient scribenginClient, String dfsDataflowHome, DataflowDescriptor dflDescriptor) {
     this.scribenginClient  = scribenginClient;
-    this.localDataflowHome = localDataflowHome;
+    this.dfsDataflowHome = dfsDataflowHome;
     this.dflDescriptor     = dflDescriptor;
   }
 
@@ -35,13 +34,9 @@ public class DataflowSubmitter {
       SequenceIdTracker dataflowIdTracker = new SequenceIdTracker(registry, ScribenginService.DATAFLOW_ID_TRACKER) ;
       dflDescriptor.setId( dataflowIdTracker.nextSeqId() + "-" + dflDescriptor.getName());
     }
-    if(localDataflowHome != null) {
-      VMDescriptor vmMaster = vmClient.getMasterVMDescriptor();
-      VMConfig vmConfig = vmMaster.getVmConfig();
-      String dataflowAppHome = vmConfig.getAppHome() + "/dataflows/" + dflDescriptor.getName();
-      dflDescriptor.setDataflowAppHome(dataflowAppHome);
-      vmClient.uploadApp(localDataflowHome, dataflowAppHome);
-    }
+
+    dflDescriptor.setDataflowAppHome(dfsDataflowHome);
+    
     h1("Submit The Dataflow " + dflDescriptor.getId());
     System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor)) ;
     VMDescriptor scribenginMaster = scribenginClient.getScribenginMaster();
