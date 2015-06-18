@@ -74,7 +74,8 @@ public class LogSampleUnitTest  {
       "--log-validator-wait-for-message-timeout", "5000",
       "--log-validator-wait-for-termination", "30000",
       
-      "--debug-dataflow-task"
+      "--dataflow-descriptor", "src/app/conf/local/log-dataflow-chain.json",
+      "--dataflow-task-debug"
     } ;
     LogSampleRunner.main(args);
   }

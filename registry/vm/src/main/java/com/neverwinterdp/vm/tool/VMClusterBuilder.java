@@ -21,11 +21,10 @@ import com.neverwinterdp.vm.service.VMService;
 
 public class VMClusterBuilder {
   protected VMClient vmClient ;
+  protected String   localAppHome; 
   
-  public VMClusterBuilder() {
-  }
-  
-  public VMClusterBuilder(VMClient vmClient) {
+  public VMClusterBuilder(String localAppHome, VMClient vmClient) {
+    this.localAppHome = localAppHome;
     this.vmClient = vmClient ;
   }
   
@@ -42,7 +41,7 @@ public class VMClusterBuilder {
     if(!vmClient.getRegistry().isConnect()) {
       vmClient.getRegistry().connect() ;
     }
-    WaitingNodeEventListener waitingListener = createVMMaster("vm-master-1");
+    WaitingNodeEventListener waitingListener = createVMMaster(localAppHome, "vm-master-1");
     waitingListener.waitForEvents(30000);
     TabularFormater info = waitingListener.getTabularFormaterEventLogInfo();
     info.setTitle("Waiting for vm-master events to make sure it is launched properly");
@@ -56,7 +55,7 @@ public class VMClusterBuilder {
     }
   }
   
-  public WaitingNodeEventListener createVMMaster(String vmId) throws Exception {
+  public WaitingNodeEventListener createVMMaster(String localAppHome, String vmId) throws Exception {
     if(!vmClient.getRegistry().isConnect()) {
       vmClient.getRegistry().connect() ;
     }
@@ -69,7 +68,7 @@ public class VMClusterBuilder {
     String vmServiceStatusPath = VMService.MASTER_PATH + "/status";
     waitingListener.add(vmServiceStatusPath, VMService.Status.RUNNING, "Wait for VMService RUNNING status ", true);
     h1(format("Create VM master %s", vmId));
-    vmClient.createVMMaster(vmId);
+    vmClient.createVMMaster(localAppHome, vmId);
     return waitingListener;
   }
   

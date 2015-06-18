@@ -15,11 +15,11 @@ public class VMZKClusterBuilder extends VMClusterBuilder {
   }
   
   public VMZKClusterBuilder(VMClient vmClient) throws RegistryException {
-    super(vmClient);
+    super(null, vmClient);
   }
   
   public VMZKClusterBuilder(String baseDir, VMClient vmClient) throws Exception {
-    super(vmClient);
+    super(null, vmClient);
     this.baseDir = baseDir ;
   }
   

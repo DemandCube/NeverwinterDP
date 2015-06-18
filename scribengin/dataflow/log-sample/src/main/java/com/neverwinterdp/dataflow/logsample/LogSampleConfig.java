@@ -5,8 +5,11 @@ import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.registry.RegistryConfig;
 
 public class LogSampleConfig {
-  @Parameter(names = "--app-home", description = "Local App Home")
-  String appHome ;
+  @Parameter(names = "--upload-app", description = "Local App Home")
+  String uploadApp ;
+
+  @Parameter(names = "--dfs-app-home", description = "Local App Home")
+  String dfsAppHome ;
 
   @Parameter(names = "--log-generator-num-of-vm", description = "Log generator message size")
   int logGeneratorNumOfVM = 1;
@@ -38,6 +41,6 @@ public class LogSampleConfig {
   @ParametersDelegate
   RegistryConfig registryConfig   = new RegistryConfig();
 
-  @Parameter(names = "--debug-dataflow-task", description = "Debug the dataflow task!")
-  boolean debugDataflowTask = false;
+  @Parameter(names = "--dataflow-task-debug", description = "Debug the dataflow task!")
+  boolean dataflowTaskDebug = false;
 }

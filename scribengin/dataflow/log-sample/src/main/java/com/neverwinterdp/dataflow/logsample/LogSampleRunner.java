@@ -27,6 +27,12 @@ public class LogSampleRunner {
     shell = new ScribenginShell(vmClient);
   }
   
+  public void uploadApp() throws Exception {
+    if(config.uploadApp != null) {
+      shell.getVMClient().uploadApp(config.uploadApp, config.dfsAppHome);
+    }
+  }
+  
   public void submitVMLogGeneratorApp() throws Exception {
     GroupVMSubmitter groupVMSubmitter = new GroupVMSubmitter(shell.getVMClient());
     for(int i = 0; i < config.logGeneratorNumOfVM; i++) {
@@ -38,7 +44,7 @@ public class LogSampleRunner {
       vmConfig.addProperty("num-of-executor", config.logGeneratorNumOfExecutorPerVm);
       vmConfig.addProperty("num-of-message-per-executor", config.logGeneratorNumOfMessagePerExecutor);
       vmConfig.addProperty("message-size", config.logGeneratorMessageSize);
-      groupVMSubmitter.add(config.appHome, vmConfig);
+      groupVMSubmitter.add(config.dfsAppHome, vmConfig);
     }
     groupVMSubmitter.submitAndWaitForRunning(45000);
   }
@@ -53,7 +59,7 @@ public class LogSampleRunner {
     vmConfig.addProperty("wait-for-termination", config.logValidatorWaitForTermination);
     vmConfig.addProperty("validate-topic", config.logValidatorValidateTopic);
     vmConfig.setVmApplication(VMLogMessageValidatorApp.class.getName());
-    VMSubmitter vmSubmitter = new VMSubmitter(shell.getVMClient(), config.appHome, vmConfig);
+    VMSubmitter vmSubmitter = new VMSubmitter(shell.getVMClient(), config.dfsAppHome, vmConfig);
     vmSubmitter.submit();
     vmSubmitter.waitForRunning(30000);
     return vmSubmitter ;
@@ -64,15 +70,11 @@ public class LogSampleRunner {
     DataflowChainConfig dflChainconfig = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
     OrderDataflowChainSubmitter submitter = 
         new OrderDataflowChainSubmitter(shell.getScribenginClient(), null, dflChainconfig);
-    if(config.debugDataflowTask) {
+    if(config.dataflowTaskDebug) {
       submitter.enableDataflowTaskDebugger();
     }
     submitter.submit(45000);
     submitter.waitForTerminated(45000);
-//    shell.execute("dataflow info --dataflow-id log-splitter-dataflow-1") ;
-//    shell.execute("dataflow info --dataflow-id log-persister-dataflow-info") ;
-//    shell.execute("dataflow info --dataflow-id log-persister-dataflow-warn") ;
-//    shell.execute("dataflow info --dataflow-id log-persister-dataflow-error") ;
   }
   
   static public void main(String[] args) throws Exception {

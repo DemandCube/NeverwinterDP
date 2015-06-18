@@ -13,17 +13,22 @@ import com.neverwinterdp.vm.util.VMRegistryFormatter;
 
 public class VMCommand extends Command {
   public VMCommand() {
-    add("start",    Start.class) ;
-    add("shutdown", Shutdown.class) ;
-    add("info",     Info.class) ;
-    add("submit",   Submit.class) ;
+    add("start",      Start.class) ;
+    add("shutdown",   Shutdown.class) ;
+    add("info",       Info.class) ;
+    add("submit",     Submit.class) ;
+    add("upload-app", UploadApp.class) ;
   }
   
   static public class Start extends SubCommand {
+    @Parameter(names = "--upload-app", description = "The path to application home to upload ")
+    private String localUploadApp = "./" ;
+    
+    
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
       VMClient vmClient = shell.getVMClient() ;
-      VMClusterBuilder clusterBuilder = new VMClusterBuilder(vmClient) ;
+      VMClusterBuilder clusterBuilder = new VMClusterBuilder(localUploadApp, vmClient) ;
       clusterBuilder.start();
     }
 
@@ -102,6 +107,28 @@ public class VMCommand extends Command {
       submitter.submit();
       submitter.waitForRunning(90000);;
       shell.console().print(submitter.getFormattedResult());
+    }
+    
+    @Override
+    public String getDescription() { return "Submit a request to run a vm application"; }
+  }
+  
+  static public class UploadApp extends SubCommand {
+    @Parameter(names = "--upload-app", description = "The path to application home to upload ")
+    private String uploadAppHome ;
+    
+    @Parameter(names = "--dfs-app-home", description = "The path to application home to upload ")
+    private String dfsAppHome ;
+    
+    
+    @Override
+    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
+      VMClient vmClient = shell.getVMClient();
+      if(dfsAppHome == null) {
+        String name = uploadAppHome.substring(uploadAppHome.lastIndexOf('/') + 1);
+        dfsAppHome = VMClient.APPLICATIONS + "/"  + name;
+      }
+      vmClient.uploadApp(uploadAppHome, dfsAppHome);
     }
     
     @Override

@@ -20,7 +20,7 @@ public class LocalVMClient extends VMClient {
   }
   
   @Override
-  public void createVMMaster(String name) throws Exception {
+  public void createVMMaster(String localAppHome, String name) throws Exception {
     VMConfig vmConfig = new VMConfig() ;
     vmConfig.
       setName(name).

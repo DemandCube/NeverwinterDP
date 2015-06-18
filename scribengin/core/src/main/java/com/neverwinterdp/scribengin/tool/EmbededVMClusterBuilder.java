@@ -25,11 +25,11 @@ public class EmbededVMClusterBuilder extends VMClusterBuilder {
   }
   
   public EmbededVMClusterBuilder(VMClient vmClient) throws RegistryException {
-    super(vmClient);
+    super(null, vmClient);
   }
   
   public EmbededVMClusterBuilder(String baseDir, VMClient vmClient) {
-    super(vmClient);
+    super(null, vmClient);
     this.baseDir = baseDir ;
   }
   

@@ -19,7 +19,6 @@ public class YarnVMClient extends VMClient {
   private HadoopProperties hadoopProperties ;
   private Configuration conf ;
   private VMConfig.ClusterEnvironment yarnEnv = VMConfig.ClusterEnvironment.YARN_MINICLUSTER ;
-  private String localAppHome = ".";
   
   public YarnVMClient(Registry registry, VMConfig.ClusterEnvironment yarnEnv, HadoopProperties hadoopProps) {
     super(registry);
@@ -38,7 +37,7 @@ public class YarnVMClient extends VMClient {
   }
   
   @Override
-  public void createVMMaster(String name) throws Exception {
+  public void createVMMaster(String localAppHome, String name) throws Exception {
     VMConfig vmConfig = new VMConfig() ;
     vmConfig.setName(name);
     vmConfig.addRoles("vm-master") ;
