@@ -41,6 +41,9 @@ public class LogSampleConfig {
   @ParametersDelegate
   RegistryConfig registryConfig   = new RegistryConfig();
 
+  @Parameter(names = "--dataflow-descriptor", description = "Debug the dataflow task!")
+  String dataflowDescriptor = "src/app/conf/local/log-dataflow-chain.json";
+  
   @Parameter(names = "--dataflow-task-debug", description = "Debug the dataflow task!")
   boolean dataflowTaskDebug = false;
 }

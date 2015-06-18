@@ -66,7 +66,7 @@ public class LogSampleRunner {
   }
   
   public void submitLogSampleDataflowChain() throws Exception {
-    String json = IOUtil.getFileContentAsString("src/app/conf/local/log-dataflow-chain.json") ;
+    String json = IOUtil.getFileContentAsString(config.dataflowDescriptor) ;
     DataflowChainConfig dflChainconfig = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
     OrderDataflowChainSubmitter submitter = 
         new OrderDataflowChainSubmitter(shell.getScribenginClient(), null, dflChainconfig);
