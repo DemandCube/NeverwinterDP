@@ -21,7 +21,8 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
     long remainTime = timeout;
     for(int i = 0; i < config.getDescriptors().size(); i++) {
       DataflowDescriptor sel = config.getDescriptors().get(i);
-      DataflowSubmitter submitter = doSubmit(client, dfsDataflowHome, sel) ;
+      remainTime = stopTime - System.currentTimeMillis() ;
+      DataflowSubmitter submitter = doSubmit(client, dfsDataflowHome, sel, remainTime) ;
       submitters.add(submitter);
       remainTime = stopTime - System.currentTimeMillis();
       if(remainTime < 0) {
@@ -31,12 +32,12 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
     }
   }
   
-  protected DataflowSubmitter doSubmit(ScribenginClient client, String dfsDataflowHome, DataflowDescriptor descriptor) throws Exception {
+  protected DataflowSubmitter doSubmit(ScribenginClient client, String dfsDataflowHome, DataflowDescriptor descriptor, long timeout) throws Exception {
     try {
       DataflowSubmitter submitter = new DataflowSubmitter(client, dfsDataflowHome, descriptor) ;
       submitter.submit();
       setupDebugger(submitter);
-      submitter.waitForRunning(45000);
+      submitter.waitForRunning(timeout);
       return submitter;
     } catch(Exception ex ) {
       try {

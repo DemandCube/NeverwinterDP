@@ -53,6 +53,6 @@ abstract public class DataflowChainSubmitter {
     }
   }
   
-  abstract protected DataflowSubmitter doSubmit(ScribenginClient client, String dfsDataflowHome, DataflowDescriptor descriptor) throws Exception;
+  abstract protected DataflowSubmitter doSubmit(ScribenginClient client, String dfsDataflowHome, DataflowDescriptor descriptor, long timeout) throws Exception;
 
 }
