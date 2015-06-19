@@ -105,9 +105,9 @@ public class KafkaAppender extends AppenderSkeleton {
             while(segment.hasNext()) {
               Log4jRecord record = segment.nextObject() ;
               String json = JSONSerializer.INSTANCE.toString(record);
-              log("before send " + record.getLoggerName());
+              log("before send " + json);
               kafkaWriter.send(topic, json, 30 * 1000);
-              log("after send " + record.getLoggerName());
+              log("after send.........................");
             }
             log("wait for ack");
             kafkaWriter.waitForAcks(60 * 1000);
