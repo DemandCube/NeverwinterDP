@@ -228,6 +228,7 @@ public class VM {
   }
   
   static public void main(String[] args) throws Exception {
+    long start = System.currentTimeMillis() ;
     System.out.println("VM: main(..) start");
     VMConfig vmConfig = new VMConfig(args);
     vmConfig.getLoggerConfig().getConsoleAppender().setEnable(false);
@@ -241,6 +242,6 @@ public class VM {
     VM vm = new VM(vmConfig);
     vm.run();
     vm.waitForComplete();
-    System.out.println("VM: main(..) finish");
+    System.out.println("VM: main(..) finish in " + (System.currentTimeMillis() - start) + "ms");
   }
 }
