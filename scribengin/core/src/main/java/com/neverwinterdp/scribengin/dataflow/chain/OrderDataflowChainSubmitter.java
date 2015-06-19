@@ -27,7 +27,7 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
       if(remainTime < 0) {
         throw new InterruptedException("Cannot finish to submit within " + timeout + "ms") ;
       }
-      if(i == 0) Thread.sleep(20000);
+      if(i == 0) Thread.sleep(25000);
     }
   }
   
