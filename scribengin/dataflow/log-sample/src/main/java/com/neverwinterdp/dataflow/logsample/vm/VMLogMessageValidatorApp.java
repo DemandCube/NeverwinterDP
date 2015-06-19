@@ -46,6 +46,6 @@ public class VMLogMessageValidatorApp extends VMApp {
     connector.consume(validateTopic, handler, numOfExecutor);
     connector.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
     messageTracker.optimize();
-    messageTracker.dump(System.out);
+    getVM().getLoggerFactory().getLogger("REPORT").info("\n" + messageTracker.getFormattedReport());
   }
 }

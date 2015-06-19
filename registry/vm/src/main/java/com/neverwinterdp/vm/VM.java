@@ -228,7 +228,9 @@ public class VM {
   static public void main(String[] args) throws Exception {
     System.out.println("VM: main(..) start");
     VMConfig vmConfig = new VMConfig(args);
+    vmConfig.getLoggerConfig().getConsoleAppender().setEnable(false);
     vmConfig.getLoggerConfig().getFileAppender().setFilePath("/opt/hadoop/vm-logs/" + vmConfig.getName() + "/vm.log");
+    
     Map<String, String> log4jProps = vmConfig.getLoggerConfig().getLog4jConfiguration() ;
     LoggerFactory.log4jConfigure(log4jProps);
     

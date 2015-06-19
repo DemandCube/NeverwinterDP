@@ -87,7 +87,8 @@ public class MessageTracker {
     }
   }
 
-  public void dump(Appendable out) throws IOException {
+  public String getFormattedReport() throws IOException {
+    StringBuilder out = new StringBuilder();
     out.append("\nMessage Tracker: \n\n");
     String[] header = {
         "Partition", "From", "To", "In Sequence", "Duplication"
@@ -116,6 +117,11 @@ public class MessageTracker {
     }
     out.append(formater.getFormatText()).append("\n");
     out.append("\nLog Count: " + getLogCount() + "\n");
+    return out.toString();
+  }
+  
+  public void dump(Appendable out) throws IOException {
+    out.append(getFormattedReport());
   }
 
   //prefer using details for each partitionTracker for a thorough report
