@@ -115,6 +115,7 @@ public class KafkaAppender extends AppenderSkeleton {
           kafkaWriter.foceClose();
           log("Kafka Error: " + ex.getMessage());
         } catch (InterruptedException e) {
+          log(e.getMessage());
           return ;
         } catch(Exception ex) {
           ex.printStackTrace() ; 
