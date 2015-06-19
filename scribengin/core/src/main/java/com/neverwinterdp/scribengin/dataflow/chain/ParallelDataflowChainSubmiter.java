@@ -11,8 +11,7 @@ public class ParallelDataflowChainSubmiter extends DataflowChainSubmitter {
   }
 
   @Override
-  protected DataflowSubmitter doSubmit(ScribenginClient client, String dataflowHome, DataflowDescriptor descriptor) throws Exception {
+  protected DataflowSubmitter doSubmit(ScribenginClient client, String dataflowHome, DataflowDescriptor descriptor, long timeout) throws Exception {
     return null;
   }
-  
 }

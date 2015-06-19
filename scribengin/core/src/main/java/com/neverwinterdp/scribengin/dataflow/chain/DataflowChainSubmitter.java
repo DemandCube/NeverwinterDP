@@ -24,7 +24,8 @@ abstract public class DataflowChainSubmitter {
     long stopTime = System.currentTimeMillis() + timeout;
     long remainTime = timeout;
     for(DataflowDescriptor sel : config.getDescriptors()) {
-      DataflowSubmitter submitter = doSubmit(client, dfsDataflowHome, sel) ;
+      remainTime = stopTime - System.currentTimeMillis();
+      DataflowSubmitter submitter = doSubmit(client, dfsDataflowHome, sel, remainTime) ;
       submitters.add(submitter);
       remainTime = stopTime - System.currentTimeMillis();
       if(remainTime < 0) {
