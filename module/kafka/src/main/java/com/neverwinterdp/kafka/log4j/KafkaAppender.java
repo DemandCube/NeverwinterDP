@@ -84,6 +84,7 @@ public class KafkaAppender extends AppenderSkeleton {
     private boolean exit = false ;
     
     public void forward() {
+      log("Kafka connects = " + connects);
       kafkaWriter = new AckKafkaWriter(topic, connects) ;
       while(true) {
         try {
