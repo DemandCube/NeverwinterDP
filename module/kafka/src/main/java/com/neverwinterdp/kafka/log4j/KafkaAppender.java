@@ -99,13 +99,14 @@ public class KafkaAppender extends AppenderSkeleton {
             Segment<Log4jRecord> segment = queue.nextReadSegment(5000) ;
             if(segment == null) continue;
             long start = System.currentTimeMillis() ;
-            log("start forward segment " + segment.getSegmentIndex()) ;
             segment.open();
+            log("start forward segment " + segment.getSegmentIndex()) ;
             while(segment.hasNext()) {
               Log4jRecord record = segment.nextObject() ;
               String json = JSONSerializer.INSTANCE.toString(record);
+              log("before send " + record.getLoggerName());
               kafkaWriter.send(topic, json, 30 * 1000);
-              log("send " + record.getLoggerName());
+              log("after send " + record.getLoggerName());
             }
             log("wait for ack");
             kafkaWriter.waitForAcks(60 * 1000);
@@ -120,6 +121,7 @@ public class KafkaAppender extends AppenderSkeleton {
           log(e.getMessage());
           return ;
         } catch(Exception ex) {
+          log("Kafka Error: " + ex.getMessage());
           ex.printStackTrace() ; 
           return ;
         }
