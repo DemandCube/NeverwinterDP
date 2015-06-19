@@ -54,13 +54,26 @@ public class VMLogMessageGeneratorApp extends VMApp {
       logger.error(new String(messageGenerator.nextMessage(groupId, messageSize)));
       
       Random rand = new Random() ;
-      for(int i = 1; i < numOfMessagePerExecutor; i++) {
+      try {
+        for(int i = 1; i < 1000; i++) {
+          double randNum = rand.nextDouble();
+          String jsonMessage = new String(messageGenerator.nextMessage(groupId, messageSize)) ;
+          if(randNum < 0.4) logger.info(jsonMessage);
+          else if (randNum < 0.7) logger.warn(jsonMessage);
+          else logger.error(jsonMessage);
+          Thread.sleep(10);
+        }
+      } catch (InterruptedException e) {
+      }
+      
+      for(int i = 1000; i < numOfMessagePerExecutor; i++) {
         double randNum = rand.nextDouble();
         String jsonMessage = new String(messageGenerator.nextMessage(groupId, messageSize)) ;
         if(randNum < 0.4) logger.info(jsonMessage);
         else if (randNum < 0.7) logger.warn(jsonMessage);
         else logger.error(jsonMessage);
       }
+      
       LogSampleRegistry appRegistry = null;
       try {
         appRegistry = new LogSampleRegistry(getVM().getVMRegistry().getRegistry());
