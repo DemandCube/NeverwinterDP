@@ -9,7 +9,6 @@ import org.apache.log4j.spi.LoggingEvent;
 import com.neverwinterdp.buffer.chronicle.MultiSegmentQueue;
 import com.neverwinterdp.buffer.chronicle.Segment;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
-import com.neverwinterdp.kafka.producer.KafkaWriter;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.log.Log4jRecord;
 
@@ -89,12 +88,18 @@ public class KafkaAppender extends AppenderSkeleton {
       while(true) {
         try {
           if(kafkaError) {
+            long start = System.currentTimeMillis();
+            log("kafka error detection") ;
             Thread.sleep(5000);
             kafkaWriter.reconnect();
             kafkaError = false ;
+            log("kafka error detection and finish reconnect in " + (System.currentTimeMillis() - start) + "ms") ;
           }
-          Segment<Log4jRecord> segment = null ;
-          while((segment = queue.nextReadSegment(5000)) != null) {
+          while(true) {
+            Segment<Log4jRecord> segment = queue.nextReadSegment(5000) ;
+            if(segment == null) continue;
+            long start = System.currentTimeMillis() ;
+            log("start forward segment " + segment.getSegmentIndex()) ;
             segment.open();
             while(segment.hasNext()) {
               Log4jRecord record = segment.nextObject() ;
@@ -103,11 +108,12 @@ public class KafkaAppender extends AppenderSkeleton {
             }
             kafkaWriter.waitForAcks(60 * 1000);
             queue.commitReadSegment(segment);
+            log("finish forward segment " + segment.getSegmentIndex() + " in " + (System.currentTimeMillis() - start) + "ms") ;
           }
         } catch(KafkaException ex) {
           kafkaError = true ;
           kafkaWriter.foceClose();
-          System.out.println("Kafka Error: " + ex.getMessage());
+          log("Kafka Error: " + ex.getMessage());
         } catch (InterruptedException e) {
           return ;
         } catch(Exception ex) {
@@ -135,6 +141,10 @@ public class KafkaAppender extends AppenderSkeleton {
     public void run() {
       forward() ;
       shutdown() ;
+    }
+    
+    void log(String mesg) {
+      System.err.println("KafkaAppender: " + mesg);
     }
   }
 }

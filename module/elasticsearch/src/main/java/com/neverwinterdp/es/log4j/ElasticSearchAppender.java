@@ -111,8 +111,9 @@ public class ElasticSearchAppender extends AppenderSkeleton {
             Thread.sleep(60 * 1000);
             elasticsearchError = false ;
           }
-          Segment<Log4jRecord> segment = null ;
-          while((segment = queue.nextReadSegment(15000)) != null) {
+          while(true) {
+            Segment<Log4jRecord> segment = queue.nextReadSegment(5000);
+            if(segment == null) continue;
             segment.open();
             while(segment.hasNext()) {
               Log4jRecord record = segment.nextObject() ;
