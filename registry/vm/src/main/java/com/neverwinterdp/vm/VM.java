@@ -229,8 +229,10 @@ public class VM {
     System.out.println("VM: main(..) start");
     VMConfig vmConfig = new VMConfig(args);
     vmConfig.getLoggerConfig().getConsoleAppender().setEnable(false);
-    vmConfig.getLoggerConfig().getFileAppender().setFilePath("/opt/hadoop/vm-logs/" + vmConfig.getName() + "/vm.log");
-    
+    String vmDir = "/opt/hadoop/vm/" + vmConfig.getName();
+    vmConfig.getLoggerConfig().getFileAppender().setFilePath(vmDir + "/logs/vm.log");
+    vmConfig.getLoggerConfig().getEsAppender().setBufferDir(vmDir + "/buffer/es/log4j");
+    vmConfig.getLoggerConfig().getKafkaAppender().setBufferDir(vmDir + "/buffer/kafka/log4j");
     Map<String, String> log4jProps = vmConfig.getLoggerConfig().getLog4jConfiguration() ;
     LoggerFactory.log4jConfigure(log4jProps);
     
