@@ -121,7 +121,7 @@ public class KafkaAppender extends AppenderSkeleton {
         } catch (InterruptedException e) {
           log(e.getMessage());
           return ;
-        } catch(Exception ex) {
+        } catch(Throwable ex) {
           log("Kafka Error: " + ex.getMessage());
           ex.printStackTrace() ; 
           return ;
