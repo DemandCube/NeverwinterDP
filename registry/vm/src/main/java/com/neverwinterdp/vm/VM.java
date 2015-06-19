@@ -176,7 +176,10 @@ public class VM {
   }
   
   public synchronized void waitForComplete() throws InterruptedException {
+    long start = System.currentTimeMillis() ;
+    logger.info("Start waitForComplete()");
     wait();
+    logger.info("Finish waitForComplete() in " + (System.currentTimeMillis() - start) + "ms");
   }
   
   public class VMApplicationRunner extends Thread {

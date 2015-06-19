@@ -95,9 +95,11 @@ public class VMDataflowWorkerApp extends VMApp {
       dataflowTaskExecutorService.waitForTerminated(500);
     } catch(InterruptedException ex) {
     } finally {
-      MetricPrinter metricPrinter = new MetricPrinter(System.out) ;
+      StringBuilder out = new StringBuilder() ;
+      MetricPrinter metricPrinter = new MetricPrinter(out) ;
       MetricRegistry mRegistry = container.getInstance(MetricRegistry.class);
       metricPrinter.print(mRegistry);
+      logger.info("\n" + out.toString());
       container.getInstance(CloseableInjector.class).close();
     }
   }
