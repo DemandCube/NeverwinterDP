@@ -19,13 +19,15 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
   public void submit(long timeout) throws Exception {
     long stopTime = System.currentTimeMillis() + timeout;
     long remainTime = timeout;
-    for(DataflowDescriptor sel : config.getDescriptors()) {
+    for(int i = 0; i < config.getDescriptors().size(); i++) {
+      DataflowDescriptor sel = config.getDescriptors().get(i);
       DataflowSubmitter submitter = doSubmit(client, dfsDataflowHome, sel) ;
       submitters.add(submitter);
       remainTime = stopTime - System.currentTimeMillis();
       if(remainTime < 0) {
         throw new InterruptedException("Cannot finish to submit within " + timeout + "ms") ;
       }
+      if(i == 0) Thread.sleep(20000);
     }
   }
   

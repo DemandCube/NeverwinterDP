@@ -93,7 +93,7 @@ public class LogSampleRunner {
     LogSampleRunner runner = new LogSampleRunner(args);
     runner.uploadApp();
     runner.submitVMLogGeneratorApp();
-    Thread.sleep(35000);
+    Thread.sleep(15000);
     runner.submitLogSampleDataflowChain();
     runner.submitVMLogValidatorApp().waitForTerminated(30000);;
   }

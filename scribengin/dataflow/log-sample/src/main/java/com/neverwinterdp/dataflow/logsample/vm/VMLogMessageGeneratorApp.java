@@ -49,17 +49,17 @@ public class VMLogMessageGeneratorApp extends VMApp {
       Logger logger = getVM().getLoggerFactory().getLogger("LogSample") ;
       
       MessageGenerator messageGenerator = new MessageGenerator.DefaultMessageGenerator() ;
+      logger.info(new String(messageGenerator.nextMessage(groupId, messageSize)));
+      logger.warn(new String(messageGenerator.nextMessage(groupId, messageSize)));
+      logger.error(new String(messageGenerator.nextMessage(groupId, messageSize)));
+      
       Random rand = new Random() ;
-      for(int i = 0; i < numOfMessagePerExecutor; i++) {
+      for(int i = 1; i < numOfMessagePerExecutor; i++) {
         double randNum = rand.nextDouble();
         String jsonMessage = new String(messageGenerator.nextMessage(groupId, messageSize)) ;
-        if(randNum < 0.4) {
-          logger.info(jsonMessage);
-        } else if (randNum < 0.7) {
-          logger.warn(jsonMessage);
-        } else {
-          logger.error(jsonMessage);
-        }
+        if(randNum < 0.4) logger.info(jsonMessage);
+        else if (randNum < 0.7) logger.warn(jsonMessage);
+        else logger.error(jsonMessage);
       }
       LogSampleRegistry appRegistry = null;
       try {

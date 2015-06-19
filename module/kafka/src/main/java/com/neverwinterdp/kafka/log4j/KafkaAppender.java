@@ -84,35 +84,25 @@ public class KafkaAppender extends AppenderSkeleton {
     private boolean exit = false ;
     
     public void forward() {
-      log("Kafka connects = " + connects);
       kafkaWriter = new AckKafkaWriter(topic, connects) ;
       while(true) {
         try {
           if(kafkaError) {
-            long start = System.currentTimeMillis();
-            log("kafka error detection") ;
             Thread.sleep(5000);
             kafkaWriter.reconnect();
             kafkaError = false ;
-            log("kafka error detection and finish reconnect in " + (System.currentTimeMillis() - start) + "ms") ;
           }
           while(true) {
             Segment<Log4jRecord> segment = queue.nextReadSegment(5000) ;
             if(segment == null) continue;
-            long start = System.currentTimeMillis() ;
             segment.open();
-            log("start forward segment " + segment.getSegmentIndex()) ;
             while(segment.hasNext()) {
               Log4jRecord record = segment.nextObject() ;
               String json = JSONSerializer.INSTANCE.toString(record);
-              log("before send " + json);
               kafkaWriter.send(topic, json, 30 * 1000);
-              log("after send.........................");
             }
-            log("wait for ack");
             kafkaWriter.waitForAcks(60 * 1000);
             queue.commitReadSegment(segment);
-            log("finish forward segment " + segment.getSegmentIndex() + " in " + (System.currentTimeMillis() - start) + "ms") ;
           }
         } catch(KafkaException ex) {
           kafkaError = true ;
