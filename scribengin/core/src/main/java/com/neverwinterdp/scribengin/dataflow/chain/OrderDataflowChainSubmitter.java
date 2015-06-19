@@ -36,7 +36,7 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
       DataflowSubmitter submitter = new DataflowSubmitter(client, dfsDataflowHome, descriptor) ;
       submitter.submit();
       setupDebugger(submitter);
-      submitter.waitForRunning(25000);
+      submitter.waitForRunning(45000);
       return submitter;
     } catch(Exception ex ) {
       try {
