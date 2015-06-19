@@ -34,7 +34,7 @@ public class VMLogMessageGeneratorApp extends VMApp {
     }
     executorService.shutdown();
     executorService.awaitTermination(60, TimeUnit.MINUTES);
-    Thread.sleep(15000);
+    Thread.sleep(45000);
   }
   
   public class RunnableLogMessageGenerator implements Runnable {
