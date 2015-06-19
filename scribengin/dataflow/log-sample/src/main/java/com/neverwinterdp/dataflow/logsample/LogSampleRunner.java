@@ -74,6 +74,7 @@ public class LogSampleRunner {
     VMSubmitter vmSubmitter = new VMSubmitter(shell.getVMClient(), config.dfsAppHome, vmConfig);
     vmSubmitter.submit();
     vmSubmitter.waitForRunning(30000);
+    vmSubmitter.waitForTerminated(config.logValidatorWaitForTermination);
     return vmSubmitter ;
   }
   
@@ -95,6 +96,6 @@ public class LogSampleRunner {
     runner.submitVMLogGeneratorApp();
     Thread.sleep(15000);
     runner.submitLogSampleDataflowChain();
-    runner.submitVMLogValidatorApp().waitForTerminated(30000);;
+    runner.submitVMLogValidatorApp();
   }
 }
