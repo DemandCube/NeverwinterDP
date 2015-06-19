@@ -149,7 +149,7 @@ public class KafkaAppender extends AppenderSkeleton {
     }
     
     void log(String mesg) {
-      System.err.println("KafkaAppender: " + mesg);
+      System.out.println("KafkaAppender: " + mesg);
     }
   }
 }
