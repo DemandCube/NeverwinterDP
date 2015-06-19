@@ -27,10 +27,6 @@ import com.neverwinterdp.vm.command.VMCommandWatcher;
 import com.neverwinterdp.vm.service.VMService;
 
 public class VM {
-  static {
-    System.setProperty("java.net.preferIPv4Stack", "true") ;
-  }
-  
   static private Map<String, VM> vms = new ConcurrentHashMap<String, VM>() ;
   
   private LoggerFactory          loggerFactory ;
@@ -223,18 +219,6 @@ public class VM {
     vms.put(vm.getDescriptor().getId(), vm);
   }
   
-  static public VM run(String[] args) throws Exception {
-    VMConfig vmConfig = new VMConfig();
-    new JCommander(vmConfig, args);
-    
-    Map<String, String> log4jProps = vmConfig.getLoggerConfig().getLog4jConfiguration() ;
-    LoggerFactory.log4jConfigure(log4jProps);
-    
-    VM vm = new VM(vmConfig);
-    vm.run();
-    return vm;
-  }
-  
   static public VM run(VMConfig vmConfig) throws Exception {
     VM vm = new VM(vmConfig);
     vm.run();
@@ -243,7 +227,13 @@ public class VM {
   
   static public void main(String[] args) throws Exception {
     System.out.println("VM: main(..) start");
-    VM vm = run(args);
+    VMConfig vmConfig = new VMConfig(args);
+    vmConfig.getLoggerConfig().getFileAppender().setFilePath("/opt/hadoop/vm-logs/" + vmConfig.getName() + "/vm.log");
+    Map<String, String> log4jProps = vmConfig.getLoggerConfig().getLog4jConfiguration() ;
+    LoggerFactory.log4jConfigure(log4jProps);
+    
+    VM vm = new VM(vmConfig);
+    vm.run();
     vm.waitForComplete();
     System.out.println("VM: main(..) finish");
   }
