@@ -100,14 +100,14 @@ public class LogSampleRunner {
     runner.submitVMLogValidatorApp();
   }
   
-  static public void runTest() throws Exception {
+  static public void runTest(String descriptorPath) throws Exception {
     String[] args = {
       "--registry-connect", "127.0.0.1:2181",
       "--registry-db-domain", "/NeverwinterDP",
       "--registry-implementation", RegistryImpl.class.getName(),
       
       "--log-generator-num-of-vm", "2",
-      "--log-generator-num-of-executor-per-vm", "2",
+      "--log-generator-num-of-executor-per-vm", "1",
       "--log-generator-num-of-message-per-executor", "3000",
       "--log-generator-message-size", "128",
       
@@ -115,9 +115,9 @@ public class LogSampleRunner {
       "--log-validator-wait-for-message-timeout", "5000",
       "--log-validator-wait-for-termination", "30000",
       
-      "--dataflow-descriptor", "src/app/conf/local/log-dataflow-chain.json",
+      "--dataflow-descriptor", descriptorPath,
       "--dataflow-wait-for-submit-timeout", "60000",
-      "--dataflow-wait-for-termination-timeout", "120000",
+      "--dataflow-wait-for-termination-timeout", "180000",
       "--dataflow-task-debug"
     } ;
     main(args);

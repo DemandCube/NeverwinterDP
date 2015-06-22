@@ -40,8 +40,9 @@ public class ZookeeperMultiDataGet<T> implements MultiDataGet<T>, AsyncCallback.
 
   @Override
   synchronized public void get(String path) {
-    if (shutdown)
+    if(shutdown) {
       throw new RuntimeException("MultiDataGet is already shutdown!");
+    }
     ZooKeeper zk = registry.getZkClient();
     String realPath = registry.realPath(path);
     DataGet<T> dataGet = new DataGet<T>(path, null);
@@ -51,8 +52,9 @@ public class ZookeeperMultiDataGet<T> implements MultiDataGet<T>, AsyncCallback.
 
   @Override
   public void get(String... paths) {
-    for (String selPath : paths)
+    for (String selPath : paths) {
       get(selPath);
+    }
   }
 
   @Override
@@ -77,10 +79,6 @@ public class ZookeeperMultiDataGet<T> implements MultiDataGet<T>, AsyncCallback.
     }
   }
 
-  public void shutdown() {
-    shutdown = true;
-  }
-
   @Override
   public List<T> getResults() {
     List<T> holder = new ArrayList<T>();
@@ -95,27 +93,31 @@ public class ZookeeperMultiDataGet<T> implements MultiDataGet<T>, AsyncCallback.
     return null;
   }
 
+  public void shutdown() {
+    shutdown = true;
+  }
+
+  
   @Override
   synchronized public void waitForAllGet(long timeout) throws RegistryException {
-    long currentTime = System.currentTimeMillis();
-    long stopTime = currentTime + timeout;
+    long stopTime = System.currentTimeMillis() + timeout;
     long waitTime = timeout;
     try {
       while (waitTime > 0) {
+        System.out.println("wait time = " + waitTime);
         wait(waitTime);
-        if (processResultCount == results.size() && shutdown)
-          return;
-        currentTime = System.currentTimeMillis();
-        waitTime = stopTime - currentTime;
+        if(processResultCount == results.size() && shutdown) return;
+        waitTime = stopTime - System.currentTimeMillis();
       }
     } catch (InterruptedException e) {
-      throw new RegistryException(ErrorCode.Timeout, "Cannot retrieve the data in " + timeout
-          + "ms");
+      throw new RegistryException(ErrorCode.Timeout, "Cannot retrieve the data in " + timeout + "ms");
     }
+    System.out.println("end wait for all get, processResultCount = " + processResultCount + ", expect " + results.size());
   }
 
   @Override
   synchronized public void processResult(int rc, String realPath, Object ctx, byte[] data, Stat stat) {
+    System.out.println("process result: " + realPath + ", rc = " + rc);
     processResultCount++;
     String path = registry.path(realPath);
     DataGet<T> dataGet = results.get(path);

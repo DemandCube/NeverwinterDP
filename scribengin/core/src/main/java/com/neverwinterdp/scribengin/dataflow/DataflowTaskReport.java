@@ -11,10 +11,16 @@ public class DataflowTaskReport {
   };
   
   private String taskId ;
-  private long  startTime  ;
-  private long  finishTime ;
-  private long  processCount ;
-  private long  commitProcessCount;
+  private long   startTime  ;
+  private long   finishTime ;
+  
+  private int    assignedCount    ;
+  private long   lastCommitTime ;
+  private int    commitCount;
+  
+  private long   processCount ;
+  private long   accCommitProcessCount;
+  private long   accRuntime ;
   
   public DataflowTaskReport() {} 
   
@@ -31,15 +37,48 @@ public class DataflowTaskReport {
   
   public long getFinishTime() { return finishTime; }
   public void setFinishTime(long finishTime) { this.finishTime = finishTime; }
+
+  public int getAssignedCount() { return assignedCount; }
+  public void setAssignedCount(int assignedCount) {
+    this.assignedCount = assignedCount;
+  }
+
+  public void incrAssignedCount() { 
+    this.assignedCount++ ;
+  }
+  
+  public long getLastCommitTime() { return lastCommitTime; }
+  public void setLastCommitTime(long lastCommitTime) { this.lastCommitTime = lastCommitTime; }
+
+  public int getCommitCount() { return commitCount; }
+  public void setCommitCount(int commitCount) {
+    this.commitCount = commitCount;
+  }
   
   public long getProcessCount() { return processCount; }
   public void setProcessCount(long processCount) { this.processCount = processCount; }
+  
   public void incrProcessCount() { processCount++ ; }
   
-  public long getCommitProcessCount() { return commitProcessCount; }
-  public void setCommitProcessCount(long commitProcessCount) { this.commitProcessCount = commitProcessCount; }
-  public void incrCommitProcessCount() { 
-    commitProcessCount += processCount ;
+  public long getAccCommitProcessCount() { return accCommitProcessCount; }
+  public void setAccCommitProcessCount(long commitProcessCount) { this.accCommitProcessCount = commitProcessCount; }
+  
+  public long getAccRuntime() { return accRuntime; }
+  public void setAccRuntime(long runtime) { accRuntime = runtime; }
+  
+  public void addAccRuntime(long amount) {
+    accRuntime += amount;
+  }
+
+  public long durationTime() {
+    if(finishTime > 0) return finishTime - startTime;
+    return System.currentTimeMillis() - startTime;
+  }
+  
+  public void updateCommit() { 
+    commitCount++ ; 
+    lastCommitTime = System.currentTimeMillis();
+    accCommitProcessCount += processCount ;
     processCount = 0;
   }
 }

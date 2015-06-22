@@ -9,6 +9,8 @@
       "numberOfWorkers" : 2,
       "numberOfExecutorsPerWorker" : 2,
       "taskMaxExecuteTime" : -1,
+      "maxRunTime": 90000,
+      "maxWaitForDataRead": 15000,
       "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessageSplitter",
 
       "sourceDescriptor" : {

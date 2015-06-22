@@ -120,7 +120,8 @@ public class AddWorkerActivityBuilder extends ActivityBuilder {
         waitingListener.add(statusPath, status, logDesc, true);
       }
       
-      waitingListener.waitForEvents(30 * 1000);
+      DataflowDescriptor dflDescriptor = dflRegistry.getDataflowDescriptor();
+      waitingListener.waitForEvents(dflDescriptor.getMaxWaitForWorkerRunningStatus());
     }
   }
 }

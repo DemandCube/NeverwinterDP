@@ -132,7 +132,7 @@ public class Formater {
         
         formater.addRow(
             descriptor.getProcessCount(),
-            descriptor.getCommitProcessCount(),
+            descriptor.getAccCommitProcessCount(),
             DateUtil.asCompactDateTime(descriptor.getStartTime()),
             finishTime
             );

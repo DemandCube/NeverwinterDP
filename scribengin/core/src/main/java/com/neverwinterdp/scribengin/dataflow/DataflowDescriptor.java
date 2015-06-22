@@ -7,18 +7,21 @@ import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.vm.LoggerConfig;
 
 public class DataflowDescriptor {
-  private String                         id  ;
+  private String                         id;
   private String                         name;
   private String                         dataflowAppHome;
   private StorageDescriptor              sourceDescriptor;
   private Map<String, StorageDescriptor> sinkDescriptors;
-  private int                            numberOfWorkers            =  1;
-  private int                            numberOfExecutorsPerWorker =  1;
+  private int                            numberOfWorkers               = 1;
+  private int                            numberOfExecutorsPerWorker    = 1;
+  private long                           maxRunTime                    = -1;
+  private long                           maxWaitForWorkerRunningStatus = 45000;
   private long                           maxWaitForAvailableDataStream = 10000;
-  private long                           maxWaitForDataRead = 5000;
-  private long                           taskMaxExecuteTime         = -1;
+  private long                           maxWaitForDataRead            = 5000;
+  
+  private long                           taskMaxExecuteTime            = -1;
   private String                         scribe;
-  private LoggerConfig                   loggerConfig = new LoggerConfig();
+  private LoggerConfig                   loggerConfig                  = new LoggerConfig();
 
   public String getId() { return id; }
   public void setId(String id)  { this.id = id; }
@@ -48,6 +51,14 @@ public class DataflowDescriptor {
   public int getNumberOfExecutorsPerWorker() { return numberOfExecutorsPerWorker; }
   public void setNumberOfExecutorsPerWorker(int number) {
     this.numberOfExecutorsPerWorker = number;
+  }
+  
+  public long getMaxRunTime() { return maxRunTime; }
+  public void setMaxRunTime(long maxRunTime) { this.maxRunTime = maxRunTime;}
+  
+  public long getMaxWaitForWorkerRunningStatus() { return maxWaitForWorkerRunningStatus; }
+  public void setMaxWaitForWorkerRunningStatus(long maxWaitForWorkerRunningStatus) {
+    this.maxWaitForWorkerRunningStatus = maxWaitForWorkerRunningStatus;
   }
   
   public long getMaxWaitForAvailableDataStream() { return maxWaitForAvailableDataStream; }

@@ -9,15 +9,11 @@ import java.util.concurrent.TimeUnit;
 import com.neverwinterdp.dataflow.logsample.LogSampleRunner;
 import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
-import com.neverwinterdp.scribengin.dataflow.chain.DataflowChainConfig;
-import com.neverwinterdp.scribengin.dataflow.chain.OrderDataflowChainSubmitter;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowCommandStartStopResumeTest;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowRandomServerFailureTest;
 import com.neverwinterdp.scribengin.dataflow.test.HDFSDataflowTest;
 import com.neverwinterdp.scribengin.dataflow.test.KafkaDataflowTest;
 import com.neverwinterdp.swing.scribengin.ScribenginCluster;
-import com.neverwinterdp.util.JSONSerializer;
-import com.neverwinterdp.util.io.IOUtil;
 
 public class DataflowTestRunner extends Thread {
   private String label;
@@ -206,29 +202,11 @@ public class DataflowTestRunner extends Thread {
 
     public LogSampleTestRunner() {
       super("Log Sample Test", "Log Sample Test");
-      final ScribenginShell shell = ScribenginCluster.getCurrentInstance().getScribenginShell();
       Runnable runnable = new Runnable() {
         @Override
         public void run() {
           try {
-            String[] args = {
-                "--registry-connect", "127.0.0.1:2181",
-                "--registry-db-domain", "/NeverwinterDP",
-                "--registry-implementation", RegistryImpl.class.getName(),
-
-                "--log-generator-num-of-vm", "2",
-                "--log-generator-num-of-executor-per-vm", "2",
-                "--log-generator-num-of-message-per-executor", "3000",
-                "--log-generator-message-size", "128",
-
-                "--log-validator-num-of-executor-per-vm", "3",
-                "--log-validator-wait-for-message-timeout", "5000",
-                "--log-validator-wait-for-termination", "30000",
-
-                "--dataflow-descriptor", "../../scribengin/dataflow/log-sample/src/app/conf/local/log-dataflow-chain.json",
-                "--dataflow-task-debug"
-            } ;
-            LogSampleRunner.main(args);
+            LogSampleRunner.runTest("../../scribengin/dataflow/log-sample/src/app/conf/local/log-dataflow-chain.json");
           } catch(Exception ex) {
             ex.printStackTrace();
           }

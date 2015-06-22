@@ -130,7 +130,7 @@ public class UIDataflowTaskReportView extends SpringLayoutGridJPanel implements 
     void loadData() throws Exception {
       for(DataflowTaskReport sel : reports) {
         Object[] cells = {
-            sel.getTaskId(), sel.getProcessCount(), sel.getCommitProcessCount(), 
+            sel.getTaskId(), sel.getProcessCount(), sel.getAccCommitProcessCount(), 
             DateUtil.asCompactDateTime(sel.getStartTime()), DateUtil.asCompactDateTime(sel.getFinishTime())
         };
         addRow(cells);

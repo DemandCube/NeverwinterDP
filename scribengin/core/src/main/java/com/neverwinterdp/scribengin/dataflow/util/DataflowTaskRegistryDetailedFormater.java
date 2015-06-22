@@ -44,7 +44,7 @@ public class DataflowTaskRegistryDetailedFormater extends NodeFormatter {
       taskFt.addRow("  Start Time", DateUtil.asCompactDateTime(dflTaskReport.getStartTime()));
       taskFt.addRow("  Finish Time", DateUtil.asCompactDateTime(dflTaskReport.getFinishTime()));
       taskFt.addRow("  Process Count", dflTaskReport.getProcessCount());
-      taskFt.addRow("  Commit Process Count", dflTaskReport.getCommitProcessCount());
+      taskFt.addRow("  Commit Process Count", dflTaskReport.getAccCommitProcessCount());
       taskFt.addRow("Worker", "");
       taskFt.addRow("  Status", status);
       b.append(taskFt.getFormatText());

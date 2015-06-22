@@ -23,7 +23,7 @@ public class LogMessageSplitter extends ScribeAbstract {
       ctx.append(record);
     }
     count++ ;
-    if(count > 0 && count % 100 == 0) {
+    if(count > 0 && count % 500 == 0) {
       ctx.commit();
     }
   }

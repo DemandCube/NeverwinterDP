@@ -11,6 +11,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.neverwinterdp.registry.DataMapperCallback;
+import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.MultiDataGet;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
@@ -363,20 +364,34 @@ public class DataflowRegistry {
     return multiGet.getResults();
   }
   
-  static public List<DataflowTaskReport> getDataflowTaskReports(Registry registry, String dataflowPath) throws RegistryException {
-    MultiDataGet<DataflowTaskReport> multiGet = registry.createMultiDataGet(DataflowTaskReport.class);
-    String taskListPath = dataflowPath + "/tasks/task-list";
-    List<String> taskIds = registry.getChildren(taskListPath) ;
-    List<String> reportPaths = new ArrayList<String>() ;
-    for(String selTaskId : taskIds) {
-      reportPaths.add(taskListPath + "/" + selTaskId + "/report") ;
-    }
-    multiGet.get(reportPaths);
-    multiGet.shutdown();
-    multiGet.waitForAllGet(30000);
-    return multiGet.getResults();
+  static public List<DataflowTaskReport> asyncGetDataflowTaskReports(Registry registry, String dataflowPath) throws RegistryException {
+      MultiDataGet<DataflowTaskReport> multiGet = registry.createMultiDataGet(DataflowTaskReport.class);
+      String taskListPath = dataflowPath + "/tasks/task-list";
+      List<String> taskIds = null;
+      try {
+        taskIds = registry.getChildren(taskListPath) ;
+      } catch(RegistryException ex) {
+        if(ex.getErrorCode() == ErrorCode.NoNode) return new ArrayList<>();
+        throw ex;
+      }
+      for(String selTaskId : taskIds) {
+        multiGet.get(taskListPath + "/" + selTaskId + "/report");
+      }
+      multiGet.shutdown();
+      multiGet.waitForAllGet(5000);
+      return multiGet.getResults();
   }
   
+  static public List<DataflowTaskRuntimeReport> getDataflowTaskReports(Registry registry, String dataflowPath) throws RegistryException {
+    String taskListPath = dataflowPath + "/tasks/task-list";
+    List<String> taskIds = registry.getChildren(taskListPath) ;
+    List<DataflowTaskRuntimeReport> holder = new ArrayList<>();
+    for(String selTaskId : taskIds) {
+      holder.add(new DataflowTaskRuntimeReport(registry, taskListPath + "/" + selTaskId));
+    }
+    return holder;
+  }
+
   public class ConfigurationRegistry {
     private Node configurationNode ;
     private Node logNode ;

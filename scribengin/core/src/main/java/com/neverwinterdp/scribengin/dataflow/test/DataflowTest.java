@@ -19,6 +19,7 @@ import com.neverwinterdp.scribengin.dataflow.DataflowTaskContext;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowWaitingEventListener;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowTestReport.DataflowSinkValidatorReport;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowTestReport.DataflowSourceGeneratorReport;
+import com.neverwinterdp.scribengin.dataflow.util.DataflowRegistryDebugger;
 import com.neverwinterdp.scribengin.scribe.ScribeAbstract;
 import com.neverwinterdp.util.text.TabularFormater;
 
@@ -142,31 +143,28 @@ abstract public class DataflowTest {
   }
 
   protected void setupDebugger(ScribenginShell shell, ScribenginClient scribenginClient, DataflowDescriptor dflDescriptor) throws Exception {
+    DataflowRegistryDebugger debugger = shell.getScribenginClient().getDataflowRegistryDebugger(System.out, dflDescriptor);
     if(detailedDebugDataflowTask){
-      shell.getScribenginClient().getDataflowTaskDebugger(System.out, dflDescriptor, true);
-    }
-    else if(debugDataflowTask) {
-      shell.getScribenginClient().getDataflowTaskDebugger(System.out, dflDescriptor, false);
+      debugger.enableDataflowTaskDebugger(true);
+    } else if(debugDataflowTask) {
+      debugger.enableDataflowTaskDebugger(false);
     }
     
     if(detailedDebugDataflowVM){
-      shell.getScribenginClient().getDataflowVMDebugger(System.out, dflDescriptor, true);
+      debugger.enableDataflowVMDebugger(true);
     } else if(debugDataflowVM) {
-      shell.getScribenginClient().getDataflowVMDebugger(System.out, dflDescriptor, false);
+      debugger.enableDataflowVMDebugger(false);
     }
     
     if(detailedDebugDataflowActivity){
-      shell.getScribenginClient().getDataflowActivityDebugger(System.out, dflDescriptor, true);
-    }
-    else if(debugDataflowActivity) {
-      shell.getScribenginClient().getDataflowActivityDebugger(System.out, dflDescriptor, false);
+      debugger.enableDataflowActivityDebugger(true);
+    } else if(debugDataflowActivity) {
+      debugger.enableDataflowVMDebugger(false);
     }
   }
 
   protected void junitReport(DataflowTestReport dataFlowTestReport) throws Exception {
-    if (junitReport == null) {
-      return;
-    }
+    if (junitReport == null)  return;
 
     DataflowSourceGeneratorReport sourceReport = dataFlowTestReport.getSourceGeneratorReport();
     DataflowSinkValidatorReport sinkReport = dataFlowTestReport.getSinkValidatorReport();

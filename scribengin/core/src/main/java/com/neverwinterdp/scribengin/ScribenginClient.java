@@ -19,6 +19,7 @@ import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.activity.util.ActiveActivityNodeDebugger;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowWaitingEventListener;
+import com.neverwinterdp.scribengin.dataflow.util.DataflowRegistryDebugger;
 import com.neverwinterdp.scribengin.dataflow.util.DataflowTaskNodeDebugger;
 import com.neverwinterdp.scribengin.dataflow.util.DataflowVMDebugger;
 import com.neverwinterdp.scribengin.service.ScribenginService;
@@ -171,10 +172,9 @@ public class ScribenginClient {
     throw new Exception("The dataflow " + dataflowId + " is not existed after " + timeout + "ms");
   }
   
-  public RegistryDebugger getDataflowTaskDebugger(Appendable out, DataflowDescriptor descriptor, boolean detailedDebugger) throws RegistryException {
-    String taskAssignedPath = ScribenginService.getDataflowPath(descriptor.getId()) + "/tasks/executions/assigned/task-ids";
-    RegistryDebugger debugger = new RegistryDebugger(out, getVMClient().getRegistry()) ;
-    debugger.watchChild(taskAssignedPath, ".*", new DataflowTaskNodeDebugger(detailedDebugger));
+  public DataflowRegistryDebugger getDataflowRegistryDebugger(Appendable out, DataflowDescriptor descriptor) throws RegistryException {
+    String dataflowPath = ScribenginService.getDataflowPath(descriptor.getId());
+    DataflowRegistryDebugger debugger = new DataflowRegistryDebugger(out, getVMClient().getRegistry(), dataflowPath) ;
     return debugger ;
   }
   

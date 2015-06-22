@@ -82,7 +82,7 @@ public class DataflowTaskContext {
       rollback();
       throw ex;
     }
-    report.incrCommitProcessCount();
+    report.updateCommit();
     dataflowRegistry.dataflowTaskReport(dataflowTaskDescriptor, report);
     return false;
   }

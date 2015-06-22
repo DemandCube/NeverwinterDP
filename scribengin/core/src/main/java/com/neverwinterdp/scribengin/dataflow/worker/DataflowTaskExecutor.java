@@ -3,6 +3,7 @@ package com.neverwinterdp.scribengin.dataflow.worker;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskContext;
 import com.neverwinterdp.scribengin.dataflow.DataflowContainer;
+import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowTask;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
@@ -56,6 +57,11 @@ public class DataflowTaskExecutor {
     Timer dataflowTaskTimerGrab = metricRegistry.getTimer("dataflow-task.timer.grab") ;
     Timer dataflowTaskTimerProcess = metricRegistry.getTimer("dataflow-task.timer.process") ;
     try {
+      DataflowDescriptor dataflowDescriptor = dataflowRegistry.getDataflowDescriptor();
+      long stopTime = -1;
+      if(dataflowDescriptor.getMaxRunTime() > 0) {
+        stopTime = System.currentTimeMillis() + dataflowDescriptor.getMaxRunTime() ;
+      }
       while(!interrupt) {
         Timer.Context dataflowTaskTimerGrabCtx = dataflowTaskTimerGrab.time() ;
         
@@ -72,10 +78,12 @@ public class DataflowTaskExecutor {
         currentDataflowTask.init();
         executorThread = new DataflowTaskExecutorThread(currentDataflowTask);
         executorThread.start();
-        executorThread.waitForTimeout(10000);
+        executorThread.waitForTimeout(30000);
         if(currentDataflowTask.isComplete()) currentDataflowTask.finish();
         else currentDataflowTask.suspend();
         dataflowTaskTimerProcessCtx.stop();
+        
+        if(stopTime > 0 && System.currentTimeMillis() > stopTime) return;
       }
     } catch (InterruptedException e) {
       System.err.println("detect shutdown interrupt for task " + currentDataflowTask.getDescriptor().getTaskId());

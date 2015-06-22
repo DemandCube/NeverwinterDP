@@ -6,7 +6,7 @@ import com.neverwinterdp.registry.util.NodeDebugger;
 import com.neverwinterdp.registry.util.NodeFormatter;
 import com.neverwinterdp.registry.util.RegistryDebugger;
 
-public class DataflowTaskNodeDebugger implements NodeDebugger{
+public class DataflowTaskNodeDebugger implements NodeDebugger {
   boolean detailedDebugger;
 
   public DataflowTaskNodeDebugger(boolean detailedDebugger){
@@ -19,7 +19,20 @@ public class DataflowTaskNodeDebugger implements NodeDebugger{
   
   @Override
   public void onCreate(RegistryDebugger registryDebugger, Node assignedTaskNode) throws Exception {
-    registryDebugger.println("DataflowTaskNodeDebugger: Node = " + assignedTaskNode.getPath() + ", Event = CREATE");
+    dump(registryDebugger, assignedTaskNode, "CREATE");
+  }
+
+  @Override
+  public void onModify(RegistryDebugger registryDebugger, Node assignedTaskNode) throws Exception {
+  }
+
+  @Override
+  public void onDelete(RegistryDebugger registryDebugger, Node assignedTaskNode) throws Exception {
+    dump(registryDebugger, assignedTaskNode, "DELETE");
+  }
+  
+  void dump(RegistryDebugger registryDebugger, Node assignedTaskNode, String event) throws Exception {
+    registryDebugger.println("DataflowTaskNodeDebugger: Node = " + assignedTaskNode.getPath() + ", Event = " + event);
     TaskTransactionId taskTransactionId = new TaskTransactionId(assignedTaskNode.getName()) ;
     Node tasksNode = assignedTaskNode.getParentNode().getParentNode().getParentNode().getParentNode();
     Node taskDescriptorNode = tasksNode.getDescendant("task-list/" + taskTransactionId.getTaskId()); 
@@ -27,18 +40,9 @@ public class DataflowTaskNodeDebugger implements NodeDebugger{
     NodeFormatter formatter = null;
     if(this.detailedDebugger){
       formatter = new DataflowTaskRegistryDetailedFormater(taskDescriptorNode);
-    }
-    else{
+    } else{
       formatter = new DataflowTaskRegistrySimpleFormater(taskDescriptorNode);
     }
     registryDebugger.println(formatter.getFormattedText());
-  }
-
-  @Override
-  public void onModify(RegistryDebugger registryDebugger, Node node) throws Exception {
-  }
-
-  @Override
-  public void onDelete(RegistryDebugger registryDebugger, Node node) throws Exception {
   }
 }

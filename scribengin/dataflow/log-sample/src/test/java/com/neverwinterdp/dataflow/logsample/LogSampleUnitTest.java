@@ -59,6 +59,6 @@ public class LogSampleUnitTest  {
   
   @Test
   public void testLogSample() throws Exception {
-    LogSampleRunner.runTest();
+    LogSampleRunner.runTest("src/app/conf/local/log-dataflow-chain.json");
   }
 }
