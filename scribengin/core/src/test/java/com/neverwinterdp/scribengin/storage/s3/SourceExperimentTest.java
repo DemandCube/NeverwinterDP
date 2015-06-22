@@ -80,7 +80,7 @@ public class SourceExperimentTest {
     for (SourceStream stream : streams) {
       SourceStreamReader reader = stream.getReader("test");
       Record record;
-      while ((record = reader.next()) != null) {
+      while ((record = reader.next(1000)) != null) {
         Message message = messageExtractor.extract(record.getData());
         messageTracker.log(message);
       }

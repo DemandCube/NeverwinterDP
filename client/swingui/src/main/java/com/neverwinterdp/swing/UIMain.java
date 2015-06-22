@@ -72,11 +72,15 @@ public class UIMain extends JPanel {
    * main method allows us to run as a standalone demo.
    */
   public static void main(String[] args) throws Exception {
+    FileUtil.removeIfExist("build/hdfs", false);
     FileUtil.removeIfExist("build/data", false);
     FileUtil.removeIfExist("build/logs", false);
+    FileUtil.removeIfExist("build/elasticsearch", false);
+    FileUtil.removeIfExist("build/cluster", false);
+    
     LoggerConfig loggerConfig = new LoggerConfig() ;
     
-    loggerConfig.getConsoleAppender().setEnable(true);
+    loggerConfig.getConsoleAppender().setEnable(false);
     loggerConfig.getFileAppender().initLocalEnvironment();
     loggerConfig.getEsAppender().initLocalEnvironment();
     loggerConfig.getKafkaAppender().initLocalEnvironment();

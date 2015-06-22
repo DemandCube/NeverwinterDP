@@ -47,7 +47,6 @@ public class VMLogMessageValidatorApp extends VMApp {
     connector.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
     messageTracker.optimize();
     getVM().getLoggerFactory().getLogger("REPORT").info("\n" + messageTracker.getFormattedReport());
-    //TODO: fix this sleep method
-    Thread.sleep(15000); //sleep to make sure all the log data flush 
+    System.out.println(messageTracker.getFormattedReport());
   }
 }

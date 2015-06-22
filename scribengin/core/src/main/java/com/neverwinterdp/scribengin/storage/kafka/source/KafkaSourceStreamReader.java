@@ -23,12 +23,12 @@ public class KafkaSourceStreamReader implements SourceStreamReader {
   public String getName() { return descriptor.attribute("name"); }
 
   @Override
-  public Record next() throws Exception {
-    return partitionReader.nextAs(Record.class);
+  public Record next(long maxWait) throws Exception {
+    return partitionReader.nextAs(Record.class, maxWait);
   }
 
   @Override
-  public Record[] next(int size) throws Exception {
+  public Record[] next(int size, long maxWait) throws Exception {
     throw new Exception("To implement") ;
   }
 

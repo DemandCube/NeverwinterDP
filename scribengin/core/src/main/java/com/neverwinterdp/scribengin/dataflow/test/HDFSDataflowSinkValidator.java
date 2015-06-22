@@ -44,7 +44,7 @@ public class HDFSDataflowSinkValidator extends DataflowSinkValidator {
       for(SourceStream selStream : streams) {
         SourceStreamReader streamReader = selStream.getReader("HDFSDataflowSinkValidator") ;
         Record record = null ;
-        while((record = streamReader.next()) != null) {
+        while((record = streamReader.next(1000)) != null) {
           Message message = messageExtractor.extract(record.getData()) ;
           messageTracker.log(message);
         }

@@ -56,7 +56,7 @@ public class SinkSourceUnitTest {
       System.out.println("Stream id: " + streams[i].getDescriptor().getId());
       SourceStreamReader reader = streams[i].getReader("kafka");
       Record record = null;
-      while((record = reader.next()) != null) {
+      while((record = reader.next(1000)) != null) {
         System.out.println("Record: " + new String(record.getData()));
       }
     }

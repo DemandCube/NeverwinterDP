@@ -60,17 +60,27 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
       DataflowDescriptor dataflowDescriptor = service.getDataflowRegistry().getDataflowDescriptor();
       SourceFactory sourceFactory = service.getSourceFactory();
       SinkFactory sinkFactory = service.getSinkFactory() ;
-
-      Source source    = sourceFactory.create(dataflowDescriptor.getSourceDescriptor()) ;
+      
+      SourceStream[] sourceStream = {} ;
+      long stopTime = System.currentTimeMillis() + dataflowDescriptor.getMaxWaitForAvailableDataStream() ;
+      while(sourceStream.length == 0 && stopTime > System.currentTimeMillis()) {
+        Source source    = sourceFactory.create(dataflowDescriptor.getSourceDescriptor()) ;
+        sourceStream = source.getStreams();
+        if(sourceStream.length == 0) {
+          Thread.sleep(1000);
+        }
+      }
+      if(sourceStream.length == 0) {
+        throw new Exception("No Data Stream is available after waiting for " + dataflowDescriptor.getMaxWaitForAvailableDataStream() + "ms") ;
+      }
+      
       Map<String, Sink> sinks = new HashMap<String, Sink>();
       for(Map.Entry<String, StorageDescriptor> entry : dataflowDescriptor.getSinkDescriptors().entrySet()) {
         Sink sink = sinkFactory.create(entry.getValue());
         sinks.put(entry.getKey(), sink);
       }
-
       DecimalFormat seqIdFormatter = new DecimalFormat("00000");
-      
-      SourceStream[] sourceStream = source.getStreams();
+      System.out.println("AVAILABLE SOURCE STREAMS FOR " + dataflowDescriptor.getId() + " = " + sourceStream.length);
       for(int i = 0; i < sourceStream.length; i++) {
         String taskId =  "task-" + seqIdFormatter.format(i);
         DataflowTaskDescriptor descriptor = new DataflowTaskDescriptor();
@@ -80,6 +90,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
         for(Map.Entry<String, Sink> entry : sinks.entrySet()) {
           descriptor.add(entry.getKey(), entry.getValue().newStream().getDescriptor());
         }
+        descriptor.setMaxWaitForReadingData(dataflowDescriptor.getMaxWaitForDataRead());
         service.addAvailableTask(descriptor);
       }
     }

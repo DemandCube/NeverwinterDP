@@ -26,8 +26,8 @@ public class RawKafkaSourceStreamReader implements SourceStreamReader {
   public String getName() { return descriptor.attribute("name"); }
 
   @Override
-  public Record next() throws Exception {
-    Message message = partitionReader.nextMessage() ;
+  public Record next(long maxWait) throws Exception {
+    Message message = partitionReader.nextMessage(maxWait) ;
     if(message == null) return null ;
     ByteBuffer payload = message.payload();
     byte[] messageBytes = new byte[payload.limit()];
@@ -41,7 +41,7 @@ public class RawKafkaSourceStreamReader implements SourceStreamReader {
   }
 
   @Override
-  public Record[] next(int size) throws Exception {
+  public Record[] next(int size, long maxWait) throws Exception {
     throw new Exception("To implement") ;
   }
 
@@ -77,5 +77,4 @@ public class RawKafkaSourceStreamReader implements SourceStreamReader {
   @Override
   public void close() throws Exception {
   }
- 
 }

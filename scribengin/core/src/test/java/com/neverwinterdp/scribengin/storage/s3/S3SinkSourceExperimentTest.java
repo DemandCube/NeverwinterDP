@@ -99,7 +99,7 @@ public class S3SinkSourceExperimentTest {
       SourceStream stream = streams[i];
       SourceStreamReader reader = stream.getReader(stream.getDescriptor().getLocation());
 
-      while (reader.next() != null) {
+      while (reader.next(1000) != null) {
         recordCount++;
       }
       reader.close();

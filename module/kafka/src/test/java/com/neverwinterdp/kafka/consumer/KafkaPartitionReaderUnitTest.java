@@ -59,7 +59,7 @@ public class KafkaPartitionReaderUnitTest {
     PartitionMetadata partitionMetadata = findPartition(topicMetadata.partitionsMetadata(), partition);
     KafkaPartitionReader partitionReader = 
         new KafkaPartitionReader(consumerName, cluster.getZKConnect(), "hello", partitionMetadata);
-    List<byte[]> messages = partitionReader.fetch(10000, maxRead);
+    List<byte[]> messages = partitionReader.fetch(10000, maxRead, 1000/*max wait*/);
     for(int i = 0; i < messages.size(); i++) {
       byte[] message = messages.get(i) ;
       System.out.println((i + 1) + ". " + new String(message));

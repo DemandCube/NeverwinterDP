@@ -40,7 +40,7 @@ public class DataflowTask {
     DataflowTaskReport report = context.getReport();
     SourceStreamReader reader = context.getSourceStreamReader() ;
     Record record = null ;
-    while(!interrupt && (record = reader.next()) != null) {
+    while(!interrupt && (record = reader.next(descriptor.getMaxWaitForReadingData())) != null) {
       report.incrProcessCount();
       processor.process(record, context);
     }

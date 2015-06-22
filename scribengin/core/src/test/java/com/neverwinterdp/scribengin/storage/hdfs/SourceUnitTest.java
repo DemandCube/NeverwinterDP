@@ -44,7 +44,7 @@ public class SourceUnitTest {
       SourceStreamReader reader = stream[i].getReader("test") ;
       Record record  = null ;
       System.out.println("stream " + stream[i].getDescriptor().getId());
-      while((record = reader.next()) != null) {
+      while((record = reader.next(1000)) != null) {
         System.out.println("  " + record.getKey());
       }
       reader.close();

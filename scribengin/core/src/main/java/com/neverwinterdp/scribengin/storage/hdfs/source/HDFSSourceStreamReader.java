@@ -47,7 +47,7 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
     return name;
   }
 
-  public Record next() throws Exception {
+  public Record next(long maxWait) throws Exception {
     if (currentDataPathInputStream.available() <= 0) {
       currentDataPathInputStream.close();
       currentDataPathInputStream = nextDataPathInputStream();
@@ -60,11 +60,11 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
     return JSONSerializer.INSTANCE.fromBytes(data, Record.class);
   }
 
-  public Record[] next(int size) throws Exception {
+  public Record[] next(int size, long maxWait) throws Exception {
     List<Record> holder = new ArrayList<Record>();
     Record[] array = new Record[holder.size()];
     for (int i = 0; i < size; i++) {
-      Record record = next();
+      Record record = next(maxWait);
       if (record != null)
         holder.add(record);
       else

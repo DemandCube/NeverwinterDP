@@ -67,44 +67,44 @@ public class KafkaPartitionReader {
     consumer.close();
   }
   
-  public byte[] next() throws Exception {
-    if(currentMessageSetIterator == null) nextMessageSet();
+  public byte[] next(long maxWait) throws Exception {
+    if(currentMessageSetIterator == null) nextMessageSet(maxWait);
     byte[] payload = getCurrentMessagePayload();
     if(payload != null) return payload;
-    nextMessageSet();
+    nextMessageSet(maxWait);
     return getCurrentMessagePayload();
   }
 
-  public Message nextMessage() throws Exception {
-    if(currentMessageSetIterator == null) nextMessageSet();
+  public Message nextMessage(long maxWait) throws Exception {
+    if(currentMessageSetIterator == null) nextMessageSet(maxWait);
     Message message = getCurrentMessage();
     if(message != null) return message;
-    nextMessageSet();
+    nextMessageSet(maxWait);
     return getCurrentMessage();
   }
   
-  public <T> T nextAs(Class<T> type) throws Exception {
-    byte[] data = next();
+  public <T> T nextAs(Class<T> type, long maxWait) throws Exception {
+    byte[] data = next(maxWait);
     if(data == null) return null;
     return JSONSerializer.INSTANCE.fromBytes(data, type);
   }
 
-  public List<byte[]> next(int maxRead) throws Exception {
+  public List<byte[]> next(int maxRead, long maxWait) throws Exception {
     List<byte[]> holder = new ArrayList<>() ;
     for(int i = 0; i < maxRead; i++) {
-      byte[] payload = next() ;
+      byte[] payload = next(maxWait) ;
       if(payload == null) return holder;
       holder.add(payload);
     }
     return holder;
   }
   
-  public List<byte[]> fetch(int fetchSize, int maxRead) throws Exception {
-    return fetch(fetchSize, maxRead, 1000, 3) ;
+  public List<byte[]> fetch(int fetchSize, int maxRead, long maxWait) throws Exception {
+    return fetch(fetchSize, maxRead, maxWait, 3) ;
   }
   
-  public List<byte[]> fetch(int fetchSize, int maxRead, int maxWait, int numRetries) throws Exception {
-    FetchOperation fetchOperation = new FetchOperation(fetchSize, maxRead, maxWait);
+  public List<byte[]> fetch(int fetchSize, int maxRead, long maxWait, int numRetries) throws Exception {
+    FetchOperation fetchOperation = new FetchOperation(fetchSize, maxRead, (int)maxWait);
     return execute(fetchOperation, numRetries, 500);
   }
   
@@ -129,13 +129,13 @@ public class KafkaPartitionReader {
   }
  
   
-  void nextMessageSet() throws Exception {
+  void nextMessageSet(long maxWait) throws Exception {
     FetchRequest req = 
         new FetchRequestBuilder().
         clientId(name).
         addFetch(topic, partitionMetadata.partitionId(), currentOffset, fetchSize).
         minBytes(1).
-        maxWait(1000).
+        maxWait((int)maxWait).
         build();
     
     FetchResponse fetchResponse = consumer.fetch(req);

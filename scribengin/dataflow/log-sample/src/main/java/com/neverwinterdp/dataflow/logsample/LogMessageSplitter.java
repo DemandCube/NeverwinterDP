@@ -8,6 +8,10 @@ import com.neverwinterdp.util.log.Log4jRecord;
 
 public class LogMessageSplitter extends ScribeAbstract {
   int count = 0;
+  
+  public LogMessageSplitter() {
+  }
+  
   public void process(Record record, DataflowTaskContext ctx) throws Exception {
     Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(record.getData(), Log4jRecord.class) ;
     if(log4jRec.getLoggerName().indexOf("LogSample") >= 0) {

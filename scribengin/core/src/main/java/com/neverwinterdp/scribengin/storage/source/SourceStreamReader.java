@@ -7,8 +7,8 @@ import com.neverwinterdp.scribengin.Record;
  */
 public interface SourceStreamReader {
   public String getName() ;
-  public Record next() throws Exception;
-  public Record[] next(int size) throws Exception ;
+  public Record next(long maxWait) throws Exception;
+  public Record[] next(int size, long maxWait) throws Exception ;
   public void rollback() throws Exception;
   public void prepareCommit() throws Exception ;
   public void completeCommit() throws Exception ;

@@ -14,6 +14,8 @@ public class DataflowDescriptor {
   private Map<String, StorageDescriptor> sinkDescriptors;
   private int                            numberOfWorkers            =  1;
   private int                            numberOfExecutorsPerWorker =  1;
+  private long                           maxWaitForAvailableDataStream = 10000;
+  private long                           maxWaitForDataRead = 5000;
   private long                           taskMaxExecuteTime         = -1;
   private String                         scribe;
   private LoggerConfig                   loggerConfig = new LoggerConfig();
@@ -46,6 +48,16 @@ public class DataflowDescriptor {
   public int getNumberOfExecutorsPerWorker() { return numberOfExecutorsPerWorker; }
   public void setNumberOfExecutorsPerWorker(int number) {
     this.numberOfExecutorsPerWorker = number;
+  }
+  
+  public long getMaxWaitForAvailableDataStream() { return maxWaitForAvailableDataStream; }
+  public void setMaxWaitForAvailableDataStream(long waitForAvailableDataStream) {
+    this.maxWaitForAvailableDataStream = waitForAvailableDataStream;
+  }
+  
+  public long getMaxWaitForDataRead() { return maxWaitForDataRead; }
+  public void setMaxWaitForDataRead(long maxWaitForDataRead) {
+    this.maxWaitForDataRead = maxWaitForDataRead;
   }
   
   public long getTaskMaxExecuteTime() { return taskMaxExecuteTime;}
