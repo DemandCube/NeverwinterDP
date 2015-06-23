@@ -63,7 +63,6 @@ public class DataflowTaskExecutor {
         stopTime = System.currentTimeMillis() + dataflowDescriptor.getMaxRunTime() ;
       }
       while(!interrupt) {
-        
         TaskContext<DataflowTaskDescriptor> taskContext = null ;
         int retries = 0 ;
         while(taskContext == null && retries < 3) {

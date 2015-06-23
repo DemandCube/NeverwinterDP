@@ -124,7 +124,7 @@ public class LogSampleRunner {
       
       "--dataflow-descriptor", descriptorPath,
       "--dataflow-wait-for-submit-timeout", "45000",
-      "--dataflow-wait-for-termination-timeout", "180000",
+      "--dataflow-wait-for-termination-timeout", "120000",
       "--dataflow-task-debug"
     } ;
     main(args);

@@ -243,7 +243,7 @@ public class DataflowRegistry {
   }
   
   public void dataflowTaskSuspend(final TaskContext<DataflowTaskDescriptor> context) throws RegistryException {
-    dataflowTaskSuspend(context, true) ;
+    dataflowTaskSuspend(context, false) ;
   }
   
   public void dataflowTaskSuspend(final TaskContext<DataflowTaskDescriptor> context, final boolean disconnectHeartbeat) throws RegistryException {
