@@ -92,9 +92,6 @@ public class LogSampleRunner {
       submitter.waitForTerminated(config.dataflowWaitForTerminationTimeout);
     } catch(Throwable ex) {
       ex.printStackTrace();
-      if(submitter != null) {
-        submitter.report(System.err);
-      }
     }
   }
   

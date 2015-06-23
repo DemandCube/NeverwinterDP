@@ -88,8 +88,11 @@ public class DataflowTaskExecutor {
         executorThread = new DataflowTaskExecutorThread(currentDataflowTask);
         executorThread.start();
         executorThread.waitForTimeout(15000);
-        if(currentDataflowTask.isComplete()) currentDataflowTask.finish();
-        else currentDataflowTask.suspend();
+        if(currentDataflowTask.isComplete()) {
+          currentDataflowTask.finish();
+        } else {
+          currentDataflowTask.suspend();
+        }
         dataflowTaskTimerProcessCtx.stop();
         
         if(stopTime > 0 && System.currentTimeMillis() > stopTime) return;
