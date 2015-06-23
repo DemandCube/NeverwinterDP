@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Collections;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -21,6 +20,7 @@ import org.jdesktop.swingx.decorator.HighlighterFactory;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskReport;
+import com.neverwinterdp.scribengin.dataflow.DataflowTaskRuntimeReport;
 import com.neverwinterdp.swing.UILifecycle;
 import com.neverwinterdp.swing.scribengin.ScribenginCluster;
 import com.neverwinterdp.swing.util.MessageUtil;
@@ -85,7 +85,7 @@ public class UIDataflowTaskReportView extends SpringLayoutGridJPanel implements 
       addMouseListener(new MouseAdapter() {
         public void mouseClicked(MouseEvent e) {
           DataflowTaskReportTableModel model = (DataflowTaskReportTableModel) getModel();
-          DataflowTaskReport report = model.getDataflowTaskReportAt(getSelectedRow());
+          DataflowTaskRuntimeReport report = model.getDataflowTaskReportAt(getSelectedRow());
         }
       });
       setHighlighters(HighlighterFactory.createSimpleStriping());
@@ -106,7 +106,7 @@ public class UIDataflowTaskReportView extends SpringLayoutGridJPanel implements 
     static String[] COLUMNS = {"Id", "Process", "Commit", "Start Time", "Finish Time"};
 
     String dataflowPath; 
-    List<DataflowTaskReport> reports;
+    List<DataflowTaskRuntimeReport> reports;
 
     public DataflowTaskReportTableModel(String dataflowPath) throws Exception {
       super(COLUMNS, 0);
@@ -114,24 +114,26 @@ public class UIDataflowTaskReportView extends SpringLayoutGridJPanel implements 
       onRefresh();
     }
 
-    public DataflowTaskReport getDataflowTaskReportAt(int selectedRow) {
+    public DataflowTaskRuntimeReport getDataflowTaskReportAt(int selectedRow) {
       return reports.get(selectedRow);
     }
 
     public void onRefresh() throws Exception {
       Registry registry = ScribenginCluster.getCurrentInstance().getRegistry();
-      reports = DataflowRegistry.getDataflowTaskReports(registry, dataflowPath);
-      Collections.sort(reports, DataflowTaskReport.COMPARATOR);
+      reports = DataflowRegistry.getDataflowTaskRuntimeReports(registry, dataflowPath);
+      //TODO: fix sort
+      //Collections.sort(reports, DataflowTaskReport.COMPARATOR);
       getDataVector().clear();
       loadData();
       fireTableDataChanged();
     }
     
     void loadData() throws Exception {
-      for(DataflowTaskReport sel : reports) {
+      for(DataflowTaskRuntimeReport selRuntimeReport : reports) {
+        DataflowTaskReport selReport = selRuntimeReport.getReport();
         Object[] cells = {
-            sel.getTaskId(), sel.getProcessCount(), sel.getAccCommitProcessCount(), 
-            DateUtil.asCompactDateTime(sel.getStartTime()), DateUtil.asCompactDateTime(sel.getFinishTime())
+            selReport.getTaskId(), selReport.getProcessCount(), selReport.getAccCommitProcessCount(), 
+            DateUtil.asCompactDateTime(selReport.getStartTime()), DateUtil.asCompactDateTime(selReport.getFinishTime())
         };
         addRow(cells);
       }

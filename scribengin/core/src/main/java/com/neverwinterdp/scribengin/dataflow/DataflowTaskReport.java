@@ -76,7 +76,7 @@ public class DataflowTaskReport {
   }
   
   public void updateCommit() { 
-    commitCount++ ; 
+    commitCount++ ;
     lastCommitTime = System.currentTimeMillis();
     accCommitProcessCount += processCount ;
     processCount = 0;

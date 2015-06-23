@@ -63,13 +63,23 @@ public class DataflowTaskExecutor {
         stopTime = System.currentTimeMillis() + dataflowDescriptor.getMaxRunTime() ;
       }
       while(!interrupt) {
-        Timer.Context dataflowTaskTimerGrabCtx = dataflowTaskTimerGrab.time() ;
         
-        TaskContext<DataflowTaskDescriptor> taskContext= dataflowRegistry.assignDataflowTask(vmDescriptor);
-        dataflowTaskTimerGrabCtx.stop();
+        TaskContext<DataflowTaskDescriptor> taskContext = null ;
+        int retries = 0 ;
+        while(taskContext == null && retries < 3) {
+          Timer.Context dataflowTaskTimerGrabCtx = dataflowTaskTimerGrab.time() ;
+          taskContext= dataflowRegistry.dataflowTaskAssign(vmDescriptor);
+          dataflowTaskTimerGrabCtx.stop();
+          Thread.sleep(3000);
+          retries++;
+        }
         
-        if(interrupt) return ;
+
         if(taskContext == null) return;
+        if(interrupt) {
+          dataflowRegistry.dataflowTaskSuspend(taskContext);
+          return ;
+        }
         
         Timer.Context dataflowTaskTimerProcessCtx = dataflowTaskTimerProcess.time() ;
         executorDescriptor.addAssignedTask(taskContext.getTaskTransactionId().getTaskId());
@@ -78,7 +88,7 @@ public class DataflowTaskExecutor {
         currentDataflowTask.init();
         executorThread = new DataflowTaskExecutorThread(currentDataflowTask);
         executorThread.start();
-        executorThread.waitForTimeout(30000);
+        executorThread.waitForTimeout(15000);
         if(currentDataflowTask.isComplete()) currentDataflowTask.finish();
         else currentDataflowTask.suspend();
         dataflowTaskTimerProcessCtx.stop();

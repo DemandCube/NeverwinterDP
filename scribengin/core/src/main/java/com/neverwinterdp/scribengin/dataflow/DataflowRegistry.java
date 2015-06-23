@@ -237,13 +237,13 @@ public class DataflowRegistry {
     create(taskDescriptor, new DataflowTaskReport(taskDescriptor.getTaskId()));
   }
 
-  public TaskContext<DataflowTaskDescriptor> assignDataflowTask(final VMDescriptor vmDescriptor) throws RegistryException  {
+  public TaskContext<DataflowTaskDescriptor> dataflowTaskAssign(final VMDescriptor vmDescriptor) throws RegistryException  {
     TaskContext<DataflowTaskDescriptor> tContext = taskRegistry.take(vmDescriptor.getRegistryPath());
     return tContext;
   }
   
   public void dataflowTaskSuspend(final TaskContext<DataflowTaskDescriptor> context) throws RegistryException {
-    dataflowTaskSuspend(context, false) ;
+    dataflowTaskSuspend(context, true) ;
   }
   
   public void dataflowTaskSuspend(final TaskContext<DataflowTaskDescriptor> context, final boolean disconnectHeartbeat) throws RegistryException {
@@ -382,14 +382,36 @@ public class DataflowRegistry {
       return multiGet.getResults();
   }
   
-  static public List<DataflowTaskRuntimeReport> getDataflowTaskReports(Registry registry, String dataflowPath) throws RegistryException {
+  static public List<DataflowTaskRuntimeReport> getDataflowTaskRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
     String taskListPath = dataflowPath + "/tasks/task-list";
-    List<String> taskIds = registry.getChildren(taskListPath) ;
-    List<DataflowTaskRuntimeReport> holder = new ArrayList<>();
-    for(String selTaskId : taskIds) {
-      holder.add(new DataflowTaskRuntimeReport(registry, taskListPath + "/" + selTaskId));
+    
+    List<String> taskIds = null;
+    try {
+      taskIds = registry.getChildren(taskListPath) ;
+      List<DataflowTaskRuntimeReport> holder = new ArrayList<>();
+      for(String selTaskId : taskIds) {
+        holder.add(new DataflowTaskRuntimeReport(registry, taskListPath + "/" + selTaskId));
+      }
+      return holder;
+    } catch(RegistryException ex) {
+      if(ex.getErrorCode() == ErrorCode.NoNode) return new ArrayList<>();
+      throw ex ;
     }
-    return holder;
+  }
+  
+  static public List<DataflowWorkerRuntimeReport> getDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
+    String workerListPath = dataflowPath + "/workers/all";
+    try {
+      List<String> workerIds = registry.getChildren(workerListPath) ;
+      List<DataflowWorkerRuntimeReport> holder = new ArrayList<>();
+      for(String selWorkerId : workerIds) {
+        holder.add(new DataflowWorkerRuntimeReport(registry, workerListPath + "/" + selWorkerId));
+      }
+      return holder;
+    } catch(RegistryException ex) {
+      if(ex.getErrorCode() == ErrorCode.NoNode) return new ArrayList<>();
+      throw ex;
+    }
   }
 
   public class ConfigurationRegistry {

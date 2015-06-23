@@ -2,6 +2,7 @@ package com.neverwinterdp.registry.task;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.neverwinterdp.registry.BatchOperations;
@@ -14,7 +15,17 @@ import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.lock.Lock;
 import com.neverwinterdp.registry.notification.Notifier;
 
-public class TaskRegistry<T>{
+public class TaskRegistry<T> {
+  static public Comparator<String> TASK_ID_SEQ_COMPARATOR = new Comparator<String>() {
+    @Override
+    public int compare(String taskId_1, String taskId_2) {
+      int taskIdSeq1 = Integer.parseInt(taskId_1.substring(taskId_1.lastIndexOf('-') + 1));
+      int taskIdSeq2 = Integer.parseInt(taskId_2.substring(taskId_2.lastIndexOf('-') + 1));
+      return taskIdSeq1 - taskIdSeq2;
+    }
+    
+  };
+  
   final static public String TASK_LIST_PATH          = "task-list";
   final static public String AVAILABLE_PATH          = "executions/available";
   final static public String ASSIGNED_PATH           = "executions/assigned/task-ids";
@@ -109,7 +120,7 @@ public class TaskRegistry<T>{
     Transaction transaction = registry.getTransaction() ;
     transaction.createChild(tasksListNode, taskId, taskDescriptor, NodeCreateMode.PERSISTENT);
     transaction.createDescendant(tasksListNode, taskId + "/" + TASK_STATUS_PATH, TaskStatus.INIT, NodeCreateMode.PERSISTENT);
-    transaction.createChild(tasksAvailableNode, taskId, NodeCreateMode.PERSISTENT);
+    transaction.createChild(tasksAvailableNode, taskId + "-", NodeCreateMode.PERSISTENT_SEQUENTIAL);
     transaction.commit();
   }
   
@@ -119,8 +130,9 @@ public class TaskRegistry<T>{
       public TaskContext<T> execute(Registry registry) throws RegistryException {
         List<String> availableTasks = tasksAvailableNode.getChildren() ;
         if(availableTasks.size() == 0) return null ;
-        Collections.sort(availableTasks);
-        String taskId = availableTasks.get(0) ;
+        Collections.sort(availableTasks, TASK_ID_SEQ_COMPARATOR);
+        String taskIdSeq = availableTasks.get(0) ;
+        String taskId = taskIdSeq.substring(0, taskIdSeq.lastIndexOf('-'));
         try {
           Node taskNode = tasksListNode.getChild(taskId) ;
           Transaction transaction = registry.getTransaction();
@@ -129,7 +141,7 @@ public class TaskRegistry<T>{
           transaction.setData(taskNode.getChild(TASK_STATUS_PATH), TaskStatus.PROCESSING);
           transaction.createChild(tasksAssignedNode, taskTransactionID.getTaskTransactionId(), NodeCreateMode.PERSISTENT);
           transaction.createChild(tasksAssignedHeartbeatNode, taskTransactionID.getTaskTransactionId(), new RefNode(executorRefPath), NodeCreateMode.EPHEMERAL);
-          transaction.deleteChild(tasksAvailableNode, taskId);
+          transaction.deleteChild(tasksAvailableNode, taskIdSeq);
           transaction.commit();
           TaskContext<T> taskContext = createTaskContext(taskTransactionID, null) ;
           return taskContext;
@@ -172,7 +184,7 @@ public class TaskRegistry<T>{
           if(!disconnectHeartbeat) {
             transaction.deleteChild(tasksAssignedHeartbeatNode, taskTransactionID.getTaskTransactionId()) ;
           }
-          transaction.createChild(tasksAvailableNode, taskTransactionID.getTaskId(), NodeCreateMode.PERSISTENT) ;
+          transaction.createChild(tasksAvailableNode, taskTransactionID.getTaskId() + "-", NodeCreateMode.PERSISTENT_SEQUENTIAL) ;
           transaction.commit();
           return true;
         } catch(RegistryException ex) {

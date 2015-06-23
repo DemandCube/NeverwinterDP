@@ -48,6 +48,12 @@ abstract public class DataflowChainSubmitter {
     return this ;
   }
   
+  public void report(Appendable out) throws Exception {
+    for(DataflowSubmitter submitter : submitters) {
+      submitter.report(out);
+    }
+  }
+  
   protected void setupDebugger(DataflowSubmitter submitter) throws Exception {
     if(enableDataflowTaskDebugger) {
       submitter.enableDataflowTaskDebugger(System.out);

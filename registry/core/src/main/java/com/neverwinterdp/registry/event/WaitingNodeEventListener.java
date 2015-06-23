@@ -57,13 +57,14 @@ abstract public class WaitingNodeEventListener {
    * @param expectData
    * @throws Exception
    */
-  synchronized public <T> void add(String path, String desc, T[] expectData) throws Exception {
+  synchronized public <T> DataChangeNodeWatcher<T> add(String path, String desc, T[] expectData) throws Exception {
     DataChangeNodeWatcher<T> watcher = 
         new DataChangeNodeWatcher<T>(path, (Class<T>)expectData[0].getClass(), expectData, desc);
     watcherQueue.addLast(watcher);
     registryListener.watch(path, watcher, true);
     waitingNodeEventCount++;
     if(detectNodeEventCount == 0) estimateLastDetectEventTime = System.currentTimeMillis() ;
+    return watcher;
   }
   
   /**
@@ -88,10 +89,12 @@ abstract public class WaitingNodeEventListener {
     if(checkBeforeWatch && registry.exists(path)) {
       for(T sel : expectData) {
         T data = (T) registry.getDataAs(path, sel.getClass());
-        if(sel.equals(data)) return;
+        if(sel.equals(data)) {
+          return;
+        }
       }
     }
-    add(path, desc, expectData);
+    DataChangeNodeWatcher<T> watcher = add(path, desc, expectData);
   }
   
   public <T> void addCreate(String path, String desc, boolean checkBeforeWatch) throws Exception {

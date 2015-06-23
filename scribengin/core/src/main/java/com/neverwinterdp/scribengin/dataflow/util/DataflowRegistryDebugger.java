@@ -28,10 +28,10 @@ public class DataflowRegistryDebugger extends RegistryDebugger {
     watchChild(workerActivePath,  ".*", new DataflowVMDebugger(detailedDebugger));
   }
   
-  public void enableDataflowLifecycleDebugger() throws RegistryException {
+  public void enableDataflowDebugger() throws RegistryException {
     String statusPath = dataflowPath + "/status";
-    DataflowLifecycleDebugger debugger = new DataflowLifecycleDebugger(dataflowPath) ;
-   // watch(statusPath, debugger, true);
+    DataflowDebugger debugger = new DataflowDebugger(dataflowPath) ;
+    watch(statusPath, debugger, true);
     String taskAssignedPath = dataflowPath + "/tasks/executions/assigned/task-ids";
     watchChild(taskAssignedPath, ".*", debugger);
   }

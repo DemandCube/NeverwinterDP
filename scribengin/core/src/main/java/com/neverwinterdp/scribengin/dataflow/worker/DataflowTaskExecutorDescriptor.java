@@ -3,8 +3,6 @@ package com.neverwinterdp.scribengin.dataflow.worker;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
-
 
 public class DataflowTaskExecutorDescriptor {
   public static enum Status { INIT, RUNNING, TERMINATED }

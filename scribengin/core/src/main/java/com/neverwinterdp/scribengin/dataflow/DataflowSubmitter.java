@@ -6,6 +6,8 @@ import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.SequenceIdTracker;
 import com.neverwinterdp.registry.event.WaitingOrderNodeEventListener;
 import com.neverwinterdp.scribengin.ScribenginClient;
+import com.neverwinterdp.scribengin.dataflow.service.DataflowService;
+import com.neverwinterdp.scribengin.dataflow.util.DataflowFormater;
 import com.neverwinterdp.scribengin.dataflow.util.DataflowRegistryDebugger;
 import com.neverwinterdp.scribengin.service.ScribenginService;
 import com.neverwinterdp.scribengin.service.VMScribenginServiceCommand;
@@ -55,7 +57,7 @@ public class DataflowSubmitter {
   public void waitForRunning(long timeout) throws Exception {
     long start = System.currentTimeMillis();
     DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
-      DataflowLifecycleStatus.RUNNING, DataflowLifecycleStatus.TERMINATED
+      DataflowLifecycleStatus.RUNNING, DataflowLifecycleStatus.TERMINATED, DataflowLifecycleStatus.FINISH
     };
     waitForStatus(timeout, status) ;
     System.out.println("Wait for RUNNING or TERMINATED status in " + (System.currentTimeMillis() - start) + "ms");
@@ -63,14 +65,14 @@ public class DataflowSubmitter {
   
   public void waitForTerminated(long timeout) throws Exception {
     DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
-      DataflowLifecycleStatus.TERMINATED
+      DataflowLifecycleStatus.TERMINATED, DataflowLifecycleStatus.FINISH
     };
     waitForStatus(timeout, status) ;
   }
   
   public DataflowSubmitter enableDataflowTaskDebugger(Appendable out) throws Exception {
     DataflowRegistryDebugger debugger = scribenginClient.getDataflowRegistryDebugger(out, dflDescriptor);
-    debugger.enableDataflowLifecycleDebugger();
+    debugger.enableDataflowDebugger();
     //debugger.enableDataflowTaskDebugger(false);
     return this ;
   }
@@ -84,6 +86,12 @@ public class DataflowSubmitter {
   }
   
   public void report(Appendable out) throws Exception {
+    String dataflowPath = ScribenginService.getDataflowPath(dflDescriptor.getId());
+    DataflowFormater dflFt = new DataflowFormater(scribenginClient.getRegistry(), dataflowPath);
+    out.append("Dataflow " + dflDescriptor.getId()).append('\n');
+    out.append("**************************************************************************************").append('\n');
+    out.append(dflFt.getFormattedText()).append('\n');
+    out.append("**************************************************************************************").append("\n\n");
   }
   
   public void dumpDataflowRegistry(Appendable out) throws Exception {

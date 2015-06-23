@@ -80,22 +80,29 @@ public class LogSampleRunner {
   }
   
   public void submitLogSampleDataflowChain() throws Exception {
-    String json = IOUtil.getFileContentAsString(config.dataflowDescriptor) ;
-    DataflowChainConfig dflChainconfig = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
-    OrderDataflowChainSubmitter submitter = 
-        new OrderDataflowChainSubmitter(shell.getScribenginClient(), config.dfsAppHome, dflChainconfig);
-    if(config.dataflowTaskDebug) {
-      submitter.enableDataflowTaskDebugger();
+    OrderDataflowChainSubmitter submitter =  null;
+    try {
+      String json = IOUtil.getFileContentAsString(config.dataflowDescriptor) ;
+      DataflowChainConfig dflChainconfig = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
+      submitter = new OrderDataflowChainSubmitter(shell.getScribenginClient(), config.dfsAppHome, dflChainconfig);
+      if(config.dataflowTaskDebug) {
+        submitter.enableDataflowTaskDebugger();
+      }
+      submitter.submit(config.dataflowWaitForSubmitTimeout);
+      submitter.waitForTerminated(config.dataflowWaitForTerminationTimeout);
+    } catch(Throwable ex) {
+      ex.printStackTrace();
+      if(submitter != null) {
+        submitter.report(System.err);
+      }
     }
-    submitter.submit(config.dataflowWaitForSubmitTimeout);
-    submitter.waitForTerminated(config.dataflowWaitForTerminationTimeout);
   }
   
   static public void main(String[] args) throws Exception {
     LogSampleRunner runner = new LogSampleRunner(args);
     runner.uploadApp();
     runner.submitVMLogGeneratorApp();
-    Thread.sleep(15000);
+    Thread.sleep(5000);
     runner.submitLogSampleDataflowChain();
     runner.submitVMLogValidatorApp();
   }
@@ -116,7 +123,7 @@ public class LogSampleRunner {
       "--log-validator-wait-for-termination", "30000",
       
       "--dataflow-descriptor", descriptorPath,
-      "--dataflow-wait-for-submit-timeout", "60000",
+      "--dataflow-wait-for-submit-timeout", "45000",
       "--dataflow-wait-for-termination-timeout", "180000",
       "--dataflow-task-debug"
     } ;
