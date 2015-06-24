@@ -107,8 +107,8 @@ public class DataflowSubmitter {
   }
   
   public void dumpDataflowRegistry(Appendable out) throws Exception {
-    report(out);
     String dataflowStatusPath = ScribenginService.getDataflowPath(dflDescriptor.getId());
     scribenginClient.getRegistry().get(dataflowStatusPath).dump(out);
+    report(out);
   }
 }
