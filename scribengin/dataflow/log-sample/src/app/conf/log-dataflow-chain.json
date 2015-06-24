@@ -10,7 +10,7 @@
       "numberOfExecutorsPerWorker" : 2,
       "maxRunTime": 900000,
       "maxWaitForDataRead": 15000,
-      "taskSwitchingPeriod" : 15000,
+      "taskSwitchingPeriod" : 30000,
       "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessageSplitter",
 
       "sourceDescriptor" : {
@@ -61,7 +61,7 @@
       "numberOfExecutorsPerWorker" : 2,
       "maxRunTime": 900000,
       "maxWaitForDataRead": 15000,
-      "taskSwitchingPeriod" : 15000,
+      "taskSwitchingPeriod" : 30000,
       "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessagePerister",
 
       "sourceDescriptor" : {
@@ -107,7 +107,7 @@
       "numberOfExecutorsPerWorker" : 2,
       "maxRunTime": 900000,
       "maxWaitForDataRead": 15000,
-      "taskSwitchingPeriod" : 15000,
+      "taskSwitchingPeriod" : 30000,
       "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessagePerister",
 
       "sourceDescriptor" : {
@@ -153,7 +153,7 @@
       "numberOfExecutorsPerWorker" : 2,
       "maxRunTime": 900000,
       "maxWaitForDataRead": 15000,
-      "taskSwitchingPeriod" : 15000,
+      "taskSwitchingPeriod" : 30000,
       "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessagePerister",
 
       "sourceDescriptor" : {
