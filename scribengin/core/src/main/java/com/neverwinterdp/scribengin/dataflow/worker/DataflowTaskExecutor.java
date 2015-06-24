@@ -83,7 +83,8 @@ public class DataflowTaskExecutor {
         currentDataflowTask.init();
         executorThread = new DataflowTaskExecutorThread(currentDataflowTask);
         executorThread.start();
-        executorThread.waitForTimeout(dflDescriptor.getTaskSwitchingPeriod());
+        //executorThread.waitForTimeout(dflDescriptor.getTaskSwitchingPeriod());
+        executorThread.waitForTimeout(15000);
         if(currentDataflowTask.isComplete()) {
           currentDataflowTask.finish();
         } else {
