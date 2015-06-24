@@ -50,15 +50,12 @@ public class VMLogMessageGeneratorApp extends VMApp {
     @Override
     public void run() {
       Logger logger = getVM().getLoggerFactory().getLogger("LogSample") ;
-      
       MessageGenerator messageGenerator = new MessageGenerator.DefaultMessageGenerator() ;
-      Random rand = new Random() ;
-      
       for(int i = 0; i < numOfMessagePerExecutor; i++) {
-        double randNum = rand.nextDouble();
+        int mod = i % 3 ;
         String jsonMessage = new String(messageGenerator.nextMessage(groupId, messageSize)) ;
-        if(randNum < 0.4) logger.info(jsonMessage);
-        else if (randNum < 0.7) logger.warn(jsonMessage);
+        if(mod == 0) logger.info(jsonMessage);
+        else if (mod == 1) logger.warn(jsonMessage);
         else logger.error(jsonMessage);
       }
       

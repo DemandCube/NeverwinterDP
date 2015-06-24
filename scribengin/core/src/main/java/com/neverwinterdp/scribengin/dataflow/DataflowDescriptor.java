@@ -19,7 +19,7 @@ public class DataflowDescriptor {
   private long                           maxWaitForAvailableDataStream = 10000;
   private long                           maxWaitForDataRead            = 5000;
   
-  private long                           taskMaxExecuteTime            = -1;
+  private long                           taskSwitchingPeriod            = -1;
   private String                         scribe;
   private LoggerConfig                   loggerConfig                  = new LoggerConfig();
 
@@ -71,9 +71,9 @@ public class DataflowDescriptor {
     this.maxWaitForDataRead = maxWaitForDataRead;
   }
   
-  public long getTaskMaxExecuteTime() { return taskMaxExecuteTime;}
-  public void setTaskMaxExecuteTime(long taskMaxExecuteTime) {
-    this.taskMaxExecuteTime = taskMaxExecuteTime;
+  public long getTaskSwitchingPeriod() { return taskSwitchingPeriod;}
+  public void setTaskSwitchingPeriod(long period) {
+    this.taskSwitchingPeriod = period;
   }
   
   public String getScribe() { return scribe; }

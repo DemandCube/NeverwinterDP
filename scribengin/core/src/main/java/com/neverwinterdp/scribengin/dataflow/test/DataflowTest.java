@@ -92,7 +92,7 @@ abstract public class DataflowTest {
     dflDescriptor.setId(dataflowId);
     dflDescriptor.setName(dataflowName);
     dflDescriptor.setNumberOfWorkers(numOfWorkers);
-    dflDescriptor.setTaskMaxExecuteTime(taskMaxExecuteTime);
+    dflDescriptor.setTaskSwitchingPeriod(taskMaxExecuteTime);
     dflDescriptor.setNumberOfExecutorsPerWorker(numOfExecutorPerWorker);
     dflDescriptor.setScribe(TestCopyScribe.class.getName());
     dflDescriptor.setSourceDescriptor(sourceGenerator.getSourceDescriptor());

@@ -19,7 +19,6 @@ public class DataflowTaskDescriptor {
   private String                        scribe;
   private StreamDescriptor              streamDescriptor;
   private Map<String, StreamDescriptor> sinkStreamDescriptors;
-  private long                          maxWaitForReadingData = 5000;
   private String                        registryPath;
 
   public DataflowTaskDescriptor() {
@@ -48,11 +47,6 @@ public class DataflowTaskDescriptor {
     this.sinkStreamDescriptors = sinkStreamDescriptors;
   }
   
-  public long getMaxWaitForReadingData() { return maxWaitForReadingData; }
-  public void setMaxWaitForReadingData(long maxWaitForReadingData) {
-    this.maxWaitForReadingData = maxWaitForReadingData;
-  }
-
   @JsonIgnore
   public String getRegistryPath() { return registryPath; }
   public void   setRegistryPath(String path) { this.registryPath = path; }

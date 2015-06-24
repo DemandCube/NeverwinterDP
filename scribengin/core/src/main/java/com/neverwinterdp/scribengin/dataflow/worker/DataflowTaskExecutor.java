@@ -3,6 +3,7 @@ package com.neverwinterdp.scribengin.dataflow.worker;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskContext;
 import com.neverwinterdp.scribengin.dataflow.DataflowContainer;
+import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowTask;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
@@ -56,6 +57,7 @@ public class DataflowTaskExecutor {
     Timer dataflowTaskTimerGrab = metricRegistry.getTimer("dataflow-task.timer.grab") ;
     Timer dataflowTaskTimerProcess = metricRegistry.getTimer("dataflow-task.timer.process") ;
     try {
+      DataflowDescriptor dflDescriptor = dataflowRegistry.getDataflowDescriptor(false);
       while(!interrupt) {
         TaskContext<DataflowTaskDescriptor> taskContext = null ;
         int retries = 0 ;
@@ -81,7 +83,7 @@ public class DataflowTaskExecutor {
         currentDataflowTask.init();
         executorThread = new DataflowTaskExecutorThread(currentDataflowTask);
         executorThread.start();
-        executorThread.waitForTimeout(25000);
+        executorThread.waitForTimeout(dflDescriptor.getTaskSwitchingPeriod());
         if(currentDataflowTask.isComplete()) {
           currentDataflowTask.finish();
         } else {
@@ -150,7 +152,8 @@ public class DataflowTaskExecutor {
     }
     
     synchronized void waitForTimeout(long timeout) throws InterruptedException {
-      wait(timeout);
+      if(timeout > 0) wait(timeout);
+      else wait();
       if(!terminated) dataflowtask.interrupt();
       waitForTerminated();
     }

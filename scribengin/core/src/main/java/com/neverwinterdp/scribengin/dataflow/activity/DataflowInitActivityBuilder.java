@@ -90,7 +90,6 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
         for(Map.Entry<String, Sink> entry : sinks.entrySet()) {
           descriptor.add(entry.getKey(), entry.getValue().newStream().getDescriptor());
         }
-        descriptor.setMaxWaitForReadingData(dataflowDescriptor.getMaxWaitForDataRead());
         service.addAvailableTask(descriptor);
       }
     }

@@ -63,7 +63,7 @@ public class UIDataflowDescriptorView extends JPanel implements UILifecycle {
       addRow("Dataflow Descriptor:","");
       addRow(indent+"Name:",                           dataflowDesc.getName());
       addRow(indent+"Id:",                             dataflowDesc.getId());
-      addRow(indent+"Task Max Execute Time:",          dataflowDesc.getTaskMaxExecuteTime());
+      addRow(indent+"Task Switching Period:",          dataflowDesc.getTaskSwitchingPeriod());
       addRow(indent+"DataflowAppHome:",                dataflowDesc.getDataflowAppHome());
       addRow(indent+"Number of Workers:",              dataflowDesc.getNumberOfWorkers());
       addRow(indent+"Number Of Executors Per Worker:", dataflowDesc.getNumberOfExecutorsPerWorker());
