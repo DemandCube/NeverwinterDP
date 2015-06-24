@@ -12,6 +12,7 @@ import com.neverwinterdp.dataflow.logsample.LogSampleRegistry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.tool.message.MessageGenerator;
 import com.neverwinterdp.vm.VMApp;
+import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
 
 public class VMLogMessageGeneratorApp extends VMApp {
@@ -21,9 +22,11 @@ public class VMLogMessageGeneratorApp extends VMApp {
   @Override
   public void run() throws Exception {
     VMDescriptor vmDescriptor = getVM().getDescriptor();
-    int numOfExecutor = vmDescriptor.getVmConfig().getPropertyAsInt("num-of-executor", 1);
-    numOfMessagePerExecutor = vmDescriptor.getVmConfig().getPropertyAsInt("num-of-message-per-executor", 5000);
-    messageSize = vmDescriptor.getVmConfig().getPropertyAsInt("message-size", 256);
+    VMConfig vmConfig = vmDescriptor.getVmConfig();
+    int numOfExecutor = vmConfig.getPropertyAsInt("num-of-executor", 1);
+    numOfMessagePerExecutor = vmConfig.getPropertyAsInt("num-of-message-per-executor", 5000);
+    messageSize = vmConfig.getPropertyAsInt("message-size", 256);
+    long waitBeforeExit = vmConfig.getPropertyAsInt("wait-before-exit", 45000);
     
     ExecutorService executorService = Executors.newFixedThreadPool(numOfExecutor);
 
@@ -34,7 +37,7 @@ public class VMLogMessageGeneratorApp extends VMApp {
     }
     executorService.shutdown();
     executorService.awaitTermination(60, TimeUnit.MINUTES);
-    Thread.sleep(15000);
+    Thread.sleep(waitBeforeExit);
   }
   
   public class RunnableLogMessageGenerator implements Runnable {

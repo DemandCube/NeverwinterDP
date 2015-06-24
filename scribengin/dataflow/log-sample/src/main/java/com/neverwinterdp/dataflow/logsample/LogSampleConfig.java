@@ -23,6 +23,9 @@ public class LogSampleConfig {
   @Parameter(names = "--log-generator-message-size", description = "Log generator message size")
   int logGeneratorMessageSize ;
   
+  @Parameter(names = "--log-generator-wait-before-exit", description = "Need to wait to make sure the log component forward the data to kafka, es")
+  long logGeneratorWaitBeforeExit = 45000 ;
+  
   @Parameter(names = "--log-validator-num-of-vm", description = "Log generator message size")
   int logValidatorNumOfVM = 1;
   
