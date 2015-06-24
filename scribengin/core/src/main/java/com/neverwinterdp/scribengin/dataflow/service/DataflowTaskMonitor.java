@@ -8,7 +8,8 @@ import com.neverwinterdp.registry.task.TaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
 
 public class DataflowTaskMonitor implements TaskMonitor<DataflowTaskDescriptor> {
-
+  private boolean finished = false;
+  
   @Override
   public void onAssign(TaskContext<DataflowTaskDescriptor> context) {
   }
@@ -24,6 +25,7 @@ public class DataflowTaskMonitor implements TaskMonitor<DataflowTaskDescriptor> 
       int allTask = taskRegistry.getTasksListNode().getChildren().size();
       int finishTask = taskRegistry.getTasksFinishedNode().getChildren().size();
       if(allTask == finishTask) {
+        finished = true ;
         synchronized(this) {
           notifyAll() ;
         }
@@ -37,7 +39,7 @@ public class DataflowTaskMonitor implements TaskMonitor<DataflowTaskDescriptor> 
       }
     }
   }
-
+  
   @Override
   public void onFail(TaskContext<DataflowTaskDescriptor> context) {
     TaskRegistry<DataflowTaskDescriptor> taskRegistry = context.getTaskRegistry();
@@ -53,8 +55,10 @@ public class DataflowTaskMonitor implements TaskMonitor<DataflowTaskDescriptor> 
     }
   }
 
-  synchronized public void waitForAllTaskFinish() throws InterruptedException {
-    wait() ;
+  synchronized public boolean waitForAllTaskFinish(long timeout) throws InterruptedException {
+    if(timeout > 0) wait(timeout) ;
+    else wait() ;
+    return finished;
   }
   
 }

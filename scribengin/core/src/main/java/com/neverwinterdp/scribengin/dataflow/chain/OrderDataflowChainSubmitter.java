@@ -55,7 +55,7 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
     long remainTime = timeout;
     for(DataflowSubmitter submitter : submitters) {
       try {
-        submitter.waitForTerminated(remainTime);
+        submitter.waitForFinish(remainTime);
       } catch(Exception ex) {
         submitter.dumpDataflowRegistry(System.err);
         throw ex;

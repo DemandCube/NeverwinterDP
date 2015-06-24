@@ -57,15 +57,15 @@ public class DataflowSubmitter {
   public void waitForRunning(long timeout) throws Exception {
     long start = System.currentTimeMillis();
     DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
-      DataflowLifecycleStatus.RUNNING, DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
+      DataflowLifecycleStatus.RUNNING, DataflowLifecycleStatus.STOP, DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
     };
     waitForStatus(timeout, status) ;
     System.out.println("Wait for RUNNING or TERMINATED status in " + (System.currentTimeMillis() - start) + "ms");
   }
   
-  public void waitForTerminated(long timeout) throws Exception {
+  public void waitForFinish(long timeout) throws Exception {
     DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
-        DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
+        DataflowLifecycleStatus.STOP, DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
     };
     waitForStatus(timeout, status) ;
   }

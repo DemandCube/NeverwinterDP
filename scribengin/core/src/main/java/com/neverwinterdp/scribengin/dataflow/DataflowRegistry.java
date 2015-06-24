@@ -65,6 +65,8 @@ public class DataflowRegistry {
   @Inject
   private VMDescriptor       vmDescriptor;
   
+  private DataflowDescriptor dataflowDescriptor;
+  
   private ConfigurationRegistry  configuration ;
   
   private Node               masterLeaderNode;
@@ -119,7 +121,7 @@ public class DataflowRegistry {
   }
   
   public void initRegistry() throws Exception {
-    DataflowDescriptor dataflowDescriptor = getDataflowDescriptor() ;
+    dataflowDescriptor = getDataflowDescriptor() ;
     
     configuration.initRegistry(dataflowDescriptor);
     
@@ -170,7 +172,12 @@ public class DataflowRegistry {
   public TaskRegistry<DataflowTaskDescriptor> getTaskRegistry() { return this.taskRegistry; }
   
   public DataflowDescriptor getDataflowDescriptor() throws RegistryException {
-    return registry.getDataAs(dataflowPath, DataflowDescriptor.class);
+    return getDataflowDescriptor(true);
+  }
+  
+  public DataflowDescriptor getDataflowDescriptor(boolean reload) throws RegistryException {
+    if(reload) dataflowDescriptor = registry.getDataAs(dataflowPath, DataflowDescriptor.class);
+    return dataflowDescriptor;
   }
   
   public void addWorker(VMDescriptor vmDescriptor) throws RegistryException {

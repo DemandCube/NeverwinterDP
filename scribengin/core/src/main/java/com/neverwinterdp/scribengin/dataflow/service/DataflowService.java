@@ -99,7 +99,11 @@ public class DataflowService {
   public void waitForTermination(Thread waitForTerminationThread) throws Exception {
     this.waitForTerminationThread = waitForTerminationThread ;
     System.err.println("Before dataflowTaskMonitor.waitForAllTaskFinish();");
-    dataflowTaskMonitor.waitForAllTaskFinish();
+    long maxRunTime = dataflowRegistry.getDataflowDescriptor(false).getMaxRunTime();
+    if(!dataflowTaskMonitor.waitForAllTaskFinish(maxRunTime)) {
+      activityService.queue(new DataflowStopActivityBuilder().build());
+      dataflowTaskMonitor.waitForAllTaskFinish(-1);
+    }
     System.err.println("After dataflowTaskMonitor.waitForAllTaskFinish();");
     
     System.err.println("Before dataflowWorkerMonitor.waitForAllWorkerTerminated();");

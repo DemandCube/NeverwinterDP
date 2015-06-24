@@ -38,7 +38,7 @@ abstract public class DataflowChainSubmitter {
     long stopTime = System.currentTimeMillis() + timeout;
     long remainTime = timeout;
     for(DataflowSubmitter submitter : submitters) {
-      submitter.waitForTerminated(remainTime);
+      submitter.waitForFinish(remainTime);
       remainTime = stopTime - System.currentTimeMillis();
     }
   }
