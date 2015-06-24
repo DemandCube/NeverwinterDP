@@ -54,12 +54,7 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
     long stopTime = System.currentTimeMillis() + timeout;
     long remainTime = timeout;
     for(DataflowSubmitter submitter : submitters) {
-      try {
-        submitter.waitForFinish(remainTime);
-      } catch(Exception ex) {
-        submitter.dumpDataflowRegistry(System.err);
-        throw ex;
-      }
+      submitter.waitForFinish(remainTime);
       remainTime = stopTime - System.currentTimeMillis();
     }
   }

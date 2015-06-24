@@ -55,19 +55,31 @@ public class DataflowSubmitter {
   }
   
   public void waitForRunning(long timeout) throws Exception {
-    long start = System.currentTimeMillis();
-    DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
-      DataflowLifecycleStatus.RUNNING, DataflowLifecycleStatus.STOP, DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
-    };
-    waitForStatus(timeout, status) ;
-    System.out.println("Wait for RUNNING or TERMINATED status in " + (System.currentTimeMillis() - start) + "ms");
+    try {
+      long start = System.currentTimeMillis();
+      DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
+          DataflowLifecycleStatus.RUNNING, DataflowLifecycleStatus.STOP, DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
+      };
+      waitForStatus(timeout, status) ;
+      System.out.println("Wait for RUNNING or TERMINATED status in " + (System.currentTimeMillis() - start) + "ms");
+    } catch(Exception ex) {
+      dumpDataflowRegistry(System.err);
+      throw ex;
+    }
   }
   
   public void waitForFinish(long timeout) throws Exception {
-    DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
-        DataflowLifecycleStatus.STOP, DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
-    };
-    waitForStatus(timeout, status) ;
+    try {
+      long start = System.currentTimeMillis();
+      DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
+          DataflowLifecycleStatus.STOP, DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
+      };
+      waitForStatus(timeout, status) ;
+      System.out.println("Wait for TERMINATED status in " + (System.currentTimeMillis() - start) + "ms");
+    } catch(Exception ex) {
+      dumpDataflowRegistry(System.err);
+      throw ex;
+    }
   }
   
   public DataflowSubmitter enableDataflowTaskDebugger(Appendable out) throws Exception {
