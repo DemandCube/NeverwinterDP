@@ -47,6 +47,7 @@ public class VMLogMessageValidatorApp extends VMApp {
     try {
       connector.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
       messageTracker.optimize();
+      getVM().getLoggerFactory().getLogger("REPORT").info("Log Count: " + messageTracker.getLogCount());
       getVM().getLoggerFactory().getLogger("REPORT").info("\n" + messageTracker.getFormattedReport());
       System.out.println(messageTracker.getFormattedReport());
     } catch(Exception ex) {
