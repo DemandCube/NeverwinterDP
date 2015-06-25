@@ -21,6 +21,7 @@ public class VMLogMessageValidatorApp extends VMApp {
   public void run() throws Exception {
     System.out.println("VMLogValidatorApp: start run()");
     VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
+    int numOfMessagePerPartition = vmConfig.getPropertyAsInt("num-of-message-per-partition", -1);
     int numOfExecutor = vmConfig.getPropertyAsInt("num-of-executor", 3);
     long waitForMessageTimeout = vmConfig.getPropertyAsInt("wait-for-message-timeout", 5000);
     long waitForTermination =  vmConfig.getPropertyAsInt("wait-for-termination", 300000);
@@ -33,7 +34,7 @@ public class VMLogMessageValidatorApp extends VMApp {
         new KafkaMessageConsumerConnector("LogValidator", zkConnectUrls).
         withConsumerTimeoutMs(waitForMessageTimeout).
         connect();
-    final BitSetMessageTracker bitSetMessageTracker = new BitSetMessageTracker(3000);
+    final BitSetMessageTracker bitSetMessageTracker = new BitSetMessageTracker(numOfMessagePerPartition);
     MessageConsumerHandler handler = new MessageConsumerHandler() {
       @Override
       public void onMessage(String topic, byte[] key, byte[] message) {

@@ -56,7 +56,7 @@ public class BitSetMessageTracker {
    
     public int getLostCount() {
       int lostCount = 0;
-      for(int i = 0; i < bitSet.size(); i++) {
+      for(int i = 0; i < numOfBits; i++) {
         if(!bitSet.get(i)) lostCount++ ;
       }
       return lostCount;

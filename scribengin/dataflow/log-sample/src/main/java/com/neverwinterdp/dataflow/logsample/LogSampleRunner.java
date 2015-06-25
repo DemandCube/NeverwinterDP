@@ -70,6 +70,7 @@ public class LogSampleRunner {
     vmConfig.setRegistryConfig(config.registryConfig);
     vmConfig.setName("log-validator");
     vmConfig.addRoles("log-validator");
+    vmConfig.addProperty("num-of-message-per-partition", config.logGeneratorNumOfMessagePerExecutor);
     vmConfig.addProperty("num-of-executor", config.logValidatorNumOfExecutorPerVM);
     vmConfig.addProperty("wait-for-message-timeout", config.logValidatorWaitForMessageTimeout);
     vmConfig.addProperty("wait-for-termination", config.logValidatorWaitForTermination);
