@@ -64,6 +64,8 @@ public class LogSampleRunner {
   }
   
   public VMSubmitter submitVMLogValidatorApp() throws Exception {
+    long start = System.currentTimeMillis() ;
+    title("Submit The Validator App");
     VMConfig vmConfig = new VMConfig() ;
     vmConfig.setRegistryConfig(config.registryConfig);
     vmConfig.setName("log-validator");
@@ -77,10 +79,14 @@ public class LogSampleRunner {
     vmSubmitter.submit();
     vmSubmitter.waitForRunning(30000);
     vmSubmitter.waitForTerminated(config.logValidatorWaitForTermination);
+    title("Finish The Validator App");
+    println("Execute Time: " + (System.currentTimeMillis() - start) + "ms");
     return vmSubmitter ;
   }
   
   public void submitLogSampleDataflowChain() throws Exception {
+    long start = System.currentTimeMillis() ;
+    title("Submit The Dataflow Chain");
     OrderDataflowChainSubmitter submitter =  null;
     try {
       String json = IOUtil.getFileContentAsString(config.dataflowDescriptor) ;
@@ -91,9 +97,21 @@ public class LogSampleRunner {
       }
       submitter.submit(config.dataflowWaitForSubmitTimeout);
       submitter.waitForTerminated(config.dataflowWaitForTerminationTimeout);
+      title("Finish The Dataflow Chain");
+      println("Execute Time: " + (System.currentTimeMillis() - start) + "ms") ;
+      submitter.report(System.out);
     } catch(Throwable ex) {
       ex.printStackTrace();
     }
+  }
+  
+  private void println(String message) {
+    System.out.println(message);
+  }
+  
+  private void title(String title) {
+    System.out.println(title);
+    System.out.println("*****************************************************************************");
   }
   
   static public void main(String[] args) throws Exception {
