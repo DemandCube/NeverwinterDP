@@ -44,9 +44,13 @@ public class VMLogMessageValidatorApp extends VMApp {
       }
     };
     connector.consume(validateTopic, handler, numOfExecutor);
-    connector.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
-    messageTracker.optimize();
-    getVM().getLoggerFactory().getLogger("REPORT").info("\n" + messageTracker.getFormattedReport());
-    System.out.println(messageTracker.getFormattedReport());
+    try {
+      connector.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
+      messageTracker.optimize();
+      getVM().getLoggerFactory().getLogger("REPORT").info("\n" + messageTracker.getFormattedReport());
+      System.out.println(messageTracker.getFormattedReport());
+    } catch(Exception ex) {
+      getVM().getLoggerFactory().getLogger("REPORT").error("Error for waiting validation", ex);
+    }
   }
 }
