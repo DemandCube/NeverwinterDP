@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.neverwinterdp.kafka.consumer.KafkaMessageConsumerConnector;
 import com.neverwinterdp.kafka.consumer.MessageConsumerHandler;
 import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.tool.message.BitSetMessageTracker;
 import com.neverwinterdp.tool.message.Message;
 import com.neverwinterdp.tool.message.MessageTracker;
 import com.neverwinterdp.util.JSONSerializer;
@@ -32,15 +33,17 @@ public class VMLogMessageValidatorApp extends VMApp {
         new KafkaMessageConsumerConnector("LogValidator", zkConnectUrls).
         withConsumerTimeoutMs(waitForMessageTimeout).
         connect();
+    final BitSetMessageTracker bitSetMessageTracker = new BitSetMessageTracker(3000);
     MessageConsumerHandler handler = new MessageConsumerHandler() {
       @Override
       public void onMessage(String topic, byte[] key, byte[] message) {
         try {
           Record rec = JSONSerializer.INSTANCE.fromBytes(message, Record.class);
-          //Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(rec.getData(), Log4jRecord.class);
-          //Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
+          Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(rec.getData(), Log4jRecord.class);
+          Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
           //messageTracker.log(lMessage);
           counter.incrementAndGet();
+          bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
         } catch(Throwable t) {
           System.err.println(t.getMessage());
         }
@@ -50,7 +53,10 @@ public class VMLogMessageValidatorApp extends VMApp {
     try {
       connector.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
       messageTracker.optimize();
+      System.out.println("Counter: " + counter.get());
+      System.out.println(bitSetMessageTracker.getFormatedReport());
       getVM().getLoggerFactory().getLogger("REPORT").info("Counter: " + counter.get());
+      
       getVM().getLoggerFactory().getLogger("REPORT").info("Log Count: " + messageTracker.getLogCount());
       getVM().getLoggerFactory().getLogger("REPORT").info("\n" + messageTracker.getFormattedReport());
       System.out.println(messageTracker.getFormattedReport());
