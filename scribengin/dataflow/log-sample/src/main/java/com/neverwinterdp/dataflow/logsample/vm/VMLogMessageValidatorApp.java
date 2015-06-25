@@ -1,6 +1,7 @@
 package com.neverwinterdp.dataflow.logsample.vm;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.neverwinterdp.kafka.consumer.KafkaMessageConsumerConnector;
 import com.neverwinterdp.kafka.consumer.MessageConsumerHandler;
@@ -25,6 +26,7 @@ public class VMLogMessageValidatorApp extends VMApp {
     String validateTopic =  vmConfig.getProperty("validate-topic");
     String zkConnectUrls = vmConfig.getRegistryConfig().getConnect() ;
     
+    final AtomicInteger counter = new AtomicInteger() ;
     messageTracker = new MessageTracker() ;
     KafkaMessageConsumerConnector connector = 
         new KafkaMessageConsumerConnector("LogValidator", zkConnectUrls).
@@ -35,9 +37,10 @@ public class VMLogMessageValidatorApp extends VMApp {
       public void onMessage(String topic, byte[] key, byte[] message) {
         try {
           Record rec = JSONSerializer.INSTANCE.fromBytes(message, Record.class);
-          Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(rec.getData(), Log4jRecord.class);
-          Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
-          messageTracker.log(lMessage);
+          //Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(rec.getData(), Log4jRecord.class);
+          //Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
+          //messageTracker.log(lMessage);
+          counter.incrementAndGet();
         } catch(Throwable t) {
           System.err.println(t.getMessage());
         }
@@ -47,6 +50,7 @@ public class VMLogMessageValidatorApp extends VMApp {
     try {
       connector.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
       messageTracker.optimize();
+      getVM().getLoggerFactory().getLogger("REPORT").info("Counter: " + counter.get());
       getVM().getLoggerFactory().getLogger("REPORT").info("Log Count: " + messageTracker.getLogCount());
       getVM().getLoggerFactory().getLogger("REPORT").info("\n" + messageTracker.getFormattedReport());
       System.out.println(messageTracker.getFormattedReport());

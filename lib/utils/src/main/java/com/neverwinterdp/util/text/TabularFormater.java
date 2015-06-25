@@ -31,6 +31,10 @@ public class TabularFormater implements TextFormater {
     for(int i = 0; i < cell.length; i++) {
       if(cellData[i] == null) cell[i] = "" ;
       else cell[i] = cellData[i].toString() ;
+      int len = cell[i].length();
+      if (len > 80) {
+        cell[i] = cell[i].substring(0, 80) + "...";
+      }
     }
     rows.add(cell) ;
   }
@@ -100,10 +104,6 @@ public class TabularFormater implements TextFormater {
   
   private void printCell(Appendable out, String cell, int width) {
     int len = cell.length();
-    if (len > 80) {
-      cell = cell.substring(0, 80) + "...";
-      len = cell.length();
-    }
     print(out, cell);
     for (int i = len; i < width; i++) {
       print(out, " ");
