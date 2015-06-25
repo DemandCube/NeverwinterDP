@@ -140,9 +140,10 @@ public class DataflowTaskExecutor {
     public void run() {
       try {
         dataflowtask.run();
-        notifyTermination();
       } catch(Exception ex) {
         ex.printStackTrace();
+      } finally {
+        notifyTermination();
       }
     }
     

@@ -50,7 +50,7 @@ public class DataflowTask {
       report.incrProcessCount();
       processor.process(record, context);
     }
-    if(!interrupt) complete = true;
+    if(record == null) complete = true;
   }
   
   public void suspend() throws Exception {
