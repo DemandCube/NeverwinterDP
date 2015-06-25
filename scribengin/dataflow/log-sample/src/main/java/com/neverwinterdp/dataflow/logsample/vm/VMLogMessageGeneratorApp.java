@@ -60,8 +60,8 @@ public class VMLogMessageGeneratorApp extends VMApp {
       
       LogSampleRegistry appRegistry = null;
       try {
-        appRegistry = new LogSampleRegistry(getVM().getVMRegistry().getRegistry());
-        LogMessageReport report = new LogMessageReport(groupId, messageGenerator.getCurrentSequenceId(groupId)) ;
+        appRegistry = new LogSampleRegistry(getVM().getVMRegistry().getRegistry(), true);
+        LogMessageReport report = new LogMessageReport(groupId, messageGenerator.getCurrentSequenceId(groupId), 0, 0) ;
         appRegistry.addGenerateReport(report);
       } catch (RegistryException e) {
         if(appRegistry != null) {

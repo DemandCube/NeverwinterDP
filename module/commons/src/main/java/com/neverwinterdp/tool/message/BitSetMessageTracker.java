@@ -23,6 +23,14 @@ public class BitSetMessageTracker {
     pTracker.log(index);;
   }
  
+  public String[] getPartitions() {
+    String[] names = new String[partitions.size()];
+    partitions.keySet().toArray(names);
+    return names;
+  }
+  
+  public BitSetPartitionMessageTracker getPartitionTracker(String name) { return partitions.get(name); }
+  
   public String getFormatedReport() {
     TabularFormater formater = new TabularFormater("Partition", "Expect", "Lost", "Duplicated");
     for(Map.Entry<String, BitSetPartitionMessageTracker> entry : partitions.entrySet()) {

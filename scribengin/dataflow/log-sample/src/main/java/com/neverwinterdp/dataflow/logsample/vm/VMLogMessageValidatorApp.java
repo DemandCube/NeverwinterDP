@@ -3,19 +3,21 @@ package com.neverwinterdp.dataflow.logsample.vm;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.neverwinterdp.dataflow.logsample.LogMessageReport;
+import com.neverwinterdp.dataflow.logsample.LogSampleRegistry;
 import com.neverwinterdp.kafka.consumer.KafkaMessageConsumerConnector;
 import com.neverwinterdp.kafka.consumer.MessageConsumerHandler;
+import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.scribengin.Record;
 import com.neverwinterdp.tool.message.BitSetMessageTracker;
 import com.neverwinterdp.tool.message.Message;
-import com.neverwinterdp.tool.message.MessageTracker;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.log.Log4jRecord;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 
 public class VMLogMessageValidatorApp extends VMApp {
-  private MessageTracker messageTracker  ;
+  BitSetMessageTracker bitSetMessageTracker;
   
   @Override
   public void run() throws Exception {
@@ -28,8 +30,6 @@ public class VMLogMessageValidatorApp extends VMApp {
     String validateTopic =  vmConfig.getProperty("validate-topic");
     String zkConnectUrls = vmConfig.getRegistryConfig().getConnect() ;
     
-    final AtomicInteger counter = new AtomicInteger() ;
-    messageTracker = new MessageTracker() ;
     KafkaMessageConsumerConnector connector = 
         new KafkaMessageConsumerConnector("LogValidator", zkConnectUrls).
         withConsumerTimeoutMs(waitForMessageTimeout).
@@ -43,7 +43,6 @@ public class VMLogMessageValidatorApp extends VMApp {
           Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(rec.getData(), Log4jRecord.class);
           Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
           //messageTracker.log(lMessage);
-          counter.incrementAndGet();
           bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
         } catch(Throwable t) {
           System.err.println(t.getMessage());
@@ -53,16 +52,27 @@ public class VMLogMessageValidatorApp extends VMApp {
     connector.consume(validateTopic, handler, numOfExecutor);
     try {
       connector.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
-      messageTracker.optimize();
-      System.out.println("Counter: " + counter.get());
-      System.out.println(bitSetMessageTracker.getFormatedReport());
-      getVM().getLoggerFactory().getLogger("REPORT").info("Counter: " + counter.get());
+      report(bitSetMessageTracker);
+      String formattedReport = bitSetMessageTracker.getFormatedReport();
+      System.out.println(formattedReport);
+      getVM().getLoggerFactory().getLogger("REPORT").info(formattedReport);
       
-      getVM().getLoggerFactory().getLogger("REPORT").info("Log Count: " + messageTracker.getLogCount());
-      getVM().getLoggerFactory().getLogger("REPORT").info("\n" + messageTracker.getFormattedReport());
-      System.out.println(messageTracker.getFormattedReport());
     } catch(Exception ex) {
       getVM().getLoggerFactory().getLogger("REPORT").error("Error for waiting validation", ex);
+    }
+  }
+  
+  private void report(BitSetMessageTracker tracker) throws Exception {
+    LogSampleRegistry appRegistry = null;
+    try {
+      appRegistry = new LogSampleRegistry(getVM().getVMRegistry().getRegistry(), true);
+      for(String partition : tracker.getPartitions()) {
+        BitSetMessageTracker.BitSetPartitionMessageTracker pTracker = tracker.getPartitionTracker(partition);
+        LogMessageReport report = new LogMessageReport(partition, pTracker.getExpect(), pTracker.getLostCount(), pTracker.getDuplicatedCount()) ;
+        appRegistry.addValidateReport(report);
+      }
+    } catch (RegistryException e) {
+      e.printStackTrace();
     }
   }
 }

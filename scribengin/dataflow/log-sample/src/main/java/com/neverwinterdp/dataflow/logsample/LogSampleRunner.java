@@ -6,6 +6,7 @@ import com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
+import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.chain.DataflowChainConfig;
 import com.neverwinterdp.scribengin.dataflow.chain.OrderDataflowChainSubmitter;
 import com.neverwinterdp.util.JSONSerializer;
@@ -63,7 +64,7 @@ public class LogSampleRunner {
     groupVMSubmitter.submitAndWaitForRunning(45000);
   }
   
-  public VMSubmitter submitVMLogValidatorApp() throws Exception {
+  public void submitVMLogValidatorApp() throws Exception {
     long start = System.currentTimeMillis() ;
     title("Submit The Validator App");
     VMConfig vmConfig = new VMConfig() ;
@@ -82,7 +83,9 @@ public class LogSampleRunner {
     vmSubmitter.waitForTerminated(config.logValidatorWaitForTermination);
     title("Finish The Validator App");
     println("Execute Time: " + (System.currentTimeMillis() - start) + "ms");
-    return vmSubmitter ;
+    LogSampleRegistry appRegistry = new LogSampleRegistry(shell.getVMClient().getRegistry(), false);
+    System.out.println(LogMessageReport.getFormattedReport("Generated Report", appRegistry.getGeneratedReports()));
+    System.out.println(LogMessageReport.getFormattedReport("Validate Report", appRegistry.getValidateReports()));
   }
   
   public void submitLogSampleDataflowChain() throws Exception {
@@ -92,6 +95,17 @@ public class LogSampleRunner {
     try {
       String json = IOUtil.getFileContentAsString(config.dataflowDescriptor) ;
       DataflowChainConfig dflChainconfig = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
+      for(int i = 0; i < dflChainconfig.getDescriptors().size(); i++) {
+        DataflowDescriptor descriptor = dflChainconfig.getDescriptors().get(i);
+        if(i == 0) {
+          long maxRuntime = config.dataflowWaitForTerminationTimeout - 6*(descriptor.getTaskSwitchingPeriod());
+          descriptor.setMaxRunTime(maxRuntime);
+        } else {
+          long maxRuntime = config.dataflowWaitForTerminationTimeout - 3*(descriptor.getTaskSwitchingPeriod());
+          descriptor.setMaxRunTime(maxRuntime);
+        }
+        
+      }
       submitter = new OrderDataflowChainSubmitter(shell.getScribenginClient(), config.dfsAppHome, dflChainconfig);
       if(config.dataflowTaskDebug) {
         submitter.enableDataflowTaskDebugger();
@@ -130,14 +144,14 @@ public class LogSampleRunner {
       "--registry-db-domain", "/NeverwinterDP",
       "--registry-implementation", RegistryImpl.class.getName(),
       
-      "--log-generator-num-of-vm", "2",
+      "--log-generator-num-of-vm", "1",
       "--log-generator-num-of-executor-per-vm", "1",
-      "--log-generator-num-of-message-per-executor", "3000",
+      "--log-generator-num-of-message-per-executor", "5000",
       "--log-generator-message-size", "128",
       
       "--dataflow-descriptor", descriptorPath,
       "--dataflow-wait-for-submit-timeout", "45000",
-      "--dataflow-wait-for-termination-timeout", "180000",
+      "--dataflow-wait-for-termination-timeout", "120000",
       "--dataflow-task-debug",
       
       "--log-validator-num-of-executor-per-vm", "3",
