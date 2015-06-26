@@ -8,8 +8,6 @@ import java.util.Properties;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 
-import com.neverwinterdp.util.text.StringUtil;
-
 public class LoggerFactory {
   private String prefix ;
   

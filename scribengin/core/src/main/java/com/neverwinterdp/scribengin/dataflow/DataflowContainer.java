@@ -12,7 +12,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.mycila.jmx.annotation.JmxBean;
-import com.neverwinterdp.module.AppModule;
+import com.neverwinterdp.module.AppServiceModule;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorService;
 import com.neverwinterdp.scribengin.storage.sink.SinkFactory;
 import com.neverwinterdp.scribengin.storage.source.SourceFactory;
@@ -30,7 +30,7 @@ public class DataflowContainer {
   
   @Deprecated
   public DataflowContainer(Map<String, String> props) {
-    AppModule module = new AppModule(props) {
+    AppServiceModule module = new AppServiceModule(props) {
       @Override
       protected void configure(Map<String, String> properties) {
         try {

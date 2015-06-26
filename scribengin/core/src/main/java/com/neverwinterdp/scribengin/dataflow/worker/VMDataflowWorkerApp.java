@@ -15,7 +15,7 @@ import com.mycila.guice.ext.closeable.CloseableInjector;
 import com.mycila.guice.ext.closeable.CloseableModule;
 import com.mycila.guice.ext.jsr250.Jsr250Module;
 import com.neverwinterdp.es.log.OSMonitorLoggerService;
-import com.neverwinterdp.module.AppModule;
+import com.neverwinterdp.module.AppServiceModule;
 import com.neverwinterdp.module.MycilaJmxModuleExt;
 import com.neverwinterdp.os.RuntimeEnv;
 import com.neverwinterdp.registry.Registry;
@@ -39,7 +39,7 @@ public class VMDataflowWorkerApp extends VMApp {
   public void run() throws Exception {
     final VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
     logger = getVM().getLoggerFactory().getLogger(VMDataflowWorkerApp.class);
-    AppModule module = new AppModule(vmConfig.getProperties()) {
+    AppServiceModule module = new AppServiceModule(vmConfig.getProperties()) {
       @Override
       protected void configure(Map<String, String> properties) {
         bindInstance(RuntimeEnv.class, getVM().getRuntimeEnv());

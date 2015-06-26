@@ -10,7 +10,7 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.mycila.guice.ext.closeable.CloseableModule;
 import com.mycila.guice.ext.jsr250.Jsr250Module;
-import com.neverwinterdp.module.AppModule;
+import com.neverwinterdp.module.AppServiceModule;
 import com.neverwinterdp.module.MycilaJmxModuleExt;
 import com.neverwinterdp.util.log.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class Main {
     }
     final Configuration conf = new Configuration() ;
     new JCommander(conf, args);
-    AppModule module = new AppModule(new HashMap<String, String>()) {
+    AppServiceModule module = new AppServiceModule(new HashMap<String, String>()) {
       @Override
       protected void configure(Map<String, String> properties) {
         bindMapProperties("esProperties", conf.esProperties) ;

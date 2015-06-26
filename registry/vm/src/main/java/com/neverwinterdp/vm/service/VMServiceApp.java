@@ -9,7 +9,7 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.mycila.guice.ext.closeable.CloseableModule;
 import com.mycila.guice.ext.jsr250.Jsr250Module;
-import com.neverwinterdp.module.AppModule;
+import com.neverwinterdp.module.AppServiceModule;
 import com.neverwinterdp.module.MycilaJmxModuleExt;
 import com.neverwinterdp.registry.RefNode;
 import com.neverwinterdp.registry.Registry;
@@ -68,7 +68,7 @@ public class VMServiceApp extends VMApp {
       RefNode refNode = new RefNode();
       refNode.setPath(getVM().getDescriptor().getRegistryPath());
       registry.setData(VMService.LEADER_PATH, refNode);
-      AppModule module = new AppModule(getVM().getDescriptor().getVmConfig().getProperties()) {
+      AppServiceModule module = new AppServiceModule(getVM().getDescriptor().getVmConfig().getProperties()) {
         @Override
         protected void configure(Map<String, String> properties) {
           bindInstance(VMConfig.class, getVM().getDescriptor().getVmConfig());

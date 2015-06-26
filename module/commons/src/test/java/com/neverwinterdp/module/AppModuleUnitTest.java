@@ -5,8 +5,6 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,7 +33,7 @@ public class AppModuleUnitTest {
     props.put("registry.db-domain", "/scribengin/v2") ;
     
     Injector container1 = 
-        Guice.createInjector(Stage.PRODUCTION, new CloseableModule(), new Jsr250Module(), new MycilaJmxModuleExt("test-domain"), new AppModule(props));
+        Guice.createInjector(Stage.PRODUCTION, new CloseableModule(), new Jsr250Module(), new MycilaJmxModuleExt("test-domain"), new AppServiceModule(props));
     
     Hello hello = container1.getInstance(Hello.class);
     hello.sayHello();
@@ -52,28 +50,6 @@ public class AppModuleUnitTest {
     Assert.assertEquals("127.0.0.1:2181", pojo.getConnect());
     Assert.assertEquals("/scribengin/v2", pojo.getDbDomain());
     container1.getInstance(CloseableInjector.class).close();
-  }
-  
-  public interface HelloMBean {
-    public void sayHello() ;
-  }
-  
-  @Singleton
-  static public class Hello implements HelloMBean {
-    @Inject @Named("hello")
-    private String hello ;
-    
-    @Inject
-    public void registerMBean(MBeanServer server) throws Exception {
-      ObjectName oname = new ObjectName("com.neverwinterdp:type=HelloMBean,name=scribengin.Hello");
-      server.registerMBean(this, oname);
-      System.out.println("Init mbean...................");
-    }
-    
-    @Override
-    public void sayHello() {
-      System.out.println("Say hello: " + hello);
-    }
   }
   
   @Singleton

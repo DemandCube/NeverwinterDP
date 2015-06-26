@@ -14,7 +14,7 @@ import com.google.inject.Stage;
 import com.mycila.guice.ext.closeable.CloseableInjector;
 import com.mycila.guice.ext.closeable.CloseableModule;
 import com.mycila.guice.ext.jsr250.Jsr250Module;
-import com.neverwinterdp.module.AppModule;
+import com.neverwinterdp.module.AppServiceModule;
 import com.neverwinterdp.os.RuntimeEnv;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
@@ -90,7 +90,7 @@ public class VM {
     logger.info("Start createVMContainer(...)");
     Map<String, String> props = new HashMap<String, String>();
     props.put("vm.registry.allocated.path", VMService.ALL_PATH + "/" + vmConfig.getName());
-    AppModule module = new AppModule(props) {
+    AppServiceModule module = new AppServiceModule(props) {
       @Override
       protected void configure(Map<String, String> props) {
         try {

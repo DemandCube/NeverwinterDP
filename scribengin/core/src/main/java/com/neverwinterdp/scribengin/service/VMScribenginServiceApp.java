@@ -12,7 +12,7 @@ import com.mycila.guice.ext.closeable.CloseableInjector;
 import com.mycila.guice.ext.closeable.CloseableModule;
 import com.mycila.guice.ext.jsr250.Jsr250Module;
 import com.neverwinterdp.es.log.OSMonitorLoggerService;
-import com.neverwinterdp.module.AppModule;
+import com.neverwinterdp.module.AppServiceModule;
 import com.neverwinterdp.module.MycilaJmxModuleExt;
 import com.neverwinterdp.os.RuntimeEnv;
 import com.neverwinterdp.registry.RefNode;
@@ -67,7 +67,7 @@ public class VMScribenginServiceApp extends VMApp {
     public void onElected() {
       try {
         final Registry registry = getVM().getVMRegistry().getRegistry();
-        AppModule module = new AppModule(getVM().getDescriptor().getVmConfig().getProperties()) {
+        AppServiceModule module = new AppServiceModule(getVM().getDescriptor().getVmConfig().getProperties()) {
           @Override
           protected void configure(Map<String, String> properties) {
             bindInstance(RegistryConfig.class, registry.getRegistryConfig());

@@ -10,6 +10,7 @@ eclipse {
 
 dependencies {
   compile project(':lib/utils')
+  compile project(':lib/yara')
 
   compile group: 'org.apache.kafka', name: 'kafka_2.10', version: "0.8.2.0"
   compile group: 'com.beust', name: 'jcommander', version: '1.35'
