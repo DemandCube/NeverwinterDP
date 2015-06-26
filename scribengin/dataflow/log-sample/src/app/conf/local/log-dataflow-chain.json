@@ -6,11 +6,11 @@
       "id" :   "log-splitter-dataflow-1",
       "name" : "log-splitter-dataflow",
 
-      "numberOfWorkers" : 2,
-      "numberOfExecutorsPerWorker" : 2,
+      "numberOfWorkers" : 1,
+      "numberOfExecutorsPerWorker" : 3,
       "taskSwitchingPeriod" : 15000,
       "maxRunTime": 90000,
-      "maxWaitForDataRead": 15000,
+      "maxWaitForDataRead": 10000,
       "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessageSplitter",
 
       "sourceDescriptor" : {
@@ -57,11 +57,11 @@
     {
       "id" :   "log-persister-dataflow-info",
       "name" : "log-persister-dataflow",
-      "numberOfWorkers" : 2,
-      "numberOfExecutorsPerWorker" : 2,
+      "numberOfWorkers" : 1,
+      "numberOfExecutorsPerWorker" : 3,
       "maxRunTime": 120000,
       "maxWaitForDataRead": 15000,
-      "taskSwitchingPeriod" : 15000,
+      "taskSwitchingPeriod" : 10000,
       "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessagePerister",
 
       "sourceDescriptor" : {
@@ -103,11 +103,11 @@
     {
       "id" :   "log-persister-dataflow-warn",
       "name" : "log-persister-dataflow",
-      "numberOfWorkers" : 2,
-      "numberOfExecutorsPerWorker" : 2,
+      "numberOfWorkers" : 1,
+      "numberOfExecutorsPerWorker" : 3,
       "maxRunTime": 120000,
       "maxWaitForDataRead": 15000,
-      "taskSwitchingPeriod" : 15000,
+      "taskSwitchingPeriod" : 10000,
       "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessagePerister",
 
       "sourceDescriptor" : {
@@ -149,11 +149,11 @@
     {
       "id" :   "log-persister-dataflow-error",
       "name" : "log-persister-dataflow",
-      "numberOfWorkers" : 2,
-      "numberOfExecutorsPerWorker" : 2,
+      "numberOfWorkers" : 1,
+      "numberOfExecutorsPerWorker" : 3,
       "maxRunTime": 120000,
       "maxWaitForDataRead": 15000,
-      "taskSwitchingPeriod" : 15000,
+      "taskSwitchingPeriod" : 10000,
       "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessagePerister",
 
       "sourceDescriptor" : {

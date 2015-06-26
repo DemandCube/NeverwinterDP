@@ -1,7 +1,6 @@
 package com.neverwinterdp.dataflow.logsample.vm;
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.neverwinterdp.dataflow.logsample.LogMessageReport;
 import com.neverwinterdp.dataflow.logsample.LogSampleRegistry;

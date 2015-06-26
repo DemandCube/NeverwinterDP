@@ -148,10 +148,11 @@ public class LogSampleRunner {
       "--log-generator-num-of-executor-per-vm", "1",
       "--log-generator-num-of-message-per-executor", "5000",
       "--log-generator-message-size", "128",
+      "--log-generator-wait-before-exit", "60000",
       
       "--dataflow-descriptor", descriptorPath,
       "--dataflow-wait-for-submit-timeout", "45000",
-      "--dataflow-wait-for-termination-timeout", "120000",
+      "--dataflow-wait-for-termination-timeout", "90000",
       "--dataflow-task-debug",
       
       "--log-validator-num-of-executor-per-vm", "3",
