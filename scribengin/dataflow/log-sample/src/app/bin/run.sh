@@ -49,8 +49,8 @@ $JAVACMD -Djava.ext.dirs=$APP_DIR/libs:$SCRIBENGIN_HOME/libs:$JAVA_HOME/jre/lib/
   --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
   --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
   --log-generator-num-of-vm 1 --log-generator-num-of-executor-per-vm 4 --log-generator-num-of-message-per-executor 2500000 --log-generator-message-size 128 \
-  --log-generator-wait-before-exit 300000 \
-  --log-validator-num-of-executor-per-vm 3 --log-validator-wait-for-message-timeout 15000 --log-validator-wait-for-termination 1800000 \
+  --log-generator-wait-before-exit 1800000 \
+  --log-validator-num-of-executor-per-vm 3 --log-validator-wait-for-message-timeout 15000 --log-validator-wait-for-termination 600000 \
   --dataflow-descriptor $APP_DIR/conf/log-dataflow-chain.json  \
   --dataflow-wait-for-submit-timeout 150000 --dataflow-wait-for-termination-timeout 5400000 \
   --dataflow-task-debug
