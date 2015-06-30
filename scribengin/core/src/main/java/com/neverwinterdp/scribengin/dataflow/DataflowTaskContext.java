@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorService;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkFactory;
@@ -16,23 +17,24 @@ import com.neverwinterdp.scribengin.storage.source.SourceStream;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
 
 public class DataflowTaskContext {
+  private DataflowTaskExecutorService executorService;
   private DataflowTaskReport report;
   private SourceContext sourceContext;
   private Map<String, SinkContext> sinkContexts = new HashMap<String, SinkContext>();
   private DataflowRegistry dataflowRegistry;
   private DataflowTaskDescriptor dataflowTaskDescriptor;
 
-  public DataflowTaskContext(DataflowContainer container, DataflowTaskDescriptor descriptor, DataflowTaskReport report)  throws Exception {
-    this.sourceContext = new SourceContext(container.getSourceFactory(), descriptor.getSourceStreamDescriptor());
+  public DataflowTaskContext(DataflowTaskExecutorService service, DataflowTaskDescriptor descriptor, DataflowTaskReport report)  throws Exception {
+    this.executorService = service;
+    this.sourceContext = new SourceContext(service.getSourceFactory(), descriptor.getSourceStreamDescriptor());
     Iterator<Map.Entry<String, StreamDescriptor>> i = descriptor.getSinkStreamDescriptors().entrySet().iterator();
       while (i.hasNext()) {
         Map.Entry<String, StreamDescriptor> entry = i.next();
-        SinkContext context = new SinkContext(container.getSinkFactory(), entry.getValue());
+        SinkContext context = new SinkContext(service.getSinkFactory(), entry.getValue());
         sinkContexts.put(entry.getKey(), context);
       }
       this.report = report;
       this.dataflowTaskDescriptor = descriptor;
-      this.dataflowRegistry = container.getDataflowRegistry();
   }
 
   public DataflowTaskReport getReport() {
@@ -83,7 +85,7 @@ public class DataflowTaskContext {
       throw ex;
     }
     report.updateCommit();
-    dataflowRegistry.dataflowTaskReport(dataflowTaskDescriptor, report);
+    executorService.getDataflowRegistry().dataflowTaskReport(dataflowTaskDescriptor, report);
     return false;
   }
 

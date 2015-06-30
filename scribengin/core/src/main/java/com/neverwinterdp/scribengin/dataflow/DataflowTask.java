@@ -2,11 +2,12 @@ package com.neverwinterdp.scribengin.dataflow;
 
 import com.neverwinterdp.registry.task.TaskContext;
 import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorService;
 import com.neverwinterdp.scribengin.scribe.ScribeAbstract;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
 
 public class DataflowTask {
-  private DataflowContainer container;
+  private DataflowTaskExecutorService executorService;
   private final TaskContext<DataflowTaskDescriptor> taskContext;
   private DataflowTaskDescriptor descriptor ;
   private ScribeAbstract processor;
@@ -15,10 +16,10 @@ public class DataflowTask {
   private boolean complete = false;
   private long    startTime = 0;
   
-  public DataflowTask(DataflowContainer container, TaskContext<DataflowTaskDescriptor> taskContext) throws Exception {
-    this.container = container;
-    this.taskContext = taskContext;
-    this.descriptor = taskContext.getTaskDescriptor(true);
+  public DataflowTask(DataflowTaskExecutorService service, TaskContext<DataflowTaskDescriptor> taskContext) throws Exception {
+    this.executorService = service;
+    this.taskContext     = taskContext;
+    this.descriptor      = taskContext.getTaskDescriptor(true);
     Class<ScribeAbstract> scribeType = (Class<ScribeAbstract>) Class.forName(descriptor.getScribe());
     processor = scribeType.newInstance();
   }
@@ -33,18 +34,18 @@ public class DataflowTask {
   
   public void init() throws Exception {
     startTime = System.currentTimeMillis();
-    DataflowRegistry dRegistry = container.getDataflowRegistry();
+    DataflowRegistry dRegistry = executorService.getDataflowRegistry();
     DataflowTaskReport report = dRegistry.getTaskReport(descriptor);
     report.incrAssignedCount();
     dRegistry.dataflowTaskReport(descriptor, report);
-    context = new DataflowTaskContext(container, descriptor, report);
+    context = new DataflowTaskContext(executorService, descriptor, report);
   }
   
   public void run() throws Exception {
     DataflowTaskReport report = context.getReport();
     SourceStreamReader reader = context.getSourceStreamReader() ;
     Record record = null ;
-    DataflowDescriptor dflDescriptor =   container.getDataflowRegistry().getDataflowDescriptor(false);
+    DataflowDescriptor dflDescriptor = executorService.getDataflowRegistry().getDataflowDescriptor(false);
     long maxWaitForDataRead =  dflDescriptor.getMaxWaitForDataRead();
     while(!interrupt && (record = reader.next(maxWaitForDataRead)) != null) {
       report.incrProcessCount();
@@ -55,14 +56,16 @@ public class DataflowTask {
   
   public void suspend() throws Exception {
     saveContext();
-    container.getDataflowRegistry().dataflowTaskSuspend(taskContext);
+    DataflowRegistry dflRegistry = executorService.getDataflowRegistry();
+    dflRegistry.dataflowTaskSuspend(taskContext);
   }
   
   public void finish() throws Exception {
     DataflowTaskReport report = context.getReport();
     report.setFinishTime(System.currentTimeMillis());
     saveContext();
-    container.getDataflowRegistry().dataflowTaskFinish(taskContext);
+    DataflowRegistry dflRegistry = executorService.getDataflowRegistry();
+    dflRegistry.dataflowTaskSuspend(taskContext);
   }
   
   void saveContext() throws Exception {

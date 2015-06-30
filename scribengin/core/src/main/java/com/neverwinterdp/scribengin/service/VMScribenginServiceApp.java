@@ -1,35 +1,23 @@
 package com.neverwinterdp.scribengin.service;
 
-import java.util.Map;
+import java.util.HashMap;
 
 import org.slf4j.Logger;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.Stage;
-import com.mycila.guice.ext.closeable.CloseableInjector;
-import com.mycila.guice.ext.closeable.CloseableModule;
-import com.mycila.guice.ext.jsr250.Jsr250Module;
-import com.neverwinterdp.es.log.OSMonitorLoggerService;
-import com.neverwinterdp.module.AppServiceModule;
-import com.neverwinterdp.module.MycilaJmxModuleExt;
-import com.neverwinterdp.os.RuntimeEnv;
+import com.neverwinterdp.module.AppContainer;
+import com.neverwinterdp.module.ScribenginServiceModule;
+import com.neverwinterdp.module.ServiceModuleContainer;
 import com.neverwinterdp.registry.RefNode;
 import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.election.LeaderElection;
 import com.neverwinterdp.registry.election.LeaderElectionListener;
 import com.neverwinterdp.scribengin.event.ScribenginShutdownEventListener;
-import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMApp;
-import com.neverwinterdp.vm.VMConfig;
-import com.neverwinterdp.vm.client.VMClient;
 
 public class VMScribenginServiceApp extends VMApp {
   private Logger logger ;
   private LeaderElection election ;
-  private Injector  appContainer ;
+  private ServiceModuleContainer scribenginServiceModuleContainer;
   private ScribenginService scribenginService;
   
   public ScribenginService getScribenginService() { return this.scribenginService ; }
@@ -53,9 +41,6 @@ public class VMScribenginServiceApp extends VMApp {
       waitForTerminate();
     } catch(InterruptedException ex) {
     } finally {
-      if(appContainer != null) {
-        appContainer.getInstance(CloseableInjector.class).close();
-      }
       if(election != null && election.getLeaderId() != null) {
         election.stop();
       }
@@ -67,37 +52,19 @@ public class VMScribenginServiceApp extends VMApp {
     public void onElected() {
       try {
         final Registry registry = getVM().getVMRegistry().getRegistry();
-        AppServiceModule module = new AppServiceModule(getVM().getDescriptor().getVmConfig().getProperties()) {
-          @Override
-          protected void configure(Map<String, String> properties) {
-            bindInstance(RegistryConfig.class, registry.getRegistryConfig());
-            try {
-              bindInstance(RuntimeEnv.class, getVM().getRuntimeEnv());
-              bindInstance(LoggerFactory.class, getVM().getLoggerFactory());
-              bindType(Registry.class, registry.getClass().getName());
-              bindInstance(VMConfig.class, getVM().getDescriptor().getVmConfig());
-              bindInstance(VMClient.class, new VMClient(registry));
-            } catch (ClassNotFoundException e) {
-              logger.error("Initialize AppModule Error", e);
-            }
-          };
-        };
-        Module[] modules = {
-          new CloseableModule(),new Jsr250Module(), 
-          new MycilaJmxModuleExt(getVM().getDescriptor().getVmConfig().getName()), 
-          module
-        };
-        appContainer = Guice.createInjector(Stage.PRODUCTION, modules);
+        AppContainer appContainer = getVM().getAppContainer();
+        appContainer.install(new HashMap<String, String>(), ScribenginServiceModule.NAME);
+        scribenginServiceModuleContainer = appContainer.getModule(ScribenginServiceModule.NAME);
         
         //TODO: fix to use module
         //appContainer.getInstance(OSMonitorLoggerService.class);
         
-        scribenginService = appContainer.getInstance(ScribenginService.class);
-        RefNode refNode = new RefNode() ;
+        scribenginService = scribenginServiceModuleContainer.getInstance(ScribenginService.class);
+        RefNode refNode = new RefNode();
         refNode.setPath(getVM().getDescriptor().getRegistryPath());
         registry.setData(ScribenginService.LEADER_PATH, refNode);
       } catch(Exception e) {
-        e.printStackTrace();
+        logger.error("Elected SCribengin Master Error:", e);
       }
     }
   }

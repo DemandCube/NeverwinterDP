@@ -1,30 +1,18 @@
 package com.neverwinterdp.scribengin.dataflow.worker;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.Stage;
-import com.mycila.guice.ext.closeable.CloseableInjector;
-import com.mycila.guice.ext.closeable.CloseableModule;
-import com.mycila.guice.ext.jsr250.Jsr250Module;
 import com.neverwinterdp.es.log.OSMonitorLoggerService;
-import com.neverwinterdp.module.AppServiceModule;
-import com.neverwinterdp.module.MycilaJmxModuleExt;
-import com.neverwinterdp.os.RuntimeEnv;
-import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.registry.RegistryConfig;
-import com.neverwinterdp.scribengin.dataflow.DataflowContainer;
-import com.neverwinterdp.util.log.LoggerFactory;
+import com.neverwinterdp.module.AppContainer;
+import com.neverwinterdp.module.DataflowWorkerModule;
+import com.neverwinterdp.module.ServiceModuleContainer;
+import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
-import com.neverwinterdp.vm.VMDescriptor;
+import com.neverwinterdp.vm.VMConfig.ClusterEnvironment;
 import com.neverwinterdp.yara.MetricPrinter;
 import com.neverwinterdp.yara.MetricRegistry;
 
@@ -32,46 +20,27 @@ import com.neverwinterdp.yara.MetricRegistry;
 public class VMDataflowWorkerApp extends VMApp {
   private Logger logger  ;
   
-  private DataflowContainer container;
   private DataflowTaskExecutorService dataflowTaskExecutorService;
   
   @Override
   public void run() throws Exception {
     final VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
     logger = getVM().getLoggerFactory().getLogger(VMDataflowWorkerApp.class);
-    AppServiceModule module = new AppServiceModule(vmConfig.getProperties()) {
-      @Override
-      protected void configure(Map<String, String> properties) {
-        bindInstance(RuntimeEnv.class, getVM().getRuntimeEnv());
-        bindInstance(MetricRegistry.class, new MetricRegistry(vmConfig.getName()));
-        bindInstance(LoggerFactory.class, getVM().getLoggerFactory());
-        Registry registry = getVM().getVMRegistry().getRegistry();
-        bindInstance(RegistryConfig.class, registry.getRegistryConfig());
-        bindType(Registry.class, registry.getClass());
-        bindInstance(VMDescriptor.class, getVM().getDescriptor());
-        try {
-          VMConfig.ClusterEnvironment env = vmConfig.getClusterEnvironment();
-          if(env == VMConfig.ClusterEnvironment.YARN || env == VMConfig.ClusterEnvironment.YARN_MINICLUSTER) {
-            YarnConfiguration conf = new YarnConfiguration();
-            vmConfig.overrideHadoopConfiguration(conf);
-            bindInstance(FileSystem.class, FileSystem.get(conf));
-          } else {
-            bindInstance(FileSystem.class, FileSystem.getLocal(new Configuration()));
-          }
-        } catch (Exception e) {
-          logger.error("Error:", e);;
-        }
-      };
-    };
-    Module[] modules = {
-      new CloseableModule(),new Jsr250Module(), 
-      new MycilaJmxModuleExt(getVM().getDescriptor().getVmConfig().getName()), 
-      module
-    };
-    Injector injector = Guice.createInjector(Stage.PRODUCTION, modules);
-    container = injector.getInstance(DataflowContainer.class);
-    container.getDataflowRegistry().addWorker(getVM().getDescriptor());
-    dataflowTaskExecutorService = container.getDataflowTaskExecutorManager();
+    
+    AppContainer appContainer = getVM().getAppContainer();
+    Map<String, String> moduleProps = new HashMap<String, String>();
+    moduleProps.putAll(vmConfig.getHadoopProperties());
+    if(vmConfig.getClusterEnvironment() ==  ClusterEnvironment.JVM) {
+      moduleProps.put("cluster.environment", "jvm");
+    } else {
+      moduleProps.put("cluster.environment", "yarn");
+    }
+   
+    appContainer.install(moduleProps, DataflowWorkerModule.NAME);
+    ServiceModuleContainer dataflowWorkerModuleContainer = appContainer.getModule(DataflowWorkerModule.NAME);
+    
+    dataflowWorkerModuleContainer.getInstance(DataflowRegistry.class).addWorker(getVM().getDescriptor());
+    dataflowTaskExecutorService = dataflowWorkerModuleContainer.getInstance(DataflowTaskExecutorService.class);
     addListener(new VMApp.VMAppTerminateEventListener() {
       @Override
       public void onEvent(VMApp vmApp, TerminateEvent terminateEvent) {
@@ -89,7 +58,7 @@ public class VMDataflowWorkerApp extends VMApp {
       }
     });
     //TODO: fix to use module
-    container.getInstance(OSMonitorLoggerService.class);
+    dataflowWorkerModuleContainer.getInstance(OSMonitorLoggerService.class);
     try {
       dataflowTaskExecutorService.start();
       dataflowTaskExecutorService.waitForTerminated(500);
@@ -97,10 +66,9 @@ public class VMDataflowWorkerApp extends VMApp {
     } finally {
       StringBuilder out = new StringBuilder() ;
       MetricPrinter metricPrinter = new MetricPrinter(out) ;
-      MetricRegistry mRegistry = container.getInstance(MetricRegistry.class);
+      MetricRegistry mRegistry = dataflowWorkerModuleContainer.getInstance(MetricRegistry.class);
       metricPrinter.print(mRegistry);
       logger.info("\n" + out.toString());
-      container.getInstance(CloseableInjector.class).close();
     }
   }
 }

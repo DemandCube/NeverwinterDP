@@ -15,6 +15,7 @@ import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
 public class SourceFactory {
   @Inject
   private FileSystem fs;
+  
   @Inject
   private S3Client s3Client;
 
