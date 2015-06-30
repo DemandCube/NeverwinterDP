@@ -19,8 +19,15 @@ public class AppContainerUnitTest {
   public void testAppContainer() throws Exception {
     Map<String, String> props = new HashMap<String, String>() ;
     props.put("hello.hello", "Hello Property") ;
-    AppContainer appContainer = new AppContainer(props);
+    AppModule appModule = new AppModule("localhost", "vm-test", ".", "./build/app-data", props) {
+      @Override
+      protected void configure(Map<String, String> props) {
+        super.configure(props);
+      }
+    };
+    AppContainer appContainer = new AppContainer(appModule);
     appContainer.onInit();
+    appContainer.install(new HashMap<String, String>(), "HelloModule");
     ServiceModuleContainer helloContainer = appContainer.getModule("HelloModule");
     Hello hello = helloContainer.getInstance(Hello.class);
     hello.sayHello();
@@ -36,8 +43,8 @@ public class AppContainerUnitTest {
     assertNotNull(hello) ;
     assertEquals("HelloModule", hello.getModuleName()) ;
     assertEquals(HelloModule.class.getName(), hello.getConfigureClass()) ;
-    assertTrue(hello.isAutoInstall()) ;
-    assertTrue(hello.isAutostart()) ;
+    assertFalse(hello.isAutoInstall()) ;
+    assertFalse(hello.isAutostart()) ;
     
     ModuleRegistration helloDisable = holder.get("HelloModuleDisable");
     assertNotNull(helloDisable) ;

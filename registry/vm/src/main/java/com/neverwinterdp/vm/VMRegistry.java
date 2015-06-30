@@ -17,13 +17,6 @@ public class VMRegistry {
   @Inject
   private Registry registry ;
 
-  public VMRegistry() {}
-  
-  public VMRegistry(Registry registry, String vmAllocatedPath) {
-    this.registry = registry ;
-    this.vmAllocatedPath = vmAllocatedPath;
-  }
-  
   public Registry getRegistry() { return this.registry; }
   
   public String getVMAllocatedPath() { return this.vmAllocatedPath ; }

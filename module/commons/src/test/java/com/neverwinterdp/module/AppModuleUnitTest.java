@@ -28,7 +28,7 @@ public class AppModuleUnitTest {
   @Test
   public void testModuleMapping() throws Exception {
     Map<String, String> props = new HashMap<String, String>() ;
-    props.put("hello", "Hello Property") ;
+    props.put("hello.hello", "Hello Property") ;
     props.put("registry.connect", "127.0.0.1:2181") ;
     props.put("registry.db-domain", "/scribengin/v2") ;
     

@@ -1,7 +1,6 @@
 package com.neverwinterdp.module;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,12 +8,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
-import com.google.inject.name.Names;
 import com.mycila.guice.ext.closeable.CloseableModule;
 import com.mycila.guice.ext.jsr250.Jsr250Module;
 import com.neverwinterdp.module.ModuleRegistration.InstallStatus;
@@ -28,31 +25,44 @@ import com.neverwinterdp.yara.Timer;
  * @email tuan08@gmail.com
  */
 public class AppContainer {
-  private Injector                        appContainer;
-
-  private RuntimeEnv                      runtimeEnv;
-
-  private MetricRegistry                  metricRegistry;
-
-  private LoggerFactory                   loggerFactory;
-  private Logger                          logger;
+  private AppModule appModule;
+  private Injector  appContainer;
+  private Logger  logger;
 
   private Map<String, ModuleRegistration> availableModules = new ConcurrentHashMap<String, ModuleRegistration>();
   private Map<String, ServiceModuleContainer>   installedModules = new ConcurrentHashMap<String, ServiceModuleContainer>();
 
-  public AppContainer(Map<String, String> properties) {
-    Module[] modules = {
-      new CloseableModule(), new Jsr250Module(), new MycilaJmxModuleExt("test-domain"), new AppModule(properties)
-    };
-    appContainer = Guice.createInjector(Stage.PRODUCTION, modules);
-    runtimeEnv = appContainer.getInstance(RuntimeEnv.class);
-    metricRegistry = appContainer.getInstance(MetricRegistry.class);
-    loggerFactory = appContainer.getInstance(LoggerFactory.class);
-    logger = loggerFactory.getLogger(getClass());
+  public AppContainer(AppModule appModule) {
+    this.appModule = appModule;
   }
   
+  public AppContainer(String hostname, String vmName, String appHome, String appDataDir, Map<String, String> props) {
+    this(new AppModule(hostname, vmName, appHome, appDataDir, props));
+  }
+  
+  public String getHostname() { return appModule.appHome ; }
+  
+  public String getVMName() { return this.appModule.vmName; }
+  
+  public String getAppHome() { return this.appModule.appHome; }
+  
+  public String getAppDataDir() { return this.appModule.appDataDir; }
+  
+  public RuntimeEnv getRuntimeEnv() { return appContainer.getInstance(RuntimeEnv.class); }
+  
+  public LoggerFactory getLoggerFactory() { return appContainer.getInstance(LoggerFactory.class); }
+  
+  public MetricRegistry getMetricRegistry() { return appContainer.getInstance(MetricRegistry.class); }
+  
+  public <T> T getInstance(Class<T> type) { return appContainer.getInstance(type); }
+  
   public void onInit() {
-    logger.info("Start onInit()") ;
+    Module[] modules = {
+      new CloseableModule(), new Jsr250Module(), new MycilaJmxModuleExt(getVMName()), appModule
+    };
+    appContainer = Guice.createInjector(Stage.PRODUCTION, modules);
+    logger = getLoggerFactory().getLogger(getClass());
+    logger.info("Start onInit()");
     ModuleRegistration.loadByAnnotation(availableModules, "com.neverwinterdp.module");
     ArrayList<String> moduleNames = new ArrayList<String>() ;
     for(ModuleRegistration sel : availableModules.values()) {
@@ -86,13 +96,13 @@ public class AppContainer {
         logger.info("Module " + moduleNames[i] + " is not available");
         continue ;
       }
-      Timer.Context timeCtx = metricRegistry.timer("server", "install", moduleNames[i]).time() ;
+      Timer.Context timeCtx = getMetricRegistry().timer("server", "install", moduleNames[i]).time() ;
       try {
         Class<ServiceModule> clazz = (Class<ServiceModule>) Class.forName(mreg.getConfigureClass());
         ServiceModule module = clazz.newInstance() ;
-        module.init(properties, runtimeEnv);
+        module.setProperties(properties);
         ServiceModuleContainer scontainer = appContainer.getInstance(ServiceModuleContainer.class) ;
-        scontainer.init(mreg, module, loggerFactory);
+        scontainer.init(mreg, module, getLoggerFactory());
         scontainer.install(appContainer);
         installedModules.put(mreg.getModuleName(), scontainer) ;
         mreg.setInstallStatus(InstallStatus.INSTALLED);
@@ -109,6 +119,7 @@ public class AppContainer {
   
   public ModuleRegistration[] uninstall(String ... moduleNames) throws Exception {
     logger.info("Start  uninstall(String ... moduleNames)");
+    MetricRegistry metricRegistry = getMetricRegistry();
     List<ModuleRegistration> holder = new ArrayList<ModuleRegistration>() ;
     for(int i = 0; i < moduleNames.length; i++) {
       ServiceModuleContainer scontainer = installedModules.get(moduleNames[i]) ;
@@ -201,31 +212,5 @@ public class AppContainer {
       array[idx++] = sel.getModuleStatus() ;
     }
     return array ;
-  }
-  
-  static public class AppModule extends AbstractModule {
-    private Map<String, String> properties ;
-    
-    public AppModule() {
-      properties = new HashMap<String, String>() ;
-    }
-    
-    public AppModule(Map<String, String> properties) {
-      this.properties = properties ;
-    }
-    
-    @Override
-    protected void configure() {
-      Names.bindProperties(binder(), properties) ;
-      
-      RuntimeEnv runtimeEnv = new RuntimeEnv("server", "vm", "build/vm") ;
-      bind(RuntimeEnv.class).toInstance(runtimeEnv);
-      
-      MetricRegistry metricRegistry = new MetricRegistry("server") ;
-      bind(MetricRegistry.class).toInstance(metricRegistry);
-      
-      LoggerFactory loggerFactory = new LoggerFactory("[NeverwinterDP]") ;
-      bind(LoggerFactory.class).toInstance(loggerFactory);
-    }
   }
 }

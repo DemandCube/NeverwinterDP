@@ -22,9 +22,6 @@ import com.neverwinterdp.yara.MetricRegistry;
  * @email tuan08@gmail.com
  */
 public class ServiceModuleContainer {
-  @Inject
-  private MetricRegistry     registry;
-
   private Injector           container;
   private Logger             logger;
   private ModuleRegistration moduleStatus;
@@ -44,7 +41,6 @@ public class ServiceModuleContainer {
     uninstall(appContainer) ;
     logger.info("install(Injector parentContainer)");
     container = appContainer.createChildInjector(module) ;
-    
     Map<Key<?>, Binding<?>> bindings = container.getBindings() ;
     for(Key<?> key : bindings.keySet()) {
       Object instance = container.getInstance(key) ;
