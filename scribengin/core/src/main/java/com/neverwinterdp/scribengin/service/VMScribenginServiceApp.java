@@ -1,10 +1,12 @@
 package com.neverwinterdp.scribengin.service;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 
 import com.neverwinterdp.module.AppContainer;
+import com.neverwinterdp.module.ESOSMonitorLoggerModule;
 import com.neverwinterdp.module.ScribenginServiceModule;
 import com.neverwinterdp.module.ServiceModuleContainer;
 import com.neverwinterdp.registry.RefNode;
@@ -53,6 +55,10 @@ public class VMScribenginServiceApp extends VMApp {
       try {
         final Registry registry = getVM().getVMRegistry().getRegistry();
         AppContainer appContainer = getVM().getAppContainer();
+        
+        Map<String, String> esLoggerModuleProps = new HashMap<String, String>();
+        appContainer.install(esLoggerModuleProps, ESOSMonitorLoggerModule.NAME);
+        
         appContainer.install(new HashMap<String, String>(), ScribenginServiceModule.NAME);
         scribenginServiceModuleContainer = appContainer.getModule(ScribenginServiceModule.NAME);
         

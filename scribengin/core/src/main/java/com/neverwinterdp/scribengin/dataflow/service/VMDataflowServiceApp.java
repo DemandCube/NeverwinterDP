@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 
 import com.neverwinterdp.module.AppContainer;
 import com.neverwinterdp.module.DataflowServiceModule;
+import com.neverwinterdp.module.ESOSMonitorLoggerModule;
 import com.neverwinterdp.module.ServiceModuleContainer;
 import com.neverwinterdp.registry.RefNode;
 import com.neverwinterdp.registry.Registry;
@@ -56,9 +57,11 @@ public class VMDataflowServiceApp extends VMApp {
         }
         VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
         AppContainer appContainer = getVM().getAppContainer();
+        Map<String, String> esLoggerModuleProps = new HashMap<String, String>();
+        appContainer.install(esLoggerModuleProps, ESOSMonitorLoggerModule.NAME);
+        
         Map<String, String> moduleProps = new HashMap<String, String>();
         moduleProps.putAll(vmConfig.getHadoopProperties());
-        //moduleProps.put("dataflow.registry.path", dataflowRegistryPath);
         if(vmConfig.getClusterEnvironment() ==  ClusterEnvironment.JVM) {
           moduleProps.put("cluster.environment", "jvm");
         } else {
@@ -66,13 +69,11 @@ public class VMDataflowServiceApp extends VMApp {
         }
        
         appContainer.install(moduleProps, DataflowServiceModule.NAME);
-        
         ServiceModuleContainer dataflowServiceModuleContainer = appContainer.getModule(DataflowServiceModule.NAME);
+
         RefNode leaderRefNode = new RefNode();
         leaderRefNode.setPath(getVM().getDescriptor().getRegistryPath());
         registry.setData(dataflowRegistryPath + "/master/leader", leaderRefNode);
-        //TODO: fix to use module
-        //appContainer.getInstance(OSMonitorLoggerService.class);
         dataflowService = dataflowServiceModuleContainer.getInstance(DataflowService.class);
         serviceRunnerThread = new ServiceRunnerThread(dataflowService);
         serviceRunnerThread.start();

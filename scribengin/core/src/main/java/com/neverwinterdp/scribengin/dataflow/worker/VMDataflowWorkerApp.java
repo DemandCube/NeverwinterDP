@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import com.neverwinterdp.es.log.OSMonitorLoggerService;
 import com.neverwinterdp.module.AppContainer;
 import com.neverwinterdp.module.DataflowWorkerModule;
+import com.neverwinterdp.module.ESOSMonitorLoggerModule;
 import com.neverwinterdp.module.ServiceModuleContainer;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.vm.VMApp;
@@ -28,15 +29,18 @@ public class VMDataflowWorkerApp extends VMApp {
     logger = getVM().getLoggerFactory().getLogger(VMDataflowWorkerApp.class);
     
     AppContainer appContainer = getVM().getAppContainer();
-    Map<String, String> moduleProps = new HashMap<String, String>();
-    moduleProps.putAll(vmConfig.getHadoopProperties());
+    Map<String, String> esLoggerModuleProps = new HashMap<String, String>();
+    appContainer.install(esLoggerModuleProps, ESOSMonitorLoggerModule.NAME);
+    
+    Map<String, String> dataflowWorkerModuleProps = new HashMap<String, String>();
+    dataflowWorkerModuleProps.putAll(vmConfig.getHadoopProperties());
     if(vmConfig.getClusterEnvironment() ==  ClusterEnvironment.JVM) {
-      moduleProps.put("cluster.environment", "jvm");
+      dataflowWorkerModuleProps.put("cluster.environment", "jvm");
     } else {
-      moduleProps.put("cluster.environment", "yarn");
+      dataflowWorkerModuleProps.put("cluster.environment", "yarn");
     }
-   
-    appContainer.install(moduleProps, DataflowWorkerModule.NAME);
+    
+    appContainer.install(dataflowWorkerModuleProps, DataflowWorkerModule.NAME);
     ServiceModuleContainer dataflowWorkerModuleContainer = appContainer.getModule(DataflowWorkerModule.NAME);
     
     dataflowWorkerModuleContainer.getInstance(DataflowRegistry.class).addWorker(getVM().getDescriptor());
@@ -57,8 +61,7 @@ public class VMDataflowWorkerApp extends VMApp {
         }
       }
     });
-    //TODO: fix to use module
-    dataflowWorkerModuleContainer.getInstance(OSMonitorLoggerService.class);
+    
     try {
       dataflowTaskExecutorService.start();
       dataflowTaskExecutorService.waitForTerminated(500);
