@@ -14,7 +14,6 @@ public class OSMonitorLoggerService extends ObjectLoggerService {
   private OSManagement osManagement;
   private MetricInfoCollectorThread metricCollectorThread;
   
-  
   @Inject
   public void onInit(RuntimeEnv runtimeEnv, OSManagement osManagement) throws Exception {
     this.osManagement = osManagement;

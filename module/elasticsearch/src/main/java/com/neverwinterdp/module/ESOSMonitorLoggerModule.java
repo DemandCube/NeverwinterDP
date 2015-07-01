@@ -10,6 +10,6 @@ public class ESOSMonitorLoggerModule extends ServiceModule {
   
   @Override
   protected void configure(Map<String, String> properties) {  
-    this.bindType(OSMonitorLoggerService.class, OSMonitorLoggerService.class);
+    bind(OSMonitorLoggerService.class).asEagerSingleton();
   }
 }
