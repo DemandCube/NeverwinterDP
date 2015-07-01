@@ -122,7 +122,7 @@ public class UIScribenginCluster extends SpringLayoutGridJPanel  implements UILi
   
   static  public class ZookeeperConnectionPanel extends SpringLayoutGridJPanel {
     static private String[]  REMOTE_ZKS = {
-      "test.scribengin:2181"
+      "tuan.neverwinterdp:2181"
     };
     
     private RegistryConfig registryConfig = RegistryConfig.getDefault();
