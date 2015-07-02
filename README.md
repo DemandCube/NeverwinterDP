@@ -1,4 +1,3 @@
-#NeverwinterDP
 
 Scribengin
 ==========
@@ -12,28 +11,63 @@ Reads and writes data from sources/sinks:
 - S3
 
 
-The Problem
-======
+
+####The Problem
 The core problem is how to reliably and at scale have a distributed application write data to multiple destination data systems.  This requires the ability to todo data mapping, partitioning with optional filtering to the destination system.
 
-Status
 
-Definitions
-======
+
+####Definitions
 
 - A **Dataflow** - is data being moved from a single source to a single sink
 - **Source** - is a system that is being read to get data from (Kafka, Kinesis e.g.)
 - **Sink** - is a destination system that is being written to (HDFS, Hbase, Hive e.g.)
+- **Scribe** - is a data processor used to filter, copy, duplicate, transform, etc. any data moving between source and sink
 
 
-Technologies Used
-======
+####Technologies Used
 - Built in Java
+- Gradle
 - YARN
 - Zookeeper
+- Elasticsearch
 - Kafka, S3, HDFS - data sources/sinks
 
 
-Design
-======
+####Design
 ![Scribengin Cluster Design](/ScribenginCluster.png "Scribengin Cluster Design")
+
+
+
+####Developer Setup
+```
+git clone https://github.com/Nventdata/NeverwinterDP/
+git checkout dev/master
+cd NeverwinterDP
+./gradlew eclipse clean build install -x test
+
+#Now you can import the project into Eclipse
+```
+
+####Release
+```
+cd NeverwinterDP/release
+../gradlew clean build release -x test
+```
+
+
+####Developer Notes on Scribengin modules
+- scribengin.core
+  - Core scribengin code
+  - Scribe, Dataflows, VM Master, Dataflow Masters
+- lib.yara
+  - Yara is our framework to capture metrics
+- module.*
+  - Mock/test modules to set up servers for unit testing
+  - Used to for testing Kafka, elasticsearch, etc
+- scribengin.release
+  - Code to release Scribengin for deployment
+- registry.*
+  - Registry is the central place for configurations, inter-node communication, and status tracking
+  - Based on Zookeeper
+  
