@@ -1,6 +1,12 @@
 package com.neverwinterdp.yara;
 
-public class CounterInfo {
+import java.io.Serializable;
+import java.util.Date;
+
+import com.neverwinterdp.util.text.DateUtil;
+
+public class CounterInfo implements Serializable {
+  private Date   timestamp;
   private String serverName;
   private String name ;
   private long   count ;
@@ -9,10 +15,18 @@ public class CounterInfo {
   }
   
   public CounterInfo(String serverName, Counter counter) {
+    timestamp = new Date();
     this.serverName = serverName;
     this.name = counter.getName();
     this.count = counter.getCount();
   }
+
+  public String uniqueId() { 
+    return "host=" + serverName + ",timestamp=" + DateUtil.asCompactDateTimeId(timestamp); 
+  }
+  
+  public Date getTimestamp() { return timestamp; }
+  public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
 
   public String getServerName() { return serverName; }
   public void setServerName(String serverName) { this.serverName = serverName; }
