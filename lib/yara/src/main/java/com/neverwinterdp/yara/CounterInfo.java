@@ -3,9 +3,11 @@ package com.neverwinterdp.yara;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neverwinterdp.util.text.DateUtil;
 
 public class CounterInfo implements Serializable {
+  @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp;
   private String serverName;
   private String name ;
