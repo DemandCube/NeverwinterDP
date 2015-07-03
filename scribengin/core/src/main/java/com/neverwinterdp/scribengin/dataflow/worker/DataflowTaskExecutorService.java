@@ -152,9 +152,7 @@ public class DataflowTaskExecutorService {
   
   public boolean isAlive() {
     for(DataflowTaskExecutor sel : taskExecutors) {
-      if(sel.isAlive()) {
-        return true;
-      }
+      if(sel.isAlive()) return true;
     }
     return false;
   }

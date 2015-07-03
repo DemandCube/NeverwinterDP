@@ -65,7 +65,7 @@ public class DataflowTask {
     report.setFinishTime(System.currentTimeMillis());
     saveContext();
     DataflowRegistry dflRegistry = executorService.getDataflowRegistry();
-    dflRegistry.dataflowTaskSuspend(taskContext);
+    dflRegistry.dataflowTaskFinish(taskContext);
   }
   
   void saveContext() throws Exception {

@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 
-import com.neverwinterdp.es.log.OSMonitorLoggerService;
 import com.neverwinterdp.module.AppContainer;
 import com.neverwinterdp.module.DataflowWorkerModule;
 import com.neverwinterdp.module.ESOSMonitorLoggerModule;
@@ -72,6 +71,8 @@ public class VMDataflowWorkerApp extends VMApp {
       MetricRegistry mRegistry = dataflowWorkerModuleContainer.getInstance(MetricRegistry.class);
       metricPrinter.print(mRegistry);
       logger.info("\n" + out.toString());
+      System.out.println("DATAFLOW WORKER METRIC");
+      System.out.println(out.toString());
     }
   }
 }
