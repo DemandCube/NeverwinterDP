@@ -9,12 +9,12 @@ public class Timer implements Serializable {
   transient private MetricPlugin metricPlugin ;
   
   private String name ;
-  private Meter   meter;
+  private EWMAMeter   eWMAMeter;
   private Histogram histogram ;
   
   public Timer() {
     histogram = new Histogram();
-    meter = new Meter();
+    eWMAMeter = new EWMAMeter();
   }
   
   public Timer(String name) {
@@ -22,10 +22,10 @@ public class Timer implements Serializable {
     this.name = name ;
   }
   
-  public Timer(String name, Histogram histogram, Meter meter) {
+  public Timer(String name, Histogram histogram, EWMAMeter eWMAMeter) {
     this.name = name ;
     this.histogram = histogram;
-    this.meter = meter;
+    this.eWMAMeter = eWMAMeter;
   }
   
   public String getName() { return this.name ; }
@@ -61,7 +61,7 @@ public class Timer implements Serializable {
   synchronized public long update(long timestampTick, long duration) {
     if (duration >= 0) {
       histogram.update(duration);
-      timestampTick = meter.mark(timestampTick,1l);
+      timestampTick = eWMAMeter.mark(timestampTick, 1l);
       if(metricPlugin != null) {
         metricPlugin.onTimerUpdate(name, timestampTick, duration);
       }
@@ -81,13 +81,13 @@ public class Timer implements Serializable {
 
   public Histogram getHistogram() { return this.histogram ; }
   
-  public double getOneMinuteRate() { return meter.getOneMinuteRate(); }
+  public double getOneMinuteRate() { return eWMAMeter.getOneMinuteRate(); }
   
-  public double getFiveMinuteRate() { return meter.getFiveMinuteRate(); }
+  public double getFiveMinuteRate() { return eWMAMeter.getFiveMinuteRate(); }
 
-  public double getFifteenMinuteRate() { return meter.getFifteenMinuteRate(); }
+  public double getFifteenMinuteRate() { return eWMAMeter.getFifteenMinuteRate(); }
 
-  public double getMeanRate() { return meter.getMeanRate(); }
+  public double getMeanRate() { return eWMAMeter.getMeanRate(); }
 
   static public Timer unionOf(Timer timer1, Timer timer2) {
     String name = timer1.getName() ;
@@ -95,8 +95,8 @@ public class Timer implements Serializable {
       throw new RuntimeException("timer name is null or not equals") ;
     }
     Histogram histogram = Histogram.unionOf(timer1.histogram, timer2.histogram) ;
-    Meter meter = Meter.unionOf(timer1.meter, timer2.meter) ;
-    return new Timer(name, histogram, meter) ;
+    EWMAMeter eWMAMeter = EWMAMeter.unionOf(timer1.eWMAMeter, timer2.eWMAMeter) ;
+    return new Timer(name, histogram, eWMAMeter) ;
   }
   
   static public Timer combine(Timer ... timer) {
