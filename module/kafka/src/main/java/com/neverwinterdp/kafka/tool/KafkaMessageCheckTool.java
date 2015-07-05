@@ -121,16 +121,17 @@ public class KafkaMessageCheckTool implements Runnable {
     executorService.shutdown();
     try {
       while(!executorService.isTerminated()) {
-        System.out.println("Read count: " + messageCounter.getTotal());
+        System.out.println("KafkaMessageCheckTool: Read count " + messageCounter.getTotal());
         if(messageCounter.getTotal() - messageTracker.getDuplicatedCount() >= topicConfig.consumerConfig.consumeMax) {
           interrupt = true;
         }
         Thread.sleep(5000);
       } 
     } catch(Exception ex) {
+      System.err.println("KafkaMessageCheckTool: " + ex.getMessage()) ;
       throw ex ;
     } finally {
-      System.out.println("Read count: " + messageCounter.getTotal() +"(Stop)") ;
+      System.out.println("KafkaMessageCheckTool: Final Read count " + messageCounter.getTotal() +"(Stop)") ;
       messageTracker.optimize();
       readDuration.stop();
     }
