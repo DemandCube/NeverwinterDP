@@ -1,9 +1,8 @@
 package com.neverwinterdp.yara.snapshot;
 
 import java.io.Serializable;
-import java.util.concurrent.TimeUnit;
 
-import com.neverwinterdp.yara.EWMAMeter;
+import com.neverwinterdp.yara.Meter;
 
 public class MeterSnapshot implements Serializable {
   private long   count;
@@ -15,12 +14,12 @@ public class MeterSnapshot implements Serializable {
   public MeterSnapshot() {
   }
 
-  public MeterSnapshot(EWMAMeter eWMAMeter, TimeUnit timeUnit) {
-    count = eWMAMeter.getCount();
-    m1Rate = eWMAMeter.getOneMinuteRate();
-    m5Rate = eWMAMeter.getFiveMinuteRate();
-    m15Rate = eWMAMeter.getFifteenMinuteRate();
-    meanRate = eWMAMeter.getMeanRate();
+  public MeterSnapshot(Meter meter) {
+    count = meter.getCount();
+    m1Rate = meter.getOneMinuteRate();
+    m5Rate = meter.getFiveMinuteRate();
+    m15Rate = meter.getFifteenMinuteRate();
+    meanRate = meter.getMeanRate();
   }
 
   public long getCount() { return count; }

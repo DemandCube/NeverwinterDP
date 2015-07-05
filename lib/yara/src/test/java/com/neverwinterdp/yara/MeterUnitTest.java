@@ -6,14 +6,17 @@ import org.junit.Test;
 
 public class MeterUnitTest {
   @Test
-  public void testMeter() throws InterruptedException {
+  public void testMeter() throws Exception {
     MetricRegistry mRegistry = new MetricRegistry();
     Random rand = new Random() ;
-    Meter meter = mRegistry.getMeter("meter") ;
-    for(int i = 0; i < 121; i++) {
+    Meter meter = mRegistry.getMeter("meter", "byte") ;
+    for(int i = 0; i < 15; i++) {
       meter.mark(rand.nextInt(100000)) ;
       Thread.sleep(1000);
     }
+    MetricPrinter mPrinter = new MetricPrinter() ;
+    mPrinter.print(mRegistry);
+    
     System.out.println("Count       = " + meter.getCount()) ;
     System.out.println("1  Min Rate = " + meter.getOneMinuteRate()) ;
     System.out.println("5  Min Rate = " + meter.getFiveMinuteRate()) ;

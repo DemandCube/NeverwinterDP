@@ -63,14 +63,16 @@ public class MetricRegistry implements Serializable {
   public Timer timer(String ... name) {
     return getTimer(name(name)) ;
   }
+
+  public Map<String, Meter> getMeters() { return this.meters ; }
   
-  public Meter getMeter(String name) {
+  public Meter getMeter(String name, String unit) {
     Meter meter = meters.get(name) ;
     if(meter != null) return meter ;
     synchronized(meters) {
       meter = meters.get(name) ;
       if(meter != null) return meter ;
-      meter = new Meter(name) ;
+      meter = new Meter(name, unit) ;
       meter.setMetricPlugin(pluginManager);
       meters.put(name, meter) ;
     }
@@ -78,7 +80,7 @@ public class MetricRegistry implements Serializable {
   }
   
   public Meter meter(String ... name) {
-    return getMeter(name(name)) ;
+    return getMeter(name(name), "call") ;
   }
   
   public int remove(String nameExp) {

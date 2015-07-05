@@ -2,26 +2,35 @@ package com.neverwinterdp.yara;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 
 public class Meter implements Serializable {
   transient private MetricPlugin metricPlugin ;
   private String name ;
+  private String unit = "call";
   
   private EWMAMeter ewmaMeter = new EWMAMeter() ;
 
   public Meter() {} 
   
-  public Meter(String name) {
+  public Meter(String name, String unit) {
     this.name = name ;
+    this.unit = unit;
   }
   
-  public Meter(String name, EWMAMeter meter) {
+  public Meter(String name, EWMAMeter meter, String unit) {
     this.name = name ;
     this.ewmaMeter = meter;
+    this.unit = unit;
   }
   
   public String getName() { return this.name ; }
+  
+  public String getUnit() { return this.unit; }
+  
+  public Meter setUnit(String unit) {
+    this.unit = unit;
+    return this;
+  }
   
   public long getCount() { return ewmaMeter.getCount() ; }
   
@@ -56,7 +65,7 @@ public class Meter implements Serializable {
       throw new RuntimeException("timer name is null or not equals") ;
     }
     EWMAMeter eWMAMeter = EWMAMeter.unionOf(meter1.ewmaMeter, meter2.ewmaMeter) ;
-    return new Meter(name, eWMAMeter) ;
+    return new Meter(name, eWMAMeter, meter1.unit) ;
   }
   
   static public Meter combine(Meter ... meter) {
