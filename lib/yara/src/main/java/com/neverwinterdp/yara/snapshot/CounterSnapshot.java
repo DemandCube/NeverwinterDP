@@ -1,22 +1,23 @@
-package com.neverwinterdp.yara;
+package com.neverwinterdp.yara.snapshot;
 
 import java.io.Serializable;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neverwinterdp.util.text.DateUtil;
+import com.neverwinterdp.yara.Counter;
 
-public class CounterInfo implements Serializable {
+public class CounterSnapshot implements Serializable {
   @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp;
   private String serverName;
   private String name ;
   private long   count ;
   
-  public CounterInfo() {
+  public CounterSnapshot() {
   }
   
-  public CounterInfo(String serverName, Counter counter) {
+  public CounterSnapshot(String serverName, Counter counter) {
     timestamp = new Date();
     this.serverName = serverName;
     this.name = counter.getName();

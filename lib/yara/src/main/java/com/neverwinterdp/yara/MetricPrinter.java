@@ -146,24 +146,26 @@ public class MetricPrinter {
     }
     
     public void print(String name, Meter meter) {
+      String rate = " " + meter.getUnit() +"/s" ;
       tformater.addRow(
         name, 
         meter.getCount(),
-        dFormater.format(meter.getOneMinuteRate()), 
-        dFormater.format(meter.getFiveMinuteRate()), 
-        dFormater.format(meter.getFifteenMinuteRate()),
-        dFormater.format(meter.getMeanRate())
+        dFormater.format(meter.getOneMinuteRate()) + rate, 
+        dFormater.format(meter.getFiveMinuteRate()) + rate, 
+        dFormater.format(meter.getFifteenMinuteRate()) + rate,
+        dFormater.format(meter.getMeanRate()) + rate
       );
     }
     
     public void print(String name, MeterSnapshot meter) {
+      String rate = " " + meter.getUnit() +"/s" ;
       tformater.addRow(
         name, 
         meter.getCount(),
-        dFormater.format(meter.getM1Rate()), 
-        dFormater.format(meter.getM5Rate()), 
-        dFormater.format(meter.getM15Rate()),
-        dFormater.format(meter.getMeanRate())
+        dFormater.format(meter.getM1Rate())  + rate, 
+        dFormater.format(meter.getM5Rate())  + rate, 
+        dFormater.format(meter.getM15Rate())  + rate,
+        dFormater.format(meter.getMeanRate()) + rate
       );
     }
     

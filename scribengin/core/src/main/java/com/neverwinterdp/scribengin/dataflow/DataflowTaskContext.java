@@ -15,18 +15,20 @@ import com.neverwinterdp.scribengin.storage.source.Source;
 import com.neverwinterdp.scribengin.storage.source.SourceFactory;
 import com.neverwinterdp.scribengin.storage.source.SourceStream;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.yara.Meter;
 
 public class DataflowTaskContext {
   private DataflowTaskExecutorService executorService;
   private DataflowTaskReport report;
   private SourceContext sourceContext;
   private Map<String, SinkContext> sinkContexts = new HashMap<String, SinkContext>();
-  private DataflowRegistry dataflowRegistry;
   private DataflowTaskDescriptor dataflowTaskDescriptor;
-
+  private Meter dataflowReadMeter ;
+  
   public DataflowTaskContext(DataflowTaskExecutorService service, DataflowTaskDescriptor descriptor, DataflowTaskReport report)  throws Exception {
-    this.executorService = service;
-    this.sourceContext = new SourceContext(service.getSourceFactory(), descriptor.getSourceStreamDescriptor());
+    executorService = service;
+    sourceContext = new SourceContext(service.getSourceFactory(), descriptor.getSourceStreamDescriptor());
+    dataflowReadMeter = service.getMetricRegistry().getMeter("dataflow.source.throughput", "byte") ;
     Iterator<Map.Entry<String, StreamDescriptor>> i = descriptor.getSinkStreamDescriptors().entrySet().iterator();
       while (i.hasNext()) {
         Map.Entry<String, StreamDescriptor> entry = i.next();
@@ -37,22 +39,30 @@ public class DataflowTaskContext {
       this.dataflowTaskDescriptor = descriptor;
   }
 
-  public DataflowTaskReport getReport() {
-    return this.report;
-  }
+  public DataflowTaskReport getReport() { return this.report; }
+  
+  public SourceStreamReader getSourceStreamReader() { return sourceContext.assignedSourceStreamReader; }
 
-  public SourceStreamReader getSourceStreamReader() {
-    return sourceContext.assignedSourceStreamReader;
+  public Record nextRecord(long maxWaitForDataRead) throws Exception {
+    Record record = getSourceStreamReader().next(maxWaitForDataRead);
+    if(record != null) {
+      dataflowReadMeter.mark(record.getData().length + record.getKey().length());
+    }
+    return record ;
   }
-
+  
   public void append(Record record) throws Exception {
     SinkContext sinkContext = sinkContexts.get("default");
     sinkContext.assignedSinkStreamWriter.append(record);
+    Meter meter = executorService.getMetricRegistry().getMeter("dataflow.sink.default.throughput"  , "byte") ;
+    meter.mark(record.getData().length + record.getKey().length());
   }
 
   public void write(String sinkName, Record record) throws Exception {
     SinkContext sinkContext = sinkContexts.get(sinkName);
     sinkContext.assignedSinkStreamWriter.append(record);
+    Meter meter = executorService.getMetricRegistry().getMeter("dataflow.sink." + sinkName + ".throughput"  , "byte") ;
+    meter.mark(record.getData().length + record.getKey().length());
   }
   
   public String[] getAvailableSinks() {

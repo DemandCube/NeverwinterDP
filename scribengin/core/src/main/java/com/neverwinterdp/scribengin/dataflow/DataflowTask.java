@@ -5,6 +5,7 @@ import com.neverwinterdp.scribengin.Record;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorService;
 import com.neverwinterdp.scribengin.scribe.ScribeAbstract;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.yara.MetricRegistry;
 
 public class DataflowTask {
   private DataflowTaskExecutorService executorService;
@@ -43,11 +44,10 @@ public class DataflowTask {
   
   public void run() throws Exception {
     DataflowTaskReport report = context.getReport();
-    SourceStreamReader reader = context.getSourceStreamReader() ;
     Record record = null ;
     DataflowDescriptor dflDescriptor = executorService.getDataflowRegistry().getDataflowDescriptor(false);
     long maxWaitForDataRead =  dflDescriptor.getMaxWaitForDataRead();
-    while(!interrupt && (record = reader.next(maxWaitForDataRead)) != null) {
+    while(!interrupt && (record = context.nextRecord(maxWaitForDataRead)) != null) {
       report.incrProcessCount();
       processor.process(record, context);
     }
@@ -73,5 +73,5 @@ public class DataflowTask {
     report.addAccRuntime(System.currentTimeMillis() - startTime);
     context.commit();
     context.close();
-  }
+  }  
 }
