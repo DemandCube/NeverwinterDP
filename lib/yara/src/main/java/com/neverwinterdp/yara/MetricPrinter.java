@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.util.text.TabularFormater;
+import com.neverwinterdp.yara.snapshot.MeterSnapshot;
 import com.neverwinterdp.yara.snapshot.TimerSnapshot;
 
 public class MetricPrinter {
@@ -20,6 +21,7 @@ public class MetricPrinter {
   
   public void print(MetricRegistry registry) throws IOException {
     printCounters(registry.getCounters()) ;
+    printMeters(registry.getMeters());
     printTimers(registry.getTimers()) ;
   }
   
@@ -28,6 +30,15 @@ public class MetricPrinter {
     String[] keys = StringUtil.toSortedArray(timers.keySet()) ;
     for(String key : keys) {
       tprinter.print(key, timers.get(key));
+    }
+    tprinter.flush(); 
+  }
+  
+  public void printMeters(Map<String, Meter> meters) throws IOException {
+    MeterPrinter tprinter = new MeterPrinter(out) ;
+    String[] keys = StringUtil.toSortedArray(meters.keySet()) ;
+    for(String key : keys) {
+      tprinter.print(key, meters.get(key));
     }
     tprinter.flush(); 
   }
@@ -106,6 +117,55 @@ public class MetricPrinter {
         dFormater.format(timer.getM5Rate()), 
         dFormater.format(timer.getM15Rate()),
         dFormater.format(timer.getMeanRate())
+      );
+    }
+    
+    public void flush() throws IOException {
+      out.append("\n") ;
+      out.append(tformater.getFormatText());
+      out.append("\n") ;
+    }
+  }
+  
+  static public class MeterPrinter {
+    private Appendable out = System.out;
+    protected DecimalFormat dFormater = new DecimalFormat("#");
+    protected TabularFormater  tformater ;
+    protected TimeUnit timeUnit = TimeUnit.NANOSECONDS ;
+    
+    public MeterPrinter() { 
+      tformater = new TabularFormater(
+        "Name", "Count", "1 Min", "5 Min", "15 Min", "M Rate"
+      ) ;
+      tformater.setTitle("Meter") ;
+    }
+    
+    public MeterPrinter(Appendable out) { 
+      this() ;
+      this.out = out ; 
+    }
+    
+    public void print(String name, Meter meter) {
+      String rate = " " + meter.getUnit() +"/s" ;
+      tformater.addRow(
+        name, 
+        meter.getCount(),
+        dFormater.format(meter.getOneMinuteRate()) + rate, 
+        dFormater.format(meter.getFiveMinuteRate()) + rate, 
+        dFormater.format(meter.getFifteenMinuteRate()) + rate,
+        dFormater.format(meter.getMeanRate()) + rate
+      );
+    }
+    
+    public void print(String name, MeterSnapshot meter) {
+      String rate = " " + meter.getUnit() +"/s" ;
+      tformater.addRow(
+        name, 
+        meter.getCount(),
+        dFormater.format(meter.getM1Rate())  + rate, 
+        dFormater.format(meter.getM5Rate())  + rate, 
+        dFormater.format(meter.getM15Rate())  + rate,
+        dFormater.format(meter.getMeanRate()) + rate
       );
     }
     

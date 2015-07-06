@@ -52,7 +52,7 @@ public class VMManagerAppUnitTest {
     YarnVMClient vmClient = new YarnVMClient(registry, yarnProps,miniYarnCluster.getConfig());
     vmCluster = new VMZKClusterBuilder(vmClient) ;
     vmCluster.clean(); 
-    vmCluster.starZookeeper();
+    vmCluster.startZookeeper();
     vmCluster.getVMClient().getRegistry().connect();
   }
 

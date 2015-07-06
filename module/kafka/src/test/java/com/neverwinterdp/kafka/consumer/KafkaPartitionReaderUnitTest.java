@@ -41,25 +41,30 @@ public class KafkaPartitionReaderUnitTest {
   public void testReader() throws Exception {
     String NAME = "test";
     DefaultKafkaWriter writer = new DefaultKafkaWriter(NAME, cluster.getKafkaConnect());
-    for(int i = 0; i < 100; i++) {
+    for(int i = 0; i < 10; i++) {
       String hello = "Hello " + i;
       writer.send("hello", 0, "key-" + i, hello, 5000);
     }
     writer.close();
     
-    readFromPartition(NAME, 0, 1);
-    readFromPartition(NAME, 0, 2);
-    readFromPartition(NAME, 0, 3);
+    readFromPartition(NAME, 0, 1, 1000/*maxWait*/);
+    readFromPartition(NAME, 0, 2, 1000/*maxWait*/);
+    readFromPartition(NAME, 0, 3, 1000/*maxWait*/);
+    
+    readFromPartition(NAME, 0, 10, 1000/*maxWait*/);
+    
+    readFromPartition(NAME, 0, 10, 5000/*maxWait*/);
   }
   
-  private void readFromPartition(String consumerName, int partition, int maxRead) throws Exception {
+  private void readFromPartition(String consumerName, int partition, int maxRead, long maxWait) throws Exception {
+    System.out.println("Read partition = " + partition + ", maxRead = " + maxRead + ", maxWait = " + maxWait);
     KafkaTool kafkaTool = new KafkaTool(consumerName, cluster.getZKConnect());
     kafkaTool.connect();
     TopicMetadata topicMetadata = kafkaTool.findTopicMetadata("hello");
     PartitionMetadata partitionMetadata = findPartition(topicMetadata.partitionsMetadata(), partition);
     KafkaPartitionReader partitionReader = 
         new KafkaPartitionReader(consumerName, cluster.getZKConnect(), "hello", partitionMetadata);
-    List<byte[]> messages = partitionReader.fetch(10000, maxRead, 1000/*max wait*/);
+    List<byte[]> messages = partitionReader.fetch(10000, maxRead, maxWait);
     for(int i = 0; i < messages.size(); i++) {
       byte[] message = messages.get(i) ;
       System.out.println((i + 1) + ". " + new String(message));

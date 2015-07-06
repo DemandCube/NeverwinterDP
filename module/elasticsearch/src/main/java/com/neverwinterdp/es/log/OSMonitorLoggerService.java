@@ -1,7 +1,6 @@
 package com.neverwinterdp.es.log;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.neverwinterdp.os.DetailThreadInfo;
 import com.neverwinterdp.os.FileStoreInfo;
 import com.neverwinterdp.os.GCInfo;
@@ -11,11 +10,9 @@ import com.neverwinterdp.os.OSManagement;
 import com.neverwinterdp.os.RuntimeEnv;
 import com.neverwinterdp.os.ThreadCountInfo;
 
-@Singleton
 public class OSMonitorLoggerService extends ObjectLoggerService {
   private OSManagement osManagement;
   private MetricInfoCollectorThread metricCollectorThread;
-  
   
   @Inject
   public void onInit(RuntimeEnv runtimeEnv, OSManagement osManagement) throws Exception {

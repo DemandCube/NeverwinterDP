@@ -38,4 +38,11 @@ public class MetricPluginManager implements MetricPlugin {
       plugin.onCounterAdd(name, timestampTick, incr);
     }
   }
+  
+  public void onMeterMark(String name, long timestampTick, long incr) {
+    for(int i = 0; i < plugins.size(); i++) {
+      MetricPlugin plugin = plugins.get(i) ;
+      plugin.onMeterMark(name, timestampTick, incr);
+    }
+  }
 }

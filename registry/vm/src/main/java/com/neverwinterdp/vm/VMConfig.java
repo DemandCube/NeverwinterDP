@@ -42,13 +42,17 @@ public class VMConfig {
   @Parameter(names = "--app-home", description = "App Home")
   private String              appHome;
 
+  @Parameter(names = "--app-data-dir", description = "App Data Dir")
+  private String              appDataDir = "build/vm";
+  
   @DynamicParameter(names = "--vm-resource:", description = "The resources for the vm")
   private Map<String, String> vmResources      = new LinkedHashMap<String, String>();
 
   @ParametersDelegate
   private RegistryConfig      registryConfig   = new RegistryConfig();
 
-  @Parameter(names = "--self-registration",
+  @Parameter(
+      names = "--self-registration",
       description = "Self create the registation entry in the registry, for master node")
   private boolean             selfRegistration = false;
 
@@ -109,6 +113,9 @@ public class VMConfig {
   
   public String getAppHome() { return appHome; }
   public void setAppHome(String appHome) { this.appHome = appHome; }
+  
+  public String getAppDataDir() { return appDataDir; }
+  public void setAppDataDir(String appDataDir) { this.appHome = appDataDir; }
   
   public Map<String, String> getVmResources() { return vmResources; }
   public void setVmResources(Map<String, String> vmResources) { this.vmResources = vmResources; }
@@ -274,5 +281,11 @@ public class VMConfig {
     }
     
     b.append(loggerConfig.buildParameters());
+  }
+  
+  static public void overrideHadoopConfiguration(Map<String, String> props, Configuration aconf) {
+    HadoopProperties hprops = new HadoopProperties() ;
+    hprops.putAll(props);
+    hprops.overrideConfiguration(aconf);
   }
 }

@@ -6,6 +6,7 @@ import com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
+import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.chain.DataflowChainConfig;
 import com.neverwinterdp.scribengin.dataflow.chain.OrderDataflowChainSubmitter;
 import com.neverwinterdp.util.JSONSerializer;
@@ -63,11 +64,14 @@ public class LogSampleRunner {
     groupVMSubmitter.submitAndWaitForRunning(45000);
   }
   
-  public VMSubmitter submitVMLogValidatorApp() throws Exception {
+  public void submitVMLogValidatorApp() throws Exception {
+    long start = System.currentTimeMillis() ;
+    title("Submit The Validator App");
     VMConfig vmConfig = new VMConfig() ;
     vmConfig.setRegistryConfig(config.registryConfig);
     vmConfig.setName("log-validator");
     vmConfig.addRoles("log-validator");
+    vmConfig.addProperty("num-of-message-per-partition", config.logGeneratorNumOfMessagePerExecutor);
     vmConfig.addProperty("num-of-executor", config.logValidatorNumOfExecutorPerVM);
     vmConfig.addProperty("wait-for-message-timeout", config.logValidatorWaitForMessageTimeout);
     vmConfig.addProperty("wait-for-termination", config.logValidatorWaitForTermination);
@@ -77,23 +81,52 @@ public class LogSampleRunner {
     vmSubmitter.submit();
     vmSubmitter.waitForRunning(30000);
     vmSubmitter.waitForTerminated(config.logValidatorWaitForTermination);
-    return vmSubmitter ;
+    title("Finish The Validator App");
+    println("Execute Time: " + (System.currentTimeMillis() - start) + "ms");
+    LogSampleRegistry appRegistry = new LogSampleRegistry(shell.getVMClient().getRegistry(), false);
+    System.out.println(LogMessageReport.getFormattedReport("Generated Report", appRegistry.getGeneratedReports()));
+    System.out.println(LogMessageReport.getFormattedReport("Validate Report", appRegistry.getValidateReports()));
   }
   
   public void submitLogSampleDataflowChain() throws Exception {
+    long start = System.currentTimeMillis() ;
+    title("Submit The Dataflow Chain");
     OrderDataflowChainSubmitter submitter =  null;
     try {
       String json = IOUtil.getFileContentAsString(config.dataflowDescriptor) ;
       DataflowChainConfig dflChainconfig = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
+      for(int i = 0; i < dflChainconfig.getDescriptors().size(); i++) {
+        DataflowDescriptor descriptor = dflChainconfig.getDescriptors().get(i);
+        if(i == 0) {
+          long maxRuntime = config.dataflowWaitForTerminationTimeout - 6*(descriptor.getTaskSwitchingPeriod());
+          descriptor.setMaxRunTime(maxRuntime);
+        } else {
+          long maxRuntime = config.dataflowWaitForTerminationTimeout - 3*(descriptor.getTaskSwitchingPeriod());
+          descriptor.setMaxRunTime(maxRuntime);
+        }
+        
+      }
       submitter = new OrderDataflowChainSubmitter(shell.getScribenginClient(), config.dfsAppHome, dflChainconfig);
       if(config.dataflowTaskDebug) {
         submitter.enableDataflowTaskDebugger();
       }
       submitter.submit(config.dataflowWaitForSubmitTimeout);
       submitter.waitForTerminated(config.dataflowWaitForTerminationTimeout);
+      title("Finish The Dataflow Chain");
+      println("Execute Time: " + (System.currentTimeMillis() - start) + "ms") ;
+      submitter.report(System.out);
     } catch(Throwable ex) {
       ex.printStackTrace();
     }
+  }
+  
+  private void println(String message) {
+    System.out.println(message);
+  }
+  
+  private void title(String title) {
+    System.out.println(title);
+    System.out.println("*****************************************************************************");
   }
   
   static public void main(String[] args) throws Exception {
@@ -111,19 +144,20 @@ public class LogSampleRunner {
       "--registry-db-domain", "/NeverwinterDP",
       "--registry-implementation", RegistryImpl.class.getName(),
       
-      "--log-generator-num-of-vm", "2",
+      "--log-generator-num-of-vm", "1",
       "--log-generator-num-of-executor-per-vm", "1",
-      "--log-generator-num-of-message-per-executor", "3000",
+      "--log-generator-num-of-message-per-executor", "5000",
       "--log-generator-message-size", "128",
-      
-      "--log-validator-num-of-executor-per-vm", "3",
-      "--log-validator-wait-for-message-timeout", "5000",
-      "--log-validator-wait-for-termination", "30000",
+      "--log-generator-wait-before-exit", "60000",
       
       "--dataflow-descriptor", descriptorPath,
       "--dataflow-wait-for-submit-timeout", "45000",
-      "--dataflow-wait-for-termination-timeout", "180000",
-      "--dataflow-task-debug"
+      "--dataflow-wait-for-termination-timeout", "90000",
+      "--dataflow-task-debug",
+      
+      "--log-validator-num-of-executor-per-vm", "3",
+      "--log-validator-wait-for-message-timeout", "15000",
+      "--log-validator-wait-for-termination", "45000"
     } ;
     main(args);
   }

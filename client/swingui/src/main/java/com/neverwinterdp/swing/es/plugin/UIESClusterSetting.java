@@ -47,7 +47,7 @@ public class UIESClusterSetting extends JPanel  implements UILifecycle {
   
   static  public class ESClusterConnectionPanel extends SpringLayoutGridJPanel {
     static private String[]  REMOTE_ES = {
-      "test.scribengin:9300"
+      "tuan.neverwinterdp:9300"
     };
     
     private String connect;

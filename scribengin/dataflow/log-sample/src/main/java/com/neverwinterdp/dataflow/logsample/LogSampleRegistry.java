@@ -1,5 +1,7 @@
 package com.neverwinterdp.dataflow.logsample;
 
+import java.util.List;
+
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
@@ -15,22 +17,31 @@ public class LogSampleRegistry {
   private Node generateErrorsNode ;
   private Node validateReportsNode ;
   
-  public LogSampleRegistry(Registry registry) throws RegistryException {
+  public LogSampleRegistry(Registry registry, boolean initRegistry) throws RegistryException {
     this.registry = registry;
-    onInit() ;
+    initRegistry(initRegistry) ;
   }
   
-  public void onInit() throws RegistryException {
-    this.appNode = registry.createIfNotExist(APP_PATH);
-    
-    this.generateReportsNode = appNode.createDescendantIfNotExists("generate/reports");
-    this.generateErrorsNode  = appNode.createDescendantIfNotExists("generate/errors");
-    
-    this.validateReportsNode = appNode.createDescendantIfNotExists("validate/reports");
+  void initRegistry(boolean create) throws RegistryException {
+    if(create) {
+      appNode = registry.createIfNotExist(APP_PATH);
+      generateReportsNode = appNode.createDescendantIfNotExists("generate/reports");
+      generateErrorsNode  = appNode.createDescendantIfNotExists("generate/errors");
+      validateReportsNode = appNode.createDescendantIfNotExists("validate/reports");
+    } else {
+      appNode = registry.get(APP_PATH);
+      generateReportsNode = appNode.getDescendant("generate/reports");
+      generateErrorsNode  = appNode.getDescendant("generate/errors");
+      validateReportsNode = appNode.getDescendant("validate/reports");
+    }
   }
-  
+
   public void addGenerateReport(LogMessageReport report) throws RegistryException {
     generateReportsNode.createChild(report.getGroupId(), report, NodeCreateMode.PERSISTENT);
+  }
+  
+  public List<LogMessageReport> getGeneratedReports() throws RegistryException {
+    return generateReportsNode.getChildrenAs(LogMessageReport.class) ;
   }
   
   public void addGenerateError(String groupId, Throwable error) throws RegistryException {
@@ -38,9 +49,11 @@ public class LogSampleRegistry {
     generateReportsNode.createChild(groupId, stacktrace, NodeCreateMode.PERSISTENT);
   }
   
-  
   public void addValidateReport(LogMessageReport report) throws RegistryException {
     validateReportsNode.createChild(report.getGroupId(), report, NodeCreateMode.PERSISTENT);
   }
   
+  public List<LogMessageReport> getValidateReports() throws RegistryException {
+    return validateReportsNode.getChildrenAs(LogMessageReport.class) ;
+  }
 }

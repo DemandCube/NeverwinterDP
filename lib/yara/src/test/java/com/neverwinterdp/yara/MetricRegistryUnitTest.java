@@ -53,5 +53,9 @@ public class MetricRegistryUnitTest {
 
     public void onCounterDecr(String name, long timestampTick, long decr) {
     }
+
+    @Override
+    public void onMeterMark(String name, long timestampTick, long n) {
+    }
   }
 }

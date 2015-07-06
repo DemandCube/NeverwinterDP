@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorService;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkFactory;
@@ -14,43 +15,54 @@ import com.neverwinterdp.scribengin.storage.source.Source;
 import com.neverwinterdp.scribengin.storage.source.SourceFactory;
 import com.neverwinterdp.scribengin.storage.source.SourceStream;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.yara.Meter;
 
 public class DataflowTaskContext {
+  private DataflowTaskExecutorService executorService;
   private DataflowTaskReport report;
   private SourceContext sourceContext;
   private Map<String, SinkContext> sinkContexts = new HashMap<String, SinkContext>();
-  private DataflowRegistry dataflowRegistry;
   private DataflowTaskDescriptor dataflowTaskDescriptor;
-
-  public DataflowTaskContext(DataflowContainer container, DataflowTaskDescriptor descriptor, DataflowTaskReport report)  throws Exception {
-    this.sourceContext = new SourceContext(container.getSourceFactory(), descriptor.getSourceStreamDescriptor());
+  private Meter dataflowReadMeter ;
+  
+  public DataflowTaskContext(DataflowTaskExecutorService service, DataflowTaskDescriptor descriptor, DataflowTaskReport report)  throws Exception {
+    executorService = service;
+    sourceContext = new SourceContext(service.getSourceFactory(), descriptor.getSourceStreamDescriptor());
+    dataflowReadMeter = service.getMetricRegistry().getMeter("dataflow.source.throughput", "byte") ;
     Iterator<Map.Entry<String, StreamDescriptor>> i = descriptor.getSinkStreamDescriptors().entrySet().iterator();
       while (i.hasNext()) {
         Map.Entry<String, StreamDescriptor> entry = i.next();
-        SinkContext context = new SinkContext(container.getSinkFactory(), entry.getValue());
+        SinkContext context = new SinkContext(service.getSinkFactory(), entry.getValue());
         sinkContexts.put(entry.getKey(), context);
       }
       this.report = report;
       this.dataflowTaskDescriptor = descriptor;
-      this.dataflowRegistry = container.getDataflowRegistry();
   }
 
-  public DataflowTaskReport getReport() {
-    return this.report;
-  }
+  public DataflowTaskReport getReport() { return this.report; }
+  
+  public SourceStreamReader getSourceStreamReader() { return sourceContext.assignedSourceStreamReader; }
 
-  public SourceStreamReader getSourceStreamReader() {
-    return sourceContext.assignedSourceStreamReader;
+  public Record nextRecord(long maxWaitForDataRead) throws Exception {
+    Record record = getSourceStreamReader().next(maxWaitForDataRead);
+    if(record != null) {
+      dataflowReadMeter.mark(record.getData().length + record.getKey().length());
+    }
+    return record ;
   }
-
+  
   public void append(Record record) throws Exception {
     SinkContext sinkContext = sinkContexts.get("default");
     sinkContext.assignedSinkStreamWriter.append(record);
+    Meter meter = executorService.getMetricRegistry().getMeter("dataflow.sink.default.throughput"  , "byte") ;
+    meter.mark(record.getData().length + record.getKey().length());
   }
 
   public void write(String sinkName, Record record) throws Exception {
     SinkContext sinkContext = sinkContexts.get(sinkName);
     sinkContext.assignedSinkStreamWriter.append(record);
+    Meter meter = executorService.getMetricRegistry().getMeter("dataflow.sink." + sinkName + ".throughput"  , "byte") ;
+    meter.mark(record.getData().length + record.getKey().length());
   }
   
   public String[] getAvailableSinks() {
@@ -83,7 +95,7 @@ public class DataflowTaskContext {
       throw ex;
     }
     report.updateCommit();
-    dataflowRegistry.dataflowTaskReport(dataflowTaskDescriptor, report);
+    executorService.getDataflowRegistry().dataflowTaskReport(dataflowTaskDescriptor, report);
     return false;
   }
 

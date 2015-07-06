@@ -1,25 +1,22 @@
 package com.neverwinterdp.vm;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Stage;
 import com.mycila.guice.ext.closeable.CloseableInjector;
-import com.mycila.guice.ext.closeable.CloseableModule;
-import com.mycila.guice.ext.jsr250.Jsr250Module;
+import com.neverwinterdp.module.AppContainer;
 import com.neverwinterdp.module.AppModule;
+import com.neverwinterdp.module.ServiceModuleContainer;
+import com.neverwinterdp.module.VMModule;
 import com.neverwinterdp.os.RuntimeEnv;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.util.io.NetworkUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMApp.TerminateEvent;
 import com.neverwinterdp.vm.command.VMCommandWatcher;
@@ -28,106 +25,95 @@ import com.neverwinterdp.vm.service.VMService;
 public class VM {
   static private Map<String, VM> vms = new ConcurrentHashMap<String, VM>() ;
   
-  private LoggerFactory          loggerFactory ;
   private Logger                 logger  ;
 
-  private VMDescriptor           descriptor;
+  private VMDescriptor           vmDescriptor;
   private VMStatus               vmStatus = VMStatus.INIT;
 
-  private Injector               vmContainer;
-  private VMRegistry             vmRegistry;
-  private RuntimeEnv             runtimeEnv;
+  private AppContainer           appContainer;
+  private ServiceModuleContainer vmModuleContainer;
+  
   private VMApplicationRunner    vmApplicationRunner;
   
   public VM(VMConfig vmConfig) throws Exception {
-    loggerFactory = new LoggerFactory("[" + vmConfig.getName() + "][NeverwinterDP] ") ;
-    logger = loggerFactory.getLogger(VM.class) ;
-    
-    logger.info("Create VM with VMConfig:");
-    logger.info(JSONSerializer.INSTANCE.toString(vmConfig));
-    vmContainer = createVMContainer(vmConfig);
-    vmRegistry = vmContainer.getInstance(VMRegistry.class);
     if(vmConfig.isSelfRegistration()) {
+      vmDescriptor = new VMDescriptor(vmConfig);
+      initContainer(vmDescriptor, vmConfig);
+      logger.info("Create VM with VMConfig:");
+      logger.info(JSONSerializer.INSTANCE.toString(vmConfig));
       logger.info("Start self registration with the registry");
-      descriptor = new VMDescriptor(vmConfig);
-      Registry registry = vmContainer.getInstance(Registry.class);
-      VMService.register(registry, descriptor);
+      
+      Registry registry = vmModuleContainer.getInstance(Registry.class);
+      VMService.register(registry, vmDescriptor);
       logger.info("Finish self registration with the registry");
     } else {
-      descriptor = vmRegistry.getVMDescriptor();
+      vmDescriptor = initContainer(null, vmConfig);
     }
-    runtimeEnv = createRuntimeEnv(vmConfig);
     init();
   }
   
-  public VM(VMDescriptor vmDescriptor) throws RegistryException {
-    loggerFactory = new LoggerFactory("[" + vmDescriptor.getId() + "][NeverwinterDP] ") ;
-    logger = loggerFactory.getLogger(VM.class) ;
-    descriptor = vmDescriptor ;
-    vmContainer = createVMContainer(vmDescriptor.getVmConfig());
-    vmRegistry = vmContainer.getInstance(VMRegistry.class);
-    runtimeEnv = createRuntimeEnv(vmDescriptor.getVmConfig());
-    init();
-  }
+  public AppContainer getAppContainer() { return this.appContainer ; }
   
-  public LoggerFactory getLoggerFactory() { return this.loggerFactory; }
+  public ServiceModuleContainer getVMModuleServiceContainer() { return this.vmModuleContainer ; }
   
-  public Injector getVMContainer() { return this.vmContainer ; }
+  public LoggerFactory getLoggerFactory() { return appContainer.getLoggerFactory(); }
   
-  public RuntimeEnv getRuntimeEnv() { return this.runtimeEnv ; }
+  public RuntimeEnv getRuntimeEnv() { return appContainer.getRuntimeEnv(); }
   
-  private RuntimeEnv createRuntimeEnv(VMConfig vmConfig)  {
-    String serverName = "unknown";
-    try {
-      serverName = InetAddress.getLocalHost().getHostName();
-    } catch (UnknownHostException e) {
+  private VMDescriptor initContainer(VMDescriptor vmDescriptor, final VMConfig vmConfig) throws Exception {
+    final String vmDescriptorPath = VMService.ALL_PATH + "/" + vmConfig.getName();
+    final RegistryConfig rConfig = vmConfig.getRegistryConfig();
+    final Registry registry = rConfig.newInstance().connect();
+    if(vmDescriptor == null) {
+      vmDescriptor = registry.getDataAs(vmDescriptorPath, VMDescriptor.class);
     }
-    RuntimeEnv env    = new RuntimeEnv(serverName, vmConfig.getName(), null);
-    return env;
-  }
-  
-  private Injector createVMContainer(final VMConfig vmConfig) {
-    logger.info("Start createVMContainer(...)");
-    Map<String, String> props = new HashMap<String, String>();
-    props.put("vm.registry.allocated.path", VMService.ALL_PATH + "/" + vmConfig.getName());
-    AppModule module = new AppModule(props) {
+    final VMDescriptor finalVMDescriptor  = vmDescriptor;
+    Map<String, String> props = vmConfig.getProperties();
+    props.put("vm.registry.allocated.path", vmDescriptorPath);
+    String hostname = NetworkUtil.getHostname();
+    AppModule appModule = new AppModule(hostname, vmConfig.getName(), vmConfig.getAppHome(), vmConfig.getAppDataDir(), props) {
       @Override
-      protected void configure(Map<String, String> props) {
+      protected void configure(Map<String, String> properties) {
+        super.configure(properties);
         try {
           bindInstance(VMConfig.class, vmConfig);
-          //bindInstance(VMDescriptor.class, descriptor);
-          RegistryConfig rConfig = vmConfig.getRegistryConfig();
+          bindInstance(VMDescriptor.class, finalVMDescriptor);
+          
           bindInstance(RegistryConfig.class, rConfig);
-
-          bindType(Registry.class, rConfig.getRegistryImplementation());
-        } catch (ClassNotFoundException e) {
-          throw new RuntimeException(e);
+          bindInstance(Registry.class, registry);
+        } catch(Exception e) {
+          e.printStackTrace();
         }
       }
     };
-    logger.info("Finish createVMContainer(...)");
-    return Guice.createInjector(Stage.PRODUCTION, new CloseableModule(),new Jsr250Module(), module);
+    appContainer = new AppContainer(appModule);
+    appContainer.onInit();
+    logger = appContainer.getLoggerFactory().getLogger(getClass());
+    appContainer.install(new HashMap<String, String>(), VMModule.NAME) ;
+    vmModuleContainer = appContainer.getModule("VMModule");
+    return finalVMDescriptor;
   }
   
   public VMStatus getVMStatus() { return this.vmStatus ; }
 
-  public VMDescriptor getDescriptor() { return descriptor; }
+  public VMDescriptor getDescriptor() { return vmDescriptor; }
   
   public VMApp getVMApplication() {
     if(vmApplicationRunner == null) return null;
     return vmApplicationRunner.vmApplication;
   }
   
-  public VMRegistry getVMRegistry() { return this.vmRegistry ; }
+  public VMRegistry getVMRegistry() { return appContainer.getInstance(VMRegistry.class) ; }
 
   public void setVMStatus(VMStatus status) throws RegistryException {
     vmStatus = status;
-    vmRegistry.updateStatus(status);
+    getVMRegistry().updateStatus(status);
   }
   
   
   public void init() throws RegistryException {
     logger.info("Start init(...)");
+    VMRegistry vmRegistry = getVMRegistry();
     setVMStatus(VMStatus.INIT);
     vmRegistry.addCommandWatcher(new VMCommandWatcher(this));
     vmRegistry.createHeartbeat();
@@ -139,7 +125,7 @@ public class VM {
     if(vmApplicationRunner != null) {
       throw new Exception("VM Application is already started");
     }
-    VMConfig vmConfig = descriptor.getVmConfig();
+    VMConfig vmConfig = vmDescriptor.getVmConfig();
     Class<VMApp> vmAppType = (Class<VMApp>)Class.forName(vmConfig.getVmApplication()) ;
     VMApp vmApp = vmAppType.newInstance();
     vmApp.setVM(this);
@@ -202,9 +188,9 @@ public class VM {
       } finally {
         try {
           setVMStatus(VMStatus.TERMINATED);
-          vmContainer.getInstance(CloseableInjector.class).close();
+          appContainer.getInstance(CloseableInjector.class).close();
         } catch (RegistryException e) {
-          System.err.println("Set terminated vm status for " + descriptor.getId() );
+          System.err.println("Set terminated vm status for " + vmDescriptor.getId() );
           e.printStackTrace();
           logger.error("Error in vm registry", e);
         }

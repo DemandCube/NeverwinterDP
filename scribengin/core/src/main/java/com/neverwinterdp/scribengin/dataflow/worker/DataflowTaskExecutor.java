@@ -2,32 +2,26 @@ package com.neverwinterdp.scribengin.dataflow.worker;
 
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskContext;
-import com.neverwinterdp.scribengin.dataflow.DataflowContainer;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowTask;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
-import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.yara.MetricRegistry;
 import com.neverwinterdp.yara.Timer;
 
 public class DataflowTaskExecutor {
   private DataflowTaskExecutorDescriptor executorDescriptor;
-  private DataflowContainer              dataflowContainer;
   private ExecutorManagerThread          executorManagerThread;
   private DataflowTaskExecutorThread     executorThread;
-  private MetricRegistry                 metricRegistry;
+  private DataflowTaskExecutorService    executorService;
   private DataflowTask                   currentDataflowTask = null;
   private boolean                        interrupt           = false;
   private boolean                        kill                = false;
 
-  public DataflowTaskExecutor(DataflowTaskExecutorDescriptor  descriptor, DataflowContainer container) throws RegistryException {
+  public DataflowTaskExecutor(DataflowTaskExecutorService service, DataflowTaskExecutorDescriptor  descriptor) throws RegistryException {
     executorDescriptor = descriptor;
-    dataflowContainer = container;
-    DataflowRegistry dataflowRegistry = dataflowContainer.getDataflowRegistry() ;
-    VMDescriptor vmDescriptor = dataflowContainer.getVMDescriptor() ;
-    metricRegistry = dataflowContainer.getInstance(MetricRegistry.class);
-    dataflowRegistry.createWorkerTaskExecutor(vmDescriptor, descriptor);
+    this.executorService = service;
+    service.getDataflowRegistry().createWorkerTaskExecutor(service.getVMDescriptor(), descriptor);
   }
   
   public DataflowTaskExecutorDescriptor getDescriptor() { return this.executorDescriptor ; }
@@ -52,8 +46,8 @@ public class DataflowTaskExecutor {
   
   public void execute() { 
     executorDescriptor.setStatus(DataflowTaskExecutorDescriptor.Status.RUNNING);
-    DataflowRegistry dataflowRegistry = dataflowContainer.getDataflowRegistry();
-    VMDescriptor vmDescriptor = dataflowContainer.getVMDescriptor() ;
+    MetricRegistry metricRegistry = executorService.getMetricRegistry();
+    DataflowRegistry dataflowRegistry = executorService.getDataflowRegistry();
     Timer dataflowTaskTimerGrab = metricRegistry.getTimer("dataflow-task.timer.grab") ;
     Timer dataflowTaskTimerProcess = metricRegistry.getTimer("dataflow-task.timer.process") ;
     try {
@@ -63,7 +57,7 @@ public class DataflowTaskExecutor {
         int retries = 0 ;
         while(taskContext == null && retries < 3) {
           Timer.Context dataflowTaskTimerGrabCtx = dataflowTaskTimerGrab.time() ;
-          taskContext= dataflowRegistry.dataflowTaskAssign(vmDescriptor);
+          taskContext= dataflowRegistry.dataflowTaskAssign(executorService.getVMDescriptor());
           dataflowTaskTimerGrabCtx.stop();
           Thread.sleep(3000);
           retries++;
@@ -78,8 +72,8 @@ public class DataflowTaskExecutor {
         
         Timer.Context dataflowTaskTimerProcessCtx = dataflowTaskTimerProcess.time() ;
         executorDescriptor.addAssignedTask(taskContext.getTaskTransactionId().getTaskId());
-        dataflowRegistry.updateWorkerTaskExecutor(vmDescriptor, executorDescriptor);
-        currentDataflowTask = new DataflowTask(dataflowContainer, taskContext);
+        dataflowRegistry.updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
+        currentDataflowTask = new DataflowTask(executorService, taskContext);
         currentDataflowTask.init();
         executorThread = new DataflowTaskExecutorThread(currentDataflowTask);
         executorThread.start();
@@ -104,10 +98,9 @@ public class DataflowTaskExecutor {
   void doExit() {
     if(kill) return ;
     try {
-      DataflowRegistry dataflowRegistry = dataflowContainer.getDataflowRegistry();
-      VMDescriptor vmDescriptor = dataflowContainer.getVMDescriptor() ;
       executorDescriptor.setStatus(DataflowTaskExecutorDescriptor.Status.TERMINATED);
-      dataflowRegistry.updateWorkerTaskExecutor(vmDescriptor, executorDescriptor);
+      DataflowRegistry dataflowRegistry = executorService.getDataflowRegistry();
+      dataflowRegistry.updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
     } catch(Exception ex) {
       ex.printStackTrace();
     }
@@ -140,9 +133,10 @@ public class DataflowTaskExecutor {
     public void run() {
       try {
         dataflowtask.run();
-        notifyTermination();
       } catch(Exception ex) {
         ex.printStackTrace();
+      } finally {
+        notifyTermination();
       }
     }
     

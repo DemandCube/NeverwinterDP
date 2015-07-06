@@ -14,7 +14,7 @@ import com.mycila.guice.ext.closeable.CloseableModule;
 import com.mycila.guice.ext.jsr250.Jsr250Module;
 import com.neverwinterdp.es.Configuration;
 import com.neverwinterdp.es.ElasticSearchService;
-import com.neverwinterdp.module.AppModule;
+import com.neverwinterdp.module.AppServiceModule;
 import com.neverwinterdp.module.MycilaJmxModuleExt;
 import com.neverwinterdp.tool.server.Server;
 import com.neverwinterdp.util.log.LoggerFactory;
@@ -72,7 +72,7 @@ public class ElasticSearchServer implements Server {
         } ;
         final Configuration configuration = new Configuration() ;
         new JCommander(configuration, args);
-        AppModule module = new AppModule(new HashMap<String, String>()) {
+        AppServiceModule module = new AppServiceModule(new HashMap<String, String>()) {
           @Override
           protected void configure(Map<String, String> properties) {
             bindMapProperties("esProperties", configuration.getESProperties()) ;

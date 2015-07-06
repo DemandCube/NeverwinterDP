@@ -49,7 +49,7 @@ public class DataflowWorkerFailureExperimentTest {
     Assert.assertEquals("kafka-to-kafka-1-master-0000000001", dflClient.getDataflowMaster().getId());
     Assert.assertEquals(1, dflClient.getDataflowMasters().size());
 
-    submitter.waitForTermination(180000);
+    submitter.waitForTermination(210000);
     serverFailureSimulator.waitForTermination(30000);
   }
   
@@ -91,9 +91,9 @@ public class DataflowWorkerFailureExperimentTest {
           "dataflow-test " + KafkaDataflowTest.TEST_NAME +
           "  --dataflow-id kafka-to-kafka-1" +
           "  --dataflow-name  kafka-to-kafka" +
-          "  --worker 2 --executor-per-worker 2 --duration 180000 --task-max-execute-time 5000" +
+          "  --worker 3 --executor-per-worker 2 --duration 180000 --task-max-execute-time 10000" +
           "  --source-name input --source-num-of-stream 10 --source-write-period 0 --source-max-records-per-stream 100000" + 
-          "  --sink-name output "+
+          "  --sink-name output"+
           "  --debug-dataflow-activity-detail" +
           "  --debug-dataflow-task" +
           "  --debug-dataflow-vm" +

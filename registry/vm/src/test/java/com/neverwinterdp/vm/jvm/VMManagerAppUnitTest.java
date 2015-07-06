@@ -39,7 +39,7 @@ public class VMManagerAppUnitTest  {
   public void setup() throws Exception {
     vmCluster = new VMZKClusterBuilder() ;
     vmCluster.clean();
-    vmCluster.starZookeeper();
+    vmCluster.startZookeeper();
     Thread.sleep(5000);
     
     debugger = new RegistryDebugger(System.err, vmCluster.getVMClient().getRegistry().connect());

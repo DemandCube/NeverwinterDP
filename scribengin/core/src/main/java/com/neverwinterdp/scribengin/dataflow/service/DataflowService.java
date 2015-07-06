@@ -3,6 +3,7 @@ package com.neverwinterdp.scribengin.dataflow.service;
 import org.slf4j.Logger;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.mycila.jmx.annotation.JmxBean;
 import com.neverwinterdp.registry.RegistryException;
@@ -43,7 +44,6 @@ public class DataflowService {
   @Inject
   private SinkFactory sinkFactory ;
   
-  @Inject
   private DataflowActivityService activityService;
   
   private TaskService<DataflowTaskDescriptor> taskService ;
@@ -60,15 +60,14 @@ public class DataflowService {
   
   public DataflowRegistry getDataflowRegistry() { return dataflowRegistry; }
 
-  public DataflowActivityService getDataflowActivityService() { return this.activityService ;  }
-  
   public SourceFactory getSourceFactory() { return sourceFactory; }
 
   public SinkFactory getSinkFactory() { return sinkFactory; }
   
   @Inject
-  public void onInject(LoggerFactory lfactory) {
+  public void onInject(Injector container, LoggerFactory lfactory) throws RegistryException {
     logger = lfactory.getLogger(DataflowService.class);
+    activityService = new DataflowActivityService(container, dataflowRegistry) ;
   }
   
   public void addAvailableTask(DataflowTaskDescriptor taskDescriptor) throws RegistryException {

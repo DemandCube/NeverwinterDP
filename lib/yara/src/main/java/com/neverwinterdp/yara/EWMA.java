@@ -1,10 +1,10 @@
 package com.neverwinterdp.yara;
 
+import static java.lang.Math.exp;
+
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static java.lang.Math.exp;
 
 /**
  * An exponentially-weighted moving average.

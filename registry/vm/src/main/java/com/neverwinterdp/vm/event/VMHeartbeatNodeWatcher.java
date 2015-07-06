@@ -14,6 +14,7 @@ public class VMHeartbeatNodeWatcher extends NodeWatcher {
   
   @Override
   public void onEvent(NodeEvent event) {
+    if(!registry.isConnect()) return;
     try {
       String path = event.getPath();
       String descriptorPath = path.replace("/status/heartbeat", "") ;

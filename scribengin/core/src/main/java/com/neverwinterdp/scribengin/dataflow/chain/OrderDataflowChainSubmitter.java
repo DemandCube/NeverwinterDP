@@ -33,21 +33,11 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
   }
   
   protected DataflowSubmitter doSubmit(ScribenginClient client, String dfsDataflowHome, DataflowDescriptor descriptor, long timeout) throws Exception {
-    try {
-      DataflowSubmitter submitter = new DataflowSubmitter(client, dfsDataflowHome, descriptor) ;
-      submitter.submit();
-      setupDebugger(submitter);
-      submitter.waitForRunning(timeout);
-      return submitter;
-    } catch(Exception ex ) {
-      try {
-        Node dataflowNode = client.getRegistry().get(ScribenginService.getDataflowPath(descriptor.getId()));
-        dataflowNode.dump(System.err);
-      } catch(Exception dumpError) {
-        dumpError.printStackTrace();
-      }
-      throw ex ;
-    }
+    DataflowSubmitter submitter = new DataflowSubmitter(client, dfsDataflowHome, descriptor) ;
+    submitter.submit();
+    setupDebugger(submitter);
+    submitter.waitForRunning(timeout);
+    return submitter;
   }
   
   public void waitForTerminated(long timeout) throws Exception {

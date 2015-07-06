@@ -31,11 +31,11 @@ public class VMZKClusterBuilder extends VMClusterBuilder {
   
   @Override
   public void start() throws Exception {
-    starZookeeper();
+    startZookeeper();
     super.start();
   }
   
-  public void starZookeeper() throws Exception {
+  public void startZookeeper() throws Exception {
     zookeeperServer = new EmbededZKServer(baseDir + "/zookeeper-1", 2181);
     zookeeperServer.start();
   }

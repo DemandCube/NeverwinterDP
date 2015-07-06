@@ -1,35 +1,32 @@
 package com.neverwinterdp.vm.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.Stage;
-import com.mycila.guice.ext.closeable.CloseableModule;
-import com.mycila.guice.ext.jsr250.Jsr250Module;
-import com.neverwinterdp.module.AppModule;
-import com.neverwinterdp.module.MycilaJmxModuleExt;
+import com.neverwinterdp.module.AppContainer;
+import com.neverwinterdp.module.ServiceModuleContainer;
+import com.neverwinterdp.module.VMServiceModule;
 import com.neverwinterdp.registry.RefNode;
 import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.election.LeaderElection;
 import com.neverwinterdp.registry.election.LeaderElectionListener;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
+import com.neverwinterdp.vm.VMConfig.ClusterEnvironment;
 import com.neverwinterdp.vm.VMDescriptor;
+import com.neverwinterdp.vm.environment.jvm.JVMVMServicePlugin;
+import com.neverwinterdp.vm.environment.yarn.YarnVMServicePlugin;
 import com.neverwinterdp.vm.event.VMShutdownEventListener;
 
 
 public class VMServiceApp extends VMApp {
   private LeaderElection election ;
   
-  private Injector  appContainer ;
-  private VMService vmService;
+  private ServiceModuleContainer vmServiceModuleContainer;
   private VMShutdownEventListener shutdownListener;
   
-  public VMService getVMService() { return this.vmService; }
+  public VMService getVMService() { return vmServiceModuleContainer.getInstance(VMService.class); }
  
   @Override
   public void run() throws Exception {
@@ -53,7 +50,7 @@ public class VMServiceApp extends VMApp {
       if(election != null && election.getLeaderId() != null) {
         election.stop();
       }
-      
+      VMService vmService = getVMService();
       if(vmService != null) {
         //TODO: should check to make sure the resource are clean before destroy the service
         Thread.sleep(3000);
@@ -64,30 +61,22 @@ public class VMServiceApp extends VMApp {
   
   public void startVMService() {
     try {
+      VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
       final Registry registry = getVM().getVMRegistry().getRegistry();
       RefNode refNode = new RefNode();
       refNode.setPath(getVM().getDescriptor().getRegistryPath());
       registry.setData(VMService.LEADER_PATH, refNode);
-      AppModule module = new AppModule(getVM().getDescriptor().getVmConfig().getProperties()) {
-        @Override
-        protected void configure(Map<String, String> properties) {
-          bindInstance(VMConfig.class, getVM().getDescriptor().getVmConfig());
-          bindInstance(RegistryConfig.class, registry.getRegistryConfig());
-          try {
-            bindType(Registry.class, registry.getClass().getName());
-          } catch (Throwable e) {
-            //TODO: use logger
-            e.printStackTrace();
-          }
-        };
-      };
-      Module[] modules = {
-          new CloseableModule(),new Jsr250Module(), 
-          new MycilaJmxModuleExt(getVM().getDescriptor().getVmConfig().getName()), 
-          module
-      };
-      appContainer = Guice.createInjector(Stage.PRODUCTION, modules);
-      vmService = appContainer.getInstance(VMService.class);
+      AppContainer appContainer = getVM().getAppContainer();
+      Map<String, String> moduleProps = new HashMap<>() ;
+      if(vmConfig.getClusterEnvironment() ==  ClusterEnvironment.JVM) {
+        moduleProps.put("module.vm.vmservice.plugin", JVMVMServicePlugin.class.getName());
+      } else {
+        moduleProps.put("module.vm.vmservice.plugin", YarnVMServicePlugin.class.getName());
+      }
+      appContainer.install(moduleProps, VMServiceModule.NAME);
+      vmServiceModuleContainer = appContainer.getModule(VMServiceModule.NAME);
+     
+      VMService vmService = vmServiceModuleContainer.getInstance(VMService.class);
       vmService.setStatus(VMService.Status.RUNNING);
       List<VMDescriptor> vmDescriptors = vmService.getActiveVMDescriptors();
       for(VMDescriptor sel : vmDescriptors) {

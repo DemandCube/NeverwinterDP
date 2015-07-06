@@ -17,12 +17,12 @@
 
 package com.neverwinterdp.yara.quantile;
 
+import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.nio.ByteBuffer;
 
 import com.neverwinterdp.yara.quantile.util.Lists;
 import com.neverwinterdp.yara.quantile.util.Preconditions;

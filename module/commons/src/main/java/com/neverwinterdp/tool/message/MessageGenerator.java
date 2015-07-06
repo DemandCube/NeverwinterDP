@@ -21,13 +21,13 @@ public interface MessageGenerator {
     @Override
     public byte[] nextMessage(String partition, int messageSize) {
       AtomicInteger idTracker = getIdTracker(partition) ;
-      Message message = new Message(partition, idTracker.incrementAndGet(), messageSize) ;
+      Message message = new Message(partition, idTracker.getAndIncrement(), messageSize) ;
       return JSONSerializer.INSTANCE.toBytes(message) ;
     }
     
     public int getCurrentSequenceId(String partition) {
       AtomicInteger idTracker = getIdTracker(partition) ;
-      return idTracker.get() + 1;
+      return idTracker.get();
     }
     
     AtomicInteger getIdTracker(String partition) {

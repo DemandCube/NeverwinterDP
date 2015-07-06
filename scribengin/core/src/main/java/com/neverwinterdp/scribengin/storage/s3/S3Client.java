@@ -34,13 +34,13 @@ public class S3Client {
   }
 
   public S3Client() {
-    region = Region.getRegion(Regions.EU_CENTRAL_1);
+    region = Region.getRegion(Regions.DEFAULT_REGION);
   }
 
   @PostConstruct
   public void onInit() {
     s3Client = new AmazonS3Client();
-  s3Client.setRegion(region);
+    s3Client.setRegion(region);
   }
 
   @PreDestroy
@@ -87,8 +87,7 @@ public class S3Client {
     return true;
   }
 
-  public ObjectMetadata getObjectMetadata(String bucketName, String key) throws AmazonClientException,
-      AmazonServiceException {
+  public ObjectMetadata getObjectMetadata(String bucketName, String key) throws AmazonClientException, AmazonServiceException {
     return s3Client.getObjectMetadata(bucketName, key);
   }
 
@@ -112,8 +111,7 @@ public class S3Client {
     return s3Client.getObject(bucketName, key);
   }
 
-  public S3Folder createS3Folder(String bucketName, String folderPath) throws AmazonClientException,
-      AmazonServiceException {
+  public S3Folder createS3Folder(String bucketName, String folderPath) throws AmazonClientException, AmazonServiceException {
     if (!hasBucket(bucketName)) {
       throw new AmazonServiceException("Bucket " + bucketName + " does not exist");
     }
@@ -126,7 +124,7 @@ public class S3Client {
   }
 
   public S3Folder getS3Folder(String bucketName, String folderPath) throws AmazonClientException,
-      AmazonServiceException {
+  AmazonServiceException {
     if (!hasBucket(bucketName)) {
       throw new AmazonServiceException("Bucket " + bucketName + " does not exist");
     }
@@ -138,13 +136,12 @@ public class S3Client {
 
   public List<S3Folder> getRootFolders(String bucket) {
     List<S3Folder> folders = new ArrayList<S3Folder>();
-    S3Folder folder;
 
     ListObjectsRequest request = new ListObjectsRequest().withBucketName(bucket).withDelimiter("/");
     ObjectListing objectListing = getAmazonS3Client().listObjects(request);
     for (String folderName : objectListing.getCommonPrefixes()) {
       folderName = folderName.substring(0, folderName.indexOf("/"));
-      folder = new S3Folder(this, bucket, folderName);
+      S3Folder folder = new S3Folder(this, bucket, folderName);
       folders.add(folder);
     }
     return folders;

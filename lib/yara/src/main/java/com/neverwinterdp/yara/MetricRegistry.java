@@ -10,8 +10,9 @@ public class MetricRegistry implements Serializable {
   transient private MetricPluginManager pluginManager = new MetricPluginManager() ;;
   
   private String name ;
-  private ConcurrentMap<String, Counter> counters = new ConcurrentHashMap<String, Counter>();
-  private ConcurrentMap<String, Timer>   timers   = new ConcurrentHashMap<String, Timer>();
+  private ConcurrentMap<String, Counter> counters = new ConcurrentHashMap<>();
+  private ConcurrentMap<String, Timer>   timers   = new ConcurrentHashMap<>();
+  private ConcurrentMap<String, Meter>   meters   = new ConcurrentHashMap<>();
 
   public MetricRegistry() { 
   }
@@ -62,9 +63,27 @@ public class MetricRegistry implements Serializable {
   public Timer timer(String ... name) {
     return getTimer(name(name)) ;
   }
+
+  public Map<String, Meter> getMeters() { return this.meters ; }
+  
+  public Meter getMeter(String name, String unit) {
+    Meter meter = meters.get(name) ;
+    if(meter != null) return meter ;
+    synchronized(meters) {
+      meter = meters.get(name) ;
+      if(meter != null) return meter ;
+      meter = new Meter(name, unit) ;
+      meter.setMetricPlugin(pluginManager);
+      meters.put(name, meter) ;
+    }
+    return meter ;
+  }
+  
+  public Meter meter(String ... name) {
+    return getMeter(name(name), "call") ;
+  }
   
   public int remove(String nameExp) {
-    //TODO: implement this method
     return 0 ;
   }
   
