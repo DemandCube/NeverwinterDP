@@ -2,6 +2,7 @@ package com.neverwinterdp.scribengin.dataflow.test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.tap4j.model.TestResult;
@@ -15,13 +16,16 @@ import com.neverwinterdp.scribengin.Record;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskContext;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowWaitingEventListener;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowTestReport.DataflowSinkValidatorReport;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowTestReport.DataflowSourceGeneratorReport;
 import com.neverwinterdp.scribengin.dataflow.util.DataflowRegistryDebugger;
 import com.neverwinterdp.scribengin.scribe.ScribeAbstract;
+import com.neverwinterdp.scribengin.service.ScribenginService;
 import com.neverwinterdp.util.text.TabularFormater;
+import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 
 abstract public class DataflowTest {
   @Parameter(names = "--dataflow-id", description = "The dataflow id")
@@ -136,10 +140,13 @@ abstract public class DataflowTest {
     junitReport(report);
   }
 
-  protected void report(ScribenginShell shell, DataflowWaitingEventListener waitingEventListener) throws IOException {
+  protected void report(ScribenginShell shell, DataflowWaitingEventListener waitingEventListener) throws Exception {
     TabularFormater dataflowEventInfo = waitingEventListener.getTabularFormaterEventLogInfo();
     dataflowEventInfo.setTitle("Dataflow event log info");
     shell.console().println(dataflowEventInfo.getFormatText());
+    String dataflowPath = ScribenginService.getDataflowPath(dataflowId);
+    List<MetricRegistrySnapshot> snapshots = DataflowRegistry.getMetrics(shell.getVMClient().getRegistry(), dataflowPath) ;
+    shell.console().println(MetricRegistrySnapshot.getFormattedText(snapshots));
   }
 
   protected void setupDebugger(ScribenginShell shell, ScribenginClient scribenginClient, DataflowDescriptor dflDescriptor) throws Exception {

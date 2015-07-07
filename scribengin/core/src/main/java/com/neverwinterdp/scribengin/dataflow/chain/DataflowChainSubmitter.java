@@ -49,9 +49,7 @@ abstract public class DataflowChainSubmitter {
   }
   
   public void report(Appendable out) throws Exception {
-    System.out.println("report submiters = " + submitters.size());
     for(DataflowSubmitter submitter : submitters) {
-      System.out.println("report submitter: " + submitter);
       submitter.report(out);
     }
   }
