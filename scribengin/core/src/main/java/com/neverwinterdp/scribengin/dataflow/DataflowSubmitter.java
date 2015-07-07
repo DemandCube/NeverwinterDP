@@ -2,6 +2,8 @@ package com.neverwinterdp.scribengin.dataflow;
 
 import static com.neverwinterdp.vm.tool.VMClusterBuilder.h1;
 
+import java.util.List;
+
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.SequenceIdTracker;
 import com.neverwinterdp.registry.event.WaitingOrderNodeEventListener;
@@ -17,6 +19,7 @@ import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.command.Command;
 import com.neverwinterdp.vm.command.CommandResult;
+import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 
 public class DataflowSubmitter {
   private ScribenginClient   scribenginClient;
@@ -103,6 +106,10 @@ public class DataflowSubmitter {
     out.append("Dataflow " + dflDescriptor.getId()).append('\n');
     out.append("**************************************************************************************").append('\n');
     out.append(dflFt.getFormattedText()).append('\n');
+    
+    List<MetricRegistrySnapshot> snapshots = DataflowRegistry.getMetrics(scribenginClient.getRegistry(), dataflowPath) ;
+    out.append(MetricRegistrySnapshot.getFormattedText(snapshots));
+    
     out.append("**************************************************************************************").append("\n\n");
   }
   

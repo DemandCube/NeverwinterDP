@@ -11,7 +11,7 @@ abstract public class DataflowChainSubmitter {
   protected ScribenginClient client;
   protected String dfsDataflowHome;
   protected DataflowChainConfig config;
-  private List<DataflowSubmitter> submitters = new ArrayList<>();
+  protected List<DataflowSubmitter> submitters = new ArrayList<>();
   private boolean enableDataflowTaskDebugger = false;
 
   public DataflowChainSubmitter(ScribenginClient client, String dfsDataflowHome, DataflowChainConfig config) {
@@ -49,7 +49,9 @@ abstract public class DataflowChainSubmitter {
   }
   
   public void report(Appendable out) throws Exception {
+    System.out.println("report submiters = " + submitters.size());
     for(DataflowSubmitter submitter : submitters) {
+      System.out.println("report submitter: " + submitter);
       submitter.report(out);
     }
   }

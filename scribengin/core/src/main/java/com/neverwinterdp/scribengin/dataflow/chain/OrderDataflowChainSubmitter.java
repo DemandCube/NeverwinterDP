@@ -1,16 +1,10 @@
 package com.neverwinterdp.scribengin.dataflow.chain;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
-import com.neverwinterdp.scribengin.service.ScribenginService;
 
 public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
-  private List<DataflowSubmitter> submitters = new ArrayList<>();
   
   public OrderDataflowChainSubmitter(ScribenginClient client, String dfsDataflowHome, DataflowChainConfig config) {
     super(client, dfsDataflowHome, config);
