@@ -3,15 +3,20 @@ package com.neverwinterdp.scribengin.dataflow;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.dataflow.test.KafkaDataflowTest;
+import com.neverwinterdp.scribengin.service.ScribenginService;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
+import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 
 public class DataflowKafkaToKafkaUnitTest {
   static {
@@ -46,7 +51,11 @@ public class DataflowKafkaToKafkaUnitTest {
     try {
       ScribenginClient scribenginClient = shell.getScribenginClient();
       assertEquals(2, scribenginClient.getScribenginMasters().size());
-      submitter.waitForTermination(90000);
+      submitter.waitForTermination(120000);
+      Registry registry = shell.getVMClient().getRegistry();
+      String dataflowPath = ScribenginService.getDataflowPath("kafka-to-kafka-1");
+      List<MetricRegistrySnapshot> snapshots = DataflowRegistry.getMetrics(registry, dataflowPath) ;
+      System.out.println(MetricRegistrySnapshot.getFormattedText(snapshots));
     } catch(Throwable err) {
       throw err;
     } finally {

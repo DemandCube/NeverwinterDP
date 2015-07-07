@@ -29,6 +29,8 @@ import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorDescript
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMDescriptor;
+import com.neverwinterdp.yara.MetricRegistry;
+import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 
 @Singleton
 public class DataflowRegistry {
@@ -82,6 +84,8 @@ public class DataflowRegistry {
   private Node               activeWorkers;
   private Node               historyWorkers;
   
+  private Node               metricsNode ;
+  
   private Notifier           dataflowTaskNotifier ;
   private Notifier           dataflowWorkerNotifier ;
 
@@ -115,6 +119,8 @@ public class DataflowRegistry {
     activeWorkers = registry.get(dataflowPath + "/" + ACTIVE_WORKERS_PATH);
     historyWorkers = registry.get(dataflowPath + "/" + HISTORY_WORKERS_PATH);
     
+    metricsNode = registry.get(dataflowPath + "/metrics");
+    
     String notificationPath = getDataflowNotificationsPath() ;
     dataflowTaskNotifier = new Notifier(registry, notificationPath, "dataflow-tasks");
     dataflowWorkerNotifier = new Notifier(registry, notificationPath, "dataflow-workers");
@@ -138,6 +144,8 @@ public class DataflowRegistry {
     allWorkers.createIfNotExists();
     activeWorkers.createIfNotExists();
     historyWorkers.createIfNotExists();
+    
+    metricsNode.createIfNotExists();
     
     dataflowTaskNotifier.initRegistry();
     dataflowWorkerNotifier.initRegistry();
@@ -342,13 +350,31 @@ public class DataflowRegistry {
     Node executors = allWorkers.getDescendant(worker + "/executors") ;
     return executors.getChildrenAs(DataflowTaskExecutorDescriptor.class);
   }
+
+  public void saveMetric(String vmName, MetricRegistry mRegistry) throws RegistryException {
+    MetricRegistrySnapshot mRegistrySnapshot = new MetricRegistrySnapshot(vmName, mRegistry) ;
+    if(!metricsNode.hasChild(vmName)) {
+      metricsNode.createChild(vmName, mRegistrySnapshot, NodeCreateMode.PERSISTENT);
+    } else {
+      metricsNode.getChild(vmName).setData( mRegistrySnapshot);
+    }
+  }
+  
+  public MetricRegistrySnapshot getMetric(String vmName) throws RegistryException {
+    MetricRegistrySnapshot mRegistrySnapshot = metricsNode.getChild(vmName).getDataAs(MetricRegistrySnapshot.class) ;
+    return mRegistrySnapshot;
+  }
+  
+  public List<MetricRegistrySnapshot> getMetrics() throws RegistryException {
+    return metricsNode.getChildrenAs(MetricRegistrySnapshot.class);
+  }
+  
+  public ActivityRegistry getActivityRegistry() throws RegistryException {
+    return new ActivityRegistry(registry, dataflowPath + "/" + ACTIVITIES_PATH) ;
+  }
   
   public void dump() throws RegistryException, IOException {
     registry.get(dataflowPath).dump(System.out);
-  }
-
-  public ActivityRegistry getActivityRegistry() throws RegistryException {
-    return new ActivityRegistry(registry, dataflowPath + "/" + ACTIVITIES_PATH) ;
   }
   
   static  public DataflowLifecycleStatus getStatus(Registry registry, String dataflowPath) throws RegistryException {
@@ -421,6 +447,10 @@ public class DataflowRegistry {
     }
   }
 
+  static public List<MetricRegistrySnapshot> getMetrics(Registry registry, String dataflowPath) throws RegistryException {
+    return registry.getChildrenAs(dataflowPath + "/metrics", MetricRegistrySnapshot.class) ;
+  }
+  
   public class ConfigurationRegistry {
     private Node configurationNode ;
     private Node logNode ;

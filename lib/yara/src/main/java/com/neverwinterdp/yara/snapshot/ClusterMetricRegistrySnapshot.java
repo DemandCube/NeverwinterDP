@@ -11,7 +11,7 @@ import com.neverwinterdp.yara.cluster.ClusterTimer;
 
 public class ClusterMetricRegistrySnapshot implements Serializable {
   private Map<String, ClusterCounterSnapshot> counters = new TreeMap<String, ClusterCounterSnapshot>();
-  private Map<String, ClusterTimerSnapshot> timers = new TreeMap<String, ClusterTimerSnapshot>();
+  private Map<String, ClusterTimerSnapshot>   timers = new TreeMap<String, ClusterTimerSnapshot>();
 
   public ClusterMetricRegistrySnapshot() { }
   

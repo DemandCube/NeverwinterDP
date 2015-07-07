@@ -69,9 +69,9 @@ public class VMDataflowWorkerApp extends VMApp {
       StringBuilder out = new StringBuilder() ;
       MetricPrinter metricPrinter = new MetricPrinter(out) ;
       MetricRegistry mRegistry = dataflowWorkerModuleContainer.getInstance(MetricRegistry.class);
+      DataflowRegistry dflRegistry = dataflowTaskExecutorService.getDataflowRegistry() ;
+      dflRegistry.saveMetric(getVM().getDescriptor().getVmConfig().getName(), mRegistry);
       metricPrinter.print(mRegistry);
-      logger.info("\n" + out.toString());
-      System.out.println("DATAFLOW WORKER METRIC");
       System.out.println(out.toString());
     }
   }
