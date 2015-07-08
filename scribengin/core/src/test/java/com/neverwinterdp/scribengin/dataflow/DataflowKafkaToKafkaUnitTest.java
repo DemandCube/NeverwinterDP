@@ -52,10 +52,6 @@ public class DataflowKafkaToKafkaUnitTest {
       ScribenginClient scribenginClient = shell.getScribenginClient();
       assertEquals(2, scribenginClient.getScribenginMasters().size());
       submitter.waitForTermination(120000);
-      Registry registry = shell.getVMClient().getRegistry();
-      String dataflowPath = ScribenginService.getDataflowPath("kafka-to-kafka-1");
-      List<MetricRegistrySnapshot> snapshots = DataflowRegistry.getMetrics(registry, dataflowPath) ;
-      System.out.println(MetricRegistrySnapshot.getFormattedText(snapshots));
     } catch(Throwable err) {
       throw err;
     } finally {
