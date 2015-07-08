@@ -7,9 +7,11 @@ import com.google.inject.Inject;
 import com.neverwinterdp.os.OSManagement;
 import com.neverwinterdp.os.RuntimeEnv;
 import com.neverwinterdp.yara.Counter;
+import com.neverwinterdp.yara.Meter;
 import com.neverwinterdp.yara.MetricRegistry;
 import com.neverwinterdp.yara.Timer;
 import com.neverwinterdp.yara.snapshot.CounterSnapshot;
+import com.neverwinterdp.yara.snapshot.MeterSnapshot;
 import com.neverwinterdp.yara.snapshot.TimerSnapshot;
 
 public class MetricLoggerService  extends ObjectLoggerService {
@@ -27,6 +29,7 @@ public class MetricLoggerService  extends ObjectLoggerService {
    
     add(CounterSnapshot.class);
     add(TimerSnapshot.class);
+    add(MeterSnapshot.class);
     
     metricCollectorThread = new MetricInfoCollectorThread();
     metricCollectorThread.start();
@@ -45,6 +48,11 @@ public class MetricLoggerService  extends ObjectLoggerService {
           for(Map.Entry<String, Timer> entry : timers.entrySet()) {
             TimerSnapshot timerSnapshot = new TimerSnapshot(serverName, entry.getValue(), TimeUnit.MILLISECONDS);
             log(timerSnapshot.uniqueId(), timerSnapshot);
+          }
+          Map<String, Meter>  meters = metricRegistry.getMeters();
+          for(Map.Entry<String, Meter> entry : meters.entrySet()) {
+            MeterSnapshot meterSnapshot = new MeterSnapshot(serverName, entry.getValue());
+            log(meterSnapshot.uniqueId(), meterSnapshot);
           }
           Thread.sleep(30000);
         }
