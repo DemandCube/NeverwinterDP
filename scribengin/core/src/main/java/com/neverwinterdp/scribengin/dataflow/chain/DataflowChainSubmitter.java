@@ -18,7 +18,11 @@ abstract public class DataflowChainSubmitter {
     this.client = client;
     this.dfsDataflowHome = dfsDataflowHome ;
     this.config = config ;
+    
+    
   }
+  
+  public List<DataflowSubmitter> getDataflowSubmitters() { return this.submitters ; }
   
   public void submit(long timeout) throws Exception {
     long stopTime = System.currentTimeMillis() + timeout;

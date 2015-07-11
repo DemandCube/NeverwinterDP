@@ -40,9 +40,7 @@ abstract public class DataflowCommandTest {
     int testNum = 0;
     
     for(ExecuteLog log : executeLogs){
-      testSet.addTestResult(newTestResult(++testNum,
-          log.getDescription(),
-          log.getStop() - log.getStart() < 120000));
+      testSet.addTestResult(newTestResult(++testNum,log.getDescription(), log.getStop() - log.getStart() < 120000));
     }
     
     File file = new File(junitReportFile);

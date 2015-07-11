@@ -6,8 +6,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.neverwinterdp.dataflow.logsample.LogSampleRunner;
-import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowCommandStartStopResumeTest;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowRandomServerFailureTest;
@@ -206,7 +204,7 @@ public class DataflowTestRunner extends Thread {
         @Override
         public void run() {
           try {
-            LogSampleRunner.runTest("../../scribengin/dataflow/log-sample/src/app/conf/local/log-dataflow-chain.json");
+            //LogSampleRunner.runTest("../../scribengin/dataflow/log-sample/src/app/conf/local/log-dataflow-chain.json");
           } catch(Exception ex) {
             ex.printStackTrace();
           }

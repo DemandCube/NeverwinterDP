@@ -32,6 +32,8 @@ public class DataflowSubmitter {
     this.dflDescriptor     = dflDescriptor;
   }
 
+  public DataflowDescriptor getDataflowDescriptor() { return this.dflDescriptor ; }
+  
   public void submit() throws Exception {
     Registry registry = scribenginClient.getRegistry();
     VMClient vmClient = scribenginClient.getVMClient() ;

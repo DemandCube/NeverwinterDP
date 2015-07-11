@@ -12,47 +12,53 @@ public class LogSampleConfig {
   String dfsAppHome ;
 
   @Parameter(names = "--log-generator-num-of-vm", description = "Log generator message size")
-  int logGeneratorNumOfVM = 1;
+  public int logGeneratorNumOfVM = 1;
   
   @Parameter(names = "--log-generator-num-of-executor-per-vm", description = "Log generator message size")
-  int logGeneratorNumOfExecutorPerVm = 1;
+  public int logGeneratorNumOfExecutorPerVm = 1;
   
   @Parameter(names = "--log-generator-num-of-message-per-executor", description = "Log generator message size")
-  int logGeneratorNumOfMessagePerExecutor = 1000;
+  public int logGeneratorNumOfMessagePerExecutor = 1000;
   
   @Parameter(names = "--log-generator-message-size", description = "Log generator message size")
-  int logGeneratorMessageSize ;
+  public int logGeneratorMessageSize ;
   
   @Parameter(names = "--log-generator-wait-before-exit", description = "Need to wait to make sure the log component forward the data to kafka, es")
-  long logGeneratorWaitBeforeExit = 45000 ;
+  public long logGeneratorWaitBeforeExit = 45000 ;
   
   @Parameter(names = "--log-validator-num-of-vm", description = "Log generator message size")
-  int logValidatorNumOfVM = 1;
+  public int logValidatorNumOfVM = 1;
   
   @Parameter(names = "--log-validator-num-of-executor-per-vm", description = "Log generator message size")
-  int logValidatorNumOfExecutorPerVM = 3;
+  public int logValidatorNumOfExecutorPerVM = 3;
   
   @Parameter(names = "--log-validator-wait-for-message-timeout", description = "Log generator message size")
-  long logValidatorWaitForMessageTimeout = 5000;
+  public long logValidatorWaitForMessageTimeout = 5000;
   
   @Parameter(names = "--log-validator-wait-for-termination", description = "Log generator message size")
-  long logValidatorWaitForTermination = 60000;
+  public long logValidatorWaitForTermination = 60000;
   
   @Parameter(names = "--log-validator-validate-topic", description = "Topic to validate")
-  String logValidatorValidateTopic = "log4j.aggregate";
+  public String logValidatorValidateTopic = "log4j.aggregate";
   
   @ParametersDelegate
-  RegistryConfig registryConfig   = new RegistryConfig();
+  public RegistryConfig registryConfig   = new RegistryConfig();
 
   @Parameter(names = "--dataflow-descriptor", description = "Debug the dataflow task!")
-  String dataflowDescriptor = "src/app/conf/local/log-dataflow-chain.json";
+  public String dataflowDescriptor = "src/app/conf/local/log-dataflow-chain.json";
  
   @Parameter(names = "--dataflow-wait-for-submit-timeout", description = "Debug the dataflow task!")
-  long dataflowWaitForSubmitTimeout = 60000;
+  public long dataflowWaitForSubmitTimeout = 60000;
  
   @Parameter(names = "--dataflow-wait-for-termination-timeout", description = "Debug the dataflow task!")
-  long dataflowWaitForTerminationTimeout = 90000;
+  public long dataflowWaitForTerminationTimeout = 90000;
  
   @Parameter(names = "--dataflow-task-debug", description = "Debug the dataflow task!")
-  boolean dataflowTaskDebug = false;
+  public boolean dataflowTaskDebug = false;
+  
+  @Parameter(names = "--dataflow-worker-failure-simulation", description = "Enable the dataflow worker failure simulation!")
+  public boolean dataflowWorkerFailureSimulation = false;
+  
+  @Parameter(names = "--dataflow-master-failure-simulation", description = "Enable the dataflow worker failure simulation!")
+  public boolean dataflowMasterFailureSimulation = false;
 }

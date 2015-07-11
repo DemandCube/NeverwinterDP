@@ -10,13 +10,14 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.LoggerConfig;
 
-public class LogSampleUnitTest  {
+public class LogSampleClientUnitTest  {
   ScribenginClusterBuilder clusterBuilder ;
   Node esNode ;
   
@@ -58,7 +59,29 @@ public class LogSampleUnitTest  {
   }
   
   @Test
-  public void testLogSample() throws Exception {
-    LogSampleRunner.runTest("src/app/conf/local/log-dataflow-chain.json");
+  public void test() throws Exception {
+    String[] args = {
+        "--registry-connect", "127.0.0.1:2181",
+        "--registry-db-domain", "/NeverwinterDP",
+        "--registry-implementation", RegistryImpl.class.getName(),
+        
+        "--log-generator-num-of-vm", "1",
+        "--log-generator-num-of-executor-per-vm", "1",
+        "--log-generator-num-of-message-per-executor", "5000",
+        "--log-generator-message-size", "128",
+        "--log-generator-wait-before-exit", "60000",
+        
+        "--dataflow-descriptor", "src/app/conf/local/log-dataflow-chain.json",
+        "--dataflow-wait-for-submit-timeout", "45000",
+        "--dataflow-wait-for-termination-timeout", "240000",
+        "--dataflow-task-debug",
+        
+        "--log-validator-num-of-executor-per-vm", "3",
+        "--log-validator-wait-for-message-timeout", "15000",
+        "--log-validator-wait-for-termination", "45000"
+      } ;
+    
+    LogSampleClient client = new LogSampleClient(args);
+    client.run();
   }
 }
