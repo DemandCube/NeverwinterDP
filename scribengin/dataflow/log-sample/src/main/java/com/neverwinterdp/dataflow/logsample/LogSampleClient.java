@@ -55,15 +55,16 @@ public class LogSampleClient  {
     DataflowChainExecutor dataflowChainExecutor = new DataflowChainExecutor(shell, config);
     dataflowChainGroup.add(dataflowChainExecutor);
     
-    if(config.dataflowWorkerFailureSimulation) {
+    if(config.dataflowFailureSimulationWorker) {
       for(DataflowDescriptor dflDescriptor : dataflowChainExecutor.getDataflowChainConfig().getDescriptors()) {
         String dataflowId = dflDescriptor.getId();
         RandomKillDataflowWorkerExecutor executor = new RandomKillDataflowWorkerExecutor(shell, dataflowId); 
+        executor.waitBeforeSimulateFailure = config.dataflowFailureSimulationWaitBeforeStart;
         dataflowChainGroup.add(executor);
       }
     }
     
-    if(config.dataflowStartStopResumeSimulation) {
+    if(config.dataflowFailureSimulationStartStopResume) {
       for(DataflowDescriptor dflDescriptor : dataflowChainExecutor.getDataflowChainConfig().getDescriptors()) {
         String dataflowId = dflDescriptor.getId();
         if(dataflowId.indexOf("splitter") >= 0) continue;

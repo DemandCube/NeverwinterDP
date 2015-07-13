@@ -56,12 +56,15 @@ public class LogSampleConfig {
   @Parameter(names = "--dataflow-task-debug", description = "Debug the dataflow task!")
   public boolean dataflowTaskDebug = false;
   
-  @Parameter(names = "--dataflow-worker-failure-simulation", description = "Enable the dataflow worker failure simulation!")
-  public boolean dataflowWorkerFailureSimulation = false;
+  @Parameter(names = "--dataflow-failure-simulation-worker", description = "Enable the dataflow worker failure simulation!")
+  public boolean dataflowFailureSimulationWorker = false;
   
-  @Parameter(names = "--dataflow-master-failure-simulation", description = "Enable the dataflow worker failure simulation!")
-  public boolean dataflowMasterFailureSimulation = false;
+  @Parameter(names = "--dataflow-failure-simulation-master", description = "Enable the dataflow worker failure simulation!")
+  public boolean dataflowFailureSimulationMaster = false;
   
-  @Parameter(names = "--dataflow-start-stop-resume-simulation", description = "Enable the dataflow worker failure simulation!")
-  public boolean dataflowStartStopResumeSimulation = false;
+  @Parameter(names = "--dataflow-failure-simulation-start-stop-resume", description = "Enable the dataflow worker failure simulation!")
+  public boolean dataflowFailureSimulationStartStopResume = false;
+  
+  @Parameter(names = "--dataflow-failure-simulation-wait-before-start", description = "Enable the dataflow worker failure simulation!")
+  public long dataflowFailureSimulationWaitBeforeStart = 15000;
 }
