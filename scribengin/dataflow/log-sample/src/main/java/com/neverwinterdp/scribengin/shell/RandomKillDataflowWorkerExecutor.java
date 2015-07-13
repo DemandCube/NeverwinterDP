@@ -15,7 +15,7 @@ import com.neverwinterdp.scribengin.dataflow.test.ExecuteLog;
 import com.neverwinterdp.util.text.TabularFormater;
 import com.neverwinterdp.vm.VMDescriptor;
 
-public class RandomDataflowWorkerKiller extends Executor {
+public class RandomKillDataflowWorkerExecutor extends Executor {
   @Parameter(names = "--wait-for-running-dataflow", description = "The command should repeat in this failurePeriod of time")
   long waitForRunningDataflow = 180000;
   
@@ -37,7 +37,7 @@ public class RandomDataflowWorkerKiller extends Executor {
   private DataflowClient   dflClient ;
   private List<ExecuteLog> executeLogs = new ArrayList<>();
   
-  public RandomDataflowWorkerKiller(ScribenginShell shell, String dataflowId) {
+  public RandomKillDataflowWorkerExecutor(ScribenginShell shell, String dataflowId) {
     super(shell) ;
     this.dataflowId = dataflowId;
   }

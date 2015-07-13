@@ -61,4 +61,7 @@ public class LogSampleConfig {
   
   @Parameter(names = "--dataflow-master-failure-simulation", description = "Enable the dataflow worker failure simulation!")
   public boolean dataflowMasterFailureSimulation = false;
+  
+  @Parameter(names = "--dataflow-start-stop-resume-simulation", description = "Enable the dataflow worker failure simulation!")
+  public boolean dataflowStartStopResumeSimulation = false;
 }

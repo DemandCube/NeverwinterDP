@@ -5,11 +5,11 @@ import com.beust.jcommander.JCommander;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
 import com.neverwinterdp.scribengin.shell.Executor;
 import com.neverwinterdp.scribengin.shell.ExecutorScheduler;
 import com.neverwinterdp.scribengin.shell.GroupExecutor;
-import com.neverwinterdp.scribengin.shell.RandomDataflowWorkerKiller;
+import com.neverwinterdp.scribengin.shell.RandomKillDataflowWorkerExecutor;
+import com.neverwinterdp.scribengin.shell.StartStopDataflowExecutor;
 import com.neverwinterdp.vm.HadoopProperties;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.client.VMClient;
@@ -55,10 +55,21 @@ public class LogSampleClient  {
     DataflowChainExecutor dataflowChainExecutor = new DataflowChainExecutor(shell, config);
     dataflowChainGroup.add(dataflowChainExecutor);
     
-    for(DataflowDescriptor dflDescriptor : dataflowChainExecutor.getDataflowChainConfig().getDescriptors()) {
-      String dataflowId = dflDescriptor.getId();
-      RandomDataflowWorkerKiller dataflowWorkerKiller = new RandomDataflowWorkerKiller(shell, dataflowId); 
-      dataflowChainGroup.add(dataflowWorkerKiller);
+    if(config.dataflowWorkerFailureSimulation) {
+      for(DataflowDescriptor dflDescriptor : dataflowChainExecutor.getDataflowChainConfig().getDescriptors()) {
+        String dataflowId = dflDescriptor.getId();
+        RandomKillDataflowWorkerExecutor executor = new RandomKillDataflowWorkerExecutor(shell, dataflowId); 
+        dataflowChainGroup.add(executor);
+      }
+    }
+    
+    if(config.dataflowStartStopResumeSimulation) {
+      for(DataflowDescriptor dflDescriptor : dataflowChainExecutor.getDataflowChainConfig().getDescriptors()) {
+        String dataflowId = dflDescriptor.getId();
+        if(dataflowId.indexOf("splitter") >= 0) continue;
+        StartStopDataflowExecutor executor = new StartStopDataflowExecutor(shell, dataflowId); 
+        dataflowChainGroup.add(executor);
+      }
     }
     
     GroupExecutor validatorGroup = scheduler.newGroupExcecutor("validator-group");
