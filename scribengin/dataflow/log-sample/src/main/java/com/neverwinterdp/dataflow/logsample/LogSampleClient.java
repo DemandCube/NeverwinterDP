@@ -60,6 +60,7 @@ public class LogSampleClient  {
         String dataflowId = dflDescriptor.getId();
         RandomKillDataflowWorkerExecutor executor = new RandomKillDataflowWorkerExecutor(shell, dataflowId); 
         executor.waitBeforeSimulateFailure = config.dataflowFailureSimulationWaitBeforeStart;
+        executor.simulateKill = config.dataflowFailureSimulationSimulateKill;
         dataflowChainGroup.add(executor);
       }
     }

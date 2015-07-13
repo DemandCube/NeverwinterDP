@@ -74,9 +74,11 @@ public class LogSampleClientUnitTest  {
         "--dataflow-descriptor", "src/app/conf/local/log-dataflow-chain.json",
         "--dataflow-wait-for-submit-timeout", "45000",
         "--dataflow-wait-for-termination-timeout", "240000",
-        "--dataflow-failure-simulation-worker",
-        //"--dataflow-failure-simulation-start-stop-resume",
+        
+        "--dataflow-failure-simulation-worker", //"--dataflow-failure-simulation-start-stop-resume",
         "--dataflow-failure-simulation-wait-before-start", "15000",
+        "--dataflow-failure-simulation-simulate-kill",
+        
         "--dataflow-task-debug",
         
         "--log-validator-num-of-executor-per-vm", "3",
