@@ -28,8 +28,8 @@ public class VMDataflowWorkerApp extends VMApp {
     logger = getVM().getLoggerFactory().getLogger(VMDataflowWorkerApp.class);
     
     AppContainer appContainer = getVM().getAppContainer();
-    //Map<String, String> esLoggerModuleProps = new HashMap<String, String>();
-    //appContainer.install(esLoggerModuleProps, ESOSMonitorLoggerModule.NAME);
+    Map<String, String> esLoggerModuleProps = new HashMap<String, String>();
+    appContainer.install(esLoggerModuleProps, ESOSMonitorLoggerModule.NAME);
     
     Map<String, String> dataflowWorkerModuleProps = new HashMap<String, String>();
     dataflowWorkerModuleProps.putAll(vmConfig.getHadoopProperties());
