@@ -20,7 +20,7 @@ public class RandomKillDataflowWorkerExecutor extends Executor {
   long waitForRunningDataflow = 180000;
   
   @Parameter(names = "--wait-before-simulate-failure", description = "Wait before simulate")
-  long waitBeforeSimulateFailure = 15000;
+  long waitBeforeSimulateFailure = 90000;
   
   
   @Parameter(names = "--failure-period", description = "The command should repeat in this period of time")
