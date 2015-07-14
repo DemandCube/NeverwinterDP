@@ -68,7 +68,7 @@ public class DataflowFormater {
   }
   
   public String getDataflowWorkerInfo() throws RegistryException {
-    List<DataflowWorkerRuntimeReport> reports =  DataflowRegistry.getActiveDataflowWorkerRuntimeReports(registry, dataflowPath);
+    List<DataflowWorkerRuntimeReport> reports =  DataflowRegistry.getAllDataflowWorkerRuntimeReports(registry, dataflowPath);
     String[] header = {
       "Worker", "Status", "Executor", "Executor Status", "Executor Assigned Tasks"
     } ;
