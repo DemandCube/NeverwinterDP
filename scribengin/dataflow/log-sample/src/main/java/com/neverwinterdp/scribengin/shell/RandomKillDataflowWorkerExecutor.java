@@ -24,7 +24,7 @@ public class RandomKillDataflowWorkerExecutor extends Executor {
   
   
   @Parameter(names = "--failure-period", description = "The command should repeat in this period of time")
-  long failurePeriod = 15000;
+  public long failurePeriod = 15000;
   
   @Parameter(names = "--max-kill", description = "The command should repeat in this period of time")
   public int maxKill = 25;

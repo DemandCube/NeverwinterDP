@@ -62,6 +62,7 @@ public class LogSampleClient  {
         executor.waitBeforeSimulateFailure = config.dataflowFailureSimulationWaitBeforeStart;
         executor.simulateKill = config.dataflowFailureSimulationSimulateKill;
         executor.maxKill = config.dataflowFailureSimulationMaxKill;
+        executor.failurePeriod = config.dataflowFailureSimulationPeriod;
         dataflowChainGroup.add(executor);
       }
     }

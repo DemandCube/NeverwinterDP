@@ -73,4 +73,7 @@ public class LogSampleConfig {
   
   @Parameter(names = "--dataflow-failure-simulation-max-kill", description = "Enable the dataflow worker failure simulation!")
   public int dataflowFailureSimulationMaxKill = 25;
+  
+  @Parameter(names = "--dataflow-failure-simulation-period", description = "Enable the dataflow worker failure simulation!")
+  public int dataflowFailureSimulationPeriod = 15000;
 }
