@@ -155,6 +155,12 @@ public class VMConfig {
   
   public String getProperty(String name) { return properties.get(name); }
   
+  public String getProperty(String name, String defaultValue) { 
+    String value = properties.get(name); 
+    if(value == null) return defaultValue;
+    return value ;
+  }
+  
   public int getPropertyAsInt(String name, int defaultVal) { 
     String val = properties.get(name); 
     return val == null ? defaultVal : Integer.parseInt(val);

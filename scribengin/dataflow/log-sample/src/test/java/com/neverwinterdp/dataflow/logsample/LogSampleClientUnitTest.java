@@ -75,11 +75,11 @@ public class LogSampleClientUnitTest  {
         "--dataflow-wait-for-submit-timeout", "45000",
         "--dataflow-wait-for-termination-timeout", "240000",
         
-        "--dataflow-failure-simulation-worker", //"--dataflow-failure-simulation-start-stop-resume",
-        "--dataflow-failure-simulation-wait-before-start", "15000",
-        "--dataflow-failure-simulation-simulate-kill",
-        "--dataflow-failure-simulation-max-kill", "2",
-        "--dataflow-failure-simulation-period", "15000",
+//        "--dataflow-failure-simulation-worker", //"--dataflow-failure-simulation-start-stop-resume",
+//        "--dataflow-failure-simulation-wait-before-start", "15000",
+//        "--dataflow-failure-simulation-simulate-kill",
+//        "--dataflow-failure-simulation-max-kill", "2",
+//        "--dataflow-failure-simulation-period", "15000",
         "--dataflow-task-debug",
         
         "--log-validator-num-of-executor-per-vm", "3",

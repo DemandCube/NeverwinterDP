@@ -19,6 +19,7 @@ public class KafkaAppender extends AppenderSkeleton {
   private int      queueMaxSizePerSegment = 100000;
   private boolean  queueError = false ;
   private MultiSegmentQueue<Log4jRecord> queue ; 
+  private boolean closed = false ;
   
   private DeamonThread forwardThread ;
   
@@ -29,6 +30,7 @@ public class KafkaAppender extends AppenderSkeleton {
   }
   
   public void close() {
+    closed = true ;
     if(forwardThread != null) {
       forwardThread.exit = true ;
       forwardThread.interrupt() ; 
@@ -65,6 +67,7 @@ public class KafkaAppender extends AppenderSkeleton {
   public boolean requiresLayout() { return false; }
 
   protected void append(LoggingEvent event) {
+    if(closed) return ;
     if(queueError) return ;
     append(new Log4jRecord(event)) ;
   }
