@@ -61,6 +61,7 @@ public class LogSampleClient  {
         RandomKillDataflowWorkerExecutor executor = new RandomKillDataflowWorkerExecutor(shell, dataflowId); 
         executor.waitBeforeSimulateFailure = config.dataflowFailureSimulationWaitBeforeStart;
         executor.simulateKill = config.dataflowFailureSimulationSimulateKill;
+        executor.maxKill = config.dataflowFailureSimulationMaxKill;
         dataflowChainGroup.add(executor);
       }
     }

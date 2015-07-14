@@ -20,14 +20,14 @@ public class RandomKillDataflowWorkerExecutor extends Executor {
   public long waitForRunningDataflow = 180000;
   
   @Parameter(names = "--wait-before-simulate-failure", description = "Wait before simulate")
-  public long waitBeforeSimulateFailure = 300000;
+  public long waitBeforeSimulateFailure = 60000;
   
   
   @Parameter(names = "--failure-period", description = "The command should repeat in this period of time")
-  long failurePeriod = 90000;
+  long failurePeriod = 15000;
   
-  @Parameter(names = "--max-failure", description = "The command should repeat in this period of time")
-  int maxFailure = 10;
+  @Parameter(names = "--max-kill", description = "The command should repeat in this period of time")
+  public int maxKill = 25;
   
   @Parameter(names = "--simulate-kill", description = "The command should repeat in this period of time")
   public boolean simulateKill = true;
@@ -67,7 +67,7 @@ public class RandomKillDataflowWorkerExecutor extends Executor {
     }
     int simulationCount = 0 ;
 
-    while(simulationCount < maxFailure) {
+    while(simulationCount < maxKill) {
       kill();
       Thread.sleep(failurePeriod);
       simulationCount++ ;

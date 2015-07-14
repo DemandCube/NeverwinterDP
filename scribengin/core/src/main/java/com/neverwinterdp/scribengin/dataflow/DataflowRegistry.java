@@ -203,6 +203,12 @@ public class DataflowRegistry {
     statusNode.setData(status);
   }
   
+  public void setWorkerStatus(String vmId, DataflowWorkerStatus status) throws RegistryException {
+    Node workerNode = allWorkers.getChild(vmId);
+    Node statusNode = workerNode.getChild("status");
+    statusNode.setData(status);
+  }
+  
   public void historyWorker(String vmId) throws RegistryException {
     Transaction transaction = registry.getTransaction() ;
     transaction.createChild(historyWorkers, vmId, NodeCreateMode.PERSISTENT) ;
@@ -432,8 +438,17 @@ public class DataflowRegistry {
     }
   }
   
-  static public List<DataflowWorkerRuntimeReport> getDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
+  static public List<DataflowWorkerRuntimeReport> getAllDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
     String workerListPath = dataflowPath + "/workers/all";
+    return getDataflowWorkerRuntimeReports(registry, workerListPath);
+  }
+  
+  static public List<DataflowWorkerRuntimeReport> getActiveDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
+    String workerListPath = dataflowPath + "/workers/active";
+    return getDataflowWorkerRuntimeReports(registry, workerListPath);
+  }
+  
+  static public List<DataflowWorkerRuntimeReport> getDataflowWorkerRuntimeReports(Registry registry, String workerListPath) throws RegistryException {
     try {
       List<String> workerIds = registry.getChildren(workerListPath) ;
       List<DataflowWorkerRuntimeReport> holder = new ArrayList<>();

@@ -39,6 +39,9 @@ public class DataflowWorkerMonitor {
     
     DataflowWorkerStatus dataflowWorkerStatus = dataflowWorkerNode.getChild("status").getDataAs(DataflowWorkerStatus.class);
     if(dataflowWorkerStatus != DataflowWorkerStatus.TERMINATED) {
+      DataflowWorkerStatus workerStatus = DataflowWorkerStatus.TERMINATED_WITH_ERROR;
+      dataflowRegistry.setWorkerStatus(vmNode.getName(), workerStatus);
+      
       Activity activity = new AddWorkerActivityBuilder().build(1);
       activityService.queue(activity);
       Notifier notifier = dataflowRegistry.getDataflowWorkerNotifier();
