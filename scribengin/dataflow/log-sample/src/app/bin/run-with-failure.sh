@@ -52,8 +52,10 @@ $JAVACMD -Djava.ext.dirs=$APP_DIR/libs:$SCRIBENGIN_HOME/libs:$JAVA_HOME/jre/lib/
   --log-generator-wait-before-exit 900000 \
   --log-validator-num-of-executor-per-vm 3 --log-validator-wait-for-message-timeout 15000 --log-validator-wait-for-termination 600000 \
   --dataflow-descriptor $APP_DIR/conf/log-dataflow-chain.json  \
-  --dataflow-wait-for-submit-timeout 150000 --dataflow-wait-for-termination-timeout 1800000 \
+  --dataflow-wait-for-submit-timeout 150000 --dataflow-wait-for-termination-timeout 2400000 \
   --dataflow-failure-simulation-worker  \
   --dataflow-failure-simulation-wait-before-start 210000 \
+  --dataflow-failure-simulation-max-kill 5 \
+  --dataflow-failure-simulation-period 180000 \
   --dataflow-task-debug
 
