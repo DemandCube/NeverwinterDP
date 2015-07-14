@@ -19,8 +19,8 @@ public class OSInfo implements Serializable {
   private long   availableProcessor;
   private long   processCpuTime;
   private double processCpuLoad;
-  private long   systemCpuTime;
   private double systemCpuLoad;
+  private double systemCpuLoadAverage;
   private long   freePhysicalMemorySize;
   private long   freeSwapSpaceSize;
   
@@ -31,9 +31,8 @@ public class OSInfo implements Serializable {
     availableProcessor = osMBean.getAvailableProcessors() ;
     processCpuTime     = osMBean.getProcessCpuTime();
     processCpuLoad     = osMBean.getProcessCpuLoad();
-    systemCpuTime      = osMBean.getProcessCpuTime();
     systemCpuLoad      = osMBean.getSystemCpuLoad();
-    
+    systemCpuLoadAverage = osMBean.getSystemLoadAverage();
     freePhysicalMemorySize = osMBean.getFreePhysicalMemorySize() ;
     freeSwapSpaceSize      = osMBean.getFreeSwapSpaceSize() ;
   }
@@ -63,11 +62,11 @@ public class OSInfo implements Serializable {
   public double getProcessCpuLoad() { return processCpuLoad; }
   public void setProcessCpuLoad(double processCpuLoad) { this.processCpuLoad = processCpuLoad; }
 
-  public long getSystemCpuTime() { return systemCpuTime;}
-  public void setSystemCpuTime(long systemCpuTime) { this.systemCpuTime = systemCpuTime; }
-
   public double getSystemCpuLoad() { return systemCpuLoad; }
   public void setSystemCpuLoad(double systemCpuLoad) { this.systemCpuLoad = systemCpuLoad; }
+
+  public double getSystemCpuLoadAverage() { return systemCpuLoadAverage; }
+  public void setSystemCpuLoadAverage(double systemCpuLoadAverage) { this.systemCpuLoadAverage = systemCpuLoadAverage; }
 
   public long getFreePhysicalMemorySize() { return freePhysicalMemorySize; }
   public void setFreePhysicalMemorySize(long freePhysicalMemorySize) {
@@ -84,7 +83,7 @@ public class OSInfo implements Serializable {
   static public String getFormattedText(OSInfo ... info) {
     String[] header = {
       "Timestamp", "Host", "Name", "Arch", "# Core", "Proc Cpu Time", "Proc Cpu Load", 
-      "Sys Cpu Time", "Sys Cpu Load", "Free Mem", "Free Swap Mem"
+      "Sys Cpu Load", "Sys Cpu Load Avg", "Free Mem", "Free Swap Mem"
     };
     TabularFormater formatter = new TabularFormater(header) ;
     for(OSInfo sel : info) {
@@ -96,8 +95,8 @@ public class OSInfo implements Serializable {
           sel.getAvailableProcessor(),
           DateUtil.timeNanoToHumanReadable(sel.getProcessCpuTime()),
           sel.getProcessCpuLoad(),
-          DateUtil.timeNanoToHumanReadable(sel.getSystemCpuTime()),
           sel.getSystemCpuLoad(),
+          sel.getSystemCpuLoadAverage(),
           ByteUtil.byteToHumanReadable(sel.getFreePhysicalMemorySize()),
           ByteUtil.byteToHumanReadable(sel.getFreeSwapSpaceSize()));
     }
