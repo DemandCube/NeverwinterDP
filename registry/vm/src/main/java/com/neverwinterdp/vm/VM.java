@@ -188,7 +188,6 @@ public class VM {
       } finally {
         try {
           setVMStatus(VMStatus.TERMINATED);
-          appContainer.onDestroy();
           appContainer.getInstance(CloseableInjector.class).close();
         } catch (RegistryException e) {
           System.err.println("Set terminated vm status for " + vmDescriptor.getId() );
@@ -230,5 +229,6 @@ public class VM {
     vm.run();
     vm.waitForComplete();
     System.out.println("VM: main(..) finish in " + (System.currentTimeMillis() - start) + "ms");
+    System.exit(0);
   }
 }
