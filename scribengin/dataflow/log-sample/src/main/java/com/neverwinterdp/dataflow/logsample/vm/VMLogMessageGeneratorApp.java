@@ -59,9 +59,9 @@ public class VMLogMessageGeneratorApp extends VMApp {
         for(int i = 0; i < numOfMessagePerExecutor; i++) {
           int mod = i % 3 ;
           String jsonMessage = new String(messageGenerator.nextMessage(groupId, messageSize)) ;
-          if(mod == 0) logWriter.write("LogSample", "INFO", jsonMessage);
+          if(mod == 0) logWriter.write("LogSample", "ERROR", jsonMessage);
           else if (mod == 1) logWriter.write("LogSample", "WARN", jsonMessage);
-          else logWriter.write("LogSample", "ERROR", jsonMessage);
+          else logWriter.write("LogSample", "INFO", jsonMessage);
         }
         logWriter.close();
       } catch(Throwable t) {
