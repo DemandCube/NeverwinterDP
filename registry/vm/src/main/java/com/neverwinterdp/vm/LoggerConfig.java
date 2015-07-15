@@ -159,7 +159,7 @@ public class LoggerConfig {
   
   static public class ESAppender {
     @Parameter(names = "--log-es-enable", description = "Enable or not the log file")
-    boolean        enable    = true;
+    boolean        enable    = false;
 
     @Parameter(names = "--log-es-name", description = "The name of the log es appender")
     private String name      = "es";
@@ -217,7 +217,7 @@ public class LoggerConfig {
   
   static public class KafkaAppender {
     @Parameter(names = "--log-kafka-enable", description = "Enable or not the kafka log")
-    boolean        enable    = true;
+    boolean        enable    = false;
 
     @Parameter(names = "--log-kafka-name", description = "The name of the kafka log appender")
     private String name      = "kafka";
