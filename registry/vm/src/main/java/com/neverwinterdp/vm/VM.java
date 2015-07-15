@@ -156,11 +156,11 @@ public class VM {
     thread.start();
   }
 
-  public synchronized void notifyComplete() {
+  synchronized public void notifyComplete() {
     notifyAll();
   }
   
-  public synchronized void waitForComplete() throws InterruptedException {
+  synchronized public void waitForComplete() throws InterruptedException {
     long start = System.currentTimeMillis() ;
     logger.info("Start waitForComplete()");
     wait();
@@ -188,6 +188,7 @@ public class VM {
       } finally {
         try {
           setVMStatus(VMStatus.TERMINATED);
+          appContainer.onDestroy();
           appContainer.getInstance(CloseableInjector.class).close();
         } catch (RegistryException e) {
           System.err.println("Set terminated vm status for " + vmDescriptor.getId() );
