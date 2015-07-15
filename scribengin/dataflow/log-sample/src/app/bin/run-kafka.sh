@@ -56,7 +56,7 @@ if [ "$PROFILE" = "test" ] ; then
     --log-generator-num-of-vm 1 --log-generator-num-of-executor-per-vm 4 --log-generator-num-of-message-per-executor 100000 --log-generator-message-size $MESSAGE_SIZE \
     --log-validator-wait-for-termination 600000 --log-validator-validate-kafka log4j.aggregate \
     --dataflow-descriptor $APP_DIR/conf/kafka-log-dataflow-chain.json  \
-    --dataflow-wait-for-submit-timeout 150000 --dataflow-wait-for-termination-timeout 300000 \
+    --dataflow-wait-for-submit-timeout 150000 --dataflow-wait-for-termination-timeout 600000 \
     --dataflow-task-debug
 elif [ "$PROFILE" = "performance" ] ; then
   $JAVACMD -Djava.ext.dirs=$APP_DIR/libs:$SCRIBENGIN_HOME/libs:$JAVA_HOME/jre/lib/ext $JAVA_OPTS $APP_OPT $LOG_OPT $MAIN_CLASS \
@@ -77,7 +77,7 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
     --log-generator-num-of-vm 1 --log-generator-num-of-executor-per-vm 4 --log-generator-num-of-message-per-executor 500000 --log-generator-message-size $MESSAGE_SIZE \
     --log-validator-wait-for-termination 600000 --log-validator-validate-kafka log4j.aggregate \
-    --dataflow-descriptor $APP_DIR/conf/log-dataflow-chain.json  \
+    --dataflow-descriptor $APP_DIR/conf/kafka-log-dataflow-chain.json  \
     --dataflow-wait-for-submit-timeout 150000 --dataflow-wait-for-termination-timeout 2400000 \
     --dataflow-failure-simulation-worker  \
     --dataflow-failure-simulation-wait-before-start 210000 \
@@ -86,7 +86,7 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     --dataflow-task-debug
 else
   echo "Usage: "
-  echo "  run-kafka.sh --profile [test, performance, dataflow-worker-failure] --message-size [128, 256, 512....]"
+  echo "  run-kafka.sh --profile=[test, performance, dataflow-worker-failure] --message-size=[128, 256, 512....]"
 fi
 
 
