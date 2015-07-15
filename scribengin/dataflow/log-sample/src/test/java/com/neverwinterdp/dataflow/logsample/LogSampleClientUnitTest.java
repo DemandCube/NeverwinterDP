@@ -33,7 +33,7 @@ public class LogSampleClientUnitTest  {
     loggerConfig.getConsoleAppender().setEnable(false);
     loggerConfig.getFileAppender().initLocalEnvironment();
     //loggerConfig.getEsAppender().initLocalEnvironment();
-    loggerConfig.getKafkaAppender().initLocalEnvironment();
+    //loggerConfig.getKafkaAppender().initLocalEnvironment();
     LoggerFactory.log4jConfigure(loggerConfig.getLog4jConfiguration());
   }
   
@@ -71,7 +71,7 @@ public class LogSampleClientUnitTest  {
         "--log-generator-message-size", "128",
         "--log-generator-wait-before-exit", "60000",
         
-        "--dataflow-descriptor", "src/app/conf/local/log-dataflow-chain.json",
+        "--dataflow-descriptor", "src/app/conf/local/hdfs-log-dataflow-chain.json",
         "--dataflow-wait-for-submit-timeout", "45000",
         "--dataflow-wait-for-termination-timeout", "240000",
         
@@ -82,9 +82,9 @@ public class LogSampleClientUnitTest  {
 //        "--dataflow-failure-simulation-period", "15000",
         "--dataflow-task-debug",
         
-        "--log-validator-num-of-executor-per-vm", "3",
-        "--log-validator-wait-for-message-timeout", "15000",
-        "--log-validator-wait-for-termination", "45000"
+        "--log-validator-wait-for-termination", "45000",
+        //"--log-validator-validate-kafka", "log4j.aggregate"
+        "--log-validator-validate-hdfs", "./build/hdfs/info,./build/hdfs/warn,./build/hdfs/error"
       } ;
     
     LogSampleClient client = new LogSampleClient(args);

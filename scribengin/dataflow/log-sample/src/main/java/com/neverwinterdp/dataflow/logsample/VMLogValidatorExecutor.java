@@ -27,10 +27,13 @@ public class VMLogValidatorExecutor extends Executor {
       vmConfig.setName("log-validator");
       vmConfig.addRoles("log-validator");
       vmConfig.addProperty("num-of-message-per-partition", config.logGeneratorNumOfMessagePerExecutor);
-      vmConfig.addProperty("num-of-executor", config.logValidatorNumOfExecutorPerVM);
-      vmConfig.addProperty("wait-for-message-timeout", config.logValidatorWaitForMessageTimeout);
       vmConfig.addProperty("wait-for-termination", config.logValidatorWaitForTermination);
-      vmConfig.addProperty("validate-topic", config.logValidatorValidateTopic);
+      if(config.logValidatorValidateKafka != null) {
+        vmConfig.addProperty("validate-kafka", config.logValidatorValidateKafka);
+      }
+      if(config.logValidatorValidateHdfs != null) {
+        vmConfig.addProperty("validate-hdfs", config.logValidatorValidateHdfs);
+      }
       vmConfig.setVmApplication(VMLogMessageValidatorApp.class.getName());
       VMSubmitter vmSubmitter = new VMSubmitter(shell.getVMClient(), config.dfsAppHome, vmConfig);
       vmSubmitter.submit();

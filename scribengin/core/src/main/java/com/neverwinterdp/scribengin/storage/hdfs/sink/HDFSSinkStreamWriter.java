@@ -131,8 +131,12 @@ public class HDFSSinkStreamWriter implements SinkStreamWriter {
     }
     
     public void commit() throws IOException {
-      output.close();
-      fs.rename(writingPath, completePath);
+      if(count <= 0) {
+        delete() ;
+      } else {
+        output.close();
+        fs.rename(writingPath, completePath);
+      }
     }
   }
 }

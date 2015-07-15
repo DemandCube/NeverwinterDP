@@ -29,17 +29,14 @@ public class LogSampleConfig {
   @Parameter(names = "--log-validator-num-of-vm", description = "Log generator message size")
   public int logValidatorNumOfVM = 1;
   
-  @Parameter(names = "--log-validator-num-of-executor-per-vm", description = "Log generator message size")
-  public int logValidatorNumOfExecutorPerVM = 3;
-  
-  @Parameter(names = "--log-validator-wait-for-message-timeout", description = "Log generator message size")
-  public long logValidatorWaitForMessageTimeout = 5000;
-  
   @Parameter(names = "--log-validator-wait-for-termination", description = "Log generator message size")
   public long logValidatorWaitForTermination = 60000;
   
-  @Parameter(names = "--log-validator-validate-topic", description = "Topic to validate")
-  public String logValidatorValidateTopic = "log4j.aggregate";
+  @Parameter(names = "--log-validator-validate-kafka", description = "Topic to validate")
+  public String logValidatorValidateKafka = null;
+  
+  @Parameter(names = "--log-validator-validate-hdfs", description = "Topic to validate")
+  public String logValidatorValidateHdfs = null;
   
   @ParametersDelegate
   public RegistryConfig registryConfig   = new RegistryConfig();

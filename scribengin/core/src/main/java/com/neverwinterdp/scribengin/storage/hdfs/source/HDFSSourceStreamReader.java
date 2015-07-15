@@ -35,12 +35,9 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
     this.name = name;
     this.fs = fs;
     FileStatus[] status = fs.listStatus(new Path(descriptor.getLocation()));
-    System.out.println("location "+descriptor.getLocation());
-    System.out.println("fileStatuses "+ status.length);
     for (int i = 0; i < status.length; i++) {
        dataPaths.add(status[i].getPath());
     }
-    currentDataPathInputStream = nextDataPathInputStream();
   }
 
   public String getName() {
@@ -48,12 +45,17 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
   }
 
   public Record next(long maxWait) throws Exception {
-    if (currentDataPathInputStream.available() <= 0) {
+    if(currentDataPathInputStream == null) {
+      currentDataPathInputStream = nextDataPathInputStream();
+    }
+    
+    if(currentDataPathInputStream.available() <= 0) {
       currentDataPathInputStream.close();
       currentDataPathInputStream = nextDataPathInputStream();
     }
-    if (currentDataPathInputStream == null)
-      return null;
+    
+    if (currentDataPathInputStream == null) return null;
+    
     int recordSize = currentDataPathInputStream.readInt();
     byte[] data = new byte[recordSize];
     currentDataPathInputStream.readFully(data);
@@ -103,9 +105,12 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
 
   private FSDataInputStream nextDataPathInputStream() throws IOException {
     currentDataPathPos++;
-    if (currentDataPathPos >= dataPaths.size())
-      return null;
+    if (currentDataPathPos >= dataPaths.size()) return null;
     FSDataInputStream is = fs.open(dataPaths.get(currentDataPathPos));
+    if(is.available() <= 0) {
+      is.close();
+      return nextDataPathInputStream();
+    }
     return is;
   }
 }
