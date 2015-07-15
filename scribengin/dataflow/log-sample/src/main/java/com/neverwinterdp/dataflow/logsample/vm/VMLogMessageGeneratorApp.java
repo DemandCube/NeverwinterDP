@@ -5,6 +5,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+
 import com.neverwinterdp.dataflow.logsample.LogMessageReport;
 import com.neverwinterdp.dataflow.logsample.LogSampleRegistry;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
@@ -18,6 +20,7 @@ import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
 
 public class VMLogMessageGeneratorApp extends VMApp {
+  private Logger logger ;
   int numOfMessagePerExecutor ;
   int messageSize;
   String zkConnects ;
@@ -25,6 +28,7 @@ public class VMLogMessageGeneratorApp extends VMApp {
   
   @Override
   public void run() throws Exception {
+    logger = getVM().getLoggerFactory().getLogger(VMLogMessageGeneratorApp.class);
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
     int numOfExecutor = vmConfig.getPropertyAsInt("num-of-executor", 1);
@@ -65,7 +69,7 @@ public class VMLogMessageGeneratorApp extends VMApp {
         }
         logWriter.close();
       } catch(Throwable t) {
-        t.printStackTrace();
+        logger.error("Generate message error", t);
       }
       LogSampleRegistry appRegistry = null;
       try {
@@ -77,10 +81,10 @@ public class VMLogMessageGeneratorApp extends VMApp {
           try {
             appRegistry.addGenerateError(groupId, e);
           } catch (RegistryException error) {
-            error.printStackTrace();
+            logger.error("Log info to registry error", error) ;
           }
         }
-        e.printStackTrace();
+        logger.error("Log info to registry error", e) ;
       }
     }
   }
@@ -114,14 +118,14 @@ public class VMLogMessageGeneratorApp extends VMApp {
     public void write(Log4jRecord record)  {
       String json = JSONSerializer.INSTANCE.toString(record);
       try {
-        kafkaWriter.send(topic, json, 30 * 1000);
+        kafkaWriter.send(topic, json, 60 * 1000);
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
     
     public void close() {
-      kafkaWriter.waitAndClose(60000);
+      kafkaWriter.waitAndClose(150000);
     }
   }
 }
