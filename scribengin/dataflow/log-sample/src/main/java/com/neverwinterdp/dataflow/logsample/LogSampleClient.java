@@ -44,7 +44,7 @@ public class LogSampleClient  {
     
     ExecutorScheduler scheduler = new ExecutorScheduler();
     GroupExecutor logGeneratorGroup = scheduler.newGroupExcecutor("log-generator");
-    logGeneratorGroup.withMaxRuntime(5000).withWaitForReady(5000);;
+    logGeneratorGroup.withMaxRuntime(5000).withWaitForReady(30000);;
     for(int i = 0; i < 1; i++) {
       Executor executor = new VMLogGeneratorExecutor(shell, (i + 1), config);
       logGeneratorGroup.add(executor);
