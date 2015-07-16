@@ -91,7 +91,7 @@ public class VMLogMessageGeneratorApp extends VMApp {
     }
   }
   
-  static public class KafkaLogWriter {
+  public class KafkaLogWriter {
     private String zkConnects ;
     private String topic ;
     private AckKafkaWriter kafkaWriter;
@@ -122,7 +122,7 @@ public class VMLogMessageGeneratorApp extends VMApp {
       try {
         kafkaWriter.send(topic, json, 60 * 1000);
       } catch (Exception e) {
-        e.printStackTrace();
+        logger.error("Kafka Error Send Message", e);
       }
     }
     
