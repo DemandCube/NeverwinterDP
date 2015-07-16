@@ -67,7 +67,7 @@ public class VMLogMessageGeneratorApp extends VMApp {
           if(mod == 0) logWriter.write("LogSample", "ERROR", jsonMessage);
           else if (mod == 1) logWriter.write("LogSample", "WARN", jsonMessage);
           else logWriter.write("LogSample", "INFO", jsonMessage);
-          if((i + 1) % 100 == 0) {
+          if((i + 1) % 1000 == 0) {
             logger.info(groupId + " generate " + (i + 1) + " messages");
           }
         }
