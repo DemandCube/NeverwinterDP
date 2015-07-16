@@ -14,10 +14,12 @@ public class ExecutorScheduler {
   
   public void run() throws Exception {
     for(int i = 0; i < groupExecutors.size(); i++) {
+      long start = System.currentTimeMillis();
       GroupExecutor groupExecutor = groupExecutors.get(i);
       groupExecutor.execute();
       groupExecutor.waitForReady();
       groupExecutor.awaitTermination();
+      System.out.println("Group Executor " + groupExecutor.getName() + "  Run In " + (System.currentTimeMillis() - start) + "ms");
     }
   }
 }

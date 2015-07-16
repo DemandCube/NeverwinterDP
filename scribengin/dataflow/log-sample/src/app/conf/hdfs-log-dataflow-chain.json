@@ -132,7 +132,7 @@
 
         "fileAppender" : { 
           "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
-        },
+        }
       }
     }
   ]
