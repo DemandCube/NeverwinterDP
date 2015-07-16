@@ -69,7 +69,7 @@ public class RegistryImpl implements Registry {
   
   @Override
   public Registry connect() throws RegistryException {
-    return connect(5000) ;
+    return connect(15000) ;
   }
   
   @Override
