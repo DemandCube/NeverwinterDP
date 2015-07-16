@@ -108,7 +108,7 @@ public class VMLogMessageGeneratorApp extends VMApp {
       kafkaWriter.reconnect();
     }
     
-    public void write(String loggerName, String level, String message) {
+    public void write(String loggerName, String level, String message) throws Exception {
       Log4jRecord record = new Log4jRecord();
       record.setTimestamp(new Date());
       record.setLoggerName(loggerName);
@@ -117,13 +117,9 @@ public class VMLogMessageGeneratorApp extends VMApp {
       write(record);
     }
     
-    public void write(Log4jRecord record)  {
+    public void write(Log4jRecord record) throws Exception  {
       String json = JSONSerializer.INSTANCE.toString(record);
-      try {
-        kafkaWriter.send(topic, json, 60 * 1000);
-      } catch (Exception e) {
-        logger.error("Kafka Error Send Message", e);
-      }
+      kafkaWriter.send(topic, json, 60 * 1000);
     }
     
     public void close() {
