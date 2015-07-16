@@ -46,7 +46,7 @@ MAIN_CLASS="com.neverwinterdp.dataflow.logsample.LogSampleClient"
 
 PROFILE=$(get_opt --profile 'unknown' $@)
 MESSAGE_SIZE=$(get_opt --message-size '128' $@)
-NUM_OF_MESSAGE_GENERATOR=$(get_opt --num-of-message-generator '4' $@)
+NUM_OF_MESSAGE_GENERATOR=$(get_opt --message-generator '4' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
 
 if [ "$PROFILE" = "performance" ] ; then
