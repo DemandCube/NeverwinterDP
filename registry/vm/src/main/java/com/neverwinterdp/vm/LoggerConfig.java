@@ -159,7 +159,7 @@ public class LoggerConfig {
   
   static public class ESAppender {
     @Parameter(names = "--log-es-enable", description = "Enable or not the log file")
-    boolean        enable    = false;
+    boolean        enable    = true;
 
     @Parameter(names = "--log-es-name", description = "The name of the log es appender")
     private String name      = "es";
