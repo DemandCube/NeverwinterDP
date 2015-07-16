@@ -25,7 +25,7 @@ public class LogSampleClient  {
   
   public void run() throws Exception {
     Registry registry = config.registryConfig.newInstance();
-    registry.connect();
+    registry.connect(30000);
     
     VMClient vmClient = null;
     if(config.dfsAppHome != null) {
