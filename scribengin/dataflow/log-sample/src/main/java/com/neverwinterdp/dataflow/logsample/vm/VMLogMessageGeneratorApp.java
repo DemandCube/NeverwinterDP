@@ -57,6 +57,7 @@ public class VMLogMessageGeneratorApp extends VMApp {
     
     @Override
     public void run() {
+      logger.info("Start generate message for group " + groupId); 
       MessageGenerator messageGenerator = new MessageGenerator.DefaultMessageGenerator() ;
       try {
         KafkaLogWriter logWriter = new KafkaLogWriter(zkConnects, topic);
@@ -68,6 +69,7 @@ public class VMLogMessageGeneratorApp extends VMApp {
           else logWriter.write("LogSample", "INFO", jsonMessage);
         }
         logWriter.close();
+        logger.info("Finish generate message for group " + groupId + ", num of message = " + numOfMessagePerExecutor); 
       } catch(Throwable t) {
         logger.error("Generate message error", t);
       }
