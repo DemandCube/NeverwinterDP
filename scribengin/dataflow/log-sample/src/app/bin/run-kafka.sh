@@ -66,7 +66,7 @@ elif [ "$PROFILE" = "performance" ] ; then
     --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
     --log-generator-num-of-vm 1 --log-generator-num-of-executor-per-vm 4 --log-generator-wait-for-ready 30000 \
-    --log-generator-num-of-message-per-executor 100000 --log-generator-message-size $MESSAGE_SIZE \
+    --log-generator-num-of-message-per-executor 2500000 --log-generator-message-size $MESSAGE_SIZE \
     --log-validator-wait-for-termination 600000 --log-validator-validate-kafka log4j.aggregate \
     --dataflow-descriptor $APP_DIR/conf/kafka-log-dataflow-chain.json  \
     --dataflow-wait-for-submit-timeout 150000 --dataflow-wait-for-termination-timeout 5400000 \
@@ -78,7 +78,7 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
     --log-generator-num-of-vm 1 --log-generator-num-of-executor-per-vm 4 --log-generator-wait-for-ready 30000 \
-    --log-generator-num-of-message-per-executor 100000 --log-generator-message-size $MESSAGE_SIZE \
+    --log-generator-num-of-message-per-executor 500000 --log-generator-message-size $MESSAGE_SIZE \
     --log-validator-wait-for-termination 600000 --log-validator-validate-kafka log4j.aggregate \
     --dataflow-descriptor $APP_DIR/conf/kafka-log-dataflow-chain.json  \
     --dataflow-wait-for-submit-timeout 150000 --dataflow-wait-for-termination-timeout 2400000 \
