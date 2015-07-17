@@ -57,7 +57,7 @@ public class SinkExperimentTest {
 
   @Test
   public void testSink() throws Exception {
-    S3Util.listObjects(s3Client, bucketName);
+    S3Util.listStructure(s3Client, bucketName);
     System.out.println("------------------");
     StorageDescriptor descriptor = new StorageDescriptor();
     descriptor.attribute("s3.bucket.name", bucketName);
@@ -79,7 +79,7 @@ public class SinkExperimentTest {
       }
       writer.commit();
       System.out.println("during the write.");
-      S3Util.listObjects(s3Client, bucketName);
+      S3Util.listStructure(s3Client, bucketName);
       System.out.println("----------------------");
     }
     writer.close();
@@ -88,7 +88,7 @@ public class SinkExperimentTest {
     assertEquals(numBuffers + 1, s3Client.createS3Folder(bucketName, folderName).getDescendants().size());
 
     System.out.println("At the end of it all");
-    S3Util.listObjects(s3Client, bucketName);
+    S3Util.listStructure(s3Client, bucketName);
     System.out.println("-------------------");
   }
 
@@ -106,17 +106,17 @@ public class SinkExperimentTest {
       writer.append(Record.create("key-" + i, "record " + i));
     }
     System.out.println("\nbefore roll back");
-    S3Util.listObjects(s3Client, bucketName);
+    S3Util.listStructure(s3Client, bucketName);
 
     writer.rollback();
 
     System.out.println("\nafter roll back");
-    S3Util.listObjects(s3Client, bucketName);
+    S3Util.listStructure(s3Client, bucketName);
     System.out.println();
 
     writer.close();
     System.out.println("at the end of it all");
-    S3Util.listObjects(s3Client, bucketName);
+    S3Util.listStructure(s3Client, bucketName);
     System.out.println("-------------------");
   }
 
@@ -134,7 +134,7 @@ public class SinkExperimentTest {
     }
     service.shutdown();
     while (!service.isTerminated()) {
-      S3Util.listObjects(s3Client, bucketName);
+      S3Util.listStructure(s3Client, bucketName);
       System.out.println("----------------------------------------");
       Thread.sleep(2000);
     }

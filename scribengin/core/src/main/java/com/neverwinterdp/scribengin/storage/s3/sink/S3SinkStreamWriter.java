@@ -20,12 +20,13 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
   public S3SinkStreamWriter(S3Folder streamS3Folder) throws IOException {
     this.streamS3Folder = streamS3Folder;
     segmentName = "segment-" + UUID.randomUUID().toString();
-
-    writer = createNewWriter();
   }
 
   @Override
   public void append(Record record) throws Exception {
+    if(writer == null) {
+      writer = createNewWriter();
+    }
     byte[] bytes = JSONSerializer.INSTANCE.toBytes(record);
     writer.write(bytes);
   }
@@ -41,10 +42,8 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
   public void completeCommit() throws Exception {
     ObjectMetadata metadata = writer.getObjectMetadata();
     metadata.addUserMetadata("transaction", "complete");
-    
     streamS3Folder.updateObjectMetadata(segmentName, metadata);
-
-    writer = createNewWriter();
+    writer = null;
   }
 
   @Override
@@ -58,16 +57,10 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
     }
   }
 
-  //discard the uncommited buffer
   @Override
   public void rollback() throws Exception {
+    writer.forceClose() ;
     streamS3Folder.deleteObject(segmentName);
-
-    ObjectMetadata metadata = new ObjectMetadata();
-    metadata.setContentType("application/binary");
-    metadata.addUserMetadata("transaction", "prepare");
-
-    writer = streamS3Folder.createObjectWriter(segmentName, metadata);
   }
 
   private S3ObjectWriter createNewWriter() throws IOException {
@@ -80,6 +73,6 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
 
   @Override
   public void close() throws Exception {
-    writer.waitAndClose(TIMEOUT);
+    if(writer != null) rollback() ;
   }
 }

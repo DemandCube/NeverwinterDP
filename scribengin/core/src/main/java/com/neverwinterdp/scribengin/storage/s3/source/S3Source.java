@@ -19,30 +19,19 @@ import com.neverwinterdp.scribengin.storage.source.SourceStream;
  * For Consistency with S3Sink a Source is a folder in a bucket, a SourceStream is a file in the folder, a SourceStreamReader read the file
  */
 public class S3Source implements Source {
-
   private S3Folder sourceFolder;
   private StorageDescriptor descriptor;
   private int streamId = 0;
   private Map<Integer, S3SourceStream> streams = new LinkedHashMap<Integer, S3SourceStream>();
 
   public S3Source(S3Client s3Client, StreamDescriptor streamDescriptor) throws Exception {
-
     this(s3Client, getSourceDescriptor(streamDescriptor));
-
   }
 
   public S3Source(S3Client s3Client, StorageDescriptor descriptor) throws Exception {
     this.descriptor = descriptor;
     String bucketName = descriptor.attribute("s3.bucket.name");
-
-    if (!s3Client.hasBucket(bucketName)) {
-      throw new AmazonServiceException("Bucket " + bucketName + " does not exist.");
-    }
-
     String folderPath = descriptor.attribute("s3.storage.path");
-    if (!s3Client.hasKey(bucketName, folderPath)) {
-      throw new AmazonServiceException("Folder " + folderPath + " does not exist.");
-    }
 
     sourceFolder = s3Client.getS3Folder(bucketName, folderPath);
     List<S3ObjectSummary> streamNames = sourceFolder.getDescendants();
@@ -57,17 +46,11 @@ public class S3Source implements Source {
     }
   }
 
-  public StorageDescriptor getDescriptor() {
-    return descriptor;
-  }
+  public StorageDescriptor getDescriptor() { return descriptor; }
 
-  public SourceStream getStream(int id) {
-    return streams.get(id);
-  }
+  public SourceStream getStream(int id) { return streams.get(id); }
 
-  public SourceStream getStream(StreamDescriptor descriptor) {
-    return streams.get(descriptor.getId());
-  }
+  public SourceStream getStream(StreamDescriptor descriptor) { return streams.get(descriptor.getId()); }
 
   public SourceStream[] getStreams() {
     SourceStream[] array = new SourceStream[streams.size()];

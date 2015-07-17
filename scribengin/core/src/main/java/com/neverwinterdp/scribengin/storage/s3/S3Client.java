@@ -48,17 +48,14 @@ public class S3Client {
     s3Client.shutdown();
   }
 
-  public AmazonS3Client getAmazonS3Client() {
-    return this.s3Client;
-  }
+  public AmazonS3Client getAmazonS3Client() { return this.s3Client; }
 
   public Bucket createBucket(String bucketName) throws AmazonClientException, AmazonServiceException {
     return s3Client.createBucket(bucketName);
   }
 
   public boolean hasBucket(String bucketName) throws AmazonClientException, AmazonServiceException {
-    boolean sheExists = s3Client.doesBucketExist(bucketName);
-    return sheExists;
+    return s3Client.doesBucketExist(bucketName);
   }
 
   public void deleteBucket(String bucketName, boolean recursive) throws AmazonClientException, AmazonServiceException {
@@ -80,15 +77,19 @@ public class S3Client {
     try {
       s3Client.getObjectMetadata(bucketName, key);
     } catch (AmazonServiceException e) {
-      if (e.getStatusCode() == 404)
-        return false;
+      if (e.getStatusCode() == 404) return false;
       throw e;
     }
     return true;
   }
 
   public ObjectMetadata getObjectMetadata(String bucketName, String key) throws AmazonClientException, AmazonServiceException {
-    return s3Client.getObjectMetadata(bucketName, key);
+    try {
+      return s3Client.getObjectMetadata(bucketName, key);
+    } catch (AmazonServiceException e) {
+      if (e.getStatusCode() == 404) return null;
+      throw e;
+    }
   }
 
   public void createObject(String bucketName, String key, byte[] data, ObjectMetadata metadata) {
@@ -102,8 +103,7 @@ public class S3Client {
   }
 
   public void updateObjectMetadata(String bucketName, String key, ObjectMetadata metadata) {
-    CopyObjectRequest request =
-        new CopyObjectRequest(bucketName, key, bucketName, key).withNewObjectMetadata(metadata);
+    CopyObjectRequest request = new CopyObjectRequest(bucketName, key, bucketName, key).withNewObjectMetadata(metadata);
     s3Client.copyObject(request);
   }
 
@@ -112,9 +112,6 @@ public class S3Client {
   }
 
   public S3Folder createS3Folder(String bucketName, String folderPath) throws AmazonClientException, AmazonServiceException {
-    if (!hasBucket(bucketName)) {
-      throw new AmazonServiceException("Bucket " + bucketName + " does not exist");
-    }
     create(bucketName, folderPath, new byte[0], "s3system/folder");
     return new S3Folder(this, bucketName, folderPath);
   }
@@ -123,8 +120,7 @@ public class S3Client {
     deleteKeyWithPrefix(bucketName, folderPath);
   }
 
-  public S3Folder getS3Folder(String bucketName, String folderPath) throws AmazonClientException,
-  AmazonServiceException {
+  public S3Folder getS3Folder(String bucketName, String folderPath) throws AmazonClientException, AmazonServiceException {
     if (!hasBucket(bucketName)) {
       throw new AmazonServiceException("Bucket " + bucketName + " does not exist");
     }

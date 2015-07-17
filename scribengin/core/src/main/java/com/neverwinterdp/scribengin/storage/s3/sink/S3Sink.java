@@ -3,7 +3,6 @@ package com.neverwinterdp.scribengin.storage.s3.sink;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.amazonaws.AmazonServiceException;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
@@ -34,15 +33,11 @@ public class S3Sink implements Sink {
     this.descriptor = descriptor;
     String bucketName = descriptor.attribute("s3.bucket.name");
  
-    if (!s3Client.hasBucket(bucketName)) {
-       throw new AmazonServiceException("Bucket " + bucketName + " does not exist");
-    }
-
     String folderPath = descriptor.attribute("s3.storage.path");
     if (!s3Client.hasKey(bucketName, folderPath)) {
       s3Client.createS3Folder(bucketName, folderPath);
     }
-
+    
     sinkFolder = s3Client.getS3Folder(bucketName, folderPath);
     List<String> streamNames = sinkFolder.getChildrenNames();
     for (String streamName : streamNames) {

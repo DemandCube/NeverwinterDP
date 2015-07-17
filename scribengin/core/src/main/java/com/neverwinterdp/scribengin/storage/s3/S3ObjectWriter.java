@@ -42,6 +42,12 @@ public class S3ObjectWriter {
     }
     pipedInput.close();
   }
+  
+  public void forceClose() throws IOException, InterruptedException {
+    pipedOutput.close();
+    writeThread.interrupt();
+    pipedInput.close();
+  }
 
   public class WriteThread extends Thread {
     boolean running = false;

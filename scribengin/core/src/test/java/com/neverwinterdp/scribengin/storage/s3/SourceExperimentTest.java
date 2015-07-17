@@ -64,7 +64,7 @@ public class SourceExperimentTest {
   
   @Test
   public void testSource() throws Exception {
-    S3Util.listObjects(s3Client, bucketName);
+    S3Util.listStructure(s3Client, bucketName);
 
     StorageDescriptor descriptor = new StorageDescriptor();
     descriptor.attribute("s3.bucket.name", bucketName);
@@ -91,6 +91,6 @@ public class SourceExperimentTest {
     int totalRecords = numOfBuffersPerStream * numRecordsPerBuffer;
     assertEquals(totalRecords, messageTracker.getLogCount());
     assertTrue(messageTracker.isInSequence());
-    S3Util.listObjects(s3Client, bucketName);
+    S3Util.listStructure(s3Client, bucketName);
   }
 }
