@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
@@ -31,6 +33,10 @@ public class S3Folder {
   public String getBucketName() { return bucketName; }
 
   public String getFolderPath() { return folderPath; }
+  
+  public boolean hasChild(String name) throws AmazonClientException, AmazonServiceException {
+    return s3Client.hasKey(bucketName, folderPath + "/name") ;
+  }
   
   public void create(String name, byte[] data, String mimeType) {
     InputStream is = new ByteArrayInputStream(data);

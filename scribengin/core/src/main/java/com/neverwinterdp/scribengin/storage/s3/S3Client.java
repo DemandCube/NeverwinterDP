@@ -144,8 +144,8 @@ public class S3Client {
   }
 
   void deleteKeyWithPrefix(String bucketName, String prefix) {
-    for (S3ObjectSummary file : s3Client.listObjects(bucketName, prefix).getObjectSummaries()) {
-      s3Client.deleteObject(bucketName, file.getKey());
+    for (S3ObjectSummary sel : s3Client.listObjects(bucketName, prefix).getObjectSummaries()) {
+      s3Client.deleteObject(bucketName, sel.getKey());
     }
   }
 }

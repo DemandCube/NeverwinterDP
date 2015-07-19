@@ -1,9 +1,6 @@
 
 package com.neverwinterdp.scribengin.storage.s3.source;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.scribengin.storage.source.SourceStream;
@@ -21,7 +18,7 @@ public class S3SourceStream implements SourceStream {
   public StreamDescriptor getDescriptor() { return descriptor ; }
   
   @Override
-  public SourceStreamReader getReader(String name) throws FileNotFoundException, IllegalArgumentException, IOException {
+  public SourceStreamReader getReader(String name) throws Exception {
     return new S3SourceStreamReader(name, s3Client, descriptor) ;
   }
 }

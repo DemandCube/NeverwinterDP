@@ -42,19 +42,11 @@ public class DataflowKafkaToHdfsUnitTest {
 
   @Test
   public void testDataflows() throws Exception {
-    System.out.println(" com.neverwinterdp.scribengin.dataflow.DataflowKafkaToHdfsUnitTest.testDataflows()");
     DataflowSubmitter submitter = new DataflowSubmitter();
     submitter.start();
     Thread.sleep(5000); // make sure that the dataflow start and running;
      try {
-      ScribenginClient scribenginClient = shell.getScribenginClient();
-      Assert.assertEquals(2, scribenginClient.getScribenginMasters().size());
-
-     submitter.waitForTermination(300000);
-      
-      Thread.sleep(3000);
-      shell.execute("vm         info");
-      shell.execute("scribengin info");
+       submitter.waitForTermination(300000);
     } catch(Throwable err) {
       throw err;
     } finally {
@@ -86,6 +78,8 @@ public class DataflowKafkaToHdfsUnitTest {
         shell.execute(command);
       } catch (Exception ex) {
         ex.printStackTrace();
+      } finally {
+        notifyTermimation();
       }
     }
 

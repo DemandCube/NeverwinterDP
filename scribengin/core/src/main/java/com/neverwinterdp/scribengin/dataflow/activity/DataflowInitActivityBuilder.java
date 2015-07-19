@@ -25,6 +25,7 @@ import com.neverwinterdp.scribengin.storage.sink.SinkFactory;
 import com.neverwinterdp.scribengin.storage.source.Source;
 import com.neverwinterdp.scribengin.storage.source.SourceFactory;
 import com.neverwinterdp.scribengin.storage.source.SourceStream;
+import com.neverwinterdp.util.JSONSerializer;
 
 public class DataflowInitActivityBuilder extends ActivityBuilder {
   
@@ -60,19 +61,9 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
       DataflowDescriptor dataflowDescriptor = service.getDataflowRegistry().getDataflowDescriptor();
       SourceFactory sourceFactory = service.getSourceFactory();
       SinkFactory sinkFactory = service.getSinkFactory() ;
-      
-      SourceStream[] sourceStream = {} ;
-      long stopTime = System.currentTimeMillis() + dataflowDescriptor.getMaxWaitForAvailableDataStream() ;
-      while(sourceStream.length == 0 && stopTime > System.currentTimeMillis()) {
-        Source source    = sourceFactory.create(dataflowDescriptor.getSourceDescriptor()) ;
-        sourceStream = source.getStreams();
-        if(sourceStream.length == 0) {
-          Thread.sleep(1000);
-        }
-      }
-      if(sourceStream.length == 0) {
-        throw new Exception("No Data Stream is available after waiting for " + dataflowDescriptor.getMaxWaitForAvailableDataStream() + "ms") ;
-      }
+
+      Source source    = sourceFactory.create(dataflowDescriptor.getSourceDescriptor()) ;
+      SourceStream[] sourceStream = source.getStreams();
       
       Map<String, Sink> sinks = new HashMap<String, Sink>();
       for(Map.Entry<String, StorageDescriptor> entry : dataflowDescriptor.getSinkDescriptors().entrySet()) {
@@ -80,7 +71,6 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
         sinks.put(entry.getKey(), sink);
       }
       DecimalFormat seqIdFormatter = new DecimalFormat("00000");
-      System.out.println("AVAILABLE SOURCE STREAMS FOR " + dataflowDescriptor.getId() + " = " + sourceStream.length);
       for(int i = 0; i < sourceStream.length; i++) {
         String taskId =  "task-" + seqIdFormatter.format(i);
         DataflowTaskDescriptor descriptor = new DataflowTaskDescriptor();

@@ -1,21 +1,18 @@
 package com.neverwinterdp.scribengin.dataflow;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.dataflow.test.S3DataflowTest;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
+import com.neverwinterdp.scribengin.storage.s3.S3Util;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 import com.neverwinterdp.util.io.FileUtil;
-import com.neverwinterdp.vm.tool.VMClusterBuilder;
 
 public class DataflowS3ToS3ExperimentTest {
   static {
@@ -28,80 +25,50 @@ public class DataflowS3ToS3ExperimentTest {
 
   private S3Client s3Client;
 
-  private String folderPath;
   private String bucketName;
 
   @Before
   public void setup() throws Exception {
     FileUtil.removeIfExist("build/storage", false);
-    clusterBuilder = new ScribenginClusterBuilder(getVMClusterBuilder());
+    clusterBuilder = new ScribenginClusterBuilder(new EmbededVMClusterBuilder());
     clusterBuilder.clean();
     clusterBuilder.startVMMasters();
     clusterBuilder.startScribenginMasters();
     shell = new ScribenginShell(clusterBuilder.getVMClusterBuilder().getVMClient());
 
     bucketName = "s3-integration-test-" + UUID.randomUUID();
-    folderPath = "dataflow-test";
 
     s3Client = new S3Client();
     s3Client.onInit();
-
-    if (s3Client.hasBucket(bucketName)) {
-      s3Client.deleteS3Folder(bucketName, folderPath);
-    }
-    s3Client.createBucket(bucketName);
   }
 
   @After
   public void teardown() throws Exception {
     clusterBuilder.shutdown();
-
-    s3Client.deleteBucket(bucketName, true);
+    if(s3Client.hasBucket(bucketName)) {
+      System.out.println("DELETE BUCKET " + bucketName);
+      s3Client.deleteBucket(bucketName, true);
+    }
     s3Client.onDestroy();
-  }
-
-  protected VMClusterBuilder getVMClusterBuilder() throws Exception {
-    return new EmbededVMClusterBuilder();
   }
 
   @Test
   public void testDataflows() throws Exception {
-    int numStreams = 1;
-
-    for (int i = 1; i <= numStreams; i++) {
-      s3Client.createS3Folder(bucketName, folderPath + "/stream-"+i);
-    }
-    Thread.sleep(1000);
-    DataflowSubmitter submitter = new DataflowSubmitter(bucketName, folderPath, numStreams);
+    DataflowSubmitter submitter = new DataflowSubmitter(bucketName, "source", "sink", 10/*numOfStreams*/);
     submitter.start();
-    Thread.sleep(5000); // make sure that the dataflow start and running;
-
-    try {
-      ScribenginClient scribenginClient = shell.getScribenginClient();
-      assertEquals(2, scribenginClient.getScribenginMasters().size());
-
-      Thread.sleep(3000);
-      shell.execute("vm         info");
-      shell.execute("scribengin info");
-
-      shell.execute("dataflow   info --history " + S3DataflowTest.TEST_NAME + "-0");
-    } catch (Throwable err) {
-      throw err;
-    } finally {
-      if (submitter.isAlive())
-        submitter.interrupt();
-    }
+    submitter.waitForTermination(150000);
   }
 
   public class DataflowSubmitter extends Thread {
-
     private String bucketName;
-    private String folderPath;
-    private int numStreams;
+    private String sourcePath;
+    private String sinkPath;
+    private int    numStreams;
 
-    public DataflowSubmitter(String bucketName, String folderPath, int numStreams) {
+    public DataflowSubmitter(String bucketName, String sourcePath, String sinkPath, int numStreams) {
       this.bucketName = bucketName;
-      this.folderPath = folderPath;
+      this.sourcePath = sourcePath;
+      this.sinkPath   = sinkPath;
       this.numStreams = numStreams;
     }
 
@@ -109,27 +76,31 @@ public class DataflowS3ToS3ExperimentTest {
       try {
         String command =
             "dataflow-test " + S3DataflowTest.TEST_NAME +
-                " --dataflow-name  s3-to-s3" +
-                " --worker 1" +
-                " --executor-per-worker 1" +
-                " --duration 90000" +
-                " --task-max-execute-time 100000" +
-                " --source-auto-create-bucket"+
-                " --source-location " + bucketName +
-                " --source-name " + folderPath +
-                " --source-num-of-stream " + numStreams +
-                " --source-max-records-per-stream 1000" +
-                " --sink-location " + bucketName +
-                " --sink-name " + folderPath +
-                " --sink-auto-delete-bucket"+
-                " --print-dataflow-info -1" +
-                " --debug-dataflow-task true" +
-                " --debug-dataflow-worker true" +
-                " --junit-report build/junit-report.xml" +
-                " --dump-registry";
+            " --dataflow-id    s3-to-s3-1" +
+            " --dataflow-name  s3-to-s3" +
+            " --worker 2 --executor-per-worker 2" +
+            " --duration 120000" +
+            " --task-max-execute-time 15000" +
+            " --source-auto-create-bucket"+
+            " --source-location " + bucketName +
+            " --source-name "     + sourcePath +
+            " --source-num-of-stream " + numStreams +
+            " --source-max-records-per-stream 500" +
+            
+            " --sink-location " + bucketName +
+            " --sink-name "     + sinkPath +
+            //" --sink-auto-delete-bucket"+
+            
+            " --print-dataflow-info -1" +
+            " --debug-dataflow-task true" +
+            " --debug-dataflow-worker true" +
+            " --junit-report build/junit-report.xml" +
+            " --dump-registry";
         shell.execute(command);
       } catch (Exception ex) {
         ex.printStackTrace();
+      } finally {
+        notifyTermimation();
       }
     }
 

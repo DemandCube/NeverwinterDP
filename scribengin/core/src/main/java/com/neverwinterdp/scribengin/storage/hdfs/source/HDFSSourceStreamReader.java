@@ -36,7 +36,10 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
     this.fs = fs;
     FileStatus[] status = fs.listStatus(new Path(descriptor.getLocation()));
     for (int i = 0; i < status.length; i++) {
-       dataPaths.add(status[i].getPath());
+      String path = status[i].getPath().getName();
+      if(path.startsWith("data-")) {
+        dataPaths.add(status[i].getPath());
+      }
     }
   }
 
@@ -47,14 +50,14 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
   public Record next(long maxWait) throws Exception {
     if(currentDataPathInputStream == null) {
       currentDataPathInputStream = nextDataPathInputStream();
+      if (currentDataPathInputStream == null) return null;
     }
     
     if(currentDataPathInputStream.available() <= 0) {
       currentDataPathInputStream.close();
       currentDataPathInputStream = nextDataPathInputStream();
+      if (currentDataPathInputStream == null) return null;
     }
-    
-    if (currentDataPathInputStream == null) return null;
     
     int recordSize = currentDataPathInputStream.readInt();
     byte[] data = new byte[recordSize];

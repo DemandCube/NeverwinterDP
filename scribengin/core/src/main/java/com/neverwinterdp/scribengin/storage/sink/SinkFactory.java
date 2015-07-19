@@ -30,6 +30,8 @@ public class SinkFactory {
   public SinkFactory(S3Client s3Client) {
     this.s3Client = s3Client;
   }
+  
+  public FileSystem getFileSyztem() { return this.fs ; }
 
   public Sink create(StorageDescriptor descriptor) throws Exception {
     if ("hdfs".equalsIgnoreCase(descriptor.getType())) {

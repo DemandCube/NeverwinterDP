@@ -15,6 +15,8 @@ import com.neverwinterdp.scribengin.storage.source.Source;
 import com.neverwinterdp.scribengin.storage.source.SourceFactory;
 import com.neverwinterdp.scribengin.storage.source.SourceStream;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 import com.neverwinterdp.yara.Meter;
 
 public class DataflowTaskContext {
@@ -32,7 +34,8 @@ public class DataflowTaskContext {
     Iterator<Map.Entry<String, StreamDescriptor>> i = descriptor.getSinkStreamDescriptors().entrySet().iterator();
       while (i.hasNext()) {
         Map.Entry<String, StreamDescriptor> entry = i.next();
-        SinkContext context = new SinkContext(service.getSinkFactory(), entry.getValue());
+        StreamDescriptor streamDescriptor = entry.getValue();
+        SinkContext context = new SinkContext(service.getSinkFactory(), streamDescriptor);
         sinkContexts.put(entry.getKey(), context);
       }
       this.report = report;
@@ -169,9 +172,9 @@ public class DataflowTaskContext {
     private SinkStreamWriter assignedSinkStreamWriter;
 
     public SinkContext(SinkFactory factory, StreamDescriptor streamDescriptor) throws Exception {
-      this.sink = factory.create(streamDescriptor);
-      this.assignedSinkStream = sink.getStream(streamDescriptor);
-      this.assignedSinkStreamWriter = this.assignedSinkStream.getWriter();
+      sink = factory.create(streamDescriptor);
+      assignedSinkStream = sink.getStream(streamDescriptor);
+      assignedSinkStreamWriter = assignedSinkStream.getWriter();
     }
 
     public void prepareCommit() throws Exception {

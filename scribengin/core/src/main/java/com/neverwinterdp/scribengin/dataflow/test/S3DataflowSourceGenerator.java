@@ -7,6 +7,7 @@ import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowTestReport.DataflowSourceGeneratorReport;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
+import com.neverwinterdp.scribengin.storage.s3.S3Util;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkFactory;
 import com.neverwinterdp.scribengin.storage.sink.SinkStream;
@@ -23,9 +24,8 @@ public class S3DataflowSourceGenerator extends DataflowSourceGenerator {
   @Override
   public StorageDescriptor getSourceDescriptor() {
     StorageDescriptor storageDescriptor = new StorageDescriptor("s3", sourceLocation);
-    storageDescriptor.attribute("s3.bucket.name", sourceLocation);
+    storageDescriptor.attribute("s3.bucket.name",  sourceLocation);
     storageDescriptor.attribute("s3.storage.path", sourceName);
-    //TODO externalize this
     storageDescriptor.attribute("s3.region.name", "eu-central-1");
     return storageDescriptor;
   }
@@ -68,12 +68,11 @@ public class S3DataflowSourceGenerator extends DataflowSourceGenerator {
 
   void generateSource(S3Client s3Client, String sourceDir) throws Exception {
     SinkFactory sinkFactory = new SinkFactory(s3Client);
-
     Sink sink = sinkFactory.create(getSourceDescriptor());
-    ;
     for (int i = 0; i < numberOfStream; i++) {
       generateStream(sink);
     }
+    S3Util.listStructure(s3Client, getSourceDescriptor().attribute("s3.bucket.name"));
   }
 
   void generateStream(Sink sink) throws Exception {
@@ -90,7 +89,5 @@ public class S3DataflowSourceGenerator extends DataflowSourceGenerator {
   }
 
   @Override
-  public boolean canRunInBackground() {
-    return false;
-  }
+  public boolean canRunInBackground() { return false; }
 }

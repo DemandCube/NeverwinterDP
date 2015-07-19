@@ -1,18 +1,14 @@
 package com.neverwinterdp.scribengin.dataflow;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.dataflow.test.HDFSDataflowTest;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 import com.neverwinterdp.util.io.FileUtil;
-import com.neverwinterdp.vm.tool.VMClusterBuilder;
 
 public class DataflowHdfsToHdfsUnitTest {
   static {
@@ -26,7 +22,7 @@ public class DataflowHdfsToHdfsUnitTest {
   @Before
   public void setup() throws Exception {
     FileUtil.removeIfExist("build/storage", false);
-    clusterBuilder = new ScribenginClusterBuilder(getVMClusterBuilder());
+    clusterBuilder = new ScribenginClusterBuilder(new EmbededVMClusterBuilder());
     clusterBuilder.clean();
     clusterBuilder.startVMMasters();
     clusterBuilder.startScribenginMasters();
@@ -38,31 +34,11 @@ public class DataflowHdfsToHdfsUnitTest {
     clusterBuilder.shutdown();
   }
 
-  protected VMClusterBuilder getVMClusterBuilder() throws Exception {
-    return new EmbededVMClusterBuilder();
-  }
-
   @Test
   public void testDataflows() throws Exception {
     DataflowSubmitter submitter = new DataflowSubmitter();
     submitter.start();
-    Thread.sleep(5000); // make sure that the dataflow start and running;
-
-    try {
-      ScribenginClient scribenginClient = shell.getScribenginClient();
-      assertEquals(2, scribenginClient.getScribenginMasters().size());
-
-      Thread.sleep(3000);
-      shell.execute("vm         info");
-      shell.execute("scribengin info");
-      
-      shell.execute("dataflow   info --history "+HDFSDataflowTest.TEST_NAME+"-0");
-    } catch (Throwable err) {
-      throw err;
-    } finally {
-      if (submitter.isAlive())
-        submitter.interrupt();
-    }
+    submitter.waitForTermination(120000);
   }
 
   public class DataflowSubmitter extends Thread {
@@ -71,14 +47,14 @@ public class DataflowHdfsToHdfsUnitTest {
         String command =
             "dataflow-test " + HDFSDataflowTest.TEST_NAME +
                 " --dataflow-name  hdfs-to-hdfs" +
-                " --worker 3" +
-                " --executor-per-worker 1" +
+                " --worker 2" +
+                " --executor-per-worker 2" +
                 " --duration 90000" +
                 " --task-max-execute-time 1000" +
-                " --source-name output" +
+                " --source-name input" +
                 " --source-num-of-stream 10" +
-                " --source-write-period 5" +
-                " --source-max-records-per-stream 100" +
+                " --source-write-period 0" +
+                " --source-max-records-per-stream 1000" +
                 " --sink-name output" +
                 " --print-dataflow-info -1" +
                 " --debug-dataflow-task " +
@@ -89,6 +65,8 @@ public class DataflowHdfsToHdfsUnitTest {
         shell.execute(command);
       } catch (Exception ex) {
         ex.printStackTrace();
+      } finally {
+        notifyTermimation();
       }
     }
 

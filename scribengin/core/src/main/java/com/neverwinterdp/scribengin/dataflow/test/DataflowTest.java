@@ -1,7 +1,6 @@
 package com.neverwinterdp.scribengin.dataflow.test;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;

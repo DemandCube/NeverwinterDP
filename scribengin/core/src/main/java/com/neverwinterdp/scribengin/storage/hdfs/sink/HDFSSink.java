@@ -12,6 +12,8 @@ import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkStream;
+import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
 public class HDFSSink implements Sink {
   private FileSystem fs;
@@ -31,7 +33,7 @@ public class HDFSSink implements Sink {
   public HDFSSink(FileSystem fs, StorageDescriptor descriptor) throws FileNotFoundException, IllegalArgumentException, IOException {
     this.fs = fs;
     this.descriptor = descriptor;
-    
+   
     Path fsLoc = new Path(descriptor.getLocation());
     if(!fs.exists(fsLoc)) fs.mkdirs(fsLoc) ;
     FileStatus[] status = fs.listStatus(fsLoc) ;
@@ -80,7 +82,6 @@ public class HDFSSink implements Sink {
   }
   
   public void fsCheck() throws Exception {
-    //TODO: this method should go through all the sink stream and call fsCheck of each stream
   }
   
   static StorageDescriptor getSinkDescriptor(StreamDescriptor streamDescriptor) {

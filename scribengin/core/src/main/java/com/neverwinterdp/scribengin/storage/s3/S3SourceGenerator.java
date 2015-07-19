@@ -29,9 +29,6 @@ public class S3SourceGenerator {
 
     Sink sink = new S3Sink(s3Client, descriptor);
     generateStream(sink);
- 
-    System.out.println("---Finished generating test data in ---> " + stopwatch.stop());
-    S3Util.listStructure(s3Client, bucketName);
   }
 
   void generateStream(Sink sink) throws Exception {

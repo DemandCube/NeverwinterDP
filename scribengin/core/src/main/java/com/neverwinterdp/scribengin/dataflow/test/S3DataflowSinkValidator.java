@@ -1,6 +1,5 @@
 package com.neverwinterdp.scribengin.dataflow.test;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Stopwatch;
@@ -25,7 +24,7 @@ public class S3DataflowSinkValidator extends DataflowSinkValidator {
   @Override
   public StorageDescriptor getSinkDescriptor() {
     StorageDescriptor storageDescriptor = new StorageDescriptor("s3", sinkLocation);
-    storageDescriptor.attribute("s3.bucket.name", sinkLocation);
+    storageDescriptor.attribute("s3.bucket.name",  sinkLocation);
     storageDescriptor.attribute("s3.storage.path", sinkName);
     //TODO externalize this
     storageDescriptor.attribute("s3.region.name", "eu-central-1");
@@ -41,13 +40,13 @@ public class S3DataflowSinkValidator extends DataflowSinkValidator {
 
   @Override
   public void run() {
+    System.out.println("S3DataflowSinkValidator: run()") ;
     stopwatch.start();
     messageTracker = new MessageTracker() ;
     MessageExtractor messageExtractor = MessageExtractor.DEFAULT_MESSAGE_EXTRACTOR ;
     try {
       S3Source source = new S3Source(s3Client, getSinkDescriptor()) ;
       SourceStream[] streams = source.getStreams();
-      System.out.println("Streams "+Arrays.toString(streams));
       for(SourceStream selStream : streams) {
         SourceStreamReader streamReader = selStream.getReader("S3DataflowSinkValidator") ;
         Record record = null ;

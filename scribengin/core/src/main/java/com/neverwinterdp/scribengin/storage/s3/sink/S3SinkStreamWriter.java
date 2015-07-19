@@ -12,38 +12,38 @@ import com.neverwinterdp.util.JSONSerializer;
 
 public class S3SinkStreamWriter implements SinkStreamWriter {
   private S3Folder streamS3Folder;
-  private String segmentName;
-  private S3ObjectWriter writer;
+  private String currentSegmentName;
+  private S3ObjectWriter currentWriter
+  ;
 
   private final int TIMEOUT = 1 * 60 * 10000;
 
   public S3SinkStreamWriter(S3Folder streamS3Folder) throws IOException {
     this.streamS3Folder = streamS3Folder;
-    segmentName = "segment-" + UUID.randomUUID().toString();
   }
 
   @Override
   public void append(Record record) throws Exception {
-    if(writer == null) {
-      writer = createNewWriter();
+    if(currentWriter == null) {
+      currentWriter = createNewWriter();
     }
     byte[] bytes = JSONSerializer.INSTANCE.toBytes(record);
-    writer.write(bytes);
+    currentWriter.write(bytes);
   }
 
-  // finish up with the previous segment writer
   @Override
   public void prepareCommit() throws Exception {
-    writer.waitAndClose(TIMEOUT);
+    if(currentWriter == null) return ;
+    currentWriter.waitAndClose(TIMEOUT);
   }
 
-  //start writing to a new segment
   @Override
   public void completeCommit() throws Exception {
-    ObjectMetadata metadata = writer.getObjectMetadata();
+    if(currentWriter == null) return ;
+    ObjectMetadata metadata = currentWriter.getObjectMetadata();
     metadata.addUserMetadata("transaction", "complete");
-    streamS3Folder.updateObjectMetadata(segmentName, metadata);
-    writer = null;
+    streamS3Folder.updateObjectMetadata(currentSegmentName, metadata);
+    currentWriter = null;
   }
 
   @Override
@@ -59,20 +59,21 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
 
   @Override
   public void rollback() throws Exception {
-    writer.forceClose() ;
-    streamS3Folder.deleteObject(segmentName);
+    if(currentWriter == null) return;
+    currentWriter.forceClose() ;
+    streamS3Folder.deleteObject(currentSegmentName);
   }
 
   private S3ObjectWriter createNewWriter() throws IOException {
-    segmentName = "segment-" + UUID.randomUUID().toString();
+    currentSegmentName = "segment-" + UUID.randomUUID().toString();
     ObjectMetadata metadata = new ObjectMetadata();
     metadata.addUserMetadata("transaction", "prepare");
-    writer = streamS3Folder.createObjectWriter(segmentName, metadata);
-    return writer;
+    currentWriter = streamS3Folder.createObjectWriter(currentSegmentName, metadata);
+    return currentWriter;
   }
 
   @Override
   public void close() throws Exception {
-    if(writer != null) rollback() ;
+    if(currentWriter != null) rollback() ;
   }
 }
