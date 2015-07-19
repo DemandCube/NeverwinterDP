@@ -58,8 +58,8 @@ if [ "$PROFILE" = "performance" ] ; then
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
     --log-generator-num-of-vm 1 --log-generator-num-of-executor-per-vm $NUM_OF_MESSAGE_GENERATOR --log-generator-wait-for-ready 30000 \
     --log-generator-num-of-message-per-executor $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
-    --log-validator-wait-for-termination 600000 --log-validator-validate-hdfs /log-sample/hdfs/info,/log-sample//hdfs/warn,/log-sample/hdfs/error \
-    --dataflow-descriptor $APP_DIR/conf/hdfs-log-dataflow-chain.json  \
+    --log-validator-wait-for-termination 600000 --log-validator-validate-s3 log-sample:info,log-sample:warn,log-sample:error \
+    --dataflow-descriptor $APP_DIR/conf/s3-log-dataflow-chain.json  \
     --dataflow-wait-for-submit-timeout 150000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-task-debug
 elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
@@ -71,8 +71,8 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
     --log-generator-num-of-vm 1 --log-generator-num-of-executor-per-vm $NUM_OF_MESSAGE_GENERATOR --log-generator-wait-for-ready 30000 \
     --log-generator-num-of-message-per-executor $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
-    --log-validator-wait-for-termination 600000 --log-validator-validate-hdfs /log-sample/hdfs/info,/log-sample//hdfs/warn,/log-sample/hdfs/error \
-    --dataflow-descriptor $APP_DIR/conf/hdfs-log-dataflow-chain.json  \
+    --log-validator-wait-for-termination 600000 --log-validator-validate-s3 log-sample:info,log-sample:warn,log-sample:error \
+    --dataflow-descriptor $APP_DIR/conf/s3-log-dataflow-chain.json  \
     --dataflow-wait-for-submit-timeout 150000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-failure-simulation-worker  \
     --dataflow-failure-simulation-wait-before-start 210000 \
@@ -81,7 +81,7 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     --dataflow-task-debug
 else
   echo "Usage: "
-  echo "  run-hdfs.sh --profile=[performance, dataflow-worker-failure] --message-size=[128, 256, 512....]"
+  echo "  run-s3.sh --profile=[performance, dataflow-worker-failure] --message-size=[128, 256, 512....]"
 fi
 
 

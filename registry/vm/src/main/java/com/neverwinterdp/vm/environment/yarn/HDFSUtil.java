@@ -67,6 +67,10 @@ public class HDFSUtil {
     System.out.println(dir);
     System.out.println("----------------------------------------------------");
     Path path = new Path(dir);
+    if(!fs.exists(path)) {
+      System.out.println(dir + " does not exist!") ;
+      return;
+    }
     dump(fs, path, "");
   }
   
