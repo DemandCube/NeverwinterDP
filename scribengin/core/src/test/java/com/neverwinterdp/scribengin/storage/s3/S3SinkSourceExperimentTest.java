@@ -12,7 +12,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.neverwinterdp.scribengin.Record;
-import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.sink.S3Sink;
 import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
 import com.neverwinterdp.scribengin.storage.sink.SinkStream;
@@ -30,7 +29,6 @@ public class S3SinkSourceExperimentTest {
   @BeforeClass
   static public void beforeClass() {
     s3Client = new S3Client();
-    s3Client.onInit();
   }
 
   @AfterClass
@@ -57,17 +55,17 @@ public class S3SinkSourceExperimentTest {
   @Test
   public void testSinkSource() throws Exception {
     S3Storage storage = new S3Storage(bucketName, storageFolder);
-
     S3Sink sink = storage.getSink(s3Client) ;
     assertNotNull(sink.getSinkFolder());
-
+    int NUM_MESSAGE_PER_STREAM = 1500;
     for(int i = 0; i < 2; i++) {
       SinkStream stream = sink.newStream();
       SinkStreamWriter writer = stream.getWriter();
-      for (int j = 0; j < 100; j++) {
+      for (int j = 0; j < NUM_MESSAGE_PER_STREAM; j++) {
         String key = "stream=" + stream.getDescriptor().getId() + ",buffer=" + j + ",record=" + j;
+        key = key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key;
         writer.append(Record.create(key, key));
-        if(j == 50) {
+        if((j + 1) % 1000 == 0) {
           writer.commit();
         }
       }
@@ -85,11 +83,7 @@ public class S3SinkSourceExperimentTest {
     S3Util.listStructure(s3Client, bucketName);
     sink.close();
     
-    StorageDescriptor sourceDescriptor = new StorageDescriptor("s3", bucketName);
-    sourceDescriptor.attribute("s3.bucket.name", bucketName);
-    sourceDescriptor.attribute("s3.storage.path", storageFolder);
-
-    S3Source source = new S3Source(s3Client, sourceDescriptor);
+    S3Source source = storage.getSource(s3Client);
     SourceStream[] sourceStreams = source.getStreams();
     assertEquals(2, streams.length);
 
@@ -101,11 +95,10 @@ public class S3SinkSourceExperimentTest {
       while (reader.next(1000) != null) {
         recordCount++;
       }
-
       reader.close();
-      S3Util.listStructure(s3Client, bucketName);
     }
-    int expected = sink.getStreams().length * 100;
+    S3Util.listStructure(s3Client, bucketName);
+    int expected = sink.getStreams().length * NUM_MESSAGE_PER_STREAM;
     assertEquals(expected, recordCount);
   }
 }

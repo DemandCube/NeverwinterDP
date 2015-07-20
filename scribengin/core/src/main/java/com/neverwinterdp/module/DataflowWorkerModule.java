@@ -6,7 +6,10 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 import com.google.inject.name.Names;
+import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.vm.VMConfig;
 
 
@@ -21,8 +24,12 @@ public class DataflowWorkerModule extends ServiceModule {
     try {
       Configuration conf = new Configuration();
       VMConfig.overrideHadoopConfiguration(props, conf);
+      
       FileSystem fs = FileSystem.get(conf);
       bindInstance(FileSystem.class, fs);
+      
+      S3Client s3Client = new S3Client(Region.getRegion(Regions.DEFAULT_REGION));
+      bindInstance(S3Client.class, s3Client);
     } catch (IOException e) {
       e.printStackTrace();
     }

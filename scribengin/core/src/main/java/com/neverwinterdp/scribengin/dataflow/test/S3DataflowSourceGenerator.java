@@ -33,8 +33,6 @@ public class S3DataflowSourceGenerator extends DataflowSourceGenerator {
   @Override
   public void init(ScribenginClient scribenginClient) throws Exception {
     s3Client = new S3Client();
-    s3Client.onInit();
-    
     //TODO improve this. We want maybe 1000 records per file
     numOfRecordsPerFile = Math.min(1000, maxRecordsPerStream);
     numOfFilesPerFolder = maxRecordsPerStream / numOfRecordsPerFile;

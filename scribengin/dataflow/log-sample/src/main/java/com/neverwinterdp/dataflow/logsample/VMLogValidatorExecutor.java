@@ -34,6 +34,9 @@ public class VMLogValidatorExecutor extends Executor {
       if(config.logValidatorValidateHdfs != null) {
         vmConfig.addProperty("validate-hdfs", config.logValidatorValidateHdfs);
       }
+      if(config.logValidatorValidateS3 != null) {
+        vmConfig.addProperty("validate-s3", config.logValidatorValidateS3);
+      }
       vmConfig.setVmApplication(VMLogMessageValidatorApp.class.getName());
       VMSubmitter vmSubmitter = new VMSubmitter(shell.getVMClient(), config.dfsAppHome, vmConfig);
       vmSubmitter.submit();

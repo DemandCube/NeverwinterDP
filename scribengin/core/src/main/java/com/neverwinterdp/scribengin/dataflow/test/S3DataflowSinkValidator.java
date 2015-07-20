@@ -35,7 +35,6 @@ public class S3DataflowSinkValidator extends DataflowSinkValidator {
   @Override
   public void init(ScribenginClient scribenginClient) throws Exception {
     s3Client= new S3Client();
-    s3Client.onInit();
   }
 
   @Override

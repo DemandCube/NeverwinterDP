@@ -27,9 +27,7 @@ public class S3ObjectWriter {
     writeThread.start();
   }
 
-  public ObjectMetadata getObjectMetadata() {
-    return this.metadata;
-  }
+  public ObjectMetadata getObjectMetadata() { return this.metadata; }
 
   public void write(byte[] data) throws IOException {
     pipedOutput.write(data);
@@ -54,7 +52,8 @@ public class S3ObjectWriter {
 
     public void run() {
       running = true;
-      s3Client.getAmazonS3Client().putObject(new PutObjectRequest(bucketName, key, pipedInput, metadata));
+      PutObjectRequest request = new PutObjectRequest(bucketName, key, pipedInput, metadata);
+      s3Client.getAmazonS3Client().putObject(request);
       running = false;
       notifyTermination();
     }

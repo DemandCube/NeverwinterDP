@@ -18,8 +18,7 @@ public class VMLogGeneratorExecutor extends ShellCommandExecutor {
         "  --vm-application " + VMLogMessageGeneratorApp.class.getName() + 
         "  --prop:num-of-executor=" + config.logGeneratorNumOfExecutorPerVm +
         "  --prop:num-of-message-per-executor=" + config.logGeneratorNumOfMessagePerExecutor +
-        "  --prop:message-size=" + config.logGeneratorMessageSize +
-        "  --prop:wait-before-exit=" + config.logGeneratorWaitBeforeExit;
+        "  --prop:message-size=" + config.logGeneratorMessageSize ;
     setCmdLine(cmdLine);
   }
 

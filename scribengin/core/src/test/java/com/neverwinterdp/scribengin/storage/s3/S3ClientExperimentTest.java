@@ -23,7 +23,6 @@ public class S3ClientExperimentTest {
   @BeforeClass
   static public void beforeClass() {
     s3Client = new S3Client() ;
-    s3Client.onInit();
     s3Client.createBucket(BUCKET_NAME);
   }
   

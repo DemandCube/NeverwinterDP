@@ -35,7 +35,6 @@ public class SourceExperimentTest {
   @BeforeClass
   public static void setupClass() {
     s3Client = new S3Client();
-    s3Client.onInit();
   }
 
   @AfterClass

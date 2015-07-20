@@ -50,7 +50,6 @@ public class S3Storage {
   
   public S3Client getS3Client() {
     S3Client s3Client = new S3Client();
-    s3Client.onInit();
     return s3Client;
   }
   

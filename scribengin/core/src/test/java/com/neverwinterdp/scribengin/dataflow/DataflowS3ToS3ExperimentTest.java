@@ -39,7 +39,6 @@ public class DataflowS3ToS3ExperimentTest {
     bucketName = "s3-integration-test-" + UUID.randomUUID();
 
     s3Client = new S3Client();
-    s3Client.onInit();
   }
 
   @After

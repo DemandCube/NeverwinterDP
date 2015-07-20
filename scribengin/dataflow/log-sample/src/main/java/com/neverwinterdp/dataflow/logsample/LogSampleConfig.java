@@ -18,16 +18,13 @@ public class LogSampleConfig {
   public int logGeneratorNumOfExecutorPerVm = 1;
   
   @Parameter(names = "--log-generator-wait-for-ready", description = "Log generator message size")
-  public long logGeneratorWaitForReady = 5000 ;
+  public long logGeneratorWaitForReady = 15000 ;
   
   @Parameter(names = "--log-generator-num-of-message-per-executor", description = "Log generator message size")
   public int logGeneratorNumOfMessagePerExecutor = 1000;
   
   @Parameter(names = "--log-generator-message-size", description = "Log generator message size")
   public int logGeneratorMessageSize ;
-  
-  @Parameter(names = "--log-generator-wait-before-exit", description = "Need to wait to make sure the log component forward the data to kafka, es")
-  public long logGeneratorWaitBeforeExit = 45000 ;
   
   @Parameter(names = "--log-validator-num-of-vm", description = "Log generator message size")
   public int logValidatorNumOfVM = 1;
@@ -40,6 +37,9 @@ public class LogSampleConfig {
   
   @Parameter(names = "--log-validator-validate-hdfs", description = "Topic to validate")
   public String logValidatorValidateHdfs = null;
+  
+  @Parameter(names = "--log-validator-validate-s3", description = "Topic to validate")
+  public String logValidatorValidateS3 = null;
   
   @ParametersDelegate
   public RegistryConfig registryConfig   = new RegistryConfig();

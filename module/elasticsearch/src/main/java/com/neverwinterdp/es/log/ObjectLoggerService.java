@@ -1,13 +1,13 @@
 package com.neverwinterdp.es.log;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ObjectLoggerService {
   private String[] connect ;
   private String   bufferBaseDir ;
   private int      queueMaxSizePerSegment;
-  private Map<String, ObjectLogger<?>> loggers = new HashMap<String, ObjectLogger<?>>();
+  private Map<String, ObjectLogger<?>> loggers = new ConcurrentHashMap<String, ObjectLogger<?>>();
   private FlushThread flushThread ;
   
   public ObjectLoggerService() {

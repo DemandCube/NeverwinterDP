@@ -62,8 +62,15 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
       SourceFactory sourceFactory = service.getSourceFactory();
       SinkFactory sinkFactory = service.getSinkFactory() ;
 
-      Source source    = sourceFactory.create(dataflowDescriptor.getSourceDescriptor()) ;
-      SourceStream[] sourceStream = source.getStreams();
+      //TODO: find a better wait to fix this
+      SourceStream[] sourceStream = null;
+      for(int i = 0; i < 30; i++) {
+        Source source    = sourceFactory.create(dataflowDescriptor.getSourceDescriptor()) ;
+        sourceStream = source.getStreams();
+        if(sourceStream.length == 0) {
+          Thread.sleep(1000);
+        }
+      }
       
       Map<String, Sink> sinks = new HashMap<String, Sink>();
       for(Map.Entry<String, StorageDescriptor> entry : dataflowDescriptor.getSinkDescriptors().entrySet()) {

@@ -31,6 +31,7 @@ public class S3SourceStreamReader implements SourceStreamReader {
   public S3SourceStreamReader(String name, S3Client client, StreamDescriptor descriptor) throws Exception {
     this.name = name;
     this.s3Client = client;
+    
     storage = new S3Storage(descriptor);
     String streamKey = storage.getStreamKey(descriptor);
     streamFolder = s3Client.getS3Folder(storage.getBucketName(), streamKey);

@@ -25,8 +25,6 @@ public class S3DataflowTest extends DataflowTest {
 
   protected void doRun(ScribenginShell shell) throws Exception {
     s3Client = new S3Client();
-    s3Client.onInit();
-    
     
     if (sourceAutoCreateBucket) {
       s3Client.createBucket(sourceGenerator.sourceLocation);

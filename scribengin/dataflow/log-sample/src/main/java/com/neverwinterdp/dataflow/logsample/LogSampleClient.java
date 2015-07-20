@@ -10,6 +10,7 @@ import com.neverwinterdp.scribengin.shell.ExecutorScheduler;
 import com.neverwinterdp.scribengin.shell.GroupExecutor;
 import com.neverwinterdp.scribengin.shell.RandomKillDataflowWorkerExecutor;
 import com.neverwinterdp.scribengin.shell.StartStopDataflowExecutor;
+import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.vm.HadoopProperties;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.client.VMClient;
@@ -26,6 +27,15 @@ public class LogSampleClient  {
   public void run() throws Exception {
     Registry registry = config.registryConfig.newInstance();
     registry.connect(30000);
+    
+    if(config.logValidatorValidateS3 != null) {
+      S3Client s3Client = new S3Client();
+      if(s3Client.hasBucket("test-log-sample")) {
+        s3Client.deleteBucket("test-log-sample", true);
+      }
+      s3Client.createBucket("test-log-sample");
+      s3Client.onDestroy();
+    }
     
     VMClient vmClient = null;
     if(config.dfsAppHome != null) {
@@ -44,7 +54,7 @@ public class LogSampleClient  {
     
     ExecutorScheduler scheduler = new ExecutorScheduler();
     GroupExecutor logGeneratorGroup = scheduler.newGroupExcecutor("log-generator");
-    logGeneratorGroup.withMaxRuntime(5000).withWaitForReady(config.logGeneratorWaitForReady);;
+    logGeneratorGroup.withMaxRuntime(30000).withWaitForReady(config.logGeneratorWaitForReady);;
     for(int i = 0; i < 1; i++) {
       Executor executor = new VMLogGeneratorExecutor(shell, (i + 1), config);
       logGeneratorGroup.add(executor);
@@ -84,6 +94,7 @@ public class LogSampleClient  {
   }
   
   static public void main(String[] args) throws Exception {
+    System.setProperty("com.amazonaws.sdk.disableCertChecking", "true"); 
     LogSampleClient client = new LogSampleClient(args);
     client.run();
   }

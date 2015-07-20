@@ -10,6 +10,7 @@ import javax.annotation.PreDestroy;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -27,22 +28,23 @@ import com.google.inject.Singleton;
 @Singleton
 public class S3Client {
   private AmazonS3Client s3Client;
-  private Region region;
 
   public S3Client(String regionName) {
-    region = Region.getRegion(Regions.fromName(regionName));
+    this(Region.getRegion(Regions.fromName(regionName)));
   }
-
+  
   public S3Client() {
-    region = Region.getRegion(Regions.DEFAULT_REGION);
+    this(Region.getRegion(Regions.DEFAULT_REGION));
   }
 
-  @PostConstruct
-  public void onInit() {
-    s3Client = new AmazonS3Client();
+  public S3Client(Region region) {
+    ClientConfiguration conf = new ClientConfiguration() ;
+    conf.setMaxConnections(100);
+    conf.setMaxErrorRetry(10);
+    s3Client = new AmazonS3Client(conf);
     s3Client.setRegion(region);
   }
-
+  
   @PreDestroy
   public void onDestroy() {
     s3Client.shutdown();

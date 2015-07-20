@@ -12,6 +12,8 @@ import com.neverwinterdp.kafka.consumer.MessageConsumerHandler;
 import com.neverwinterdp.scribengin.Record;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSource;
+import com.neverwinterdp.scribengin.storage.s3.S3Storage;
+import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
 import com.neverwinterdp.scribengin.storage.source.SourceStream;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
 import com.neverwinterdp.tool.message.BitSetMessageTracker;
@@ -26,6 +28,7 @@ public class VMLogMessageValidatorApp extends VMApp {
   long waitForTermination ;
   String validateKafkaTopic ;
   String validateHdfs ;
+  String validateS3 ;
   
   BitSetMessageTracker bitSetMessageTracker;
   
@@ -38,9 +41,9 @@ public class VMLogMessageValidatorApp extends VMApp {
     
     validateKafkaTopic =  vmConfig.getProperty("validate-kafka", null);
     validateHdfs =  vmConfig.getProperty("validate-hdfs", null);
+    validateS3 =  vmConfig.getProperty("validate-s3", null);
     bitSetMessageTracker = new BitSetMessageTracker(numOfMessagePerPartition);
     
-    System.out.println("validate hdfs: " + validateHdfs);
     if(validateKafkaTopic != null) {
       KafkaMessageValidator kafkaValidator = new KafkaMessageValidator() ;
       kafkaValidator.validate(validateKafkaTopic);
@@ -49,6 +52,15 @@ public class VMLogMessageValidatorApp extends VMApp {
       String[] hdfsLoc = validateHdfs.split(",");
       for(String selHdfsLoc : hdfsLoc) {
         hdfsValidator.validate(selHdfsLoc);
+      }
+    } else if(validateS3 != null) {
+      S3MessageValidator s3Validator = new S3MessageValidator() ;
+      String[] s3Loc = validateS3.split(",");
+      for(String selS3Loc : s3Loc) {
+        int colonIdx = selS3Loc.indexOf(":");
+        String bucketName = selS3Loc.substring(0, colonIdx);
+        String folderPath = selS3Loc.substring(colonIdx + 1) ;
+        s3Validator.validate(bucketName, folderPath);
       }
     }
     
@@ -78,6 +90,28 @@ public class VMLogMessageValidatorApp extends VMApp {
       SourceStream[] streams = source.getStreams();
       for(SourceStream selStream : streams) {
         SourceStreamReader streamReader = selStream.getReader("HDFSSinkValidator") ;
+        Record record = null ;
+        while((record = streamReader.next(5000)) != null) {
+          Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(record.getData(), Log4jRecord.class);
+          Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
+          bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
+        }
+        streamReader.close();
+      }
+    }
+  }
+  
+  public class S3MessageValidator {
+    public void validate(String bucketName, String storageFolder) throws Exception {
+      Configuration conf = new Configuration();
+      getVM().getDescriptor().getVmConfig().getHadoopProperties().overrideConfiguration(conf);;
+
+      S3Storage storage = new S3Storage(bucketName, storageFolder);
+      S3Source source = storage.getSource();
+      SourceStream[] streams = source.getStreams();
+      for (int i = 0; i < streams.length; i++) {
+        SourceStream stream = streams[i];
+        SourceStreamReader streamReader = stream.getReader("HDFSSinkValidator") ;
         Record record = null ;
         while((record = streamReader.next(5000)) != null) {
           Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(record.getData(), Log4jRecord.class);
