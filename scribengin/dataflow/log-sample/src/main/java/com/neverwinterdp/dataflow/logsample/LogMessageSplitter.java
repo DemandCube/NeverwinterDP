@@ -19,11 +19,10 @@ public class LogMessageSplitter extends ScribeAbstract {
       String level = log4jRec.getLevel().toLowerCase();
       ctx.write(level, record);
     } else {
-      //Write to default sink
       ctx.append(record);
     }
     count++ ;
-    if(count > 0 && count % 5000 == 0) {
+    if(count > 0 && count % 10000 == 0) {
       ctx.commit();
     }
   }
