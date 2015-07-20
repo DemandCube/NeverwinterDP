@@ -28,7 +28,7 @@ public class DataflowWorkerModule extends ServiceModule {
       FileSystem fs = FileSystem.get(conf);
       bindInstance(FileSystem.class, fs);
       
-      S3Client s3Client = new S3Client(Region.getRegion(Regions.DEFAULT_REGION));
+      S3Client s3Client = new S3Client();
       bindInstance(S3Client.class, s3Client);
     } catch (IOException e) {
       e.printStackTrace();
