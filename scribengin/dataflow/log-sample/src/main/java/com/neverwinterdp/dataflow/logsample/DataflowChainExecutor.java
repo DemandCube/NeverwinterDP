@@ -24,6 +24,7 @@ public class DataflowChainExecutor extends Executor {
       DataflowDescriptor descriptor = dflChainconfig.getDescriptors().get(i);
       long stopTime = 5 * descriptor.getTaskSwitchingPeriod() ;
       if(stopTime < 60000) stopTime = 60000 ;
+      else if(stopTime > 180000) stopTime = 180000 ;
       long maxRuntime = config.dataflowWaitForTerminationTimeout - stopTime;
       if(maxRuntime < 30000) maxRuntime = 30000;
       descriptor.setMaxRunTime(maxRuntime);
