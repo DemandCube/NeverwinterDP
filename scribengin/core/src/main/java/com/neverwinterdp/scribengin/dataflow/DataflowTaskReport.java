@@ -59,7 +59,7 @@ public class DataflowTaskReport {
   public void setLastAssignedWithNoMessageProcess(int lastAssignedWithNoMessageProcess) {
     this.lastAssignedWithNoMessageProcess = lastAssignedWithNoMessageProcess;
   }
-
+  
   public long getLastCommitTime() { return lastCommitTime; }
   public void setLastCommitTime(long lastCommitTime) { this.lastCommitTime = lastCommitTime; }
 
