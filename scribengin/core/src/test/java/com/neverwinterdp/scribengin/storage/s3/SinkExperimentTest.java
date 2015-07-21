@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.sink.S3Sink;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
@@ -74,7 +74,7 @@ public class SinkExperimentTest {
     for (int i = 0; i < numBuffers; i++) {
       for (int j = 0; j < 100; j++) {
         String key = "stream=" + stream.getDescriptor().getId() + ",buffer=" + i + ",record=" + j;
-        writer.append(Record.create(key, key));
+        writer.append(DataflowMessage.create(key, key));
       }
       writer.commit();
       System.out.println("during the write.");
@@ -102,7 +102,7 @@ public class SinkExperimentTest {
     SinkStream stream0 = sink.newStream();
     SinkStreamWriter writer = stream0.getWriter();
     for (int i = 0; i < 100; i++) {
-      writer.append(Record.create("key-" + i, "record " + i));
+      writer.append(DataflowMessage.create("key-" + i, "record " + i));
     }
     System.out.println("\nbefore roll back");
     S3Util.listStructure(s3Client, bucketName);
@@ -154,7 +154,7 @@ public class SinkExperimentTest {
         Random random = new Random();
         for (int i = 0; i < 5; i++) {
           for (int j = 0; j < 100; j++) {
-            writer.append(Record.create("key-" + i, "record " + i));
+            writer.append(DataflowMessage.create("key-" + i, "record " + i));
             Thread.sleep(random.nextInt(10));
           }
           writer.commit();

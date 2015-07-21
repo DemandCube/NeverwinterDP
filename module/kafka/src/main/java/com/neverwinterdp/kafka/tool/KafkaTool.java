@@ -97,7 +97,7 @@ public class KafkaTool implements Closeable {
     };
     createTopic(args);
   }
-
+  
   /**
    * Create a topic. This method will not create a topic that is currently scheduled for deletion.
    * For valid configs see https://cwiki.apache.org/confluence/display/KAFKA/Replication+tools#Replicationtools-Howtousethetool?.3

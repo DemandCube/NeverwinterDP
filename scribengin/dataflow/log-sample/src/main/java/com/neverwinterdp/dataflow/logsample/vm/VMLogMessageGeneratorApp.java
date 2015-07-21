@@ -1,9 +1,13 @@
 package com.neverwinterdp.dataflow.logsample.vm;
 
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import kafka.javaapi.PartitionMetadata;
+import kafka.javaapi.TopicMetadata;
 
 import org.slf4j.Logger;
 
@@ -21,10 +25,12 @@ import com.neverwinterdp.vm.VMDescriptor;
 
 public class VMLogMessageGeneratorApp extends VMApp {
   private Logger logger ;
-  int numOfMessagePerExecutor ;
-  int messageSize;
-  String zkConnects ;
-  String topic ;
+  private int numOfMessage ;
+  private int messageSize;
+  private String zkConnects ;
+  private String topic ;
+  private MessageGenerator messageGenerator = new MessageGenerator.DefaultMessageGenerator() ;
+  private int messageGeneratorCount ;
   
   @Override
   public void run() throws Exception {
@@ -34,75 +40,91 @@ public class VMLogMessageGeneratorApp extends VMApp {
     int numOfExecutor = vmConfig.getPropertyAsInt("num-of-executor", 1);
     zkConnects = vmConfig.getProperty("zk-connects", "zookeeper-1:2181");
     topic      = vmConfig.getProperty("topic", "log4j");
-    numOfMessagePerExecutor = vmConfig.getPropertyAsInt("num-of-message-per-executor", 5000);
+    numOfMessage = vmConfig.getPropertyAsInt("num-of-message", 5000);
     messageSize = vmConfig.getPropertyAsInt("message-size", 256);
     
-    ExecutorService executorService = Executors.newFixedThreadPool(numOfExecutor);
-
-    for(int i = 0; i < numOfExecutor; i++) {
-      String vmId = getVM().getDescriptor().getId();
-      String groupId = vmId + "-executor-" + (i + 1);
-      executorService.submit(new RunnableLogMessageGenerator(groupId));
+    KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
+    kafkaTool.connect();
+    if(!kafkaTool.topicExits(topic)) kafkaTool.createTopic(topic, 1, 10);
+    
+    TopicMetadata topicMetadata = kafkaTool.findTopicMetadata(topic);
+    List<PartitionMetadata> partitionMetadataHolder = topicMetadata.partitionsMetadata();
+    kafkaTool.close();
+    ExecutorService executorService = Executors.newFixedThreadPool(partitionMetadataHolder.size());
+    for(int i = 0; i < partitionMetadataHolder.size(); i++) {
+      executorService.submit(new RunnableLogMessageGenerator(partitionMetadataHolder.get(i)));
     }
     executorService.shutdown();
     executorService.awaitTermination(60, TimeUnit.MINUTES);
+    String vmId = getVM().getDescriptor().getId();
+    LogMessageReport report = new LogMessageReport(vmId, messageGenerator.getCurrentSequenceId(vmId), 0, 0) ;
+    System.err.println("LOG GENERATOR:");
+    System.err.println(JSONSerializer.INSTANCE.toString(report));
+    LogSampleRegistry appRegistry = null;
+    try {
+      appRegistry = new LogSampleRegistry(getVM().getVMRegistry().getRegistry(), true);
+      appRegistry.addGenerateReport(report);
+    } catch (RegistryException e) {
+      if(appRegistry != null) {
+        try {
+          appRegistry.addGenerateError(vmId, e);
+        } catch (RegistryException error) {
+          logger.error("Log info to registry error", error) ;
+        }
+      }
+      logger.error("Log info to registry error", e) ;
+    }
+  }
+  
+  synchronized private String nextMessage() {
+    if(messageGeneratorCount >= this.numOfMessage) return null ;
+    String vmId = getVM().getDescriptor().getId();
+    String jsonMessage = new String(messageGenerator.nextMessage(vmId, messageSize)) ;
+    messageGeneratorCount++ ;
+    return jsonMessage;
   }
   
   public class RunnableLogMessageGenerator implements Runnable {
-    private String groupId ;
+    private PartitionMetadata partitionMetadata;
     
-    public  RunnableLogMessageGenerator(String groupId) {
-      this.groupId = groupId;
+    public RunnableLogMessageGenerator(PartitionMetadata partitionMetadata) {
+      this.partitionMetadata = partitionMetadata ;
     }
     
     @Override
     public void run() {
-      logger.info("Start generate message for group " + groupId); 
-      MessageGenerator messageGenerator = new MessageGenerator.DefaultMessageGenerator() ;
+      logger.info("Start generate message for partition " + partitionMetadata.partitionId()); 
       try {
-        KafkaLogWriter logWriter = new KafkaLogWriter(zkConnects, topic);
-        for(int i = 0; i < numOfMessagePerExecutor; i++) {
-          int mod = i % 3 ;
-          String jsonMessage = new String(messageGenerator.nextMessage(groupId, messageSize)) ;
+        KafkaPartitionLogWriter logWriter = new KafkaPartitionLogWriter(zkConnects, topic, partitionMetadata);
+        String jsonMessage = null ;
+        int count = 0 ;
+        while((jsonMessage = nextMessage()) != null) {
+          count++ ;
+          int mod = count % 3 ;
           if(mod == 0) logWriter.write("LogSample", "ERROR", jsonMessage);
           else if (mod == 1) logWriter.write("LogSample", "WARN", jsonMessage);
           else logWriter.write("LogSample", "INFO", jsonMessage);
-          if((i + 1) % 1000 == 0) {
-            logger.info(groupId + " generate " + (i + 1) + " messages");
+          if(count % 1000 == 0) {
+            logger.info("Generate " + count+ " messages for partition " + partitionMetadata.partitionId());
           }
         }
+        logWriter.write("LogSample", "INFO",  "EOS");
         logWriter.close();
-        logger.info("Finish generate message for group " + groupId + ", num of message = " + numOfMessagePerExecutor); 
+        logger.info("Finish generate message for partition " + partitionMetadata.partitionId() + ", num of message = " + numOfMessage); 
       } catch(Throwable t) {
         logger.error("Generate message error", t);
-      }
-      LogSampleRegistry appRegistry = null;
-      try {
-        appRegistry = new LogSampleRegistry(getVM().getVMRegistry().getRegistry(), true);
-        LogMessageReport report = new LogMessageReport(groupId, messageGenerator.getCurrentSequenceId(groupId), 0, 0) ;
-        appRegistry.addGenerateReport(report);
-      } catch (RegistryException e) {
-        if(appRegistry != null) {
-          try {
-            appRegistry.addGenerateError(groupId, e);
-          } catch (RegistryException error) {
-            logger.error("Log info to registry error", error) ;
-          }
-        }
-        logger.error("Log info to registry error", e) ;
       }
     }
   }
   
-  public class KafkaLogWriter {
-    private String zkConnects ;
+  public class KafkaPartitionLogWriter {
     private String topic ;
+    private PartitionMetadata partitionMetadata ;
     private AckKafkaWriter kafkaWriter;
     
-    public KafkaLogWriter(String zkConnects, String topic) throws Exception {
-      this.zkConnects = zkConnects ;
+    public KafkaPartitionLogWriter(String zkConnects, String topic, PartitionMetadata partitionMetadata) throws Exception {
       this.topic = topic ;
-      
+      this.partitionMetadata = partitionMetadata;
       KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
       kafkaTool.connect();
       String kafkaConnects = kafkaTool.getKafkaBrokerList();
@@ -122,7 +144,7 @@ public class VMLogMessageGeneratorApp extends VMApp {
     
     public void write(Log4jRecord record) throws Exception  {
       String json = JSONSerializer.INSTANCE.toString(record);
-      kafkaWriter.send(topic, json, 60 * 1000);
+      kafkaWriter.send(topic, partitionMetadata.partitionId(), json, 60 * 1000);
     }
     
     public void close() {

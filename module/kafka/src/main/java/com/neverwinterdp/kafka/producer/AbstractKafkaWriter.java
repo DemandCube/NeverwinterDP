@@ -35,6 +35,10 @@ abstract public class AbstractKafkaWriter implements KafkaWriter {
     send(topic, -1, key, data, null, timeout);
   }
 
+  public void send(String topic, int partition, String data, long timeout) throws Exception {
+    send(topic, partition, nextKey(-1), data, null, timeout);
+  }
+  
   @Override
   public void send(String topic, int partition, String key, String data, long timeout) throws Exception {
     send(topic, partition, key, data, null, timeout);

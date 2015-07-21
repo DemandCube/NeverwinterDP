@@ -1,7 +1,6 @@
 package com.neverwinterdp.scribengin.dataflow;
 
 import com.neverwinterdp.registry.task.TaskContext;
-import com.neverwinterdp.scribengin.Record;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorService;
 import com.neverwinterdp.scribengin.scribe.ScribeAbstract;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
@@ -14,7 +13,6 @@ public class DataflowTask {
   private ScribeAbstract processor;
   private DataflowTaskContext context;
   private boolean interrupt = false;
-  private boolean complete = false;
   private long    startTime = 0;
   
   public DataflowTask(DataflowTaskExecutorService service, TaskContext<DataflowTaskDescriptor> taskContext) throws Exception {
@@ -29,7 +27,7 @@ public class DataflowTask {
   
   public DataflowTaskDescriptor getDescriptor() { return descriptor ; }
   
-  public boolean isComplete() { return this.complete ; }
+  public boolean isComplete() { return context.isComplete() ; }
   
   public void interrupt() { interrupt = true; }
   
@@ -44,14 +42,27 @@ public class DataflowTask {
   
   public void run() throws Exception {
     DataflowTaskReport report = context.getReport();
-    Record record = null ;
-    DataflowDescriptor dflDescriptor = executorService.getDataflowRegistry().getDataflowDescriptor(false);
-    long maxWaitForDataRead =  dflDescriptor.getMaxWaitForDataRead();
-    while(!interrupt && (record = context.nextRecord(maxWaitForDataRead)) != null) {
-      report.incrProcessCount();
-      processor.process(record, context);
+    while(!interrupt && !context.isComplete() && !context.isEndOfDataStream()) {
+      DataflowMessage dataflowMessage = context.nextRecord(5000);
+      if(dataflowMessage != null) {
+        if(dataflowMessage.getType() == DataflowMessage.Type.INSTRUCTION) {
+          DataflowInstruction ins = dataflowMessage.dataAsDataflowInstruction(); 
+          processor.process(ins, context);
+          if(ins == DataflowInstruction.END_OF_DATASTREAM) {
+            context.setComplete(true) ;
+            return ;
+          }
+        } else {
+          report.incrProcessCount();
+          processor.process(dataflowMessage, context);
+        }
+      } else {
+        Thread.sleep(1000);
+      }
     }
-    if(record == null) complete = true;
+    if(context.isEndOfDataStream()) {
+      context.setComplete(true);
+    }
   }
   
   public void suspend() throws Exception {

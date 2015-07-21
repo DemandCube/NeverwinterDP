@@ -15,7 +15,7 @@ import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 
 public class S3DataflowSourceGenerator extends DataflowSourceGenerator {
 
-  private RecordMessageGenerator recordGenerator = new RecordMessageGenerator();
+  private DataflowMessageGenerator recordGenerator = new DataflowMessageGenerator();
   private Stopwatch stopwatch = Stopwatch.createUnstarted();
   private S3Client s3Client;
   private int numOfFilesPerFolder;
@@ -60,7 +60,7 @@ public class S3DataflowSourceGenerator extends DataflowSourceGenerator {
     DataflowSourceGeneratorReport sourceReport = report.getSourceGeneratorReport();
     sourceReport.setSourceName(sourceName);
     sourceReport.setNumberOfStreams(numberOfStream);
-    sourceReport.setWriteCount(RecordMessageGenerator.idTracker.get());
+    sourceReport.setWriteCount(DataflowMessageGenerator.idTracker.get());
     sourceReport.setDuration(stopwatch.elapsed(TimeUnit.MILLISECONDS));
   }
 

@@ -10,6 +10,8 @@ public interface MessageGenerator {
   
   public byte[] nextMessage(String partition, int messageSize);
   
+  public byte[] eosMessage() ;
+  
   //TODO remove after testing
   public Map<String, AtomicInteger> getMessageTrackers();
   
@@ -23,6 +25,11 @@ public interface MessageGenerator {
       AtomicInteger idTracker = getIdTracker(partition) ;
       Message message = new Message(partition, idTracker.getAndIncrement(), messageSize) ;
       return JSONSerializer.INSTANCE.toBytes(message) ;
+    }
+  
+    @Override
+    public byte[] eosMessage() {
+      return  null ;
     }
     
     public int getCurrentSequenceId(String partition) {

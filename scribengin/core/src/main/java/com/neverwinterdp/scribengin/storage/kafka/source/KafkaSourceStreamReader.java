@@ -3,7 +3,7 @@ package com.neverwinterdp.scribengin.storage.kafka.source;
 import kafka.javaapi.PartitionMetadata;
 
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
@@ -23,15 +23,17 @@ public class KafkaSourceStreamReader implements SourceStreamReader {
   public String getName() { return descriptor.attribute("name"); }
 
   @Override
-  public Record next(long maxWait) throws Exception {
-    return partitionReader.nextAs(Record.class, maxWait);
+  public DataflowMessage next(long maxWait) throws Exception {
+    return partitionReader.nextAs(DataflowMessage.class, maxWait);
   }
 
   @Override
-  public Record[] next(int size, long maxWait) throws Exception {
+  public DataflowMessage[] next(int size, long maxWait) throws Exception {
     throw new Exception("To implement") ;
   }
 
+  public boolean isEndOfDataStream() { return false; }
+  
   @Override
   public void rollback() throws Exception {
     throw new Exception("To implement") ;

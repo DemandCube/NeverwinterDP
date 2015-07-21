@@ -8,7 +8,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
@@ -30,8 +30,8 @@ public class HDFSSinkStreamWriter implements SinkStreamWriter {
   }
   
   @Override
-  synchronized public void append(Record record) throws Exception {
-    currentBuffer.append(record);
+  synchronized public void append(DataflowMessage dataflowMessage) throws Exception {
+    currentBuffer.append(dataflowMessage);
   }
 
   @Override
@@ -112,8 +112,8 @@ public class HDFSSinkStreamWriter implements SinkStreamWriter {
       output = fs.create(writingPath) ;
     }
     
-    public void append(Record record) throws IOException {
-      byte[] bytes = JSONSerializer.INSTANCE.toBytes(record) ;
+    public void append(DataflowMessage dataflowMessage) throws IOException {
+      byte[] bytes = JSONSerializer.INSTANCE.toBytes(dataflowMessage) ;
       output.writeInt(bytes.length);
       output.write(bytes);
       count++;

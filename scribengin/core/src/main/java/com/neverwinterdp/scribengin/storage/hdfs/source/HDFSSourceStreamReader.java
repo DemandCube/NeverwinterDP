@@ -10,7 +10,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
@@ -25,6 +25,7 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
   private List<Path> dataPaths = new ArrayList<Path>();
   private int currentDataPathPos = -1;
   private FSDataInputStream currentDataPathInputStream;
+  private boolean endOfStream = false; 
 
   private int commitPoint;
   private int currPosition;
@@ -43,11 +44,9 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
     }
   }
 
-  public String getName() {
-    return name;
-  }
+  public String getName() { return name; }
 
-  public Record next(long maxWait) throws Exception {
+  public DataflowMessage next(long maxWait) throws Exception {
     if(currentDataPathInputStream == null) {
       currentDataPathInputStream = nextDataPathInputStream();
       if (currentDataPathInputStream == null) return null;
@@ -62,16 +61,16 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
     int recordSize = currentDataPathInputStream.readInt();
     byte[] data = new byte[recordSize];
     currentDataPathInputStream.readFully(data);
-    return JSONSerializer.INSTANCE.fromBytes(data, Record.class);
+    return JSONSerializer.INSTANCE.fromBytes(data, DataflowMessage.class);
   }
 
-  public Record[] next(int size, long maxWait) throws Exception {
-    List<Record> holder = new ArrayList<Record>();
-    Record[] array = new Record[holder.size()];
+  public DataflowMessage[] next(int size, long maxWait) throws Exception {
+    List<DataflowMessage> holder = new ArrayList<DataflowMessage>();
+    DataflowMessage[] array = new DataflowMessage[holder.size()];
     for (int i = 0; i < size; i++) {
-      Record record = next(maxWait);
-      if (record != null)
-        holder.add(record);
+      DataflowMessage dataflowMessage = next(maxWait);
+      if (dataflowMessage != null)
+        holder.add(dataflowMessage);
       else
         break;
     }
@@ -79,6 +78,8 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
     return array;
   }
 
+  public boolean isEndOfDataStream() { return endOfStream; }
+  
   public void rollback() throws Exception {
     System.err.println("This method is not implemented");
     currPosition = commitPoint;
@@ -108,7 +109,10 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
 
   private FSDataInputStream nextDataPathInputStream() throws IOException {
     currentDataPathPos++;
-    if (currentDataPathPos >= dataPaths.size()) return null;
+    if (currentDataPathPos >= dataPaths.size()) {
+      endOfStream = true;
+      return null;
+    }
     FSDataInputStream is = fs.open(dataPaths.get(currentDataPathPos));
     if(is.available() <= 0) {
       is.close();

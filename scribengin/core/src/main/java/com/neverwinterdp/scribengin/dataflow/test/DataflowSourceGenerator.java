@@ -5,8 +5,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.beust.jcommander.Parameter;
-import com.neverwinterdp.scribengin.Record;
 import com.neverwinterdp.scribengin.ScribenginClient;
+import com.neverwinterdp.scribengin.dataflow.DataflowInstruction;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.tool.message.MessageGenerator;
 import com.neverwinterdp.util.JSONSerializer;
@@ -66,7 +67,7 @@ abstract public class DataflowSourceGenerator implements Runnable {
   
   abstract public void populate(DataflowTestReport report) ;
 
-  static public class RecordMessageGenerator implements MessageGenerator {
+  static public class DataflowMessageGenerator implements MessageGenerator {
     MessageGenerator defaultMessageGenerator = new MessageGenerator.DefaultMessageGenerator() ;
     static public AtomicLong idTracker = new AtomicLong() ;
     
@@ -74,10 +75,15 @@ abstract public class DataflowSourceGenerator implements Runnable {
       return JSONSerializer.INSTANCE.toBytes(nextRecord(partition, messageSize));
     }
     
-    public Record nextRecord(String partition, int messageSize) {
+    public byte[] eosMessage() {
+      DataflowMessage dflMessage = new DataflowMessage(DataflowInstruction.END_OF_DATASTREAM) ;
+      return JSONSerializer.INSTANCE.toBytes(dflMessage);
+    }
+    
+    public DataflowMessage nextRecord(String partition, int messageSize) {
       byte[] messagePayload = defaultMessageGenerator.nextMessage(partition, messageSize);
       String key = "partition=" + partition + ",id=" + idTracker.getAndIncrement();
-      return new Record(key, messagePayload);
+      return new DataflowMessage(key, messagePayload);
     }
     
     @Override

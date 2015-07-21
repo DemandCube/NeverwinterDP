@@ -22,7 +22,8 @@ public class DataflowChainExecutor extends Executor {
     dflChainconfig = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
     for(int i = 0; i < dflChainconfig.getDescriptors().size(); i++) {
       DataflowDescriptor descriptor = dflChainconfig.getDescriptors().get(i);
-      long maxRuntime = config.dataflowWaitForTerminationTimeout - 5*(descriptor.getTaskSwitchingPeriod());
+      long maxRuntime = config.dataflowWaitForTerminationTimeout - 60000;
+      if(maxRuntime < 30000) maxRuntime = 30000;
       descriptor.setMaxRunTime(maxRuntime);
     }
     submitter = new OrderDataflowChainSubmitter(shell.getScribenginClient(), config.dfsAppHome, dflChainconfig);

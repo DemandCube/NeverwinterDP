@@ -1,5 +1,6 @@
 package com.neverwinterdp.registry.lock;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -117,6 +118,7 @@ public class Lock {
     }
     
     synchronized public void tryWatch(SortedSet<LockId> currentLockIds) throws RegistryException {
+      if(isComplete()) return;
       while(true) {
         try {
           LockId ownerId = currentLockIds.first() ;
@@ -150,7 +152,21 @@ public class Lock {
         throw new RegistryException(ErrorCode.Timeout, e) ;
       }
       if(!obtainedLock) {
+        //check one more time
+        SortedSet<LockId> currentLockIds = getSortedLockIds() ;
+        LockId ownerId = currentLockIds.first() ;
+        if(ownerId.equals(lockId)) {
+          obtainedLock = true ;
+          setComplete();
+          return ;
+        }
         String lockIdPath = lockId.getPath();
+        try {
+          System.err.println("cannot obtain lock for lock " + lockIdPath);
+          registry.get(lockIdPath).getParentNode().dump(System.err);
+        } catch (IOException e) {
+          e.printStackTrace();
+        };
         setComplete() ;
         unlock();
         throw new RegistryException(ErrorCode.Timeout, "Cannot obtain a lock at " + lockIdPath + " after " + timeout + "ms") ;

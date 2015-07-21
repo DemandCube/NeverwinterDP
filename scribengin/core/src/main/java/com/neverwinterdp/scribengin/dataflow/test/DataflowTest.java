@@ -11,12 +11,12 @@ import org.tap4j.producer.TapProducerFactory;
 import org.tap4j.util.StatusValues;
 
 import com.beust.jcommander.Parameter;
-import com.neverwinterdp.scribengin.Record;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskContext;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowWaitingEventListener;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowTestReport.DataflowSinkValidatorReport;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowTestReport.DataflowSourceGeneratorReport;
@@ -263,8 +263,8 @@ abstract public class DataflowTest {
     private int count = 0;
 
     @Override
-    public void process(Record record, DataflowTaskContext ctx) throws Exception {
-      ctx.append(record);
+    public void process(DataflowMessage dataflowMessage, DataflowTaskContext ctx) throws Exception {
+      ctx.append(dataflowMessage);
       count++;
       if (count == 100) {
         ctx.commit();

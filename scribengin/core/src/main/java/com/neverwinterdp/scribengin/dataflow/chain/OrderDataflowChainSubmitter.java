@@ -31,9 +31,6 @@ public class OrderDataflowChainSubmitter extends DataflowChainSubmitter {
     submitter.submit();
     setupDebugger(submitter);
     submitter.waitForRunning(timeout);
-    if(descriptor.getId().indexOf("splitter") > 0) {
-      Thread.sleep(60000);
-    }
     return submitter;
   }
   

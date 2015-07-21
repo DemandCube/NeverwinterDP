@@ -1,7 +1,7 @@
 package com.neverwinterdp.scribengin.storage.s3;
 
 import com.google.common.base.Stopwatch;
-import com.neverwinterdp.scribengin.dataflow.test.DataflowSourceGenerator.RecordMessageGenerator;
+import com.neverwinterdp.scribengin.dataflow.test.DataflowSourceGenerator.DataflowMessageGenerator;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.sink.S3Sink;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
@@ -10,7 +10,7 @@ import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 
 public class S3SourceGenerator {
 
-  private RecordMessageGenerator recordGenerator = new RecordMessageGenerator();
+  private DataflowMessageGenerator recordGenerator = new DataflowMessageGenerator();
 
   private int numOfBufferPerStream;
   private int numOfRecordPerBuffer;

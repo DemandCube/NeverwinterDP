@@ -10,7 +10,6 @@ import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.dataflow.test.S3DataflowTest;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
-import com.neverwinterdp.scribengin.storage.s3.S3Util;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 import com.neverwinterdp.util.io.FileUtil;
 

@@ -162,6 +162,7 @@ public class KafkaMessageSendTool implements Runnable {
    
     TopicMetadata topicMetadata = kafkaTool.findTopicMetadata(topicConfig.topic);
     List<PartitionMetadata> partitionMetadataHolder = topicMetadata.partitionsMetadata();
+    
     for (PartitionMetadata sel : partitionMetadataHolder) {
       PartitionMessageWriter writer = new PartitionMessageWriter(sel, kafkaConnects);
       writers.put(sel.partitionId(), writer);
@@ -212,6 +213,11 @@ public class KafkaMessageSendTool implements Runnable {
           } else if (topicConfig.producerConfig.sendPeriod > 0) {
             Thread.sleep(topicConfig.producerConfig.sendPeriod);
           }
+        }
+        byte[] eosMessage = messageGenerator.eosMessage();
+        if(eosMessage != null) {
+          byte[] key = "eos-messafe".getBytes();
+          writer.send(topicConfig.topic, metadata.partitionId(), key, eosMessage, failedCountCallback, topicConfig.producerConfig.sendTimeout);
         }
       } catch (InterruptedException e) {
       } catch (Exception e) {

@@ -17,7 +17,6 @@ public class DataflowDescriptor {
   private long                           maxRunTime                    = -1;
   private long                           maxWaitForWorkerRunningStatus = 45000;
   private long                           maxWaitForAvailableDataStream = 10000;
-  private long                           maxWaitForDataRead            = 5000;
   
   private long                           taskSwitchingPeriod            = 30000;
   private String                         scribe;
@@ -64,11 +63,6 @@ public class DataflowDescriptor {
   public long getMaxWaitForAvailableDataStream() { return maxWaitForAvailableDataStream; }
   public void setMaxWaitForAvailableDataStream(long waitForAvailableDataStream) {
     this.maxWaitForAvailableDataStream = waitForAvailableDataStream;
-  }
-  
-  public long getMaxWaitForDataRead() { return maxWaitForDataRead; }
-  public void setMaxWaitForDataRead(long maxWaitForDataRead) {
-    this.maxWaitForDataRead = maxWaitForDataRead;
   }
   
   public long getTaskSwitchingPeriod() { return taskSwitchingPeriod;}

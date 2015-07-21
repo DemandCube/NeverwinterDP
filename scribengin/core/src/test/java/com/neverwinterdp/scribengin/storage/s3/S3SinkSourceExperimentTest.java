@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.s3.sink.S3Sink;
 import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
 import com.neverwinterdp.scribengin.storage.sink.SinkStream;
@@ -64,7 +64,7 @@ public class S3SinkSourceExperimentTest {
       for (int j = 0; j < NUM_MESSAGE_PER_STREAM; j++) {
         String key = "stream=" + stream.getDescriptor().getId() + ",buffer=" + j + ",record=" + j;
         key = key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key;
-        writer.append(Record.create(key, key));
+        writer.append(DataflowMessage.create(key, key));
         if((j + 1) % 1000 == 0) {
           writer.commit();
         }

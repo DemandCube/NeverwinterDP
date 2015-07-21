@@ -2,7 +2,7 @@ package com.neverwinterdp.scribengin.storage.es.sink;
 
 import com.neverwinterdp.es.ESClient;
 import com.neverwinterdp.es.ESObjectClient;
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.es.ESStorage;
 import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
@@ -20,9 +20,9 @@ public class ESStreamWriter implements SinkStreamWriter {
   }
   
   @Override
-  public void append(Record record) throws Exception {
-    Object obj = JSONSerializer.INSTANCE.fromBytes(record.getData(), storage.getMappingType());
-    esObjClient.put(obj, record.getKey());
+  public void append(DataflowMessage dataflowMessage) throws Exception {
+    Object obj = JSONSerializer.INSTANCE.fromBytes(dataflowMessage.getData(), storage.getMappingType());
+    esObjClient.put(obj, dataflowMessage.getKey());
   }
 
 

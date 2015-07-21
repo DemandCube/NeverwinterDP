@@ -202,7 +202,7 @@ public class TaskRegistry<T> {
     };
     try {
       Lock lock = tasksLockNode.getLock("write", "Lock to move the task " + taskTransactionID.getTaskTransactionId() + " to suspend by " + executorRef) ;
-      lock.execute(suspendtOp, 3, 10000);
+      lock.execute(suspendtOp, 5, 5000);
     } catch(RegistryException ex) {
       String errorMessage = "Fail to suspend the task " + taskTransactionID.getTaskTransactionId();
       taskExecutionNotifier.error("fail-to-suspend-dataflow-task", errorMessage, ex);

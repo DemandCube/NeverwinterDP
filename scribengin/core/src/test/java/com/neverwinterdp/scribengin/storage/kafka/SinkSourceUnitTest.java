@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
 import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSource;
 import com.neverwinterdp.scribengin.storage.sink.SinkStream;
@@ -44,8 +44,8 @@ public class SinkSourceUnitTest {
     SinkStreamWriter writer = stream.getWriter();
     for(int i = 0; i < 10; i++) {
       String hello = "Hello " + i ;
-      Record record = new Record("key-" + i, hello.getBytes());
-      writer.append(record);
+      DataflowMessage dataflowMessage = new DataflowMessage("key-" + i, hello.getBytes());
+      writer.append(dataflowMessage);
     }
     writer.close();
     
@@ -55,9 +55,9 @@ public class SinkSourceUnitTest {
     for(int i = 0; i < streams.length; i++) {
       System.out.println("Stream id: " + streams[i].getDescriptor().getId());
       SourceStreamReader reader = streams[i].getReader("kafka");
-      Record record = null;
-      while((record = reader.next(1000)) != null) {
-        System.out.println("Record: " + new String(record.getData()));
+      DataflowMessage dataflowMessage = null;
+      while((dataflowMessage = reader.next(1000)) != null) {
+        System.out.println("Record: " + new String(dataflowMessage.getData()));
       }
     }
   }

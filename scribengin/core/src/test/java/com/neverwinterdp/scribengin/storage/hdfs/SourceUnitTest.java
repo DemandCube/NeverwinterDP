@@ -7,7 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.hdfs.HDFSSourceGenerator;
 import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSource;
 import com.neverwinterdp.scribengin.storage.source.SourceStream;
@@ -42,10 +42,10 @@ public class SourceUnitTest {
     SourceStream[] stream = source.getStreams();
     for(int  i = 0; i < stream.length; i++) {
       SourceStreamReader reader = stream[i].getReader("test") ;
-      Record record  = null ;
+      DataflowMessage dataflowMessage  = null ;
       System.out.println("stream " + stream[i].getDescriptor().getId());
-      while((record = reader.next(1000)) != null) {
-        System.out.println("  " + record.getKey());
+      while((dataflowMessage = reader.next(1000)) != null) {
+        System.out.println("  " + dataflowMessage.getKey());
       }
       reader.close();
     }

@@ -1,14 +1,15 @@
 package com.neverwinterdp.scribengin.storage.source;
 
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 
 /**
  * @author Tuan Nguyen
  */
 public interface SourceStreamReader {
   public String getName() ;
-  public Record next(long maxWait) throws Exception;
-  public Record[] next(int size, long maxWait) throws Exception ;
+  public DataflowMessage next(long maxWait) throws Exception;
+  public DataflowMessage[] next(int size, long maxWait) throws Exception ;
+  public boolean isEndOfDataStream() throws Exception ;
   public void rollback() throws Exception;
   public void prepareCommit() throws Exception ;
   public void completeCommit() throws Exception ;

@@ -2,7 +2,6 @@ package com.neverwinterdp.scribengin.dataflow;
 
 import java.util.Random;
 
-import com.neverwinterdp.scribengin.Record;
 import com.neverwinterdp.scribengin.scribe.ScribeAbstract;
 
 public class TestCopyDataProcessor extends ScribeAbstract {
@@ -10,12 +9,12 @@ public class TestCopyDataProcessor extends ScribeAbstract {
   private Random random = new Random();
   
   
-  public void process(Record record, DataflowTaskContext ctx) throws Exception {
+  public void process(DataflowMessage dflMessage, DataflowTaskContext ctx) throws Exception {
     if(random.nextDouble() < 0.8) {
-      ctx.write("default",record);
+      ctx.write("default", dflMessage);
       //System.out.println("Write default");
     } else {
-      ctx.write("invalid", record);
+      ctx.write("invalid", dflMessage);
       //System.out.println("Write invalid");
     }
     count++ ;

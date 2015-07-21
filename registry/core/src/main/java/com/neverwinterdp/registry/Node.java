@@ -187,10 +187,11 @@ public class Node {
   }
   
   public void dump(Appendable out) throws RegistryException, IOException  {
+    out.append(path).append(path).append("\n");
     List<String> childNodes = registry.getChildren(path);
     Collections.sort(childNodes);
     for(String node : childNodes) {
-      dump(out, path, node, registry, "");
+      dump(out, path, node, registry, "  ");
     }
   }
   

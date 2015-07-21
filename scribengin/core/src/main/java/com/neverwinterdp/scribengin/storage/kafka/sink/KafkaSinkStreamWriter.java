@@ -1,7 +1,7 @@
 package com.neverwinterdp.scribengin.storage.kafka.sink;
 
 import com.neverwinterdp.kafka.producer.DefaultKafkaWriter;
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 
@@ -18,8 +18,8 @@ public class KafkaSinkStreamWriter implements SinkStreamWriter {
   }
   
   @Override
-  public void append(Record record) throws Exception {
-    defaultKafkaWriter.send(topic, record, 5000);
+  public void append(DataflowMessage dataflowMessage) throws Exception {
+    defaultKafkaWriter.send(topic, dataflowMessage, 5000);
   }
 
 

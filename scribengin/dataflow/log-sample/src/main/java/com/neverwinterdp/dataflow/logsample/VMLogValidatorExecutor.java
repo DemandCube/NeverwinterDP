@@ -26,7 +26,7 @@ public class VMLogValidatorExecutor extends Executor {
       vmConfig.setRegistryConfig(config.registryConfig);
       vmConfig.setName("log-validator");
       vmConfig.addRoles("log-validator");
-      vmConfig.addProperty("num-of-message-per-partition", config.logGeneratorNumOfMessagePerExecutor);
+      vmConfig.addProperty("num-of-message-per-partition", config.logGeneratorNumOfMessage);
       vmConfig.addProperty("wait-for-termination", config.logValidatorWaitForTermination);
       if(config.logValidatorValidateKafka != null) {
         vmConfig.addProperty("validate-kafka", config.logValidatorValidateKafka);

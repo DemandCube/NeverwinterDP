@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.amazonaws.services.s3.model.S3Object;
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.scribengin.storage.s3.S3Folder;
@@ -21,6 +21,7 @@ public class S3SourceStreamReader implements SourceStreamReader {
   private List<String> segments = new ArrayList<String>();
   private int currentSegmentPos = -1;
   private S3Folder streamFolder ;
+  private boolean endOfStream = false;
   
   private S3ObjectReader currentSegmenttReader;
   
@@ -40,7 +41,7 @@ public class S3SourceStreamReader implements SourceStreamReader {
 
   public String getName() { return name; }
 
-  public Record next(long maxWait) throws Exception {
+  public DataflowMessage next(long maxWait) throws Exception {
     if (currentSegmenttReader == null) {
       currentSegmenttReader = nextSegmentReader();
     }
@@ -55,18 +56,20 @@ public class S3SourceStreamReader implements SourceStreamReader {
     }
   }
 
-  public Record[] next(int size, long maxWait) throws Exception {
-    List<Record> holder = new ArrayList<Record>();
-    Record[] array = new Record[holder.size()];
+  public DataflowMessage[] next(int size, long maxWait) throws Exception {
+    List<DataflowMessage> holder = new ArrayList<DataflowMessage>();
+    DataflowMessage[] array = new DataflowMessage[holder.size()];
     for (int i = 0; i < size; i++) {
-      Record record = next(maxWait);
-      if (record != null) holder.add(record);
+      DataflowMessage dataflowMessage = next(maxWait);
+      if (dataflowMessage != null) holder.add(dataflowMessage);
       else break;
     }
     holder.toArray(array);
     return array;
   }
 
+  public boolean isEndOfDataStream() { return endOfStream; }
+  
   public void rollback() throws Exception {
     System.err.println("rollback() This method is not implemented");
     currPosition = commitPoint;
@@ -100,7 +103,10 @@ public class S3SourceStreamReader implements SourceStreamReader {
 
   private S3ObjectReader nextSegmentReader() throws IOException {
     currentSegmentPos++;
-    if (currentSegmentPos >= segments.size()) return null;
+    if (currentSegmentPos >= segments.size()) {
+      endOfStream = true;
+      return null;
+    }
     String segment = segments.get(currentSegmentPos);
     S3Object s3Object = streamFolder.getS3Object(segment);
     S3ObjectReader reader = new S3ObjectReader(s3Object.getObjectContent());

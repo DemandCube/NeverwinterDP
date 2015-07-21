@@ -24,7 +24,7 @@ public class KafkaDataflowSourceGenerator extends DataflowSourceGenerator {
         "--zk-connect",             zkConnect
     };
     sendTool = new KafkaMessageSendTool(sendArgs);
-    sendTool.setMessageGenerator(new RecordMessageGenerator());
+    sendTool.setMessageGenerator(new DataflowMessageGenerator());
     setNumberOfGeneratedRecords(numberOfStream * maxRecordsPerStream);
   }
   
@@ -56,7 +56,5 @@ public class KafkaDataflowSourceGenerator extends DataflowSourceGenerator {
   }
 
   @Override
-  public boolean canRunInBackground() {
-    return true;
-  }
+  public boolean canRunInBackground() { return true; }
 }

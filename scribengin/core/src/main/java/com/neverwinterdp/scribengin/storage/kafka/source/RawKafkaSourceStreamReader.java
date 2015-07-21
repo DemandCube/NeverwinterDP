@@ -6,7 +6,7 @@ import kafka.javaapi.PartitionMetadata;
 import kafka.message.Message;
 
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
@@ -26,7 +26,7 @@ public class RawKafkaSourceStreamReader implements SourceStreamReader {
   public String getName() { return descriptor.attribute("name"); }
 
   @Override
-  public Record next(long maxWait) throws Exception {
+  public DataflowMessage next(long maxWait) throws Exception {
     Message message = partitionReader.nextMessage(maxWait) ;
     if(message == null) return null ;
     ByteBuffer payload = message.payload();
@@ -36,14 +36,16 @@ public class RawKafkaSourceStreamReader implements SourceStreamReader {
     ByteBuffer key = message.key();
     byte[] keyBytes = new byte[key.limit()];
     key.get(keyBytes);
-    Record record = new Record(new String(keyBytes), messageBytes) ;
-    return record;
+    DataflowMessage dataflowMessage = new DataflowMessage(new String(keyBytes), messageBytes) ;
+    return dataflowMessage;
   }
 
   @Override
-  public Record[] next(int size, long maxWait) throws Exception {
+  public DataflowMessage[] next(int size, long maxWait) throws Exception {
     throw new Exception("To implement") ;
   }
+  
+  public boolean isEndOfDataStream() { return false; }
 
   @Override
   public void rollback() throws Exception {

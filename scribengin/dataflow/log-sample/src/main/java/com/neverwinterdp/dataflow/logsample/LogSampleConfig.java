@@ -14,14 +14,11 @@ public class LogSampleConfig {
   @Parameter(names = "--log-generator-num-of-vm", description = "Log generator message size")
   public int logGeneratorNumOfVM = 1;
   
-  @Parameter(names = "--log-generator-num-of-executor-per-vm", description = "Log generator message size")
-  public int logGeneratorNumOfExecutorPerVm = 1;
-  
   @Parameter(names = "--log-generator-wait-for-ready", description = "Log generator message size")
   public long logGeneratorWaitForReady = 15000 ;
   
-  @Parameter(names = "--log-generator-num-of-message-per-executor", description = "Log generator message size")
-  public int logGeneratorNumOfMessagePerExecutor = 1000;
+  @Parameter(names = "--log-generator-num-of-message", description = "Log generator message size")
+  public int logGeneratorNumOfMessage = 1000;
   
   @Parameter(names = "--log-generator-message-size", description = "Log generator message size")
   public int logGeneratorMessageSize ;

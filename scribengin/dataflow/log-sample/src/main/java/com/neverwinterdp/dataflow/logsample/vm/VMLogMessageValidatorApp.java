@@ -9,7 +9,7 @@ import com.neverwinterdp.dataflow.logsample.LogMessageReport;
 import com.neverwinterdp.dataflow.logsample.LogSampleRegistry;
 import com.neverwinterdp.kafka.consumer.KafkaMessageConsumerConnector;
 import com.neverwinterdp.kafka.consumer.MessageConsumerHandler;
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSource;
 import com.neverwinterdp.scribengin.storage.s3.S3Storage;
@@ -90,9 +90,9 @@ public class VMLogMessageValidatorApp extends VMApp {
       SourceStream[] streams = source.getStreams();
       for(SourceStream selStream : streams) {
         SourceStreamReader streamReader = selStream.getReader("HDFSSinkValidator") ;
-        Record record = null ;
-        while((record = streamReader.next(5000)) != null) {
-          Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(record.getData(), Log4jRecord.class);
+        DataflowMessage dflMessage = null ;
+        while((dflMessage = streamReader.next(5000)) != null) {
+          Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class);
           Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
           bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
         }
@@ -112,9 +112,9 @@ public class VMLogMessageValidatorApp extends VMApp {
       for (int i = 0; i < streams.length; i++) {
         SourceStream stream = streams[i];
         SourceStreamReader streamReader = stream.getReader("HDFSSinkValidator") ;
-        Record record = null ;
-        while((record = streamReader.next(5000)) != null) {
-          Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(record.getData(), Log4jRecord.class);
+        DataflowMessage dflMessage = null ;
+        while((dflMessage = streamReader.next(5000)) != null) {
+          Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class);
           Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
           bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
         }
@@ -134,7 +134,7 @@ public class VMLogMessageValidatorApp extends VMApp {
         @Override
         public void onMessage(String topic, byte[] key, byte[] message) {
           try {
-            Record rec = JSONSerializer.INSTANCE.fromBytes(message, Record.class);
+            DataflowMessage rec = JSONSerializer.INSTANCE.fromBytes(message, DataflowMessage.class);
             Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(rec.getData(), Log4jRecord.class);
             Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
             //messageTracker.log(lMessage);

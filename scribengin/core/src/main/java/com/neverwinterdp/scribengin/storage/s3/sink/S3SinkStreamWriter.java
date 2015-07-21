@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.scribengin.storage.s3.S3Folder;
 import com.neverwinterdp.scribengin.storage.s3.S3ObjectWriter;
@@ -24,11 +24,11 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
   }
   
   @Override
-  public void append(Record record) throws Exception {
+  public void append(DataflowMessage dataflowMessage) throws Exception {
     if(currentWriter == null) {
       currentWriter = createNewWriter();
     }
-    byte[] bytes = JSONSerializer.INSTANCE.toBytes(record);
+    byte[] bytes = JSONSerializer.INSTANCE.toBytes(dataflowMessage);
     currentWriter.write(bytes);
   }
 

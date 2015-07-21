@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
 import com.neverwinterdp.scribengin.storage.source.SourceStream;
@@ -78,9 +78,9 @@ public class SourceExperimentTest {
     assertEquals(numOfBuffersPerStream, streams.length);
     for (SourceStream stream : streams) {
       SourceStreamReader reader = stream.getReader("test");
-      Record record;
-      while ((record = reader.next(1000)) != null) {
-        Message message = messageExtractor.extract(record.getData());
+      DataflowMessage dataflowMessage;
+      while ((dataflowMessage = reader.next(1000)) != null) {
+        Message message = messageExtractor.extract(dataflowMessage.getData());
         messageTracker.log(message);
       }
       reader.close();

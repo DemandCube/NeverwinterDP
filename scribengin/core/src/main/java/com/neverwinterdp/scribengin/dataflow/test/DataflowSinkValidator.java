@@ -1,8 +1,8 @@
 package com.neverwinterdp.scribengin.dataflow.test;
 
 import com.beust.jcommander.Parameter;
-import com.neverwinterdp.scribengin.Record;
 import com.neverwinterdp.scribengin.ScribenginClient;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.tool.message.Message;
 import com.neverwinterdp.tool.message.MessageExtractor;
@@ -40,8 +40,8 @@ abstract public class DataflowSinkValidator implements Runnable {
   static public class RecordMessageExtractor implements MessageExtractor {
     @Override
     public Message extract(byte[] message) {
-      Record record = JSONSerializer.INSTANCE.fromBytes(message, Record.class) ;
-      return MessageExtractor.DEFAULT_MESSAGE_EXTRACTOR.extract(record.getData()) ;
+      DataflowMessage dataflowMessage = JSONSerializer.INSTANCE.fromBytes(message, DataflowMessage.class) ;
+      return MessageExtractor.DEFAULT_MESSAGE_EXTRACTOR.extract(dataflowMessage.getData()) ;
     }
   }
 }

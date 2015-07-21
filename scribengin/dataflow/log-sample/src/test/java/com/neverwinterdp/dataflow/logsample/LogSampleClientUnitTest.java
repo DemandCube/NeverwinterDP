@@ -67,13 +67,12 @@ public class LogSampleClientUnitTest  {
         "--registry-implementation", RegistryImpl.class.getName(),
         
         "--log-generator-num-of-vm", "1",
-        "--log-generator-num-of-executor-per-vm", "1",
-        "--log-generator-num-of-message-per-executor", "5000",
+        "--log-generator-num-of-message", "1000",
         "--log-generator-message-size", "128",
         
         "--dataflow-descriptor", "src/app/conf/local/kafka-log-dataflow-chain.json",
         "--dataflow-wait-for-submit-timeout", "45000",
-        "--dataflow-wait-for-termination-timeout", "240000",
+        "--dataflow-wait-for-termination-timeout", "90000",
         
 //        "--dataflow-failure-simulation-worker", //"--dataflow-failure-simulation-start-stop-resume",
 //        "--dataflow-failure-simulation-wait-before-start", "15000",
@@ -98,19 +97,17 @@ public class LogSampleClientUnitTest  {
         "--registry-implementation", RegistryImpl.class.getName(),
         
         "--log-generator-num-of-vm", "1",
-        "--log-generator-num-of-executor-per-vm", "1",
-        "--log-generator-num-of-message-per-executor", "5000",
+        "--log-generator-num-of-message", "1000",
         "--log-generator-message-size", "128",
         
         "--dataflow-descriptor", "src/app/conf/local/hdfs-log-dataflow-chain.json",
         "--dataflow-wait-for-submit-timeout", "45000",
-        "--dataflow-wait-for-termination-timeout", "240000",
+        "--dataflow-wait-for-termination-timeout", "90000",
         "--dataflow-task-debug",
         
         "--log-validator-wait-for-termination", "90000",
         "--log-validator-validate-hdfs", "./build/hdfs/info,./build/hdfs/warn,./build/hdfs/error"
-      } ;
-    
+    } ;
     LogSampleClient client = new LogSampleClient(args);
     client.run();
   }
@@ -130,13 +127,12 @@ public class LogSampleClientUnitTest  {
         "--registry-implementation", RegistryImpl.class.getName(),
         
         "--log-generator-num-of-vm", "1",
-        "--log-generator-num-of-executor-per-vm", "1",
-        "--log-generator-num-of-message-per-executor", "5000",
+        "--log-generator-num-of-message", "1000",
         "--log-generator-message-size", "128",
         
         "--dataflow-descriptor", "src/app/conf/local/s3-log-dataflow-chain.json",
         "--dataflow-wait-for-submit-timeout", "45000",
-        "--dataflow-wait-for-termination-timeout", "240000",
+        "--dataflow-wait-for-termination-timeout", "120000",
         "--dataflow-task-debug",
         
         "--log-validator-wait-for-termination", "45000",

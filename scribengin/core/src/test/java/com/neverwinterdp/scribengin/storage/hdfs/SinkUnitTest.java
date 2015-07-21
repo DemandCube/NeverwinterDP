@@ -11,7 +11,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.hdfs.sink.HDFSSink;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkStream;
@@ -46,7 +46,7 @@ public class SinkUnitTest {
     for(int i = 0; i < 5; i++) {
       for(int j = 0; j < 100; j ++) {
         String key = "stream=" + stream.getDescriptor().getId() +",buffer=" + i + ",record=" + j;
-        writer.append(Record.create(key, key));
+        writer.append(DataflowMessage.create(key, key));
       }
       writer.commit();
     }
@@ -64,7 +64,7 @@ public class SinkUnitTest {
     SinkStream stream0 = sink.newStream();
     SinkStreamWriter writer = stream0.getWriter();
     for(int i = 0; i < 10; i ++) {
-      writer.append(Record.create("key-" + i, "record " + i));
+      writer.append(DataflowMessage.create("key-" + i, "record " + i));
     }
     writer.rollback();
     writer.close();
@@ -103,7 +103,7 @@ public class SinkUnitTest {
         Random random = new Random() ;
         for(int i = 0; i < 5; i++) {
           for(int j = 0; j < 100; j ++) {
-            writer.append(Record.create("key-" + i, "record " + i));
+            writer.append(DataflowMessage.create("key-" + i, "record " + i));
             Thread.sleep(random.nextInt(10));
           }
           writer.commit();

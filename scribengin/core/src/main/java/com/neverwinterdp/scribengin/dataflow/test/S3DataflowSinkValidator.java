@@ -3,8 +3,8 @@ package com.neverwinterdp.scribengin.dataflow.test;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Stopwatch;
-import com.neverwinterdp.scribengin.Record;
 import com.neverwinterdp.scribengin.ScribenginClient;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowTestReport.DataflowSinkValidatorReport;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
@@ -48,9 +48,9 @@ public class S3DataflowSinkValidator extends DataflowSinkValidator {
       SourceStream[] streams = source.getStreams();
       for(SourceStream selStream : streams) {
         SourceStreamReader streamReader = selStream.getReader("S3DataflowSinkValidator") ;
-        Record record = null ;
-        while((record = streamReader.next(1000)) != null) {
-          Message message = messageExtractor.extract(record.getData()) ;
+        DataflowMessage dataflowMessage = null ;
+        while((dataflowMessage = streamReader.next(1000)) != null) {
+          Message message = messageExtractor.extract(dataflowMessage.getData()) ;
           messageTracker.log(message);
         }
         streamReader.close();

@@ -2,7 +2,7 @@ package com.neverwinterdp.scribengin.storage.hdfs;
 
 import org.apache.hadoop.fs.FileSystem;
 
-import com.neverwinterdp.scribengin.Record;
+import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkFactory;
@@ -30,7 +30,7 @@ public class HDFSSourceGenerator {
       for(int j = 0; j < numOfRecordPerBuffer; j ++) {
         String key = "stream:" + stream.getDescriptor().getId() +",buffer:" + i + ",record:" + j;
  
-        writer.append(Record.create(key, key));
+        writer.append(DataflowMessage.create(key, key));
       }
       writer.commit();
     }
