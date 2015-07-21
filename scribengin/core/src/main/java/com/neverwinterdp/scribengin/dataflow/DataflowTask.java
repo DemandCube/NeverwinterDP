@@ -42,25 +42,36 @@ public class DataflowTask {
   
   public void run() throws Exception {
     DataflowTaskReport report = context.getReport();
+    int dataflowMessageCount = 0;
     while(!interrupt && !context.isComplete() && !context.isEndOfDataStream()) {
       DataflowMessage dataflowMessage = context.nextRecord(5000);
       if(dataflowMessage != null) {
+        dataflowMessageCount++;
         if(dataflowMessage.getType() == DataflowMessage.Type.INSTRUCTION) {
           DataflowInstruction ins = dataflowMessage.dataAsDataflowInstruction(); 
           processor.process(ins, context);
           if(ins == DataflowInstruction.END_OF_DATASTREAM) {
             context.setComplete(true) ;
-            return ;
+            break;
           }
         } else {
           report.incrProcessCount();
           processor.process(dataflowMessage, context);
         }
       } else {
-        Thread.sleep(1000);
+        break ;
       }
     }
+    if(dataflowMessageCount > 0) {
+      report.setAssignedWithNoMessageProcess(report.getAssignedWithNoMessageProcess() + 1);
+      report.setLastAssignedWithNoMessageProcess(report.getLastAssignedWithNoMessageProcess() + 1);
+    } else {
+      report.setLastAssignedWithNoMessageProcess(0);
+    }
     if(context.isEndOfDataStream()) {
+      context.setComplete(true);
+    }
+    if(report.getLastAssignedWithNoMessageProcess() > 5) {
       context.setComplete(true);
     }
   }

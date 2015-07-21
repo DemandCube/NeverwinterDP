@@ -49,7 +49,7 @@ MESSAGE_SIZE=$(get_opt --message-size '128' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
 
 if [ "$PROFILE" = "performance" ] ; then
-  MAX_RUN_TIME=$(( 180000 + ($NUM_OF_MESSAGE * 1) ))
+  MAX_RUN_TIME=$(( 180000 + ($NUM_OF_MESSAGE / 10) ))
   $JAVACMD -Djava.ext.dirs=$APP_DIR/libs:$SCRIBENGIN_HOME/libs:$JAVA_HOME/jre/lib/ext $JAVA_OPTS $APP_OPT $LOG_OPT $MAIN_CLASS \
     --registry-connect zookeeper-1:2181 \
     --registry-db-domain /NeverwinterDP \

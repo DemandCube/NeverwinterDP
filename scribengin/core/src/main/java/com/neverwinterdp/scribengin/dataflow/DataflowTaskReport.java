@@ -15,6 +15,9 @@ public class DataflowTaskReport {
   private long   finishTime ;
   
   private int    assignedCount    ;
+  private int    assignedWithNoMessageProcess ;
+  private int    lastAssignedWithNoMessageProcess ;
+  
   private long   lastCommitTime ;
   private int    commitCount;
   
@@ -42,11 +45,21 @@ public class DataflowTaskReport {
   public void setAssignedCount(int assignedCount) {
     this.assignedCount = assignedCount;
   }
-
+  
   public void incrAssignedCount() { 
     this.assignedCount++ ;
   }
   
+  public int getAssignedWithNoMessageProcess() { return assignedWithNoMessageProcess; }
+  public void setAssignedWithNoMessageProcess(int assignedWithNoMessageProcess) {
+    this.assignedWithNoMessageProcess = assignedWithNoMessageProcess;
+  }
+  
+  public int getLastAssignedWithNoMessageProcess() { return lastAssignedWithNoMessageProcess; }
+  public void setLastAssignedWithNoMessageProcess(int lastAssignedWithNoMessageProcess) {
+    this.lastAssignedWithNoMessageProcess = lastAssignedWithNoMessageProcess;
+  }
+
   public long getLastCommitTime() { return lastCommitTime; }
   public void setLastCommitTime(long lastCommitTime) { this.lastCommitTime = lastCommitTime; }
 
