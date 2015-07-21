@@ -70,9 +70,7 @@ public class DataflowTask {
     }
     if(context.isEndOfDataStream()) {
       context.setComplete(true);
-    }
-    
-    if(report.getLastAssignedWithNoMessageProcess() > 5) {
+    } else if(report.getLastAssignedWithNoMessageProcess() > 5) {
       context.setComplete(true);
     }
   }
