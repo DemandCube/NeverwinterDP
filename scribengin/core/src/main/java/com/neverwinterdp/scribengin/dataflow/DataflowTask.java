@@ -62,7 +62,7 @@ public class DataflowTask {
         break ;
       }
     }
-    if(dataflowMessageCount > 0) {
+    if(dataflowMessageCount == 0) {
       report.setAssignedWithNoMessageProcess(report.getAssignedWithNoMessageProcess() + 1);
       report.setLastAssignedWithNoMessageProcess(report.getLastAssignedWithNoMessageProcess() + 1);
     } else {
