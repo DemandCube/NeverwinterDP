@@ -57,7 +57,7 @@ if [ "$PROFILE" = "performance" ] ; then
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
     --log-generator-num-of-vm 1 --log-generator-wait-for-ready 30000 \
     --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
-    --log-validator-wait-for-termination 600000 --log-validator-validate-s3 test-log-sample:info,test-log-sample:warn,test-log-sample:error \
+    --log-validator-wait-for-termination 1800000 --log-validator-validate-s3 test-log-sample:info,test-log-sample:warn,test-log-sample:error \
     --dataflow-descriptor $APP_DIR/conf/s3-log-dataflow-chain.json  \
     --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-task-debug
@@ -70,7 +70,7 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
     --log-generator-num-of-vm 1  --log-generator-wait-for-ready 30000 \
     --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
-    --log-validator-wait-for-termination 600000 --log-validator-validate-s3 test-log-sample:info,test-log-sample:warn,test-log-sample:error \
+    --log-validator-wait-for-termination 1800000 --log-validator-validate-s3 test-log-sample:info,test-log-sample:warn,test-log-sample:error \
     --dataflow-descriptor $APP_DIR/conf/s3-log-dataflow-chain.json  \
     --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-failure-simulation-worker  \

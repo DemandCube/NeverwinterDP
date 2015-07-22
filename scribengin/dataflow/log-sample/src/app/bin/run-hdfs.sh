@@ -57,7 +57,7 @@ if [ "$PROFILE" = "performance" ] ; then
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
     --log-generator-num-of-vm 1 --log-generator-wait-for-ready 30000 \
     --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
-    --log-validator-wait-for-termination 600000 --log-validator-validate-hdfs /log-sample/hdfs/info,/log-sample//hdfs/warn,/log-sample/hdfs/error \
+    --log-validator-wait-for-termination 1200000 --log-validator-validate-hdfs /log-sample/hdfs/info,/log-sample//hdfs/warn,/log-sample/hdfs/error \
     --dataflow-descriptor $APP_DIR/conf/hdfs-log-dataflow-chain.json  \
     --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-task-debug
