@@ -59,7 +59,7 @@ if [ "$PROFILE" = "performance" ] ; then
     --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
     --log-validator-wait-for-termination 600000 --log-validator-validate-kafka log4j.aggregate \
     --dataflow-descriptor $APP_DIR/conf/kafka-log-dataflow-chain.json  \
-    --dataflow-wait-for-submit-timeout 150000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
+    --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-task-debug
 elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
   MAX_RUN_TIME=$(( 60000 + ($NUM_OF_MESSAGE * 4) ))
@@ -72,7 +72,7 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
     --log-validator-wait-for-termination 600000 --log-validator-validate-kafka log4j.aggregate \
     --dataflow-descriptor $APP_DIR/conf/kafka-log-dataflow-chain.json  \
-    --dataflow-wait-for-submit-timeout 150000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
+    --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-failure-simulation-worker  \
     --dataflow-failure-simulation-wait-before-start 210000 \
     --dataflow-failure-simulation-max-kill 5 \

@@ -72,7 +72,7 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
     --log-validator-wait-for-termination 600000 --log-validator-validate-s3 test-log-sample:info,test-log-sample:warn,test-log-sample:error \
     --dataflow-descriptor $APP_DIR/conf/s3-log-dataflow-chain.json  \
-    --dataflow-wait-for-submit-timeout 150000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
+    --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-failure-simulation-worker  \
     --dataflow-failure-simulation-wait-before-start 210000 \
     --dataflow-failure-simulation-max-kill 5 \
