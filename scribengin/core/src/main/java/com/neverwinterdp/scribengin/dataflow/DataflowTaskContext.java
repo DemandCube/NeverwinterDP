@@ -85,14 +85,25 @@ public class DataflowTaskContext {
   }
   
   private void prepareCommit() throws Exception {
-    sourceContext.assignedSourceStreamReader.prepareCommit();
     Iterator<SinkContext> i = sinkContexts.values().iterator();
     while (i.hasNext()) {
       SinkContext ctx = i.next();
       ctx.prepareCommit();
     }
+    sourceContext.prepareCommit();;
   }
-
+  
+  private void completeCommit() throws Exception {
+    Iterator<SinkContext> i = sinkContexts.values().iterator();
+    while (i.hasNext()) {
+      SinkContext ctx = i.next();
+      ctx.completeCommit();
+    }
+    //The source should commit after sink commit. In the case the source or sink does not support
+    //2 phases commit, it will cause the data to duplicate only, not loss
+    sourceContext.assignedSourceStreamReader.completeCommit();
+  }
+  
   public boolean commit() throws Exception {
     //prepareCommit is a vote to make sure both sink, invalidSink, and source
     //are ready to commit data, otherwise rollback will occur
@@ -131,17 +142,6 @@ public class DataflowTaskContext {
     sourceContext.close();
   }
 
-  private void completeCommit() throws Exception {
-    Iterator<SinkContext> i = sinkContexts.values().iterator();
-    while (i.hasNext()) {
-      SinkContext ctx = i.next();
-      ctx.completeCommit();
-    }
-    //The source should commit after sink commit. In the case the source or sink does not support
-    //2 phases commit, it will cause the data to duplicate only, not loss
-    sourceContext.assignedSourceStreamReader.completeCommit();
-  }
-
   static public class SourceContext {
     private Source source;
     private SourceStream assignedSourceStream;
@@ -153,16 +153,12 @@ public class DataflowTaskContext {
       this.assignedSourceStreamReader = assignedSourceStream.getReader("DataflowTask");
     }
 
-    public void prepapreCommit() throws Exception {
+    public void prepareCommit() throws Exception {
       assignedSourceStreamReader.prepareCommit();
     }
 
     public void completeCommit() throws Exception {
       assignedSourceStreamReader.completeCommit();
-    }
-
-    public void commit() throws Exception {
-      assignedSourceStreamReader.commit();
     }
 
     public void rollback() throws Exception {
@@ -191,10 +187,6 @@ public class DataflowTaskContext {
 
     public void completeCommit() throws Exception {
       assignedSinkStreamWriter.completeCommit();
-    }
-
-    public void commit() throws Exception {
-      assignedSinkStreamWriter.commit();
     }
 
     public void rollback() throws Exception {
