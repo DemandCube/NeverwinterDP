@@ -82,13 +82,14 @@ public class AddWorkerActivityBuilder extends ActivityBuilder {
 
       VMConfig vmConfig = new VMConfig();
       vmConfig.
-      setClusterEnvironment(service.getVMConfig().getClusterEnvironment()).
-      setName(dflDescriptor.getId() + "-worker-" + step.attribute("worker.id")).
-      addRoles("dataflow-worker").
-      setRegistryConfig(registryConfig).
-      setVmApplication(VMDataflowWorkerApp.class.getName()).
-      addProperty("dataflow.registry.path", dataflowRegistry.getDataflowPath()).
-      setHadoopProperties(service.getVMConfig().getHadoopProperties());
+        setClusterEnvironment(service.getVMConfig().getClusterEnvironment()).
+        setName(dflDescriptor.getId() + "-worker-" + step.attribute("worker.id")).
+        addRoles("dataflow-worker").
+        setRequestMemory(dflDescriptor.getWorkerMemory()).
+        setRegistryConfig(registryConfig).
+        setVmApplication(VMDataflowWorkerApp.class.getName()).
+        addProperty("dataflow.registry.path", dataflowRegistry.getDataflowPath()).
+        setHadoopProperties(service.getVMConfig().getHadoopProperties());
 
       String dataflowAppHome = dflDescriptor.getDataflowAppHome();
       if(dataflowAppHome != null) {

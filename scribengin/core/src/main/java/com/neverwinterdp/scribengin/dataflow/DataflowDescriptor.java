@@ -14,6 +14,7 @@ public class DataflowDescriptor {
   private Map<String, StorageDescriptor> sinkDescriptors;
   private int                            numberOfWorkers               = 1;
   private int                            numberOfExecutorsPerWorker    = 1;
+  private int                            workerMemory                  =  128;
   private long                           maxRunTime                    = -1;
   private long                           maxWaitForWorkerRunningStatus = 45000;
   private long                           maxWaitForAvailableDataStream = 10000;
@@ -50,6 +51,11 @@ public class DataflowDescriptor {
   public int getNumberOfExecutorsPerWorker() { return numberOfExecutorsPerWorker; }
   public void setNumberOfExecutorsPerWorker(int number) {
     this.numberOfExecutorsPerWorker = number;
+  }
+  
+  public int getWorkerMemory() { return workerMemory; }
+  public void setWorkerMemory(int workerMemory) {
+    this.workerMemory = workerMemory;
   }
   
   public long getMaxRunTime() { return maxRunTime; }
