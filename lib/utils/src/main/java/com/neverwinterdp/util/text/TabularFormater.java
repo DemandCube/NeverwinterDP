@@ -9,6 +9,7 @@ import java.util.List;
 public class TabularFormater implements TextFormater {
   private String         indent  ;
   private String         title ;
+  private List<String>   footers = new ArrayList<>();
   private String[]       colHeaders ;
   private List<String[]> rows   ;
 
@@ -19,6 +20,10 @@ public class TabularFormater implements TextFormater {
   
   public void setTitle(String title) { 
     this.title = title ;
+  }
+  
+  public void addFooter(String mesg) { 
+    footers.add(mesg) ;
   }
   
   public void setIndent(String indent) { this.indent = indent ; }
@@ -99,6 +104,13 @@ public class TabularFormater implements TextFormater {
         printCell(out,  cell[j], width[j]) ;
       }
       print(out, "\n") ;
+    }
+    if(footers.size() > 0 ) {
+      for(String mesg : footers) {
+        print(out, indent) ;
+        print(out, "*" + mesg) ;
+        print(out, "\n") ;
+      }
     }
   }
   

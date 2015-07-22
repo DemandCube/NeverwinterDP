@@ -44,10 +44,14 @@ public class DataflowFormater {
   public String getDataflowTaskInfo() throws RegistryException {
     List<DataflowTaskRuntimeReport> reports =  DataflowRegistry.getDataflowTaskRuntimeReports(registry, dataflowPath);
     String[] header = {
-      "Id", "Status", "Assigned", "Acc Commit", "Commit Count", "Last Commit Time", "Start Time", "Finish Time", "Exec Time", "Duration"
+      "Id", "Status", "Assigned", "AWNM", "LAWNM", "AC", "CC", "Last Commit Time", "Start Time", "Finish Time", "Exec Time", "Duration"
     } ;
     TabularFormater taskFt = new TabularFormater(header);
     taskFt.setTitle("Dataflow Task Info");
+    taskFt.addFooter("AWNM  = Assigned With No Message Count");
+    taskFt.addFooter("LAWNM = Last Assigned With No Message Count");
+    taskFt.addFooter("AC    = Accumulate Message Commit Count");
+    taskFt.addFooter("CC    = Commit Count");
     for(int i = 0; i < reports.size(); i++) {
       DataflowTaskRuntimeReport rtReport = reports.get(i);
       DataflowTaskReport report = rtReport.getReport();
@@ -55,6 +59,8 @@ public class DataflowFormater {
           report.getTaskId(), 
           rtReport.getStatus(), 
           report.getAssignedCount(),
+          report.getAssignedWithNoMessageProcess(),
+          report.getLastAssignedWithNoMessageProcess(),
           report.getAccCommitProcessCount(),
           report.getCommitCount(),
           DateUtil.asCompactDateTime(report.getLastCommitTime()),
