@@ -37,7 +37,6 @@ public class VMLogMessageGeneratorApp extends VMApp {
     logger = getVM().getLoggerFactory().getLogger(VMLogMessageGeneratorApp.class);
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
-    int numOfExecutor = vmConfig.getPropertyAsInt("num-of-executor", 1);
     zkConnects = vmConfig.getProperty("zk-connects", "zookeeper-1:2181");
     topic      = vmConfig.getProperty("topic", "log4j");
     numOfMessage = vmConfig.getPropertyAsInt("num-of-message", 5000);
