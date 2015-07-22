@@ -22,7 +22,7 @@ public class S3ObjectWriter {
     this.key = key;
     this.metadata = metadata;
     pipedOutput = new PipedOutputStream();
-    pipedInput = new PipedInputStream(pipedOutput);
+    pipedInput = new PipedInputStream(pipedOutput, 5 * 1024 * 1024); //buffer size 5M
     writeThread = new WriteThread();
     writeThread.start();
   }
