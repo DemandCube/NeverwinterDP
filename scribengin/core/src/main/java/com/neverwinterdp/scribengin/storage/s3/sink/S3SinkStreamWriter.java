@@ -24,7 +24,7 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
   }
   
   @Override
-  public void append(DataflowMessage dataflowMessage) throws Exception {
+  synchronized public void append(DataflowMessage dataflowMessage) throws Exception {
     if(currentWriter == null) {
       currentWriter = createNewWriter();
     }
@@ -33,13 +33,13 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
   }
 
   @Override
-  public void prepareCommit() throws Exception {
+  synchronized public void prepareCommit() throws Exception {
     if(currentWriter == null) return ;
     currentWriter.waitAndClose(TIMEOUT);
   }
 
   @Override
-  public void completeCommit() throws Exception {
+  synchronized  public void completeCommit() throws Exception {
     if(currentWriter == null) return ;
     ObjectMetadata metadata = currentWriter.getObjectMetadata();
     metadata.addUserMetadata("transaction", "complete");
@@ -48,7 +48,7 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
   }
 
   @Override
-  public void commit() throws Exception {
+  synchronized  public void commit() throws Exception {
     try {
       prepareCommit();
       completeCommit();
@@ -59,7 +59,7 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
   }
 
   @Override
-  public void rollback() throws Exception {
+  synchronized  public void rollback() throws Exception {
     if(currentWriter == null) return;
     currentWriter.forceClose() ;
     streamS3Folder.deleteObject(currentSegmentName);
@@ -74,7 +74,7 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
   }
 
   @Override
-  public void close() throws Exception {
+  synchronized public void close() throws Exception {
     if(currentWriter != null) rollback() ;
   }
 }
