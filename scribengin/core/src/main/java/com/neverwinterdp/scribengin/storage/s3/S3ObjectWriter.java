@@ -16,6 +16,8 @@ public class S3ObjectWriter {
   ObjectMetadata metadata = new ObjectMetadata();
   private PipedOutputStream pipedOutput;
   private PipedInputStream pipedInput;
+  private SdkBufferedInputStream bufferedPipedInput;
+  
   private WriteThread writeThread;
 
   public S3ObjectWriter(S3Client s3Client, String bucketName, String key, ObjectMetadata metadata) throws IOException {
@@ -25,7 +27,8 @@ public class S3ObjectWriter {
     this.metadata = metadata;
     
     pipedOutput = new PipedOutputStream();
-    pipedInput = new PipedInputStream(pipedOutput,  1 * 1024 * 1024); //buffer size 1M
+    pipedInput  = new PipedInputStream(pipedOutput,  1 * 1024 * 1024); //buffer size 1M
+    bufferedPipedInput = new SdkBufferedInputStream(pipedInput, 4 * 1024 * 1024) ;
     writeThread = new WriteThread();
     writeThread.start();
   }
@@ -42,12 +45,14 @@ public class S3ObjectWriter {
       throw new IOException("The writer thread cannot upload all the data to S3 in " + timeout + "ms");
     }
     pipedInput.close();
+    bufferedPipedInput.close();
   }
   
   public void forceClose() throws IOException, InterruptedException {
     pipedOutput.close();
     writeThread.interrupt();
     pipedInput.close();
+    bufferedPipedInput.close();
   }
 
   public class WriteThread extends Thread {
@@ -55,16 +60,10 @@ public class S3ObjectWriter {
     
     public void run() {
       running = true;
-      SdkBufferedInputStream bufferedIs = new SdkBufferedInputStream(pipedInput, 8 * 1024 * 1024) ;
-      PutObjectRequest request = new PutObjectRequest(bucketName, key, bufferedIs, metadata);
+      PutObjectRequest request = new PutObjectRequest(bucketName, key, bufferedPipedInput, metadata);
       request.getRequestClientOptions().setReadLimit(1 * 1024 * 1024); //buffer limit 1M
       s3Client.getAmazonS3Client().putObject(request);
       running = false;
-      try {
-        bufferedIs.close();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
       notifyTermination();
     }
 

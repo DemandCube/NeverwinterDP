@@ -80,11 +80,7 @@ public class TabularFormater implements TextFormater {
       print(out, indent) ;
       print(out, title) ;
       print(out, "\n") ;
-      print(out, indent) ;
-      for(int i = 0; i < lineLength; i++) {
-        print(out, "-") ;
-      }
-      print(out, "\n") ;
+      printLine(out, lineLength);
     }
     print(out, indent) ;
     for(int i = 0; i < colHeaders.length; i++) {
@@ -93,10 +89,6 @@ public class TabularFormater implements TextFormater {
     print(out, "\n") ;
     
     print(out, indent) ;
-    for(int i = 0; i < lineLength; i++) {
-      print(out, "-") ;
-    }
-    print(out, "\n") ;
     for(int i = 0; i < rows.size(); i++) {
       print(out, indent) ;
       String[] cell = rows.get(i) ;
@@ -105,13 +97,23 @@ public class TabularFormater implements TextFormater {
       }
       print(out, "\n") ;
     }
+    printLine(out, lineLength);
     if(footers.size() > 0 ) {
       for(String mesg : footers) {
         print(out, indent) ;
         print(out, "*" + mesg) ;
         print(out, "\n") ;
       }
+      printLine(out, lineLength);
     }
+  }
+  
+  private void printLine(Appendable out, int lineLength) {
+    print(out, indent) ;
+    for(int i = 0; i < lineLength; i++) {
+      print(out, "-") ;
+    }
+    print(out, "\n") ;
   }
   
   private void printCell(Appendable out, String cell, int width) {
