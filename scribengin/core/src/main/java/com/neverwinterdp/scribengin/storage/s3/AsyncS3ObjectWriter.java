@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
+import com.amazonaws.internal.SdkBufferedInputStream;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+//import org.jets3t.service.io.RepeatableInputStream;
 
-public class S3ObjectWriter {
+public class AsyncS3ObjectWriter {
   private S3Client s3Client;
   private String bucketName;
   private String key;
@@ -16,13 +18,14 @@ public class S3ObjectWriter {
   private PipedInputStream pipedInput;
   private WriteThread writeThread;
 
-  public S3ObjectWriter(S3Client s3Client, String bucketName, String key, ObjectMetadata metadata) throws IOException {
+  public AsyncS3ObjectWriter(S3Client s3Client, String bucketName, String key, ObjectMetadata metadata) throws IOException {
     this.s3Client = s3Client;
     this.bucketName = bucketName;
     this.key = key;
     this.metadata = metadata;
+    
     pipedOutput = new PipedOutputStream();
-    pipedInput = new PipedInputStream(pipedOutput, 5 * 1024 * 1024); //buffer size 5M
+    pipedInput = new PipedInputStream(pipedOutput,  3 * 1024 * 1024); //buffer size 5M
     writeThread = new WriteThread();
     writeThread.start();
   }
@@ -49,13 +52,19 @@ public class S3ObjectWriter {
 
   public class WriteThread extends Thread {
     boolean running = false;
-
+    
     public void run() {
       running = true;
-      PutObjectRequest request = new PutObjectRequest(bucketName, key, pipedInput, metadata);
-      request.getRequestClientOptions().setReadLimit(5*1024*1024); //buffer limit 1M
+      SdkBufferedInputStream bufferedIs = new SdkBufferedInputStream(pipedInput, 5 * 1024 * 1024) ;
+      PutObjectRequest request = new PutObjectRequest(bucketName, key, bufferedIs, metadata);
+      request.getRequestClientOptions().setReadLimit(3 * 1024 * 1024); //buffer limit 1M
       s3Client.getAmazonS3Client().putObject(request);
       running = false;
+      try {
+        bufferedIs.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
       notifyTermination();
     }
 
