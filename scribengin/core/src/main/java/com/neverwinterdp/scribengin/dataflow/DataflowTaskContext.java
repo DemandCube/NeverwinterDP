@@ -100,11 +100,11 @@ public class DataflowTaskContext {
       prepareCommit();
       completeCommit();
       report.updateCommit();
-      return true;
+      return true ;
     } catch (Exception ex) {
       report.setCommitFailCount(report.getCommitFailCount() + 1);
       rollback();
-      throw ex;
+      return false ;
     } finally {
       executorService.getDataflowRegistry().dataflowTaskReport(dataflowTaskDescriptor, report);
     }
