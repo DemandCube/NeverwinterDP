@@ -5,7 +5,7 @@ import java.util.List;
 
 
 public class DataflowTaskExecutorDescriptor {
-  public static enum Status { INIT, RUNNING, TERMINATED }
+  public static enum Status { INIT, RUNNING, TERMINATED, TERMINATED_WITH_ERROR, TERMINATED_WITH_INTERRUPT }
   
   private String id ;
   private Status status = Status.INIT ;

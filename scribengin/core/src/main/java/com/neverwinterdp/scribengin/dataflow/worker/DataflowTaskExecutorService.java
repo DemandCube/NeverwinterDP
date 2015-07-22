@@ -64,6 +64,8 @@ public class DataflowTaskExecutorService {
   
   public VMDescriptor getVMDescriptor() { return this.vmDescriptor; }
   
+  public Logger getLogger() { return logger ; }
+  
   @PostConstruct
   public void onInit() throws Exception {
     logger = loggerFactory.getLogger(DataflowTaskExecutorService.class) ;

@@ -85,20 +85,21 @@ public class DataflowTaskExecutor {
         }
         dataflowTaskTimerProcessCtx.stop();
       }
+      doExit(DataflowTaskExecutorDescriptor.Status.TERMINATED);
     } catch (InterruptedException e) {
-      System.err.println("detect shutdown interrupt for task " + currentDataflowTask.getDescriptor().getTaskId());
+      executorService.getLogger().error("DataflowTaskExecutor: detect shutdown interrupt for task " + currentDataflowTask.getDescriptor().getTaskId());
       currentDataflowTask.interrupt();
-    } catch (Exception e) {
-      e.printStackTrace();
-    } finally {
-      doExit();
+      doExit(DataflowTaskExecutorDescriptor.Status.TERMINATED_WITH_INTERRUPT);
+    } catch (Throwable e) {
+      executorService.getLogger().error("DataflowTaskExecutor Error", e);
+      doExit(DataflowTaskExecutorDescriptor.Status.TERMINATED_WITH_ERROR);
     }
   }
 
-  void doExit() {
+  void doExit(DataflowTaskExecutorDescriptor.Status status) {
     if(kill) return ;
     try {
-      executorDescriptor.setStatus(DataflowTaskExecutorDescriptor.Status.TERMINATED);
+      executorDescriptor.setStatus(status);
       DataflowRegistry dataflowRegistry = executorService.getDataflowRegistry();
       dataflowRegistry.updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
     } catch(Exception ex) {

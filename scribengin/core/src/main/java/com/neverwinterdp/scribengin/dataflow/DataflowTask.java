@@ -3,8 +3,6 @@ package com.neverwinterdp.scribengin.dataflow;
 import com.neverwinterdp.registry.task.TaskContext;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorService;
 import com.neverwinterdp.scribengin.scribe.ScribeAbstract;
-import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
-import com.neverwinterdp.yara.MetricRegistry;
 
 public class DataflowTask {
   private DataflowTaskExecutorService executorService;
@@ -70,7 +68,7 @@ public class DataflowTask {
     }
     if(context.isEndOfDataStream()) {
       context.setComplete(true);
-    } else if(report.getLastAssignedWithNoMessageProcess() > 10) {
+    } else if(report.getLastAssignedWithNoMessageProcess() > 5) {
       context.setComplete(true);
     }
   }
