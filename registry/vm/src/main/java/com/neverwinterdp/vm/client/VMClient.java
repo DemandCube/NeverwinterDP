@@ -31,7 +31,7 @@ public class VMClient {
   final static public String APPLICATIONS = "/applications";
   
   private Registry registry;
-  private long     waitForResultTimeout = 30000;
+  private long     waitForResultTimeout = 60000;
 
   public VMClient(Registry registry) {
     this.registry = registry;
