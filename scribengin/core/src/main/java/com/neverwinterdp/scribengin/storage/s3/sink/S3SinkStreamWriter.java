@@ -6,7 +6,7 @@ import java.util.UUID;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.s3.S3Folder;
-import com.neverwinterdp.scribengin.storage.s3.AsyncS3ObjectWriter;
+import com.neverwinterdp.scribengin.storage.s3.S3ObjectWriter;
 import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 import com.neverwinterdp.util.JSONSerializer;
 
@@ -15,7 +15,7 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
   
   private S3Folder streamS3Folder;
   private String currentSegmentName;
-  private AsyncS3ObjectWriter currentWriter ;
+  private S3ObjectWriter currentWriter ;
 
   
 
@@ -65,7 +65,7 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
     streamS3Folder.deleteObject(currentSegmentName);
   }
 
-  private AsyncS3ObjectWriter createNewWriter() throws IOException {
+  private S3ObjectWriter createNewWriter() throws IOException {
     currentSegmentName = "segment-" + UUID.randomUUID().toString();
     ObjectMetadata metadata = new ObjectMetadata();
     metadata.addUserMetadata("transaction", "prepare");

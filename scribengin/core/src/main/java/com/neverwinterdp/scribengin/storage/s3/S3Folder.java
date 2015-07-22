@@ -99,10 +99,10 @@ public class S3Folder {
     s3Client.updateObjectMetadata(bucketName, toKey(name), metadata);
   }
   
-  public AsyncS3ObjectWriter createObjectWriter(String name, ObjectMetadata metadata) throws IOException {
+  public S3ObjectWriter createObjectWriter(String name, ObjectMetadata metadata) throws IOException {
     //TODO (tuan) confirm if this should be here.
     createFolder(toKey(name));
-    AsyncS3ObjectWriter writer = new AsyncS3ObjectWriter(s3Client, bucketName, toKey(name), metadata);
+    S3ObjectWriter writer = new S3ObjectWriter(s3Client, bucketName, toKey(name), metadata);
     return writer;
   }
   
