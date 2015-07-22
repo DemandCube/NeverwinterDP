@@ -132,13 +132,8 @@ public class DataflowTaskExecutor {
     }
 
     public void run() {
-      try {
-        dataflowtask.run();
-      } catch(Exception ex) {
-        ex.printStackTrace();
-      } finally {
-        notifyTermination();
-      }
+      dataflowtask.run();
+      notifyTermination();
     }
     
     synchronized public void notifyTermination() {

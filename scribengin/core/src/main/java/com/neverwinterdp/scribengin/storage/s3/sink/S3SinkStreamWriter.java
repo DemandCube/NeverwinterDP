@@ -11,7 +11,7 @@ import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class S3SinkStreamWriter implements SinkStreamWriter {
-  static private final int TIMEOUT = 5 * 60 * 1000;
+  static private final int TIMEOUT = 10 * 60 * 1000;
   
   private S3Folder streamS3Folder;
   private String currentSegmentName;

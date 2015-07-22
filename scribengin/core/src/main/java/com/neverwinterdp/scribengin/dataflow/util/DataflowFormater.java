@@ -44,14 +44,16 @@ public class DataflowFormater {
   public String getDataflowTaskInfo() throws RegistryException {
     List<DataflowTaskRuntimeReport> reports =  DataflowRegistry.getDataflowTaskRuntimeReports(registry, dataflowPath);
     String[] header = {
-      "Id", "Status", "Assigned", "AWNM", "LAWNM", "AC", "CC", "Last Commit Time", "Start Time", "Finish Time", "Exec Time", "Duration"
+      "Id", "Status", "Assigned", "AHE", "AWNM", "LAWNM", "AC", "CC", "CFC", "Last Commit Time", "Start Time", "Finish Time", "Exec Time", "Duration"
     } ;
     TabularFormater taskFt = new TabularFormater(header);
     taskFt.setTitle("Dataflow Task Info");
+    taskFt.addFooter("AHE   = Assigned Has Error");
     taskFt.addFooter("AWNM  = Assigned With No Message Count");
     taskFt.addFooter("LAWNM = Last Assigned With No Message Count");
     taskFt.addFooter("AC    = Accumulate Message Commit Count");
     taskFt.addFooter("CC    = Commit Count");
+    taskFt.addFooter("CFC    = Commit Fail Count");
     for(int i = 0; i < reports.size(); i++) {
       DataflowTaskRuntimeReport rtReport = reports.get(i);
       DataflowTaskReport report = rtReport.getReport();
@@ -59,10 +61,12 @@ public class DataflowFormater {
           report.getTaskId(), 
           rtReport.getStatus(), 
           report.getAssignedCount(),
+          report.getAssignedHasErrorCount(),
           report.getAssignedWithNoMessageProcess(),
           report.getLastAssignedWithNoMessageProcess(),
           report.getAccCommitProcessCount(),
           report.getCommitCount(),
+          report.getCommitFailCount(),
           DateUtil.asCompactDateTime(report.getLastCommitTime()),
           DateUtil.asCompactDateTime(report.getStartTime()),
           DateUtil.asCompactDateTime(report.getFinishTime()),

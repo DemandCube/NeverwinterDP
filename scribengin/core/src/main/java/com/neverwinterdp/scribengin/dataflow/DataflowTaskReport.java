@@ -15,11 +15,13 @@ public class DataflowTaskReport {
   private long   finishTime ;
   
   private int    assignedCount    ;
+  private int    assignedHasErrorCount ;
   private int    assignedWithNoMessageProcess ;
   private int    lastAssignedWithNoMessageProcess ;
   
   private long   lastCommitTime ;
   private int    commitCount;
+  private int    commitFailCount ;
   
   private long   processCount ;
   private long   accCommitProcessCount;
@@ -50,6 +52,11 @@ public class DataflowTaskReport {
     this.assignedCount++ ;
   }
   
+  public int getAssignedHasErrorCount() { return assignedHasErrorCount; }
+  public void setAssignedHasErrorCount(int assignedHasErrorCount) {
+    this.assignedHasErrorCount = assignedHasErrorCount;
+  }
+
   public int getAssignedWithNoMessageProcess() { return assignedWithNoMessageProcess; }
   public void setAssignedWithNoMessageProcess(int assignedWithNoMessageProcess) {
     this.assignedWithNoMessageProcess = assignedWithNoMessageProcess;
@@ -68,6 +75,11 @@ public class DataflowTaskReport {
     this.commitCount = commitCount;
   }
   
+  public int getCommitFailCount() { return commitFailCount; }
+  public void setCommitFailCount(int commitFailCount) {
+    this.commitFailCount = commitFailCount;
+  }
+
   public long getProcessCount() { return processCount; }
   public void setProcessCount(long processCount) { this.processCount = processCount; }
   

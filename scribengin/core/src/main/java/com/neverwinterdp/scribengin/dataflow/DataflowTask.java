@@ -38,38 +38,44 @@ public class DataflowTask {
     context = new DataflowTaskContext(executorService, descriptor, report);
   }
   
-  public void run() throws Exception {
+  public void run()  {
     DataflowTaskReport report = context.getReport();
     int dataflowMessageCount = 0;
-    while(!interrupt && !context.isComplete() && !context.isEndOfDataStream()) {
-      DataflowMessage dataflowMessage = context.nextRecord(5000);
-      if(dataflowMessage != null) {
-        dataflowMessageCount++;
-        if(dataflowMessage.getType() == DataflowMessage.Type.INSTRUCTION) {
-          DataflowInstruction ins = dataflowMessage.dataAsDataflowInstruction(); 
-          processor.process(ins, context);
-          if(ins == DataflowInstruction.END_OF_DATASTREAM) {
-            context.setComplete(true) ;
-            break;
+    try {
+      while(!interrupt && !context.isComplete() && !context.isEndOfDataStream()) {
+        DataflowMessage dataflowMessage = context.nextRecord(5000);
+        if(dataflowMessage != null) {
+          dataflowMessageCount++;
+          if(dataflowMessage.getType() == DataflowMessage.Type.INSTRUCTION) {
+            DataflowInstruction ins = dataflowMessage.dataAsDataflowInstruction(); 
+            processor.process(ins, context);
+            if(ins == DataflowInstruction.END_OF_DATASTREAM) {
+              context.setComplete(true) ;
+              break;
+            }
+          } else {
+            report.incrProcessCount();
+            processor.process(dataflowMessage, context);
           }
         } else {
-          report.incrProcessCount();
-          processor.process(dataflowMessage, context);
+          break ;
         }
-      } else {
-        break ;
       }
-    }
-    if(dataflowMessageCount == 0) {
-      report.setAssignedWithNoMessageProcess(report.getAssignedWithNoMessageProcess() + 1);
-      report.setLastAssignedWithNoMessageProcess(report.getLastAssignedWithNoMessageProcess() + 1);
-    } else {
-      report.setLastAssignedWithNoMessageProcess(0);
-    }
-    if(context.isEndOfDataStream()) {
-      context.setComplete(true);
-    } else if(report.getLastAssignedWithNoMessageProcess() > 5) {
-      context.setComplete(true);
+      if(dataflowMessageCount == 0) {
+        report.setAssignedWithNoMessageProcess(report.getAssignedWithNoMessageProcess() + 1);
+        report.setLastAssignedWithNoMessageProcess(report.getLastAssignedWithNoMessageProcess() + 1);
+      } else {
+        report.setLastAssignedWithNoMessageProcess(0);
+      }
+      
+      if(context.isEndOfDataStream()) {
+        context.setComplete(true);
+      } else if(report.getLastAssignedWithNoMessageProcess() > 5) {
+        context.setComplete(true);
+      }
+    } catch(Throwable t) {
+      report.setAssignedHasErrorCount(report.getAssignedHasErrorCount() + 1);
+      executorService.getLogger().error("DataflowTask Error", t);
     }
   }
   
