@@ -36,7 +36,7 @@ public class KafkaSourceStreamReader implements SourceStreamReader {
   
   @Override
   public void rollback() throws Exception {
-    throw new Exception("To implement") ;
+    partitionReader.rollback();
   }
 
   @Override

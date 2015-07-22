@@ -7,6 +7,7 @@ import kafka.javaapi.PartitionMetadata;
 import kafka.javaapi.TopicMetadata;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,6 +36,31 @@ public class KafkaPartitionReaderUnitTest {
   @After
   public void tearDown() throws Exception {
     cluster.shutdown();
+  }
+  
+  @Test
+  public void testPartitionReaderCommitAndRollback() throws Exception {
+    String NAME = "test";
+    DefaultKafkaWriter writer = new DefaultKafkaWriter(NAME, cluster.getKafkaConnect());
+    for(int i = 0; i < 10; i++) {
+      String hello = "Hello " + i;
+      writer.send("hello", 0, "key-" + i, hello, 5000);
+    }
+    writer.close();
+    KafkaTool kafkaTool = new KafkaTool(NAME, cluster.getZKConnect());
+    kafkaTool.connect();
+    TopicMetadata topicMetadata = kafkaTool.findTopicMetadata("hello");
+    kafkaTool.close();
+    PartitionMetadata partitionMetadata = findPartition(topicMetadata.partitionsMetadata(), 0);
+    KafkaPartitionReader partitionReader = 
+        new KafkaPartitionReader(NAME, cluster.getZKConnect(), "hello", partitionMetadata);
+    Assert.assertEquals(0, partitionReader.getCurrentOffset());
+    partitionReader.fetch(10000, 3, 1000);
+    partitionReader.commit();
+    Assert.assertEquals(3, partitionReader.getCurrentOffset());
+    partitionReader.fetch(10000, 3, 1000);
+    partitionReader.rollback();
+    Assert.assertEquals(3, partitionReader.getCurrentOffset());
   }
 
   @Test

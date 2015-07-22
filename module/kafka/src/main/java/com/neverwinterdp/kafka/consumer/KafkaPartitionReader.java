@@ -50,6 +50,8 @@ public class KafkaPartitionReader {
   
   public int getPartition() { return partitionMetadata.partitionId(); }
   
+  public long getCurrentOffset() { return this.currentOffset ; }
+  
   public void setFetchSize(int size) { this.fetchSize = size; }
   
   public void reconnect() {
@@ -61,6 +63,10 @@ public class KafkaPartitionReader {
   public void commit() throws Exception {
     CommitOperation commitOp = new CommitOperation(currentOffset, (short) 0) ;
     execute(commitOp, 3, 500);
+  }
+  
+  public void rollback()  {
+    currentOffset = getLastCommitOffset();
   }
   
   public void close() throws Exception {
