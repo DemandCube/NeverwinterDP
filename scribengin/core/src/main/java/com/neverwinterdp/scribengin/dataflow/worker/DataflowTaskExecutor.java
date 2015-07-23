@@ -53,21 +53,20 @@ public class DataflowTaskExecutor {
     try {
       DataflowDescriptor dflDescriptor = dataflowRegistry.getDataflowDescriptor(false);
       while(!interrupt) {
-        TaskContext<DataflowTaskDescriptor> taskContext = null ;
-        int retries = 0 ;
-        while(taskContext == null && retries < 3) {
-          Timer.Context dataflowTaskTimerGrabCtx = dataflowTaskTimerGrab.time() ;
-          taskContext= dataflowRegistry.dataflowTaskAssign(executorService.getVMDescriptor());
-          dataflowTaskTimerGrabCtx.stop();
-          Thread.sleep(3000);
-          retries++;
-        }
-        
+        Timer.Context dataflowTaskTimerGrabCtx = dataflowTaskTimerGrab.time() ;
+        TaskContext<DataflowTaskDescriptor> taskContext = 
+            dataflowRegistry.dataflowTaskAssign(executorService.getVMDescriptor());
+        dataflowTaskTimerGrabCtx.stop();
 
-        if(taskContext == null) return;
         if(interrupt) {
           dataflowRegistry.dataflowTaskSuspend(taskContext);
+          doExit(DataflowTaskExecutorDescriptor.Status.TERMINATED_WITH_INTERRUPT);
           return ;
+        }
+        
+        if(taskContext == null) {
+          doExit(DataflowTaskExecutorDescriptor.Status.TERMINATED);
+          return;
         }
         
         Timer.Context dataflowTaskTimerProcessCtx = dataflowTaskTimerProcess.time() ;
@@ -85,10 +84,6 @@ public class DataflowTaskExecutor {
         }
         dataflowTaskTimerProcessCtx.stop();
       }
-      doExit(DataflowTaskExecutorDescriptor.Status.TERMINATED);
-    } catch (InterruptedException e) {
-      executorService.getLogger().error("DataflowTaskExecutor: detect shutdown interrupt for task " + currentDataflowTask.getDescriptor().getTaskId());
-      currentDataflowTask.interrupt();
       doExit(DataflowTaskExecutorDescriptor.Status.TERMINATED_WITH_INTERRUPT);
     } catch (Throwable e) {
       executorService.getLogger().error("DataflowTaskExecutor Error", e);
@@ -103,7 +98,7 @@ public class DataflowTaskExecutor {
       DataflowRegistry dataflowRegistry = executorService.getDataflowRegistry();
       dataflowRegistry.updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
     } catch(Exception ex) {
-      ex.printStackTrace();
+      executorService.getLogger().error("DataflowTaskExecutor Fail To Updat Status", ex);
     }
   }
   
