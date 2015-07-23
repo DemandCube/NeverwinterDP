@@ -1,9 +1,12 @@
 package com.neverwinterdp.dataflow.logsample.vm;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.slf4j.Logger;
 
 import com.neverwinterdp.dataflow.logsample.LogMessageReport;
 import com.neverwinterdp.dataflow.logsample.LogSampleRegistry;
@@ -24,6 +27,7 @@ import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 
 public class VMLogMessageValidatorApp extends VMApp {
+  private Logger logger ;
   int  numOfMessagePerPartition ;
   long waitForTermination ;
   String validateKafkaTopic ;
@@ -34,7 +38,8 @@ public class VMLogMessageValidatorApp extends VMApp {
   
   @Override
   public void run() throws Exception {
-    System.out.println("VMLogValidatorApp: start run()");
+    logger =  getVM().getLoggerFactory().getLogger(VMLogMessageValidatorApp.class) ;
+    logger.info("Start run()");
     VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
     numOfMessagePerPartition = vmConfig.getPropertyAsInt("num-of-message-per-partition", -1);
     waitForTermination       = vmConfig.getPropertyAsInt("wait-for-termination", 300000);
@@ -48,26 +53,30 @@ public class VMLogMessageValidatorApp extends VMApp {
       KafkaMessageValidator kafkaValidator = new KafkaMessageValidator() ;
       kafkaValidator.validate(validateKafkaTopic);
     } else if(validateHdfs != null) {
-      HDFSMessageValidator hdfsValidator = new HDFSMessageValidator() ;
       String[] hdfsLoc = validateHdfs.split(",");
+      ExecutorService executorService = Executors.newFixedThreadPool(hdfsLoc.length);
       for(String selHdfsLoc : hdfsLoc) {
-        hdfsValidator.validate(selHdfsLoc);
+        executorService.submit(new HDFSMessageValidator(selHdfsLoc));
       }
+      executorService.shutdown();
+      executorService.awaitTermination(waitForTermination + 90000, TimeUnit.MILLISECONDS);
     } else if(validateS3 != null) {
-      S3MessageValidator s3Validator = new S3MessageValidator() ;
       String[] s3Loc = validateS3.split(",");
+      ExecutorService executorService = Executors.newFixedThreadPool(s3Loc.length);
       for(String selS3Loc : s3Loc) {
         int colonIdx = selS3Loc.indexOf(":");
         String bucketName = selS3Loc.substring(0, colonIdx);
         String folderPath = selS3Loc.substring(colonIdx + 1) ;
-        s3Validator.validate(bucketName, folderPath);
+        executorService.submit(new S3MessageValidator(bucketName, folderPath)) ;
       }
+      executorService.shutdown();
+      executorService.awaitTermination(waitForTermination + 90000, TimeUnit.MILLISECONDS);
     }
     
     report(bitSetMessageTracker);
     String formattedReport = bitSetMessageTracker.getFormatedReport();
     System.out.println(formattedReport);
-    getVM().getLoggerFactory().getLogger("REPORT").info(formattedReport);
+    logger.info("\n" + formattedReport);
   }
   
   void report(BitSetMessageTracker tracker) throws Exception {
@@ -80,46 +89,102 @@ public class VMLogMessageValidatorApp extends VMApp {
     }
   }
   
-  public class HDFSMessageValidator {
-    public void validate(String hdfsLoc) throws Exception {
+  public class HDFSMessageValidator implements Runnable {
+    String hdfsLoc;
+    
+    HDFSMessageValidator(String hdfsLoc) {
+      this.hdfsLoc = hdfsLoc;
+    }
+    
+    public void run() {
+      try {
+        validate() ;
+      } catch (Exception e) {
+        logger.error("Validate HDFS Source error, hdfs loc=" + hdfsLoc, e) ;
+      }
+    }
+    
+    public void validate() throws Exception {
       Configuration conf = new Configuration();
       getVM().getDescriptor().getVmConfig().getHadoopProperties().overrideConfiguration(conf);;
       FileSystem fs = FileSystem.get(conf);
       StorageDescriptor storageDescriptor = new StorageDescriptor("HDFS", hdfsLoc) ;
       HDFSSource source = new HDFSSource(fs, storageDescriptor) ;
       SourceStream[] streams = source.getStreams();
-      for(SourceStream selStream : streams) {
-        SourceStreamReader streamReader = selStream.getReader("HDFSSinkValidator") ;
-        DataflowMessage dflMessage = null ;
-        while((dflMessage = streamReader.next(5000)) != null) {
-          Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class);
-          Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
-          bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
-        }
-        streamReader.close();
+      ExecutorService executorService = Executors.newFixedThreadPool(streams.length);
+      for(final SourceStream selStream : streams) {
+        Runnable runnable = new Runnable() {
+          @Override
+          public void run() {
+            try {
+              SourceStreamReader streamReader = selStream.getReader("HDFSSinkValidator") ;
+              DataflowMessage dflMessage = null ;
+              while((dflMessage = streamReader.next(5000)) != null) {
+                Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class);
+                Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
+                bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
+              }
+              streamReader.close();
+            } catch(Exception ex) {
+              logger.error("Validate HDFS Source Stream Error:", ex) ;
+            }
+          }
+        };
+        executorService.submit(runnable);
       }
+      executorService.shutdown();
+      executorService.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
     }
   }
   
-  public class S3MessageValidator {
-    public void validate(String bucketName, String storageFolder) throws Exception {
+  public class S3MessageValidator implements Runnable {
+    String bucketName;
+    String storageFolder;
+    
+    public S3MessageValidator(String bucketName, String storageFolder) {
+      this.bucketName = bucketName;
+      this.storageFolder = storageFolder;
+    }
+    
+    public void run() {
+      try {
+        validate() ;
+      } catch (Exception e) {
+        logger.error("Validate S3 Source error, bucketName=" + bucketName + ", folder = " + storageFolder, e) ;
+      }
+    }
+    
+    public void validate() throws Exception {
       Configuration conf = new Configuration();
       getVM().getDescriptor().getVmConfig().getHadoopProperties().overrideConfiguration(conf);;
 
       S3Storage storage = new S3Storage(bucketName, storageFolder);
       S3Source source = storage.getSource();
       SourceStream[] streams = source.getStreams();
+      ExecutorService executorService = Executors.newFixedThreadPool(streams.length);
       for (int i = 0; i < streams.length; i++) {
-        SourceStream stream = streams[i];
-        SourceStreamReader streamReader = stream.getReader("HDFSSinkValidator") ;
-        DataflowMessage dflMessage = null ;
-        while((dflMessage = streamReader.next(5000)) != null) {
-          Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class);
-          Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
-          bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
-        }
-        streamReader.close();
+        final SourceStream stream = streams[i];
+        Runnable runnable = new Runnable() {
+          @Override
+          public void run() {
+            try {
+              SourceStreamReader streamReader = stream.getReader("HDFSSinkValidator") ;
+              DataflowMessage dflMessage = null ;
+              while((dflMessage = streamReader.next(5000)) != null) {
+                Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class);
+                Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
+                bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
+              }
+              streamReader.close();
+            } catch(Exception ex) {
+              logger.error("Validate HDFS Source Stream Error:", ex) ;
+            }
+          }
+        };
+        executorService.submit(runnable);
       }
+      executorService.shutdown();
+      executorService.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
     }
   }
   

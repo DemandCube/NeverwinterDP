@@ -132,7 +132,7 @@ public class DataflowTaskExecutor {
     }
 
     public void run() {
-      dataflowtask.run();
+      dataflowtask.execute();
       notifyTermination();
     }
     

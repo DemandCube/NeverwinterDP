@@ -38,7 +38,7 @@ public class DataflowTask {
     context = new DataflowTaskContext(executorService, descriptor, report);
   }
   
-  public void run()  {
+  public void execute()  {
     DataflowTaskReport report = context.getReport();
     int dataflowMessageCount = 0;
     try {
