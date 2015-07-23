@@ -10,21 +10,20 @@ import com.neverwinterdp.yara.MetricRegistry;
 import com.neverwinterdp.yara.Timer;
 
 public class DataflowTaskExecutor {
-  private DataflowTaskExecutorDescriptor executorDescriptor;
+  protected DataflowTaskExecutorDescriptor executorDescriptor;
+  protected DataflowTaskExecutorService    executorService;
+  
   private ExecutorManagerThread          executorManagerThread;
   private DataflowTaskExecutorThread     executorThread;
-  private DataflowTaskExecutorService    executorService;
   private DataflowTask                   currentDataflowTask = null;
   private boolean                        interrupt           = false;
   private boolean                        kill                = false;
 
-  public DataflowTaskExecutor(DataflowTaskExecutorService service, DataflowTaskExecutorDescriptor  descriptor) throws RegistryException {
+  public DataflowTaskExecutor(DataflowTaskExecutorService service, DataflowTaskExecutorDescriptor descriptor) throws RegistryException {
     executorDescriptor = descriptor;
     this.executorService = service;
     service.getDataflowRegistry().createWorkerTaskExecutor(service.getVMDescriptor(), descriptor);
   }
-  
-  public DataflowTaskExecutorDescriptor getDescriptor() { return this.executorDescriptor ; }
   
   public void start() {
     interrupt = false ;
@@ -106,7 +105,7 @@ public class DataflowTaskExecutor {
    * This method is used to simulate the failure
    * @throws Exception
    */
-  public void kill() throws Exception {
+  public void simulateKill() throws Exception {
     kill = true;
     if(executorThread != null && executorThread.isAlive()) executorThread.interrupt();
     if(executorManagerThread != null && executorManagerThread.isAlive()) executorManagerThread.interrupt();
@@ -127,8 +126,11 @@ public class DataflowTaskExecutor {
     }
 
     public void run() {
-      dataflowtask.execute();
-      notifyTermination();
+      try {
+        dataflowtask.execute();
+        notifyTermination();
+      } catch (InterruptedException e) {
+      }
     }
     
     synchronized public void notifyTermination() {
@@ -140,11 +142,6 @@ public class DataflowTaskExecutor {
       if(timeout > 0) wait(timeout);
       else wait();
       if(!terminated) dataflowtask.interrupt();
-      waitForTerminated();
-    }
-    
-    synchronized void waitForTerminated() throws InterruptedException {
-      if(terminated) return ;
       wait(3000);
     }
   }

@@ -67,7 +67,7 @@ public class LogSampleClientUnitTest  {
         "--registry-implementation", RegistryImpl.class.getName(),
         
         "--log-generator-num-of-vm", "1",
-        "--log-generator-num-of-message", "1000",
+        "--log-generator-num-of-message", "10000",
         "--log-generator-message-size", "128",
         
         "--dataflow-descriptor", "src/app/conf/local/kafka-log-dataflow-chain.json",
@@ -97,7 +97,7 @@ public class LogSampleClientUnitTest  {
         "--registry-implementation", RegistryImpl.class.getName(),
         
         "--log-generator-num-of-vm", "1",
-        "--log-generator-num-of-message", "1000",
+        "--log-generator-num-of-message", "5000",
         "--log-generator-message-size", "128",
         
         "--dataflow-descriptor", "src/app/conf/local/hdfs-log-dataflow-chain.json",

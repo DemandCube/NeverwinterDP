@@ -88,7 +88,6 @@ public class TabularFormater implements TextFormater {
     }
     print(out, "\n") ;
     
-    print(out, indent) ;
     for(int i = 0; i < rows.size(); i++) {
       print(out, indent) ;
       String[] cell = rows.get(i) ;

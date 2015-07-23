@@ -19,7 +19,7 @@ public class DataflowDescriptor {
   private long                           maxWaitForWorkerRunningStatus = 45000;
   private long                           maxWaitForAvailableDataStream = 10000;
   
-  private long                           taskSwitchingPeriod            = 30000;
+  private long                           taskSwitchingPeriod           = 30000;
   private String                         scribe;
   private LoggerConfig                   loggerConfig                  = new LoggerConfig();
 

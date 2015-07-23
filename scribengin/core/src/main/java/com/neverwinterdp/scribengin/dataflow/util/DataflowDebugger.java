@@ -13,14 +13,14 @@ public class DataflowDebugger implements NodeDebugger {
   
   @Override
   public void onCreate(RegistryDebugger registryDebugger, Node node) throws Exception {
-    registryDebugger.println("DataflowLifecycleDebugger: Node = " + node.getPath() + ", Event = CREATE");
+    registryDebugger.println("DataflowDebugger: Node = " + node.getPath() + ", Event = CREATE");
     DataflowFormater dflFormater = new DataflowFormater(registryDebugger.getRegistry(), dataflowPath);
     registryDebugger.println(dflFormater.getFormattedText());
   }
 
   @Override
   public void onModify(RegistryDebugger registryDebugger, Node node) throws Exception {
-    registryDebugger.println("DataflowLifecycleDebugger: Node = " + node.getPath() + ", Event = MODIFY");
+    registryDebugger.println("DataflowDebugger: Node = " + node.getPath() + ", Event = MODIFY");
     DataflowFormater dflFormater = new DataflowFormater(registryDebugger.getRegistry(), dataflowPath);
     registryDebugger.println(dflFormater.getFormattedText());
   }

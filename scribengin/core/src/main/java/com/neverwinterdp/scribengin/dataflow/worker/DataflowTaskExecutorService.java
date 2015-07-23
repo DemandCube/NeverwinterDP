@@ -145,34 +145,32 @@ public class DataflowTaskExecutorService {
     kill = true ;
     if(workerStatus != DataflowWorkerStatus.TERMINATED) {
       for(DataflowTaskExecutor sel : taskExecutors) {
-        if(sel.isAlive()) sel.kill();
+        if(sel.isAlive()) sel.simulateKill();
       }
     }
     notifier.info("finish-simulate-kill", "DataflowTaskExecutorService: finish simulateKill()");
     logger.info("Finish kill()");
   }
   
-  public boolean isAlive() {
+  public int countAliveExecutor() {
+    int count = 0 ;
     for(DataflowTaskExecutor sel : taskExecutors) {
-      if(sel.isAlive()) return true;
+      if(sel.isAlive()) count++ ;
     }
-    return false;
+    return count;
   }
   
   synchronized void waitForExecutorTermination(long checkPeriod) throws InterruptedException {
-    while(isAlive()) {
+    while(countAliveExecutor() > 0) {
       wait(checkPeriod);
     }
   }
   
   synchronized public void waitForTerminated(long checkPeriod) throws InterruptedException, RegistryException {
-    while(workerStatus != DataflowWorkerStatus.TERMINATED) {
+    if(workerStatus == DataflowWorkerStatus.RUNNING) {
       waitForExecutorTermination(checkPeriod);
-      if(workerStatus == DataflowWorkerStatus.RUNNING) {
-        workerStatus = DataflowWorkerStatus.TERMINATED;
-        dataflowRegistry.setWorkerStatus(vmDescriptor, workerStatus);
-      }
-      wait(checkPeriod);
+      workerStatus = DataflowWorkerStatus.TERMINATED;
+      dataflowRegistry.setWorkerStatus(vmDescriptor, workerStatus);
     }
   }
   

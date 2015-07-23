@@ -38,7 +38,7 @@ public class DataflowTask {
     context = new DataflowTaskContext(executorService, descriptor, report);
   }
   
-  public void execute()  {
+  public void execute()  throws InterruptedException {
     DataflowTaskReport report = context.getReport();
     int dataflowMessageCount = 0;
     try {
@@ -73,6 +73,9 @@ public class DataflowTask {
       } else if(report.getLastAssignedWithNoMessageProcess() >= 3) {
         context.setComplete(true);
       }
+    } catch(InterruptedException ex) {
+      //kill simulation
+      throw ex ;
     } catch(Throwable t) {
       report.setAssignedHasErrorCount(report.getAssignedHasErrorCount() + 1);
       executorService.getLogger().error("DataflowTask Error", t);
