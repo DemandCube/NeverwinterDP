@@ -64,6 +64,7 @@ public class DataflowKafkaToKafkaUnitTest {
             " --dataflow-name  kafka-to-kafka" +
             " --worker 3" +
             " --executor-per-worker 1" +
+            //" --dataflow-task-executor-dedicated " +
             " --duration 120000" +
             " --task-max-execute-time 10000" +
             " --source-name input" +

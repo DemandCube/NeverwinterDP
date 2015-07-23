@@ -5,10 +5,12 @@ import java.util.List;
 
 
 public class DataflowTaskExecutorDescriptor {
-  public static enum Status { INIT, RUNNING, TERMINATED, TERMINATED_WITH_ERROR, TERMINATED_WITH_INTERRUPT }
+  static public enum Status { 
+    INIT, RUNNING, TERMINATED, TERMINATED_WITH_ERROR, TERMINATED_WITH_INTERRUPT 
+  }
   
-  private String id ;
-  private Status status = Status.INIT ;
+  private String       id ;
+  private Status       status = Status.INIT ;
   private List<String> assignedTaskIds = new ArrayList<>() ;
   
   public DataflowTaskExecutorDescriptor() { }

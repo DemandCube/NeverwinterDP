@@ -39,6 +39,10 @@ abstract public class DataflowTest {
   @Parameter(names = "--executor-per-worker", description = "The number of executor per worker")
   protected int numOfExecutorPerWorker = 3;
 
+  @Parameter(names = "--dataflow-task-executor-dedicated", description = "Enable detailed debugger")
+  protected boolean dataflowTaskExecutorDedicated = false;
+  
+  
   @Parameter(names = "--task-max-execute-time", description = "The max time an executor should work on a task")
   protected long taskMaxExecuteTime = 10000;
 
@@ -95,6 +99,9 @@ abstract public class DataflowTest {
     dflDescriptor.setId(dataflowId);
     dflDescriptor.setName(dataflowName);
     dflDescriptor.setNumberOfWorkers(numOfWorkers);
+    if(dataflowTaskExecutorDedicated) {
+      dflDescriptor.setDataflowTaskExecutorType(DataflowDescriptor.DataflowTaskExecutorType.Dedicated);
+    }
     dflDescriptor.setTaskSwitchingPeriod(taskMaxExecuteTime);
     dflDescriptor.setNumberOfExecutorsPerWorker(numOfExecutorPerWorker);
     dflDescriptor.setScribe(TestCopyScribe.class.getName());

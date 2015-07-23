@@ -81,8 +81,11 @@ public class DataflowTaskExecutorService {
     taskExecutors = new ArrayList<DataflowTaskExecutor>();
     for(int i = 0; i < numOfExecutors; i++) {
       DataflowTaskExecutorDescriptor descriptor = new DataflowTaskExecutorDescriptor ("executor-" + i);
-      DataflowTaskExecutor executor = new DataflowTaskExecutor(this, descriptor);
-      taskExecutors.add(executor);
+      if(dataflowDescriptor.getDataflowTaskExecutorType() == DataflowDescriptor.DataflowTaskExecutorType.Dedicated) {
+        taskExecutors.add(new DataflowTaskDedicatedExecutor(this, descriptor));
+      } else {
+        taskExecutors.add(new DataflowTaskSwitchableExecutor(this, descriptor));
+      }
     }
     logger.info("Finish onInit()");
   }

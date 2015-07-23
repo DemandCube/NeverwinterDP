@@ -7,6 +7,8 @@ import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.vm.LoggerConfig;
 
 public class DataflowDescriptor {
+  static public enum DataflowTaskExecutorType { Switchable, Dedicated }
+  
   private String                         id;
   private String                         name;
   private String                         dataflowAppHome;
@@ -14,9 +16,10 @@ public class DataflowDescriptor {
   private Map<String, StorageDescriptor> sinkDescriptors;
   private int                            numberOfWorkers               = 1;
   private int                            numberOfExecutorsPerWorker    = 1;
+  private DataflowTaskExecutorType       dataflowTaskExecutorType      = DataflowTaskExecutorType.Switchable;
   private int                            workerMemory                  =  128;
   private long                           maxRunTime                    = -1;
-  private long                           maxWaitForWorkerRunningStatus = 45000;
+  private long                           maxWaitForWorkerRunningStatus = 30000;
   private long                           maxWaitForAvailableDataStream = 10000;
   
   private long                           taskSwitchingPeriod           = 30000;
@@ -46,16 +49,21 @@ public class DataflowDescriptor {
   }
   
   public int getNumberOfWorkers() { return numberOfWorkers; }
-  public void setNumberOfWorkers(int numberOfWorkers) { this.numberOfWorkers = numberOfWorkers; }
+  public void setNumberOfWorkers(int number) { this.numberOfWorkers = number; }
   
   public int getNumberOfExecutorsPerWorker() { return numberOfExecutorsPerWorker; }
   public void setNumberOfExecutorsPerWorker(int number) {
     this.numberOfExecutorsPerWorker = number;
   }
   
+  public DataflowTaskExecutorType getDataflowTaskExecutorType() { return dataflowTaskExecutorType; }
+  public void setDataflowTaskExecutorType(DataflowTaskExecutorType type) {
+    this.dataflowTaskExecutorType = type;
+  }
+  
   public int getWorkerMemory() { return workerMemory; }
-  public void setWorkerMemory(int workerMemory) {
-    this.workerMemory = workerMemory;
+  public void setWorkerMemory(int memory) {
+    this.workerMemory = memory;
   }
   
   public long getMaxRunTime() { return maxRunTime; }

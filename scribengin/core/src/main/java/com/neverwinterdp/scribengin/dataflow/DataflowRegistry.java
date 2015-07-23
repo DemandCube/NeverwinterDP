@@ -188,6 +188,11 @@ public class DataflowRegistry {
     return dataflowDescriptor;
   }
   
+  public void updateDataflowDescriptor(DataflowDescriptor descriptor) throws RegistryException {
+    registry.setData(dataflowPath, descriptor);
+    this.dataflowDescriptor = descriptor ;
+  }
+  
   public void addWorker(VMDescriptor vmDescriptor) throws RegistryException {
     Transaction transaction = registry.getTransaction() ;
     RefNode refNode = new RefNode(vmDescriptor.getRegistryPath()) ;

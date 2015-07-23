@@ -27,6 +27,8 @@ public class DataflowTask {
   
   public boolean isComplete() { return context.isComplete() ; }
   
+  public boolean isIterrupted() { return this.interrupt ; }
+  
   public void interrupt() { interrupt = true; }
   
   public void init() throws Exception {

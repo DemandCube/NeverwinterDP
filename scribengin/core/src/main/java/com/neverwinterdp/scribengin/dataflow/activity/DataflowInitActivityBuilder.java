@@ -11,7 +11,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.neverwinterdp.registry.activity.Activity;
 import com.neverwinterdp.registry.activity.ActivityBuilder;
-import com.neverwinterdp.registry.activity.ActivityCoordinator;
 import com.neverwinterdp.registry.activity.ActivityExecutionContext;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.activity.ActivityStepBuilder;
@@ -25,7 +24,6 @@ import com.neverwinterdp.scribengin.storage.sink.SinkFactory;
 import com.neverwinterdp.scribengin.storage.source.Source;
 import com.neverwinterdp.scribengin.storage.source.SourceFactory;
 import com.neverwinterdp.scribengin.storage.source.SourceStream;
-import com.neverwinterdp.util.JSONSerializer;
 
 public class DataflowInitActivityBuilder extends ActivityBuilder {
   
@@ -58,22 +56,25 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
 
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
-      DataflowDescriptor dataflowDescriptor = service.getDataflowRegistry().getDataflowDescriptor();
+      DataflowDescriptor dflDescriptor = service.getDataflowRegistry().getDataflowDescriptor();
       SourceFactory sourceFactory = service.getSourceFactory();
       SinkFactory sinkFactory = service.getSinkFactory() ;
 
-      //TODO: find a better wait to fix this
-      SourceStream[] sourceStream = null;
-      for(int i = 0; i < 30; i++) {
-        Source source    = sourceFactory.create(dataflowDescriptor.getSourceDescriptor()) ;
+      SourceStream[] sourceStream = {};
+      long stopTime = System.currentTimeMillis() + dflDescriptor.getMaxWaitForAvailableDataStream();
+      while(sourceStream.length == 0 && System.currentTimeMillis() < stopTime) {
+        Source source    = sourceFactory.create(dflDescriptor.getSourceDescriptor()) ;
         sourceStream = source.getStreams();
-        if(sourceStream.length == 0) {
-          Thread.sleep(1000);
-        }
+        if(sourceStream.length == 0) Thread.sleep(1000);
+      }
+      if(dflDescriptor.getDataflowTaskExecutorType() == DataflowDescriptor.DataflowTaskExecutorType.Dedicated) {
+        int numOfExecutorPerWorker = sourceStream.length/dflDescriptor.getNumberOfWorkers()  + 1;
+        dflDescriptor.setNumberOfExecutorsPerWorker(numOfExecutorPerWorker);
+        service.getDataflowRegistry().updateDataflowDescriptor(dflDescriptor) ;
       }
       
       Map<String, Sink> sinks = new HashMap<String, Sink>();
-      for(Map.Entry<String, StorageDescriptor> entry : dataflowDescriptor.getSinkDescriptors().entrySet()) {
+      for(Map.Entry<String, StorageDescriptor> entry : dflDescriptor.getSinkDescriptors().entrySet()) {
         Sink sink = sinkFactory.create(entry.getValue());
         sinks.put(entry.getKey(), sink);
       }
@@ -82,7 +83,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
         String taskId =  "task-" + seqIdFormatter.format(i);
         DataflowTaskDescriptor descriptor = new DataflowTaskDescriptor();
         descriptor.setTaskId(taskId);
-        descriptor.setScribe(dataflowDescriptor.getScribe());
+        descriptor.setScribe(dflDescriptor.getScribe());
         descriptor.setSourceStreamDescriptor(sourceStream[i].getDescriptor());
         for(Map.Entry<String, Sink> entry : sinks.entrySet()) {
           descriptor.add(entry.getKey(), entry.getValue().newStream().getDescriptor());

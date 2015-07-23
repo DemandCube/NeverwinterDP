@@ -50,6 +50,10 @@ public class LogSampleConfig {
   @Parameter(names = "--dataflow-wait-for-termination-timeout", description = "Debug the dataflow task!")
   public long dataflowWaitForTerminationTimeout = 90000;
  
+  @Parameter(names = "--dataflow-task-executor-dedicated", description = "")
+  public boolean dataflowTaskExecutorDedicated = false;
+  
+  
   @Parameter(names = "--dataflow-task-debug", description = "Debug the dataflow task!")
   public boolean dataflowTaskDebug = false;
   
