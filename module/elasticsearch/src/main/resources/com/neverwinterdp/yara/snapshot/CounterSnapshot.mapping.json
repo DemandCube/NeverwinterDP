@@ -3,7 +3,13 @@
     "properties" : {
       "timestamp" : { 
         "type" : "date", "format" : "dd/MM/yyyy HH:mm:ss" 
-      } 
+      },
+      "serverName" : {
+        "type" : "string", "index":"not_analyzed"
+      },
+      "name" : {
+        "type" : "string", "index":"not_analyzed"
+      }
     }
   }
 }
