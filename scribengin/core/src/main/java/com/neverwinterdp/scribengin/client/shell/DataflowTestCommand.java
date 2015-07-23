@@ -5,9 +5,7 @@ import com.neverwinterdp.scribengin.dataflow.test.DataflowCommandTest;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowRandomServerFailureTest;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowTest;
 import com.neverwinterdp.scribengin.dataflow.test.HDFSDataflowTest;
-import com.neverwinterdp.scribengin.dataflow.test.HDFSToKafkaDataflowTest;
 import com.neverwinterdp.scribengin.dataflow.test.KafkaDataflowTest;
-import com.neverwinterdp.scribengin.dataflow.test.KafkaToHdfsDataflowTest;
 import com.neverwinterdp.scribengin.dataflow.test.S3DataflowTest;
 import com.neverwinterdp.vm.client.shell.Command;
 import com.neverwinterdp.vm.client.shell.CommandInput;
@@ -19,13 +17,9 @@ public class DataflowTestCommand extends Command {
   public DataflowTestCommand() {
     add(KafkaDataflowTest.TEST_NAME, KafkaDataflowTestSubCommand.class);
 
-    //TODO: fix the other sub command, you should realize that you have a lot similar and copy/paste code.
     add(HDFSDataflowTest.TEST_NAME, HdfsDataflowTestSubCommand.class);
     add(S3DataflowTest.TEST_NAME, S3DataflowTestSubCommand.class);
     
-    add(HDFSToKafkaDataflowTest.TEST_NAME, HdfsToKafkaDataflowTestSubCommand.class);
-    add(KafkaToHdfsDataflowTest.TEST_NAME, KafkaToHdfsDataflowTestSubCommand.class);
-
     add(DataflowCommandStartStopResumeTest.TEST_NAME, StartStopResumeSubcommand.class);
     add(DataflowRandomServerFailureTest.TEST_NAME, RandomServerFailureSubcommand.class);
   }
@@ -57,27 +51,6 @@ public class DataflowTestCommand extends Command {
     }
   }
   
-  static public class KafkaToHdfsDataflowTestSubCommand<T extends DataflowTest> extends SubCommand {
-    Class<? extends DataflowTest> testClass ;
-    
-    public KafkaToHdfsDataflowTestSubCommand() {
-      this.testClass = KafkaToHdfsDataflowTest.class;
-    }
-    
-    @Override
-    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
-      ScribenginShell scribenginShell = (ScribenginShell) shell;
-      DataflowTest test = testClass.newInstance() ;
-      cmdInput.mapRemainArgs(test);
-      test.run(scribenginShell);
-    }
-
-    @Override
-    public String getDescription() {
-      return "creates the sample dataflow";
-    }
-  }
-  
   static public class HdfsDataflowTestSubCommand<T extends DataflowTest> extends SubCommand {
     Class<? extends DataflowTest> testClass ;
     
@@ -102,26 +75,6 @@ public class DataflowTestCommand extends Command {
     
     public S3DataflowTestSubCommand() {
       this.testClass = S3DataflowTest.class;
-    }
-    
-    @Override
-    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
-      ScribenginShell scribenginShell = (ScribenginShell) shell;
-      DataflowTest test = testClass.newInstance() ;
-      cmdInput.mapRemainArgs(test);
-      test.run(scribenginShell);
-    }
-
-    @Override
-    public String getDescription() {
-      return "creates the sample dataflow";
-    }
-  }
-  static public class HdfsToKafkaDataflowTestSubCommand<T extends DataflowTest> extends SubCommand {
-    Class<? extends DataflowTest> testClass ;
-    
-    public HdfsToKafkaDataflowTestSubCommand() {
-      this.testClass = HDFSToKafkaDataflowTest.class;
     }
     
     @Override
