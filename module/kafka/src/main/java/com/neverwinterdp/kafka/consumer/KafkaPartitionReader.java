@@ -65,8 +65,9 @@ public class KafkaPartitionReader {
     execute(commitOp, 3, 500);
   }
   
-  public void rollback()  {
+  public void rollback() throws Exception  {
     currentOffset = getLastCommitOffset();
+    commit() ;
   }
   
   public void close() throws Exception {
