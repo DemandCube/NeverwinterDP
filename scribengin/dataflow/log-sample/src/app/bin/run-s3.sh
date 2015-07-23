@@ -47,6 +47,7 @@ MAIN_CLASS="com.neverwinterdp.dataflow.logsample.LogSampleClient"
 PROFILE=$(get_opt --profile 'unknown' $@)
 MESSAGE_SIZE=$(get_opt --message-size '128' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
+DEDICATED_EXECUTOR=$(get_opt --dedicated-executor 'false' $@)
 
 if [ "$PROFILE" = "performance" ] ; then
   MAX_RUN_TIME=$(( 180000 + ($NUM_OF_MESSAGE / 5) ))
@@ -60,6 +61,7 @@ if [ "$PROFILE" = "performance" ] ; then
     --log-validator-wait-for-termination 1800000 --log-validator-validate-s3 test-log-sample:info,test-log-sample:warn,test-log-sample:error \
     --dataflow-descriptor $APP_DIR/conf/s3-log-dataflow-chain.json  \
     --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
+    --dataflow-task-dedicated-executor $DEDICATED_EXECUTOR \
     --dataflow-task-debug
 elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
   MAX_RUN_TIME=$(( 180000 + ($NUM_OF_MESSAGE / 2) ))
@@ -73,6 +75,7 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     --log-validator-wait-for-termination 1800000 --log-validator-validate-s3 test-log-sample:info,test-log-sample:warn,test-log-sample:error \
     --dataflow-descriptor $APP_DIR/conf/s3-log-dataflow-chain.json  \
     --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
+    --dataflow-task-dedicated-executor $DEDICATED_EXECUTOR \
     --dataflow-failure-simulation-worker  \
     --dataflow-failure-simulation-wait-before-start 210000 \
     --dataflow-failure-simulation-max-kill 5 \

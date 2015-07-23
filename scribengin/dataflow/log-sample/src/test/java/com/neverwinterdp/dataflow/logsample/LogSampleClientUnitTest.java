@@ -71,7 +71,7 @@ public class LogSampleClientUnitTest  {
         "--log-generator-message-size", "128",
         
         "--dataflow-descriptor", "src/app/conf/local/kafka-log-dataflow-chain.json",
-        //"--dataflow-task-executor-dedicated",
+        "--dataflow-task-dedicated-executor", "false",
         "--dataflow-wait-for-submit-timeout", "45000",
         "--dataflow-wait-for-termination-timeout", "90000",
         
