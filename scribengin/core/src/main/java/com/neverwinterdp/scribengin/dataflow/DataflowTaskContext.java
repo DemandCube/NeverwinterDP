@@ -113,7 +113,7 @@ public class DataflowTaskContext {
       report.updateCommit();
     } catch (Exception ex) {
       report.setCommitFailCount(report.getCommitFailCount() + 1);
-      executorService.getLogger().warn("DataflowTask Commit Fail, Rollback", ex);
+      executorService.getLogger().warn("DataflowTask Commit Fail, Rollback");
       try {
         rollback();
       } catch(Exception rollbackEx) {
