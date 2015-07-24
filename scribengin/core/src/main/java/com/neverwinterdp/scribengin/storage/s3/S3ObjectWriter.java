@@ -28,8 +28,8 @@ public class S3ObjectWriter {
     this.metadata = metadata;
     
     pipedOutput = new PipedOutputStream();
-    pipedInput  = new PipedInputStream(pipedOutput,  4 * 1024 * 1024/*buffer size 4M */);
-    bufferedPipedInput = new SdkBufferedInputStream(pipedInput, 4 * 1024 * 1024/*buffer size 2M */) ;
+    pipedInput  = new PipedInputStream(pipedOutput,  8 * 1024 * 1024/*buffer size 4M */);
+    bufferedPipedInput = new SdkBufferedInputStream(pipedInput, 8 * 1024 * 1024/*buffer size 2M */) ;
     writeThread = new WriteThread();
     writeThread.start();
   }
@@ -66,7 +66,7 @@ public class S3ObjectWriter {
       running = true;
       try {
         PutObjectRequest request = new PutObjectRequest(bucketName, key, bufferedPipedInput, metadata);
-        request.getRequestClientOptions().setReadLimit(4 * 1024 * 1024); //buffer limit 1M
+        request.getRequestClientOptions().setReadLimit(8 * 1024 * 1024); //buffer limit 1M
         s3Client.getAmazonS3Client().putObject(request);
       } catch(Throwable t) {
         error = t ;
