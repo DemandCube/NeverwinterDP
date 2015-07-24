@@ -33,7 +33,7 @@ public class S3ClientExperimentTest {
   }
   
   @Test
-  public void testS3ObjectWriter() throws IOException, InterruptedException {
+  public void testS3ObjectWriter() throws Exception, IOException, InterruptedException {
     String KEY = "test-s3-object-writer" ;
     S3ObjectWriter writer = new S3ObjectWriter(s3Client, BUCKET_NAME, KEY, new ObjectMetadata());
     for(int i = 0; i < 10; i++) {
