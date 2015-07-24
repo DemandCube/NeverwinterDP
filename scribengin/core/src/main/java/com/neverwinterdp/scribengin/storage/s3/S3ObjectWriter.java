@@ -40,7 +40,7 @@ public class S3ObjectWriter {
     pipedOutput.write(data);
   }
 
-  public void waitAndClose(long timeout) throws IOException, InterruptedException {
+  public void waitAndClose(long timeout) throws Exception, IOException, InterruptedException {
     pipedOutput.close();
     if (!writeThread.waitForTermination(timeout)) {
       throw new IOException("The writer thread cannot upload all the data to S3 in " + timeout + "ms");
@@ -48,7 +48,7 @@ public class S3ObjectWriter {
     pipedInput.close();
     bufferedPipedInput.close();
     if(error != null) {
-      throw new RuntimeException(error) ;
+      throw new Exception(error) ;
     }
   }
   
