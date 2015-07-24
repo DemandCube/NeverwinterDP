@@ -3,9 +3,11 @@ package com.neverwinterdp.scribengin.dataflow.chain;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
+import com.neverwinterdp.yara.snapshot.ClusterMetricRegistrySnapshot;
 
 abstract public class DataflowChainSubmitter {
   protected ScribenginClient client;
@@ -62,6 +64,15 @@ abstract public class DataflowChainSubmitter {
     if(enableDataflowTaskDebugger) {
       submitter.enableDataflowTaskDebugger(System.out);
     }
+  }
+  
+  public List<ClusterMetricRegistrySnapshot> getMetrics() throws RegistryException {
+    List<ClusterMetricRegistrySnapshot> holder = new ArrayList<>();
+    for(DataflowSubmitter sel : submitters) {
+      ClusterMetricRegistrySnapshot dflMetrics = sel.getDataflowMetrics() ;
+      holder.add(dflMetrics);
+    }
+    return holder;
   }
   
   abstract protected DataflowSubmitter doSubmit(ScribenginClient client, String dfsDataflowHome, DataflowDescriptor descriptor, long timeout) throws Exception;

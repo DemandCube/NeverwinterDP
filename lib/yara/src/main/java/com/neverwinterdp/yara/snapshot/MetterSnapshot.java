@@ -7,11 +7,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.yara.Meter;
 
-public class MeterSnapshot implements Serializable {
+public class MetterSnapshot implements Serializable {
   @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp;
   private String serverName;
   
+  private String name ;
   private long   count;
   private String unit ;
   private double m1Rate;
@@ -19,13 +20,14 @@ public class MeterSnapshot implements Serializable {
   private double m15Rate;
   private double meanRate;
   
-  public MeterSnapshot() {
+  public MetterSnapshot() {
   }
 
-  public MeterSnapshot(String serverName, Meter meter) {
+  public MetterSnapshot(String serverName, Meter meter) {
     timestamp = new Date();
     this.serverName = serverName;
     
+    name  = meter.getName();
     count = meter.getCount();
     unit = meter.getUnit();
     m1Rate = meter.getOneMinuteRate();
@@ -43,6 +45,11 @@ public class MeterSnapshot implements Serializable {
 
   public String getServerName() { return serverName; }
   public void setServerName(String serverName) { this.serverName = serverName; }
+
+  public String getName() { return name; }
+  public void setName(String name) {
+    this.name = name;
+  }
 
   public long getCount() { return count; }
   public void setCount(long count) { this.count = count; }

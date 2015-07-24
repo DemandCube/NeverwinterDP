@@ -42,8 +42,9 @@ public class TimerSnapshot implements Serializable {
   }
   
   public TimerSnapshot(String serverName, Timer timer, TimeUnit timeUnit) {
-    this.serverName = serverName;
     timestamp = new Date();
+    this.serverName = serverName;
+    
     name = timer.getName();
     Histogram histogram = timer.getHistogram();
     count = timer.getCount();

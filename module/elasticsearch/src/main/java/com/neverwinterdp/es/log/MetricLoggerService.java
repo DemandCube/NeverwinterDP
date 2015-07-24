@@ -11,7 +11,7 @@ import com.neverwinterdp.yara.Meter;
 import com.neverwinterdp.yara.MetricRegistry;
 import com.neverwinterdp.yara.Timer;
 import com.neverwinterdp.yara.snapshot.CounterSnapshot;
-import com.neverwinterdp.yara.snapshot.MeterSnapshot;
+import com.neverwinterdp.yara.snapshot.MetterSnapshot;
 import com.neverwinterdp.yara.snapshot.TimerSnapshot;
 
 public class MetricLoggerService  extends ObjectLoggerService {
@@ -29,7 +29,7 @@ public class MetricLoggerService  extends ObjectLoggerService {
    
     add(CounterSnapshot.class);
     add(TimerSnapshot.class);
-    add(MeterSnapshot.class);
+    add(MetterSnapshot.class);
     
     metricCollectorThread = new MetricInfoCollectorThread();
     metricCollectorThread.start();
@@ -51,7 +51,7 @@ public class MetricLoggerService  extends ObjectLoggerService {
           }
           Map<String, Meter>  meters = metricRegistry.getMeters();
           for(Map.Entry<String, Meter> entry : meters.entrySet()) {
-            MeterSnapshot meterSnapshot = new MeterSnapshot(serverName, entry.getValue());
+            MetterSnapshot meterSnapshot = new MetterSnapshot(serverName, entry.getValue());
             log(meterSnapshot.uniqueId(), meterSnapshot);
           }
           Thread.sleep(30000);

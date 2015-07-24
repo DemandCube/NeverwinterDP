@@ -1,6 +1,8 @@
 package com.neverwinterdp.dataflow.logsample;
 
 
+import java.util.List;
+
 import com.beust.jcommander.JCommander;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
@@ -11,10 +13,12 @@ import com.neverwinterdp.scribengin.shell.GroupExecutor;
 import com.neverwinterdp.scribengin.shell.RandomKillDataflowWorkerExecutor;
 import com.neverwinterdp.scribengin.shell.StartStopDataflowExecutor;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.HadoopProperties;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.client.YarnVMClient;
+import com.neverwinterdp.yara.snapshot.ClusterMetricRegistrySnapshot;
 
 public class LogSampleClient  {
   LogSampleConfig config;
@@ -91,6 +95,13 @@ public class LogSampleClient  {
     Executor validatorExecutor = new VMLogValidatorExecutor(shell, config);
     validatorGroup.add(validatorExecutor);
     scheduler.run();
+    
+    List<ClusterMetricRegistrySnapshot> metrics = dataflowChainExecutor.getDataflowChainSubmitter().getMetrics();
+    for(ClusterMetricRegistrySnapshot sel : metrics) {
+      System.out.println("Dataflow " + sel.getClusterName() + " Report");
+      System.out.println("**************************************************************************************");
+      System.out.println(sel.getFormattedReport());
+    }
   }
   
   static public void main(String[] args) throws Exception {

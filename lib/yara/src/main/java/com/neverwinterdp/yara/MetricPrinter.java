@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.util.text.TabularFormater;
-import com.neverwinterdp.yara.snapshot.MeterSnapshot;
+import com.neverwinterdp.yara.snapshot.MetterSnapshot;
 import com.neverwinterdp.yara.snapshot.TimerSnapshot;
 
 public class MetricPrinter {
@@ -157,7 +157,7 @@ public class MetricPrinter {
       );
     }
     
-    public void print(String name, MeterSnapshot meter) {
+    public void print(String name, MetterSnapshot meter) {
       String rate = " " + meter.getUnit() +"/s" ;
       tformater.addRow(
         name, 

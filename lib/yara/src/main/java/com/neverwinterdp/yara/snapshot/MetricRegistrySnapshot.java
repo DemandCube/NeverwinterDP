@@ -18,7 +18,7 @@ public class MetricRegistrySnapshot implements Serializable {
   private String serverName ;
   private TreeMap<String, CounterSnapshot> counters = new TreeMap<>() ;
   private TreeMap<String, TimerSnapshot>   timers   = new TreeMap<>() ;
-  private TreeMap<String, MeterSnapshot>   meters   = new TreeMap<>() ;
+  private TreeMap<String, MetterSnapshot>   metters   = new TreeMap<>() ;
 
   public MetricRegistrySnapshot() {}
   
@@ -37,7 +37,7 @@ public class MetricRegistrySnapshot implements Serializable {
     }
     
     for(Map.Entry<String, Meter> entry : registry.getMeters().entrySet()) {
-      meters.put(entry.getKey(), new MeterSnapshot(serverName, entry.getValue())) ;
+      metters.put(entry.getKey(), new MetterSnapshot(serverName, entry.getValue())) ;
     }
   }
   
@@ -50,8 +50,8 @@ public class MetricRegistrySnapshot implements Serializable {
   public TreeMap<String, TimerSnapshot> getTimers() { return timers; }
   public void setTimers(TreeMap<String, TimerSnapshot> timers) { this.timers = timers; }
 
-  public TreeMap<String, MeterSnapshot> getMeters() { return meters; }
-  public void setMeters(TreeMap<String, MeterSnapshot> meters)  { this.meters = meters; }
+  public TreeMap<String, MetterSnapshot> getMetters() { return metters; }
+  public void setMetters(TreeMap<String, MetterSnapshot> metters)  { this.metters = metters; }
   
   static public String getFormattedText(List<MetricRegistrySnapshot> snapshots) {
     return new MetricRegistrySnapshotFormater(snapshots).getFormattedText();
@@ -69,7 +69,7 @@ public class MetricRegistrySnapshot implements Serializable {
         MetricRegistrySnapshot snapshot = list.get(i);
         counterKeys.addAll(snapshot.getCounters().keySet()) ;
         timerKeys.addAll(snapshot.getTimers().keySet()) ;
-        metricKeys.addAll(snapshot.getMeters().keySet()) ;
+        metricKeys.addAll(snapshot.getMetters().keySet()) ;
       }
     }
     
@@ -148,7 +148,7 @@ public class MetricRegistrySnapshot implements Serializable {
       for(String key : metricKeys) {
         meterFt.addRow(key, "", "", "", "", "");
         for(MetricRegistrySnapshot sel : snapshots) {
-          MeterSnapshot meter = sel.getMeters().get(key);
+          MetterSnapshot meter = sel.getMetters().get(key);
           if(meter != null) {
             meterFt.addRow(
               " - " + meter.getServerName(), 

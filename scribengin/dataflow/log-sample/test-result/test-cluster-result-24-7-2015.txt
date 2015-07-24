@@ -247,3 +247,24 @@ dataflow.sink.kafka.throughput
 dataflow.source.throughput                                                                               
  - log-persister-dataflow-error-worker-0000000007   16192970746   245602   2031277   3477534   5028596   
  - log-persister-dataflow-error-worker-0000000008   10799617575   168969   1365583   2710275   4190810   
+ 
+Finish The Validator App
+Execute Time: 2654807ms
+Generated Report
+----------------------------------------------------------
+Group Id             Num Of Message   Lost   Duplicated   
+vm-log-generator-1   50000000         0      0            
+----------------------------------------------------------
+
+Validate Report
+----------------------------------------------------------
+Group Id             Num Of Message   Lost   Duplicated   
+vm-log-generator-1   50000000         0      0            
+----------------------------------------------------------
+
+Group Executor validator-group  Run In 2654825ms
+
+real    102m59.113s
+user    0m26.219s
+sys     0m3.901s
+ 

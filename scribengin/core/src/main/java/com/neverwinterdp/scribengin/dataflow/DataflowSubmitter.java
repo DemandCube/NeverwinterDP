@@ -5,10 +5,10 @@ import static com.neverwinterdp.vm.tool.VMClusterBuilder.h1;
 import java.util.List;
 
 import com.neverwinterdp.registry.Registry;
+import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.SequenceIdTracker;
 import com.neverwinterdp.registry.event.WaitingOrderNodeEventListener;
 import com.neverwinterdp.scribengin.ScribenginClient;
-import com.neverwinterdp.scribengin.dataflow.service.DataflowService;
 import com.neverwinterdp.scribengin.dataflow.util.DataflowFormater;
 import com.neverwinterdp.scribengin.dataflow.util.DataflowRegistryDebugger;
 import com.neverwinterdp.scribengin.service.ScribenginService;
@@ -19,6 +19,7 @@ import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.command.Command;
 import com.neverwinterdp.vm.command.CommandResult;
+import com.neverwinterdp.yara.snapshot.ClusterMetricRegistrySnapshot;
 import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 
 public class DataflowSubmitter {
@@ -90,7 +91,6 @@ public class DataflowSubmitter {
   public DataflowSubmitter enableDataflowTaskDebugger(Appendable out) throws Exception {
     DataflowRegistryDebugger debugger = scribenginClient.getDataflowRegistryDebugger(out, dflDescriptor);
     debugger.enableDataflowDebugger();
-    //debugger.enableDataflowTaskDebugger(false);
     return this ;
   }
   
@@ -100,6 +100,16 @@ public class DataflowSubmitter {
     debugger.enableDataflowVMDebugger(false);
     debugger.enableDataflowActivityDebugger(false);
     return this ;
+  }
+  
+  public  ClusterMetricRegistrySnapshot getDataflowMetrics() throws RegistryException {
+    ClusterMetricRegistrySnapshot dflMetrics = new ClusterMetricRegistrySnapshot(dflDescriptor.getId()) ;
+    String dataflowPath = ScribenginService.getDataflowPath(dflDescriptor.getId());
+    List<MetricRegistrySnapshot> snapshots = DataflowRegistry.getMetrics(scribenginClient.getRegistry(), dataflowPath) ;
+    for(MetricRegistrySnapshot sel : snapshots) {
+      dflMetrics.add(sel);
+    }
+    return dflMetrics ;
   }
   
   public void report(Appendable out) throws Exception {
