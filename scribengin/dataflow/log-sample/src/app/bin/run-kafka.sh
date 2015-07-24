@@ -58,7 +58,7 @@ if [ "$PROFILE" = "performance" ] ; then
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
     --log-generator-num-of-vm 1 --log-generator-wait-for-ready 30000 \
     --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
-    --log-validator-wait-for-termination 1200000 --log-validator-validate-kafka log4j.aggregate \
+    --log-validator-wait-for-termination 3600000 --log-validator-validate-kafka log4j.aggregate \
     --dataflow-descriptor $APP_DIR/conf/kafka-log-dataflow-chain.json  \
     --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-task-dedicated-executor $DEDICATED_EXECUTOR \
@@ -72,7 +72,7 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
     --log-generator-num-of-vm 1  --log-generator-wait-for-ready 30000 \
     --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
-    --log-validator-wait-for-termination 1200000 --log-validator-validate-kafka log4j.aggregate \
+    --log-validator-wait-for-termination 3600000 --log-validator-validate-kafka log4j.aggregate \
     --dataflow-descriptor $APP_DIR/conf/kafka-log-dataflow-chain.json  \
     --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-task-dedicated-executor $DEDICATED_EXECUTOR \

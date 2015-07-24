@@ -1,0 +1,18 @@
+Real Cluster Summary
+####################
+
+Date            Name     M Size   N Mesg  Exec    Splitter   Info    Warn     Error     Total
+----------------------------------------------    -------------------------------------------
+First Run      
+                Kafka     512      10M     SW       14.26M    4.69M   4.76M    5.95M    29.66M
+                Kafka    1024      10M     SW       25.20M    8.71M   8.87M   13.91M    56.69M
+
+                HDFS      512      10M     SW       14.15M    4.31M   4.37M    9.15M    31.98M 
+                HDFS     1024      10M     SW       14.20M     3.7M    3.7M    4.53M    22.46M
+
+July 24, 2015   
+                Kafka     512      10M     SW       25.80M     7.3M    7.05M  16.0MM    56.40M
+                Kafka    1024      10M     SW       27.60M    8.26M    8.25M  25.4MM    69.51M
+
+                Kafka     512      50M     SW       26.80M    8.60M    8.54M   13.4M    57.34M
+                Kafka    1024      50M     SW       26.80M    8.60M    8.54M   13.4M    57.34M *
