@@ -41,10 +41,11 @@ public class VMLogMessageGeneratorApp extends VMApp {
     topic      = vmConfig.getProperty("topic", "log4j");
     numOfMessage = vmConfig.getPropertyAsInt("num-of-message", 5000);
     messageSize = vmConfig.getPropertyAsInt("message-size", 256);
+    int numOfStream = vmConfig.getPropertyAsInt("num-of-stream", 10);
     
     KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
     kafkaTool.connect();
-    if(!kafkaTool.topicExits(topic)) kafkaTool.createTopic(topic, 1, 10);
+    if(!kafkaTool.topicExits(topic)) kafkaTool.createTopic(topic, 1, numOfStream);
     
     TopicMetadata topicMetadata = kafkaTool.findTopicMetadata(topic);
     List<PartitionMetadata> partitionMetadataHolder = topicMetadata.partitionsMetadata();
