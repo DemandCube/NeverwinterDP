@@ -53,7 +53,7 @@ public class DataflowFormater {
     taskFt.addFooter("LAWNM = Last Assigned With No Message Count");
     taskFt.addFooter("AC    = Accumulate Message Commit Count");
     taskFt.addFooter("CC    = Commit Count");
-    taskFt.addFooter("CFC    = Commit Fail Count");
+    taskFt.addFooter("CFC   = Commit Fail Count");
     for(int i = 0; i < reports.size(); i++) {
       DataflowTaskRuntimeReport rtReport = reports.get(i);
       DataflowTaskReport report = rtReport.getReport();
