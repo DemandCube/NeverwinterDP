@@ -146,3 +146,104 @@ Group Executor validator-group  Run In 311002ms
 **************************************************************************************************
 Kafka Throughput On Real Cluster, Message Size = 1024, Num Of Message = 50M
 **************************************************************************************************
+
+Meter
+---------------------------------------------------------------------------------------------------------
+Name                                           Count         1 Min      5 Min      15 Min     M Rate
+dataflow.sink.error.throughput
+ - log-splitter-dataflow-1-worker-0000000001   13245551591   4396403    5014107    4969452    5215041
+ - log-splitter-dataflow-1-worker-0000000002   13747035108   5381930    5427012    5167433    5332437
+dataflow.sink.info.throughput
+ - log-splitter-dataflow-1-worker-0000000001   13237394112   4286380    4980071    4944494    5210353
+ - log-splitter-dataflow-1-worker-0000000002   13738532384   5445796    5436806    5156298    5327663
+dataflow.sink.warn.throughput
+ - log-splitter-dataflow-1-worker-0000000001   13237382752   4294741    4981948    4943407    5210107
+ - log-splitter-dataflow-1-worker-0000000002   13738548566   5456322    5438874    5154987    5327437
+dataflow.source.throughput
+ - log-splitter-dataflow-1-worker-0000000001   39720329722   12999451   14980451   14772142   15624673
+ - log-splitter-dataflow-1-worker-0000000002   41224116601   15504926   16139524   15323102   15975411
+---------------------------------------------------------------------------------------------------------
+
+
+Meter
+---------------------------------------------------------------------------------------------------------
+Name                                               Count         1 Min     5 Min     15 Min    M Rate
+dataflow.sink.kafka.throughput
+ - log-persister-dataflow-info-worker-0000000003   13772304467   1146577   3745528   4712258   5202196
+ - log-persister-dataflow-info-worker-0000000004   13203622029   1317060   4065245   4814634   4999971
+dataflow.source.throughput
+ - log-persister-dataflow-info-worker-0000000003   13772304467   1155342   3752638   4700073   5201033
+ - log-persister-dataflow-info-worker-0000000004   13203622029   1326721   4071591   4800316   4999056
+ 
+ 
+ Meter
+---------------------------------------------------------------------------------------------------------
+Name                                               Count         1 Min     5 Min     15 Min    M Rate
+dataflow.sink.kafka.throughput
+ - log-persister-dataflow-warn-worker-0000000005   13612823120   1129065   3785245   5039069   5165957
+ - log-persister-dataflow-warn-worker-0000000006   13363108198   1211086   3948656   5053329   5072173
+dataflow.source.throughput
+ - log-persister-dataflow-warn-worker-0000000005   13612823120   1134130   3788724   4990180   5165386
+ - log-persister-dataflow-warn-worker-0000000006   13363108198   1217976   3953058   4985372   5071536
+ 
+ 
+ Meter
+----------------------------------------------------------------------------------------------------------
+Name                                                Count         1 Min     5 Min     15 Min    M Rate
+dataflow.sink.kafka.throughput
+ - log-persister-dataflow-error-worker-0000000007   15903895357   1167627   3823932   5226588   6054250
+ - log-persister-dataflow-error-worker-0000000008   11088691342   1130414   3905380   5675779   5600036
+dataflow.source.throughput
+ - log-persister-dataflow-error-worker-0000000007   15903895357   1171142   3826778   5183335   6053723
+ - log-persister-dataflow-error-worker-0000000008   11088691342   1133107   3907199   5611510   5599419
+ 
+ 
+ **************************************************************************************************
+Kafka Throughput On Real Cluster, Message Size = 1024, Num Of Message = 50M, Executor = Dedicated
+****************************************************************************************************
+Meter
+--------------------------------------------------------------------------------------------------------
+Name                                           Count         1 Min     5 Min      15 Min     M Rate     
+dataflow.sink.error.throughput                                                                          
+ - log-splitter-dataflow-1-worker-0000000001   16187851012   2781568   4215928    4216966    5155449    
+ - log-splitter-dataflow-1-worker-0000000002   10804737309   1399682   2148982    2801320    3829977    
+dataflow.sink.info.throughput                                                                           
+ - log-splitter-dataflow-1-worker-0000000001   16177858988   2584398   4152347    4185338    5151241    
+ - log-splitter-dataflow-1-worker-0000000002   10798067503   1411016   2151355    2792023    3826870    
+dataflow.sink.warn.throughput                                                                           
+ - log-splitter-dataflow-1-worker-0000000001   16177860592   2584399   4152348    4185237    5151217    
+ - log-splitter-dataflow-1-worker-0000000002   10798069110   1413820   2152120    2790564    3826722    
+dataflow.source.throughput                                                                              
+ - log-splitter-dataflow-1-worker-0000000001   48543571678   8123218   12575212   12498537   15443240   
+ - log-splitter-dataflow-1-worker-0000000002   32400874646   4385811   6500276    8296005    11474654   
+ 
+ Meter
+--------------------------------------------------------------------------------------------------------
+Name                                               Count         1 Min    5 Min     15 Min    M Rate    
+dataflow.sink.kafka.throughput                                                                          
+ - log-persister-dataflow-info-worker-0000000003   16182975568   245946   2030845   3513415   4994653   
+ - log-persister-dataflow-info-worker-0000000004   10792950923   177510   1375054   2400365   3331268   
+dataflow.source.throughput                                                                              
+ - log-persister-dataflow-info-worker-0000000003   16182975568   249189   2036154   3453333   4993480   
+ - log-persister-dataflow-info-worker-0000000004   10792950923   164514   1354239   2356879   3330845   
+ 
+ 
+ Meter
+--------------------------------------------------------------------------------------------------------
+Name                                               Count         1 Min    5 Min     15 Min    M Rate    
+dataflow.sink.kafka.throughput                                                                          
+ - log-persister-dataflow-warn-worker-0000000005   10792954147   174145   1369709   2348654   3342410   
+ - log-persister-dataflow-warn-worker-0000000006   16182975555   262032   2056642   3467591   5011810   
+dataflow.source.throughput                                                                              
+ - log-persister-dataflow-warn-worker-0000000005   10792954147   174854   1370837   2341604   3342180   
+ - log-persister-dataflow-warn-worker-0000000006   16182975555   263711   2059264   3448888   5011241   
+ 
+ Meter
+---------------------------------------------------------------------------------------------------------
+Name                                                Count         1 Min    5 Min     15 Min    M Rate    
+dataflow.sink.kafka.throughput                                                                           
+ - log-persister-dataflow-error-worker-0000000007   16192970746   264769   2062105   3539599   5029301   
+ - log-persister-dataflow-error-worker-0000000008   10799617575   168268   1364586   2744489   4191198   
+dataflow.source.throughput                                                                               
+ - log-persister-dataflow-error-worker-0000000007   16192970746   245602   2031277   3477534   5028596   
+ - log-persister-dataflow-error-worker-0000000008   10799617575   168969   1365583   2710275   4190810   
