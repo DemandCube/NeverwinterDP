@@ -104,14 +104,13 @@ public class DataflowTaskContext {
     sourceContext.assignedSourceStreamReader.completeCommit();
   }
   
-  public boolean commit() throws Exception {
+  public void commit() throws Exception {
     //prepareCommit is a vote to make sure both sink, invalidSink, and source
     //are ready to commit data, otherwise rollback will occur
     try {
       prepareCommit();
       completeCommit();
       report.updateCommit();
-      return true ;
     } catch (Exception ex) {
       report.setCommitFailCount(report.getCommitFailCount() + 1);
       executorService.getLogger().warn("DataflowTask Commit Fail, Rollback", ex);
@@ -119,9 +118,8 @@ public class DataflowTaskContext {
         rollback();
       } catch(Exception rollbackEx) {
         executorService.getLogger().error("DataflowTask Rollback Fail", rollbackEx);
-        throw rollbackEx ;
       }
-      return false ;
+      throw ex;
     } finally {
       executorService.getDataflowRegistry().dataflowTaskReport(dataflowTaskDescriptor, report);
     }
