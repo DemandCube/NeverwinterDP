@@ -27,8 +27,8 @@ public class S3ObjectWriter {
     this.metadata = metadata;
     
     pipedOutput = new PipedOutputStream();
-    pipedInput  = new PipedInputStream(pipedOutput,  2 * 1024 * 1024/*buffer size 2M */);
-    bufferedPipedInput = new SdkBufferedInputStream(pipedInput, 4 * 1024 * 1024/*buffer size 4M */) ;
+    pipedInput  = new PipedInputStream(pipedOutput,  4 * 1024 * 1024/*buffer size 4M */);
+    bufferedPipedInput = new SdkBufferedInputStream(pipedInput, 512 * 1024/*buffer size 2M */) ;
     writeThread = new WriteThread();
     writeThread.start();
   }
