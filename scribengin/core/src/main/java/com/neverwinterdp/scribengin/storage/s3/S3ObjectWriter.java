@@ -17,6 +17,7 @@ public class S3ObjectWriter {
   private PipedOutputStream pipedOutput;
   private PipedInputStream pipedInput;
   private SdkBufferedInputStream bufferedPipedInput;
+  private Throwable error ;
   
   private WriteThread writeThread;
 
@@ -46,6 +47,9 @@ public class S3ObjectWriter {
     }
     pipedInput.close();
     bufferedPipedInput.close();
+    if(error != null) {
+      throw new RuntimeException(error) ;
+    }
   }
   
   public void forceClose() throws IOException, InterruptedException {
@@ -60,9 +64,13 @@ public class S3ObjectWriter {
     
     public void run() {
       running = true;
-      PutObjectRequest request = new PutObjectRequest(bucketName, key, bufferedPipedInput, metadata);
-      request.getRequestClientOptions().setReadLimit(1 * 1024 * 1024); //buffer limit 1M
-      s3Client.getAmazonS3Client().putObject(request);
+      try {
+        PutObjectRequest request = new PutObjectRequest(bucketName, key, bufferedPipedInput, metadata);
+        request.getRequestClientOptions().setReadLimit(1 * 1024 * 1024); //buffer limit 1M
+        s3Client.getAmazonS3Client().putObject(request);
+      } catch(Throwable t) {
+        error = t ;
+      }
       running = false;
       notifyTermination();
     }
