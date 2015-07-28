@@ -68,14 +68,16 @@ public class S3SinkStreamWriter implements SinkStreamWriter {
     
     public SegmentWriter(S3Folder streamS3Folder) throws IOException {
       this.streamS3Folder = streamS3Folder ;
-      currentSegmentName = "segment-" + UUID.randomUUID().toString();
-      ObjectMetadata metadata = new ObjectMetadata();
-      metadata.addUserMetadata("transaction", "prepare");
-      currentWriter = streamS3Folder.createObjectWriter(currentSegmentName, metadata);
     }
     
     
     public void append(DataflowMessage dataflowMessage) throws Exception {
+      if(currentWriter == null) {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.addUserMetadata("transaction", "prepare");
+        currentSegmentName = "segment-" + UUID.randomUUID().toString();
+        currentWriter = streamS3Folder.createObjectWriter(currentSegmentName, metadata);
+      }
       byte[] bytes = JSONSerializer.INSTANCE.toBytes(dataflowMessage);
       currentWriter.write(bytes);
     }

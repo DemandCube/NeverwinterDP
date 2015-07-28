@@ -7,7 +7,6 @@ import java.io.PipedOutputStream;
 import com.amazonaws.internal.SdkBufferedInputStream;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-//import org.jets3t.service.io.RepeatableInputStream;
 
 public class S3ObjectWriter {
   private S3Client s3Client;
@@ -18,7 +17,6 @@ public class S3ObjectWriter {
   private PipedInputStream pipedInput;
   private SdkBufferedInputStream bufferedPipedInput;
   private Throwable error ;
-  
   private WriteThread writeThread;
 
   public S3ObjectWriter(S3Client s3Client, String bucketName, String key, ObjectMetadata metadata) throws IOException {
