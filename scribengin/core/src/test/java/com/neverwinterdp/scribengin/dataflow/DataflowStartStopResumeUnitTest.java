@@ -2,7 +2,6 @@ package com.neverwinterdp.scribengin.dataflow;
 
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,8 +42,6 @@ public class DataflowStartStopResumeUnitTest {
 
     ScribenginClient scribenginClient = shell.getScribenginClient();
     DataflowClient dflClient = scribenginClient.getDataflowClient("kafka-to-kafka-1");
-    Assert.assertEquals("kafka-to-kafka-1-master-1", dflClient.getDataflowMaster().getId());
-    Assert.assertEquals(1, dflClient.getDataflowMasters().size());
 
     StartStopResumeRunner startStopResumeRunner = new StartStopResumeRunner() ;
     startStopResumeRunner.start();

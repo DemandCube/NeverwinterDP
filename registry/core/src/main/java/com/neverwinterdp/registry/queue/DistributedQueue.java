@@ -3,6 +3,7 @@ package com.neverwinterdp.registry.queue;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
@@ -45,6 +46,11 @@ public class DistributedQueue {
   }
   
   public void offer(Transaction transaction, byte[] data) throws RegistryException {
+    transaction.create(path + "/", data, NodeCreateMode.PERSISTENT_SEQUENTIAL);
+  }
+  
+  public <T> void offerAs(Transaction transaction, T object) throws RegistryException {
+    byte[] data = JSONSerializer.INSTANCE.toBytes(object);
     transaction.create(path + "/", data, NodeCreateMode.PERSISTENT_SEQUENTIAL);
   }
   
@@ -115,27 +121,58 @@ public class DistributedQueue {
    * @throws InterruptedException
    */
   public byte[] take() throws RegistryException, ShutdownException, InterruptedException {
-    while(true){
+    List<String> orderedChildren = orderedChildren();
+    while(orderedChildren.size() == 0){
       if(shutdown) {
         throw new ShutdownException("The queue has been shut down") ;
       }
-      List<String> orderedChildren = orderedChildren();
-      if(orderedChildren.size() == 0) {
-        takeAvailableWatcher = new LatchChildWatcher();
-        registry.watchChildren(path, takeAvailableWatcher);
-        takeAvailableWatcher.await();
-        continue;
-      }
-      String headNode = orderedChildren.get(0);
-      String headNodePath = path +"/"+headNode;
-      byte[] data = registry.getData(headNodePath);
-      registry.delete(headNodePath);
-      return data;
+      takeAvailableWatcher = new LatchChildWatcher();
+      registry.watchChildren(path, takeAvailableWatcher);
+      takeAvailableWatcher.await();
     }
+    String headNode = orderedChildren.get(0);
+    String headNodePath = path +"/"+headNode;
+    byte[] data = registry.getData(headNodePath);
+    registry.delete(headNodePath);
+    return data;
+  }
+  
+  /**
+   * This method suppose to wait if the queue is empty and return when the queue entry is available
+   * @return
+   * @throws RegistryException
+   * @throws InterruptedException
+   */
+  public byte[] take(long timeout) throws RegistryException, ShutdownException, InterruptedException {
+    List<String> orderedChildren = orderedChildren();
+    long stopTime = System.currentTimeMillis() + timeout;
+    while(orderedChildren.size() == 0) {
+      if(shutdown) {
+        throw new ShutdownException("The queue has been shut down") ;
+      }
+      takeAvailableWatcher = new LatchChildWatcher();
+      registry.watchChildren(path, takeAvailableWatcher);
+      long waitTime = stopTime - System.currentTimeMillis() ;
+      if(waitTime <= 0) return null;
+      takeAvailableWatcher.await(waitTime);
+      orderedChildren = orderedChildren();
+    }
+    
+    String headNode = orderedChildren.get(0);
+    String headNodePath = path +"/"+headNode;
+    byte[] data = registry.getData(headNodePath);
+    registry.delete(headNodePath);
+    return data;
   }
   
   public <T> T takeAs(Class<T> type) throws RegistryException, InterruptedException, ShutdownException {
     byte[] data = take() ;
+    return JSONSerializer.INSTANCE.fromBytes(data, type);
+  }
+  
+  public <T> T takeAs(Class<T> type, long timeout) throws RegistryException, InterruptedException, ShutdownException {
+    byte[] data = take(timeout) ;
+    if(data == null) return null ;
     return JSONSerializer.INSTANCE.fromBytes(data, type);
   }
   
@@ -170,6 +207,10 @@ public class DistributedQueue {
     
     public void await() throws InterruptedException {
       latch.await();
+    }
+    
+    public void await(long timeout) throws InterruptedException {
+      latch.await(timeout, TimeUnit.MILLISECONDS);
     }
   }
   

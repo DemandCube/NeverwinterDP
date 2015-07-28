@@ -84,7 +84,6 @@ public class DataflowPauseActivityBuilder extends ActivityBuilder {
       }
       
       dflRegistry.broadcastWorkerEvent(DataflowEvent.PAUSE);
-      
       waitingListener.waitForEvents(30 * 1000);
     }
   }

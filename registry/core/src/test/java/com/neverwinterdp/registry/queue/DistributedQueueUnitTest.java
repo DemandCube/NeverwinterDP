@@ -1,5 +1,7 @@
 package com.neverwinterdp.registry.queue;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -50,20 +52,16 @@ public class DistributedQueueUnitTest {
       Assert.assertEquals("hello " + count++, new String(data));
     }
   }
-
   
   @Test
   public void testTake() throws Exception {
-    int size = 10;
-    offer(size);
+    final AtomicInteger counter = new AtomicInteger() ;
     Thread thread = new Thread() {
-      int count = 0;
-      
       public void run() {
         try {
           while(true) {
             byte[] data = queue.take() ;
-            Assert.assertEquals("hello " + count++, new String(data));
+            Assert.assertEquals("hello " + counter.getAndIncrement(), new String(data));
           }
         } catch (RegistryException e) {
           e.printStackTrace();
@@ -74,8 +72,40 @@ public class DistributedQueueUnitTest {
       }
     };
     thread.start();
+    
+    offer(10);
     Thread.sleep(1000);
     thread.interrupt();
+    System.out.println("take = " + counter.get()) ;
+  }
+  
+  @Test
+  public void testTakeTimeout() throws Exception {
+    final AtomicInteger counter = new AtomicInteger() ;
+    Thread thread = new Thread() {
+      public void run() {
+        try {
+          while(true) {
+            byte[] data = queue.take(1000) ;
+            if(data == null) return ;
+            Assert.assertEquals("hello " + counter.getAndIncrement(), new String(data));
+          }
+        } catch (RegistryException e) {
+          e.printStackTrace();
+        } catch (InterruptedException e) {
+        } catch (Throwable e) {
+          e.printStackTrace();
+        }
+      }
+    };
+    thread.start();
+    for(int i = 0 ; i < 10; i++) {
+      String data = "hello " + i ;
+      queue.offer(data.getBytes());
+      Thread.sleep((i + 1) * 200);
+    }
+    Assert.assertTrue(counter.get() < 8) ;
+    System.out.println("take = " + counter.get()) ;
   }
   
   void offer(int size) throws Exception {

@@ -94,7 +94,7 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
   
   static public class ActiveDataflowWorkerWatcher extends NodeChildrenWatcher {
     private List<String> activeWorkers = null ;
-    private Node activeWorkersNode ;
+    private Node         activeWorkersNode ;
     
     public ActiveDataflowWorkerWatcher(DataflowRegistry dflRegistry, boolean persistent) throws RegistryException {
       super(dflRegistry.getRegistry(), persistent);

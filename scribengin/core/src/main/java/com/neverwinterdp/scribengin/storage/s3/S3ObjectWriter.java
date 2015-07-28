@@ -66,7 +66,7 @@ public class S3ObjectWriter {
       running = true;
       try {
         PutObjectRequest request = new PutObjectRequest(bucketName, key, bufferedPipedInput, metadata);
-        request.getRequestClientOptions().setReadLimit(8 * 1024 * 1024); //buffer limit 1M
+        request.getRequestClientOptions().setReadLimit(512 * 1024); //buffer limit 1M
         s3Client.getAmazonS3Client().putObject(request);
       } catch(Throwable t) {
         error = t ;

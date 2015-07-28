@@ -33,7 +33,7 @@ public class StartStopDataflowExecutor extends Executor {
   long sleepBeforeResume = 10000;
   
   @Parameter(names = "--max-wait-for-stop", description = "The command should repeat in this failurePeriod of time")
-  long maxWaitForStop = 20000;
+  long maxWaitForStop = 60000;
   
   @Parameter(names = "--max-wait-for-resume", description = "The command should repeat in this failurePeriod of time")
   long maxWaitForResume = 20000;

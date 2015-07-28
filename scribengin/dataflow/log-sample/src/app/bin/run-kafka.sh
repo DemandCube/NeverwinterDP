@@ -44,10 +44,25 @@ APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hado
 
 MAIN_CLASS="com.neverwinterdp.dataflow.logsample.LogSampleClient"
 
-PROFILE=$(get_opt --profile 'unknown' $@)
+PROFILE=$(get_opt --profile 'performance' $@)
 MESSAGE_SIZE=$(get_opt --message-size '128' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
 DEDICATED_EXECUTOR=$(get_opt --dedicated-executor 'false' $@)
+
+STORAGE=$(get_opt --storage 'kafka' $@)
+
+DATAFLOW_DESCRIPTOR_FILE=""
+LOG_VALIDATOR_VALIDATE=""
+if [ "$STORAGE" = "hdfs" ] ; then
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/hdfs-log-dataflow-chain.json"
+  LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-hdfs /log-sample/hdfs/info,/log-sample//hdfs/warn,/log-sample/hdfs/error"
+elif [ "$STORAGE" = "s3" ] ; then
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/s3-log-dataflow-chain.json"
+  LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-s3 test-log-sample:info,test-log-sample:warn,test-log-sample:error" \
+else
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/kafka-log-dataflow-chain.json"
+  LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-kafka log4j.aggregate"
+fi
 
 if [ "$PROFILE" = "performance" ] ; then
   MAX_RUN_TIME=$(( 180000 + ($NUM_OF_MESSAGE / 5) ))
@@ -56,10 +71,14 @@ if [ "$PROFILE" = "performance" ] ; then
     --registry-db-domain /NeverwinterDP \
     --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
+    \
     --log-generator-num-of-vm 1 --log-generator-wait-for-ready 30000 \
     --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
-    --log-validator-wait-for-termination 3600000 --log-validator-validate-kafka log4j.aggregate \
-    --dataflow-descriptor $APP_DIR/conf/kafka-log-dataflow-chain.json  \
+    \
+    --log-validator-wait-for-termination 3600000 \
+    $LOG_VALIDATOR_VALIDATE_OPT \
+    \
+    --dataflow-descriptor $DATAFLOW_DESCRIPTOR_FILE  \
     --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-task-dedicated-executor $DEDICATED_EXECUTOR \
     --dataflow-task-debug
@@ -70,12 +89,17 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     --registry-db-domain /NeverwinterDP \
     --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
+    \
     --log-generator-num-of-vm 1  --log-generator-wait-for-ready 30000 \
     --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
-    --log-validator-wait-for-termination 3600000 --log-validator-validate-kafka log4j.aggregate \
-    --dataflow-descriptor $APP_DIR/conf/kafka-log-dataflow-chain.json  \
+    \
+    --log-validator-wait-for-termination 3600000 \
+    $LOG_VALIDATOR_VALIDATE_OPT \
+    \
+    --dataflow-descriptor $DATAFLOW_DESCRIPTOR_FILE  \
     --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-task-dedicated-executor $DEDICATED_EXECUTOR \
+    \
     --dataflow-failure-simulation-worker  \
     --dataflow-failure-simulation-wait-before-start 210000 \
     --dataflow-failure-simulation-max-kill 5 \
@@ -85,5 +109,3 @@ else
   echo "Usage: "
   echo "  run-kafka.sh --profile=[performance, dataflow-worker-failure] --message-size=[128, 256, 512....]"
 fi
-
-
