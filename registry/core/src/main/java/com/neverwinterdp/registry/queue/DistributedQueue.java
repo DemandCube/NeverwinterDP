@@ -129,6 +129,7 @@ public class DistributedQueue {
       takeAvailableWatcher = new LatchChildWatcher();
       registry.watchChildren(path, takeAvailableWatcher);
       takeAvailableWatcher.await();
+      orderedChildren = orderedChildren();
     }
     String headNode = orderedChildren.get(0);
     String headNodePath = path +"/"+headNode;
@@ -136,6 +137,26 @@ public class DistributedQueue {
     registry.delete(headNodePath);
     return data;
   }
+  
+//  public byte[] take() throws RegistryException, ShutdownException, InterruptedException {
+//    while(true){
+//      if(shutdown) {
+//        throw new ShutdownException("The queue has been shut down") ;
+//      }
+//      List<String> orderedChildren = orderedChildren();
+//      if(orderedChildren.size() == 0) {
+//        takeAvailableWatcher = new LatchChildWatcher();
+//        registry.watchChildren(path, takeAvailableWatcher);
+//        takeAvailableWatcher.await();
+//        continue;
+//      }
+//      String headNode = orderedChildren.get(0);
+//      String headNodePath = path +"/"+headNode;
+//      byte[] data = registry.getData(headNodePath);
+//      registry.delete(headNodePath);
+//      return data;
+//    }
+//  }
   
   /**
    * This method suppose to wait if the queue is empty and return when the queue entry is available

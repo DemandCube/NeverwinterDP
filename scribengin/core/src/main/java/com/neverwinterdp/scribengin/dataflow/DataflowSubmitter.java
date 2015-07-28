@@ -49,7 +49,8 @@ public class DataflowSubmitter {
     System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor)) ;
     VMDescriptor scribenginMaster = scribenginClient.getScribenginMaster();
     Command deployCmd = new VMScribenginServiceCommand.DataflowDeployCommand(dflDescriptor) ;
-    CommandResult<Boolean> result = (CommandResult<Boolean>)vmClient.execute(scribenginMaster, deployCmd);
+    CommandResult<Boolean> result = 
+        (CommandResult<Boolean>)vmClient.execute(scribenginMaster, deployCmd);
   }
   
   public void waitForStatus(long timeout, DataflowLifecycleStatus[] status) throws Exception {

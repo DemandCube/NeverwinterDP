@@ -77,7 +77,6 @@ public class ScribenginService {
     
     Activity activity = new AddDataflowMasterActivityBuilder().build(dataflowNode.getPath()) ;
     activityService.queue(activity);
-    //activityService.queue(activity);
     return true;
   }
   
