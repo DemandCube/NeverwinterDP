@@ -28,7 +28,7 @@ public class S3ObjectWriter {
 //    pipedOutput = new PipedOutputStream();
 //    pipedInput  = new PipedInputStream(pipedOutput, 8 * 1024 * 1024/*buffer size 4M */);
     
-    pipedInput  = new PipedInputStream(64 * 1024 * 1024/*buffer size 4M */);
+    pipedInput  = new PipedInputStream(64 * 1024/*buffer size 4M */);
     pipedOutput = new PipedOutputStream(pipedInput);
     //bufferedPipedInput = new SdkBufferedInputStream(pipedInput, 8 * 1024 * 1024/*buffer size 2M */) ;
     writeThread = new WriteThread();
@@ -39,13 +39,13 @@ public class S3ObjectWriter {
 
   public void write(byte[] data) throws IOException {
     pipedOutput.write(data);
+    pipedOutput.flush();
   }
 
   public void waitAndClose(long timeout) throws Exception, IOException, InterruptedException {
     System.err.println("Start wait and close") ;
     long start = System.currentTimeMillis() ;
     pipedOutput.close();
-    pipedOutput.flush();
     if (!writeThread.waitForTermination(timeout)) {
       throw new IOException("The writer thread cannot upload all the data to S3 in " + timeout + "ms");
     }
