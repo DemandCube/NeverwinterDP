@@ -28,7 +28,7 @@ public class S3ObjectWriter {
 //    pipedOutput = new PipedOutputStream();
 //    pipedInput  = new PipedInputStream(pipedOutput, 8 * 1024 * 1024/*buffer size 4M */);
     
-    pipedInput  = new PipedInputStream(8 * 1024 * 1024/*buffer size 4M */);
+    pipedInput  = new PipedInputStream(64 * 1024 * 1024/*buffer size 4M */);
     pipedOutput = new PipedOutputStream(pipedInput);
     //bufferedPipedInput = new SdkBufferedInputStream(pipedInput, 8 * 1024 * 1024/*buffer size 2M */) ;
     writeThread = new WriteThread();
