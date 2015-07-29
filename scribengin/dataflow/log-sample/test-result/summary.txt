@@ -18,3 +18,14 @@ July 24, 2015
                 Kafka    1024      50M     SW       31.60M   10.20M    12.4M  11.65M    65.85M
 
                 Kafka    1024      50M     DD       26.90M    8.34M    8.35M   9.20M    52.79M
+
+
+
+Docker Summary
+####################
+
+Date            Name     M Size   N Mesg  Exec    Splitter   Info    Warn     Error     Total
+----------------------------------------------    -------------------------------------------
+July 29, 2015   
+                S3        512      10M     SW      7.04M     2.20M    2.28M    2.36M     13.9M
+                HDFS      512      10M     SW      6.00M     1.92M    1.94M    2.34M     12.2M

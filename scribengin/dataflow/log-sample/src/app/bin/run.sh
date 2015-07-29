@@ -102,8 +102,8 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     \
     --dataflow-failure-simulation-worker  \
     --dataflow-failure-simulation-wait-before-start 210000 \
-    --dataflow-failure-simulation-max-kill 5 \
-    --dataflow-failure-simulation-period 180000 \
+    --dataflow-failure-simulation-max-kill 3 \
+    --dataflow-failure-simulation-period 90000 \
     --dataflow-task-debug
 else
   echo "Usage: "
