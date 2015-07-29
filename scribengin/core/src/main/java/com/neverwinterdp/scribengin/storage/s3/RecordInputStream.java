@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class RecordInputStream extends InputStream {
-  private LinkedBlockingQueue<Record> recordHolder = new LinkedBlockingQueue<Record>(1000);
+  private LinkedBlockingQueue<Record> recordHolder = new LinkedBlockingQueue<Record>();
   private Record       currentRecord ;
   private boolean      end = false;
   

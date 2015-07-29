@@ -1,10 +1,7 @@
 package com.neverwinterdp.scribengin.storage.s3;
 
 import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 
-import com.amazonaws.internal.SdkBufferedInputStream;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
