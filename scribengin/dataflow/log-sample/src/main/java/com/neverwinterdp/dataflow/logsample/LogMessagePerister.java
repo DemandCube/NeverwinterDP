@@ -14,7 +14,7 @@ public class LogMessagePerister extends ScribeAbstract {
     }
     
     count++ ;
-    if(count > 0 && count % 20000 == 0) {
+    if(count > 0 && count % 10000 == 0) {
       ctx.commit();
     }
   }
