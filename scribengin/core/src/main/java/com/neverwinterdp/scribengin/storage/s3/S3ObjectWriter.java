@@ -15,7 +15,7 @@ public class S3ObjectWriter {
   ObjectMetadata metadata = new ObjectMetadata();
   private PipedOutputStream pipedOutput;
   private PipedInputStream pipedInput;
-  //private SdkBufferedInputStream bufferedPipedInput;
+  private SdkBufferedInputStream bufferedPipedInput;
   private Throwable error ;
   private WriteThread writeThread;
 
@@ -28,9 +28,10 @@ public class S3ObjectWriter {
 //    pipedOutput = new PipedOutputStream();
 //    pipedInput  = new PipedInputStream(pipedOutput, 8 * 1024 * 1024/*buffer size 4M */);
     
-    pipedInput  = new PipedInputStream(64 * 1024/*buffer size 4M */);
+    pipedInput  = new PipedInputStream(1024 * 1024/*buffer size 4M */);
     pipedOutput = new PipedOutputStream(pipedInput);
-    //bufferedPipedInput = new SdkBufferedInputStream(pipedInput, 8 * 1024 * 1024/*buffer size 2M */) ;
+    
+    bufferedPipedInput = new SdkBufferedInputStream(pipedInput, 2 * 1024 * 1024/*buffer size 2M */) ;
     writeThread = new WriteThread();
     writeThread.start();
   }
@@ -50,7 +51,7 @@ public class S3ObjectWriter {
       throw new IOException("The writer thread cannot upload all the data to S3 in " + timeout + "ms");
     }
     pipedInput.close();
-    //bufferedPipedInput.close();
+    bufferedPipedInput.close();
     if(error != null) {
       throw new Exception(error) ;
     }
@@ -61,7 +62,7 @@ public class S3ObjectWriter {
     pipedOutput.close();
     writeThread.interrupt();
     pipedInput.close();
-    //bufferedPipedInput.close();
+    bufferedPipedInput.close();
   }
 
   public class WriteThread extends Thread {
@@ -70,8 +71,8 @@ public class S3ObjectWriter {
     public void run() {
       running = true;
       try {
-        PutObjectRequest request = new PutObjectRequest(bucketName, key, pipedInput, metadata);
-        request.getRequestClientOptions().setReadLimit(32 * 1024); //buffer limit 1M
+        PutObjectRequest request = new PutObjectRequest(bucketName, key, bufferedPipedInput, metadata);
+        request.getRequestClientOptions().setReadLimit(128 * 1024); //buffer limit 1M
         s3Client.getAmazonS3Client().putObject(request);
       } catch(Throwable t) {
         error = t ;
