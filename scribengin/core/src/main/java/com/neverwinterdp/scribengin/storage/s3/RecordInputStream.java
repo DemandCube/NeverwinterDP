@@ -5,9 +5,11 @@ import java.io.InputStream;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class RecordInputStream extends InputStream {
-  private LinkedBlockingQueue<Record> recordHolder = new LinkedBlockingQueue<Record>();
+  static int read =  0;
+  private LinkedBlockingQueue<Record> recordHolder = new LinkedBlockingQueue<Record>(64);
   private Record       currentRecord ;
   private boolean      end = false;
+  int nextRecordCount = 0 ;
   
   public void write(byte[] data) throws InterruptedException {
     recordHolder.put(new Record(data)) ;
@@ -26,8 +28,10 @@ public class RecordInputStream extends InputStream {
     int ret = currentRecord.read() ;
     if(ret == -1) {
       currentRecord = null ;
+      System.out.println("Next record " + ++nextRecordCount + ", read = " + read); 
       return read() ;
     }
+    read++ ;
     return ret ;
   }
   
@@ -39,6 +43,7 @@ public class RecordInputStream extends InputStream {
     
     public Record(byte[] data) {
       this.data = data ;
+      this.readIdx = 0;
     }
     
     public int read() {
