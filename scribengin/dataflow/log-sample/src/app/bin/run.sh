@@ -58,7 +58,7 @@ if [ "$STORAGE" = "hdfs" ] ; then
   LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-hdfs /log-sample/hdfs/info,/log-sample//hdfs/warn,/log-sample/hdfs/error"
 elif [ "$STORAGE" = "s3" ] ; then
   DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/s3-log-dataflow-chain.json"
-  LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-s3 test-log-sample:info,test-log-sample:warn,test-log-sample:error" \
+  LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-s3 test-log-sample:info,test-log-sample:warn,test-log-sample:error" 
 else
   DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/kafka-log-dataflow-chain.json"
   LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-kafka log4j.aggregate"
