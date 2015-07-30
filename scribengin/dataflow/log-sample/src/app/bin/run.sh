@@ -51,6 +51,9 @@ DEDICATED_EXECUTOR=$(get_opt --dedicated-executor 'false' $@)
 
 STORAGE=$(get_opt --storage 'kafka' $@)
 
+KILL_MAX=$(get_opt --kill-max '3' $@)
+KILL_PERIOD=$(get_opt --kill-period '90000' $@)
+
 DATAFLOW_DESCRIPTOR_FILE=""
 LOG_VALIDATOR_VALIDATE=""
 if [ "$STORAGE" = "hdfs" ] ; then
@@ -102,8 +105,8 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     \
     --dataflow-failure-simulation-worker  \
     --dataflow-failure-simulation-wait-before-start 90000 \
-    --dataflow-failure-simulation-max-kill 3 \
-    --dataflow-failure-simulation-period 90000 \
+    --dataflow-failure-simulation-max-kill $KILL_MAX \
+    --dataflow-failure-simulation-period $KILL_PERIOD \
     --dataflow-task-debug
 else
   echo "Usage: "
