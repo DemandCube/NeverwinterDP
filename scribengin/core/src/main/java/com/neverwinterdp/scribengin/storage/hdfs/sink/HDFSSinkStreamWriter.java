@@ -4,14 +4,12 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 import com.neverwinterdp.util.JSONSerializer;
-import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
 public class HDFSSinkStreamWriter implements SinkStreamWriter {
   private FileSystem fs;
@@ -25,16 +23,11 @@ public class HDFSSinkStreamWriter implements SinkStreamWriter {
   }
   
   @Override
-  synchronized public void append(DataflowMessage dataflowMessage) throws Exception {
+  public void append(DataflowMessage dataflowMessage) throws Exception {
     if(currentBuffer == null) {
       currentBuffer = nextSinkBuffer();
     }
     currentBuffer.append(dataflowMessage);
-  }
-
-  @Override
-  public void rollback() throws Exception {
-    currentBuffer.rollback();
   }
 
   @Override
@@ -44,7 +37,7 @@ public class HDFSSinkStreamWriter implements SinkStreamWriter {
 
   @Override
   public void completeCommit() throws Exception {
-  //TODO: reimplement correctly 2 phases commit
+    //TODO: reimplement correctly 2 phases commit
     currentBuffer.commit();
     currentBuffer = null ;
   }
@@ -53,6 +46,12 @@ public class HDFSSinkStreamWriter implements SinkStreamWriter {
   synchronized public void commit() throws Exception {
     prepareCommit();
     completeCommit();
+  }
+
+  @Override
+  public void rollback() throws Exception {
+    currentBuffer.rollback();
+    currentBuffer = null ;
   }
   
   @Override
@@ -81,10 +80,10 @@ public class HDFSSinkStreamWriter implements SinkStreamWriter {
     private int count = 0 ;
     
     public SinkBuffer() throws IOException {
-      String name = "data-" + UUID.randomUUID().toString() ;
-      writingPath = new Path(location + "/" + name + ".writing") ;
+      String name  = "data-" + UUID.randomUUID().toString() ;
+      writingPath  = new Path(location + "/" + name + ".writing") ;
       completePath = new Path(location + "/"  + name + ".dat") ;
-      output = fs.create(writingPath) ;
+      output       = fs.create(writingPath) ;
     }
     
     public void append(DataflowMessage dataflowMessage) throws IOException {
@@ -94,22 +93,18 @@ public class HDFSSinkStreamWriter implements SinkStreamWriter {
       count++;
     }
     
-    public void delete() throws IOException {
+    public void rollback() throws IOException {
       output.close();
       fs.delete(writingPath, true) ;
-    }
-    
-    public void rollback() throws IOException {
-      delete();
       count = 0;
       output = fs.create(writingPath, true) ;
     }
     
     public void commit() throws IOException {
+      output.close();
       if(count <= 0) {
-        delete() ;
+        fs.delete(writingPath, true) ;
       } else {
-        output.close();
         fs.rename(writingPath, completePath);
       }
     }
