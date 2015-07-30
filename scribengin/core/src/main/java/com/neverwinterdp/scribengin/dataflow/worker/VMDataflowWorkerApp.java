@@ -53,6 +53,7 @@ public class VMDataflowWorkerApp extends VMApp {
           } else if(terminateEvent == TerminateEvent.SimulateKill) {
             dataflowTaskExecutorService.simulateKill();
           } else if(terminateEvent == TerminateEvent.Kill) {
+            logger.info("Execute the kill event with System.exit(0)");
             System.exit(0);
           }
         } catch (Exception e) {
