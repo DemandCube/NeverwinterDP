@@ -30,7 +30,7 @@ public class RandomKillDataflowWorkerExecutor extends Executor {
   public int maxKill = 25;
   
   @Parameter(names = "--simulate-kill", description = "The command should repeat in this period of time")
-  public boolean simulateKill = true;
+  public boolean simulateKill = false;
   
   String dataflowId ;
 

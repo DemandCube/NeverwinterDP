@@ -13,7 +13,6 @@ import com.neverwinterdp.scribengin.shell.GroupExecutor;
 import com.neverwinterdp.scribengin.shell.RandomKillDataflowWorkerExecutor;
 import com.neverwinterdp.scribengin.shell.StartStopDataflowExecutor;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
-import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.HadoopProperties;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.client.VMClient;

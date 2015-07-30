@@ -75,13 +75,13 @@ public class DataflowTaskContext {
   }
   
   public String[] getAvailableSinks() {
-    String[] name = new String[sinkContexts.size()] ;
-    sinkContexts.keySet().toArray(name) ;
-    return name ;
+    String[] name = new String[sinkContexts.size()];
+    sinkContexts.keySet().toArray(name);
+    return name;
   }
   
   public SinkContext getSinkContext(String name) {
-    return sinkContexts.get(name) ;
+    return sinkContexts.get(name);
   }
   
   private void prepareCommit() throws Exception {

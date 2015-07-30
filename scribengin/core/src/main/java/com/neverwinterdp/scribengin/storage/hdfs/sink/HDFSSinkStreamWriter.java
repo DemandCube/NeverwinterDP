@@ -37,6 +37,7 @@ public class HDFSSinkStreamWriter implements SinkStreamWriter {
 
   @Override
   public void completeCommit() throws Exception {
+    if(currentBuffer == null) return;
     //TODO: reimplement correctly 2 phases commit
     currentBuffer.commit();
     currentBuffer = null ;
