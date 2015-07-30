@@ -146,11 +146,10 @@ public class VM {
     Thread thread = new Thread() {
       public void run() {
         try {
-          Thread.sleep(delay);
-          vmApplicationRunner.vmApplication.terminate(event);
-          if(!vmApplicationRunner.vmApplication.isWaittingForTerminate()) {
-            vmApplicationRunner.interrupt();
+          if(delay > 0) {
+            Thread.sleep(delay);
           }
+          vmApplicationRunner.vmApplication.terminate(event);
         } catch (InterruptedException e) {
         }
       }

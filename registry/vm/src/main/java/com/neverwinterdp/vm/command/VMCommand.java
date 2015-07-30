@@ -54,10 +54,6 @@ public class VMCommand {
     
     @Override
     public CommandResult<?> execute(VM vm) {
-      try {
-      } catch(Exception ex) {
-        ex.printStackTrace();
-      }
       return super.execute(vm) ;
     }
   }

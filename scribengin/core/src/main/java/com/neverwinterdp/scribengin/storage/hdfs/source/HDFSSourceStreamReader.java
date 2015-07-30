@@ -38,7 +38,7 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
     FileStatus[] status = fs.listStatus(new Path(descriptor.getLocation()));
     for (int i = 0; i < status.length; i++) {
       String path = status[i].getPath().getName();
-      if(path.startsWith("data-")) {
+      if(path.startsWith("data-") && path.endsWith(".dat")) {
         dataPaths.add(status[i].getPath());
       }
     }
