@@ -13,13 +13,16 @@ import org.junit.Test;
 
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.hdfs.sink.HDFSSink;
+import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSource;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkStream;
 import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
+import com.neverwinterdp.scribengin.storage.source.SourceStream;
+import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
-public class SinkUnitTest {
+public class SinkSourceUnitTest {
   static String DATA_DIRECTORY = "./build/sinkhdfs" ;
   
   private FileSystem fs ;
@@ -51,10 +54,13 @@ public class SinkUnitTest {
       writer.commit();
     }
     System.out.println("Before close");
+    Assert.assertEquals(5 * 100, count(DATA_DIRECTORY));
     HDFSUtil.dump(fs, DATA_DIRECTORY);
+
     writer.close();
-    System.out.println("\n\n") ;
     System.out.println("After close");
+    Assert.assertEquals(5 * 100, count(DATA_DIRECTORY));
+    System.out.println("\n\n") ;
     HDFSUtil.dump(fs, DATA_DIRECTORY);
   }
   
@@ -113,5 +119,20 @@ public class SinkUnitTest {
         ex.printStackTrace();
       }
     }
+  }
+  
+  private int count(String hdfsDir) throws Exception {
+    HDFSSource source = new HDFSSource(fs, hdfsDir);
+    SourceStream[] stream = source.getStreams();
+    int count  = 0; 
+    for(int  i = 0; i < stream.length; i++) {
+      SourceStreamReader reader = stream[i].getReader("test") ;
+      System.out.println("stream " + stream[i].getDescriptor().getId());
+      while(reader.next(1000) != null) {
+        count++ ;
+      }
+      reader.close();
+    }
+    return count;
   }
 }
