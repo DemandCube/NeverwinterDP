@@ -31,8 +31,7 @@ public class HDFSSourceStreamReader implements SourceStreamReader {
   private int currPosition;
   private CommitPoint lastCommitInfo;
 
-  public HDFSSourceStreamReader(String name, FileSystem fs, StreamDescriptor descriptor) throws FileNotFoundException,
-      IllegalArgumentException, IOException {
+  public HDFSSourceStreamReader(String name, FileSystem fs, StreamDescriptor descriptor) throws FileNotFoundException, IllegalArgumentException, IOException {
     this.name = name;
     this.fs = fs;
     FileStatus[] status = fs.listStatus(new Path(descriptor.getLocation()));
