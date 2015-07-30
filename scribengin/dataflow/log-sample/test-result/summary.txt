@@ -1,8 +1,8 @@
 Real Cluster Summary
 ####################
 
-Date            Name     M Size   N Mesg  Exec    Splitter   Info    Warn     Error     Total      Validate     Lost    Failure
-----------------------------------------------    ---------------------------------------------   -------------------------------
+Date            Name     M Size   N Mesg  Exec    Splitter   Info    Warn     Error     Total      Duplicate     Lost    Kill      Run Time
+----------------------------------------------    ---------------------------------------------   -----------------------------------------
 First Run      
                 Kafka     512      10M     SW       14.26M    4.69M   4.76M    5.95M    29.66M
                 Kafka    1024      10M     SW       25.20M    8.71M   8.87M   13.91M    56.69M
@@ -24,8 +24,10 @@ July 24, 2015
 Docker Summary
 ####################
 
-Date            Name     M Size   N Mesg  Exec    Splitter   Info    Warn     Error     Total      Validate     Lost    Failure
-----------------------------------------------    ---------------------------------------------   -------------------------------
+Date            Name     M Size   N Mesg  Exec    Splitter   Info    Warn     Error     Total      Duplicate     Lost    Kill      Run Time
+----------------------------------------------    ---------------------------------------------   -----------------------------------------
 July 29, 2015   
                 S3        512      10M     SW      7.04M     2.20M    2.28M    2.36M     13.9M
                 HDFS      512      10M     SW      6.00M     1.92M    1.94M    2.34M     12.2M
+
+July 30, 2015   Kafka     512      10M     SW                                                        262286         0       5      2189248ms

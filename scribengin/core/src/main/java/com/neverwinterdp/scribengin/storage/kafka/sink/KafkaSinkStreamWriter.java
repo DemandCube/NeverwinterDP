@@ -1,6 +1,7 @@
 package com.neverwinterdp.scribengin.storage.kafka.sink;
 
-import com.neverwinterdp.kafka.producer.DefaultKafkaWriter;
+import com.neverwinterdp.kafka.producer.AckKafkaWriter;
+import com.neverwinterdp.kafka.producer.KafkaWriter;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
@@ -8,24 +9,25 @@ import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 //TODO: Allow the writer write to the assigned partition and configure the send time out
 public class KafkaSinkStreamWriter implements SinkStreamWriter {
   private StreamDescriptor descriptor;
-  private DefaultKafkaWriter defaultKafkaWriter ;
+  private KafkaWriter writer ;
   private String topic;
   
   public KafkaSinkStreamWriter(StreamDescriptor descriptor) {
     this.descriptor = descriptor;
-    this.defaultKafkaWriter = new DefaultKafkaWriter(descriptor.attribute("name"), descriptor.attribute("broker.list")) ;
+    this.writer = 
+      new AckKafkaWriter(descriptor.attribute("name"), descriptor.attribute("broker.list")) ;
     this.topic = descriptor.attribute("topic");
   }
   
   @Override
   public void append(DataflowMessage dataflowMessage) throws Exception {
-    defaultKafkaWriter.send(topic, dataflowMessage, 5000);
+    writer.send(topic, dataflowMessage, 5000);
   }
 
 
   @Override
   public void close() throws Exception {
-    defaultKafkaWriter.close();
+    writer.close();
   }
 
   @Override
