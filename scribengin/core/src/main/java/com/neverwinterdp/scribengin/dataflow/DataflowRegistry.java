@@ -23,6 +23,7 @@ import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.registry.task.TaskContext;
 import com.neverwinterdp.registry.task.TaskRegistry;
+import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.simulation.FailureConfig;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorDescriptor;
@@ -77,6 +78,7 @@ public class DataflowRegistry {
   private Node               workerEventNode;
   private Node               failureEventNode;
   private Node               masterEventNode;
+  private TXEventBroadcaster workerEventBroadcaster ;
   
   private Node               activeActivitiesNode;
   
@@ -112,6 +114,7 @@ public class DataflowRegistry {
     masterEventNode  = registry.get(dataflowPath + "/" + MASTER_EVENT_PATH);
     workerEventNode  = registry.get(dataflowPath + "/" + WORKER_EVENT_PATH);
     failureEventNode = registry.get(dataflowPath + "/" + FAILURE_EVENT_PATH);
+    workerEventBroadcaster = new TXEventBroadcaster(registry, dataflowPath + "/" + WORKER_EVENT_PATH);
     
     activeActivitiesNode = registry.get(dataflowPath + "/" + ACTIVITIES_PATH);
     
@@ -241,6 +244,10 @@ public class DataflowRegistry {
   
   public void setStatus(DataflowLifecycleStatus event) throws RegistryException {
     statusNode.setData(event);
+  }
+  
+  public TXEventBroadcaster getWorkerEventBroadcaster() {
+    return this.workerEventBroadcaster;
   }
   
   public <T> void broadcastWorkerEvent(T event) throws RegistryException {

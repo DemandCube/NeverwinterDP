@@ -5,15 +5,15 @@ import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 
-public class TXEventManager {
+public class TXEventBroadcaster {
   private Registry         registry;
   private String           eventPath;
   private Node             eventsNode ;
   
-  public TXEventManager(Registry registry, String eventPath) throws RegistryException {
+  public TXEventBroadcaster(Registry registry, String eventsPath) throws RegistryException {
     this.registry = registry;
-    this.eventPath = eventPath;
-    eventsNode = registry.createIfNotExist(eventPath + "/events") ;
+    this.eventPath = eventsPath;
+    eventsNode = registry.createIfNotExist(eventsPath)  ;
   }
   
   public String getEventPath() { return this.eventPath ; }
@@ -24,9 +24,10 @@ public class TXEventManager {
     eventsNode.createChild(event.getName(), event, NodeCreateMode.PERSISTENT);
   }
   
-  public void broadcast(TXEvent event, TXEventNotificationListener listener) throws RegistryException {
-    eventsNode.createChild(event.getName(), event, NodeCreateMode.PERSISTENT);
-    
+  public TXEventNotificationWatcher broadcast(TXEvent event, TXEventNotificationListener listener) throws RegistryException {
+    eventsNode.createChild(event.getId(), event, NodeCreateMode.PERSISTENT);
+    TXEventNotificationWatcher watcher = new TXEventNotificationWatcher(this, event, listener);
+    return watcher;
   }
 
   public void notify(TXEvent event, TXEventNotification notification) throws RegistryException {

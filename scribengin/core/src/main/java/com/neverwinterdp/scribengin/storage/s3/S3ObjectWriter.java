@@ -29,8 +29,6 @@ public class S3ObjectWriter {
   }
 
   public void waitAndClose(long timeout) throws Exception, IOException, InterruptedException {
-    System.err.println("Start wait and close") ;
-    long start = System.currentTimeMillis() ;
     byte[] data = output.toByteArray();
     output.close(); 
     ByteArrayInputStream input = new ByteArrayInputStream(data);
@@ -38,7 +36,6 @@ public class S3ObjectWriter {
     PutObjectRequest request = new PutObjectRequest(bucketName, key, input, metadata);
     request.getRequestClientOptions().setReadLimit(1024); //buffer limit 1M
     s3Client.getAmazonS3Client().putObject(request);
-    System.err.println("Finish wait and close in " + (System.currentTimeMillis() - start)) ;
   }
   
   public void forceClose() throws IOException, InterruptedException {

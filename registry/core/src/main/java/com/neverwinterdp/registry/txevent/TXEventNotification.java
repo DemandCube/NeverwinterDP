@@ -6,6 +6,13 @@ public class TXEventNotification {
   private String       clientId ;
   private Status       status;
   
+  public TXEventNotification() {} 
+  
+  public TXEventNotification(String clientId, Status status) {
+    this.clientId = clientId;
+    this.status = status ;
+  }
+  
   public String getClientId() { return clientId; }
   public void setClientId(String clientId) { this.clientId = clientId; }
   
