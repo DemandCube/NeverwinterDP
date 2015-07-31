@@ -117,7 +117,7 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
   
   public void close() throws InterruptedException { 
     if(resendThread != null && resendThread.isAlive()) {
-      resendThread.waitForTermination(60000);
+      resendThread.waitForTermination(90000);
     }
     producer.close(); 
     producer = null ;

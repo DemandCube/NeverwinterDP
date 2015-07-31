@@ -22,8 +22,9 @@ public class LogSampleUnitTest  {
   ScribenginClusterBuilder clusterBuilder ;
   Node esNode ;
   
-  @BeforeClass
-  static public void init() throws Exception {
+  
+  @Before
+  public void setup() throws Exception {
     FileUtil.removeIfExist("build/hdfs", false);
     FileUtil.removeIfExist("build/data", false);
     FileUtil.removeIfExist("build/logs", false);
@@ -36,10 +37,7 @@ public class LogSampleUnitTest  {
     //loggerConfig.getEsAppender().initLocalEnvironment();
     //loggerConfig.getKafkaAppender().initLocalEnvironment();
     LoggerFactory.log4jConfigure(loggerConfig.getLog4jConfiguration());
-  }
-  
-  @Before
-  public void setup() throws Exception {
+    
     NodeBuilder nb = nodeBuilder();
     nb.getSettings().put("cluster.name",       "neverwinterdp");
     nb.getSettings().put("path.data",          "build/elasticsearch/data");
@@ -73,7 +71,7 @@ public class LogSampleUnitTest  {
         "--dataflow-descriptor", "src/app/conf/local/kafka-log-dataflow-chain.json",
         "--dataflow-task-dedicated-executor", "false",
         "--dataflow-wait-for-submit-timeout", "45000",
-        "--dataflow-wait-for-termination-timeout", "90000",
+        "--dataflow-wait-for-termination-timeout", "120000",
         "--dataflow-task-debug",
         
         "--log-validator-wait-for-termination", "45000",

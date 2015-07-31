@@ -150,6 +150,9 @@ public class VM {
             Thread.sleep(delay);
           }
           vmApplicationRunner.vmApplication.terminate(event);
+          if(!vmApplicationRunner.vmApplication.isWaittingForTerminate()) {
+            vmApplicationRunner.interrupt();
+          }
         } catch (InterruptedException e) {
         }
       }
