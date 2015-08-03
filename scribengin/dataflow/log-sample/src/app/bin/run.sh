@@ -51,8 +51,8 @@ DEDICATED_EXECUTOR=$(get_opt --dedicated-executor 'false' $@)
 
 STORAGE=$(get_opt --storage 'kafka' $@)
 
-KILL_MAX=$(get_opt --kill-max '3' $@)
-KILL_PERIOD=$(get_opt --kill-period '90000' $@)
+EXECUTION_MAX=$(get_opt --execution-max '3' $@)
+EXECUTION_PERIOD=$(get_opt --execution-period '90000' $@)
 
 DATAFLOW_DESCRIPTOR_FILE=""
 LOG_VALIDATOR_VALIDATE=""
@@ -105,8 +105,8 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     \
     --dataflow-failure-simulation-worker  \
     --dataflow-failure-simulation-wait-before-start 90000 \
-    --dataflow-failure-simulation-max-execution $KILL_MAX \
-    --dataflow-failure-simulation-period $KILL_PERIOD \
+    --dataflow-failure-simulation-max-execution $EXECUTION_MAX \
+    --dataflow-failure-simulation-period $EXECUTION_PERIOD \
     --dataflow-task-debug
 elif [ "$PROFILE" = "dataflow-start-stop" ] ; then
   MAX_RUN_TIME=$(( 60000 + ($NUM_OF_MESSAGE * 4) ))
@@ -128,8 +128,8 @@ elif [ "$PROFILE" = "dataflow-start-stop" ] ; then
     \
     --dataflow-failure-simulation-start-stop-resume  \
     --dataflow-failure-simulation-wait-before-start 90000 \
-    --dataflow-failure-simulation-max-execution $KILL_MAX \
-    --dataflow-failure-simulation-period $KILL_PERIOD \
+    --dataflow-failure-simulation-max-execution $EXECUTION_MAX \
+    --dataflow-failure-simulation-period $EXECUTION_PERIOD \
     --dataflow-task-debug
 else
   echo "Usage: "
