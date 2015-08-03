@@ -6,21 +6,19 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.activity.Activity;
 import com.neverwinterdp.registry.activity.ActivityBuilder;
-import com.neverwinterdp.registry.activity.ActivityCoordinator;
 import com.neverwinterdp.registry.activity.ActivityExecutionContext;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.activity.ActivityStepBuilder;
 import com.neverwinterdp.registry.activity.ActivityStepExecutor;
-import com.neverwinterdp.registry.event.WaitingNodeEventListener;
-import com.neverwinterdp.registry.event.WaitingRandomNodeEventListener;
+import com.neverwinterdp.registry.txevent.TXEvent;
+import com.neverwinterdp.registry.txevent.TXEventNotificationCompleteListener;
+import com.neverwinterdp.registry.txevent.TXEventNotificationWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.service.DataflowService;
-import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
 
 public class DataflowResumeActivityBuilder extends ActivityBuilder {
   public Activity build() {
@@ -58,15 +56,10 @@ public class DataflowResumeActivityBuilder extends ActivityBuilder {
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
       List<String> workers = dflRegistry.getActiveWorkersNode().getChildren();
-      WaitingNodeEventListener waitingListener = new WaitingRandomNodeEventListener(dflRegistry.getRegistry()) ;
-      for(int i = 0; i < workers.size(); i++) {
-        Node workerNode = dflRegistry.getWorkerNode(workers.get(i)) ;
-        String path = workerNode.getPath() + "/status" ;
-        waitingListener.add(path, "Expect the RUNNING status for worker " + workers.get(i), DataflowWorkerStatus.RUNNING);
-      }
-      
-      dflRegistry.broadcastWorkerEvent(DataflowEvent.RESUME);
-      waitingListener.waitForEvents(30 * 1000);
+      TXEvent pEvent = new TXEvent("resume", DataflowEvent.RESUME);
+      TXEventNotificationWatcher watcher = 
+          dflRegistry.getWorkerEventBroadcaster().broadcast(pEvent, new TXEventNotificationCompleteListener());
+      watcher.waitForNotifications(workers.size(), 30 * 1000);
     }
   }
   

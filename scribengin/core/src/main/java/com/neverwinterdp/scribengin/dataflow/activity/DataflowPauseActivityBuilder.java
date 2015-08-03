@@ -9,19 +9,20 @@ import com.google.inject.Singleton;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.activity.Activity;
 import com.neverwinterdp.registry.activity.ActivityBuilder;
-import com.neverwinterdp.registry.activity.ActivityCoordinator;
 import com.neverwinterdp.registry.activity.ActivityExecutionContext;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.activity.ActivityStepBuilder;
 import com.neverwinterdp.registry.activity.ActivityStepExecutor;
 import com.neverwinterdp.registry.event.WaitingNodeEventListener;
 import com.neverwinterdp.registry.event.WaitingRandomNodeEventListener;
+import com.neverwinterdp.registry.txevent.TXEvent;
+import com.neverwinterdp.registry.txevent.TXEventNotificationCompleteListener;
+import com.neverwinterdp.registry.txevent.TXEventNotificationWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.service.DataflowService;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
-import com.neverwinterdp.util.text.TabularFormater;
 
 public class DataflowPauseActivityBuilder extends ActivityBuilder {
   public Activity build() {
@@ -76,15 +77,10 @@ public class DataflowPauseActivityBuilder extends ActivityBuilder {
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
       List<String> activeWorkers = dflRegistry.getActiveWorkersNode().getChildren();
-      WaitingNodeEventListener waitingListener = new WaitingRandomNodeEventListener(dflRegistry.getRegistry()) ;
-      for(int i = 0; i < activeWorkers.size(); i++) {
-        Node workerNode = dflRegistry.getWorkerNode(activeWorkers.get(i));
-        String path = workerNode.getPath() + "/status" ;
-        waitingListener.add(path, "Wait for status PAUSE on " + activeWorkers.get(i), DataflowWorkerStatus.PAUSE);
-      }
-      
-      dflRegistry.broadcastWorkerEvent(DataflowEvent.PAUSE);
-      waitingListener.waitForEvents(30 * 1000);
+      TXEvent pEvent = new TXEvent("pause", DataflowEvent.PAUSE);
+      TXEventNotificationWatcher watcher = 
+          dflRegistry.getWorkerEventBroadcaster().broadcast(pEvent, new TXEventNotificationCompleteListener());
+      watcher.waitForNotifications(activeWorkers.size(), 30 * 1000);
     }
   }
   

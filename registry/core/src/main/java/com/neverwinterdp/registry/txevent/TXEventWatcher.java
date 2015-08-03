@@ -23,11 +23,19 @@ public class TXEventWatcher extends NodeChildrenWatcher {
     watchChildren(eventsPath);
   }
   
+  public String getClientId() { return this.clientId; }
+  
   public void notify(TXEvent event, TXEventNotification notification) throws RegistryException {
     Node eventNode = eventsNode.getChild(event.getId());
     eventNode.createChild("notitification-", notification, NodeCreateMode.PERSISTENT_SEQUENTIAL);
   }
- 
+
+  public void notify(TXEvent event, TXEventNotification.Status status) throws RegistryException {
+    TXEventNotification notification = new TXEventNotification(clientId, status) ;
+    Node eventNode = eventsNode.getChild(event.getId());
+    eventNode.createChild("notitification-", notification, NodeCreateMode.PERSISTENT_SEQUENTIAL);
+  }
+  
   synchronized public void checkAndProcessTXEvents() throws Exception {
     Registry registry = getRegistry();
     String eventsPath = getWatchedPath() ;
@@ -48,8 +56,6 @@ public class TXEventWatcher extends NodeChildrenWatcher {
   }
   
   public void onTXEvent(TXEvent txEvent) throws Exception {
-    TXEventNotification notification = 
-        new TXEventNotification(clientId, TXEventNotification.Status.Complete) ;
-    notify(txEvent, notification);
+    notify(txEvent, TXEventNotification.Status.Complete);
   }
 }

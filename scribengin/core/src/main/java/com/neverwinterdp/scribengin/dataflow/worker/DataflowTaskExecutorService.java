@@ -11,10 +11,14 @@ import org.slf4j.Logger;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.neverwinterdp.registry.Node;
+import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.event.NodeEventWatcher;
 import com.neverwinterdp.registry.notification.Notifier;
+import com.neverwinterdp.registry.txevent.TXEvent;
+import com.neverwinterdp.registry.txevent.TXEventNotification;
+import com.neverwinterdp.registry.txevent.TXEventWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
@@ -48,7 +52,9 @@ public class DataflowTaskExecutorService {
   private LoggerFactory loggerFactory ;
   
   private Notifier notifier ;
-  private DataflowWorkerEventListenter dataflowTaskEventListener ;
+  
+  private DataflowWorkerEventWatcher   dataflowWorkerEventWatcher ;
+  
   private DataflowDescriptor dataflowDescriptor;
   private List<DataflowTaskExecutor> taskExecutors;
   private DataflowWorkerStatus workerStatus = DataflowWorkerStatus.INIT;
@@ -74,7 +80,8 @@ public class DataflowTaskExecutorService {
     notifier = new Notifier(dataflowRegistry.getRegistry(),  workerNode.getPath() + "/notification", "dataflow-executor-service");
     notifier.initRegistry();
     
-    dataflowTaskEventListener = new DataflowWorkerEventListenter(dataflowRegistry);
+    String workerEvtPath = dataflowRegistry.getWorkerEventBroadcaster().getEventPath();
+    dataflowWorkerEventWatcher = new DataflowWorkerEventWatcher(dataflowRegistry, workerEvtPath, vmDescriptor.getId());
     dataflowDescriptor = dataflowRegistry.getDataflowDescriptor();
     
     int numOfExecutors = dataflowDescriptor.getNumberOfExecutorsPerWorker();
@@ -128,11 +135,11 @@ public class DataflowTaskExecutorService {
     if(kill) return;
     logger.info("Start shutdown()");
     notifier.info("start-shutdown", "DataflowTaskExecutorService: start shutdown()");
-    if(workerStatus != DataflowWorkerStatus.TERMINATED) {
+    if(workerStatus != DataflowWorkerStatus.TERMINATED && workerStatus != DataflowWorkerStatus.TERMINATED_WITH_ERROR) {
       System.err.println("DataflowTaskExecutorService: shutdown()");
       workerStatus = DataflowWorkerStatus.TERMINATING;
       dataflowRegistry.setWorkerStatus(vmDescriptor, workerStatus);
-      dataflowTaskEventListener.setComplete();
+      dataflowWorkerEventWatcher.setComplete();
       interrupt() ;
       workerStatus = DataflowWorkerStatus.TERMINATED;
       dataflowRegistry.setWorkerStatus(vmDescriptor, workerStatus);
@@ -177,27 +184,24 @@ public class DataflowTaskExecutorService {
     }
   }
   
-  public class DataflowWorkerEventListenter extends NodeEventWatcher {
-    public DataflowWorkerEventListenter(DataflowRegistry dflRegistry) throws RegistryException {
-      super(dflRegistry.getRegistry(), true/*persistent*/);
-      watchModify(dflRegistry.getWorkerEventNode().getPath());
+  public class DataflowWorkerEventWatcher extends TXEventWatcher {
+    public DataflowWorkerEventWatcher(DataflowRegistry dflRegistry, String eventsPath, String clientId) throws RegistryException {
+      super(dflRegistry.getRegistry(), eventsPath, clientId);
     }
-
-    @Override
-    public void processNodeEvent(NodeEvent event) throws Exception {
-      if(event.getType() == NodeEvent.Type.MODIFY) {
-        DataflowEvent taskEvent = getRegistry().getDataAs(event.getPath(), DataflowEvent.class);
-        if(taskEvent == DataflowEvent.PAUSE) {
-          logger.info("Dataflow worker detect pause event!");
-          pause() ;
-        } else if(taskEvent == DataflowEvent.STOP) {
-          logger.info("Dataflow worker detect stop event!");
-          shutdown() ;
-        } else if(taskEvent == DataflowEvent.RESUME) {
-          logger.info("Dataflow worker detect resume event!");
-          start() ;
-        }
+    
+    public void onTXEvent(TXEvent txEvent) throws Exception {
+      DataflowEvent taskEvent = txEvent.getDataAs(DataflowEvent.class);
+      if(taskEvent == DataflowEvent.PAUSE) {
+        logger.info("Dataflow worker detect pause event!");
+        pause() ;
+      } else if(taskEvent == DataflowEvent.STOP) {
+        logger.info("Dataflow worker detect stop event!");
+        shutdown() ;
+      } else if(taskEvent == DataflowEvent.RESUME) {
+        logger.info("Dataflow worker detect resume event!");
+        start() ;
       }
+      notify(txEvent, TXEventNotification.Status.Complete);
     }
   }
 }

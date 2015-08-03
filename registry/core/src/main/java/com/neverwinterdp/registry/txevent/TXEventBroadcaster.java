@@ -11,9 +11,17 @@ public class TXEventBroadcaster {
   private Node             eventsNode ;
   
   public TXEventBroadcaster(Registry registry, String eventsPath) throws RegistryException {
+    this(registry, eventsPath, true) ;
+  }
+  
+  public TXEventBroadcaster(Registry registry, String eventsPath, boolean create) throws RegistryException {
     this.registry = registry;
     this.eventPath = eventsPath;
-    eventsNode = registry.createIfNotExist(eventsPath)  ;
+    if(create) {
+      eventsNode = registry.createIfNotExist(eventsPath);
+    } else {
+      eventsNode = registry.get(eventsPath);
+    }
   }
   
   public String getEventPath() { return this.eventPath ; }

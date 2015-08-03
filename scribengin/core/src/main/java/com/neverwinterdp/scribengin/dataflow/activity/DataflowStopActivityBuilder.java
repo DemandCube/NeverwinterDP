@@ -16,6 +16,9 @@ import com.neverwinterdp.registry.activity.ActivityStepBuilder;
 import com.neverwinterdp.registry.activity.ActivityStepExecutor;
 import com.neverwinterdp.registry.event.NodeChildrenWatcher;
 import com.neverwinterdp.registry.event.NodeEvent;
+import com.neverwinterdp.registry.txevent.TXEvent;
+import com.neverwinterdp.registry.txevent.TXEventNotificationCompleteListener;
+import com.neverwinterdp.registry.txevent.TXEventNotificationWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
@@ -72,11 +75,11 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      ActiveDataflowWorkerWatcher workerWatcher = new ActiveDataflowWorkerWatcher(dflRegistry, true) ;
-      dflRegistry.broadcastWorkerEvent(DataflowEvent.STOP);
-      if(!workerWatcher.waitForNoMoreWorker(45 * 1000)) {
-       throw new Exception("Wait for no more workers, but there is still " + dflRegistry.countActiveDataflowWorkers() + " workers") ; 
-      }
+      List<String> workers = dflRegistry.getActiveWorkerNames() ;
+      TXEvent pEvent = new TXEvent("stop", DataflowEvent.STOP);
+      TXEventNotificationWatcher watcher = 
+          dflRegistry.getWorkerEventBroadcaster().broadcast(pEvent, new TXEventNotificationCompleteListener());
+      watcher.waitForNotifications(workers.size(), 45 * 1000);
     }
   }
   
@@ -89,53 +92,6 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
       dflRegistry.setStatus(DataflowLifecycleStatus.STOP);
-    }
-  }
-  
-  static public class ActiveDataflowWorkerWatcher extends NodeChildrenWatcher {
-    private List<String> activeWorkers = null ;
-    private Node         activeWorkersNode ;
-    
-    public ActiveDataflowWorkerWatcher(DataflowRegistry dflRegistry, boolean persistent) throws RegistryException {
-      super(dflRegistry.getRegistry(), persistent);
-      activeWorkersNode = dflRegistry.getActiveWorkersNode() ;
-      watchChildren(activeWorkersNode.getPath());
-    }
-
-    @Override
-    public void processNodeEvent(NodeEvent event) throws Exception {
-      if(event.getType() == NodeEvent.Type.CHILDREN_CHANGED) {
-        activeWorkers = getRegistry().getChildren(event.getPath());
-        notifyActiveWorkerChange();
-      } else if(event.getType() == NodeEvent.Type.DELETE) {
-        setComplete(); ;
-      }
-    }
-    
-    synchronized void notifyActiveWorkerChange() {
-      notifyAll() ;
-    }
-    
-    synchronized List<String> waitForActiveWorkerChange(long timeout) throws InterruptedException {
-      wait(timeout) ;
-      return activeWorkers ;
-    }
-    
-    public boolean waitForNoMoreWorker(long timeout) throws Exception, InterruptedException {
-      List<String> workers = activeWorkersNode.getChildren();
-      if(workers.size() == 0) return true;
-      long waitTime = timeout ;
-      while(waitTime > 0) {
-        long start = System.currentTimeMillis() ;
-        workers = waitForActiveWorkerChange(waitTime) ;
-        if(workers == null) {
-          workers = activeWorkersNode.getChildren();
-        }
-        if(workers.size() == 0) return true;
-        long duration = System.currentTimeMillis() - start ;
-        waitTime = waitTime - duration ;
-      }
-      return false ;
     }
   }
 }

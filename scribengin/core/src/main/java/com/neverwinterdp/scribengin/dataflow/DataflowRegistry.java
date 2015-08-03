@@ -75,7 +75,6 @@ public class DataflowRegistry {
   private Node               masterLeaderNode;
   private Node               statusNode;
 
-  private Node               workerEventNode;
   private Node               failureEventNode;
   private Node               masterEventNode;
   private TXEventBroadcaster workerEventBroadcaster ;
@@ -112,9 +111,9 @@ public class DataflowRegistry {
     statusNode = registry.get(dataflowPath + "/status");
     
     masterEventNode  = registry.get(dataflowPath + "/" + MASTER_EVENT_PATH);
-    workerEventNode  = registry.get(dataflowPath + "/" + WORKER_EVENT_PATH);
     failureEventNode = registry.get(dataflowPath + "/" + FAILURE_EVENT_PATH);
-    workerEventBroadcaster = new TXEventBroadcaster(registry, dataflowPath + "/" + WORKER_EVENT_PATH);
+    workerEventBroadcaster = 
+        new TXEventBroadcaster(registry, dataflowPath + "/" + WORKER_EVENT_PATH, false);
     
     activeActivitiesNode = registry.get(dataflowPath + "/" + ACTIVITIES_PATH);
     
@@ -139,8 +138,8 @@ public class DataflowRegistry {
     statusNode.createIfNotExists();
     
     masterEventNode.createIfNotExists();
-    workerEventNode.createIfNotExists();
     failureEventNode.createIfNotExists();
+    registry.createIfNotExist(dataflowPath + "/" + WORKER_EVENT_PATH);
     
     activeActivitiesNode.createIfNotExists();
     
@@ -160,8 +159,6 @@ public class DataflowRegistry {
   
   public String getDataflowNotificationsPath() { return this.dataflowPath  + "/" + NOTIFICATIONS_PATH; }
   
-  public Node getWorkerEventNode() { return workerEventNode ; }
-
   public Node getMasterEventNode() { return masterEventNode ; }
   
   public Node getFailureEventNode() { return failureEventNode ; }
@@ -248,10 +245,6 @@ public class DataflowRegistry {
   
   public TXEventBroadcaster getWorkerEventBroadcaster() {
     return this.workerEventBroadcaster;
-  }
-  
-  public <T> void broadcastWorkerEvent(T event) throws RegistryException {
-    workerEventNode.setData(event);
   }
   
   public void broadcastMasterEvent(DataflowEvent event) throws RegistryException {

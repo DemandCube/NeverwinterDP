@@ -45,8 +45,9 @@ public class TXEventNotificationWatcher extends NodeChildrenWatcher {
   public int waitForNotifications(int expectNumOfNotification, long timeout) throws Exception {
     long stopTime = System.currentTimeMillis() + timeout;
     long waitTime = timeout ;
-    while(waitTime > 0 && processedNotifications.size() < expectNumOfNotification) {
+    while(processedNotifications.size() < expectNumOfNotification) {
       waitTime = stopTime - System.currentTimeMillis();
+      if(waitTime <= 0) break;
       waitForNotification(waitTime);
     }
     boolean complete = processedNotifications.size() == expectNumOfNotification;

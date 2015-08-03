@@ -21,6 +21,10 @@ public class TXEvent {
     this.data = data ;
   }
 
+  public <T> TXEvent(String name, T obj) {
+    this(name, System.currentTimeMillis() + 60000,JSONSerializer.INSTANCE.toBytes(obj));
+  }
+  
   public <T> TXEvent(String name, long expiredTime, T obj) {
     this(name, expiredTime,JSONSerializer.INSTANCE.toBytes(obj));
   }
@@ -39,5 +43,9 @@ public class TXEvent {
   public byte[] getData() { return data; }
   public void setData(byte[] data) {
     this.data = data;
+  }
+  
+  public <T> T getDataAs(Class<T> type) {
+    return JSONSerializer.INSTANCE.fromBytes(data, type);
   }
 }
