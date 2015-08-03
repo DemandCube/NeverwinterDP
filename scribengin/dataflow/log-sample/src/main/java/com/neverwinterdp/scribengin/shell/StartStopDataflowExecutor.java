@@ -20,29 +20,17 @@ import com.neverwinterdp.util.ExceptionUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
 public class StartStopDataflowExecutor extends Executor {
-  @Parameter(names = "--wait-for-running-dataflow", description = "The command should repeat in this failurePeriod of time")
-  long waitForRunningDataflow = 180000;
-  
   @Parameter(names = "--wait-before-start", description = "The command should repeat in this failurePeriod of time")
-  long waitBeforeStart = -1;
+  public long waitBeforeSimulateFailure = -1;
   
-  @Parameter(names = "--sleep-before-stop", description = "The command should repeat in this failurePeriod of time")
-  long sleepBeforeStop = 10000;
+  @Parameter(names = "--failure-period", description = "The command should repeat in this failurePeriod of time")
+  public long failurePeriod = 10000;
   
-  @Parameter(names = "--sleep-before-resume", description = "The command should repeat in this failurePeriod of time")
-  long sleepBeforeResume = 10000;
-  
-  @Parameter(names = "--max-wait-for-stop", description = "The command should repeat in this failurePeriod of time")
-  long maxWaitForStop = 60000;
-  
-  @Parameter(names = "--max-wait-for-resume", description = "The command should repeat in this failurePeriod of time")
-  long maxWaitForResume = 20000;
-
   @Parameter(names = "--print-summary", description = "Enable to dump the registry at the end")
   protected boolean printSummary = false;
   
   @Parameter(names = "--max-execution", description = "The maximum number of start/stop/resume execution")
-  int maxExecution = 3;
+  public int maxExecution = 3;
 
   String dataflowId ;
   private DataflowClient   dflClient ;
@@ -75,21 +63,22 @@ public class StartStopDataflowExecutor extends Executor {
   void execute(ScribenginShell shell) throws Exception {
     Notifier notifier       = null ;
     ScribenginClient scribenginClient = shell.getScribenginClient() ;
-    dflClient = scribenginClient.getDataflowClient(dataflowId, waitForRunningDataflow);
+    dflClient = scribenginClient.getDataflowClient(dataflowId, 180000);
     String notifierPath = "/scribengin/failure-simulation/" + dataflowId + "/start-stop-resume";
     DataflowLifecycleStatus dataflowStatus = dflClient.getStatus();
 
     Registry registry = scribenginClient.getRegistry() ;
 
-    if(waitBeforeStart > 0) Thread.sleep(waitBeforeStart);
+    if(waitBeforeSimulateFailure > 0) Thread.sleep(waitBeforeSimulateFailure);
+    
     int count = 0 ;
     while(count < maxExecution) {
       count++ ;
       notifier = new Notifier(registry, notifierPath, "simulation-" + (count + 1));
       notifier.initRegistry();
       
-      notifier.info("wait-before-stop", "Wait " + sleepBeforeStop + "ms before stop the dataflow");
-      if(sleepBeforeStop > 0) Thread.sleep(sleepBeforeStop);
+      notifier.info("wait-before-stop", "Wait " + failurePeriod + "ms before stop the dataflow");
+      
       try {
         dataflowStatus = dflClient.getStatus();
       } catch(RegistryException ex) {
@@ -114,8 +103,8 @@ public class StartStopDataflowExecutor extends Executor {
       }
       stopCompleteCount++ ;
 
-      notifier.info("sleep-before-resume", "Sleep " + sleepBeforeResume +"ms before resume");
-      if(sleepBeforeResume > 0) Thread.sleep(sleepBeforeResume);
+      notifier.info("sleep-before-resume", "Sleep " + failurePeriod +"ms before resume");
+      Thread.sleep(failurePeriod);
 
       resumeCount++ ;
       notifier.info("before-resume", "Before resume");
@@ -160,7 +149,7 @@ public class StartStopDataflowExecutor extends Executor {
     WaitingOrderNodeEventListener stopWaitingListener = new WaitingOrderNodeEventListener(dflClient.getRegistry());
     stopWaitingListener.add(dflRegistry.getStatusNode().getPath(), expectStatus, "Wait for dataflow status " + expectStatus, true);
     dflClient.setDataflowEvent(stopEvent);
-    stopWaitingListener.waitForEvents(maxWaitForStop);
+    stopWaitingListener.waitForEvents(60000);
     if(stopWaitingListener.getUndetectNodeEventCount() > 0) {
       executeLog.setSuccess(false);
     }
@@ -178,7 +167,7 @@ public class StartStopDataflowExecutor extends Executor {
     String statusPath = dflClient.getDataflowRegistry().getStatusNode().getPath();
     resumeWaitingListener.add(statusPath, DataflowLifecycleStatus.RUNNING, "Expect RUNNING for the dataflow status", true);
     dflClient.setDataflowEvent(DataflowEvent.RESUME);
-    resumeWaitingListener.waitForEvents(maxWaitForResume);
+    resumeWaitingListener.waitForEvents(60000);
     if(resumeWaitingListener.getUndetectNodeEventCount() > 0) {
       executeLog.setSuccess(false);
     }

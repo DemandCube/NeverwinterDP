@@ -74,7 +74,7 @@ public class LogSampleClient  {
         RandomKillDataflowWorkerExecutor executor = new RandomKillDataflowWorkerExecutor(shell, dataflowId); 
         executor.waitBeforeSimulateFailure = config.dataflowFailureSimulationWaitBeforeStart;
         executor.simulateKill = config.dataflowFailureSimulationSimulateKill;
-        executor.maxKill = config.dataflowFailureSimulationMaxKill;
+        executor.maxKill = config.dataflowFailureSimulationMaxExecution;
         executor.failurePeriod = config.dataflowFailureSimulationPeriod;
         dataflowChainGroup.add(executor);
       }
@@ -85,6 +85,9 @@ public class LogSampleClient  {
         String dataflowId = dflDescriptor.getId();
         if(dataflowId.indexOf("splitter") >= 0) continue;
         StartStopDataflowExecutor executor = new StartStopDataflowExecutor(shell, dataflowId); 
+        executor.waitBeforeSimulateFailure = config.dataflowFailureSimulationWaitBeforeStart;
+        executor.maxExecution = config.dataflowFailureSimulationMaxExecution;
+        executor.failurePeriod = config.dataflowFailureSimulationPeriod;
         dataflowChainGroup.add(executor);
       }
     }

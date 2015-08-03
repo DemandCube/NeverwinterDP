@@ -16,9 +16,6 @@ import com.neverwinterdp.util.text.TabularFormater;
 import com.neverwinterdp.vm.VMDescriptor;
 
 public class RandomKillDataflowWorkerExecutor extends Executor {
-  @Parameter(names = "--wait-for-running-dataflow", description = "The command should repeat in this failurePeriod of time")
-  public long waitForRunningDataflow = 180000;
-  
   @Parameter(names = "--wait-before-simulate-failure", description = "Wait before simulate")
   public long waitBeforeSimulateFailure = 60000;
   
@@ -27,7 +24,7 @@ public class RandomKillDataflowWorkerExecutor extends Executor {
   public long failurePeriod = 15000;
   
   @Parameter(names = "--max-kill", description = "The command should repeat in this period of time")
-  public int maxKill = 25;
+  public int maxKill = 5;
   
   @Parameter(names = "--simulate-kill", description = "The command should repeat in this period of time")
   public boolean simulateKill = false;
@@ -58,7 +55,7 @@ public class RandomKillDataflowWorkerExecutor extends Executor {
   void execute(ScribenginShell shell) throws Exception {
     System.err.println("RandomDataflowWorkerKiller: start") ;
     ScribenginClient scribenginClient = shell.getScribenginClient() ;
-    dflClient = scribenginClient.getDataflowClient(dataflowId, waitForRunningDataflow);
+    dflClient = scribenginClient.getDataflowClient(dataflowId, 180000);
 
     
     System.err.println("RandomDataflowWorkerKiller: waitBeforeSimulateFailure") ;

@@ -78,7 +78,7 @@ public class LogSampleWithFailureSimulaionUnitTest  {
         "--dataflow-failure-simulation-start-stop-resume",
         "--dataflow-failure-simulation-wait-before-start", "15000",
         "--dataflow-failure-simulation-simulate-kill",
-        "--dataflow-failure-simulation-max-kill", "2",
+        "--dataflow-failure-simulation-max-execution", "2",
         "--dataflow-failure-simulation-period", "35000",
         "--dataflow-task-debug",
         

@@ -105,7 +105,30 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     \
     --dataflow-failure-simulation-worker  \
     --dataflow-failure-simulation-wait-before-start 90000 \
-    --dataflow-failure-simulation-max-kill $KILL_MAX \
+    --dataflow-failure-simulation-max-execution $KILL_MAX \
+    --dataflow-failure-simulation-period $KILL_PERIOD \
+    --dataflow-task-debug
+elif [ "$PROFILE" = "dataflow-start-stop" ] ; then
+  MAX_RUN_TIME=$(( 60000 + ($NUM_OF_MESSAGE * 4) ))
+  $JAVACMD -Djava.ext.dirs=$APP_DIR/libs:$SCRIBENGIN_HOME/libs:$JAVA_HOME/jre/lib/ext $JAVA_OPTS $APP_OPT $LOG_OPT $MAIN_CLASS \
+    --registry-connect zookeeper-1:2181 \
+    --registry-db-domain /NeverwinterDP \
+    --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
+    --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
+    \
+    --log-generator-num-of-vm 1  --log-generator-wait-for-ready 30000 \
+    --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
+    \
+    --log-validator-wait-for-termination 3600000 \
+    $LOG_VALIDATOR_VALIDATE_OPT \
+    \
+    --dataflow-descriptor $DATAFLOW_DESCRIPTOR_FILE  \
+    --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
+    --dataflow-task-dedicated-executor $DEDICATED_EXECUTOR \
+    \
+    --dataflow-failure-simulation-start-stop-resume  \
+    --dataflow-failure-simulation-wait-before-start 90000 \
+    --dataflow-failure-simulation-max-execution $KILL_MAX \
     --dataflow-failure-simulation-period $KILL_PERIOD \
     --dataflow-task-debug
 else
