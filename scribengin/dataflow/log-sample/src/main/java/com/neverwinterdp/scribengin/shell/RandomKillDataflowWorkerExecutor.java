@@ -65,6 +65,9 @@ public class RandomKillDataflowWorkerExecutor extends Executor {
     int simulationCount = 0 ;
 
     while(simulationCount < maxKill) {
+      if(dflClient.getStatus() != DataflowLifecycleStatus.RUNNING) {
+        break;
+      }
       kill();
       Thread.sleep(failurePeriod);
       simulationCount++ ;
@@ -73,9 +76,6 @@ public class RandomKillDataflowWorkerExecutor extends Executor {
   }
 
   public void kill() throws Exception {
-    if(dflClient.getStatus() != DataflowLifecycleStatus.RUNNING) {
-      return  ;
-    }
     Registry registry = dflClient.getRegistry() ;
     String path = "/scribengin/failure-simulation/" + dataflowId + "/workers";
     Notifier notifier = new Notifier(registry, path, "simulation-" + executeLogs.size());
