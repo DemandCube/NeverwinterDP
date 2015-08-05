@@ -54,40 +54,20 @@ public class DataflowSubmitter {
         (CommandResult<Boolean>)vmClient.execute(scribenginMaster, deployCmd);
   }
   
-  public void waitForStatus(long timeout, DataflowLifecycleStatus[] status) throws Exception {
-    WaitingOrderNodeEventListener eventListener = new WaitingOrderNodeEventListener(scribenginClient.getRegistry());
-    String dataflowStatusPath = ScribenginService.getDataflowStatusPath(dflDescriptor.getId());
-    String mesg = "Wait for one of the dataflow status " + StringUtil.join(status, ",");
-    eventListener.add(dataflowStatusPath, status, mesg, true);
-    eventListener.waitForEvents(timeout);
+  public void waitForStatus(long timeout, DataflowLifecycleStatus ... status) throws Exception {
+    DataflowClient dflClient = scribenginClient.getDataflowClient(dflDescriptor.getId(), 90000);
+    dflClient.waitForStatus(3000, timeout, status);
   }
   
   public void waitForRunning(long timeout) throws Exception {
-    try {
-      long start = System.currentTimeMillis();
-      DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
-          DataflowLifecycleStatus.RUNNING, DataflowLifecycleStatus.STOP, DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
-      };
-      waitForStatus(timeout, status) ;
-      System.out.println("Wait for RUNNING or TERMINATED status in " + (System.currentTimeMillis() - start) + "ms");
-    } catch(Exception ex) {
-      dumpDataflowRegistry(System.err);
-      throw ex;
-    }
+    DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
+        DataflowLifecycleStatus.RUNNING, DataflowLifecycleStatus.STOP, DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
+    };
+    waitForStatus(timeout, status) ;
   }
   
   public void waitForFinish(long timeout) throws Exception {
-    try {
-      long start = System.currentTimeMillis();
-      DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
-        DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
-      };
-      waitForStatus(timeout, status) ;
-      System.out.println("Wait for TERMINATED status in " + (System.currentTimeMillis() - start) + "ms");
-    } catch(Exception ex) {
-      dumpDataflowRegistry(System.err);
-      throw ex;
-    }
+    waitForStatus(timeout, DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED) ;
   }
   
   public DataflowSubmitter enableDataflowTaskDebugger(Appendable out) throws Exception {
