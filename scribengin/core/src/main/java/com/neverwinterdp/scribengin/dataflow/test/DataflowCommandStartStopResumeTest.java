@@ -7,15 +7,16 @@ import com.beust.jcommander.Parameter;
 import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.registry.event.WaitingOrderNodeEventListener;
 import com.neverwinterdp.registry.notification.Notifier;
+import com.neverwinterdp.registry.txevent.TXEventNotificationWatcher;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.util.ExceptionUtil;
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.text.TabularFormater;
 
 public class DataflowCommandStartStopResumeTest extends DataflowCommandTest {
@@ -150,16 +151,17 @@ public class DataflowCommandStartStopResumeTest extends DataflowCommandTest {
       expectStatus = DataflowLifecycleStatus.STOP;
     }
     System.err.println("Client: start request stop, event = " + stopEvent + ", expect status = " + expectStatus);
-    WaitingOrderNodeEventListener stopWaitingListener = new WaitingOrderNodeEventListener(dflClient.getRegistry());
-    stopWaitingListener.add(dflRegistry.getStatusNode().getPath(), expectStatus, "Wait for dataflow status " + expectStatus, true);
-    dflClient.setDataflowEvent(stopEvent);
-    stopWaitingListener.waitForEvents(maxWaitForStop);
-    if(stopWaitingListener.getUndetectNodeEventCount() > 0) {
+    TXEventNotificationWatcher watcher = dflClient.broadcastDataflowEvent(stopEvent);
+    int countNotification = watcher.waitForNotifications(1, maxWaitForStop);
+    watcher.complete();
+    if(!dflRegistry.waitForDataflowStatus(expectStatus, maxWaitForStop)) {
       executeLog.setSuccess(false);
+      executeLog.addLog("Fail to wait for the dataflow" + expectStatus + " status");
     }
-    System.err.println("Client: finish request stop, success = " + executeLog.isSuccess() + ", undetect event = " + stopWaitingListener.getUndetectNodeEventCount());
-    executeLog.addLog(stopWaitingListener.getTabularFormaterEventLogInfo().getFormatText());
     executeLog.stop();
+    System.err.println("Client: finish request stop");
+    System.err.println("  Count notification  = " + countNotification);
+    System.err.println("  Log  : " + JSONSerializer.INSTANCE.toString(executeLog));
     return executeLog;
   }
   
@@ -167,17 +169,20 @@ public class DataflowCommandStartStopResumeTest extends DataflowCommandTest {
     ExecuteLog executeLog = new ExecuteLog("Resume the dataflow") ;
     executeLog.start();
     System.err.println("Client: start request resume...");
-    WaitingOrderNodeEventListener resumeWaitingListener = new WaitingOrderNodeEventListener(dflClient.getRegistry());
-    String statusPath = dflClient.getDataflowRegistry().getStatusNode().getPath();
-    resumeWaitingListener.add(statusPath, DataflowLifecycleStatus.RUNNING, "Expect RUNNING for the dataflow status", true);
-    dflClient.setDataflowEvent(DataflowEvent.RESUME);
-    resumeWaitingListener.waitForEvents(maxWaitForResume);
-    if(resumeWaitingListener.getUndetectNodeEventCount() > 0) {
+    DataflowRegistry dflRegistry = dflClient.getDataflowRegistry();
+
+    TXEventNotificationWatcher watcher = dflClient.broadcastDataflowEvent(DataflowEvent.RESUME);
+    int countNotification = watcher.waitForNotifications(1, maxWaitForResume);
+    watcher.complete();
+    if(!dflRegistry.waitForDataflowStatus(DataflowLifecycleStatus.RUNNING, maxWaitForResume)) {
       executeLog.setSuccess(false);
+      executeLog.addLog("Fail to wait for the dataflow RUNNING status");
     }
-    System.err.println("Client: finish request stop, success = " + executeLog.isSuccess() + ", undetect event = " + resumeWaitingListener.getUndetectNodeEventCount());
-    executeLog.addLog(resumeWaitingListener.getTabularFormaterEventLogInfo().getFormatText());
     executeLog.stop();
+    System.err.println("Client: finish request resume");
+    System.err.println("Client: finish request stop");
+    System.err.println("  Count notification  = " + countNotification);
+    System.err.println("  Log  : " + JSONSerializer.INSTANCE.toString(executeLog));
     return executeLog ;
   }
 }

@@ -66,7 +66,7 @@ public class LogSampleWithFailureSimulaionUnitTest  {
         "--registry-implementation", RegistryImpl.class.getName(),
         
         "--log-generator-num-of-vm", "1",
-        "--log-generator-num-of-message", "20000",
+        "--log-generator-num-of-message", "50000",
         "--log-generator-message-size", "128",
         
         "--dataflow-descriptor", "src/app/conf/local/kafka-log-dataflow-chain.json",
@@ -74,12 +74,12 @@ public class LogSampleWithFailureSimulaionUnitTest  {
         "--dataflow-wait-for-submit-timeout", "45000",
         "--dataflow-wait-for-termination-timeout", "240000",
         
-        //"--dataflow-failure-simulation-worker",
-        "--dataflow-failure-simulation-start-stop-resume",
-        "--dataflow-failure-simulation-wait-before-start", "15000",
+        "--dataflow-failure-simulation-worker",
+        //"--dataflow-failure-simulation-start-stop-resume",
+        "--dataflow-failure-simulation-wait-before-start", "10000",
         "--dataflow-failure-simulation-simulate-kill",
         "--dataflow-failure-simulation-max-execution", "2",
-        "--dataflow-failure-simulation-period", "35000",
+        "--dataflow-failure-simulation-period", "10000",
         "--dataflow-task-debug",
         
         "--log-validator-wait-for-termination", "45000",

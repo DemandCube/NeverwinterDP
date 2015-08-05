@@ -21,7 +21,7 @@ import com.neverwinterdp.registry.activity.ActivityStepExecutor;
 import com.neverwinterdp.registry.event.WaitingNodeEventListener;
 import com.neverwinterdp.registry.event.WaitingRandomNodeEventListener;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.service.DataflowService;
 import com.neverwinterdp.scribengin.dataflow.service.VMDataflowServiceApp;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
@@ -112,10 +112,10 @@ public class AddDataflowMasterActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      List<String> workers = dflRegistry.getActiveWorkerNames();
+      List<String> workers = dflRegistry.getWorkerRegistry().getActiveWorkerIds();
       WaitingNodeEventListener waitingListener = new WaitingRandomNodeEventListener(dflRegistry.getRegistry()) ;
       for(int i = 0; i < workers.size(); i++) {
-        String path = dflRegistry.getWorkerNode(workers.get(i)) + "/status" ;
+        String path = dflRegistry.getWorkerRegistry().getWorkerNode(workers.get(i)) + "/status" ;
         waitingListener.add(path, DataflowWorkerStatus.RUNNING);
       }
       

@@ -56,7 +56,7 @@ public class TXEventNotificationWatcher extends NodeChildrenWatcher {
     }
     return processedNotifications.size();
   }
-  
+
   synchronized int waitForNotification(long timeout) throws InterruptedException {
     wait(timeout);
     return processedNotifications.size();

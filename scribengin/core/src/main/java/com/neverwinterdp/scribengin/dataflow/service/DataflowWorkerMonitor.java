@@ -9,9 +9,9 @@ import com.neverwinterdp.registry.activity.Activity;
 import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.event.NodeEventWatcher;
 import com.neverwinterdp.registry.notification.Notifier;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.activity.AddWorkerActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.activity.DataflowActivityService;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
 import com.neverwinterdp.vm.VMDescriptor;
 
@@ -34,18 +34,18 @@ public class DataflowWorkerMonitor {
     Node heartbeatNode = new Node(dataflowRegistry.getRegistry(), heartbeatPath);
     Node vmNode = heartbeatNode.getParentNode().getParentNode();
     workerHeartbeatListeners.remove(vmNode.getPath());
-    Node dataflowWorkerNode = dataflowRegistry.getAllWorkersNode().getChild(vmNode.getName());
-    dataflowRegistry.historyWorker(vmNode.getName());
+    dataflowRegistry.getWorkerRegistry().historyWorker(vmNode.getName());
     
-    DataflowWorkerStatus dataflowWorkerStatus = dataflowWorkerNode.getChild("status").getDataAs(DataflowWorkerStatus.class);
+    DataflowWorkerStatus dataflowWorkerStatus = 
+        dataflowRegistry.getWorkerRegistry().getDataflowWorkerStatus(vmNode.getName());
     if(dataflowWorkerStatus != DataflowWorkerStatus.TERMINATED) {
       DataflowWorkerStatus workerStatus = DataflowWorkerStatus.TERMINATED_WITH_ERROR;
-      dataflowRegistry.setWorkerStatus(vmNode.getName(), workerStatus);
+      dataflowRegistry.getWorkerRegistry().setWorkerStatus(vmNode.getName(), workerStatus);
       
       Activity activity = new AddWorkerActivityBuilder().build(1);
       activityService.queue(activity);
       Notifier notifier = dataflowRegistry.getDataflowWorkerNotifier();
-      notifier.warn("dataflow-worker-faillure-detection", "Detect a failed dataflow worker " + dataflowWorkerNode.getName() + " and allocate a new one");
+      notifier.warn("dataflow-worker-faillure-detection", "Detect a failed dataflow worker " + vmNode.getName() + " and allocate a new one");
     } else {
       notifyWorkerTerminated();
     }

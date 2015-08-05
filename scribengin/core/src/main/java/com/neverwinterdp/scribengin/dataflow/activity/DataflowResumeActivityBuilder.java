@@ -13,11 +13,12 @@ import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.activity.ActivityStepBuilder;
 import com.neverwinterdp.registry.activity.ActivityStepExecutor;
 import com.neverwinterdp.registry.txevent.TXEvent;
+import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.registry.txevent.TXEventNotificationCompleteListener;
 import com.neverwinterdp.registry.txevent.TXEventNotificationWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.service.DataflowService;
 
 public class DataflowResumeActivityBuilder extends ActivityBuilder {
@@ -55,11 +56,18 @@ public class DataflowResumeActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      List<String> workers = dflRegistry.getActiveWorkersNode().getChildren();
+      List<String> activeWorkers = dflRegistry.getWorkerRegistry().getActiveWorkerIds();
       TXEvent pEvent = new TXEvent("resume", DataflowEvent.RESUME);
+      TXEventBroadcaster broadcaster = dflRegistry.getWorkerRegistry().getWorkerEventBroadcaster();
       TXEventNotificationWatcher watcher = 
-          dflRegistry.getWorkerEventBroadcaster().broadcast(pEvent, new TXEventNotificationCompleteListener());
-      watcher.waitForNotifications(workers.size(), 30 * 1000);
+          broadcaster.broadcast(pEvent, new TXEventNotificationCompleteListener());
+      System.err.println("DataflowResumeActivity: broadcast resume for worker, workers = " + activeWorkers) ;
+      int count = watcher.waitForNotifications(activeWorkers.size(), 30 * 1000);
+      watcher.complete();
+      if(count != activeWorkers.size()) {
+        throw new Exception("Expect " + activeWorkers.size() + ", but get only " + count + " notification") ;
+      }
+      System.err.println("DataflowResumeActivity: broadcast successfully");
     }
   }
   

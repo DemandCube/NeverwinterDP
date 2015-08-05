@@ -11,7 +11,7 @@ public class MeterUnitTest {
     Random rand = new Random() ;
     Meter meter = mRegistry.getMeter("meter", "byte") ;
     for(int i = 0; i < 150; i++) {
-      meter.mark(rand.nextInt(100000));
+      meter.mark(rand.nextInt(100));
       Thread.sleep(100);
     }
     MetricPrinter mPrinter = new MetricPrinter() ;

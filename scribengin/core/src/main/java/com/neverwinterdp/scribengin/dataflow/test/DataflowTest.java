@@ -14,10 +14,10 @@ import com.beust.jcommander.Parameter;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskContext;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowWaitingEventListener;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowTestReport.DataflowSinkValidatorReport;
 import com.neverwinterdp.scribengin.dataflow.test.DataflowTestReport.DataflowSourceGeneratorReport;
 import com.neverwinterdp.scribengin.dataflow.util.DataflowRegistryDebugger;
@@ -156,24 +156,8 @@ abstract public class DataflowTest {
   }
 
   protected void setupDebugger(ScribenginShell shell, ScribenginClient scribenginClient, DataflowDescriptor dflDescriptor) throws Exception {
-    DataflowRegistryDebugger debugger = shell.getScribenginClient().getDataflowRegistryDebugger(System.out, dflDescriptor);
-    if(detailedDebugDataflowTask){
-      debugger.enableDataflowTaskDebugger(true);
-    } else if(debugDataflowTask) {
-      debugger.enableDataflowTaskDebugger(false);
-    }
-    
-    if(detailedDebugDataflowVM){
-      debugger.enableDataflowVMDebugger(true);
-    } else if(debugDataflowVM) {
-      debugger.enableDataflowVMDebugger(false);
-    }
-    
-    if(detailedDebugDataflowActivity){
-      debugger.enableDataflowActivityDebugger(true);
-    } else if(debugDataflowActivity) {
-      debugger.enableDataflowVMDebugger(false);
-    }
+    DataflowRegistryDebugger debugger = scribenginClient.getDataflowRegistryDebugger(System.out, dflDescriptor);
+    debugger.enableDataflowDebugger();
   }
 
   protected void junitReport(DataflowTestReport dataFlowTestReport) throws Exception {

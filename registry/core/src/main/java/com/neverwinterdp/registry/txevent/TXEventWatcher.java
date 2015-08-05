@@ -1,8 +1,11 @@
 package com.neverwinterdp.registry.txevent;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
@@ -40,11 +43,18 @@ public class TXEventWatcher extends NodeChildrenWatcher {
     Registry registry = getRegistry();
     String eventsPath = getWatchedPath() ;
     List<String> names = registry.getChildren(eventsPath);
+    Set<String> currentEvents = new HashSet<>(names);
     for(String name : names) {
       if(processedTxEvents.containsKey(name)) continue ;
       TXEvent txEvent = registry.getDataAs(eventsPath + "/" + name, TXEvent.class); 
       onTXEvent(txEvent);
       processedTxEvents.put(name, txEvent);
+    }
+    Iterator<Map.Entry<String, TXEvent>> i = processedTxEvents.entrySet().iterator() ;
+    while(i.hasNext()) {
+      if(!currentEvents.contains(i.next().getKey())) {
+        i.remove();
+      }
     }
   }
   

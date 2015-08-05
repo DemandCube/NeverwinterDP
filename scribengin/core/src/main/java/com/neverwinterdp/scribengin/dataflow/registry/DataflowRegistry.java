@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow;
+package com.neverwinterdp.scribengin.dataflow.registry;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,6 +24,12 @@ import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.registry.task.TaskContext;
 import com.neverwinterdp.registry.task.TaskRegistry;
 import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
+import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
+import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataflowTaskReport;
+import com.neverwinterdp.scribengin.dataflow.DataflowTaskRuntimeReport;
+import com.neverwinterdp.scribengin.dataflow.DataflowWorkerRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.simulation.FailureConfig;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorDescriptor;
@@ -36,8 +42,6 @@ import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 @Singleton
 public class DataflowRegistry {
   
-  final static public String MASTER_EVENT_PATH      = "event/master" ;
-  final static public String WORKER_EVENT_PATH      = "event/worker" ;
   final static public String FAILURE_EVENT_PATH     = "event/failure" ;
   
   final static public String ACTIVITIES_PATH        = "activities";
@@ -46,10 +50,9 @@ public class DataflowRegistry {
   
   final static public String MASTER_PATH            = "master";
   final static public String MASTER_LEADER_PATH     = MASTER_PATH + "/leader";
+  final static public String MASTER_EVENT_PATH      = MASTER_PATH + "/events";
   
-  final static public String ALL_WORKERS_PATH       = "workers/all";
-  final static public String ACTIVE_WORKERS_PATH    = "workers/active";
-  final static public String HISTORY_WORKERS_PATH   = "workers/history";
+  
   
   final static public DataMapperCallback<DataflowTaskDescriptor> TASK_DESCRIPTOR_DATA_MAPPER = new DataMapperCallback<DataflowTaskDescriptor>() {
     @Override
@@ -72,26 +75,24 @@ public class DataflowRegistry {
   
   private ConfigurationRegistry  configuration ;
   
+  private DataflowMasterRegistry masterRegistry ;
+  private DataflowWorkerRegistry workerRegistry ;
+  private TaskRegistry<DataflowTaskDescriptor> taskRegistry ;
+  
   private Node               masterLeaderNode;
   private Node               statusNode;
 
   private Node               failureEventNode;
   private Node               masterEventNode;
-  private TXEventBroadcaster workerEventBroadcaster ;
+  private TXEventBroadcaster masterEventBroadcaster ;
   
   private Node               activeActivitiesNode;
-  
-  private Node               allWorkers;
-  private Node               activeWorkers;
-  private Node               historyWorkers;
   
   private Node               metricsNode ;
   
   private Notifier           dataflowTaskNotifier ;
   private Notifier           dataflowWorkerNotifier ;
 
-  private TaskRegistry<DataflowTaskDescriptor> taskRegistry ;
-  
   public DataflowRegistry() { }
   
   public DataflowRegistry(Registry registry, String dataflowPath) throws Exception { 
@@ -103,24 +104,22 @@ public class DataflowRegistry {
   @Inject
   public void onInit() throws Exception {
     configuration = new ConfigurationRegistry(dataflowPath);
-    masterLeaderNode = registry.get(dataflowPath + "/" + MASTER_LEADER_PATH);
+    masterRegistry = new DataflowMasterRegistry(dataflowPath);
+    workerRegistry = new DataflowWorkerRegistry(registry, dataflowPath);
     
     String taskPath = dataflowPath + "/tasks";
     taskRegistry = new TaskRegistry<DataflowTaskDescriptor>(registry, taskPath, DataflowTaskDescriptor.class);
+    
+    masterLeaderNode = registry.get(dataflowPath + "/" + MASTER_LEADER_PATH);
     
     statusNode = registry.get(dataflowPath + "/status");
     
     masterEventNode  = registry.get(dataflowPath + "/" + MASTER_EVENT_PATH);
     failureEventNode = registry.get(dataflowPath + "/" + FAILURE_EVENT_PATH);
-    workerEventBroadcaster = 
-        new TXEventBroadcaster(registry, dataflowPath + "/" + WORKER_EVENT_PATH, false);
-    
+    masterEventBroadcaster = 
+      new TXEventBroadcaster(registry, dataflowPath + "/" + MASTER_EVENT_PATH, false);
+   
     activeActivitiesNode = registry.get(dataflowPath + "/" + ACTIVITIES_PATH);
-    
-    allWorkers = registry.get(dataflowPath + "/" + ALL_WORKERS_PATH);
-    activeWorkers = registry.get(dataflowPath + "/" + ACTIVE_WORKERS_PATH);
-    historyWorkers = registry.get(dataflowPath + "/" + HISTORY_WORKERS_PATH);
-    
     metricsNode = registry.get(dataflowPath + "/metrics");
     
     String notificationPath = getDataflowNotificationsPath() ;
@@ -130,22 +129,18 @@ public class DataflowRegistry {
   
   public void initRegistry() throws Exception {
     dataflowDescriptor = getDataflowDescriptor() ;
-    
     configuration.initRegistry(dataflowDescriptor);
+    masterRegistry.initRegistry();
+    workerRegistry.initRegistry();
     
     masterLeaderNode.createIfNotExists();
     
     statusNode.createIfNotExists();
     
-    masterEventNode.createIfNotExists();
     failureEventNode.createIfNotExists();
-    registry.createIfNotExist(dataflowPath + "/" + WORKER_EVENT_PATH);
+    registry.createIfNotExist(dataflowPath + "/" + MASTER_EVENT_PATH);
     
     activeActivitiesNode.createIfNotExists();
-    
-    allWorkers.createIfNotExists();
-    activeWorkers.createIfNotExists();
-    historyWorkers.createIfNotExists();
     
     metricsNode.createIfNotExists();
     
@@ -155,7 +150,11 @@ public class DataflowRegistry {
   
   public String getDataflowPath() { return this.dataflowPath ; }
   
-  public ConfigurationRegistry getConfiguration() { return this.configuration ; }
+  public ConfigurationRegistry getConfiguration() { return this.configuration ;}
+  
+  public DataflowMasterRegistry getMasterRegistry() { return this.masterRegistry;}
+  
+  public DataflowWorkerRegistry getWorkerRegistry() { return this.workerRegistry;}
   
   public String getDataflowNotificationsPath() { return this.dataflowPath  + "/" + NOTIFICATIONS_PATH; }
   
@@ -193,46 +192,6 @@ public class DataflowRegistry {
     this.dataflowDescriptor = descriptor ;
   }
   
-  public void addWorker(VMDescriptor vmDescriptor) throws RegistryException {
-    Transaction transaction = registry.getTransaction() ;
-    RefNode refNode = new RefNode(vmDescriptor.getRegistryPath()) ;
-    transaction.createChild(allWorkers, vmDescriptor.getId(), refNode, NodeCreateMode.PERSISTENT) ;
-    transaction.createDescendant(allWorkers, vmDescriptor.getId() + "/status", DataflowWorkerStatus.INIT, NodeCreateMode.PERSISTENT) ;
-    transaction.createChild(activeWorkers, vmDescriptor.getId(), NodeCreateMode.PERSISTENT) ;
-    transaction.commit();
-  }
-  
-  public void setWorkerStatus(VMDescriptor vmDescriptor, DataflowWorkerStatus status) throws RegistryException {
-    Node workerNode = allWorkers.getChild(vmDescriptor.getId());
-    Node statusNode = workerNode.getChild("status");
-    statusNode.setData(status);
-  }
-  
-  public void setWorkerStatus(String vmId, DataflowWorkerStatus status) throws RegistryException {
-    Node workerNode = allWorkers.getChild(vmId);
-    Node statusNode = workerNode.getChild("status");
-    statusNode.setData(status);
-  }
-  
-  public void historyWorker(String vmId) throws RegistryException {
-    Transaction transaction = registry.getTransaction() ;
-    transaction.createChild(historyWorkers, vmId, NodeCreateMode.PERSISTENT) ;
-    transaction.deleteChild(activeWorkers, vmId) ;
-    transaction.commit();
-  }
-  
-  public void createWorkerTaskExecutor(VMDescriptor vmDescriptor, DataflowTaskExecutorDescriptor descriptor) throws RegistryException {
-    Node worker = allWorkers.getChild(vmDescriptor.getId()) ;
-    Node executors = worker.createDescendantIfNotExists("executors");
-    executors.createChild(descriptor.getId(), descriptor, NodeCreateMode.PERSISTENT);
-  }
-  
-  public void updateWorkerTaskExecutor(VMDescriptor vmDescriptor, DataflowTaskExecutorDescriptor descriptor) throws RegistryException {
-    Node worker = allWorkers.getChild(vmDescriptor.getId()) ;
-    Node executor = worker.getDescendant("executors/" + descriptor.getId()) ;
-    executor.setData(descriptor);
-  }
-  
   public Node getStatusNode() { return this.statusNode ; }
   
   public DataflowLifecycleStatus getStatus() throws RegistryException {
@@ -243,9 +202,7 @@ public class DataflowRegistry {
     statusNode.setData(event);
   }
   
-  public TXEventBroadcaster getWorkerEventBroadcaster() {
-    return this.workerEventBroadcaster;
-  }
+  public TXEventBroadcaster getMasterEventBroadcaster() { return masterEventBroadcaster; }
   
   public void broadcastMasterEvent(DataflowEvent event) throws RegistryException {
     masterEventNode.setData(event);
@@ -319,49 +276,10 @@ public class DataflowRegistry {
     return node.getDataAs(VMDescriptor.class);
   }
   
-  public List<VMDescriptor> getDataflowMasters() throws RegistryException {
-    return registry.getRefChildrenAs(dataflowPath + "/" + MASTER_PATH, VMDescriptor.class);
-  }
-  
   public int countDataflowMasters() throws RegistryException {
     return registry.getChildren(dataflowPath + "/" + MASTER_LEADER_PATH ).size();
   }
   
-  
-  public List<VMDescriptor> getActiveWorkers() throws RegistryException {
-    List<String> activeWorkerIds = activeWorkers.getChildren();
-    return allWorkers.getSelectRefChildrenAs(activeWorkerIds, VMDescriptor.class) ;
-  }
-  
-  public int countActiveDataflowWorkers() throws RegistryException {
-    return activeWorkers.getChildren().size();
-  }
-  
-  public Node getAllWorkersNode() { return allWorkers ; }
-  
-  public Node getActiveWorkersNode() { return activeWorkers ; }
-  
-  public Node getWorkerNode(String vmId) throws RegistryException { 
-    return allWorkers.getChild(vmId) ; 
-  }
-  
-  public List<String> getAllWorkerNames() throws RegistryException {
-    return allWorkers.getChildren();
-  }
-  
-  public List<String> getActiveWorkerNames() throws RegistryException {
-    return activeWorkers.getChildren();
-  }
-  
-  public DataflowWorkerStatus getDataflowWorkerStatus(String vmId) throws RegistryException {
-    return allWorkers.getChild(vmId).getChild("status").getDataAs(DataflowWorkerStatus.class);
-  }
-  
-  public List<DataflowTaskExecutorDescriptor> getWorkerExecutors(String worker) throws RegistryException {
-    Node executors = allWorkers.getDescendant(worker + "/executors") ;
-    return executors.getChildrenAs(DataflowTaskExecutorDescriptor.class);
-  }
-
   public void saveMetric(String vmName, MetricRegistry mRegistry) throws RegistryException {
     MetricRegistrySnapshot mRegistrySnapshot = new MetricRegistrySnapshot(vmName, mRegistry) ;
     if(!metricsNode.hasChild(vmName)) {
@@ -382,6 +300,16 @@ public class DataflowRegistry {
   
   public ActivityRegistry getActivityRegistry() throws RegistryException {
     return new ActivityRegistry(registry, dataflowPath + "/" + ACTIVITIES_PATH) ;
+  }
+
+  public boolean waitForDataflowStatus(DataflowLifecycleStatus status, long timeout) throws Exception {
+    long stopTime = System.currentTimeMillis() + timeout ;
+    while(System.currentTimeMillis() < stopTime) {
+      if(status == getStatus()) return true;
+      Thread.sleep(1000);
+    }
+    dump();
+    return false ;
   }
   
   public void dump() throws RegistryException, IOException {

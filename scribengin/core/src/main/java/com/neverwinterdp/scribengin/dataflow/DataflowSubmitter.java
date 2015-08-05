@@ -9,6 +9,7 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.SequenceIdTracker;
 import com.neverwinterdp.registry.event.WaitingOrderNodeEventListener;
 import com.neverwinterdp.scribengin.ScribenginClient;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.util.DataflowFormater;
 import com.neverwinterdp.scribengin.dataflow.util.DataflowRegistryDebugger;
 import com.neverwinterdp.scribengin.service.ScribenginService;
@@ -79,7 +80,7 @@ public class DataflowSubmitter {
     try {
       long start = System.currentTimeMillis();
       DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
-          DataflowLifecycleStatus.STOP, DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
+        DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
       };
       waitForStatus(timeout, status) ;
       System.out.println("Wait for TERMINATED status in " + (System.currentTimeMillis() - start) + "ms");

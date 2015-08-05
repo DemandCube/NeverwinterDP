@@ -5,9 +5,9 @@ import java.util.List;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.task.TaskStatus;
 import com.neverwinterdp.registry.util.NodeFormatter;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskReport;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 

@@ -3,7 +3,7 @@ package com.neverwinterdp.scribengin.dataflow.activity;
 import com.google.inject.Injector;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.activity.ActivityService;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 
 public class DataflowActivityService extends ActivityService {
   

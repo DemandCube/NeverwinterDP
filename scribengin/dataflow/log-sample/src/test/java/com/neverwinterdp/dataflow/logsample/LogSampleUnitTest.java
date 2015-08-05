@@ -7,7 +7,6 @@ import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.neverwinterdp.registry.zk.RegistryImpl;
@@ -71,7 +70,7 @@ public class LogSampleUnitTest  {
         "--dataflow-descriptor", "src/app/conf/local/kafka-log-dataflow-chain.json",
         "--dataflow-task-dedicated-executor", "false",
         "--dataflow-wait-for-submit-timeout", "45000",
-        "--dataflow-wait-for-termination-timeout", "120000",
+        "--dataflow-wait-for-termination-timeout", "90000",
         "--dataflow-task-debug",
         
         "--log-validator-wait-for-termination", "45000",

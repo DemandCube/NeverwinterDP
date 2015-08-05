@@ -19,8 +19,9 @@ import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.registry.txevent.TXEventNotificationCompleteListener;
 import com.neverwinterdp.registry.txevent.TXEventNotificationWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowWorkerRegistry;
 import com.neverwinterdp.scribengin.dataflow.service.DataflowService;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
 
@@ -40,9 +41,6 @@ public class DataflowPauseActivityBuilder extends ActivityBuilder {
     @Override
     public List<ActivityStep> build(Activity activity, Injector container) throws Exception {
       List<ActivityStep> steps = new ArrayList<>() ;
-      steps.add(new ActivityStep().
-          withType("check-dataflow-status").
-          withExecutor(CheckDataflowStatusStepExecutor.class));
       
       steps.add(new ActivityStep().
           withType("broadcast-pause-dataflow-worker").
@@ -56,19 +54,6 @@ public class DataflowPauseActivityBuilder extends ActivityBuilder {
   }
   
   @Singleton
-  static public class CheckDataflowStatusStepExecutor implements ActivityStepExecutor {
-    @Inject
-    private DataflowRegistry dflRegistry ;
-    
-    @Override
-    public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
-      if(DataflowLifecycleStatus.RUNNING != dflRegistry.getStatus()) {
-       ctx.setAbort(true);
-      }
-    }
-  }
-  
-  @Singleton
   static public class BroadcastPauseWorkerStepExecutor implements ActivityStepExecutor {
     @Inject
     private DataflowService service ;
@@ -76,11 +61,19 @@ public class DataflowPauseActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      List<String> activeWorkers = dflRegistry.getActiveWorkersNode().getChildren();
+      if(DataflowLifecycleStatus.RUNNING != dflRegistry.getStatus()) {
+        ctx.setAbort(true);
+        return ;
+      }
+      List<String> activeWorkers = dflRegistry.getWorkerRegistry().getActiveWorkerIds();
       TXEvent pEvent = new TXEvent("pause", DataflowEvent.PAUSE);
-      TXEventNotificationWatcher watcher = 
-          dflRegistry.getWorkerEventBroadcaster().broadcast(pEvent, new TXEventNotificationCompleteListener());
-      watcher.waitForNotifications(activeWorkers.size(), 30 * 1000);
+      DataflowWorkerRegistry workerRegistry = dflRegistry.getWorkerRegistry();
+      TXEventNotificationWatcher watcher = workerRegistry.getWorkerEventBroadcaster().broadcast(pEvent);
+      int count = watcher.waitForNotifications(activeWorkers.size(), 30 * 1000);
+      watcher.complete();
+      if(count != activeWorkers.size()) {
+        throw new Exception("Expect " + activeWorkers.size() + ", but get only " + count + " notification") ;
+      }
     }
   }
   

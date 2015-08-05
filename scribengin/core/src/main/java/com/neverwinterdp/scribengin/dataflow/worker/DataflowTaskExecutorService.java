@@ -1,8 +1,5 @@
 package com.neverwinterdp.scribengin.dataflow.worker;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -11,17 +8,15 @@ import org.slf4j.Logger;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.neverwinterdp.registry.Node;
-import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.registry.event.NodeEvent;
-import com.neverwinterdp.registry.event.NodeEventWatcher;
 import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.registry.txevent.TXEvent;
+import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.registry.txevent.TXEventNotification;
 import com.neverwinterdp.registry.txevent.TXEventWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.storage.sink.SinkFactory;
 import com.neverwinterdp.scribengin.storage.source.SourceFactory;
 import com.neverwinterdp.util.log.LoggerFactory;
@@ -56,8 +51,9 @@ public class DataflowTaskExecutorService {
   private DataflowWorkerEventWatcher   dataflowWorkerEventWatcher ;
   
   private DataflowDescriptor dataflowDescriptor;
-  private List<DataflowTaskExecutor> taskExecutors;
+  private DataflowTaskExecutors taskExecutors = new DataflowTaskExecutors();
   private DataflowWorkerStatus workerStatus = DataflowWorkerStatus.INIT;
+  
   private boolean kill = false ;
   
   public DataflowRegistry getDataflowRegistry() { return this.dataflowRegistry ; }
@@ -69,6 +65,8 @@ public class DataflowTaskExecutorService {
   public SinkFactory   getSinkFactory() { return this.sinkFactory; }
   
   public VMDescriptor getVMDescriptor() { return this.vmDescriptor; }
+
+  public DataflowTaskExecutors getDataflowTaskExecutors() { return this.taskExecutors; }
   
   public Logger getLogger() { return logger ; }
   
@@ -76,16 +74,16 @@ public class DataflowTaskExecutorService {
   public void onInit() throws Exception {
     logger = loggerFactory.getLogger(DataflowTaskExecutorService.class) ;
     logger.info("Start onInit()");
-    Node workerNode = dataflowRegistry.getWorkerNode(vmDescriptor.getId()) ;
+    Node workerNode = dataflowRegistry.getWorkerRegistry().getWorkerNode(vmDescriptor.getId()) ;
     notifier = new Notifier(dataflowRegistry.getRegistry(),  workerNode.getPath() + "/notification", "dataflow-executor-service");
     notifier.initRegistry();
     
-    String workerEvtPath = dataflowRegistry.getWorkerEventBroadcaster().getEventPath();
+    TXEventBroadcaster broadcaster = dataflowRegistry.getWorkerRegistry().getWorkerEventBroadcaster();
+    String workerEvtPath = broadcaster.getEventPath();
     dataflowWorkerEventWatcher = new DataflowWorkerEventWatcher(dataflowRegistry, workerEvtPath, vmDescriptor.getId());
     dataflowDescriptor = dataflowRegistry.getDataflowDescriptor();
     
     int numOfExecutors = dataflowDescriptor.getNumberOfExecutorsPerWorker();
-    taskExecutors = new ArrayList<DataflowTaskExecutor>();
     for(int i = 0; i < numOfExecutors; i++) {
       DataflowTaskExecutorDescriptor descriptor = new DataflowTaskExecutorDescriptor ("executor-" + i);
       if(dataflowDescriptor.getDataflowTaskExecutorType() == DataflowDescriptor.DataflowTaskExecutorType.Dedicated) {
@@ -100,32 +98,28 @@ public class DataflowTaskExecutorService {
   public void start() throws Exception {
     logger.info("Start start()");
     notifier.info("start-start", "DataflowTaskExecutorService: start start()");
-    for(int i = 0; i < taskExecutors.size(); i++) {
-      DataflowTaskExecutor executor = taskExecutors.get(i);
-      executor.start();
-    }
+    taskExecutors.start();
     workerStatus = DataflowWorkerStatus.RUNNING;
-    dataflowRegistry.setWorkerStatus(vmDescriptor, workerStatus);
+    dataflowRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
     notifier.info("finish-start", "DataflowTaskExecutorService: finish start()");
     logger.info("Finish start()");
   }
   
   
   void interrupt() throws Exception {
-    for(DataflowTaskExecutor sel : taskExecutors) {
-      if(sel.isAlive()) sel.interrupt();
-    }
-    waitForExecutorTermination(500);
+    taskExecutors.interrupt();
+    taskExecutors.waitForTermination();
   }
   
   public void pause() throws Exception {
     logger.info("start pause()");
     notifier.info("start-pause", "DataflowTaskExecutorService: start pause()");
     workerStatus = DataflowWorkerStatus.PAUSING;
-    dataflowRegistry.setWorkerStatus(vmDescriptor, workerStatus);
+    dataflowRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
     interrupt();
+    
     workerStatus = DataflowWorkerStatus.PAUSE;
-    dataflowRegistry.setWorkerStatus(vmDescriptor, workerStatus);
+    dataflowRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
     notifier.info("finish-pause", "DataflowTaskExecutorService: finish pause()");
     logger.info("finish pause()");
   }
@@ -133,18 +127,21 @@ public class DataflowTaskExecutorService {
   @PreDestroy
   public void shutdown() throws Exception {
     if(kill) return;
+    if(workerStatus == DataflowWorkerStatus.TERMINATED || workerStatus == DataflowWorkerStatus.TERMINATED_WITH_ERROR ) {
+      return;
+    }
     logger.info("Start shutdown()");
     notifier.info("start-shutdown", "DataflowTaskExecutorService: start shutdown()");
-    if(workerStatus != DataflowWorkerStatus.TERMINATED && workerStatus != DataflowWorkerStatus.TERMINATED_WITH_ERROR) {
-      System.err.println("DataflowTaskExecutorService: shutdown()");
-      workerStatus = DataflowWorkerStatus.TERMINATING;
-      dataflowRegistry.setWorkerStatus(vmDescriptor, workerStatus);
-      dataflowWorkerEventWatcher.setComplete();
+
+    workerStatus = DataflowWorkerStatus.TERMINATING;
+    dataflowRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
+    dataflowWorkerEventWatcher.setComplete();
+    if(taskExecutors.countAlive() > 0) {
       interrupt() ;
-      workerStatus = DataflowWorkerStatus.TERMINATED;
-      dataflowRegistry.setWorkerStatus(vmDescriptor, workerStatus);
-      System.err.println("DataflowTaskExecutorService: shutdown() done!");
     }
+    workerStatus = DataflowWorkerStatus.TERMINATED;
+    dataflowRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
+
     notifier.info("finish-shutdown", "DataflowTaskExecutorService: finish shutdown()");
     logger.info("Finish shutdown()");
   }
@@ -154,33 +151,24 @@ public class DataflowTaskExecutorService {
     notifier.info("start-simulate-kill", "DataflowTaskExecutorService: start simulateKill()");
     kill = true ;
     if(workerStatus != DataflowWorkerStatus.TERMINATED) {
-      for(DataflowTaskExecutor sel : taskExecutors) {
-        if(sel.isAlive()) sel.simulateKill();
-      }
+      taskExecutors.simulateKill();
     }
     notifier.info("finish-simulate-kill", "DataflowTaskExecutorService: finish simulateKill()");
     logger.info("Finish kill()");
   }
   
-  public int countAliveExecutor() {
-    int count = 0 ;
-    for(DataflowTaskExecutor sel : taskExecutors) {
-      if(sel.isAlive()) count++ ;
-    }
-    return count;
-  }
   
-  synchronized void waitForExecutorTermination(long checkPeriod) throws InterruptedException {
-    while(countAliveExecutor() > 0) {
-      wait(checkPeriod);
-    }
-  }
-  
-  synchronized public void waitForTerminated(long checkPeriod) throws InterruptedException, RegistryException {
-    if(workerStatus == DataflowWorkerStatus.RUNNING) {
-      waitForExecutorTermination(checkPeriod);
-      workerStatus = DataflowWorkerStatus.TERMINATED;
-      dataflowRegistry.setWorkerStatus(vmDescriptor, workerStatus);
+  synchronized public void waitForTerminated(long checkPeriod) throws Exception {
+    while(true) {
+      taskExecutors.waitForTermination();
+      if(workerStatus == DataflowWorkerStatus.RUNNING) {
+        shutdown();
+        return ;
+      } else if(workerStatus == DataflowWorkerStatus.TERMINATED || 
+                workerStatus == DataflowWorkerStatus.TERMINATED_WITH_ERROR) {
+        return ;
+      }
+      Thread.sleep(checkPeriod);
     }
   }
   

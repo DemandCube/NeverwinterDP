@@ -8,13 +8,13 @@ import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskReport;
 import com.neverwinterdp.scribengin.dataflow.chain.DataflowChainConfig;
 import com.neverwinterdp.scribengin.dataflow.chain.OrderDataflowChainSubmitter;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowWaitingEventListener;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorDescriptor;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.IOUtil;
@@ -77,9 +77,10 @@ public class DataflowCommand extends Command {
       
       if(workers || showAll){
         console.println("\nActive Workers:");
-        List<String> workers = dRegistry.getActiveWorkerNames();
+        List<String> workers = dRegistry.getWorkerRegistry().getActiveWorkerIds();
         for(String worker : workers) {
-          List<DataflowTaskExecutorDescriptor> descriptors = dRegistry.getWorkerExecutors(worker);
+          List<DataflowTaskExecutorDescriptor> descriptors = 
+              dRegistry.getWorkerRegistry().getWorkerExecutors(worker);
           console.println("  Worker: " + worker);
           Formater.ExecutorList executorList = new Formater.ExecutorList(descriptors);
           console.println(executorList.format("Executors", "    "));

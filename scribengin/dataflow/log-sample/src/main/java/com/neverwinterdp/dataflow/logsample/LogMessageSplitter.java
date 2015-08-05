@@ -22,7 +22,7 @@ public class LogMessageSplitter extends ScribeAbstract {
       String level = log4jRec.getLevel().toLowerCase();
       if("EOS".equals(log4jRec.getMessage())) {
         //ctx.write(level, new DataflowMessage(DataflowInstruction.END_OF_DATASTREAM));
-        ctx.setComplete(true);
+        ctx.setComplete();
       } else {
         //Extract the log message that generate by the tool
         ctx.write(level, dflMessage);

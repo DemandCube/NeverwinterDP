@@ -10,7 +10,7 @@ import com.neverwinterdp.registry.activity.Activity;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.event.NodeEventWatcher;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.service.DataflowService;
 import com.neverwinterdp.scribengin.dataflow.simulation.FailureConfig.FailurePoint;
 import com.neverwinterdp.util.JSONSerializer;

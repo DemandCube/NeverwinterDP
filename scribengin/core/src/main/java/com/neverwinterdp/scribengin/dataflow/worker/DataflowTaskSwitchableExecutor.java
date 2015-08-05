@@ -3,9 +3,9 @@ package com.neverwinterdp.scribengin.dataflow.worker;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskContext;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowTask;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.yara.MetricRegistry;
 import com.neverwinterdp.yara.Timer;
 
@@ -49,7 +49,7 @@ public class DataflowTaskSwitchableExecutor extends DataflowTaskExecutor {
       while(!interrupt) {
         Timer.Context dataflowTaskTimerGrabCtx = dataflowTaskTimerGrab.time() ;
         TaskContext<DataflowTaskDescriptor> taskContext = 
-            dataflowRegistry.dataflowTaskAssign(executorService.getVMDescriptor());
+          dataflowRegistry.dataflowTaskAssign(executorService.getVMDescriptor());
         dataflowTaskTimerGrabCtx.stop();
 
         if(interrupt) {
@@ -65,7 +65,9 @@ public class DataflowTaskSwitchableExecutor extends DataflowTaskExecutor {
         
         Timer.Context dataflowTaskTimerProcessCtx = dataflowTaskTimerProcess.time() ;
         executorDescriptor.addAssignedTask(taskContext.getTaskTransactionId().getTaskId());
-        dataflowRegistry.updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
+        dataflowRegistry.
+          getWorkerRegistry().
+          updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
         currentDataflowTask = new DataflowTask(executorService, taskContext);
         currentDataflowTask.init();
         executorThread = new DataflowTaskExecutorThread(currentDataflowTask);
@@ -76,12 +78,15 @@ public class DataflowTaskSwitchableExecutor extends DataflowTaskExecutor {
         } else {
           currentDataflowTask.suspend();
         }
+        currentDataflowTask = null ;
         dataflowTaskTimerProcessCtx.stop();
       }
       doExit(DataflowTaskExecutorDescriptor.Status.TERMINATED_WITH_INTERRUPT);
     } catch (Throwable e) {
       executorService.getLogger().error("DataflowTaskExecutor Error", e);
       doExit(DataflowTaskExecutorDescriptor.Status.TERMINATED_WITH_ERROR);
+    } finally {
+      notifyExecutorTermination();
     }
   }
 
@@ -90,7 +95,9 @@ public class DataflowTaskSwitchableExecutor extends DataflowTaskExecutor {
     try {
       executorDescriptor.setStatus(status);
       DataflowRegistry dataflowRegistry = executorService.getDataflowRegistry();
-      dataflowRegistry.updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
+      dataflowRegistry.
+        getWorkerRegistry().
+        updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
     } catch(Exception ex) {
       executorService.getLogger().error("DataflowTaskExecutor Fail To Updat Status", ex);
     }
@@ -102,8 +109,12 @@ public class DataflowTaskSwitchableExecutor extends DataflowTaskExecutor {
    */
   public void simulateKill() throws Exception {
     kill = true;
-    if(executorThread != null && executorThread.isAlive()) executorThread.interrupt();
-    if(executorManagerThread != null && executorManagerThread.isAlive()) executorManagerThread.interrupt();
+    if(executorThread != null && executorThread.isAlive()) {
+      executorThread.interrupt();
+    }
+    if(executorManagerThread != null && executorManagerThread.isAlive()) {
+      executorManagerThread.interrupt();
+    }
   }
   
   public class ExecutorManagerThread extends Thread {
@@ -136,8 +147,12 @@ public class DataflowTaskSwitchableExecutor extends DataflowTaskExecutor {
     synchronized void waitForTimeout(long timeout) throws InterruptedException {
       if(timeout > 0) wait(timeout);
       else wait();
-      if(!terminated) dataflowtask.interrupt();
-      wait(3000);
+      if(!terminated) {
+        dataflowtask.interrupt();
+        while(!terminated) {
+          wait(500);
+        }
+      }
     }
   }
 }

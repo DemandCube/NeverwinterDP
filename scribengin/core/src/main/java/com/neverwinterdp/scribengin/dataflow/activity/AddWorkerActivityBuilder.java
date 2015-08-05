@@ -19,7 +19,7 @@ import com.neverwinterdp.registry.activity.ActivityStepExecutor;
 import com.neverwinterdp.registry.event.WaitingNodeEventListener;
 import com.neverwinterdp.registry.event.WaitingRandomNodeEventListener;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.service.DataflowService;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
 import com.neverwinterdp.scribengin.dataflow.worker.VMDataflowWorkerApp;
@@ -111,10 +111,10 @@ public class AddWorkerActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      List<String> workers = dflRegistry.getActiveWorkersNode().getChildren();
+      List<String> workers = dflRegistry.getWorkerRegistry().getActiveWorkerIds();
       WaitingNodeEventListener waitingListener = new WaitingRandomNodeEventListener(dflRegistry.getRegistry()) ;
       for(int i = 0; i < workers.size(); i++) {
-        Node workerNode = dflRegistry.getWorkerNode(workers.get(i)) ;
+        Node workerNode = dflRegistry.getWorkerRegistry().getWorkerNode(workers.get(i)) ;
         String statusPath = workerNode.getPath() + "/status" ;
         String logDesc = "Wait for RUNNING status for worker " + workerNode.getName() ;
         DataflowWorkerStatus[] status = {DataflowWorkerStatus.RUNNING, DataflowWorkerStatus.TERMINATED} ;

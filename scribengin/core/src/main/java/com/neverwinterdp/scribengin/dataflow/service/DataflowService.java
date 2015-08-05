@@ -8,11 +8,11 @@ import com.google.inject.Singleton;
 import com.mycila.jmx.annotation.JmxBean;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.activity.Activity;
-import com.neverwinterdp.registry.event.NodeEvent;
-import com.neverwinterdp.registry.event.NodeEventWatcher;
 import com.neverwinterdp.registry.task.TaskService;
+import com.neverwinterdp.registry.txevent.TXEvent;
+import com.neverwinterdp.registry.txevent.TXEventNotification;
+import com.neverwinterdp.registry.txevent.TXEventWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
 import com.neverwinterdp.scribengin.dataflow.activity.DataflowActivityService;
 import com.neverwinterdp.scribengin.dataflow.activity.DataflowInitActivityBuilder;
@@ -21,6 +21,7 @@ import com.neverwinterdp.scribengin.dataflow.activity.DataflowResumeActivityBuil
 import com.neverwinterdp.scribengin.dataflow.activity.DataflowRunActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.activity.DataflowStopActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.storage.sink.SinkFactory;
 import com.neverwinterdp.scribengin.storage.source.SourceFactory;
 import com.neverwinterdp.util.log.LoggerFactory;
@@ -52,7 +53,7 @@ public class DataflowService {
   
   private DataflowWorkerMonitor  dataflowWorkerMonitor ;
   
-  private DataflowTaskMasterEventListenter masterEventListener ;
+  private DataflowTaskMasterEventWatcher eventWatcher ;
   
   private Thread waitForTerminationThread ;
   
@@ -83,7 +84,10 @@ public class DataflowService {
     dataflowRegistry.initRegistry();
     dataflowWorkerMonitor = new DataflowWorkerMonitor(dataflowRegistry, activityService);
     dataflowRegistry.setStatus(DataflowLifecycleStatus.INIT);
-    masterEventListener = new DataflowTaskMasterEventListenter(dataflowRegistry);
+    
+    //masterEventListener = new DataflowTaskMasterEventListenter(dataflowRegistry);
+    String evtPath = dataflowRegistry.getMasterEventBroadcaster().getEventPath();
+    eventWatcher = new DataflowTaskMasterEventWatcher(dataflowRegistry, evtPath, vmConfig.getName());
     
     dataflowTaskMonitor = new DataflowTaskMonitor();
     taskService = new TaskService<>(dataflowRegistry.getTaskRegistry());
@@ -96,7 +100,7 @@ public class DataflowService {
   
   
   public void waitForTermination(Thread waitForTerminationThread) throws Exception {
-    this.waitForTerminationThread = waitForTerminationThread ;
+    this.waitForTerminationThread = waitForTerminationThread;
     System.err.println("Before dataflowTaskMonitor.waitForAllTaskFinish();");
     long maxRunTime = dataflowRegistry.getDataflowDescriptor(false).getMaxRunTime();
     if(!dataflowTaskMonitor.waitForAllTaskFinish(maxRunTime)) {
@@ -119,36 +123,34 @@ public class DataflowService {
     }
   }
   
-  public class DataflowTaskMasterEventListenter extends NodeEventWatcher {
-    public DataflowTaskMasterEventListenter(DataflowRegistry dflRegistry) throws RegistryException {
-      super(dflRegistry.getRegistry(), true/*persistent*/);
-      watchModify(dflRegistry.getMasterEventNode().getPath());
+  public class DataflowTaskMasterEventWatcher extends TXEventWatcher {
+    public DataflowTaskMasterEventWatcher(DataflowRegistry dflRegistry, String eventsPath, String clientId) throws RegistryException {
+      super(dflRegistry.getRegistry(), eventsPath, clientId);
     }
-
-    @Override
-    public void processNodeEvent(NodeEvent event) throws Exception {
-      if(event.getType() == NodeEvent.Type.MODIFY) {
-        DataflowEvent taskEvent = getRegistry().getDataAs(event.getPath(), DataflowEvent.class);
-        if(taskEvent == DataflowEvent.PAUSE) {
-          Activity activity = new DataflowPauseActivityBuilder().build();
+    
+    public void onTXEvent(TXEvent txEvent) throws Exception {
+      DataflowEvent taskEvent = txEvent.getDataAs(DataflowEvent.class);
+      if(taskEvent == DataflowEvent.PAUSE) {
+        Activity activity = new DataflowPauseActivityBuilder().build();
+        activityService.queue(activity);
+        logger.info("Queue a pause activity");
+      } else if(taskEvent == DataflowEvent.STOP) {
+        activityService.queue(new DataflowStopActivityBuilder().build());
+        logger.info("Queue a stop activity");
+      } else if(taskEvent == DataflowEvent.RESUME) {
+        DataflowLifecycleStatus currentStatus = dataflowRegistry.getStatus();
+        if(currentStatus == DataflowLifecycleStatus.PAUSE) {
+          Activity activity = new DataflowResumeActivityBuilder().build();
           activityService.queue(activity);
-          logger.info("Queue a pause activity");
-        } else if(taskEvent == DataflowEvent.STOP) {
-          activityService.queue(new DataflowStopActivityBuilder().build());
-          logger.info("Queue a stop activity");
-        } else if(taskEvent == DataflowEvent.RESUME) {
-          DataflowLifecycleStatus currentStatus = dataflowRegistry.getStatus();
-          if(currentStatus == DataflowLifecycleStatus.PAUSE) {
-            Activity activity = new DataflowResumeActivityBuilder().build();
-            activityService.queue(activity);
-            logger.info("Queue a resume pause activity");
-          } else if(currentStatus == DataflowLifecycleStatus.STOP) {
-            activityService.queue(new DataflowRunActivityBuilder().build());
-            logger.info("Queue a run activity");
-          }
-          
+          logger.info("Queue a resume pause activity");
+          System.err.println("DataflowService: Resume from PAUSE") ;
+        } else if(currentStatus == DataflowLifecycleStatus.STOP) {
+          activityService.queue(new DataflowRunActivityBuilder().build());
+          logger.info("Queue a run activity");
+          System.err.println("DataflowService: Resume from STOP") ;
         }
       }
+      notify(txEvent, TXEventNotification.Status.Complete);
     }
   }
 }

@@ -46,7 +46,7 @@ public class DataflowStartStopResumeUnitTest {
     StartStopResumeRunner startStopResumeRunner = new StartStopResumeRunner() ;
     startStopResumeRunner.start();
     
-    submitter.waitForTermination(180000);
+    submitter.waitForTermination(240000);
     startStopResumeRunner.waitForTermination(30000);
   }
   
@@ -58,10 +58,10 @@ public class DataflowStartStopResumeUnitTest {
         String command = 
             "dataflow-test " + DataflowCommandStartStopResumeTest.TEST_NAME +
             "  --dataflow-id kafka-to-kafka-1" +
-            "  --sleep-before-stop 10000 --sleep-before-resume 5000" +
-            "  --max-wait-for-stop    15000 " +
-            "  --max-wait-for-resume  5000 " +
-            "  --max-execution 2" +
+            "  --sleep-before-stop 15000 --sleep-before-resume 3000" +
+            "  --max-wait-for-stop    20000 " +
+            "  --max-wait-for-resume  20000 " +
+            "  --max-execution 4" +
             "  --print-summary ";
         shell.execute(command);
       } catch (Exception e) {
@@ -91,8 +91,9 @@ public class DataflowStartStopResumeUnitTest {
           "dataflow-test " + KafkaDataflowTest.TEST_NAME +
           "  --dataflow-id kafka-to-kafka-1" +
           "  --dataflow-name  kafka-to-kafka" +
-          "  --worker 2 --executor-per-worker 2 --duration 180000 --task-max-execute-time 10000" +
-          "  --source-name input --source-num-of-stream 10 --source-write-period 0 --source-max-records-per-stream 100000" + 
+          "  --worker 2 --executor-per-worker 2 --duration 210000 --task-max-execute-time 10000" +
+          "  --source-name input --source-num-of-stream 10 --source-write-period 0 " + 
+          "  --source-max-records-per-stream 150000" + 
           "  --sink-name output "+
           "  --debug-dataflow-activity-detail" +
           "  --debug-dataflow-task" +

@@ -45,10 +45,8 @@ public class DataflowWorkerFailureExperimentTest {
     submitter.start();
     
     ScribenginClient scribenginClient = shell.getScribenginClient();
-    DataflowClient dflClient = scribenginClient.getDataflowClient("kafka-to-kafka-1");
-    Assert.assertEquals("kafka-to-kafka-1-master-0000000001", dflClient.getDataflowMaster().getId());
-    Assert.assertEquals(1, dflClient.getDataflowMasters().size());
-
+    DataflowClient dflClient = scribenginClient.getDataflowClient("kafka-to-kafka-1", 600000);
+    
     submitter.waitForTermination(210000);
     serverFailureSimulator.waitForTermination(30000);
   }

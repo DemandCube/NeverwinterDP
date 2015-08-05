@@ -1,6 +1,7 @@
 package com.neverwinterdp.scribengin.dataflow;
 
 import com.neverwinterdp.registry.task.TaskContext;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorService;
 import com.neverwinterdp.scribengin.scribe.ScribeAbstract;
 
@@ -46,34 +47,31 @@ public class DataflowTask {
     try {
       while(!interrupt && !context.isComplete() && !context.isEndOfDataStream()) {
         DataflowMessage dataflowMessage = context.nextRecord(5000);
-        if(dataflowMessage != null) {
-          dataflowMessageCount++;
-          if(dataflowMessage.getType() == DataflowMessage.Type.INSTRUCTION) {
-            DataflowInstruction ins = dataflowMessage.dataAsDataflowInstruction(); 
-            processor.process(ins, context);
-            if(ins == DataflowInstruction.END_OF_DATASTREAM) {
-              context.setComplete(true) ;
-              break;
-            }
-          } else {
-            report.incrProcessCount();
-            processor.process(dataflowMessage, context);
+        if(dataflowMessage == null) break ;
+
+        dataflowMessageCount++;
+        if(dataflowMessage.getType() == DataflowMessage.Type.INSTRUCTION) {
+          DataflowInstruction ins = dataflowMessage.dataAsDataflowInstruction(); 
+          processor.process(ins, context);
+          if(ins == DataflowInstruction.END_OF_DATASTREAM) {
+            context.setComplete() ;
+            break;
           }
         } else {
-          break ;
+          report.incrProcessCount();
+          processor.process(dataflowMessage, context);
         }
-      }
+      } //end while
       if(dataflowMessageCount == 0) {
         report.setAssignedWithNoMessageProcess(report.getAssignedWithNoMessageProcess() + 1);
         report.setLastAssignedWithNoMessageProcess(report.getLastAssignedWithNoMessageProcess() + 1);
       } else {
         report.setLastAssignedWithNoMessageProcess(0);
       }
-      
       if(context.isEndOfDataStream()) {
-        context.setComplete(true);
+        context.setComplete();
       } else if(report.getLastAssignedWithNoMessageProcess() >= 3) {
-        context.setComplete(true);
+        context.setComplete();
       }
     } catch(InterruptedException ex) {
       //kill simulation

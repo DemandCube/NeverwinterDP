@@ -3,9 +3,9 @@ package com.neverwinterdp.scribengin.dataflow.worker;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskContext;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.DataflowTask;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.yara.MetricRegistry;
 import com.neverwinterdp.yara.Timer;
 
@@ -64,15 +64,12 @@ public class DataflowTaskDedicatedExecutor extends DataflowTaskExecutor {
 
         Timer.Context dataflowTaskTimerProcessCtx = metricRegistry.getTimer("dataflow-task.timer.process").time() ;
         executorDescriptor.addAssignedTask(taskContext.getTaskTransactionId().getTaskId());
-        dflRegistry.updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
+        dflRegistry.
+          getWorkerRegistry().
+          updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
         dataflowTask = new DataflowTask(executorService, taskContext);
         dataflowTask.init();
-        while(!dataflowTask.isComplete()) {
-          dataflowTask.execute();
-          long taskSwitchingPeriod = dflDescriptor.getTaskSwitchingPeriod();
-          if(taskSwitchingPeriod < 0) taskSwitchingPeriod = 5000;
-          Thread.sleep(taskSwitchingPeriod);
-        }
+        dataflowTask.execute();
         dataflowTask.finish();
         dataflowTaskTimerProcessCtx.stop();
         if(dataflowTask.isIterrupted()) {
@@ -83,6 +80,8 @@ public class DataflowTaskDedicatedExecutor extends DataflowTaskExecutor {
       } catch (Throwable e) {
         executorService.getLogger().error("DataflowTaskExecutor Error", e);
         doExit(DataflowTaskExecutorDescriptor.Status.TERMINATED_WITH_ERROR);
+      } finally {
+        notifyExecutorTermination();
       }
     }
     
@@ -91,7 +90,9 @@ public class DataflowTaskDedicatedExecutor extends DataflowTaskExecutor {
       try {
         executorDescriptor.setStatus(status);
         DataflowRegistry dataflowRegistry = executorService.getDataflowRegistry();
-        dataflowRegistry.updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
+        dataflowRegistry.
+          getWorkerRegistry().
+          updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
       } catch(Exception ex) {
         executorService.getLogger().error("DataflowTaskExecutor Fail To Updat Status", ex);
       }

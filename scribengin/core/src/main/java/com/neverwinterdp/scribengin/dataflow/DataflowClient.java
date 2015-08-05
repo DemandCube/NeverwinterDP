@@ -4,8 +4,11 @@ import java.util.List;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.txevent.TXEvent;
+import com.neverwinterdp.registry.txevent.TXEventNotificationWatcher;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.vm.VMDescriptor;
 
 public class DataflowClient {
@@ -28,20 +31,22 @@ public class DataflowClient {
     return dflRegistry.getDataflowMaster() ;
   }
   
-  public List<VMDescriptor> getDataflowMasters() throws RegistryException {
-    return dflRegistry.getDataflowMasters();
-  }
-  
   public List<VMDescriptor> getActiveDataflowWorkers() throws RegistryException {
-    return dflRegistry.getActiveWorkers();
+    return dflRegistry.getWorkerRegistry().getActiveWorkers();
   }
   
   public int countActiveDataflowWorkers() throws RegistryException {
-    return dflRegistry.countActiveDataflowWorkers();
+    return dflRegistry.getWorkerRegistry().countActiveDataflowWorkers();
   }
   
   public void setDataflowEvent(DataflowEvent event) throws RegistryException {
     dflRegistry.broadcastMasterEvent(event);
+  }
+  
+  public TXEventNotificationWatcher broadcastDataflowEvent(DataflowEvent event) throws Exception {
+    String eventName = event.toString().toLowerCase();
+    TXEvent txEvent = new TXEvent(eventName, event) ;
+    return dflRegistry.getMasterEventBroadcaster().broadcast(txEvent);
   }
   
   public DataflowLifecycleStatus getStatus() throws RegistryException {

@@ -7,9 +7,8 @@ import org.slf4j.Logger;
 
 import com.neverwinterdp.module.AppContainer;
 import com.neverwinterdp.module.DataflowWorkerModule;
-import com.neverwinterdp.module.ESOSMonitorLoggerModule;
 import com.neverwinterdp.module.ServiceModuleContainer;
-import com.neverwinterdp.scribengin.dataflow.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMConfig.ClusterEnvironment;
@@ -42,7 +41,8 @@ public class VMDataflowWorkerApp extends VMApp {
     appContainer.install(dataflowWorkerModuleProps, DataflowWorkerModule.NAME);
     ServiceModuleContainer dataflowWorkerModuleContainer = appContainer.getModule(DataflowWorkerModule.NAME);
     
-    dataflowWorkerModuleContainer.getInstance(DataflowRegistry.class).addWorker(getVM().getDescriptor());
+    DataflowRegistry dflRegistry = dataflowWorkerModuleContainer.getInstance(DataflowRegistry.class);
+    dflRegistry.getWorkerRegistry().addWorker(getVM().getDescriptor());
     dataflowTaskExecutorService = dataflowWorkerModuleContainer.getInstance(DataflowTaskExecutorService.class);
     addListener(new VMApp.VMAppTerminateEventListener() {
       @Override
@@ -64,13 +64,12 @@ public class VMDataflowWorkerApp extends VMApp {
     
     try {
       dataflowTaskExecutorService.start();
-      dataflowTaskExecutorService.waitForTerminated(500);
+      dataflowTaskExecutorService.waitForTerminated(3000);
     } catch(InterruptedException ex) {
     } finally {
       StringBuilder out = new StringBuilder() ;
       MetricPrinter metricPrinter = new MetricPrinter(out) ;
       MetricRegistry mRegistry = dataflowWorkerModuleContainer.getInstance(MetricRegistry.class);
-      DataflowRegistry dflRegistry = dataflowTaskExecutorService.getDataflowRegistry() ;
       dflRegistry.saveMetric(getVM().getDescriptor().getVmConfig().getName(), mRegistry);
       metricPrinter.print(mRegistry);
       System.out.println(out.toString());

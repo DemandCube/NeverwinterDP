@@ -28,8 +28,11 @@ public class TXEventBroadcaster {
   
   public Registry getRegistry() { return this.registry ; }
   
-  public void broadcast(TXEvent event) throws RegistryException {
-    eventsNode.createChild(event.getName(), event, NodeCreateMode.PERSISTENT);
+  public TXEventNotificationWatcher broadcast(TXEvent event) throws RegistryException {
+    eventsNode.createChild(event.getId(), event, NodeCreateMode.PERSISTENT);
+    TXEventNotificationListener listener = new TXEventNotificationCompleteListener() ;
+    TXEventNotificationWatcher watcher = new TXEventNotificationWatcher(this, event, listener);
+    return watcher;
   }
   
   public TXEventNotificationWatcher broadcast(TXEvent event, TXEventNotificationListener listener) throws RegistryException {

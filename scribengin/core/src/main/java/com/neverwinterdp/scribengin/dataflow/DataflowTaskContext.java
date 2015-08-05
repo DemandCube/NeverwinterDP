@@ -46,7 +46,7 @@ public class DataflowTaskContext {
 
   public boolean isComplete() { return this.complete ; }
   
-  public void setComplete(boolean b) { this.complete = b ; }
+  public void setComplete() { this.complete = true; }
   
   public boolean isEndOfDataStream() throws Exception { 
     return  getSourceStreamReader().isEndOfDataStream() ; 

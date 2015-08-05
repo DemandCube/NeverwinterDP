@@ -6,11 +6,18 @@ abstract public class DataflowTaskExecutor {
   protected DataflowTaskExecutorDescriptor executorDescriptor;
   protected DataflowTaskExecutorService    executorService;
   
-
-  public DataflowTaskExecutor(DataflowTaskExecutorService service, DataflowTaskExecutorDescriptor descriptor) throws RegistryException {
+  public DataflowTaskExecutor(DataflowTaskExecutorService service,
+                              DataflowTaskExecutorDescriptor descriptor) throws RegistryException {
     executorDescriptor = descriptor;
     this.executorService = service;
-    service.getDataflowRegistry().createWorkerTaskExecutor(service.getVMDescriptor(), descriptor);
+    service.
+      getDataflowRegistry().
+      getWorkerRegistry().
+      createWorkerTaskExecutor(service.getVMDescriptor(), descriptor);
+  }
+
+  protected void notifyExecutorTermination() {
+    executorService.getDataflowTaskExecutors().notifyExecutorTermination();
   }
   
   abstract public void start() ;
