@@ -96,7 +96,8 @@ public class StartStopDataflowExecutor extends Executor {
       stopCompleteCount++ ;
 
       notifier.info("sleep-before-resume", "Sleep " + failurePeriod +"ms before resume");
-      Thread.sleep(failurePeriod);
+      
+      Thread.sleep(5000);
 
       resumeCount++ ;
       notifier.info("before-resume", "Before resume");
@@ -106,6 +107,8 @@ public class StartStopDataflowExecutor extends Executor {
       shell.console().println(resumeExecuteLog.getFormatText());
       if(!resumeExecuteLog.isSuccess()) break;
       resumeCompleteCount++ ;
+      
+      Thread.sleep(failurePeriod);
     }
 
     if(printSummary) printSummary(shell);
