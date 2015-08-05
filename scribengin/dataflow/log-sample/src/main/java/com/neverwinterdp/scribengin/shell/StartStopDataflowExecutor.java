@@ -66,27 +66,20 @@ public class StartStopDataflowExecutor extends Executor {
     ScribenginClient scribenginClient = shell.getScribenginClient() ;
     dflClient = scribenginClient.getDataflowClient(dataflowId, 180000);
     String notifierPath = "/scribengin/failure-simulation/" + dataflowId + "/start-stop-resume";
-    DataflowLifecycleStatus dataflowStatus = dflClient.getStatus();
-
     Registry registry = scribenginClient.getRegistry() ;
 
     if(waitBeforeSimulateFailure > 0) Thread.sleep(waitBeforeSimulateFailure);
     
     int count = 0 ;
     while(count < maxExecution) {
+      DataflowLifecycleStatus dataflowStatus = dflClient.getStatus();
+      if(dataflowStatus != DataflowLifecycleStatus.RUNNING) break;
       count++ ;
       notifier = new Notifier(registry, notifierPath, "simulation-" + (count + 1));
       notifier.initRegistry();
       
       notifier.info("wait-before-stop", "Wait " + failurePeriod + "ms before stop the dataflow");
       
-      try {
-        dataflowStatus = dflClient.getStatus();
-      } catch(RegistryException ex) {
-        notifier.info("unexpected-error", ExceptionUtil.getStackTrace(ex));
-        if(ex.getErrorCode() == ErrorCode.NoNode) break;
-        throw ex;
-      }
       notifier.info("check-dataflow-status", "The current dataflow status is " + dataflowStatus);
       if(dataflowStatus == DataflowLifecycleStatus.FINISH || dataflowStatus == DataflowLifecycleStatus.TERMINATED) {
         notifier.info("terminate", "Terminate the failure simulation, the dataflow status is " + dataflowStatus);
@@ -95,13 +88,11 @@ public class StartStopDataflowExecutor extends Executor {
       stopCount++ ;
       DataflowEvent stopEvent = stopCount % 2 == 0 ? DataflowEvent.PAUSE : DataflowEvent.STOP;
       notifier.info("before-stop", "Before execute stop with the event" + stopEvent);
-      ExecuteLog stopExecuteLog = doStop(dflClient, DataflowEvent.PAUSE) ;
+      ExecuteLog stopExecuteLog = doStop(dflClient, stopEvent) ;
       notifier.info("after-stop", stopExecuteLog.getFormatText());
       executeLogs.add(stopExecuteLog);
       shell.console().println(stopExecuteLog.getFormatText());
-      if(!stopExecuteLog.isSuccess()) {
-        break;
-      }
+      if(!stopExecuteLog.isSuccess()) break;
       stopCompleteCount++ ;
 
       notifier.info("sleep-before-resume", "Sleep " + failurePeriod +"ms before resume");
@@ -113,9 +104,7 @@ public class StartStopDataflowExecutor extends Executor {
       notifier.info("after-resume", resumeExecuteLog.getFormatText());
       executeLogs.add(resumeExecuteLog);
       shell.console().println(resumeExecuteLog.getFormatText());
-      if(!resumeExecuteLog.isSuccess()) {
-        break;
-      }
+      if(!resumeExecuteLog.isSuccess()) break;
       resumeCompleteCount++ ;
     }
 
