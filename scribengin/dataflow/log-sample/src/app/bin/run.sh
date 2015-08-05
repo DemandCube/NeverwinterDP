@@ -127,7 +127,7 @@ elif [ "$PROFILE" = "dataflow-start-stop" ] ; then
     --dataflow-task-dedicated-executor $DEDICATED_EXECUTOR \
     \
     --dataflow-failure-simulation-start-stop-resume  \
-    --dataflow-failure-simulation-wait-before-start 90000 \
+    --dataflow-failure-simulation-wait-before-start 45000 \
     --dataflow-failure-simulation-max-execution $EXECUTION_MAX \
     --dataflow-failure-simulation-period $EXECUTION_PERIOD \
     --dataflow-task-debug
