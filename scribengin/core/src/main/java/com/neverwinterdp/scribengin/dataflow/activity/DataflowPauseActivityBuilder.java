@@ -69,11 +69,11 @@ public class DataflowPauseActivityBuilder extends ActivityBuilder {
       TXEvent pEvent = new TXEvent("pause", DataflowEvent.PAUSE);
       DataflowWorkerRegistry workerRegistry = dflRegistry.getWorkerRegistry();
       TXEventNotificationWatcher watcher = workerRegistry.getWorkerEventBroadcaster().broadcast(pEvent);
-      int count = watcher.waitForNotifications(activeWorkers.size(), 30 * 1000);
-      watcher.complete();
+      int count = watcher.waitForNotifications(activeWorkers.size(), 60 * 1000);
       if(count != activeWorkers.size()) {
         throw new Exception("Expect " + activeWorkers.size() + ", but get only " + count + " notification") ;
       }
+      watcher.complete();
     }
   }
   

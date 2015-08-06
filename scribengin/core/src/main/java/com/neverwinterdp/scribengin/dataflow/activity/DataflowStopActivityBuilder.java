@@ -65,13 +65,12 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
       TXEventBroadcaster broadcaster = dflRegistry.getWorkerRegistry().getWorkerEventBroadcaster();
       TXEventNotificationWatcher watcher = 
           broadcaster.broadcast(pEvent, new TXEventNotificationCompleteListener());
-      int countNotification = watcher.waitForNotifications(workers.size(), 45 * 1000);
-      watcher.complete();
+      int countNotification = watcher.waitForNotifications(workers.size(), 60 * 1000);
       if(countNotification != workers.size()) {
         System.err.println("DataflowService Stop Activity fail!...") ;
         throw new Exception("Expect " + workers.size() + ", but only get " + countNotification) ;
       }
-      System.err.println("DataflowService Stop Activity success!!") ;
+      watcher.complete();
     }
   }
   
