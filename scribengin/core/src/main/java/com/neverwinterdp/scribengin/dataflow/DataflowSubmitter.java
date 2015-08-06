@@ -7,7 +7,6 @@ import java.util.List;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.SequenceIdTracker;
-import com.neverwinterdp.registry.event.WaitingOrderNodeEventListener;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.util.DataflowFormater;
@@ -15,7 +14,6 @@ import com.neverwinterdp.scribengin.dataflow.util.DataflowRegistryDebugger;
 import com.neverwinterdp.scribengin.service.ScribenginService;
 import com.neverwinterdp.scribengin.service.VMScribenginServiceCommand;
 import com.neverwinterdp.util.JSONSerializer;
-import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.command.Command;
@@ -54,20 +52,17 @@ public class DataflowSubmitter {
         (CommandResult<Boolean>)vmClient.execute(scribenginMaster, deployCmd);
   }
   
-  public void waitForStatus(long timeout, DataflowLifecycleStatus ... status) throws Exception {
+  void waitForEqualOrGreaterThanStatus(long timeout, DataflowLifecycleStatus status) throws Exception {
     DataflowClient dflClient = scribenginClient.getDataflowClient(dflDescriptor.getId(), 90000);
-    dflClient.waitForStatus(3000, timeout, status);
+    dflClient.waitForEqualOrGreaterThanStatus(3000, timeout, status);
   }
   
   public void waitForRunning(long timeout) throws Exception {
-    DataflowLifecycleStatus[] status = new DataflowLifecycleStatus[] {
-        DataflowLifecycleStatus.RUNNING, DataflowLifecycleStatus.STOP, DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED
-    };
-    waitForStatus(timeout, status) ;
+    waitForEqualOrGreaterThanStatus(timeout, DataflowLifecycleStatus.RUNNING) ;
   }
   
   public void waitForFinish(long timeout) throws Exception {
-    waitForStatus(timeout, DataflowLifecycleStatus.FINISH, DataflowLifecycleStatus.TERMINATED) ;
+    waitForEqualOrGreaterThanStatus(timeout, DataflowLifecycleStatus.FINISH) ;
   }
   
   public DataflowSubmitter enableDataflowTaskDebugger(Appendable out) throws Exception {

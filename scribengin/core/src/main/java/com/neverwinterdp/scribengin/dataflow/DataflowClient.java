@@ -53,19 +53,13 @@ public class DataflowClient {
     return dflRegistry.getStatus() ;
   }
   
-  public void waitForStatus(long timeout, DataflowLifecycleStatus ... status) throws Exception {
-    waitForStatus(1000, timeout, status);
-  }
-  
-  public void waitForStatus(long checkPeriod, long timeout, DataflowLifecycleStatus ... status) throws Exception {
+  public void waitForEqualOrGreaterThanStatus(long checkPeriod, long timeout, DataflowLifecycleStatus status) throws Exception {
     long stopTime = System.currentTimeMillis() + timeout;
     while(System.currentTimeMillis() < stopTime) {
       DataflowLifecycleStatus currentStatus = dflRegistry.getStatus();
-      for(DataflowLifecycleStatus sel : status) {
-        if(currentStatus == sel) return;
-      }
+      if(currentStatus.equalOrGreaterThan(status)) return;
       Thread.sleep(checkPeriod);
     }
-    throw new Exception("Cannot get the " + status + " after " + timeout + "ms");
+    throw new Exception("Cannot get the equal or greater than " + status + " after " + timeout + "ms");
   }
 }
