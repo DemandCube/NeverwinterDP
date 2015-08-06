@@ -161,7 +161,7 @@ public class ScribenginClient {
       String statusPath = dataflowPath + "/status";
       if(getRegistry().exists(statusPath)) {
         DataflowLifecycleStatus status = registry.get(statusPath).getDataAs(DataflowLifecycleStatus.class) ;
-        if(status.equalOrGreaterThan(DataflowLifecycleStatus.RUNNING)) {
+        if(status != null && status.equalOrGreaterThan(DataflowLifecycleStatus.RUNNING)) {
           DataflowClient dataflowClient = new DataflowClient(this, dataflowPath);
           return dataflowClient ;
         }
