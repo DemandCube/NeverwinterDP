@@ -1,4 +1,4 @@
-package com.neverwinterdp.dataflow.logsample;
+package com.neverwinterdp.dataflow.logsample.chain;
 
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.neverwinterdp.dataflow.logsample.chain.LogSampleChainClient;
 import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
@@ -67,7 +68,7 @@ public class LogSampleUnitTest  {
         "--log-generator-num-of-message", "5000",
         "--log-generator-message-size", "128",
         
-        "--dataflow-descriptor", "src/app/conf/local/kafka-log-dataflow-chain.json",
+        "--dataflow-descriptor", "src/app/conf/chain/local/kafka-log-dataflow-chain.json",
         "--dataflow-task-dedicated-executor", "false",
         "--dataflow-wait-for-submit-timeout", "45000",
         "--dataflow-wait-for-termination-timeout", "90000",
@@ -77,7 +78,7 @@ public class LogSampleUnitTest  {
         "--log-validator-validate-kafka", "log4j.aggregate"
       } ;
     
-    LogSampleClient client = new LogSampleClient(args);
+    LogSampleChainClient client = new LogSampleChainClient(args);
     client.run();
   }
   
@@ -92,7 +93,7 @@ public class LogSampleUnitTest  {
         "--log-generator-num-of-message", "5000",
         "--log-generator-message-size", "128",
         
-        "--dataflow-descriptor", "src/app/conf/local/hdfs-log-dataflow-chain.json",
+        "--dataflow-descriptor", "src/app/conf/chain/local/hdfs-log-dataflow-chain.json",
         "--dataflow-wait-for-submit-timeout", "45000",
         "--dataflow-wait-for-termination-timeout", "90000",
         "--dataflow-task-debug",
@@ -100,7 +101,7 @@ public class LogSampleUnitTest  {
         "--log-validator-wait-for-termination", "90000",
         "--log-validator-validate-hdfs", "./build/hdfs/info,./build/hdfs/warn,./build/hdfs/error"
     } ;
-    LogSampleClient client = new LogSampleClient(args);
+    LogSampleChainClient client = new LogSampleChainClient(args);
     client.run();
   }
   
@@ -122,7 +123,7 @@ public class LogSampleUnitTest  {
         "--log-generator-num-of-message", "1000",
         "--log-generator-message-size", "128",
         
-        "--dataflow-descriptor", "src/app/conf/local/s3-log-dataflow-chain.json",
+        "--dataflow-descriptor", "src/app/conf/chain/local/s3-log-dataflow-chain.json",
         "--dataflow-wait-for-submit-timeout", "45000",
         "--dataflow-wait-for-termination-timeout", "120000",
         "--dataflow-task-debug",
@@ -131,6 +132,6 @@ public class LogSampleUnitTest  {
         "--log-validator-validate-s3", "test-log-sample:info,test-log-sample:warn,test-log-sample:error"
     } ;
     
-    LogSampleClient.main(args);
+    LogSampleChainClient.main(args);
   }
 }

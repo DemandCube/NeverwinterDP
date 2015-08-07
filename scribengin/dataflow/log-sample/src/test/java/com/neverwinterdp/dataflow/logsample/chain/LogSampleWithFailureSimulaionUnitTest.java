@@ -1,4 +1,4 @@
-package com.neverwinterdp.dataflow.logsample;
+package com.neverwinterdp.dataflow.logsample.chain;
 
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.neverwinterdp.dataflow.logsample.chain.LogSampleChainClient;
 import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
@@ -86,7 +87,7 @@ public class LogSampleWithFailureSimulaionUnitTest  {
         "--log-validator-validate-kafka", "log4j.aggregate"
       } ;
     
-    LogSampleClient client = new LogSampleClient(args);
+    LogSampleChainClient client = new LogSampleChainClient(args);
     client.run();
   }
 }

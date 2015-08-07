@@ -8,7 +8,7 @@ import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.util.ExceptionUtil;
 
-public class LogSampleRegistry {
+public class MessageReportRegistry {
   final static public String APP_PATH = "/apps/log-sample" ;
 
   private Registry registry ;
@@ -17,7 +17,7 @@ public class LogSampleRegistry {
   private Node generateErrorsNode ;
   private Node validateReportsNode ;
   
-  public LogSampleRegistry(Registry registry, boolean initRegistry) throws RegistryException {
+  public MessageReportRegistry(Registry registry, boolean initRegistry) throws RegistryException {
     this.registry = registry;
     initRegistry(initRegistry) ;
   }
@@ -36,12 +36,12 @@ public class LogSampleRegistry {
     }
   }
 
-  public void addGenerateReport(LogMessageReport report) throws RegistryException {
+  public void addGenerateReport(MessageReport report) throws RegistryException {
     generateReportsNode.createChild(report.getGroupId(), report, NodeCreateMode.PERSISTENT);
   }
   
-  public List<LogMessageReport> getGeneratedReports() throws RegistryException {
-    return generateReportsNode.getChildrenAs(LogMessageReport.class) ;
+  public List<MessageReport> getGeneratedReports() throws RegistryException {
+    return generateReportsNode.getChildrenAs(MessageReport.class) ;
   }
   
   public void addGenerateError(String groupId, Throwable error) throws RegistryException {
@@ -49,11 +49,11 @@ public class LogSampleRegistry {
     generateReportsNode.createChild(groupId, stacktrace, NodeCreateMode.PERSISTENT);
   }
   
-  public void addValidateReport(LogMessageReport report) throws RegistryException {
+  public void addValidateReport(MessageReport report) throws RegistryException {
     validateReportsNode.createChild(report.getGroupId(), report, NodeCreateMode.PERSISTENT);
   }
   
-  public List<LogMessageReport> getValidateReports() throws RegistryException {
-    return validateReportsNode.getChildrenAs(LogMessageReport.class) ;
+  public List<MessageReport> getValidateReports() throws RegistryException {
+    return validateReportsNode.getChildrenAs(MessageReport.class) ;
   }
 }

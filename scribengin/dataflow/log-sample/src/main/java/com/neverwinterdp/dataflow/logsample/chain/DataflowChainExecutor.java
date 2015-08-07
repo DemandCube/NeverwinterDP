@@ -1,4 +1,4 @@
-package com.neverwinterdp.dataflow.logsample;
+package com.neverwinterdp.dataflow.logsample.chain;
 
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
@@ -10,11 +10,11 @@ import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.IOUtil;
 
 public class DataflowChainExecutor extends Executor {
-  private LogSampleConfig config;
+  private LogSampleChainConfig config;
   private DataflowChainConfig dflChainconfig ;
   private DataflowChainSubmitter submitter ;
   
-  public DataflowChainExecutor(ScribenginShell shell,LogSampleConfig config) throws Exception {
+  public DataflowChainExecutor(ScribenginShell shell,LogSampleChainConfig config) throws Exception {
     super(shell);
     this.config = config;
     

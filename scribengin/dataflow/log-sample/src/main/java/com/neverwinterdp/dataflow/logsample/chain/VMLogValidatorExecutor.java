@@ -1,5 +1,7 @@
-package com.neverwinterdp.dataflow.logsample;
+package com.neverwinterdp.dataflow.logsample.chain;
 
+import com.neverwinterdp.dataflow.logsample.MessageReport;
+import com.neverwinterdp.dataflow.logsample.MessageReportRegistry;
 import com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.shell.Executor;
@@ -7,9 +9,9 @@ import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.client.VMSubmitter;
 
 public class VMLogValidatorExecutor extends Executor {
-  private LogSampleConfig config;
+  private LogSampleChainConfig config;
   
-  public VMLogValidatorExecutor(ScribenginShell shell, LogSampleConfig config) {
+  public VMLogValidatorExecutor(ScribenginShell shell, LogSampleChainConfig config) {
     super(shell);
     this.config = config;
   }
@@ -44,9 +46,9 @@ public class VMLogValidatorExecutor extends Executor {
       vmSubmitter.waitForTerminated(config.logValidatorWaitForTermination);
       System.out.println("Finish The Validator App");
       System.out.println("Execute Time: " + (System.currentTimeMillis() - start) + "ms");
-      LogSampleRegistry appRegistry = new LogSampleRegistry(shell.getVMClient().getRegistry(), false);
-      System.out.println(LogMessageReport.getFormattedReport("Generated Report", appRegistry.getGeneratedReports()));
-      System.out.println(LogMessageReport.getFormattedReport("Validate Report", appRegistry.getValidateReports()));
+      MessageReportRegistry appRegistry = new MessageReportRegistry(shell.getVMClient().getRegistry(), false);
+      System.out.println(MessageReport.getFormattedReport("Generated Report", appRegistry.getGeneratedReports()));
+      System.out.println(MessageReport.getFormattedReport("Validate Report", appRegistry.getValidateReports()));
     } catch(Exception ex) {
       ex.printStackTrace();
     }

@@ -42,7 +42,6 @@ configurations.all {
 
 dependencies {
   compile project(':scribengin/core')
-  compile project(':scribengin/dataflow/hdfs')
   compile project(':scribengin/dataflow/log-sample')
 
   compile group: 'junit', name: 'junit', version: '4.11'

@@ -11,8 +11,8 @@ import kafka.javaapi.TopicMetadata;
 
 import org.slf4j.Logger;
 
-import com.neverwinterdp.dataflow.logsample.LogMessageReport;
-import com.neverwinterdp.dataflow.logsample.LogSampleRegistry;
+import com.neverwinterdp.dataflow.logsample.MessageReport;
+import com.neverwinterdp.dataflow.logsample.MessageReportRegistry;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.registry.RegistryException;
@@ -23,7 +23,7 @@ import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
 
-public class VMLogMessageGeneratorApp extends VMApp {
+public class VMToKafkaLogMessageGeneratorApp extends VMApp {
   private Logger logger ;
   private int numOfMessage ;
   private int messageSize;
@@ -34,7 +34,7 @@ public class VMLogMessageGeneratorApp extends VMApp {
   
   @Override
   public void run() throws Exception {
-    logger = getVM().getLoggerFactory().getLogger(VMLogMessageGeneratorApp.class);
+    logger = getVM().getLoggerFactory().getLogger(VMToKafkaLogMessageGeneratorApp.class);
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
     zkConnects = vmConfig.getProperty("zk-connects", "zookeeper-1:2181");
@@ -57,12 +57,12 @@ public class VMLogMessageGeneratorApp extends VMApp {
     executorService.shutdown();
     executorService.awaitTermination(60, TimeUnit.MINUTES);
     String vmId = getVM().getDescriptor().getId();
-    LogMessageReport report = new LogMessageReport(vmId, messageGenerator.getCurrentSequenceId(vmId), 0, 0) ;
+    MessageReport report = new MessageReport(vmId, messageGenerator.getCurrentSequenceId(vmId), 0, 0) ;
     System.err.println("LOG GENERATOR:");
     System.err.println(JSONSerializer.INSTANCE.toString(report));
-    LogSampleRegistry appRegistry = null;
+    MessageReportRegistry appRegistry = null;
     try {
-      appRegistry = new LogSampleRegistry(getVM().getVMRegistry().getRegistry(), true);
+      appRegistry = new MessageReportRegistry(getVM().getVMRegistry().getRegistry(), true);
       appRegistry.addGenerateReport(report);
     } catch (RegistryException e) {
       if(appRegistry != null) {

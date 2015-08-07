@@ -42,7 +42,7 @@ JAVA_OPTS="-Xshare:auto -Xms128m -Xmx1024m -XX:-UseSplitVerifier"
 APP_OPT="-Dapp.dir=$APP_DIR -Duser.dir=$APP_DIR"
 APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
 
-MAIN_CLASS="com.neverwinterdp.dataflow.logsample.LogSampleClient"
+MAIN_CLASS="com.neverwinterdp.dataflow.logsample.chain.LogSampleChainClient"
 
 PROFILE=$(get_opt --profile 'performance' $@)
 MESSAGE_SIZE=$(get_opt --message-size '128' $@)
@@ -57,13 +57,13 @@ EXECUTION_PERIOD=$(get_opt --execution-period '90000' $@)
 DATAFLOW_DESCRIPTOR_FILE=""
 LOG_VALIDATOR_VALIDATE=""
 if [ "$STORAGE" = "hdfs" ] ; then
-  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/hdfs-log-dataflow-chain.json"
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/hdfs-log-dataflow-chain.json"
   LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-hdfs /log-sample/hdfs/info,/log-sample//hdfs/warn,/log-sample/hdfs/error"
 elif [ "$STORAGE" = "s3" ] ; then
-  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/s3-log-dataflow-chain.json"
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/s3-log-dataflow-chain.json"
   LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-s3 test-log-sample:info,test-log-sample:warn,test-log-sample:error" 
 else
-  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/kafka-log-dataflow-chain.json"
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/kafka-log-dataflow-chain.json"
   LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-kafka log4j.aggregate"
 fi
 

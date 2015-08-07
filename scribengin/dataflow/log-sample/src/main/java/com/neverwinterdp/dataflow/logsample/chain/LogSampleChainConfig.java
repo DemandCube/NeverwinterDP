@@ -1,15 +1,15 @@
-package com.neverwinterdp.dataflow.logsample;
+package com.neverwinterdp.dataflow.logsample.chain;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.registry.RegistryConfig;
 
-public class LogSampleConfig {
+public class LogSampleChainConfig {
   @Parameter(names = "--upload-app", description = "Local App Home")
-  String uploadApp ;
+  public String uploadApp ;
 
   @Parameter(names = "--dfs-app-home", description = "Local App Home")
-  String dfsAppHome ;
+  public String dfsAppHome ;
 
   @Parameter(names = "--log-generator-num-of-vm", description = "Log generator message size")
   public int logGeneratorNumOfVM = 1;

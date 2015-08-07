@@ -8,8 +8,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 
-import com.neverwinterdp.dataflow.logsample.LogMessageReport;
-import com.neverwinterdp.dataflow.logsample.LogSampleRegistry;
+import com.neverwinterdp.dataflow.logsample.MessageReport;
+import com.neverwinterdp.dataflow.logsample.MessageReportRegistry;
 import com.neverwinterdp.kafka.consumer.KafkaMessageConsumerConnector;
 import com.neverwinterdp.kafka.consumer.MessageConsumerHandler;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
@@ -80,11 +80,11 @@ public class VMLogMessageValidatorApp extends VMApp {
   }
   
   void report(BitSetMessageTracker tracker) throws Exception {
-    LogSampleRegistry appRegistry = null;
-    appRegistry = new LogSampleRegistry(getVM().getVMRegistry().getRegistry(), true);
+    MessageReportRegistry appRegistry = null;
+    appRegistry = new MessageReportRegistry(getVM().getVMRegistry().getRegistry(), true);
     for(String partition : tracker.getPartitions()) {
       BitSetMessageTracker.BitSetPartitionMessageTracker pTracker = tracker.getPartitionTracker(partition);
-      LogMessageReport report = new LogMessageReport(partition, pTracker.getExpect(), pTracker.getLostCount(), pTracker.getDuplicatedCount()) ;
+      MessageReport report = new MessageReport(partition, pTracker.getExpect(), pTracker.getLostCount(), pTracker.getDuplicatedCount()) ;
       appRegistry.addValidateReport(report);
     }
   }

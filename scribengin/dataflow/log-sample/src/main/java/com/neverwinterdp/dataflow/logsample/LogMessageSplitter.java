@@ -21,10 +21,8 @@ public class LogMessageSplitter extends ScribeAbstract {
     if(log4jRec.getLoggerName().indexOf("LogSample") >= 0) {
       String level = log4jRec.getLevel().toLowerCase();
       if("EOS".equals(log4jRec.getMessage())) {
-        //ctx.write(level, new DataflowMessage(DataflowInstruction.END_OF_DATASTREAM));
         ctx.setComplete();
       } else {
-        //Extract the log message that generate by the tool
         ctx.write(level, dflMessage);
       }
     } else {
@@ -34,6 +32,5 @@ public class LogMessageSplitter extends ScribeAbstract {
     if(count > 0 && count % 10000 == 0) {
       ctx.commit();
     }
-    //System.err.println("Splitter process " + allCounter.incrementAndGet() + ", key = " + dflMessage.getKey()) ;
   }
 }

@@ -1,4 +1,4 @@
-package com.neverwinterdp.dataflow.logsample;
+package com.neverwinterdp.dataflow.logsample.chain;
 
 
 import java.util.List;
@@ -19,11 +19,11 @@ import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.client.YarnVMClient;
 import com.neverwinterdp.yara.snapshot.ClusterMetricRegistrySnapshot;
 
-public class LogSampleClient  {
-  LogSampleConfig config;
+public class LogSampleChainClient  {
+  LogSampleChainConfig config;
   
-  public LogSampleClient(String[] args) {
-    config = new LogSampleConfig();
+  public LogSampleChainClient(String[] args) {
+    config = new LogSampleChainConfig();
     new JCommander(config, args);
   }
   
@@ -108,7 +108,7 @@ public class LogSampleClient  {
   
   static public void main(String[] args) throws Exception {
     System.setProperty("com.amazonaws.sdk.disableCertChecking", "true"); 
-    LogSampleClient client = new LogSampleClient(args);
+    LogSampleChainClient client = new LogSampleChainClient(args);
     client.run();
   }
 }
