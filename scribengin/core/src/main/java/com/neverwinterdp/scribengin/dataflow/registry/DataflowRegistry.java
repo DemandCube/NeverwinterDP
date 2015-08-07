@@ -336,6 +336,10 @@ public class DataflowRegistry {
     return multiGet.getResults();
   }
   
+  static public ActivityRegistry getActivityRegistry(Registry registry, String dataflowPath) throws RegistryException {
+    return new ActivityRegistry(registry, dataflowPath + "/" + ACTIVITIES_PATH) ;
+  }
+  
   static public List<DataflowTaskReport> asyncGetDataflowTaskReports(Registry registry, String dataflowPath) throws RegistryException {
       MultiDataGet<DataflowTaskReport> multiGet = registry.createMultiDataGet(DataflowTaskReport.class);
       String taskListPath = dataflowPath + "/tasks/task-list";

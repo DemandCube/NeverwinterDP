@@ -15,6 +15,7 @@ import com.neverwinterdp.dataflow.logsample.MessageReport;
 import com.neverwinterdp.dataflow.logsample.MessageReportRegistry;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.kafka.tool.KafkaTool;
+import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.tool.message.MessageGenerator;
 import com.neverwinterdp.util.JSONSerializer;
@@ -27,6 +28,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
   private Logger logger ;
   private int numOfMessage ;
   private int messageSize;
+  private String reportPath ;
   private String zkConnects ;
   private String topic ;
   private MessageGenerator messageGenerator = new MessageGenerator.DefaultMessageGenerator() ;
@@ -37,6 +39,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     logger = getVM().getLoggerFactory().getLogger(VMToKafkaLogMessageGeneratorApp.class);
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
+    reportPath = vmConfig.getProperty("report-path", "/apps/log-sample");
     zkConnects = vmConfig.getProperty("zk-connects", "zookeeper-1:2181");
     topic      = vmConfig.getProperty("topic", "log4j");
     numOfMessage = vmConfig.getPropertyAsInt("num-of-message", 5000);
@@ -58,11 +61,11 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     executorService.awaitTermination(60, TimeUnit.MINUTES);
     String vmId = getVM().getDescriptor().getId();
     MessageReport report = new MessageReport(vmId, messageGenerator.getCurrentSequenceId(vmId), 0, 0) ;
-    System.err.println("LOG GENERATOR:");
-    System.err.println(JSONSerializer.INSTANCE.toString(report));
     MessageReportRegistry appRegistry = null;
     try {
-      appRegistry = new MessageReportRegistry(getVM().getVMRegistry().getRegistry(), true);
+      Registry registry = getVM().getVMRegistry().getRegistry();
+      appRegistry = 
+        new MessageReportRegistry(registry, reportPath, true);
       appRegistry.addGenerateReport(report);
     } catch (RegistryException e) {
       if(appRegistry != null) {
@@ -74,6 +77,9 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
       }
       logger.error("Log info to registry error", e) ;
     }
+    System.out.println("LOG GENERATOR:");
+    System.out.println("Report Path: " + reportPath);
+    System.out.println(JSONSerializer.INSTANCE.toString(report));
   }
   
   synchronized private String nextMessage() {

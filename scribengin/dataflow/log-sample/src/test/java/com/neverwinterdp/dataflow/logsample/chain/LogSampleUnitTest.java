@@ -71,7 +71,7 @@ public class LogSampleUnitTest  {
         "--dataflow-descriptor", "src/app/conf/chain/local/kafka-log-dataflow-chain.json",
         "--dataflow-task-dedicated-executor", "false",
         "--dataflow-wait-for-submit-timeout", "45000",
-        "--dataflow-wait-for-termination-timeout", "90000",
+        "--dataflow-wait-for-termination-timeout", "150000",
         "--dataflow-task-debug",
         
         "--log-validator-wait-for-termination", "45000",
@@ -95,7 +95,7 @@ public class LogSampleUnitTest  {
         
         "--dataflow-descriptor", "src/app/conf/chain/local/hdfs-log-dataflow-chain.json",
         "--dataflow-wait-for-submit-timeout", "45000",
-        "--dataflow-wait-for-termination-timeout", "90000",
+        "--dataflow-wait-for-termination-timeout", "150000",
         "--dataflow-task-debug",
         
         "--log-validator-wait-for-termination", "90000",
@@ -125,7 +125,7 @@ public class LogSampleUnitTest  {
         
         "--dataflow-descriptor", "src/app/conf/chain/local/s3-log-dataflow-chain.json",
         "--dataflow-wait-for-submit-timeout", "45000",
-        "--dataflow-wait-for-termination-timeout", "120000",
+        "--dataflow-wait-for-termination-timeout", "150000",
         "--dataflow-task-debug",
         
         "--log-validator-wait-for-termination", "45000",

@@ -5,6 +5,10 @@ import java.util.List;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.activity.Activity;
+import com.neverwinterdp.registry.activity.ActivityFormatter;
+import com.neverwinterdp.registry.activity.ActivityRegistry;
+import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskReport;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskRuntimeReport;
@@ -22,6 +26,11 @@ public class DataflowFormater {
   public DataflowFormater(Registry registry, String dataflowPath) {
     this.registry     = registry;
     this.dataflowPath = dataflowPath;
+  }
+  
+  public DataflowFormater(DataflowRegistry dflRegistry) {
+    this.registry     = dflRegistry.getRegistry();
+    this.dataflowPath = dflRegistry.getDataflowPath();
   }
 
   public String getFormattedText() throws RegistryException {
@@ -42,7 +51,8 @@ public class DataflowFormater {
   }
   
   public String getDataflowTaskInfo() throws RegistryException {
-    List<DataflowTaskRuntimeReport> reports =  DataflowRegistry.getDataflowTaskRuntimeReports(registry, dataflowPath);
+    List<DataflowTaskRuntimeReport> reports =  
+        DataflowRegistry.getDataflowTaskRuntimeReports(registry, dataflowPath);
     String[] header = {
       "Id", "Status", "Assigned", "AHE", "AWNM", "LAWNM", "AC", "CC", "CFC", "Last Commit Time", "Start Time", "Finish Time", "Exec Time", "Duration"
     } ;
@@ -75,6 +85,29 @@ public class DataflowFormater {
       );
     }
     return taskFt.getFormattedText();
+  }
+  
+  public String getActivitiesInfo() throws RegistryException {
+    StringBuilder b = new StringBuilder() ;
+    b.append("\nActivities:").append("\n");
+    b.append("  Active Activities:");
+    ActivityRegistry activityRegistry = DataflowRegistry.getActivityRegistry(registry, dataflowPath) ;
+    List<Activity> ActiveActivities = activityRegistry.getActiveActivities();
+    for(Activity activity : ActiveActivities) {
+      List<ActivityStep> steps = activityRegistry.getActivitySteps(activity);
+      ActivityFormatter activityFormatter = new ActivityFormatter(activity, steps, true);
+      b.append(activityFormatter.format("    "));
+      b.append("\n");
+    }
+    
+    b.append("  History Activities:\n");
+    List<Activity> historyActivities = activityRegistry.getHistoryActivities();
+    for(Activity activity : historyActivities) {
+      List<ActivityStep> steps = activityRegistry.getActivitySteps(activity);
+      ActivityFormatter activityFormatter = new ActivityFormatter(activity, steps, true);
+      b.append(activityFormatter.format("    "));
+    }
+    return b.toString();
   }
   
   public String getDataflowWorkerInfo() throws RegistryException {

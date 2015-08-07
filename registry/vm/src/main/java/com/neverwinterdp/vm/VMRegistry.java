@@ -26,6 +26,14 @@ public class VMRegistry {
     return descriptor;
   }
   
+  public VMStatus getVMStatus() throws RegistryException {
+    return registry.getDataAs(vmAllocatedPath + "/status", VMStatus.class) ;
+  }
+  
+  public void updateStatus(VMStatus status) throws RegistryException {
+    registry.setData(vmAllocatedPath + "/status", status) ;
+  }
+  
   public void addCommandWatcher(NodeWatcher watcher) throws RegistryException {
     Node commandNode = registry.get(vmAllocatedPath + "/commands") ;
     commandNode.watchChildren(watcher);
@@ -37,9 +45,5 @@ public class VMRegistry {
   
   public void deleteHeartbeat() throws RegistryException {
     registry.delete(vmAllocatedPath + "/status/heartbeat") ;
-  }
-  
-  public void updateStatus(VMStatus status) throws RegistryException {
-    registry.setData(vmAllocatedPath + "/status", status) ;
   }
 }

@@ -6,6 +6,7 @@ import com.beust.jcommander.Parameter;
 import com.neverwinterdp.util.text.TabularFormater;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
+import com.neverwinterdp.vm.VMStatus;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.client.VMSubmitter;
 import com.neverwinterdp.vm.tool.VMClusterBuilder;
@@ -13,11 +14,12 @@ import com.neverwinterdp.vm.util.VMRegistryFormatter;
 
 public class VMCommand extends Command {
   public VMCommand() {
-    add("start",      Start.class) ;
-    add("shutdown",   Shutdown.class) ;
-    add("info",       Info.class) ;
-    add("submit",     Submit.class) ;
-    add("upload-app", UploadApp.class) ;
+    add("start",              Start.class) ;
+    add("shutdown",           Shutdown.class) ;
+    add("info",               Info.class) ;
+    add("wait-for-vm-status", WaitForVMStatus.class) ;
+    add("submit",             Submit.class) ;
+    add("upload-app",         UploadApp.class) ;
   }
   
   static public class Start extends SubCommand {
@@ -114,25 +116,51 @@ public class VMCommand extends Command {
   }
   
   static public class UploadApp extends SubCommand {
-    @Parameter(names = "--upload-app", description = "The path to application home to upload ")
-    private String uploadAppHome ;
+    @Parameter(names = "--local", description = "The local home path")
+    private String localHome ;
     
-    @Parameter(names = "--dfs-app-home", description = "The path to application home to upload ")
-    private String dfsAppHome ;
+    @Parameter(names = "--dfs", description = "The dfs home path")
+    private String dfsHome ;
     
     
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
       VMClient vmClient = shell.getVMClient();
-      if(dfsAppHome == null) {
-        String name = uploadAppHome.substring(uploadAppHome.lastIndexOf('/') + 1);
-        dfsAppHome = VMClient.APPLICATIONS + "/"  + name;
+      if(dfsHome == null) {
+        String name = localHome.substring(localHome.lastIndexOf('/') + 1);
+        dfsHome = VMClient.APPLICATIONS + "/"  + name;
       }
-      vmClient.uploadApp(uploadAppHome, dfsAppHome);
+      vmClient.uploadApp(localHome, dfsHome);
     }
     
     @Override
     public String getDescription() { return "Submit a request to run a vm application"; }
+  }
+  
+  static public class WaitForVMStatus extends SubCommand {
+    @Parameter(names = "--vm-id", required=true)
+    String vmId ;
+    
+    @Parameter(names = "--vm-status", required=true)
+    String vmStatus ;
+    
+    @Parameter(names = "--max-wait-time", required=true)
+    long maxWaitTime = 30000;
+    
+    @Override
+    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
+      VMClient vmClient = shell.getVMClient();
+      shell.console().println("\n");
+      shell.console().h1("Wait For VM " + vmId + " With VMSatus " + vmStatus);
+      VMStatus status = VMStatus.valueOf(vmStatus);
+      long start = System.currentTimeMillis();
+      vmClient.waitForEqualOrGreaterThan(vmId, status, 1000, maxWaitTime);
+      long waitTime = System.currentTimeMillis() - start;
+      shell.console().println("Wait for vm status in " + waitTime + "ms") ;
+    }
+    
+    @Override
+    public String getDescription() { return "Wait for vm status"; }
   }
 
   @Override

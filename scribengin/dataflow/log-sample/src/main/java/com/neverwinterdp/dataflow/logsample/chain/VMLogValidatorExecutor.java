@@ -30,6 +30,7 @@ public class VMLogValidatorExecutor extends Executor {
       vmConfig.addRoles("log-validator");
       vmConfig.addProperty("num-of-message-per-partition", config.logGeneratorNumOfMessage);
       vmConfig.addProperty("wait-for-termination", config.logValidatorWaitForTermination);
+      vmConfig.addProperty("report-path", "/apps/log-sample/message-report");
       if(config.logValidatorValidateKafka != null) {
         vmConfig.addProperty("validate-kafka", config.logValidatorValidateKafka);
       }
@@ -46,7 +47,8 @@ public class VMLogValidatorExecutor extends Executor {
       vmSubmitter.waitForTerminated(config.logValidatorWaitForTermination);
       System.out.println("Finish The Validator App");
       System.out.println("Execute Time: " + (System.currentTimeMillis() - start) + "ms");
-      MessageReportRegistry appRegistry = new MessageReportRegistry(shell.getVMClient().getRegistry(), false);
+      MessageReportRegistry appRegistry = 
+        new MessageReportRegistry(shell.getVMClient().getRegistry(), "/apps/log-sample/message-report", false);
       System.out.println(MessageReport.getFormattedReport("Generated Report", appRegistry.getGeneratedReports()));
       System.out.println(MessageReport.getFormattedReport("Validate Report", appRegistry.getValidateReports()));
     } catch(Exception ex) {

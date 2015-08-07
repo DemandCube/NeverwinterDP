@@ -7,17 +7,17 @@ import java.util.Map;
 import com.neverwinterdp.util.text.TabularFormater;
 
 public class BitSetMessageTracker {
-  private int expectNumOfMessage ;
+  private int expectNumOfMessagePerPartition ;
   private Map<String, BitSetPartitionMessageTracker> partitions = new HashMap<>();
   
   public BitSetMessageTracker(int expectNumOfMessage) {
-    this.expectNumOfMessage = expectNumOfMessage;
+    this.expectNumOfMessagePerPartition = expectNumOfMessage;
   }
   
   synchronized public void log(String partition, int index) {
     BitSetPartitionMessageTracker pTracker = partitions.get(partition) ;
     if(pTracker == null) {
-      pTracker = new BitSetPartitionMessageTracker(expectNumOfMessage);
+      pTracker = new BitSetPartitionMessageTracker(expectNumOfMessagePerPartition);
       partitions.put(partition, pTracker);
     }
     pTracker.log(index);;

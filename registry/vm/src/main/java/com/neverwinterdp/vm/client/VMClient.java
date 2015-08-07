@@ -19,6 +19,7 @@ import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.event.NodeWatcher;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
+import com.neverwinterdp.vm.VMStatus;
 import com.neverwinterdp.vm.command.Command;
 import com.neverwinterdp.vm.command.CommandPayload;
 import com.neverwinterdp.vm.command.CommandResult;
@@ -127,7 +128,18 @@ public class VMClient {
     if(result.isDiscardResult()) return true;
     return result.getResultAs(Boolean.class);
   }
-  
+
+  public void waitForEqualOrGreaterThan(String vmId, VMStatus status, long checkPeriod, long timeout) throws Exception {
+    String vmStatusPath = VMService.getVMStatusPath(vmId);
+    long stopTime = System.currentTimeMillis() + timeout;
+    while(System.currentTimeMillis() < stopTime) {
+      VMStatus currentStatus = registry.getDataAs(vmStatusPath, VMStatus.class);
+      if(currentStatus != null && currentStatus.equalOrGreaterThan(status)) {
+        return ;
+      }
+      Thread.sleep(checkPeriod);
+    }
+  }
   
   public FileSystem getFileSystem() throws IOException {
     return FileSystem.get(new Configuration());

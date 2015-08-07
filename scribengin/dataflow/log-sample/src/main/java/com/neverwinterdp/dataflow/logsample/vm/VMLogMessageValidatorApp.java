@@ -30,6 +30,7 @@ public class VMLogMessageValidatorApp extends VMApp {
   private Logger logger ;
   int  numOfMessagePerPartition ;
   long waitForTermination ;
+  String reportPath ;
   String validateKafkaTopic ;
   String validateHdfs ;
   String validateS3 ;
@@ -44,14 +45,22 @@ public class VMLogMessageValidatorApp extends VMApp {
     numOfMessagePerPartition = vmConfig.getPropertyAsInt("num-of-message-per-partition", -1);
     waitForTermination       = vmConfig.getPropertyAsInt("wait-for-termination", 300000);
     
+    reportPath = vmConfig.getProperty("report-path", "/apps/log-sample/reports");
+    
     validateKafkaTopic =  vmConfig.getProperty("validate-kafka", null);
     validateHdfs =  vmConfig.getProperty("validate-hdfs", null);
     validateS3 =  vmConfig.getProperty("validate-s3", null);
+    
     bitSetMessageTracker = new BitSetMessageTracker(numOfMessagePerPartition);
     
     if(validateKafkaTopic != null) {
-      KafkaMessageValidator kafkaValidator = new KafkaMessageValidator() ;
-      kafkaValidator.validate(validateKafkaTopic);
+      String[] topic = validateKafkaTopic.split(",");
+      ExecutorService executorService = Executors.newFixedThreadPool(topic.length);
+      for(String selTopic : topic) {
+        executorService.submit(new KafkaMessageValidator(selTopic) );
+      }
+      executorService.shutdown();
+      executorService.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
     } else if(validateHdfs != null) {
       String[] hdfsLoc = validateHdfs.split(",");
       ExecutorService executorService = Executors.newFixedThreadPool(hdfsLoc.length);
@@ -81,7 +90,7 @@ public class VMLogMessageValidatorApp extends VMApp {
   
   void report(BitSetMessageTracker tracker) throws Exception {
     MessageReportRegistry appRegistry = null;
-    appRegistry = new MessageReportRegistry(getVM().getVMRegistry().getRegistry(), true);
+    appRegistry = new MessageReportRegistry(getVM().getVMRegistry().getRegistry(),reportPath, true);
     for(String partition : tracker.getPartitions()) {
       BitSetMessageTracker.BitSetPartitionMessageTracker pTracker = tracker.getPartitionTracker(partition);
       MessageReport report = new MessageReport(partition, pTracker.getExpect(), pTracker.getLostCount(), pTracker.getDuplicatedCount()) ;
@@ -188,7 +197,18 @@ public class VMLogMessageValidatorApp extends VMApp {
     }
   }
   
-  public class KafkaMessageValidator {
+  public class KafkaMessageValidator implements Runnable {
+    private String topic ;
+    
+    KafkaMessageValidator(String topic) {
+      this.topic = topic;
+    }
+    
+    
+    public void run() {
+      validate(topic);
+    }
+    
     public void validate(String topic) {
       String zkConnectUrls = getVM().getDescriptor().getVmConfig().getRegistryConfig().getConnect() ;
       KafkaMessageConsumerConnector connector = 

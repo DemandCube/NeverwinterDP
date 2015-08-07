@@ -1,21 +1,15 @@
 package com.neverwinterdp.scribengin.client.shell;
 
-import java.util.List;
-
 import com.beust.jcommander.Parameter;
-import com.neverwinterdp.registry.activity.Activity;
-import com.neverwinterdp.registry.activity.ActivityRegistry;
-import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.scribengin.ScribenginClient;
+import com.neverwinterdp.scribengin.dataflow.DataflowClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
-import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
-import com.neverwinterdp.scribengin.dataflow.DataflowTaskReport;
 import com.neverwinterdp.scribengin.dataflow.chain.DataflowChainConfig;
 import com.neverwinterdp.scribengin.dataflow.chain.OrderDataflowChainSubmitter;
-import com.neverwinterdp.scribengin.dataflow.event.DataflowWaitingEventListener;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
-import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorDescriptor;
+import com.neverwinterdp.scribengin.dataflow.util.DataflowFormater;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.vm.client.shell.Command;
@@ -26,8 +20,10 @@ import com.neverwinterdp.vm.client.shell.SubCommand;
 
 public class DataflowCommand extends Command {
   public DataflowCommand() {
-    add("info",   Info.class) ;
-    add("submit", Submit.class) ;
+    add("info",            Info.class) ;
+    add("submit",          Submit.class) ;
+    add("submit-chain",    SubmitChain.class) ;
+    add("wait-for-status", WaitForStatus.class) ;
   }
   
   @Override
@@ -36,78 +32,38 @@ public class DataflowCommand extends Command {
   }
   
   static public class Info extends SubCommand {
-    @Parameter(names = "--dataflow-id", description = "The dataflow id")
-    private String dataflowId = "DataflowCommand-unknown";
+    @Parameter(names = "--dataflow-id", required=true, description = "The dataflow id")
+    String dataflowId ;
     
     @Parameter(names = "--show-tasks", description = "The history dataflow id")
-    private boolean tasks = false;
+    boolean tasks = false;
     
     @Parameter(names = "--show-workers", description = "The history dataflow id")
-    private boolean workers = false;
+    boolean workers = false;
     
     @Parameter(names = "--show-activities", description = "The history dataflow id")
-    private boolean activities = false;
+    boolean activities = false;
     
-    @Parameter(names = "--verbose", description = "Verbose output")
-    private boolean verbose = false;
+    @Parameter(names = "--show-all", description = "The history dataflow id")
+    boolean all = false;
     
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
-      boolean showAll = false;
-      if(!tasks && !workers && !activities){
-        showAll = true;
-      }
-      
       ScribenginShell scribenginShell = (ScribenginShell) shell;
       ScribenginClient scribenginClient= scribenginShell.getScribenginClient();
       DataflowRegistry dRegistry = scribenginClient.getDataflowRegistry(dataflowId);
+      DataflowFormater dflFormater = new DataflowFormater(dRegistry) ;
       
       Console console = shell.console();
       console.h1("Dataflow " + dRegistry.getDataflowPath());
       
-      if(tasks || showAll){
-        console.println("\nTasks:");
-        List<DataflowTaskDescriptor> taskDescriptors = dRegistry.getTaskDescriptors();
-        Formater.DataFlowTaskDescriptorList taskList = new Formater.DataFlowTaskDescriptorList(taskDescriptors);
-        console.println(taskList.format("All Tasks"));
-        List<DataflowTaskReport> taskReports = dRegistry.getTaskReports(taskDescriptors) ;
-        Formater.DataflowTaskReportList reportList = new Formater.DataflowTaskReportList(taskReports);
-        console.print(reportList.format("Report", "  "));
-      }
+      console.println(dflFormater.getInfo());
       
-      if(workers || showAll){
-        console.println("\nActive Workers:");
-        List<String> workers = dRegistry.getWorkerRegistry().getActiveWorkerIds();
-        for(String worker : workers) {
-          List<DataflowTaskExecutorDescriptor> descriptors = 
-              dRegistry.getWorkerRegistry().getWorkerExecutors(worker);
-          console.println("  Worker: " + worker);
-          Formater.ExecutorList executorList = new Formater.ExecutorList(descriptors);
-          console.println(executorList.format("Executors", "    "));
-        }
-      }
+      if(all || tasks) console.println(dflFormater.getDataflowTaskInfo());
       
-      if(activities || showAll){
-        console.println("\nActivities:");
-        console.println("  Active Activities:");
-        
-        ActivityRegistry activityRegistry = dRegistry.getActivityRegistry() ;
-        List<Activity> ActiveActivities = activityRegistry.getActiveActivities();
-        for(Activity activity : ActiveActivities) {
-          List<ActivityStep> steps = activityRegistry.getActivitySteps(activity);
-          Formater.ActivityFormatter activityFormatter = new Formater.ActivityFormatter(activity, steps, verbose);
-          console.println(activityFormatter.format("    "));
-          console.println("");
-        }
-        
-        console.println("  History Activities:");
-        List<Activity> historyActivities = activityRegistry.getHistoryActivities();
-        for(Activity activity : historyActivities) {
-          List<ActivityStep> steps = activityRegistry.getActivitySteps(activity);
-          Formater.ActivityFormatter activityFormatter = new Formater.ActivityFormatter(activity, steps, verbose);
-          console.println(activityFormatter.format("    "));
-        }
-      }
+      if(all || workers) console.println(dflFormater.getDataflowWorkerInfo());
+      
+      if(all || activities) console.println(dflFormater.getActivitiesInfo());
     }
 
     @Override
@@ -120,6 +76,42 @@ public class DataflowCommand extends Command {
     @Parameter(names = "--dataflow-config",  description = "The dataflow descriptor path in the json format")
     private String dataflowConfig ;
     
+    @Parameter(names = "--dfs-app-home",  description = "DFS App Home Path")
+    private String dfsAppHome ;
+    
+    @Parameter(names = "--dataflow-id",  description = "Specify the id for the dataflow")
+    private String dataflowId ;
+    
+    @Parameter(names = "--deploy", description = "The dataflow path to deploy")
+    private String dataflowPath ;
+    
+    @Parameter(names = "--wait-for-running-timeout", description = "The dataflow path to deploy")
+    private long waitForRunningTimeout = 120000;
+    
+    
+    @Override
+    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
+      ScribenginShell scribenginShell = (ScribenginShell) shell;
+      ScribenginClient client = scribenginShell.getScribenginClient();
+      String dataflowJson = IOUtil.getFileContentAsString(dataflowConfig) ;
+      DataflowDescriptor config = 
+        JSONSerializer.INSTANCE.fromString(dataflowJson, DataflowDescriptor.class);
+      if(dataflowId != null) config.setId(dataflowId);
+      config.setDataflowAppHome(dfsAppHome);
+      DataflowSubmitter submitter = new DataflowSubmitter(client, dataflowPath, config);
+      shell.console().println("Dataflow JSON:");
+      shell.console().println(dataflowJson);
+      submitter.submit();
+      shell.console().println("Submited");
+      submitter.waitForRunning(waitForRunningTimeout);
+      shell.console().println("Finished waiting for the dataflow running status");
+    }
+
+    @Override
+    public String getDescription() { return "submit a dataflow"; }
+  }
+  
+  static public class SubmitChain extends SubCommand {
     @Parameter(names = "--dataflow-chain-config",  description = "The dataflow descriptor path in the json format")
     private String dataflowChainConfig ;
     
@@ -133,41 +125,46 @@ public class DataflowCommand extends Command {
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
       ScribenginShell scribenginShell = (ScribenginShell) shell;
-      if(dataflowConfig != null) {
-        submitDataflow(scribenginShell) ;
-      } else if(dataflowChainConfig != null) {
-        submitDataflowChain(scribenginShell) ;
-      } else {
-        shell.console().println("Error: Expect the dataflow config or dataflow chain config file");
-      }
-      
-    }
-
-    void submitDataflow(ScribenginShell shell) throws Exception {
-      ScribenginClient client = shell.getScribenginClient();
-      String dataflowJson = IOUtil.getFileContentAsString(dataflowConfig) ;
-      DataflowDescriptor config = JSONSerializer.INSTANCE.fromString(dataflowJson, DataflowDescriptor.class);
-      DataflowSubmitter submitter = new DataflowSubmitter(client, dataflowPath, config);
-      shell.console().println("Dataflow JSON:");
-      shell.console().println(dataflowJson);
-      submitter.submit();
-      shell.console().println("Submited");
-      submitter.waitForRunning(waitForRunningTimeout);
-      shell.console().println("Finished waiting for the dataflow running status");
-    } 
-    
-    void submitDataflowChain(ScribenginShell shell) throws Exception {
+      ScribenginClient client = scribenginShell.getScribenginClient();
       shell.console().println("Submit:");
       shell.console().println("  dataflow chain config: " + dataflowChainConfig);
       shell.console().println("  dataflow local home:"    + dataflowPath);
       String json = IOUtil.getFileContentAsString(dataflowChainConfig) ;
       DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
-      OrderDataflowChainSubmitter submitter = 
-          new OrderDataflowChainSubmitter(shell.getScribenginClient(), dataflowPath, config);
+      OrderDataflowChainSubmitter submitter = new OrderDataflowChainSubmitter(client, dataflowPath, config);
       submitter.submit(waitForRunningTimeout);
     }
     
     @Override
     public String getDescription() { return "submit a dataflow"; }
+  }
+  
+  static public class WaitForStatus extends SubCommand {
+    @Parameter(names = "--dataflow-id",  required=true , description = "Specify the id for the dataflow")
+    private String dataflowId ;
+    
+    @Parameter(names = "--max-wait-time", description = "The dataflow path to deploy")
+    private long maxWaitTime = 180000;
+    
+    @Parameter(names = "--status",  required=true , description = "Dataflow status")
+    private String status ;
+    
+    @Override
+    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
+      ScribenginShell scribenginShell = (ScribenginShell) shell;
+      ScribenginClient scribenginClient = scribenginShell.getScribenginClient();
+      DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId, 30000);
+      Console console = shell.console();
+      console.h1("Wait For Dataflow Status" + status);
+      
+      long start = System.currentTimeMillis();
+      DataflowLifecycleStatus dflStatus = DataflowLifecycleStatus.valueOf(status);
+      dflClient.waitForEqualOrGreaterThanStatus(1000, maxWaitTime, dflStatus);
+      long waitTime = System.currentTimeMillis() - start;
+      console.println("Wait for the dataflow status " + status + " in " + waitTime + "ms");
+    }
+    
+    @Override
+    public String getDescription() { return "wait for the dataflow status"; }
   }
 }

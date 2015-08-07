@@ -9,27 +9,27 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.util.ExceptionUtil;
 
 public class MessageReportRegistry {
-  final static public String APP_PATH = "/apps/log-sample" ;
-
   private Registry registry ;
   private Node appNode ;
   private Node generateReportsNode ;
   private Node generateErrorsNode ;
   private Node validateReportsNode ;
+  private String reportPath = "/apps/log-sample" ;
   
-  public MessageReportRegistry(Registry registry, boolean initRegistry) throws RegistryException {
+  public MessageReportRegistry(Registry registry, String reportPath, boolean initRegistry) throws RegistryException {
     this.registry = registry;
     initRegistry(initRegistry) ;
+    this.reportPath = reportPath;
   }
   
   void initRegistry(boolean create) throws RegistryException {
     if(create) {
-      appNode = registry.createIfNotExist(APP_PATH);
+      appNode = registry.createIfNotExist(reportPath);
       generateReportsNode = appNode.createDescendantIfNotExists("generate/reports");
       generateErrorsNode  = appNode.createDescendantIfNotExists("generate/errors");
       validateReportsNode = appNode.createDescendantIfNotExists("validate/reports");
     } else {
-      appNode = registry.get(APP_PATH);
+      appNode = registry.get(reportPath);
       generateReportsNode = appNode.getDescendant("generate/reports");
       generateErrorsNode  = appNode.getDescendant("generate/errors");
       validateReportsNode = appNode.getDescendant("validate/reports");
