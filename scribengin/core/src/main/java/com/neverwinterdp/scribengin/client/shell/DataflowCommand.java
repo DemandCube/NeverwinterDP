@@ -78,12 +78,15 @@ public class DataflowCommand extends Command {
     
     @Parameter(names = "--dfs-app-home",  description = "DFS App Home Path")
     private String dfsAppHome ;
+
+    @Parameter(names = "--deploy", description = "The dataflow path to deploy")
+    private String dataflowPath ;
     
     @Parameter(names = "--dataflow-id",  description = "Specify the id for the dataflow")
     private String dataflowId ;
     
-    @Parameter(names = "--deploy", description = "The dataflow path to deploy")
-    private String dataflowPath ;
+    @Parameter(names = "--max-run-time", description = "Max Run Time")
+    private long maxRunTime = -1l;
     
     @Parameter(names = "--wait-for-running-timeout", description = "The dataflow path to deploy")
     private long waitForRunningTimeout = 120000;
@@ -97,6 +100,7 @@ public class DataflowCommand extends Command {
       DataflowDescriptor config = 
         JSONSerializer.INSTANCE.fromString(dataflowJson, DataflowDescriptor.class);
       if(dataflowId != null) config.setId(dataflowId);
+      if(maxRunTime > 0) config.setMaxRunTime(maxRunTime);
       config.setDataflowAppHome(dfsAppHome);
       DataflowSubmitter submitter = new DataflowSubmitter(client, dataflowPath, config);
       shell.console().println("Dataflow JSON:");
@@ -155,7 +159,7 @@ public class DataflowCommand extends Command {
       ScribenginClient scribenginClient = scribenginShell.getScribenginClient();
       DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId, 30000);
       Console console = shell.console();
-      console.h1("Wait For Dataflow Status" + status);
+      console.h1("Wait For Dataflow Status " + status);
       
       long start = System.currentTimeMillis();
       DataflowLifecycleStatus dflStatus = DataflowLifecycleStatus.valueOf(status);
