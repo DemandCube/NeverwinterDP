@@ -104,7 +104,7 @@ public class DataflowCommand extends Command {
       config.setDataflowAppHome(dfsAppHome);
       DataflowSubmitter submitter = new DataflowSubmitter(client, dataflowPath, config);
       shell.console().println("Dataflow JSON:");
-      shell.console().println(dataflowJson);
+      shell.console().println(JSONSerializer.INSTANCE.toString(config));
       submitter.submit();
       shell.console().println("Submited");
       submitter.waitForRunning(waitForRunningTimeout);

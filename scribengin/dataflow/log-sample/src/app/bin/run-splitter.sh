@@ -75,7 +75,7 @@ $SHELL vm upload-app --local $APP_DIR --dfs /apps/log-sample
 
 $SHELL vm submit \
    --dfs-app-home /apps/log-sample \
-   --registry-connect zookeeper-1:2181 --registry-db-domain /NeverwinterDP  --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
+   --registry-connect zookeeper-1:2181 --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
    --name vm-log-generator-1  --role vm-log-generator --vm-application  com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp \
    --prop:report-path=/apps/log-sample/reports --prop:num-of-message=5000 --prop:message-size=512
 
@@ -84,6 +84,9 @@ $SHELL dataflow submit \
   --dfs-app-home /apps/log-sample \
   --dataflow-config $APP_DIR/conf/splitter/kafka-log-splitter-dataflow.json \
   --dataflow-id log-splitter-dataflow-1 --max-run-time 180000
+
+$SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 45000
+$SHELL registry dump --path /apps/log-sample
 
 $SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow-1 --status TERMINATED
 $SHELL dataflow info --dataflow-id log-splitter-dataflow-1 --show-all
