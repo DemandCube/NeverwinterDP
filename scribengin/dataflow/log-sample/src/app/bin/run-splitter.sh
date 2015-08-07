@@ -71,7 +71,7 @@ fi
 SHELL=./scribengin/bin/shell.sh
 
 
-$SHELL vm upload-app --local ./dataflow/log-sample --dfs /apps/log-sample
+$SHELL vm upload-app --local $APP_DIR --dfs /apps/log-sample
 
 $SHELL vm submit \
    --dfs-app-home /apps/log-sample \
@@ -82,7 +82,8 @@ $SHELL vm submit \
 
 $SHELL dataflow submit \
   --dfs-app-home /apps/log-sample \
-  --dataflow-config ./log-sample/conf/splitter/kafka-log-splitter-dataflow.json --dataflow-id log-splitter-dataflow-1
+  --dataflow-config $APP_DIR/conf/splitter/kafka-log-splitter-dataflow.json \
+  --dataflow-id log-splitter-dataflow-1 --max-run-time 180000
 
 $SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow-1 --status TERMINATED
 $SHELL dataflow info --dataflow-id log-splitter-dataflow-1 --show-all
@@ -97,7 +98,7 @@ $SHELL vm submit  \
   --prop:wait-for-termination=300000 \
   --prop:validate-kafka=log4j.info,log4j.warn,log4j.error
 
-$SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 25000
+$SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 60000
 
 $SHELL vm info
 $SHELL registry dump --path /apps/log-sample
