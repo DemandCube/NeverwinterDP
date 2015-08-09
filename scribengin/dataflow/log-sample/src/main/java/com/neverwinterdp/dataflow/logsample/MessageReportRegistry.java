@@ -18,8 +18,8 @@ public class MessageReportRegistry {
   
   public MessageReportRegistry(Registry registry, String reportPath, boolean initRegistry) throws RegistryException {
     this.registry = registry;
-    initRegistry(initRegistry) ;
     this.reportPath = reportPath;
+    initRegistry(initRegistry) ;
   }
   
   void initRegistry(boolean create) throws RegistryException {
