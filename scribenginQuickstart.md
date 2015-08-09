@@ -7,7 +7,7 @@ Scribengin Quickstart
 * Install Ansible
 * Install Docker
 * Install Gradle
-* Make sure the user you're running as has write permissions for /etc/hosts
+* Make sure the user you are running as has write permissions for /etc/hosts
   * Setup scripts will update your /etc/hosts file, but will not remove any entries that are already there
 
 #####Setup neverwinterdp_home
@@ -79,9 +79,9 @@ zookeeper      zookeeper-1
 
 ###Access the Scribengin Command Line
 ```
-#When the cluster is first launched, there won't be much running
+#When the cluster is first launched, there will not  be much running
 #so the following commands will show limited information.
-#Once you launch a dataflow, you'll be able to see more interesting output
+#Once you launch a dataflow, you will be able to see more interesting output
 
 #Get the full list of commands the shell can give you
 ./NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh
@@ -108,7 +108,82 @@ zookeeper      zookeeper-1
 ```
 
 ###Launching a dataflow manually
+
+In order to launch the dataflow, we expect that you read the document how to build the cluster with the docker script or digitalocean script. Basically you will need those server install and run:
+
+1. Zookeeper
+2. Kafka
+3. Hadoop
+4. Elasticsearch
+5. Run vm-master and scribengin on top of hadoop yarn as an yarn application
+
+You need to build the dataflow log-sample by check out the NeverwinterDP code:
+
 ```
+#Check out the NeverwinterDP code
+git clone https://github.com/Nventdata/NeverwinterDP.git
+
+#Build and install
+cd NeverwinterDP
+gradle clean build install -x test
+
+#Build the release
+cd release
+gradle clean release
+```
+
+You will find the release in NeverwinterDP/release/build/release/neverwinterdp
+
+You will need to run the following command in order to generate the sample data, launch the dataflow, run the validator:
+
+```
+#The location of the scribengin shell script
+SHELL=./scribengin/bin/shell.sh
+
+
+#Upload the log-sample application from local to remote dfs location
+$SHELL vm upload-app --local $APP_DIR --dfs /applications/log-sample
+
+#Submit and run the log generator. The log generator is run in a separate vm 
+$SHELL vm submit \
+   --dfs-app-home /applications/log-sample \
+   --registry-connect zookeeper-1:2181 --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
+   --name vm-log-generator-1  --role vm-log-generator --vm-application  com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp \
+   --prop:report-path=/applications/log-sample/reports --prop:num-of-message=5000 --prop:message-size=512
+
+#Submit and launch the sample log splitter dataflow
+$SHELL dataflow submit \
+  --dfs-app-home /applications/log-sample \
+  --dataflow-config $APP_DIR/conf/splitter/kafka-log-splitter-dataflow.json \
+  --dataflow-id log-splitter-dataflow-1 --max-run-time 180000
+
+#This command is wait and detect when the vm log generator terminated. This command is not important
+$SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 45000
+
+#This command dump the registry that the log generator report
+$SHELL registry dump --path /applications/log-sample
+
+#This command wait and detect when the dataflow is finished
+$SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow-1 --status TERMINATED
+#Print the dataflow info
+$SHELL dataflow info --dataflow-id log-splitter-dataflow-1 --show-all
+
+
+#Submit and run the log validator vm
+$SHELL vm submit  \
+  --dfs-app-home /applications/log-sample \
+  --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
+  --name vm-log-validator-1 --role log-validator  --vm-application com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp \
+  --prop:report-path=/applications/log-sample/reports \
+  --prop:num-of-message-per-partition=5000 \
+  --prop:wait-for-termination=300000 \
+  --prop:validate-kafka=log4j.info,log4j.warn,log4j.error
+
+$SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 60000
+
+$SHELL vm info
+#This command dump the registry that the log generator validator report
+$SHELL registry dump --path /applications/log-sample
 ```
 
 
@@ -116,3 +191,6 @@ zookeeper      zookeeper-1
 ```
 Point your browser to http://monitoring-1:5601
 ```
+
+
+
