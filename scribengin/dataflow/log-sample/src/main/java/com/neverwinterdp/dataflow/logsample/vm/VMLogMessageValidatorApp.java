@@ -45,7 +45,7 @@ public class VMLogMessageValidatorApp extends VMApp {
     numOfMessagePerPartition = vmConfig.getPropertyAsInt("num-of-message-per-partition", -1);
     waitForTermination       = vmConfig.getPropertyAsInt("wait-for-termination", 300000);
     
-    reportPath = vmConfig.getProperty("report-path", "/apps/log-sample/reports");
+    reportPath = vmConfig.getProperty("report-path", "/applications/log-sample/reports");
     
     validateKafkaTopic =  vmConfig.getProperty("validate-kafka", null);
     validateHdfs =  vmConfig.getProperty("validate-hdfs", null);

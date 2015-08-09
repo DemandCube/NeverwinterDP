@@ -94,7 +94,7 @@ $SHELL dataflow info --dataflow-id log-splitter-dataflow-1 --show-all
 
 $SHELL vm submit  \
   --dfs-app-home /applications/log-sample \
-  --registry-connect 127.0.0.1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
+  --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
   --name vm-log-validator-1 --role log-validator  --vm-application com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp \
   --prop:report-path=/applications/log-sample/reports \
   --prop:num-of-message-per-partition=5000 \

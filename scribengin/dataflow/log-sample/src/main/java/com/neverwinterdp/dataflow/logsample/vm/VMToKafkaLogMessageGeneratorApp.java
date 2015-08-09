@@ -39,7 +39,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     logger = getVM().getLoggerFactory().getLogger(VMToKafkaLogMessageGeneratorApp.class);
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
-    reportPath = vmConfig.getProperty("report-path", "/apps/log-sample");
+    reportPath = vmConfig.getProperty("report-path", "/applications/log-sample");
     zkConnects = vmConfig.getProperty("zk-connects", "zookeeper-1:2181");
     topic      = vmConfig.getProperty("topic", "log4j");
     numOfMessage = vmConfig.getPropertyAsInt("num-of-message", 5000);
