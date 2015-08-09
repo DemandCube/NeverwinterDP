@@ -28,7 +28,7 @@ public class DataflowSubmitter {
 
   public DataflowSubmitter(ScribenginClient scribenginClient, String dfsDataflowHome, DataflowDescriptor dflDescriptor) {
     this.scribenginClient  = scribenginClient;
-    this.dfsDataflowHome = dfsDataflowHome;
+    this.dfsDataflowHome   = dfsDataflowHome;
     this.dflDescriptor     = dflDescriptor;
   }
 

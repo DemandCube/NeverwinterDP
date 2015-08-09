@@ -97,16 +97,12 @@ public class DataflowCommand extends Command {
       ScribenginShell scribenginShell = (ScribenginShell) shell;
       ScribenginClient client = scribenginShell.getScribenginClient();
       String dataflowJson = IOUtil.getFileContentAsString(dataflowConfig) ;
-      DataflowDescriptor config = 
+      DataflowDescriptor dflDescriptor = 
         JSONSerializer.INSTANCE.fromString(dataflowJson, DataflowDescriptor.class);
-      if(dataflowId != null) config.setId(dataflowId);
-      if(maxRunTime > 0) config.setMaxRunTime(maxRunTime);
-      config.setDataflowAppHome(dfsAppHome);
-      DataflowSubmitter submitter = new DataflowSubmitter(client, dataflowPath, config);
-      shell.console().println("Dataflow JSON:");
-      shell.console().println(JSONSerializer.INSTANCE.toString(config));
+      if(dataflowId != null) dflDescriptor.setId(dataflowId);
+      if(maxRunTime > 0) dflDescriptor.setMaxRunTime(maxRunTime);
+      DataflowSubmitter submitter = new DataflowSubmitter(client, dfsAppHome, dflDescriptor);
       submitter.submit();
-      shell.console().println("Submited");
       submitter.waitForRunning(waitForRunningTimeout);
       shell.console().println("Finished waiting for the dataflow running status");
     }
