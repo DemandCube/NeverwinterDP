@@ -14,7 +14,7 @@ public class MessageReportRegistry {
   private Node generateReportsNode ;
   private Node generateErrorsNode ;
   private Node validateReportsNode ;
-  private String reportPath = "/apps/log-sample" ;
+  private String reportPath  ;
   
   public MessageReportRegistry(Registry registry, String reportPath, boolean initRegistry) throws RegistryException {
     this.registry = registry;

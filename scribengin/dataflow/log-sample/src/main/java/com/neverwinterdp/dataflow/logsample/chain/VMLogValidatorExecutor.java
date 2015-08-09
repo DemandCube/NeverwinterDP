@@ -23,6 +23,7 @@ public class VMLogValidatorExecutor extends Executor {
   public void run() {
     long start = System.currentTimeMillis() ;
     System.out.println("Submit The Validator App");
+    String reportPath = "/applications/log-sample/message-report";
     try {
       VMConfig vmConfig = new VMConfig() ;
       vmConfig.setRegistryConfig(config.registryConfig);
@@ -30,7 +31,7 @@ public class VMLogValidatorExecutor extends Executor {
       vmConfig.addRoles("log-validator");
       vmConfig.addProperty("num-of-message-per-partition", config.logGeneratorNumOfMessage);
       vmConfig.addProperty("wait-for-termination", config.logValidatorWaitForTermination);
-      vmConfig.addProperty("report-path", "/apps/log-sample/message-report");
+      vmConfig.addProperty("report-path", reportPath);
       if(config.logValidatorValidateKafka != null) {
         vmConfig.addProperty("validate-kafka", config.logValidatorValidateKafka);
       }
@@ -48,7 +49,7 @@ public class VMLogValidatorExecutor extends Executor {
       System.out.println("Finish The Validator App");
       System.out.println("Execute Time: " + (System.currentTimeMillis() - start) + "ms");
       MessageReportRegistry appRegistry = 
-        new MessageReportRegistry(shell.getVMClient().getRegistry(), "/apps/log-sample/message-report", false);
+        new MessageReportRegistry(shell.getVMClient().getRegistry(), reportPath, false);
       System.out.println(MessageReport.getFormattedReport("Generated Report", appRegistry.getGeneratedReports()));
       System.out.println(MessageReport.getFormattedReport("Validate Report", appRegistry.getValidateReports()));
     } catch(Exception ex) {
