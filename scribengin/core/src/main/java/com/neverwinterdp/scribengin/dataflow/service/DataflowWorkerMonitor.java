@@ -38,7 +38,7 @@ public class DataflowWorkerMonitor {
     
     DataflowWorkerStatus dataflowWorkerStatus = 
         dataflowRegistry.getWorkerRegistry().getDataflowWorkerStatus(vmNode.getName());
-    if(dataflowWorkerStatus != DataflowWorkerStatus.TERMINATED) {
+    if(dataflowWorkerStatus.lessThan(DataflowWorkerStatus.TERMINATED)) {
       DataflowWorkerStatus workerStatus = DataflowWorkerStatus.TERMINATED_WITH_ERROR;
       dataflowRegistry.getWorkerRegistry().setWorkerStatus(vmNode.getName(), workerStatus);
       

@@ -19,6 +19,10 @@ public enum DataflowWorkerStatus {
     return level > other.level ;
   }
   
+  public boolean lessThan(DataflowWorkerStatus other) {
+    return level < other.level ;
+  }
+  
   public boolean equalOrGreaterThan(DataflowWorkerStatus other) {
     return level >= other.level ;
   }

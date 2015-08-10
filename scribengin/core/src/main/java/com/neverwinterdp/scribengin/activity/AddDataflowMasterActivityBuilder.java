@@ -18,15 +18,9 @@ import com.neverwinterdp.registry.activity.ActivityExecutionContext;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.activity.ActivityStepBuilder;
 import com.neverwinterdp.registry.activity.ActivityStepExecutor;
-import com.neverwinterdp.registry.event.WaitingNodeEventListener;
-import com.neverwinterdp.registry.event.WaitingRandomNodeEventListener;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
-import com.neverwinterdp.scribengin.dataflow.service.DataflowService;
 import com.neverwinterdp.scribengin.dataflow.service.VMDataflowServiceApp;
-import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
 import com.neverwinterdp.scribengin.service.ScribenginService;
-import com.neverwinterdp.util.text.TabularFormater;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.vm.client.VMClient;
@@ -101,27 +95,6 @@ public class AddDataflowMasterActivityBuilder extends ActivityBuilder {
       dfVMConfig.setHadoopProperties(vmConfig.getHadoopProperties());
       VMClient vmClient = new VMClient(registry);
       VMDescriptor vmDescriptor = vmClient.allocate(dfVMConfig);
-    }
-  }
-  
-  @Singleton
-  static public class WaitForDataflowMasterRunningStatus implements ActivityStepExecutor {
-    @Inject
-    private DataflowService service ;
-    
-    @Override
-    public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
-      DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      List<String> workers = dflRegistry.getWorkerRegistry().getActiveWorkerIds();
-      WaitingNodeEventListener waitingListener = new WaitingRandomNodeEventListener(dflRegistry.getRegistry()) ;
-      for(int i = 0; i < workers.size(); i++) {
-        String path = dflRegistry.getWorkerRegistry().getWorkerNode(workers.get(i)) + "/status" ;
-        waitingListener.add(path, DataflowWorkerStatus.RUNNING);
-      }
-      
-      waitingListener.waitForEvents(30 * 1000);
-      TabularFormater formater = waitingListener.getTabularFormaterEventLogInfo();
-      System.err.println(formater.getFormatText());
     }
   }
 }

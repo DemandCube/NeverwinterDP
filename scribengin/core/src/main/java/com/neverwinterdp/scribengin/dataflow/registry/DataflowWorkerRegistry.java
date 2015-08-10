@@ -83,9 +83,7 @@ public class DataflowWorkerRegistry {
   }
   
   public void setWorkerStatus(VMDescriptor vmDescriptor, DataflowWorkerStatus status) throws RegistryException {
-    Node workerNode = allWorkers.getChild(vmDescriptor.getId());
-    Node statusNode = workerNode.getChild("status");
-    statusNode.setData(status);
+    setWorkerStatus(vmDescriptor.getId(), status);
   }
   
   public void setWorkerStatus(String vmId, DataflowWorkerStatus status) throws RegistryException {
