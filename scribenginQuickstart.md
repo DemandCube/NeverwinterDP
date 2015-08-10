@@ -15,6 +15,7 @@ Scribengin Quickstart
      echo -e "Host *\n  StrictHostKeyChecking no" >> ~/.ssh/config
      ``` 
 * If you want to work with S3, set up your credentials file in this format
+     
      ```
      user@machine $ cat ~/.aws/credentials
      [default]
