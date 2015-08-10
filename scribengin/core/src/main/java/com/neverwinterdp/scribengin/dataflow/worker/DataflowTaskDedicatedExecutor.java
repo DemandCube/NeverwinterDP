@@ -52,7 +52,6 @@ public class DataflowTaskDedicatedExecutor extends DataflowTaskExecutor {
       DataflowRegistry dflRegistry = executorService.getDataflowRegistry();
       
       try {
-        DataflowDescriptor dflDescriptor = dflRegistry.getDataflowDescriptor(false);
         Timer.Context dataflowTaskTimerGrabCtx = metricRegistry.getTimer("dataflow-task.timer.grab").time() ;
         TaskContext<DataflowTaskDescriptor> taskContext = dflRegistry.dataflowTaskAssign(executorService.getVMDescriptor());
         dataflowTaskTimerGrabCtx.stop();

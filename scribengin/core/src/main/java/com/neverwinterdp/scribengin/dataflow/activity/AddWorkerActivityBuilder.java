@@ -98,7 +98,7 @@ public class AddWorkerActivityBuilder extends ActivityBuilder {
       }
 
       VMClient vmClient = new VMClient(registry);
-      VMDescriptor vmDescriptor = vmClient.allocate(vmConfig);
+      VMDescriptor vmDescriptor = vmClient.allocate(vmConfig, 90000);
       service.addWorker(vmDescriptor);
     }
   }

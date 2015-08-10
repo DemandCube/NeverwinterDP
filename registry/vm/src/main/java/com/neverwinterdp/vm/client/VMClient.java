@@ -83,15 +83,21 @@ public class VMClient {
   }
   
   public VMDescriptor allocate(VMConfig vmConfig) throws Exception {
+    return allocate(vmConfig, this.waitForResultTimeout);
+  }
+  
+  public VMDescriptor allocate(VMConfig vmConfig, long timeout) throws Exception {
     VMDescriptor masterVMDescriptor = getMasterVMDescriptor();
+    Command allocateCommand = new VMServiceCommand.Allocate(vmConfig);
     CommandResult<VMDescriptor> result = 
-        (CommandResult<VMDescriptor>) execute(masterVMDescriptor, new VMServiceCommand.Allocate(vmConfig));
+      (CommandResult<VMDescriptor>) execute(masterVMDescriptor, allocateCommand, timeout);
     if(result.getErrorStacktrace() != null) {
       registry.get("/").dump(System.err);
       throw new Exception(result.getErrorStacktrace());
     }
     return result.getResult();
   }
+  
   
   public boolean shutdown(VMDescriptor vmDescriptor) throws Exception {
     CommandResult<?> result = execute(vmDescriptor, new VMCommand.Shutdown());
