@@ -127,7 +127,8 @@ public class DataflowWorkerRegistry {
     while(stopTime > System.currentTimeMillis()) {
       boolean ok = true;
       for(DataflowWorkerStatus selStatus : getActiveWorkerStatus()) {
-        if(selStatus != status) {
+        if(selStatus == null) continue;
+        if(!selStatus.equalOrGreaterThan(status)) {
           ok = false;
           break;
         }
