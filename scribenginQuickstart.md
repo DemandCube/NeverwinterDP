@@ -55,7 +55,10 @@ git clone git clone https://<bitbucket_user>@bitbucket.org/nventdata/neverwinter
 boot2docker up
 
 #Build images, launch containers, run ansible
-./neverwinterdp-deployments/docker/scribengin/docker.sh  cluster --launch --neverwinterdp-home=/your/path/to/NeverwinterDP
+./neverwinterdp-deployments/docker/scribengin/docker.sh  cluster --launch
+
+#If you decided not to set NEVERWINTERDP_HOME, then you can pass it in manually here
+./neverwinterdp-deployments/docker/scribengin/docker.sh  cluster --launch--neverwinterdp-home=/your/path/to/NeverwinterDP
 ```
 
 ###Checking the status of your cluster
