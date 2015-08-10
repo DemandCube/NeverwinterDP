@@ -47,12 +47,9 @@ MAIN_CLASS="com.neverwinterdp.dataflow.logsample.chain.LogSampleChainClient"
 PROFILE=$(get_opt --profile 'performance' $@)
 MESSAGE_SIZE=$(get_opt --message-size '128' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
-DEDICATED_EXECUTOR=$(get_opt --dedicated-executor 'false' $@)
 
 STORAGE=$(get_opt --storage 'kafka' $@)
 
-EXECUTION_MAX=$(get_opt --execution-max '3' $@)
-EXECUTION_PERIOD=$(get_opt --execution-period '90000' $@)
 
 DATAFLOW_DESCRIPTOR_FILE=""
 LOG_VALIDATOR_VALIDATE=""
@@ -77,7 +74,7 @@ $SHELL vm submit \
    --dfs-app-home /applications/log-sample \
    --registry-connect zookeeper-1:2181 --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
    --name vm-log-generator-1  --role vm-log-generator --vm-application  com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp \
-   --prop:report-path=/applications/log-sample/reports --prop:num-of-message=5000 --prop:message-size=512
+   --prop:report-path=/applications/log-sample/reports --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE
 
 
 $SHELL dataflow submit \
