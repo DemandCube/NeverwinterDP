@@ -57,6 +57,8 @@ elif [ "$PROFILE" = "kafka-to-hdfs" ] ; then
   DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/splitter/kafka-to-hdfs-log-dataflow-chain.json"
   LOG_VALIDATOR_OPTS="--prop:validate-hdfs=/log-sample/hdfs/info,/log-sample/hdfs/warn,/log-sample/hdfs/error"
 elif [ "$PROFILE" = "kafka-to-s3" ] ; then
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/splitter/kafka-to-s3-log-dataflow-chain.json"
+  LOG_VALIDATOR_OPTS="--prop:validate-hdfs=test-log-sample:info,test-log-sample:warn,test-log-sample:error" 
 else
   echo "Unknown PROFILE"
   return
