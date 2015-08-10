@@ -83,7 +83,6 @@ public class LogSampleChainClient  {
     if(config.dataflowFailureSimulationStartStopResume) {
       for(DataflowDescriptor dflDescriptor : dataflowChainExecutor.getDataflowChainConfig().getDescriptors()) {
         String dataflowId = dflDescriptor.getId();
-        //if(dataflowId.indexOf("splitter") >= 0) continue;
         StartStopDataflowExecutor executor = new StartStopDataflowExecutor(shell, dataflowId); 
         executor.waitBeforeSimulateFailure = config.dataflowFailureSimulationWaitBeforeStart;
         executor.maxExecution = config.dataflowFailureSimulationMaxExecution;

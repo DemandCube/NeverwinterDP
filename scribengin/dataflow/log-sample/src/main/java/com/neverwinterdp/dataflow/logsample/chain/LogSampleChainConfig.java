@@ -11,6 +11,9 @@ public class LogSampleChainConfig {
   @Parameter(names = "--dfs-app-home", description = "Local App Home")
   public String dfsAppHome ;
 
+  @Parameter(names = "--report-path", description = "Topic to validate")
+  public String reportPath = "/applications/log-sample/dataflow-chain-reports";
+  
   @Parameter(names = "--log-generator-num-of-vm", description = "Log generator message size")
   public int logGeneratorNumOfVM = 1;
   

@@ -48,6 +48,16 @@ public class DataflowWorkerRegistry {
     return allWorkers.getChild(vmId) ; 
   }
   
+  public DataflowWorkerStatus[] getActiveWorkerStatus() throws RegistryException {
+    List<String> vmIds = activeWorkers.getChildren();
+    DataflowWorkerStatus[] status = new DataflowWorkerStatus[vmIds.size()];
+    for(int i = 0; i < vmIds.size(); i++) {
+      status[i] = getDataflowWorkerStatus(vmIds.get(i)) ;
+      
+    }
+    return status ;
+  }
+  
   public TXEventBroadcaster getWorkerEventBroadcaster() { return workerEventBroadcaster; }
   
   public List<VMDescriptor> getActiveWorkers() throws RegistryException {
@@ -111,6 +121,20 @@ public class DataflowWorkerRegistry {
     Node executors = allWorkers.getDescendant(worker + "/executors") ;
     return executors.getChildrenAs(DataflowTaskExecutorDescriptor.class);
   }
-  public void waitForWorkerStatus(long timeout) {
+  
+  public void waitForWorkerStatus(DataflowWorkerStatus status, long checkPeriod, long timeout) throws Exception {
+    long stopTime = System.currentTimeMillis() + timeout;
+    while(stopTime > System.currentTimeMillis()) {
+      boolean ok = true;
+      for(DataflowWorkerStatus selStatus : getActiveWorkerStatus()) {
+        if(selStatus != status) {
+          ok = false;
+          break;
+        }
+      }
+      if(ok) return;
+      Thread.sleep(checkPeriod);
+    }
+    throw new Exception("Not all dataflow worker have the " + status + ", after " + timeout + "ms");
   }
 }

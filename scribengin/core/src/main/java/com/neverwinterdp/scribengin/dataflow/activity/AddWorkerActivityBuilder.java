@@ -111,18 +111,11 @@ public class AddWorkerActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      List<String> workers = dflRegistry.getWorkerRegistry().getActiveWorkerIds();
-      WaitingNodeEventListener waitingListener = new WaitingRandomNodeEventListener(dflRegistry.getRegistry()) ;
-      for(int i = 0; i < workers.size(); i++) {
-        Node workerNode = dflRegistry.getWorkerRegistry().getWorkerNode(workers.get(i)) ;
-        String statusPath = workerNode.getPath() + "/status" ;
-        String logDesc = "Wait for RUNNING status for worker " + workerNode.getName() ;
-        DataflowWorkerStatus[] status = {DataflowWorkerStatus.RUNNING, DataflowWorkerStatus.TERMINATED} ;
-        waitingListener.add(statusPath, status, logDesc, true);
-      }
-      
       DataflowDescriptor dflDescriptor = dflRegistry.getDataflowDescriptor();
-      waitingListener.waitForEvents(dflDescriptor.getMaxWaitForWorkerRunningStatus());
+      long maxWait = dflDescriptor.getMaxWaitForWorkerRunningStatus();
+      dflRegistry.
+        getWorkerRegistry().
+        waitForWorkerStatus(DataflowWorkerStatus.RUNNING, 1000, maxWait);
     }
   }
 }
