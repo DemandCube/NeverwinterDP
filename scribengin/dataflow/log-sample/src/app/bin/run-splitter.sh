@@ -94,7 +94,7 @@ $SHELL vm submit  \
   --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
   --name vm-log-validator-1 --role log-validator  --vm-application com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp \
   --prop:report-path=/applications/log-sample/reports \
-  --prop:num-of-message-per-partition=5000 \
+  --prop:num-of-message-per-partition=$NUM_OF_MESSAGE \
   --prop:wait-for-termination=300000 \
   $LOG_VALIDATOR_OPTS
 
