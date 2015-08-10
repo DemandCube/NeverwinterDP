@@ -59,6 +59,9 @@ boot2docker up
 
 #If you decided not to set NEVERWINTERDP_HOME, then you can pass it in manually here
 ./neverwinterdp-deployments/docker/scribengin/docker.sh  cluster --launch--neverwinterdp-home=/your/path/to/NeverwinterDP
+
+#If you wish to DESTROY your cluster (clean images and containers)
+./neverwinterdp-deployments/docker/scribengin/docker.sh cluster --clean-containers --clean-image
 ```
 
 ###Checking the status of your cluster
