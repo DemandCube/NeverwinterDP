@@ -9,6 +9,12 @@ Scribengin Quickstart
 * Install Gradle
 * Make sure the user you are running as has write permissions for /etc/hosts
   * Setup scripts will update your /etc/hosts file, but will not remove any entries that are already there
+* Setup your SSH config
+  * 
+     ```
+     echo -e "\nStrictHostKeyChecking no" >> ~/.ssh/config
+     ``` 
+ 
 
 #####Setup neverwinterdp_home
 
