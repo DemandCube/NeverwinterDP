@@ -18,16 +18,16 @@
       "address" : "elasticsearch-1:9300", "indexName": "dataflow_app_log", "mappingType": "com.neverwinterdp.util.log.Log4jRecord"
     },
 
+    "info" : {
+      "type" : "HDFS", "location" : "/log-sample/hdfs/info"
+    },
+
     "warn" : {
-      "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "zookeeper-1:2181", "name" : "LogSplitterDataflow"
+      "type" : "HDFS", "location" : "/log-sample/hdfs/warn"
     },
 
     "error" : {
-      "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "zookeeper-1:2181", "name" : "LogSplitterDataflow"
-    },
-
-    "info" : {
-      "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "zookeeper-1:2181", "name" : "LogSplitterDataflow"
+      "type" : "HDFS", "location" : "/log-sample/hdfs/error"
     }
   },
 
