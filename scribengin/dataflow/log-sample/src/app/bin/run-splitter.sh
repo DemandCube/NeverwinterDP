@@ -44,24 +44,21 @@ APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hado
 
 MAIN_CLASS="com.neverwinterdp.dataflow.logsample.chain.LogSampleChainClient"
 
-PROFILE=$(get_opt --profile 'performance' $@)
+PROFILE=$(get_opt --profile 'kafka-to-kafka' $@)
 MESSAGE_SIZE=$(get_opt --message-size '128' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
 
-STORAGE=$(get_opt --storage 'kafka' $@)
-
-
 DATAFLOW_DESCRIPTOR_FILE=""
 LOG_VALIDATOR_VALIDATE=""
-if [ "$STORAGE" = "hdfs" ] ; then
-  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/hdfs-log-dataflow-chain.json"
+if [ "$PROFILE" = "kafka-to-kafka" ] ; then
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/splitter/kafka-to-kafka-log-dataflow-chain.json"
   LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-hdfs /log-sample/hdfs/info,/log-sample//hdfs/warn,/log-sample/hdfs/error"
-elif [ "$STORAGE" = "s3" ] ; then
-  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/s3-log-dataflow-chain.json"
+elif [ "$STORAGE" = "kafka-to-hdfs" ] ; then
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/splitter/kafka-to-hdfs-log-dataflow-chain.json"
   LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-s3 test-log-sample:info,test-log-sample:warn,test-log-sample:error" 
 else
-  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/kafka-log-dataflow-chain.json"
-  LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-kafka log4j.aggregate"
+  echo "Unknown PROFILE"
+  return
 fi
 
 
@@ -79,7 +76,7 @@ $SHELL vm submit \
 
 $SHELL dataflow submit \
   --dfs-app-home /applications/log-sample \
-  --dataflow-config $APP_DIR/conf/splitter/kafka-log-splitter-dataflow.json \
+  --dataflow-config $DATAFLOW_DESCRIPTOR_FILE \
   --dataflow-id log-splitter-dataflow-1 --max-run-time 180000
 
 $SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 45000

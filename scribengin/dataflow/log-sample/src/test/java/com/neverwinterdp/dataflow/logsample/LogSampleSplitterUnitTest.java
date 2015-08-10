@@ -79,7 +79,7 @@ public class LogSampleSplitterUnitTest  {
     
     String dataflowSubmitCommand = 
         "dataflow submit " + 
-        "  --dataflow-config src/app/conf/splitter/local/kafka-log-splitter-dataflow.json" +
+        "  --dataflow-config src/app/conf/splitter/local/kafka-to-kafka-log-splitter-dataflow.json" +
         "  --dataflow-id log-splitter-dataflow-1";
     shell.execute(dataflowSubmitCommand);
     
