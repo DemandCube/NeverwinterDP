@@ -12,7 +12,7 @@ Scribengin Quickstart
 * Setup your SSH config
   * 
      ```
-     echo -e "\nStrictHostKeyChecking no" >> ~/.ssh/config
+     echo -e "Host *\n  StrictHostKeyChecking no" >> ~/.ssh/config
      ``` 
  
 
@@ -49,6 +49,11 @@ git clone git clone https://<bitbucket_user>@bitbucket.org/nventdata/neverwinter
 
 #####Build docker image with scribengin in one step
 ```
+#If you're running on a Mac!
+#Run the following command, then follow the instructions 
+#on the screen for which environment variables to export
+boot2docker up
+
 #Build images, launch containers, run ansible
 ./neverwinterdp-deployments/docker/scribengin/docker.sh  cluster --launch --neverwinterdp-home=/your/path/to/NeverwinterDP
 ```
@@ -89,25 +94,10 @@ zookeeper      zookeeper-1
                                 QuorumPeerMain             285          /opt/zookeeper                      Running
 ```
 
-
-
-###Access the Scribengin Command Line
+###Navigate to Kibana to view real time metrics
 ```
-#When the cluster is first launched, there will not  be much running
-#so the following commands will show limited information.
-#Once you launch a dataflow, you will be able to see more interesting output
-
-#Get the full list of commands the shell can give you
-./NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh
-
-#Dump the registry
-./NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh registry dump
-
-#Get info on running containers
-./NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh vm info
-
-#Get info on running dataflows
-./NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh scribengin info
+Point your browser to http://monitoring-1:5601
+You can change the interval at which Kibana refreshes itself in the top panel, or manually refresh the page
 ```
 
 
@@ -201,10 +191,25 @@ $SHELL registry dump --path /applications/log-sample
 ```
 
 
-###Navigate to Kibana to view real time metrics
-```
-Point your browser to http://monitoring-1:5601
-```
 
+
+###Access the Scribengin Command Line
+```
+#When the cluster is first launched, there will not  be much running
+#so the following commands will show limited information.
+#Once you launch a dataflow, you will be able to see more interesting output
+
+#Get the full list of commands the shell can give you
+./NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh
+
+#Dump the registry
+./NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh registry dump
+
+#Get info on running containers
+./NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh vm info
+
+#Get info on running dataflows
+./NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh scribengin info
+```
 
 
