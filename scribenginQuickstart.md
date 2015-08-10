@@ -16,6 +16,7 @@ Scribengin Quickstart
 
 ```
 git clone https://github.com/Nventdata/NeverwinterDP
+cd NeverwinterDP
 
 #You may want to work with the latest code:
 #switch to the dev/master branch
@@ -24,7 +25,6 @@ git checkout dev/master
 #Pull for the latest code
 git pull origin dev/master 
 
-cd NeverwinterDP
 gradle clean build install -x test
 gradle release -x test
 ```
