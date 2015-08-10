@@ -92,7 +92,6 @@ public class VMClient {
     CommandResult<VMDescriptor> result = 
       (CommandResult<VMDescriptor>) execute(masterVMDescriptor, allocateCommand, timeout);
     if(result.getErrorStacktrace() != null) {
-      registry.get("/").dump(System.err);
       throw new Exception(result.getErrorStacktrace());
     }
     return result.getResult();

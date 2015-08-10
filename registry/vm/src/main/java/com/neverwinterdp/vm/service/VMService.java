@@ -23,6 +23,7 @@ import com.neverwinterdp.vm.event.VMHeartbeatNodeWatcher;
 @Singleton
 @JmxBean("role=vm-manager, type=VMService, name=VMService")
 public class VMService {
+  final static public String VM_PATH        = "/vm";
   final static public String ALL_PATH       = "/vm/instances/all";
   final static public String ACTIVE_PATH    = "/vm/instances/active";
   final static public String HISTORY_PATH   = "/vm/instances/history";
