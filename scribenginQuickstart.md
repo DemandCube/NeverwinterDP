@@ -124,15 +124,12 @@ In order to launch the dataflow, we expect that you read the document how to bui
 You need to build the dataflow log-sample by check out the NeverwinterDP code:
 
 ```
-#Check out the NeverwinterDP code
-git clone https://github.com/Nventdata/NeverwinterDP.git
-
 #Build and install
 cd NeverwinterDP
 gradle clean build install -x test
 
 #Build the release
-cd release
+cd NeverwinterDP/release
 gradle clean release
 ```
 
