@@ -63,6 +63,10 @@ boot2docker up
 
 ###Checking the status of your cluster
 ```
+#Run the setup script for clusterCommander once
+$> sudo ./neverwinterdp-deployments/tools/cluster/setup.sh
+
+#Then run
 $> ./neverwinterdp-deployments/tools/cluster/clusterCommander.py status
 Role           Hostname         ProcessIdentifier          ProcessID    HomeDir                             Status
 -------------  ---------------  -------------------------  -----------  ----------------------------------  --------
