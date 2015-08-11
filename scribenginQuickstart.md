@@ -127,7 +127,7 @@ You can change the interval at which Kibana refreshes itself in the top panel, o
 ./neverwinterdp-deployments/tests/scribengin/integration-tests/Scribengin_Integration_Kafka.sh
 
 #The Log Sample test is a more complicated, longer running test
-./neverwinterdp-deployments/tests/scribengin/integration-tests/Scribengin_Integration_Log_Sample.sh
+./neverwinterdp-deployments/tests/scribengin/integration-tests/Log_Sample_Chain.sh
 ```
 
 ###Launching a dataflow manually
