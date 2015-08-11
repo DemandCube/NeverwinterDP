@@ -110,10 +110,10 @@ The scribengin is a project that allow to move the data from different source ty
 
 The core component consist:
 
-1. storage source:
+1. storage source: The source concept is a data repository that partition into multiple data stream. The source api consist of the Source, SourceStream and SourceStreamReader.   
 2. storage sink:
 3. scribengin service:
-4. dataflow:
+4. dataflow and dataflow task:
 5. dataflow service:
 6. dataflow worker:
 
