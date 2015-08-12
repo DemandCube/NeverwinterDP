@@ -69,7 +69,7 @@ public class ShutdownDataflowMasterActivityBuilder extends ActivityBuilder {
       System.err.println("ShutdownDataflowMasterStepExecutor: execute().............");
       String dataflowPath = activity.attribute("dataflow.path");
       DataflowRegistry dataflowRegistry = new DataflowRegistry(registry, dataflowPath) ;
-      while(dataflowRegistry.countDataflowMasters() > 0) {
+      while(dataflowRegistry.getMasterRegistry().countDataflowMasters() > 0) {
         Thread.sleep(500);
         System.err.println("Wait for all the dataflow master shutdown");
       }

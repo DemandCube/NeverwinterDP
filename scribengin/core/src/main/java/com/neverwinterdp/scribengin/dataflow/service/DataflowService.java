@@ -86,7 +86,8 @@ public class DataflowService {
     dataflowRegistry.setStatus(DataflowLifecycleStatus.INIT);
     
     //masterEventListener = new DataflowTaskMasterEventListenter(dataflowRegistry);
-    String evtPath = dataflowRegistry.getMasterEventBroadcaster().getEventPath();
+    String evtPath = 
+      dataflowRegistry.getMasterRegistry().getMasterEventBroadcaster().getEventPath();
     eventWatcher = new DataflowTaskMasterEventWatcher(dataflowRegistry, evtPath, vmConfig.getName());
     
     dataflowTaskMonitor = new DataflowTaskMonitor();

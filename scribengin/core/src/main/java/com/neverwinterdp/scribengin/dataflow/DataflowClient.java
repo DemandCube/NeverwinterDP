@@ -27,10 +27,6 @@ public class DataflowClient {
   public ScribenginClient getScribenginClient() { return this.scribenginClient; }
   
   
-  public VMDescriptor getDataflowMaster() throws RegistryException { 
-    return dflRegistry.getDataflowMaster() ;
-  }
-  
   public List<VMDescriptor> getActiveDataflowWorkers() throws RegistryException {
     return dflRegistry.getWorkerRegistry().getActiveWorkers();
   }
@@ -39,14 +35,10 @@ public class DataflowClient {
     return dflRegistry.getWorkerRegistry().countActiveDataflowWorkers();
   }
   
-  public void setDataflowEvent(DataflowEvent event) throws RegistryException {
-    dflRegistry.broadcastMasterEvent(event);
-  }
-  
   public TXEventNotificationWatcher broadcastDataflowEvent(DataflowEvent event) throws Exception {
     String eventName = event.toString().toLowerCase();
     TXEvent txEvent = new TXEvent(eventName, event) ;
-    return dflRegistry.getMasterEventBroadcaster().broadcast(txEvent);
+    return dflRegistry.getMasterRegistry().getMasterEventBroadcaster().broadcast(txEvent);
   }
   
   public DataflowLifecycleStatus getStatus() throws RegistryException {

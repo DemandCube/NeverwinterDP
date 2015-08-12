@@ -43,7 +43,8 @@ public class DataflowMasterFailureExperimentTest {
     
     ScribenginClient scribenginClient = shell.getScribenginClient();
     DataflowClient dflClient = scribenginClient.getDataflowClient("kafka-to-kafka-1");
-    FailureConfig failureConfig = new FailureConfig("run-dataflow", "create-dataflow-worker", FailurePoint.After) ;
+    FailureConfig failureConfig = 
+        new FailureConfig("run-dataflow", "create-dataflow-worker", FailurePoint.After) ;
     dflClient.getDataflowRegistry().broadcastFailureEvent(failureConfig);
     submitter.waitForTermination(180000);
   }

@@ -15,10 +15,8 @@ import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.MultiDataGet;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
-import com.neverwinterdp.registry.RefNode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.registry.task.TaskContext;
@@ -32,8 +30,6 @@ import com.neverwinterdp.scribengin.dataflow.DataflowTaskRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.DataflowWorkerRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.simulation.FailureConfig;
-import com.neverwinterdp.scribengin.dataflow.worker.DataflowTaskExecutorDescriptor;
-import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.yara.MetricRegistry;
@@ -47,12 +43,6 @@ public class DataflowRegistry {
   final static public String ACTIVITIES_PATH        = "activities";
   
   final static public String NOTIFICATIONS_PATH     = "notifications";
-  
-  final static public String MASTER_PATH            = "master";
-  final static public String MASTER_LEADER_PATH     = MASTER_PATH + "/leader";
-  final static public String MASTER_EVENT_PATH      = MASTER_PATH + "/events";
-  
-  
   
   final static public DataMapperCallback<DataflowTaskDescriptor> TASK_DESCRIPTOR_DATA_MAPPER = new DataMapperCallback<DataflowTaskDescriptor>() {
     @Override
@@ -79,13 +69,10 @@ public class DataflowRegistry {
   private DataflowWorkerRegistry workerRegistry ;
   private TaskRegistry<DataflowTaskDescriptor> taskRegistry ;
   
-  private Node               masterLeaderNode;
   private Node               statusNode;
 
   private Node               failureEventNode;
-  private Node               masterEventNode;
-  private TXEventBroadcaster masterEventBroadcaster ;
-  
+
   private Node               activeActivitiesNode;
   
   private Node               metricsNode ;
@@ -104,20 +91,17 @@ public class DataflowRegistry {
   @Inject
   public void onInit() throws Exception {
     configuration = new ConfigurationRegistry(dataflowPath);
-    masterRegistry = new DataflowMasterRegistry(dataflowPath);
+    masterRegistry = new DataflowMasterRegistry(registry, dataflowPath);
     workerRegistry = new DataflowWorkerRegistry(registry, dataflowPath);
     
     String taskPath = dataflowPath + "/tasks";
     taskRegistry = new TaskRegistry<DataflowTaskDescriptor>(registry, taskPath, DataflowTaskDescriptor.class);
     
-    masterLeaderNode = registry.get(dataflowPath + "/" + MASTER_LEADER_PATH);
     
     statusNode = registry.get(dataflowPath + "/status");
-    
-    masterEventNode  = registry.get(dataflowPath + "/" + MASTER_EVENT_PATH);
+
     failureEventNode = registry.get(dataflowPath + "/" + FAILURE_EVENT_PATH);
-    masterEventBroadcaster = 
-      new TXEventBroadcaster(registry, dataflowPath + "/" + MASTER_EVENT_PATH, false);
+    
    
     activeActivitiesNode = registry.get(dataflowPath + "/" + ACTIVITIES_PATH);
     metricsNode = registry.get(dataflowPath + "/metrics");
@@ -133,12 +117,9 @@ public class DataflowRegistry {
     masterRegistry.initRegistry();
     workerRegistry.initRegistry();
     
-    masterLeaderNode.createIfNotExists();
-    
     statusNode.createIfNotExists();
     
     failureEventNode.createIfNotExists();
-    registry.createIfNotExist(dataflowPath + "/" + MASTER_EVENT_PATH);
     
     activeActivitiesNode.createIfNotExists();
     
@@ -157,8 +138,6 @@ public class DataflowRegistry {
   public DataflowWorkerRegistry getWorkerRegistry() { return this.workerRegistry;}
   
   public String getDataflowNotificationsPath() { return this.dataflowPath  + "/" + NOTIFICATIONS_PATH; }
-  
-  public Node getMasterEventNode() { return masterEventNode ; }
   
   public Node getFailureEventNode() { return failureEventNode ; }
   
@@ -200,12 +179,6 @@ public class DataflowRegistry {
   
   public void setStatus(DataflowLifecycleStatus event) throws RegistryException {
     statusNode.setData(event);
-  }
-  
-  public TXEventBroadcaster getMasterEventBroadcaster() { return masterEventBroadcaster; }
-  
-  public void broadcastMasterEvent(DataflowEvent event) throws RegistryException {
-    masterEventNode.setData(event);
   }
   
   public void broadcastFailureEvent(FailureConfig event) throws RegistryException {
@@ -268,16 +241,6 @@ public class DataflowRegistry {
       reportPaths.add(taskNode.getPath() + "/report") ;
     }
     return registry.getDataAs(reportPaths, DataflowTaskReport.class) ;
-  }
-  
-  public VMDescriptor getDataflowMaster() throws RegistryException {
-    String leaderPath = dataflowPath + "/" + MASTER_LEADER_PATH;
-    Node node = registry.getRef(leaderPath);
-    return node.getDataAs(VMDescriptor.class);
-  }
-  
-  public int countDataflowMasters() throws RegistryException {
-    return registry.getChildren(dataflowPath + "/" + MASTER_LEADER_PATH ).size();
   }
   
   public void saveMetric(String vmName, MetricRegistry mRegistry) throws RegistryException {
