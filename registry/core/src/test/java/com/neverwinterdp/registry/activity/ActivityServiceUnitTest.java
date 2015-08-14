@@ -118,9 +118,25 @@ public class ActivityServiceUnitTest {
     Activity activity = new HelloActivityBuilder().build() ;
     
     service.queue(activity);
-    Thread.sleep(5000);
+    Thread.sleep(3000);
     registry.get("/").dump(System.out);
     service.onDestroy();
+  }
+  
+  @Test
+  public void testResumeActivity() throws Exception {
+    ActivityService service1 = new ActivityService(container, ACTIVITIES_PATH) ;
+    Activity activity = new HelloActivityBuilder().build() ;
+    service1.queue(activity);
+    Thread.sleep(250);
+    registry.disconnect();
+    Thread.sleep(3000);
+    registry.connect();
+    service1.onDestroy();
+    registry.get("/").dump(System.out);
+    ActivityService service2 = new ActivityService(container, ACTIVITIES_PATH) ;
+    Thread.sleep(5000);
+    registry.get("/").dump(System.out);
   }
   
   static public class HelloActivityStepWorkerDescriptor {

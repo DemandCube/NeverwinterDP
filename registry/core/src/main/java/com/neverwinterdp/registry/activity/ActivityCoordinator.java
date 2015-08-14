@@ -25,6 +25,10 @@ abstract public class ActivityCoordinator {
     for(ActivityCoordinatorAdapter sel : adapters) sel.beforeOnResume(ctx, activity);
     ActivityService service = ctx.getActivityService();
     List<ActivityStep> activitySteps = findUnfinishedActivitySteps(service, activity);
+    System.err.println("Resume Activity " + activity.getId());
+    for(ActivityStep step : activitySteps) {
+      System.err.println(" Step: " + step.getId());
+    }
     execute(ctx, activity, activitySteps);
     for(ActivityCoordinatorAdapter sel : adapters) sel.afterOnResume(ctx, activity);
   }
@@ -79,7 +83,6 @@ abstract public class ActivityCoordinator {
       ActivityStep step = activitySteps.get(i);
       if(!ActivityStep.Status.FINISHED.equals(step.getStatus())) {
         nextStepHolder.add(step) ;
-        break;
       }
     }
     return nextStepHolder;

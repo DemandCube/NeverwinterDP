@@ -21,14 +21,12 @@ import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.registry.task.TaskContext;
 import com.neverwinterdp.registry.task.TaskRegistry;
-import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskReport;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.DataflowWorkerRuntimeReport;
-import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.simulation.FailureConfig;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMDescriptor;
@@ -37,9 +35,6 @@ import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 
 @Singleton
 public class DataflowRegistry {
-  
-  final static public String FAILURE_EVENT_PATH     = "event/failure" ;
-  
   final static public String ACTIVITIES_PATH        = "activities";
   
   final static public String NOTIFICATIONS_PATH     = "notifications";
@@ -71,8 +66,6 @@ public class DataflowRegistry {
   
   private Node               statusNode;
 
-  private Node               failureEventNode;
-
   private Node               activeActivitiesNode;
   
   private Node               metricsNode ;
@@ -100,8 +93,6 @@ public class DataflowRegistry {
     
     statusNode = registry.get(dataflowPath + "/status");
 
-    failureEventNode = registry.get(dataflowPath + "/" + FAILURE_EVENT_PATH);
-    
    
     activeActivitiesNode = registry.get(dataflowPath + "/" + ACTIVITIES_PATH);
     metricsNode = registry.get(dataflowPath + "/metrics");
@@ -111,15 +102,16 @@ public class DataflowRegistry {
     dataflowWorkerNotifier = new Notifier(registry, notificationPath, "dataflow-workers");
   }
   
-  public void initRegistry() throws Exception {
+  public boolean initRegistry() throws Exception {
     dataflowDescriptor = getDataflowDescriptor() ;
+    if(statusNode.exists()) {
+      return false;
+    }
     configuration.initRegistry(dataflowDescriptor);
     masterRegistry.initRegistry();
     workerRegistry.initRegistry();
     
     statusNode.createIfNotExists();
-    
-    failureEventNode.createIfNotExists();
     
     activeActivitiesNode.createIfNotExists();
     
@@ -127,6 +119,8 @@ public class DataflowRegistry {
     
     dataflowTaskNotifier.initRegistry();
     dataflowWorkerNotifier.initRegistry();
+    setStatus(DataflowLifecycleStatus.INIT);
+    return true;
   }
   
   public String getDataflowPath() { return this.dataflowPath ; }
@@ -138,8 +132,6 @@ public class DataflowRegistry {
   public DataflowWorkerRegistry getWorkerRegistry() { return this.workerRegistry;}
   
   public String getDataflowNotificationsPath() { return this.dataflowPath  + "/" + NOTIFICATIONS_PATH; }
-  
-  public Node getFailureEventNode() { return failureEventNode ; }
   
   public Node getTasksFinishedNode() { return taskRegistry.getTasksFinishedNode();}
   
@@ -181,10 +173,6 @@ public class DataflowRegistry {
     statusNode.setData(event);
   }
   
-  public void broadcastFailureEvent(FailureConfig event) throws RegistryException {
-    failureEventNode.setData(event);
-  }
-
   public void addAvailableTask(DataflowTaskDescriptor taskDescriptor) throws RegistryException {
     String taskId = taskDescriptor.getTaskId();
     Node taskNode = taskRegistry.getTasksListNode().getChild(taskId);

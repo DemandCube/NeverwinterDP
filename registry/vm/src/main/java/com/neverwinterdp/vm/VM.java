@@ -132,7 +132,8 @@ public class VM {
     VMApp vmApp = vmAppType.newInstance();
     vmApp.setVM(this);
     setVMStatus(VMStatus.RUNNING);
-    vmApplicationRunner = new VMApplicationRunner(vmApp, vmConfig.getProperties()) ;
+    String threadName = "VM-" + vmApp.getVM().getDescriptor().getId();
+    vmApplicationRunner = new VMApplicationRunner(threadName, vmApp, vmConfig.getProperties()) ;
     vmApplicationRunner.start();
     logger.info("Finish run()");
   }
@@ -175,8 +176,8 @@ public class VM {
     VMApp vmApplication;
     Map<String, String> properties;
     
-    public VMApplicationRunner(VMApp vmApplication, Map<String, String> props) {
-      setName("VM-" + vmApplication.getVM().getDescriptor().getId());
+    public VMApplicationRunner(String threadName, VMApp vmApplication, Map<String, String> props) {
+      super(new ThreadGroup(threadName), threadName);
       this.vmApplication = vmApplication;
       this.properties = props;
     }
@@ -193,6 +194,7 @@ public class VM {
         try {
           setVMStatus(VMStatus.TERMINATED);
           appContainer.getInstance(CloseableInjector.class).close();
+          System.err.println("Destroyed: " + vmDescriptor.getId() );
         } catch (RegistryException e) {
           System.err.println("Set terminated vm status for " + vmDescriptor.getId() );
           e.printStackTrace();

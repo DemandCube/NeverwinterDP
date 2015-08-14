@@ -6,7 +6,6 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.SequenceIdTracker;
@@ -16,8 +15,6 @@ import com.neverwinterdp.registry.activity.ActivityExecutionContext;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.activity.ActivityStepBuilder;
 import com.neverwinterdp.registry.activity.ActivityStepExecutor;
-import com.neverwinterdp.registry.event.WaitingNodeEventListener;
-import com.neverwinterdp.registry.event.WaitingRandomNodeEventListener;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.service.DataflowService;
@@ -28,62 +25,65 @@ import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.vm.client.VMClient;
 
-public class AddWorkerActivityBuilder extends ActivityBuilder {
-  public Activity build(int numOfWorkerToAdd) {
+public class AllocateWorkerActivityBuilder extends ActivityBuilder {
+  public Activity build() {
     Activity activity = new Activity();
-    activity.setDescription("Add Dataflow Worker Activity");
-    activity.setType("add-dataflow-worker");
+    activity.setDescription("Allocate Dataflow Worker Activity");
+    activity.setType("allocate-dataflow-worker");
     activity.withCoordinator(DataflowActivityCoordinator.class);
-    activity.withActivityStepBuilder(AddDataflowWorkerActivityStepBuilder.class) ;
-    activity.attribute("num-of-worker-to-add", numOfWorkerToAdd);
+    activity.withActivityStepBuilder(AllocateDataflowWorkerActivityStepBuilder.class) ;
     return activity;
   }
   
   @Singleton
-  static public class AddDataflowWorkerActivityStepBuilder implements ActivityStepBuilder {
+  static public class AllocateDataflowWorkerActivityStepBuilder implements ActivityStepBuilder {
     @Inject
     private Registry registry ;
     
     @Override
     public List<ActivityStep> build(Activity activity, Injector container) throws Exception {
       List<ActivityStep> steps = new ArrayList<>() ;
-      int numOfWorkerToAdd = activity.attributeAsInt("num-of-worker-to-add", 0);
-      for(int i = 0; i < numOfWorkerToAdd; i++) {
-        steps.add(createAddDataflowWorkerStep(registry));
-      }
-      steps.add(new ActivityStep().
-          withType("wait-for-worker-run-status").
-          withExecutor(WaitForWorkerRunningStatus.class));
+      steps.add(createAllocateDataflowWorkerStep(registry));
+      steps.add(
+        new ActivityStep().
+        withType("wait-for-worker-run-status").
+        withExecutor(WaitForWorkerRunningStatus.class));
       return steps;
     }
     
-    static public ActivityStep createAddDataflowWorkerStep(Registry registry) throws Exception {
-      SequenceIdTracker dataflowMasterIdTracker = new SequenceIdTracker(registry, ScribenginService.DATAFLOW_WORKER_ID_TRACKER);
+    static public ActivityStep createAllocateDataflowWorkerStep(Registry registry) throws Exception {
       ActivityStep step = new ActivityStep().
-      withType("create-dataflow-worker").
-      withExecutor(AddDataflowWorkerStepExecutor.class).
-      attribute("worker.id", dataflowMasterIdTracker.nextSeqId());
+      withType("allocate-dataflow-worker").
+      withExecutor(AllocateDataflowWorkerStepExecutor.class);
       return step;
     }
   }
   
   @Singleton
-  static public class AddDataflowWorkerStepExecutor implements ActivityStepExecutor {
+  static public class AllocateDataflowWorkerStepExecutor implements ActivityStepExecutor {
     @Inject
     private DataflowService service ;
     
     @Override
     public void execute(ActivityExecutionContext context, Activity activity, ActivityStep step) throws Exception {
       DataflowDescriptor dflDescriptor = service.getDataflowRegistry().getDataflowDescriptor();
-
-      DataflowRegistry dataflowRegistry = service.getDataflowRegistry();
+      DataflowRegistry dflRegistry = service.getDataflowRegistry();
+      SequenceIdTracker idTracker = 
+        new SequenceIdTracker(dflRegistry.getRegistry(), ScribenginService.DATAFLOW_WORKER_ID_TRACKER);
+      List<String> activeWorkers = dflRegistry.getWorkerRegistry().getActiveWorkerIds();
+      for(int i = activeWorkers.size(); i < dflDescriptor.getNumberOfWorkers(); i++) {
+        String workerId = dflDescriptor.getId() + "-worker-" + idTracker.nextSeqId();
+        allocate(dflRegistry, dflDescriptor, workerId);
+      }
+    }
+    
+    private void allocate(DataflowRegistry dataflowRegistry, DataflowDescriptor dflDescriptor, String workerId) throws Exception {
       Registry registry = dataflowRegistry.getRegistry();
       RegistryConfig registryConfig = registry.getRegistryConfig();
-
       VMConfig vmConfig = new VMConfig();
       vmConfig.
         setClusterEnvironment(service.getVMConfig().getClusterEnvironment()).
-        setName(dflDescriptor.getId() + "-worker-" + step.attribute("worker.id")).
+        setName(workerId).
         addRoles("dataflow-worker").
         setRequestMemory(dflDescriptor.getWorkerMemory()).
         setRegistryConfig(registryConfig).

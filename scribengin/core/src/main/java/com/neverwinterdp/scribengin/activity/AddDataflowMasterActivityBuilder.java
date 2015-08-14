@@ -47,10 +47,12 @@ public class AddDataflowMasterActivityBuilder extends ActivityBuilder {
     public List<ActivityStep> build(Activity activity, Injector container) throws Exception {
       SequenceIdTracker dataflowMasterIdTracker = new SequenceIdTracker(registry, ScribenginService.DATAFLOW_MASTER_ID_TRACKER);
       List<ActivityStep> steps = new ArrayList<>() ;
+      for(int i = 0; i < 2; i++) {
       steps.add(new ActivityStep().
           withType("create-dataflow-master").
           withExecutor(AddDataflowMasterStepExecutor.class).
           attribute("master.id", dataflowMasterIdTracker.nextSeqId()));
+      }
       return steps;
     }
   }

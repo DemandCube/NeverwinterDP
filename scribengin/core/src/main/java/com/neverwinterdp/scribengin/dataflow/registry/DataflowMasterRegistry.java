@@ -7,15 +7,17 @@ import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.vm.VMDescriptor;
 
 public class DataflowMasterRegistry {
-  final static public String MASTER_PATH            = "master";
-  final static public String MASTER_LEADER_PATH     = MASTER_PATH + "/leader";
-  final static public String MASTER_EVENT_PATH      = MASTER_PATH + "/events";
+  final static public String MASTER_PATH                   = "master";
+  final static public String MASTER_LEADER_PATH            = MASTER_PATH + "/leader";
+  final static public String MASTER_EVENT_PATH             = MASTER_PATH + "/events";
+  final static public String FAILURE_SIMULATION_EVENT_PATH = MASTER_PATH + "/failure-simulation-events" ;
   
   private Registry           registry;
   private String             dataflowPath;
   private Node               masterLeaderNode;
   private Node               masterEventNode;
   private TXEventBroadcaster masterEventBroadcaster;
+  private TXEventBroadcaster failureSimulationEventBroadcaster;
   
   public DataflowMasterRegistry(Registry registry, String dataflowPath) throws RegistryException {
     this.registry = registry;
@@ -24,17 +26,24 @@ public class DataflowMasterRegistry {
     masterEventNode  = registry.get(dataflowPath + "/" + MASTER_EVENT_PATH);
     masterEventBroadcaster = 
       new TXEventBroadcaster(registry, dataflowPath + "/" + MASTER_EVENT_PATH, false);
+    failureSimulationEventBroadcaster = 
+      new TXEventBroadcaster(registry, dataflowPath + "/" + FAILURE_SIMULATION_EVENT_PATH, false);
   }
   
   public void initRegistry() throws Exception {
     masterLeaderNode.createIfNotExists();
     masterEventNode.createIfNotExists();
-    registry.createIfNotExist(dataflowPath + "/" + MASTER_EVENT_PATH);
+    masterEventBroadcaster.initRegistry();
+    failureSimulationEventBroadcaster.initRegistry();
   }
   
   public Node getMasterEventNode() { return masterEventNode ; }
   
   public TXEventBroadcaster getMasterEventBroadcaster() { return masterEventBroadcaster; }
+  
+  public TXEventBroadcaster getFaillureSimulationEventBroadcaster() { 
+    return failureSimulationEventBroadcaster; 
+  }
   
   public VMDescriptor getDataflowMaster() throws RegistryException {
     String leaderPath = dataflowPath + "/" + MASTER_LEADER_PATH;

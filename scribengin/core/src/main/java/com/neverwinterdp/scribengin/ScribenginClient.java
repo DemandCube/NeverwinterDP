@@ -150,10 +150,14 @@ public class ScribenginClient {
   }
   
   public DataflowClient getDataflowClient(String dataflowId) throws Exception {
-    return getDataflowClient(dataflowId, 60000) ;
+    return getDataflowClient(dataflowId,DataflowLifecycleStatus.RUNNING, 1000, 60000) ;
   }
   
   public DataflowClient getDataflowClient(String dataflowId, long timeout) throws Exception {
+    return getDataflowClient(dataflowId,DataflowLifecycleStatus.RUNNING, 1000, timeout) ;
+  }
+  
+  public DataflowClient getDataflowClient(String dataflowId, DataflowLifecycleStatus exepectStatus, long checkPeriod, long timeout) throws Exception {
     Registry registry = getRegistry() ;
     String dataflowPath = ScribenginService.getDataflowPath(dataflowId);
     long stopTime = System.currentTimeMillis() + timeout;
@@ -161,12 +165,12 @@ public class ScribenginClient {
       String statusPath = dataflowPath + "/status";
       if(getRegistry().exists(statusPath)) {
         DataflowLifecycleStatus status = registry.get(statusPath).getDataAs(DataflowLifecycleStatus.class) ;
-        if(status != null && status.equalOrGreaterThan(DataflowLifecycleStatus.RUNNING)) {
+        if(status != null && status.equalOrGreaterThan(exepectStatus)) {
           DataflowClient dataflowClient = new DataflowClient(this, dataflowPath);
           return dataflowClient ;
         }
       }
-      Thread.sleep(500);
+      Thread.sleep(checkPeriod);
     }
     throw new Exception("The dataflow " + dataflowId + " is not existed after " + timeout + "ms");
   }

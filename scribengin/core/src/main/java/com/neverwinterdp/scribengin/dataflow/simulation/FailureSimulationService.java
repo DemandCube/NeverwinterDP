@@ -1,15 +1,17 @@
 package com.neverwinterdp.scribengin.dataflow.simulation;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.activity.Activity;
 import com.neverwinterdp.registry.activity.ActivityStep;
-import com.neverwinterdp.registry.event.NodeEvent;
-import com.neverwinterdp.registry.event.NodeEventWatcher;
+import com.neverwinterdp.registry.txevent.TXEvent;
+import com.neverwinterdp.registry.txevent.TXEventNotification;
+import com.neverwinterdp.registry.txevent.TXEventWatcher;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.service.DataflowService;
 import com.neverwinterdp.scribengin.dataflow.simulation.FailureConfig.FailurePoint;
@@ -19,44 +21,54 @@ import com.neverwinterdp.vm.VMConfig;
 @Singleton
 public class FailureSimulationService {
   @Inject
-  private DataflowService        dataflowService;
+  private DataflowService                   dataflowService;
   
   @Inject
-  private VMConfig                vmConfig;
+  private VMConfig                          vmConfig;
 
-  private FailureEventNodeWatcher failureEventNodeWatcher;
-  private FailureConfig           currentFailureConfig;
-  
+  private FailureSimulationEventNodeWatcher failureEventNodeWatcher;
+  private FailureConfig                     currentFailureConfig;
   
   @PostConstruct
   public void onInit() throws Exception {
-    failureEventNodeWatcher = new FailureEventNodeWatcher(dataflowService.getDataflowRegistry());
+    DataflowRegistry dflRegistry = dataflowService.getDataflowRegistry();
+    String eventPath = 
+      dflRegistry.getMasterRegistry().getFaillureSimulationEventBroadcaster().getEventPath();
+    failureEventNodeWatcher = 
+      new FailureSimulationEventNodeWatcher(dflRegistry, eventPath, vmConfig.getName());
+    
+    System.err.println("FailureSimulationService: ");
+    List<TXEvent> events = 
+        dflRegistry.getRegistry().getChildrenAs(eventPath, TXEvent.class);
+    System.err.println("FailureSimulationService: old events = " + events.size());
+    if(events.size() > 0) {
+      TXEvent txEvent = events.get(events.size() - 1);
+      currentFailureConfig = txEvent.getDataAs(FailureConfig.class);
+      failureEventNodeWatcher.notify(txEvent, TXEventNotification.Status.Complete);
+    }
   }
   
-  public void runFailureSimulation(Activity activity, ActivityStep step, FailurePoint failurePoint) throws Exception {
+  synchronized public void runFailureSimulation(Activity activity, ActivityStep step, FailurePoint failurePoint) throws Exception {
     if(currentFailureConfig == null) return;
     if(currentFailureConfig.matches(activity) &&
        currentFailureConfig.matches(step) && 
        currentFailureConfig.matches(failurePoint)) {
-      dataflowService.kill();
+      System.err.println("runFailureSimulation(...)");
+      System.err.println("  json: " + JSONSerializer.INSTANCE.toString(currentFailureConfig));
+      dataflowService.simulateKill();
       currentFailureConfig = null ;
     }
   }
   
-  public class FailureEventNodeWatcher extends NodeEventWatcher {
-    public FailureEventNodeWatcher(DataflowRegistry dflRegistry) throws RegistryException {
-      super(dflRegistry.getRegistry(), true);
-      watchModify(dflRegistry.getFailureEventNode().getPath());
+  public class FailureSimulationEventNodeWatcher extends TXEventWatcher {
+    public FailureSimulationEventNodeWatcher(DataflowRegistry dflRegistry, String eventsPath, String clientId) throws RegistryException {
+      super(dflRegistry.getRegistry(), eventsPath, clientId);
     }
-
-    @Override
-    public void processNodeEvent(NodeEvent event) throws Exception {
-      System.err.println("FailureSimulationService: event = " + event.getType() + ", path = " + event.getPath());
-      if(event.getType() == NodeEvent.Type.MODIFY) {
-        Registry registry = getRegistry() ;
-        currentFailureConfig = registry.getDataAs(event.getPath(), FailureConfig.class);
-        System.err.println(JSONSerializer.INSTANCE.toString(currentFailureConfig));
-      }
+    
+    public void onTXEvent(TXEvent txEvent) throws Exception {
+      currentFailureConfig = txEvent.getDataAs(FailureConfig.class);
+      System.out.println("FailureSimulationEventNodeWatcher: " + JSONSerializer.INSTANCE.toString(currentFailureConfig)); 
+      notify(txEvent, TXEventNotification.Status.Complete);
     }
   }
 }

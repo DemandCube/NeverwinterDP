@@ -5,6 +5,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.neverwinterdp.registry.txevent.TXEvent;
+import com.neverwinterdp.registry.txevent.TXEventNotificationWatcher;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
@@ -42,11 +44,16 @@ public class DataflowMasterFailureExperimentTest {
     submitter.start();
     
     ScribenginClient scribenginClient = shell.getScribenginClient();
-    DataflowClient dflClient = scribenginClient.getDataflowClient("kafka-to-kafka-1");
+    DataflowClient dflClient = 
+      scribenginClient.getDataflowClient("kafka-to-kafka-1", DataflowLifecycleStatus.INIT, 10, 60000);
     FailureConfig failureConfig = 
-        new FailureConfig("run-dataflow", "create-dataflow-worker", FailurePoint.After) ;
-    dflClient.getDataflowRegistry().broadcastFailureEvent(failureConfig);
-    submitter.waitForTermination(180000);
+      new FailureConfig("run-dataflow", "allocate-dataflow-worker", FailurePoint.After) ;
+    TXEvent event = new TXEvent("kill-after-run-dataflow", failureConfig);
+    TXEventNotificationWatcher  watcher =
+      dflClient.getDataflowRegistry().getMasterRegistry().getFaillureSimulationEventBroadcaster().broadcast(event);
+    watcher.waitForNotifications(1, 30000);
+    watcher.complete();
+    submitter.waitForTermination(60000);
   }
   
   public class DataflowSubmitter extends Thread {
@@ -56,8 +63,8 @@ public class DataflowMasterFailureExperimentTest {
       try {
         String command = 
           "dataflow-test " + KafkaDataflowTest.TEST_NAME +
-          "  --dataflow-id  kafka-to-kafka-1" +
-          "  --dataflow-name  kafka-to-kafka" +
+          "  --dataflow-id kafka-to-kafka-1 " +
+          "  --dataflow-name kafka-to-kafka " +
           "  --worker 2 --executor-per-worker 2 --duration 180000 --task-max-execute-time 10000" +
           "  --source-name input --source-num-of-stream 10 --source-write-period 0 --source-max-records-per-stream 10000" + 
           "  --sink-name output "+

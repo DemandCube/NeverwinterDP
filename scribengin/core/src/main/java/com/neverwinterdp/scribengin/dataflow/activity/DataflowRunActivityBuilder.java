@@ -16,7 +16,7 @@ import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.service.DataflowService;
 
-public class DataflowRunActivityBuilder extends AddWorkerActivityBuilder {
+public class DataflowRunActivityBuilder extends AllocateWorkerActivityBuilder {
   public Activity build() {
     Activity activity = new Activity() ;
     activity.setDescription("Run Dataflow Activity");
@@ -33,13 +33,11 @@ public class DataflowRunActivityBuilder extends AddWorkerActivityBuilder {
     
     @Override
     public List<ActivityStep> build(Activity activity, Injector container) throws Exception {
-      DataflowDescriptor dflDescriptor = service.getDataflowRegistry().getDataflowDescriptor();
       List<ActivityStep> steps = new ArrayList<>() ;
-      for(int i = 0; i < dflDescriptor.getNumberOfWorkers(); i++) {
-        ActivityStep addWorkerStep = 
-          AddDataflowWorkerActivityStepBuilder.createAddDataflowWorkerStep(service.getDataflowRegistry().getRegistry());
-        steps.add(addWorkerStep);
-      }
+      ActivityStep addWorkerStep = 
+        AllocateDataflowWorkerActivityStepBuilder.createAllocateDataflowWorkerStep(service.getDataflowRegistry().getRegistry());
+      steps.add(addWorkerStep);
+        
       steps.add(new ActivityStep().
           withType("wait-for-worker-run-status").
           withExecutor(WaitForWorkerRunningStatus.class));

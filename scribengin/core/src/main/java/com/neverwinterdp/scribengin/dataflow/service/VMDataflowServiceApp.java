@@ -30,14 +30,15 @@ public class VMDataflowServiceApp extends VMApp {
   public void run() throws Exception {
     logger = getVM().getLoggerFactory().getLogger(VMDataflowServiceApp.class);
     logger.info("Start run()");
+    Registry registry = getVM().getVMRegistry().getRegistry();
     VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
     dataflowRegistryPath = vmConfig.getProperties().get("dataflow.registry.path");
-    election = new LeaderElection(getVM().getVMRegistry().getRegistry(), dataflowRegistryPath + "/master/leader") ;
+    election = new LeaderElection(registry, dataflowRegistryPath + "/master/leader") ;
     election.setListener(new MasterLeaderElectionListener());
     election.start();
     try {
       waitForTerminate();
-      logger.info("Finish waitForTerminate()()");
+      logger.info("Finish waitForTerminate()");
     } catch(InterruptedException ex) {
     } finally {
       if(election != null && election.getLeaderId() != null) {
@@ -49,11 +50,15 @@ public class VMDataflowServiceApp extends VMApp {
   class MasterLeaderElectionListener implements LeaderElectionListener {
     @Override
     public void onElected() {
+      final Registry registry = getVM().getVMRegistry().getRegistry();
+      System.err.println("VMDataflowServiceApp: on elected " + getVM().getDescriptor().getId() + "with registry " + registry.hashCode()) ;
       try {
-        final Registry registry = getVM().getVMRegistry().getRegistry();
-        if(registry.exists(dataflowRegistryPath + "/status") && DataflowLifecycleStatus.FINISH == DataflowRegistry.getStatus(registry, dataflowRegistryPath)) {
-          terminate(TerminateEvent.Shutdown);
-          return;
+        if(registry.exists(dataflowRegistryPath + "/status")) {
+          DataflowLifecycleStatus currentStatus = DataflowRegistry.getStatus(registry, dataflowRegistryPath);
+          if(currentStatus == DataflowLifecycleStatus.FINISH) {
+            terminate(TerminateEvent.Shutdown);
+            return;
+          }
         }
         VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
         AppContainer appContainer = getVM().getAppContainer();
@@ -95,7 +100,8 @@ public class VMDataflowServiceApp extends VMApp {
         service.run();
         service. waitForTermination(this);
       } catch (Exception e) {
-        e.printStackTrace();
+        System.err.println("VMDataflowServiceApp ServiceRunnerThread Error: " + e.getMessage());
+        logger.error("Error: ", e);
       } finally {
         terminate(TerminateEvent.Shutdown);
       }
