@@ -20,7 +20,7 @@ import com.neverwinterdp.scribengin.activity.ScribenginActivityService;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.activity.AllocateDataflowMasterActivityBuilder;
-import com.neverwinterdp.scribengin.dataflow.activity.ShutdownDataflowMasterActivityBuilder;
+import com.neverwinterdp.scribengin.dataflow.activity.DataflowShutdownMasterActivityBuilder;
 import com.neverwinterdp.vm.VMDescriptor;
 
 @Singleton
@@ -106,7 +106,7 @@ public class ScribenginService {
           //DataflowDescriptor dataflowDescriptor = dataflowNode.getDataAs(DataflowDescriptor.class);
           //moveToHistory(dataflowDescriptor) ;
           System.err.println("ShutdownDataflowMasterActivityBuilder: detect event and call shutdown activity") ;
-          Activity activity = new ShutdownDataflowMasterActivityBuilder().build(dataflowNode.getPath()) ;
+          Activity activity = new DataflowShutdownMasterActivityBuilder().build(dataflowNode.getPath()) ;
           activityService.queue(activity);
         } catch (Exception e) {
           e.printStackTrace();

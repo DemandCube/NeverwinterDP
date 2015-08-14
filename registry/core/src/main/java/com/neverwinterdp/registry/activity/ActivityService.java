@@ -200,7 +200,6 @@ public class ActivityService extends ActivityRegistry {
         ActivityExecutionContext context = new ActivityExecutionContext(activity, ActivityService.this);
         ActivityRunner runner = new ActivityRunner(context, activity, false);
         runner.start();
-
       }
     }
   }
@@ -228,12 +227,10 @@ public class ActivityService extends ActivityRegistry {
       activeActivities.put(activity.getId(), this);
       boolean lockAcquired = false;
       try {
-        System.err.println("try lock for activity " + activity.getId());
         lockAcquired = getLock().tryLock(30, TimeUnit.MINUTES);
         if (!lockAcquired) {
           throw new Exception("Cannet obtain the lock after 15 minutes");
         }
-        System.err.println("obtain lock for activity " + activity.getId());
         doRun();
       } catch (Exception e) {
         e.printStackTrace();
@@ -241,7 +238,6 @@ public class ActivityService extends ActivityRegistry {
         activeActivities.remove(activity.getId());
         if (lockAcquired) {
           getLock().unlock();
-          System.err.println("unlock lock for activity " + activity.getId());
         }
         context.notifyTermination();
       }

@@ -98,7 +98,7 @@ public class VMDataflowServiceApp extends VMApp {
     public void run() {
       try {
         service.run();
-        service. waitForTermination(this);
+        service. waitForTermination();
       } catch (Exception e) {
         System.err.println("VMDataflowServiceApp ServiceRunnerThread Error: " + e.getMessage());
         logger.error("Error: ", e);

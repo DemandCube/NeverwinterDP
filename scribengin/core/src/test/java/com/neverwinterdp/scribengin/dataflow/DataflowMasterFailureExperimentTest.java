@@ -5,8 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.registry.txevent.TXEvent;
-import com.neverwinterdp.registry.txevent.TXEventNotificationWatcher;
+import com.neverwinterdp.registry.queue.DistributedQueue;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
@@ -17,7 +16,6 @@ import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 
 public class DataflowMasterFailureExperimentTest {
   static {
-    System.setProperty("java.net.preferIPv4Stack", "true") ;
     System.setProperty("log4j.configuration", "file:src/test/resources/test-log4j.properties") ;
   }
   
@@ -46,13 +44,10 @@ public class DataflowMasterFailureExperimentTest {
     ScribenginClient scribenginClient = shell.getScribenginClient();
     DataflowClient dflClient = 
       scribenginClient.getDataflowClient("kafka-to-kafka-1", DataflowLifecycleStatus.INIT, 10, 60000);
-    FailureConfig failureConfig = 
-      new FailureConfig("run-dataflow", "allocate-dataflow-worker", FailurePoint.After) ;
-    TXEvent event = new TXEvent("kill-after-run-dataflow", failureConfig);
-    TXEventNotificationWatcher  watcher =
-      dflClient.getDataflowRegistry().getMasterRegistry().getFaillureSimulationEventBroadcaster().broadcast(event);
-    watcher.waitForNotifications(1, 30000);
-    watcher.complete();
+    
+    DistributedQueue failureEventQueue = dflClient.getDataflowRegistry().getMasterRegistry().getFailureEventQueue();
+    failureEventQueue.offerAs(new FailureConfig("init-dataflow", "init-dataflow-task", FailurePoint.Before, 0/*delay*/));
+    //failureEventQueue.offerAs(new FailureConfig("run-dataflow", "allocate-dataflow-worker", FailurePoint.Before, 25/*delay*/));
     submitter.waitForTermination(60000);
   }
   

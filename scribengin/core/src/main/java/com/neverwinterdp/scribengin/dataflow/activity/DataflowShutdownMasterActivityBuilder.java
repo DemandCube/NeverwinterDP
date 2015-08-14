@@ -2,7 +2,6 @@ package com.neverwinterdp.scribengin.dataflow.activity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -21,13 +20,11 @@ import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.service.ScribenginService;
 
-public class ShutdownDataflowMasterActivityBuilder extends ActivityBuilder {
-  static public AtomicInteger idTracker = new AtomicInteger(1) ;
-  
+public class DataflowShutdownMasterActivityBuilder extends ActivityBuilder {
   public Activity build(String dataflowPath) {
     Activity activity = new Activity();
     activity.setDescription("Shutdown Dataflow Master Activity");
-    activity.setType("shutdown-dataflow-master");
+    activity.setType("dataflow-shutdown-master");
     activity.attribute("dataflow.path", dataflowPath);
     activity.withCoordinator(ShutdownDataflowMasterActivityCoordinator.class);
     activity.withActivityStepBuilder(ShutdownDataflowMasterActivityStepBuilder.class) ;
@@ -40,7 +37,7 @@ public class ShutdownDataflowMasterActivityBuilder extends ActivityBuilder {
     public List<ActivityStep> build(Activity activity, Injector container) throws Exception {
       List<ActivityStep> steps = new ArrayList<>() ;
       steps.add(new ActivityStep().
-          withType("shutdown-dataflow-master").
+          withType("dataflow-shutdown-master").
           withExecutor(ShutdownDataflowMasterStepExecutor.class));
       return steps;
     }

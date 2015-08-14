@@ -24,15 +24,25 @@ public class DistributedQueue {
   private boolean shutdown = false;
 
   public DistributedQueue(Registry registry, String path) throws RegistryException {
+    this(registry, path, true);
+  }
+  
+  public DistributedQueue(Registry registry, String path, boolean initRegistry) throws RegistryException {
     this.path = path;
     this.registry = registry;
-    registry.createIfNotExist(path) ;
+    if(initRegistry) {
+      initRegistry();
+    }
   }
 
   public String getPath() { return this.path ; }
   
   public Registry getRegistry() { return this.registry; }
 
+  public void initRegistry() throws RegistryException {
+    registry.createIfNotExist(path) ;
+  }
+  
   /**
    * Inserts the specified element into this queue if it is possible to do
    * so immediately without violating capacity restrictions.
@@ -102,6 +112,12 @@ public class DistributedQueue {
     return data;
   }
 
+  public <T> T elementAs(Class<T> type) throws RegistryException {
+    byte[] data = element();
+    if(data == null || data.length == 0) return null;
+    return JSONSerializer.INSTANCE.fromBytes(data, type);
+  }
+  
   /**
    * Retrieves, but does not remove, the head of this queue, or returns <tt>null</tt> if this queue is empty.
    */
@@ -137,26 +153,6 @@ public class DistributedQueue {
     registry.delete(headNodePath);
     return data;
   }
-  
-//  public byte[] take() throws RegistryException, ShutdownException, InterruptedException {
-//    while(true){
-//      if(shutdown) {
-//        throw new ShutdownException("The queue has been shut down") ;
-//      }
-//      List<String> orderedChildren = orderedChildren();
-//      if(orderedChildren.size() == 0) {
-//        takeAvailableWatcher = new LatchChildWatcher();
-//        registry.watchChildren(path, takeAvailableWatcher);
-//        takeAvailableWatcher.await();
-//        continue;
-//      }
-//      String headNode = orderedChildren.get(0);
-//      String headNodePath = path +"/"+headNode;
-//      byte[] data = registry.getData(headNodePath);
-//      registry.delete(headNodePath);
-//      return data;
-//    }
-//  }
   
   /**
    * This method suppose to wait if the queue is empty and return when the queue entry is available

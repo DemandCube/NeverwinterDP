@@ -3,6 +3,7 @@ package com.neverwinterdp.scribengin.dataflow.registry;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.queue.DistributedQueue;
 import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.vm.VMDescriptor;
 
@@ -17,7 +18,7 @@ public class DataflowMasterRegistry {
   private Node               masterLeaderNode;
   private Node               masterEventNode;
   private TXEventBroadcaster masterEventBroadcaster;
-  private TXEventBroadcaster failureSimulationEventBroadcaster;
+  private DistributedQueue   failureEventQueue ;
   
   public DataflowMasterRegistry(Registry registry, String dataflowPath) throws RegistryException {
     this.registry = registry;
@@ -26,24 +27,21 @@ public class DataflowMasterRegistry {
     masterEventNode  = registry.get(dataflowPath + "/" + MASTER_EVENT_PATH);
     masterEventBroadcaster = 
       new TXEventBroadcaster(registry, dataflowPath + "/" + MASTER_EVENT_PATH, false);
-    failureSimulationEventBroadcaster = 
-      new TXEventBroadcaster(registry, dataflowPath + "/" + FAILURE_SIMULATION_EVENT_PATH, false);
+    failureEventQueue = new DistributedQueue(registry, dataflowPath + "/" + FAILURE_SIMULATION_EVENT_PATH, false) ;
   }
   
   public void initRegistry() throws Exception {
     masterLeaderNode.createIfNotExists();
     masterEventNode.createIfNotExists();
     masterEventBroadcaster.initRegistry();
-    failureSimulationEventBroadcaster.initRegistry();
+    failureEventQueue.initRegistry();
   }
   
   public Node getMasterEventNode() { return masterEventNode ; }
   
   public TXEventBroadcaster getMasterEventBroadcaster() { return masterEventBroadcaster; }
   
-  public TXEventBroadcaster getFaillureSimulationEventBroadcaster() { 
-    return failureSimulationEventBroadcaster; 
-  }
+  public DistributedQueue getFailureEventQueue() { return failureEventQueue; }
   
   public VMDescriptor getDataflowMaster() throws RegistryException {
     String leaderPath = dataflowPath + "/" + MASTER_LEADER_PATH;

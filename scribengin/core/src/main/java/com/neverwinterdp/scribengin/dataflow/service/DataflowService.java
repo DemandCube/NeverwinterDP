@@ -59,8 +59,6 @@ public class DataflowService {
   
   private DataflowTaskMasterEventWatcher eventWatcher ;
   
-  private Thread waitForTerminationThread ;
-  
   public VMConfig getVMConfig() { return this.vmConfig ; }
   
   public DataflowRegistry getDataflowRegistry() { return dflRegistry; }
@@ -106,19 +104,13 @@ public class DataflowService {
   }
   
   
-  public void waitForTermination(Thread waitForTerminationThread) throws Exception {
-    this.waitForTerminationThread = waitForTerminationThread;
-    System.err.println("Before dataflowTaskMonitor.waitForAllTaskFinish();");
+  public void waitForTermination() throws Exception {
     long maxRunTime = dflRegistry.getDataflowDescriptor(false).getMaxRunTime();
     if(!dataflowTaskMonitor.waitForAllTaskFinish(maxRunTime)) {
       activityService.queue(new DataflowStopActivityBuilder().build());
       dataflowTaskMonitor.waitForAllTaskFinish(-1);
     }
-    System.err.println("After dataflowTaskMonitor.waitForAllTaskFinish();");
-    
-    System.err.println("Before dataflowWorkerMonitor.waitForAllWorkerTerminated();");
     dataflowWorkerMonitor.waitForAllWorkerTerminated();
-    System.err.println("After dataflowWorkerMonitor.waitForAllWorkerTerminated();");
     //finish
     dflRegistry.setStatus(DataflowLifecycleStatus.FINISH);
   }
@@ -127,10 +119,10 @@ public class DataflowService {
     Registry registry = dflRegistry.getRegistry();
     registry.disconnect();
     Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-    String threadGroupName = "VM-" + vmConfig.getName();
+    String vmTGName = "VM-" + vmConfig.getName();
     for(Thread selThread : threadSet) {
-      String groupName = selThread.getThreadGroup().getName();
-      if(threadGroupName.equals(groupName)) {
+      ThreadGroup tGroup = selThread.getThreadGroup();
+      if(tGroup != null && vmTGName.equals(tGroup.getName())) {
         try {
           selThread.interrupt();
         } catch(Exception ex) {
