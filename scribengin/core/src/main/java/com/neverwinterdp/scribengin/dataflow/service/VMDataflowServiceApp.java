@@ -33,7 +33,8 @@ public class VMDataflowServiceApp extends VMApp {
     Registry registry = getVM().getVMRegistry().getRegistry();
     VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
     dataflowRegistryPath = vmConfig.getProperties().get("dataflow.registry.path");
-    election = new LeaderElection(registry, dataflowRegistryPath + "/master/leader") ;
+    RefNode leaderRefNode = new RefNode(getVM().getDescriptor().getRegistryPath());
+    election = new LeaderElection(registry, dataflowRegistryPath + "/master/leader", leaderRefNode) ;
     election.setListener(new MasterLeaderElectionListener());
     election.start();
     try {
@@ -76,8 +77,7 @@ public class VMDataflowServiceApp extends VMApp {
         appContainer.install(moduleProps, DataflowServiceModule.NAME);
         ServiceModuleContainer dataflowServiceModuleContainer = appContainer.getModule(DataflowServiceModule.NAME);
 
-        RefNode leaderRefNode = new RefNode();
-        leaderRefNode.setPath(getVM().getDescriptor().getRegistryPath());
+        RefNode leaderRefNode = new RefNode(getVM().getDescriptor().getRegistryPath());
         registry.setData(dataflowRegistryPath + "/master/leader", leaderRefNode);
         dataflowService = dataflowServiceModuleContainer.getInstance(DataflowService.class);
         serviceRunnerThread = new ServiceRunnerThread(dataflowService);

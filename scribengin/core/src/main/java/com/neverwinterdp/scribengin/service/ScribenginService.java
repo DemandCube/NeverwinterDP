@@ -1,5 +1,7 @@
 package com.neverwinterdp.scribengin.service;
 
+import java.util.List;
+
 import javax.annotation.PreDestroy;
 
 import com.google.inject.Inject;
@@ -8,16 +10,18 @@ import com.mycila.jmx.annotation.JmxBean;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
+import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.activity.Activity;
 import com.neverwinterdp.registry.event.DataChangeNodeWatcher;
 import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.event.RegistryListener;
-import com.neverwinterdp.scribengin.activity.AddDataflowMasterActivityBuilder;
 import com.neverwinterdp.scribengin.activity.ScribenginActivityService;
-import com.neverwinterdp.scribengin.activity.ShutdownDataflowMasterActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
+import com.neverwinterdp.scribengin.dataflow.activity.AllocateDataflowMasterActivityBuilder;
+import com.neverwinterdp.scribengin.dataflow.activity.ShutdownDataflowMasterActivityBuilder;
+import com.neverwinterdp.vm.VMDescriptor;
 
 @Singleton
 @JmxBean("role=scribengin-master, type=ScribenginService, dataflowName=ScribenginService")
@@ -75,7 +79,8 @@ public class ScribenginService {
     String dataflowStatusPath = getDataflowStatusPath(descriptor.getId());
     registryListener.watch(dataflowStatusPath, new DataflowStatusListener(registry));
     
-    Activity activity = new AddDataflowMasterActivityBuilder().build(dataflowNode.getPath()) ;
+    Activity activity = 
+      new AllocateDataflowMasterActivityBuilder().build(dataflowNode.getPath()) ;
     activityService.queue(activity);
     return true;
   }
@@ -122,5 +127,10 @@ public class ScribenginService {
   
   static public String getDataflowLeaderPath(String dataflowId) { 
     return getDataflowPath(dataflowId) + "/master/leader" ; 
+  }
+  
+  static public List<VMDescriptor> getDataflowMasterDescriptors(Registry registry, String dataflowPath) throws RegistryException { 
+    List<VMDescriptor> vmDescriptors = registry.getRefChildrenAs(dataflowPath + "/master/leader", VMDescriptor.class);
+    return vmDescriptors;
   }
 }

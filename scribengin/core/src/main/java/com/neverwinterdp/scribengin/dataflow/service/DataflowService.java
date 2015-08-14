@@ -17,6 +17,7 @@ import com.neverwinterdp.registry.txevent.TXEventNotification;
 import com.neverwinterdp.registry.txevent.TXEventWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
+import com.neverwinterdp.scribengin.dataflow.activity.AllocateDataflowMasterActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.activity.DataflowActivityService;
 import com.neverwinterdp.scribengin.dataflow.activity.DataflowInitActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.activity.DataflowPauseActivityBuilder;
@@ -40,7 +41,7 @@ public class DataflowService {
   private VMConfig vmConfig;
  
   @Inject
-  private DataflowRegistry dataflowRegistry;
+  private DataflowRegistry dflRegistry;
   
   @Inject
   private SourceFactory sourceFactory ;
@@ -62,7 +63,7 @@ public class DataflowService {
   
   public VMConfig getVMConfig() { return this.vmConfig ; }
   
-  public DataflowRegistry getDataflowRegistry() { return dataflowRegistry; }
+  public DataflowRegistry getDataflowRegistry() { return dflRegistry; }
 
   public SourceFactory getSourceFactory() { return sourceFactory; }
 
@@ -71,11 +72,11 @@ public class DataflowService {
   @Inject
   public void onInject(Injector container, LoggerFactory lfactory) throws Exception {
     logger = lfactory.getLogger(DataflowService.class);
-    activityService = new DataflowActivityService(container, dataflowRegistry) ;
+    activityService = new DataflowActivityService(container, dflRegistry) ;
   }
   
   public void addAvailableTask(DataflowTaskDescriptor taskDescriptor) throws RegistryException {
-    dataflowRegistry.addAvailableTask(taskDescriptor);
+    dflRegistry.addAvailableTask(taskDescriptor);
   }
   
   public void addWorker(VMDescriptor vmDescriptor) throws RegistryException {
@@ -83,17 +84,20 @@ public class DataflowService {
   }
   
   public void run() throws Exception {
-    boolean initRegistry = dataflowRegistry.initRegistry();
-    dataflowWorkerMonitor = new DataflowWorkerMonitor(dataflowRegistry, activityService);
+    boolean initRegistry = dflRegistry.initRegistry();
+    dataflowWorkerMonitor = new DataflowWorkerMonitor(dflRegistry, activityService);
     
-    //masterEventListener = new DataflowTaskMasterEventListenter(dataflowRegistry);
     String evtPath = 
-      dataflowRegistry.getMasterRegistry().getMasterEventBroadcaster().getEventPath();
-    eventWatcher = new DataflowTaskMasterEventWatcher(dataflowRegistry, evtPath, vmConfig.getName());
+      dflRegistry.getMasterRegistry().getMasterEventBroadcaster().getEventPath();
+    eventWatcher = new DataflowTaskMasterEventWatcher(dflRegistry, evtPath, vmConfig.getName());
     
     dataflowTaskMonitor = new DataflowTaskMonitor();
-    taskService = new TaskService<>(dataflowRegistry.getTaskRegistry());
+    taskService = new TaskService<>(dflRegistry.getTaskRegistry());
     taskService.addTaskMonitor(dataflowTaskMonitor);
+    
+    Activity activity = 
+        new AllocateDataflowMasterActivityBuilder().build(dflRegistry.getDataflowPath()) ;
+    activityService.queue(activity);
     
     if(initRegistry) {
       activityService.queue(new DataflowInitActivityBuilder().build());
@@ -105,7 +109,7 @@ public class DataflowService {
   public void waitForTermination(Thread waitForTerminationThread) throws Exception {
     this.waitForTerminationThread = waitForTerminationThread;
     System.err.println("Before dataflowTaskMonitor.waitForAllTaskFinish();");
-    long maxRunTime = dataflowRegistry.getDataflowDescriptor(false).getMaxRunTime();
+    long maxRunTime = dflRegistry.getDataflowDescriptor(false).getMaxRunTime();
     if(!dataflowTaskMonitor.waitForAllTaskFinish(maxRunTime)) {
       activityService.queue(new DataflowStopActivityBuilder().build());
       dataflowTaskMonitor.waitForAllTaskFinish(-1);
@@ -116,12 +120,11 @@ public class DataflowService {
     dataflowWorkerMonitor.waitForAllWorkerTerminated();
     System.err.println("After dataflowWorkerMonitor.waitForAllWorkerTerminated();");
     //finish
-    dataflowRegistry.setStatus(DataflowLifecycleStatus.FINISH);
+    dflRegistry.setStatus(DataflowLifecycleStatus.FINISH);
   }
   
   public void simulateKill() throws Exception {
-    Registry registry = dataflowRegistry.getRegistry();
-    System.err.println("DataflowService simulate kill with registry " + registry.hashCode());
+    Registry registry = dflRegistry.getRegistry();
     registry.disconnect();
     Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
     String threadGroupName = "VM-" + vmConfig.getName();
@@ -134,10 +137,6 @@ public class DataflowService {
         }
       }
     }
-//    activityService.kill();
-//    if(waitForTerminationThread != null) {
-//      waitForTerminationThread.interrupt();
-//    }
   }
   
   public class DataflowTaskMasterEventWatcher extends TXEventWatcher {
@@ -155,7 +154,7 @@ public class DataflowService {
         activityService.queue(new DataflowStopActivityBuilder().build());
         logger.info("Queue a stop activity");
       } else if(taskEvent == DataflowEvent.RESUME) {
-        DataflowLifecycleStatus currentStatus = dataflowRegistry.getStatus();
+        DataflowLifecycleStatus currentStatus = dflRegistry.getStatus();
         if(currentStatus == DataflowLifecycleStatus.PAUSE) {
           Activity activity = new DataflowResumeActivityBuilder().build();
           activityService.queue(activity);

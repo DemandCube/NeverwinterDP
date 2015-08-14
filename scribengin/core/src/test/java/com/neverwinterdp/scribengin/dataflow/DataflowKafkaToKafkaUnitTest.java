@@ -62,8 +62,8 @@ public class DataflowKafkaToKafkaUnitTest {
             "dataflow-test " + KafkaDataflowTest.TEST_NAME +
             " --dataflow-id    kafka-to-kafka-1" +
             " --dataflow-name  kafka-to-kafka" +
-            " --worker 3" +
-            " --executor-per-worker 1" +
+            " --worker 2" +
+            " --executor-per-worker 2" +
             //" --dataflow-task-executor-dedicated " +
             " --duration 120000" +
             " --task-max-execute-time 10000" +
