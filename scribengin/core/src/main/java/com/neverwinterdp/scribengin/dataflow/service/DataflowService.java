@@ -93,9 +93,9 @@ public class DataflowService {
     taskService = new TaskService<>(dflRegistry.getTaskRegistry());
     taskService.addTaskMonitor(dataflowTaskMonitor);
     
-    Activity activity = 
-        new AllocateDataflowMasterActivityBuilder().build(dflRegistry.getDataflowPath()) ;
-    activityService.queue(activity);
+//    Activity activity = 
+//        new AllocateDataflowMasterActivityBuilder().build(dflRegistry.getDataflowPath()) ;
+//    activityService.queue(activity);
     
     if(initRegistry) {
       activityService.queue(new DataflowInitActivityBuilder().build());
