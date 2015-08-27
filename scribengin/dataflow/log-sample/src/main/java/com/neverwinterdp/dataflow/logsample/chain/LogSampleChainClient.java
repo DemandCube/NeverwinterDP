@@ -97,8 +97,7 @@ public class LogSampleChainClient  {
     validatorGroup.add(validatorExecutor);
     scheduler.run();
     
-    List<ClusterMetricRegistrySnapshot> metrics = 
-        dataflowChainExecutor.getDataflowChainSubmitter().getMetrics();
+    List<ClusterMetricRegistrySnapshot> metrics = dataflowChainExecutor.getDataflowChainSubmitter().getMetrics();
     for(ClusterMetricRegistrySnapshot sel : metrics) {
       System.out.println("Dataflow " + sel.getClusterName() + " Report");
       System.out.println("**************************************************************************************");

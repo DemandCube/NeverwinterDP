@@ -53,7 +53,7 @@ public class DataflowSubmitter {
   }
   
   void waitForEqualOrGreaterThanStatus(long timeout, DataflowLifecycleStatus status) throws Exception {
-    DataflowClient dflClient = scribenginClient.getDataflowClient(dflDescriptor.getId(), 90000);
+    DataflowClient dflClient = scribenginClient.getDataflowClient(dflDescriptor.getId(), timeout);
     dflClient.waitForEqualOrGreaterThanStatus(3000, timeout, status);
   }
   
