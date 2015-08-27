@@ -20,6 +20,9 @@ public class LogSampleChainConfig {
   @Parameter(names = "--log-generator-wait-for-ready", description = "Log generator message size")
   public long logGeneratorWaitForReady = 15000 ;
   
+  @Parameter(names = "--log-generator-wait-for-terminated", description = "Log generator message size")
+  public long logGeneratorWaitForTerminated = 90000 ;
+  
   @Parameter(names = "--log-generator-num-of-message", description = "Log generator message size")
   public int logGeneratorNumOfMessage = 1000;
   
