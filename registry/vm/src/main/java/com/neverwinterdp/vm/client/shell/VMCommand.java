@@ -100,6 +100,12 @@ public class VMCommand extends Command {
     @Parameter(names = "--dfs-app-home", description = "The path to application home to upload ")
     private String dfsAppHome ;
     
+    @Parameter(names = "--wait-for-running", description = "The path to application home to upload ")
+    private long waitForrunning = 90000;
+    
+    @Parameter(names = "--wait-for-terminated", description = "The path to application home to upload ")
+    private long waitForTerminated = -1;
+    
     
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
@@ -107,7 +113,10 @@ public class VMCommand extends Command {
       VMSubmitter submitter = new VMSubmitter(vmClient, dfsAppHome, new VMConfig(cmdInput.getRemainArgs()));
       if(uploadAppHome != null) submitter.setUploadAppHome(uploadAppHome);
       submitter.submit();
-      submitter.waitForRunning(90000);;
+      submitter.waitForRunning(waitForrunning);
+      if(waitForTerminated > 0) {
+        submitter.waitForTerminated(waitForTerminated);
+      }
       shell.console().print(submitter.getFormattedResult());
     }
     

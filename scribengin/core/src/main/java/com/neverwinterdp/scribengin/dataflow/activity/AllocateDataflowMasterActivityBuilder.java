@@ -79,7 +79,7 @@ public class AllocateDataflowMasterActivityBuilder extends ActivityBuilder {
       
       List<VMDescriptor> masters = 
           ScribenginService.getDataflowMasterDescriptors(registry, dataflowPath);
-      for(int i = masters.size(); i < 2; i++) {
+      for(int i = masters.size(); i < 1; i++) {
         String masterId = descriptor.getId() + "-master-" + idTracker.nextSeqId();
         allocate(dataflowNode, descriptor, masterId);
       }

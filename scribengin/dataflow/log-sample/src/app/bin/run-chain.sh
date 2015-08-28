@@ -75,7 +75,7 @@ if [ "$PROFILE" = "performance" ] ; then
     --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
     \
-    --log-generator-num-of-vm 1 --log-generator-wait-for-ready 10000 \
+    --log-generator-num-of-vm 1 --log-generator-wait-for-ready 10000  --log-generator-wait-for-terminated 3600000 \
     --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
     \
     --log-validator-wait-for-termination 3600000 \
@@ -93,7 +93,7 @@ elif [ "$PROFILE" = "dataflow-worker-failure" ] ; then
     --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
     \
-    --log-generator-num-of-vm 1  --log-generator-wait-for-ready 10000 \
+    --log-generator-num-of-vm 1 --log-generator-wait-for-ready 10000  --log-generator-wait-for-terminated 3600000 \
     --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
     \
     --log-validator-wait-for-termination 3600000 \
@@ -116,7 +116,7 @@ elif [ "$PROFILE" = "dataflow-start-stop" ] ; then
     --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
     --upload-app $APP_DIR --dfs-app-home /applications/dataflow/log-sample \
     \
-    --log-generator-num-of-vm 1  --log-generator-wait-for-ready 10000 \
+    --log-generator-num-of-vm 1 --log-generator-wait-for-ready 10000  --log-generator-wait-for-terminated 3600000 \
     --log-generator-num-of-message $NUM_OF_MESSAGE --log-generator-message-size $MESSAGE_SIZE \
     \
     --log-validator-wait-for-termination 3600000 \

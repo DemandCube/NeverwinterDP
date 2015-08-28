@@ -57,7 +57,7 @@ public class LogSampleChainClient  {
     
     ExecutorScheduler scheduler = new ExecutorScheduler();
     GroupExecutor logGeneratorGroup = scheduler.newGroupExcecutor("log-generator");
-    logGeneratorGroup.withMaxRuntime(30000).withWaitForReady(config.logGeneratorWaitForReady);;
+    logGeneratorGroup.withMaxRuntime(config.logGeneratorWaitForTerminated + 30000);
     for(int i = 0; i < 1; i++) {
       Executor executor = new VMLogGeneratorExecutor(shell, (i + 1), config);
       logGeneratorGroup.add(executor);
@@ -97,8 +97,7 @@ public class LogSampleChainClient  {
     validatorGroup.add(validatorExecutor);
     scheduler.run();
     
-    List<ClusterMetricRegistrySnapshot> metrics = 
-        dataflowChainExecutor.getDataflowChainSubmitter().getMetrics();
+    List<ClusterMetricRegistrySnapshot> metrics = dataflowChainExecutor.getDataflowChainSubmitter().getMetrics();
     for(ClusterMetricRegistrySnapshot sel : metrics) {
       System.out.println("Dataflow " + sel.getClusterName() + " Report");
       System.out.println("**************************************************************************************");

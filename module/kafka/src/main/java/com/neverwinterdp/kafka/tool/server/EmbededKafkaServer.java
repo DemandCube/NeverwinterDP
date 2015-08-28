@@ -93,17 +93,7 @@ public class EmbededKafkaServer implements Server {
     if (server == null)
       return;
     long startTime = System.currentTimeMillis();
-    // server.awaitShutdown();
-    // server.socketServer().shutdown();
-    // server.kafkaController().shutdown();
-    // server.kafkaScheduler().shutdown();
-    // server.replicaManager().shutdown() ;
-    // kafkaGroup.interrupt() ;
     server.shutdown();
-    // server.kafkaController().shutdown();
-    // server.replicaManager().replicaFetcherManager().closeAllFetchers();
-    // server.kafkaScheduler().shutdown();
-    // server.logManager().shutdown();
     kafkaGroup.interrupt();
     kafkaGroup = null;
     server = null;

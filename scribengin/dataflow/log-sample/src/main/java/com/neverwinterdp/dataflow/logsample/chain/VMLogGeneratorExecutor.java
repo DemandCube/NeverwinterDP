@@ -11,6 +11,8 @@ public class VMLogGeneratorExecutor extends ShellCommandExecutor {
     String cmdLine = 
       "vm submit " +
       "  --dfs-app-home " + config.dfsAppHome +
+      "  --wait-for-running " + config.logGeneratorWaitForReady +
+      "  --wait-for-terminated " + config.logGeneratorWaitForTerminated +
       "  --registry-connect " + config.registryConfig.getConnect() +
       "  --registry-db-domain " + config.registryConfig.getDbDomain() +
       "  --registry-implementation " + config.registryConfig.getRegistryImplementation() +
