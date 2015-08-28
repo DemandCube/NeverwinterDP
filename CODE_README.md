@@ -30,95 +30,172 @@ NeverwinterDP
   ├── release
 ```
 
-where the first level can be considered as a project. The seccond level is the components of the project. A project can be depended on another project or a component of the other project
+where the first level can be considered a project. The second level are the components of the project. A project can depend on another project or a component of another project.
+
+<br><br>
 
 #Lib#
 
-The lib project contains many small and independant library that use to solve a speicific problem or requirement. The library component is usually small, depend only on the jre or 1 or 2 other thrird party libraries.
+The lib project contains many small and independant libraries that are used to solve a speicific problem or requirement. A library component is  small, and only depend on the jre or 1 or 2 other third party libraries.
 
-##utils##
+###utils###
 
 1. The com.neverwinterdp.util contains many util classes that help to manage json, exception, reflection, list, map...
 2. The com.neverwinterdp.util.text contains the util classes that help to fomat the text, convert the number , byte to string format , to print out the data in the tabular format.
 3. The com.neverwinterdp.util.io contains classes that help to manage the files, read/write from/to InputStream and OutputStream.
 
-##buffer##
+###buffer###
 
-The buffer project is based the chronicle queue https://github.com/OpenHFT/Java-Chronicle, which is a high, reliable and persisted framework. The buffer project extends the chronicle project by implementing a multiple queue that allow one thread to write to a segment while another thread dequeue from another segment. So the read and write thread does not block each other.
+The buffer project is based the chronicle queue https://github.com/OpenHFT/Java-Chronicle, which is a highly reliable and persisted framework. The buffer project extends the chronicle project by implementing a multiple queue that allows one thread to write to a segment while another thread dequeues from another segment; the read and write threads do not block each other.
 
-##yara##
+###yara###
 
-Yara project is a metric project base on the codahale or later drop wizard project concept. The main different between codahale and yara is yara used the QDigest algorithm from https://github.com/addthis/stream-lib/tree/master/src/main/java/com/clearspring/analytics/stream/quantile. The main advantage from qdigest algorithm is it used less memorey and allow to merge the data which is very important to merge the metric from the different server. you can AlgorithmComparatorUnitTest to see the different performance and accuracy of the codahale, QDigest and TDigest algorithm.
+Yara project is a metric project base on the codahale or later drop wizard project concept. The main different between codahale and yara is yara uses the QDigest algorithm from https://github.com/addthis/stream-lib/tree/master/src/main/java/com/clearspring/analytics/stream/quantile. The main advantage from the qdigest algorithm is it uses less memory and allows us to merge data/metrics from multiple sources/servers. Check out AlgorithmComparatorUnitTest to see the different performance and accuracy of the codahale, QDigest and TDigest algorithm.
+
+<br><br>
 
 #Module#
 
-The goal of the module project is to create a service api/framework that allow to implement, wire and deploy the services in the same manager. The project goal is also to wrap the other project such kafka, zookeeper, elasticsearch as a service of the neverwinterdp.
+The goal of the module project is to create a service api/framework that allows us to implement and deploy services in a single JVM. The project's goal is also to wrap other projects such as kafka, zookeeper, elasticsearch as a service for neverwinterdp.
 
-##commons##
+###commons###
 
-The commons component contains the service framework and api that base on the google guice project.
+The commons component contains the service framework and api that is based on Google Guice.
 
-##elasticsearch##
+###elasticsearch###
 
-The elasticsearch project contains the service code wrapper that allow to run the elasticsearch as a neverwinterdp service. It also contains other code sunch the elasticsearch client wrapper, the multi node server to simulate the elasticsearch cluster for the unit test.
+The elasticsearch project contains the service code wrapper that allow to run the elasticsearch as a neverwinterdp service. It also contains other code such as the elasticsearch client wrapper and the multi node server to simulate an elasticsearch cluster for unit testing.
 
-##kafka##
+###kafka###
 
 The kafka module project contains: 
 
-1. The service code wrapper that allow to run the kafka as a neverwinterdp service. 
-2. The multi node server to simulate the kafka cluster for the unit test.
-3. The AckKafkaWriter to allow buffer and resend a message if the message is sent to a dead broker and does not get an ack.
-4. The KafkaPartitionReader to allow to read the message from a kafka partition, commit or rollback to a previous commit read.
-5. The Kafka send and check tool. The tool allow to send a set of message to a topic and the check tool will retrieve the messages and check to see if there is any lost or duplicated message.
+1. The service code wrapper that allows us to run the kafka as a neverwinterdp service. 
+2. The multi node server to simulate the kafka cluster for unit testing.
+3. The AckKafkaWriter - uses a buffer and resends a message if the message is sent to a dead broker and does not get an ack.
+4. The KafkaPartitionReader - reads the message from a kafka partition, can commit or rollback to a previous commit already read.
+5. The Kafka send and check tool. The tool is used to send a set of message to a topic and the check tool will retrieve the messages and check to see if there is any lost or duplicated messages.
+
+<br><br>
 
 #Registry#
 
-The registry is a centralized service that maintain the data in a hierachry structure. The service is used for maintaining configuration information, naming, providing distributed synchronization, and providing group services. The current registry is implemented on top of the zookeeper project.
+The registry is a centralized service that maintains cluster data in a hierarchical structure. The service is used for maintaining configuration information, naming, providing distributed synchronization, and providing group services. The current registry is implemented on top of the zookeeper project.
 
-##core##
+###core###
 
 The core component contains:
 
-1. A Registry api that allow to create,retrieve, update the data in the registry
+1. A Registry api that allow to create, retrieve, update the data in the registry
 2. A zookeeper Registry implementation
 3. A distributed lock framework that allow multiple servers synchronously access and read/write/update a resource
 4. A distributed queue framework
-5. A leader election framework to allow a server is elected as a leader and the other stay as a backup.
-6. A task framework is a a generic framework that keep track of the task list, available tasks to process, the assigned tasks, the status of the tasks... The task framework works as follow. A task master will read the configuration, compute and create a task list in the registry. The task worker will pickup a task from the available task list, create a heartbeat and mark the task as RUNNING and start working on the task. The worker may suspended the task and put back the task in the available list and another worker may pick up the task again and resume the task. If a worker fail at the middle, the task master should detect the broken heartbeat and put back the task in the available list.
-7. The transaction event framework or txevent framework. The framework allow one client broadcast an event and obtain a watcher, the watcher will notify the client when an other server receive the event , complete to process the event or other custom status.
+5. A leader election framework to allow a server to be elected as a leader and the others stay as a backup.
+6. A task framework is a a generic framework that keeps track of the task list, available tasks to process, the assigned tasks, the status of the tasks...
+7. The task framework works as follows - A task master will read the configuration, compute and create a task list in the registry. The task worker will pickup a task from the available task list, create a heartbeat and mark the task as RUNNING and start working on the task. The worker may suspend the task and put the task back in the available list, and another worker may pick up the task again later and resume the task. If a worker fails in the middle, the task master should detect the broken heartbeat and put the task back in the available list.
+8. The transaction event (txevent) framework allows one client to broadcast an event and obtain a watcher, the watcher will then notify the client when another server receives the event, to complete and process the event or other custom status.
 
-##vm##
+###vm###
 
-The vm component is a sub project of the registry. The vm project allows to dynamically manage a group of vm (virtual machine). The vm can be allocated on request and return to the vm pool when it terminates. The framework consist of a vm master and  1 or more master slave. The vm master is responsible to allocate the vm, register it with the registry and detect the broken or terminated vm, return them to the vm pool. 
+The vm component is a sub project of the registry. The vm project allows to dynamically manage a group of vm (virtual machine). The vm can be allocated on request and returned to the vm pool when it terminates. The framework consist of a vm master and  1 or more master slave. The vm master is responsible to allocate the vm, register it with the registry and detect the broken or terminated vm, return them to the vm pool. 
 
-The vm project come with 2 implementations:
+The vm project has 2 implementations:
 
 1. The single jvm implementation, which all the vms run in the same jvm. Each vm has its own thread to run and manage the vm. The single jvm implementation is designed for unit testing.
 
-2. The yarn implemetation is an implementation on top of hadoop yarn project. In this implementation, the vm master is a yarn application master, it wait for the request and allocate the yarn container, register it with the vm registry framework.
+2. The yarn implemetation is an implementation on top of YARN. In this implementation, the vm master is a YARN application master - it waits for requests and allocates yarn containers, then registers them with the vm registry framework into the registry.
 
-##vm-sample##
+###vm-sample###
 
-The project contains a single class VMSampleApp which print out some hello message. You can run it with the unit vm unit test framework or in a vm yarn application framework.
+The project contains a single class VMSampleApp which prints out a sample hello message. You can run it with the unit vm unit test framework or in a vm yarn application framework.
+
+<br><br>
 
 #Scribengin#
 
-The scribengin is a project that allow to move the data from different source type to the different sink in a fast and reliable manner.
+Scribengin moves data from any source to any sink in a fast and reliable manner.
 
-##core##
+###core###
 
-The core component consist:
+The core components consist of:
 
-1. storage source: The source concept is a data repository that partition into multiple data stream. The source api consist of the Source, SourceStream and SourceStreamReader.   
-2. storage sink:
-3. scribengin service:
-4. dataflow and dataflow task:
-5. dataflow service:
-6. dataflow worker:
+  * storage source
+  * storage sink
+  * scribengin service
+  * dataflow
+  * dataflow task
+  * dataflow service
+  * dataflow worker
+  
+For details, check out the Features section below
 
-##dataflow log-sample##
-
-##release##
+<br><br>
 
 #Release#
+
+This project manages releasing Neverwinter and creating scripts/binaries
+
+<br><br><hr><br><br>
+
+#Features#
+
+###dataflows###
+Dataflows are a concept for how Scribengin organizes tasks.  A Dataflow is made up of a Source, Scribe, and Sinks
+  *  Source - is a system that is being read to get data from (Kafka, Kinesis e.g.)
+  *  Sink - is a destination system that is being written to (HDFS, Hbase, Hive e.g.)
+  *  Scribe - is a data processor used to filter, copy, duplicate, transform, etc. any data moving between source and sink
+  
+Sources and Sinks are responsible for partitioning and receiving data in multiple data streams for greater concurrency.
+The Source API consists of Source, SourceStream, and SourceStreamReader
+The Sink API consists of Sink, SinkStream, and SinkStreamWriter
+
+###masters###
+A container running the Scribengin cluster responsible for managing specific items of work.
+
+Examples are:
+  *  ScribenginMaster - monitors for incoming requests for dataflows
+  *  VMMaster - responsible for allocating containers for workers/masters
+  *  DataflowMaster - monitors all the workers of a dataflow
+
+###workers###
+A container that runs in the Scribengin cluster.  A worker contains a configurable number of executors and works on tasks.
+
+###executors###
+An executor is similar to a thread.  A Worker can have many (configurable) executors running at a time.  Executors, pick up and execute tasks
+
+An Executor is defined by:
+  *  id - A Unique ID
+  *  status - Current running status
+  *  assignedTaskIds - a list of assigned Task IDs
+
+###tasks###
+A task can be considered a single unit of work within Scribengin.  A dataflow is split into multiple tasks - for example a Kafka task may be split into tasks by topic and partition - so a single topic with 3 partitions can be broken into 3 tasks.  Tasks and their status are tracked in the registry.
+
+Tasks are made up of:
+  *  taskId - a unique Identifier 
+  *  scribe - The Scribe (processor) to use
+  *  StreamDescriptor - The source stream configuration
+  *  sinkStreamDescriptors - The sink stream(s) configurations
+  *  registryPath - Registry path of the task
+
+###activities###
+An activity is an action(s) that occurs internally within the Scribengin cluster.  Activites can include starting a dataflow master, deactivating a dataflow master, starting/stopping/initializing dataflows.  Activities and their status' can be tracked in the registry.  Activities make it easy such that if something fails, it can be retried.
+
+
+###heartbeat###
+A heartbeat is a way for Scribengin to monitor the status of executors and workers in the cluster.  The heartbeat is an ephemeral node that lives within the registry.  If that node goes down, we know something has gone wrong with that worker and action must be taken to restore sanity.
+
+###services###
+Components of the Scribengin cluster run as services.  Services tend to wait for input from elsewhere in the cluster, then allocate resources or perform a task based on that request.
+
+Services include:
+  *  VMService - The service that runs as the VM Master and allocates containers upon request
+  *  ScribenginService - Waits for requests for dataflows, then populates the registry and kicks off new dataflows
+
+###high availability###
+Components of the Scribengin cluster are highly available.  If a container is detected to have gone down (whether via an error, or lost heartbeat) - a new container will step in and seamlessly take its place.  This is achieved by setting the backup machine as the master, and reading configuration from the registry.
+Components in the cluster that are HA:
+  *  DataflowMaster
+  *  ScribenginMaster
+  *  DataflowWorkers (can be respawned by DataflowMaster)
+
