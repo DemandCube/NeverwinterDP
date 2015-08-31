@@ -24,11 +24,15 @@ public class DataflowTaskContext {
   private DataflowTaskDescriptor dataflowTaskDescriptor;
   private boolean complete = false;
   private Meter dataflowReadMeter ;
+  private Meter dataflowRecordMeter ;
   
   public DataflowTaskContext(DataflowTaskExecutorService service, DataflowTaskDescriptor descriptor, DataflowTaskReport report)  throws Exception {
     executorService = service;
+    
     sourceContext = new SourceContext(service.getSourceFactory(), descriptor.getSourceStreamDescriptor());
-    dataflowReadMeter = service.getMetricRegistry().getMeter("dataflow.source.throughput", "byte") ;
+    dataflowReadMeter = service.getMetricRegistry().getMeter("dataflow.source.throughput.byte", "byte") ;
+    dataflowRecordMeter = service.getMetricRegistry().getMeter("dataflow.source.throughput.record", "record") ;
+    
     Iterator<Map.Entry<String, StreamDescriptor>> i = descriptor.getSinkStreamDescriptors().entrySet().iterator();
       while (i.hasNext()) {
         Map.Entry<String, StreamDescriptor> entry = i.next();
@@ -56,6 +60,7 @@ public class DataflowTaskContext {
     DataflowMessage dataflowMessage = getSourceStreamReader().next(maxWaitForDataRead);
     if(dataflowMessage != null) {
       dataflowReadMeter.mark(dataflowMessage.getData().length + dataflowMessage.getKey().length());
+      dataflowRecordMeter.mark(1);
     }
     return dataflowMessage ;
   }
@@ -63,15 +68,23 @@ public class DataflowTaskContext {
   public void append(DataflowMessage dataflowMessage) throws Exception {
     SinkContext sinkContext = sinkContexts.get("default");
     sinkContext.assignedSinkStreamWriter.append(dataflowMessage);
-    Meter meter = executorService.getMetricRegistry().getMeter("dataflow.sink.default.throughput"  , "byte") ;
-    meter.mark(dataflowMessage.getData().length + dataflowMessage.getKey().length());
+    Meter byteMetter = 
+        executorService.getMetricRegistry().getMeter("dataflow.sink.default.throughput.byte", "byte") ;
+    byteMetter.mark(dataflowMessage.getData().length + dataflowMessage.getKey().length());
+    Meter recordMetter = 
+        executorService.getMetricRegistry().getMeter("dataflow.sink.default.throughput.record", "record") ;
+    recordMetter.mark(1);
   }
 
   public void write(String sinkName, DataflowMessage dataflowMessage) throws Exception {
     SinkContext sinkContext = sinkContexts.get(sinkName);
     sinkContext.assignedSinkStreamWriter.append(dataflowMessage);
-    Meter meter = executorService.getMetricRegistry().getMeter("dataflow.sink." + sinkName + ".throughput"  , "byte") ;
+    Meter meter = 
+        executorService.getMetricRegistry().getMeter("dataflow.sink." + sinkName + ".throughput.byte", "byte") ;
     meter.mark(dataflowMessage.getData().length + dataflowMessage.getKey().length());
+    Meter recordMetter = 
+        executorService.getMetricRegistry().getMeter("dataflow.sink." + sinkName + ".throughput.record", "record") ;
+    recordMetter.mark(1);
   }
   
   public String[] getAvailableSinks() {
