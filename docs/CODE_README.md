@@ -216,3 +216,6 @@ Components in the cluster that are HA:
   *  ScribenginMaster
   *  DataflowWorkers (can be respawned by DataflowMaster)
 
+###Scribengin Design####
+![Scribengin Internal Diagram](/ScribenginCluster.png "Scribengin Internal Diagram")
+
