@@ -37,6 +37,9 @@ function get_opt() {
 }
 
 
+#########################################################################################################################
+# Setup environment and collect the setup parameters                                                                    #
+#########################################################################################################################
 SCRIBENGIN_HOME="/opt/neverwinterdp/scribengin"
 JAVA_OPTS="-Xshare:auto -Xms128m -Xmx1024m -XX:-UseSplitVerifier" 
 APP_OPT="-Dapp.dir=$APP_DIR -Duser.dir=$APP_DIR"
@@ -66,33 +69,38 @@ MAX_RUNTIME=$(( 180000 + ($NUM_OF_MESSAGE / 5) ))
 SHELL=./scribengin/bin/shell.sh
 
 
-##################################################################################
-# Upload The App                                                                 #
-##################################################################################
+#########################################################################################################################
+# Upload The App                                                                                                        #
+#########################################################################################################################
 $SHELL vm upload-app --local $APP_DIR --dfs /applications/log-sample
 
-##################################################################################
-# Launch The Message Generator                                                   #
-##################################################################################
+#########################################################################################################################
+# Launch The Message Generator                                                                                          #
+#########################################################################################################################
 $SHELL vm submit \
    --dfs-app-home /applications/log-sample \
    --registry-connect zookeeper-1:2181 --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
    --name vm-log-generator-1  --role vm-log-generator --vm-application  com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp \
    --prop:report-path=/applications/log-sample/reports --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE
 
-##################################################################################
-# Launch Dataflow Chain                                                          #
-##################################################################################
+#########################################################################################################################
+# Launch Dataflow Chain                                                                                                 #
+#########################################################################################################################
 $SHELL dataflow submit-chain --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --dataflow-max-runtime $MAX_RUNTIME
+
+sleep 60
+
+$SHELL registry dump 
+
 $SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow --max-wait-time $MAX_RUNTIME --status TERMINATED
 $SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-info  --status TERMINATED
 
 $SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-warn  --status TERMINATED
 $SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED
 
-##################################################################################
-# Launch Validator                                                               #
-##################################################################################
+#########################################################################################################################
+# Launch Validator                                                                                                      #
+#########################################################################################################################
 $SHELL vm submit  \
   --dfs-app-home /applications/log-sample \
   --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
@@ -104,5 +112,8 @@ $SHELL vm submit  \
 
 $SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 60000
 
+#########################################################################################################################
+# Dump the vm and registry info                                                                                         #
+#########################################################################################################################
 $SHELL vm info
 $SHELL registry dump --path /applications/log-sample
