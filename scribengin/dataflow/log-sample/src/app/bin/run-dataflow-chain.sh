@@ -61,7 +61,7 @@ else
   LOG_VALIDATOR_VALIDATE_OPT="--log-validator-validate-kafka log4j.aggregate"
 fi
 
-MAX_RUNTME=$(( 180000 + ($NUM_OF_MESSAGE / 5) ))
+MAX_RUNTIME=$(( 180000 + ($NUM_OF_MESSAGE / 5) ))
 
 SHELL=./scribengin/bin/shell.sh
 
@@ -83,11 +83,11 @@ $SHELL vm submit \
 ##################################################################################
 # Launch Dataflow Chain                                                          #
 ##################################################################################
-$SHELL dataflow submit-chain --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --dataflow-max-runtime $MAX_RUNTME
-$SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow --status TERMINATED
-$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-info --status TERMINATED
+$SHELL dataflow submit-chain --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --dataflow-max-runtime $MAX_RUNTIME
+$SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow --max-wait-time $MAX_RUNTIME --status TERMINATED
+$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-info  --status TERMINATED
 
-$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-warn --status TERMINATED
+$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-warn  --status TERMINATED
 $SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED
 
 ##################################################################################
