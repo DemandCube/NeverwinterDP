@@ -112,7 +112,7 @@ $SHELL vm submit  \
   --prop:wait-for-termination=300000 \
   $LOG_VALIDATOR_OPTS
 
-$SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 60000
+$SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 3600000
 
 #########################################################################################################################
 # Dump the vm and registry info                                                                                         #
