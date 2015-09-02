@@ -131,7 +131,7 @@ public class DataflowCommand extends Command {
       ScribenginClient client = scribenginShell.getScribenginClient();
       shell.console().println("Submit:");
       shell.console().println("  dataflow chain config: " + dataflowChainConfig);
-      shell.console().println("  dfs app home:"  + dfsAppHome);
+      shell.console().println("  dfs app home:          "  + dfsAppHome);
       String json = IOUtil.getFileContentAsString(dataflowChainConfig) ;
       DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
       for(DataflowDescriptor sel : config.getDescriptors()) {

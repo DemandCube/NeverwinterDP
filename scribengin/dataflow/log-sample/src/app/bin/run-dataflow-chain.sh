@@ -90,10 +90,6 @@ $SHELL dataflow submit-chain \
    --dfs-app-home /applications/log-sample \
   --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --dataflow-max-runtime $MAX_RUNTIME
 
-sleep 60
-
-$SHELL registry dump 
-
 $SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow --max-wait-time $MAX_RUNTIME --status TERMINATED
 $SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-info  --status TERMINATED
 
@@ -109,8 +105,8 @@ $SHELL vm submit  \
   --name vm-log-validator-1 --role log-validator  --vm-application com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp \
   --prop:report-path=/applications/log-sample/reports \
   --prop:num-of-message-per-partition=$NUM_OF_MESSAGE \
-  --prop:wait-for-termination=300000 \
-  $LOG_VALIDATOR_OPTS
+  --prop:wait-for-termination=3600000 \
+  $LOG_VALIDATOR_VALIDATE_OPT
 
 $SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 3600000
 
