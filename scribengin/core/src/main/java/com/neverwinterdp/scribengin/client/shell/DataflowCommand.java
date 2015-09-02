@@ -166,7 +166,7 @@ public class DataflowCommand extends Command {
       ScribenginClient scribenginClient = scribenginShell.getScribenginClient();
       DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId, 30000);
       Console console = shell.console();
-      console.h1("Wait For Dataflow Status " + status);
+      console.h1("Wait For Dataflow " + dataflowId + " Status " + status);
       
       long start = System.currentTimeMillis();
       DataflowLifecycleStatus dflStatus = DataflowLifecycleStatus.valueOf(status);
