@@ -132,6 +132,9 @@ The project contains a single class VMSampleApp which prints out a sample hello 
 
 Scribengin moves data from any source to any sink in a fast and reliable manner.
 
+##Scribengin Design##
+![Scribengin Internal Diagram](ScribenginCluster.png "Scribengin Internal Diagram")
+
 ###core###
 
 The core components consist of:
@@ -152,8 +155,6 @@ For details, check out the Features section below
 
 This project manages releasing Neverwinter and creating scripts/binaries
 
-<br><br><hr><br><br>
-
 #Features#
 
 ###dataflows###
@@ -170,8 +171,8 @@ The Sink API consists of Sink, SinkStream, and SinkStreamWriter
 A container running the Scribengin cluster responsible for managing specific items of work.
 
 Examples are:
-  *  ScribenginMaster - monitors for incoming requests for dataflows
   *  VMMaster - responsible for allocating containers for workers/masters
+  *  ScribenginMaster - monitors for incoming requests for dataflows
   *  DataflowMaster - monitors all the workers of a dataflow
 
 ###workers###
@@ -215,7 +216,3 @@ Components in the cluster that are HA:
   *  DataflowMaster
   *  ScribenginMaster
   *  DataflowWorkers (can be respawned by DataflowMaster)
-
-###Scribengin Design####
-![Scribengin Internal Diagram](ScribenginCluster.png "Scribengin Internal Diagram")
-

@@ -1,3 +1,80 @@
+#Overview#
+
+#Develop A Dataflow#
+
+Dataflow Sample For Log Splitter
+
+##Diagram##
+`````````
+Draw the dataflow diagram here
+`````````
+
+##Implement A Scribe##
+
+Implementation of the LogMessageSplitter class
+
+`````````
+  public class LogMessageSplitter extends ScribeAbstract {
+    int count = 0;
+
+    public void process(DataflowMessage dflMessage, DataflowTaskContext ctx) throws Exception {
+      Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class) ;
+      String level = log4jRec.getLevel().toLowerCase();
+      ctx.write(level, dflMessage);
+
+      count++ ;
+      if(count > 0 && count % 10000 == 0) {
+        ctx.commit();
+      }
+    }
+  }
+
+`````````
+
+Configure the dataflow
+
+`````````
+  {
+    "id" :   "log-splitter-dataflow-1",
+    "name" : "log-splitter-dataflow",
+
+    "numberOfWorkers" : 1,
+    "numberOfExecutorsPerWorker" : 3,
+    "taskSwitchingPeriod" : 5000,
+    "maxRunTime": 90000,
+    "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessageSplitter",
+
+    "sourceDescriptor" : {
+      "type" : "kafka", "topic" : "log4j", "zk.connect" : "zookeeper-1:2181", "reader" : "raw", "name" : "LogSplitterDataflow"
+    },
+
+    "sinkDescriptors" : {
+      "default" : {
+        "type" : "elasticsearch", 
+        "address" : "elasticsearch-1:9300", "indexName": "dataflow_app_log", "mappingType": "com.neverwinterdp.util.log.Log4jRecord"
+      },
+
+      "info" : {
+        "type" : "HDFS", "location" : "/log-sample/hdfs/info"
+      },
+
+      "warn" : {
+        "type" : "HDFS", "location" : "/log-sample/hdfs/warn"
+      },
+
+      "error" : {
+        "type" : "HDFS", "location" : "/log-sample/hdfs/error"
+      }
+    }
+  }
+
+`````````
+
+#Develop A Dataflow Chain#
+
+
+
+
 Dataflow Chain For Log Processing Diagram
 
 
