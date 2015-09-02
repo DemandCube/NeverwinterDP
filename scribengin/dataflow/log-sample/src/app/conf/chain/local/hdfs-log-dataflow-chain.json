@@ -3,7 +3,7 @@
 
   "descriptors": [
     {
-      "id" :   "log-splitter-dataflow-1",
+      "id" :   "log-splitter-dataflow",
       "name" : "log-splitter-dataflow",
 
       "numberOfWorkers" : 1,
@@ -33,15 +33,6 @@
         "info" : {
           "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "127.0.0.1:2181", "name" : "LogSplitterDataflow"
         }
-      },
-
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : false },
-
-        "fileAppender" : {
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5
-        }
       }
     },
 
@@ -60,15 +51,6 @@
       "sinkDescriptors" : {
         "hdfs" : {
           "type" : "HDFS", "location" : "build/hdfs/info"
-        }
-      },
-
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : false },
-
-        "fileAppender" : { 
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
         }
       }
     },
@@ -90,14 +72,6 @@
         "hdfs" : {
           "type" : "HDFS", "location" : "build/hdfs/warn"
         }
-      },
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : false },
-
-        "fileAppender" : { 
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
-        }
       }
     },
 
@@ -117,14 +91,6 @@
       "sinkDescriptors" : {
         "hdfs" : {
           "type" : "HDFS", "location" : "build/hdfs/error"
-        }
-      },
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : false },
-
-        "fileAppender" : { 
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
         }
       }
     }

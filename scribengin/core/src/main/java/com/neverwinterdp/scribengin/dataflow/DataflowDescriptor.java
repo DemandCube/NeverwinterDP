@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.vm.LoggerConfig;
 
 public class DataflowDescriptor {
   static public enum DataflowTaskExecutorType { Switchable, Dedicated }
@@ -24,7 +23,7 @@ public class DataflowDescriptor {
   
   private long                           taskSwitchingPeriod           = 30000;
   private String                         scribe;
-  private LoggerConfig                   loggerConfig                  = new LoggerConfig();
+  private String                         log4jConfigUrl = "classpath:scribengin/log4j/vm-log4j.properties";
 
   public String getId() { return id; }
   public void setId(String id)  { this.id = id; }
@@ -86,7 +85,7 @@ public class DataflowDescriptor {
   
   public String getScribe() { return scribe; }
   public void setScribe(String scribe) { this.scribe = scribe; }
-  
-  public LoggerConfig getLoggerConfig() { return loggerConfig; }
-  public void setLoggerConfig(LoggerConfig loggerConfig) { this.loggerConfig = loggerConfig; }
+
+  public String getLog4jConfigUrl() { return log4jConfigUrl; }
+  public void   setLog4jConfigUrl(String log4jConfigUrl) { this.log4jConfigUrl = log4jConfigUrl; }
 }

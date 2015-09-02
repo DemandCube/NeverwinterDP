@@ -1,4 +1,4 @@
-package com.neverwinterdp.dataflow.logsample;
+package com.neverwinterdp.dataflow.logsample.chain;
 
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
@@ -16,12 +16,14 @@ import com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
+import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
+import com.neverwinterdp.vm.LoggerConfig;
 
-public class LogSampleSplitterUnitTest  {
+public class S3LogSampleChainUnitTest  {
   ScribenginClusterBuilder clusterBuilder ;
   Node esNode ;
   ScribenginShell shell;
@@ -33,13 +35,13 @@ public class LogSampleSplitterUnitTest  {
     FileUtil.removeIfExist("build/logs", false);
     FileUtil.removeIfExist("build/elasticsearch", false);
     FileUtil.removeIfExist("build/cluster", false);
+    FileUtil.removeIfExist("build/scribngin", false);
     
     System.setProperty("vm.app.dir", "build/scribengin");
     Properties log4jProps = new Properties() ;
     log4jProps.load(IOUtil.loadRes("classpath:scribengin/log4j/vm-log4j.properties"));
     log4jProps.setProperty("log4j.rootLogger", "INFO, file");
     LoggerFactory.log4jConfigure(log4jProps);
-    
     
     NodeBuilder nb = nodeBuilder();
     nb.getSettings().put("cluster.name",       "neverwinterdp");
@@ -64,7 +66,16 @@ public class LogSampleSplitterUnitTest  {
   }
   
   @Test
-  public void testSplitterToKafka() throws Exception {
+  public void testLogSampleChain() throws Exception {
+    S3Client s3Client = new S3Client();
+    if(s3Client.hasBucket("test-log-sample")) {
+      s3Client.deleteBucket("test-log-sample", true);
+    }
+    s3Client.createBucket("test-log-sample");
+    s3Client.onDestroy();
+    
+    int NUM_OF_MESSAGE = 5000;
+    String REPORT_PATH = "/applications/log-sample/reports";
     String logGeneratorSubmitCommand = 
         "vm submit " +
         "  --dfs-app-home /applications/log-sample" +
@@ -73,23 +84,37 @@ public class LogSampleSplitterUnitTest  {
         "  --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl" + 
         "  --name vm-log-generator-1  --role vm-log-generator" + 
         "  --vm-application " + VMToKafkaLogMessageGeneratorApp.class.getName() + 
-        "  --prop:report-path=/applications/log-sample/reports" +
-        "  --prop:num-of-message=5000" +
+        "  --prop:report-path=" +    REPORT_PATH +
+        "  --prop:num-of-message=" + NUM_OF_MESSAGE +
         "  --prop:message-size=512";
     shell.execute(logGeneratorSubmitCommand);
-    Thread.sleep(1000);
-    
-    String dataflowSubmitCommand = 
-        "dataflow submit " + 
-        "  --dataflow-config src/app/conf/splitter/local/kafka-to-kafka-log-splitter-dataflow.json" +
-        "  --dataflow-id log-splitter-dataflow-1";
-    shell.execute(dataflowSubmitCommand);
+    shell.execute(
+      "vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 25000"
+    );
+
+    String dataflowChainSubmitCommand = 
+        "dataflow submit-chain " + 
+        "  --dataflow-chain-config src/app/conf/chain/local/s3-log-dataflow-chain.json";
+    shell.execute(dataflowChainSubmitCommand);
     
     shell.execute(
-      "dataflow wait-for-status --dataflow-id log-splitter-dataflow-1 --status TERMINATED"
+      "dataflow wait-for-status --dataflow-id log-splitter-dataflow --status TERMINATED"
     );
-    shell.execute("dataflow info --dataflow-id log-splitter-dataflow-1 --show-all");
-  
+    shell.execute(
+      "dataflow wait-for-status --dataflow-id log-persister-dataflow-info --status TERMINATED"
+    );
+    shell.execute(
+      "dataflow wait-for-status --dataflow-id log-persister-dataflow-warn --status TERMINATED"
+    );
+    shell.execute(
+      "dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED"
+    );
+    
+    shell.execute("dataflow info --dataflow-id log-splitter-dataflow --show-all");
+    shell.execute("dataflow info --dataflow-id log-persister-dataflow-info --show-all");
+    shell.execute("dataflow info --dataflow-id log-persister-dataflow-warn --show-all");
+    shell.execute("dataflow info --dataflow-id log-persister-dataflow-error --show-all");
+    
     String logValidatorSubmitCommand = 
       "vm submit " +
       "  --dfs-app-home /applications/log-sample" +
@@ -98,15 +123,16 @@ public class LogSampleSplitterUnitTest  {
       "  --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl" + 
       "  --name vm-log-validator-1 --role log-validator" + 
       "  --vm-application " + VMLogMessageValidatorApp.class.getName() + 
-      "  --prop:report-path=/applications/log-sample/reports" +
-      "  --prop:num-of-message-per-partition=5000" +
-      "  --prop:wait-for-termination=300000" +
-      "  --prop:validate-kafka=log4j.info,log4j.warn,log4j.error";
+      "  --prop:report-path=" +                  REPORT_PATH +
+      "  --prop:num-of-message-per-partition=" + NUM_OF_MESSAGE +
+      "  --prop:wait-for-termination=180000" +
+      "  --prop:validate-s3=test-log-sample:info,test-log-sample:warn,test-log-sample:error";
     shell.execute(logValidatorSubmitCommand);
     
-    shell.execute("vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 25000");
+    shell.execute(
+      "vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 25000"
+    );
    
-    shell.execute("vm info");
     shell.execute("registry dump --path /applications/log-sample");
   }
 }

@@ -33,23 +33,6 @@
         "info" : {
           "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "zookeeper-1:2181", "name" : "LogSplitterDataflow"
         }
-      },
-
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : false },
-
-        "fileAppender" : {
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5
-        },
-
-        "esAppender" : {
-          "enable" : false, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "build/data/buffer/es/log4j", "indexName" : "log4j"
-        },
-
-        "kafkaAppender" : {
-          "enable" : false, "name" : "kafka", "connects" : "kafka-1:9092, kafka-2:9092, kafka-3:9092", "bufferDir" : "build/data/buffer/kafka/log4j", "topic" : "log4j"
-        }
       }
     },
 
@@ -69,23 +52,6 @@
       "sinkDescriptors" : {
         "kafka" : {
           "type" : "kafka", "topic" : "log4j.aggregate", "zk.connect" : "zookeeper-1:2181", "name" : "InfoLogPersisterDataflow"
-        }
-      },
-
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : false },
-
-        "fileAppender" : { 
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
-        },
-
-        "esAppender" : {
-          "enable" : false, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "build/data/buffer/es/log4j", "indexName" : "log4j"
-        },
-
-        "kafkaAppender" : {
-          "enable" : false, "name" : "kafka", "connects" : "kafka-1:9092, kafka-2:9092, kafka-3:9092", "bufferDir" : "build/data/buffer/kafka/log4j", "topic" : "log4j"
         }
       }
     },
@@ -107,22 +73,6 @@
         "kafka" : {
           "type" : "kafka", "topic" : "log4j.aggregate", "zk.connect" : "zookeeper-1:2181", "name" : "WarnLogPersisterDataflow"
         }
-      },
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : false },
-
-        "fileAppender" : { 
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
-        },
-
-        "esAppender" : {
-          "enable" : false, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "build/data/buffer/es/log4j", "indexName" : "log4j"
-        },
-
-        "kafkaAppender" : {
-          "enable" : false, "name" : "kafka", "connects" : "kafka-1:9092, kafka-2:9092, kafka-3:9092", "bufferDir" : "build/data/buffer/kafka/log4j", "topic" : "log4j"
-        }
       }
     },
 
@@ -142,22 +92,6 @@
       "sinkDescriptors" : {
         "kafka" : {
           "type" : "kafka", "topic" : "log4j.aggregate", "zk.connect" : "zookeeper-1:2181", "name" : "ErrorLogPersisterDataflow"
-        }
-      },
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : false },
-
-        "fileAppender" : { 
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
-        },
-
-        "esAppender" : {
-          "enable" : false, "name" : "es", "connects" : "elasticsearch-1:9300", "bufferDir" : "build/data/buffer/es/log4j", "indexName" : "log4j"
-        },
-
-        "kafkaAppender" : {
-          "enable" : false, "name" : "kafka", "connects" : "kafka-1:9092, kafka-2:9092, kafka-3:9092", "bufferDir" : "build/data/buffer/kafka/log4j", "topic" : "log4j"
         }
       }
     }

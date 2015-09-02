@@ -3,7 +3,7 @@
 
   "descriptors": [
     {
-      "id" :   "log-splitter-dataflow-1",
+      "id" :   "log-splitter-dataflow",
       "name" : "log-splitter-dataflow",
 
       "numberOfWorkers" : 1,
@@ -33,15 +33,6 @@
         "info" : {
           "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "127.0.0.1:2181", "name" : "LogSplitterDataflow"
         }
-      },
-
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : false },
-
-        "fileAppender" : {
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5
-        }
       }
     },
 
@@ -57,18 +48,10 @@
       "sourceDescriptor" : {
         "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "127.0.0.1:2181", "reader" : "record", "name" : "LogSampleDataflow"
       },
+
       "sinkDescriptors" : {
         "kafka" : {
           "type" : "kafka", "topic" : "log4j.aggregate", "zk.connect" : "127.0.0.1:2181", "name" : "InfoLogPersisterDataflow"
-        }
-      },
-
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : false },
-
-        "fileAppender" : { 
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
         }
       }
     },
@@ -90,14 +73,6 @@
         "kafka" : {
           "type" : "kafka", "topic" : "log4j.aggregate", "zk.connect" : "127.0.0.1:2181", "name" : "WarnLogPersisterDataflow"
         }
-      },
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : false },
-
-        "fileAppender" : { 
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
-        }
       }
     },
 
@@ -117,14 +92,6 @@
       "sinkDescriptors" : {
         "kafka" : {
           "type" : "kafka", "topic" : "log4j.aggregate", "zk.connect" : "127.0.0.1:2181", "name" : "ErrorLogPersisterDataflow"
-        }
-      },
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : false },
-
-        "fileAppender" : { 
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
         }
       }
     }

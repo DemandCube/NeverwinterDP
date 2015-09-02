@@ -115,6 +115,13 @@ public class DataflowCommand extends Command {
     @Parameter(names = "--dataflow-chain-config",  description = "The dataflow descriptor path in the json format")
     private String dataflowChainConfig ;
     
+    @Parameter(names = "--dataflow-max-run-time",  description = "Dataflow max run time")
+    private long dataflowMaxRunTime =  -1;
+   
+    @Parameter(names = "--dataflow-task-switching-period",  description = "Dataflow task switching period")
+    private long dataflowTaskSwitchingPeriod =  -1;
+   
+    
     @Parameter(names = "--deploy", description = "The dataflow path to deploy")
     private String dataflowPath ;
     
@@ -131,6 +138,10 @@ public class DataflowCommand extends Command {
       shell.console().println("  dataflow local home:"    + dataflowPath);
       String json = IOUtil.getFileContentAsString(dataflowChainConfig) ;
       DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
+      for(DataflowDescriptor sel : config.getDescriptors()) {
+        if(dataflowMaxRunTime > 0) sel.setMaxRunTime(dataflowMaxRunTime);
+        if(dataflowTaskSwitchingPeriod > 0) sel.setTaskSwitchingPeriod(dataflowTaskSwitchingPeriod);
+      }
       OrderDataflowChainSubmitter submitter = new OrderDataflowChainSubmitter(client, dataflowPath, config);
       submitter.submit(waitForRunningTimeout);
     }

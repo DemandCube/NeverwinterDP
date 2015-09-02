@@ -29,14 +29,5 @@
     "error" : {
       "type" : "HDFS", "location" : "/log-sample/hdfs/error"
     }
-  },
-
-  "loggerConfig" : {
-    "logLevel" : "INFO ",
-    "consoleAppender" : { "enable" : false },
-
-    "fileAppender" : {
-      "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5
-    }
   }
 }

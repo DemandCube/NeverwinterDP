@@ -3,6 +3,8 @@ package com.neverwinterdp.dataflow.logsample.chain;
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
+import java.util.Properties;
+
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
@@ -10,13 +12,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.neverwinterdp.dataflow.logsample.chain.LogSampleChainClient;
 import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 import com.neverwinterdp.util.io.FileUtil;
+import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
-import com.neverwinterdp.vm.LoggerConfig;
 
 public class LogSampleWithFailureSimulaionUnitTest  {
   ScribenginClusterBuilder clusterBuilder ;
@@ -29,13 +30,14 @@ public class LogSampleWithFailureSimulaionUnitTest  {
     FileUtil.removeIfExist("build/logs", false);
     FileUtil.removeIfExist("build/elasticsearch", false);
     FileUtil.removeIfExist("build/cluster", false);
+    FileUtil.removeIfExist("build/scribengin", false);
     
-    LoggerConfig loggerConfig = new LoggerConfig() ;
-    loggerConfig.getConsoleAppender().setEnable(false);
-    loggerConfig.getFileAppender().initLocalEnvironment();
-    //loggerConfig.getEsAppender().initLocalEnvironment();
-    //loggerConfig.getKafkaAppender().initLocalEnvironment();
-    LoggerFactory.log4jConfigure(loggerConfig.getLog4jConfiguration());
+    System.setProperty("vm.app.dir", "build/scribengin");
+    Properties log4jProps = new Properties() ;
+    log4jProps.load(IOUtil.loadRes("classpath:scribengin/log4j/vm-log4j.properties"));
+    log4jProps.setProperty("log4j.rootLogger", "INFO, file");
+    LoggerFactory.log4jConfigure(log4jProps);
+    
   }
   
   @Before

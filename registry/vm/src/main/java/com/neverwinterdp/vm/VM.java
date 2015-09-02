@@ -2,6 +2,7 @@ package com.neverwinterdp.vm;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.io.NetworkUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMApp.TerminateEvent;
@@ -220,15 +222,15 @@ public class VM {
   }
   
   static public void main(String[] args) throws Exception {
+    
     long start = System.currentTimeMillis() ;
     System.out.println("VM: main(..) start");
     VMConfig vmConfig = new VMConfig(args);
-    vmConfig.getLoggerConfig().getConsoleAppender().setEnable(false);
     String vmDir = "/opt/hadoop/vm/" + vmConfig.getName();
-    vmConfig.getLoggerConfig().getFileAppender().setFilePath(vmDir + "/logs/vm.log");
-    vmConfig.getLoggerConfig().getEsAppender().setBufferDir(vmDir + "/buffer/es/log4j");
-    vmConfig.getLoggerConfig().getKafkaAppender().setBufferDir(vmDir + "/buffer/kafka/log4j");
-    Map<String, String> log4jProps = vmConfig.getLoggerConfig().getLog4jConfiguration() ;
+    System.setProperty("vm.app.dir", vmDir);
+    
+    Properties log4jProps = new Properties();
+    log4jProps.load(IOUtil.loadRes(vmConfig.getLog4jConfigUrl()));
     LoggerFactory.log4jConfigure(log4jProps);
     
     VM vm = new VM(vmConfig);

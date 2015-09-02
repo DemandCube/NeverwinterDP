@@ -33,15 +33,6 @@
         "info" : {
           "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "zookeeper-1:2181", "name" : "LogSplitterDataflow"
         }
-      },
-
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : true },
-
-        "fileAppender" : {
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5
-        }
       }
     },
 
@@ -61,15 +52,6 @@
       "sinkDescriptors" : {
         "hdfs" : {
           "type" : "HDFS", "location" : "/log-sample/hdfs/info"
-        }
-      },
-
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : true },
-
-        "fileAppender" : { 
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
         }
       }
     },
@@ -91,15 +73,6 @@
         "hdfs" : {
           "type" : "HDFS", "location" : "/log-sample/hdfs/warn"
         }
-      },
-
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : true },
-
-        "fileAppender" : { 
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
-        }
       }
     },
 
@@ -119,15 +92,6 @@
       "sinkDescriptors" : {
         "hdfs" : {
           "type" : "HDFS", "location" : "/log-sample/hdfs/error"
-        }
-      },
-
-      "loggerConfig" : {
-        "logLevel" : "INFO ",
-        "consoleAppender" : { "enable" : true },
-
-        "fileAppender" : { 
-          "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5 
         }
       }
     }

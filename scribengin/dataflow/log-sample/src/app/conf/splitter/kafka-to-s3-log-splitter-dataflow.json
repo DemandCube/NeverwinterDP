@@ -29,14 +29,5 @@
     "error" : {
       "type" : "S3", "location" : "test-log-sample", "s3.bucket.name": "test-log-sample", "s3.storage.path": "error"
     }
-  },
-
-  "loggerConfig" : {
-    "logLevel" : "INFO ",
-    "consoleAppender" : { "enable" : false },
-
-    "fileAppender" : {
-      "enable" : true, "name" : "file", "filePath" : "build/logs/vm.log", "maxSizeInMb" : 5, "maxBackup" : 5
-    }
   }
 }
