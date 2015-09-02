@@ -42,8 +42,6 @@ JAVA_OPTS="-Xshare:auto -Xms128m -Xmx1024m -XX:-UseSplitVerifier"
 APP_OPT="-Dapp.dir=$APP_DIR -Duser.dir=$APP_DIR"
 APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
 
-MAIN_CLASS="com.neverwinterdp.dataflow.logsample.chain.LogSampleChainClient"
-
 PROFILE=$(get_opt --profile 'kafka-to-kafka' $@)
 MESSAGE_SIZE=$(get_opt --message-size '128' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
@@ -68,27 +66,38 @@ fi
 SHELL=./scribengin/bin/shell.sh
 
 
+#########################################################################################################################
+# Upload The App                                                                                                        #
+#########################################################################################################################
 $SHELL vm upload-app --local $APP_DIR --dfs /applications/log-sample
 
+#########################################################################################################################
+# Launch The Message Generator                                                                                          #
+#########################################################################################################################
 $SHELL vm submit \
    --dfs-app-home /applications/log-sample \
    --registry-connect zookeeper-1:2181 --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
    --name vm-log-generator-1  --role vm-log-generator --vm-application  com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp \
    --prop:report-path=/applications/log-sample/reports --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE
 
+$SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 45000
 
+#########################################################################################################################
+# Launch A Single Dataflow                                                                                              #
+#########################################################################################################################
 $SHELL dataflow submit \
   --dfs-app-home /applications/log-sample \
   --dataflow-config $DATAFLOW_DESCRIPTOR_FILE \
   --dataflow-id log-splitter-dataflow-1 --max-run-time 180000
 
-$SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 45000
-$SHELL registry dump --path /applications/log-sample
 
 $SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow-1 --status TERMINATED
 $SHELL dataflow info --dataflow-id log-splitter-dataflow-1 --show-all
 
 
+#########################################################################################################################
+# Launch Validator                                                                                                      #
+#########################################################################################################################
 $SHELL vm submit  \
   --dfs-app-home /applications/log-sample \
   --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
@@ -98,7 +107,7 @@ $SHELL vm submit  \
   --prop:wait-for-termination=300000 \
   $LOG_VALIDATOR_OPTS
 
-$SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 60000
+$SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 300000
 
 $SHELL vm info
 $SHELL registry dump --path /applications/log-sample

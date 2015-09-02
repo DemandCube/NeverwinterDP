@@ -101,7 +101,6 @@ public class KafkaLogSampleChainUnitTest  {
       "dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED"
     );
     
-    
     shell.execute("dataflow info --dataflow-id log-splitter-dataflow --show-all");
     shell.execute("dataflow info --dataflow-id log-persister-dataflow-info --show-all");
     shell.execute("dataflow info --dataflow-id log-persister-dataflow-warn --show-all");

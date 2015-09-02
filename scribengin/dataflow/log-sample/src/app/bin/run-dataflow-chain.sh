@@ -84,7 +84,7 @@ $SHELL vm submit \
    --prop:report-path=/applications/log-sample/reports --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE
 
 #########################################################################################################################
-# Launch Dataflow Chain                                                                                                 #
+# Launch A Dataflow Chain                                                                                               #
 #########################################################################################################################
 $SHELL dataflow submit-chain \
    --dfs-app-home /applications/log-sample \
