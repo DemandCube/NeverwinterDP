@@ -3,7 +3,7 @@
 
   "descriptors": [
     {
-      "id" :   "log-splitter-dataflow-1",
+      "id" :   "log-splitter-dataflow",
       "name" : "log-splitter-dataflow",
 
       "numberOfWorkers" : 2,
