@@ -86,7 +86,9 @@ $SHELL vm submit \
 #########################################################################################################################
 # Launch Dataflow Chain                                                                                                 #
 #########################################################################################################################
-$SHELL dataflow submit-chain --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --dataflow-max-runtime $MAX_RUNTIME
+$SHELL dataflow submit-chain \
+   --dfs-app-home /applications/log-sample \
+  --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --dataflow-max-runtime $MAX_RUNTIME
 
 sleep 60
 

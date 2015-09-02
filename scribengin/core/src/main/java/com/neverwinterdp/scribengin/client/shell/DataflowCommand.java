@@ -79,9 +79,6 @@ public class DataflowCommand extends Command {
     @Parameter(names = "--dfs-app-home",  description = "DFS App Home Path")
     private String dfsAppHome ;
 
-    @Parameter(names = "--deploy", description = "The dataflow path to deploy")
-    private String dataflowPath ;
-    
     @Parameter(names = "--dataflow-id",  description = "Specify the id for the dataflow")
     private String dataflowId ;
     
@@ -121,9 +118,8 @@ public class DataflowCommand extends Command {
     @Parameter(names = "--dataflow-task-switching-period",  description = "Dataflow task switching period")
     private long dataflowTaskSwitchingPeriod =  -1;
    
-    
-    @Parameter(names = "--deploy", description = "The dataflow path to deploy")
-    private String dataflowPath ;
+    @Parameter(names = "--dfs-app-home",  description = "DFS App Home Path")
+    private String dfsAppHome ;
     
     @Parameter(names = "--wait-for-running-timeout", description = "The dataflow path to deploy")
     private long waitForRunningTimeout = 120000;
@@ -135,14 +131,14 @@ public class DataflowCommand extends Command {
       ScribenginClient client = scribenginShell.getScribenginClient();
       shell.console().println("Submit:");
       shell.console().println("  dataflow chain config: " + dataflowChainConfig);
-      shell.console().println("  dataflow local home:"    + dataflowPath);
+      shell.console().println("  dfs app home:"  + dfsAppHome);
       String json = IOUtil.getFileContentAsString(dataflowChainConfig) ;
       DataflowChainConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowChainConfig.class);
       for(DataflowDescriptor sel : config.getDescriptors()) {
         if(dataflowMaxRunTime > 0) sel.setMaxRunTime(dataflowMaxRunTime);
         if(dataflowTaskSwitchingPeriod > 0) sel.setTaskSwitchingPeriod(dataflowTaskSwitchingPeriod);
       }
-      OrderDataflowChainSubmitter submitter = new OrderDataflowChainSubmitter(client, dataflowPath, config);
+      OrderDataflowChainSubmitter submitter = new OrderDataflowChainSubmitter(client, dfsAppHome, config);
       submitter.submit(waitForRunningTimeout);
     }
     
