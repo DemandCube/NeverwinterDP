@@ -164,14 +164,109 @@ The dataflow should be packaged as show below
 
 Where the conf and lib directory are mandatory and the bin directory is optional
 
-* conf:
-* lib: 
-* bin:
+* conf: The dataflow configuration, dataflow chain configuration, log4j configuration ... should be placed in this directory
+* lib:  The lib directory should contain the library of your scribe class and its dependencies
+* bin:  This is an optional directory. In order to a dataflow, you may need many extra steps such launch the data generator, deploy the dataflow package... and then run. You may want to write a script to simplify the launch process and the script should be placed in the bin directory
+
+##Deploy And Run The Dataflow Log Splitter##
+
+In order to deploy and run a dataflow, you need to setup a scribengin cluster. See scribengin-cluster-setup-quickstart.md for more detail instruction.
+
+Make sure that your scribengin cluster is running:
+
+1. Make sure zookeeper is running
+2. Make sure hadoop-master and hadoop-worker are running
+3. The command $path/scribengin/bin/shell.sh scribengin info should give a good report and status
+
+To run a dataflow , you will need to upload the dataflow app to dfs and then submit the dataflow to the scribengin. The scribengin service will be responsible to init and launch the dataflow master according to the dataflow configuration. The dataflow master will continue to init the registry and launch the dataflow tasl worker.
 
 
-##Run The Dataflow Log Splitter##
+Command to upload and run the dataflow
 
-Run the log splitter dataflow
+````````
+SHELL=./scribengin/bin/shell.sh
+
+#########################################################################################################################
+# Upload The App                                                                                                        #
+#########################################################################################################################
+
+$SHELL vm upload-app --local $APP_DIR --dfs /applications/log-sample
+
+#########################################################################################################################
+# Launch A Single Dataflow                                                                                              #
+#########################################################################################################################
+$SHELL dataflow submit \
+  --dfs-app-home /applications/log-sample \
+  --dataflow-config $DATAFLOW_DESCRIPTOR_FILE \
+  --dataflow-id log-splitter-dataflow-1 --max-run-time 180000
+````````
+
+In the log sample program , You can find the log splitter script log-sample/src/app/bin/run-splitter.sh. The script does:
+
+1. Upload the dataflow package
+2. Generate the message
+ * Submit the log generator app 
+ * Wait the log generator app to terminate
+3. Run the log splitter dataflow
+ * Submit the log splitter dataflow
+ * Wait for the dataflow termination
+ * Print the dataflow splitter info
+4. Run the log message validator
+ * Submit the log validator app
+ * Wait for the log validator app terminates.
+5. Print scribengin , registry and dataflow information
+
+````````
+
+SHELL=./scribengin/bin/shell.sh
+
+#########################################################################################################################
+# Upload The App                                                                                                        #
+#########################################################################################################################
+$SHELL vm upload-app --local $APP_DIR --dfs /applications/log-sample
+
+#########################################################################################################################
+# Launch The Message Generator                                                                                          #
+#########################################################################################################################
+$SHELL vm submit \
+   --dfs-app-home /applications/log-sample \
+   --registry-connect zookeeper-1:2181 --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
+   --name vm-log-generator-1  --role vm-log-generator --vm-application  com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp \
+   --prop:report-path=/applications/log-sample/reports --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE
+
+$SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 45000
+
+#########################################################################################################################
+# Launch A Single Dataflow                                                                                              #
+#########################################################################################################################
+$SHELL dataflow submit \
+  --dfs-app-home /applications/log-sample \
+  --dataflow-config $DATAFLOW_DESCRIPTOR_FILE \
+  --dataflow-id log-splitter-dataflow-1 --max-run-time 180000
+
+
+$SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow-1 --status TERMINATED
+$SHELL dataflow info --dataflow-id log-splitter-dataflow-1 --show-all
+
+
+#########################################################################################################################
+# Launch Validator                                                                                                      #
+#########################################################################################################################
+$SHELL vm submit  \
+  --dfs-app-home /applications/log-sample \
+  --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
+  --name vm-log-validator-1 --role log-validator  --vm-application com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp \
+  --prop:report-path=/applications/log-sample/reports \
+  --prop:num-of-message-per-partition=$NUM_OF_MESSAGE \
+  --prop:wait-for-termination=300000 \
+  $LOG_VALIDATOR_OPTS
+
+$SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 300000
+
+$SHELL vm info
+$SHELL registry dump --path /applications/log-sample
+
+````````
 
 #Develop A Dataflow Chain#
 
