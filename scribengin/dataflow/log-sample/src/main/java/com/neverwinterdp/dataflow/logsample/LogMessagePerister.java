@@ -13,7 +13,7 @@ public class LogMessagePerister extends ScribeAbstract {
       ctx.write(selSink, dflMessage);
     }
     
-    count++ ;
+    count++;
     if(count > 0 && count % 10000 == 0) {
       ctx.commit();
     }
