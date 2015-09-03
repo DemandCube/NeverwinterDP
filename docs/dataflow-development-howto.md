@@ -301,7 +301,25 @@ The dataflow chain is designed in a way that the output of the previous dataflow
 
 ##Implement The Dataflow Log Splitter And Persister Scribe##
 
+1. We can reuse the log message splitter from the previous dataflow
+2. Implement a log persister that will save the log message to the different location according to the sink configuration.
+
 ``````
+  public class LogMessageSplitter extends ScribeAbstract {
+    int count = 0;
+
+    public void process(DataflowMessage dflMessage, DataflowTaskContext ctx) throws Exception {
+      Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class) ;
+      String level = log4jRec.getLevel().toLowerCase();
+      ctx.write(level, dflMessage);
+
+      count++ ;
+      if(count > 0 && count % 10000 == 0) {
+        ctx.commit();
+      }
+    }
+  }
+
   public class LogMessagePerister extends ScribeAbstract {
     int count = 0 ;
 
@@ -317,6 +335,7 @@ The dataflow chain is designed in a way that the output of the previous dataflow
       }
     }
   }
+
 ``````
 
 ##Dataflow Chain Configuration##
