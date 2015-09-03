@@ -263,6 +263,9 @@ $SHELL vm submit  \
 
 $SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 300000
 
+#########################################################################################################################
+# Print Info                                                                                                            #
+#########################################################################################################################
 $SHELL vm info
 $SHELL registry dump --path /applications/log-sample
 
@@ -270,51 +273,61 @@ $SHELL registry dump --path /applications/log-sample
 
 #Develop A Dataflow Chain#
 
-Demo Requirements:
+The dataflow chain is designed in a way that the output of the previous dataflow is the input of the next dataflow.
 
-1. Create a kafka log appender, configure hadoop, zookeeper, kafka ... to use the kafka log appender to collect the log data into a log topic
-2. Create a dummy server that is periodically output the log data to the kafka log topic as well.
-3. Create a splitter dataflow that split the log into 3 topics: INFO, WARNING, ERROR
-4. Create a persister dataflow that save the log into the HDFS or S3. All the log should be output to elasticsearch as well.
-5. Each dataflow should enhanced the message with perfix or suffix "Processed by the dataflow ${dataflowId}"
-6. Create a chain framework that allow to chain multiple dataflow into one configuration and run by a single command
+##The Log Splitter Dataflow Chain Diagran##
 
+`````````
 
-
-Dataflow Chain For Log Processing Diagram
+                                                        Scribe Engine
+                                            ...........................................
+                                            .                                         .
+                                            .                          ............   .       ...........
+                                            .                       - -. Persister. - . - - > .  Info   .
+                                            .                       |  ............   .       ...........
+                                            .                                         .
+ ................      ...............      .     ...............   |  ............   .       ...........
+ . Log Generator. - >  . Kafka Topic . - -  . - > . Log Splitter. -  - . Persister. - . - - > .  Warn   .
+ ................      ...............      .     . .............      ............   .       ...........
+                                            .                       |                 .
+                                            .                          ............   .       ...........
+                                            .                       | -. Persister. - . - - > .  Error  .
+                                            .                          ............   .       ...........
+                                            .                                         .
+                                            ...........................................
 
 
 `````````
 
---------------------------------        -------------
-/-----|  Kafka INFO Topic | Dataflow | -----> |  HDFS/S3  |
-|     |------------------------------|   |    |------------
-|                                        |
-|                                        |
-|     -------------------------------|   |    |----------|
+##Implement The Dataflow Log Splitter And Persister Scribe##
 
-|--------------------- ------|    |     |  Kafka WARN Topic | Dataflow | -----> |  HDFS/S3 |
-Log Appender ===> | Kafka Log Topic | Dataflow | ---------|------------------------------|   |    ------------
------------------------------|    |                                        |
-|                                        |
-|     --------------------------------|  |    |-------------|
-|     |  Kafka ERROR Topic | Dataflow |-----> |  HDFS/S3    |
-\-----|-------------------------------|  |    |--------------
-|
-|  
-|
-|     --------------------------
-----> |  ElasticSearch Sink    |
-|-------------------------
-`````````
+``````
+  public class LogMessagePerister extends ScribeAbstract {
+    int count = 0 ;
 
-Configuration
+    public void process(DataflowMessage dflMessage, DataflowTaskContext ctx) throws Exception {
+      String[] sink = ctx.getAvailableSinks();
+      for(String selSink : sink) {
+        ctx.write(selSink, dflMessage);
+      }
+
+      count++ ;
+      if(count > 0 && count % 10000 == 0) {
+        ctx.commit();
+      }
+    }
+  }
+``````
+
+##Dataflow Chain Configuration##
+
+The dataflow chain configuration is quite similar to the dataflow configuration. The different in the configuration is in the chain configuration, you have a list of dataflow configuration and you have to make sure that the output (sink) of one dataflow is the input (source) of the other dataflow. 
 
 `````````
 {
   "submitter": "Order",
 
-    "descriptors": [
+  "descriptors": [
     {
       "id" :   "log-splitter-dataflow",
       "name" : "log-splitter-dataflow",
@@ -413,7 +426,93 @@ Configuration
 
 `````````
 
+* submitter: allow you to select the submitter type , either order or parallel
+ * order make sure that the dataflow submit in the order, the dataflow has to successfull submit and have the running status before the next one is submitted
+ * parallel allow all the dataflows are submitted in the same time by a isolated thread.
+* descriptors: The list of the dataflow descriptor
 
+##Package The Dataflow Chain##
+
+Same as the dataflow package.  In fact you can package multiple dataflow or a dataflow chain into one package and deploy once.
+
+
+##Run The Dataflow Chain##
+
+As running the dataflow, you have to make sure that your scribengin cluster is running:
+
+* Make sure zookeeper is running
+* Make sure hadoop-master and hadoop-worker are running
+* The command $path/scribengin/bin/shell.sh scribengin info should give a good report and status
+
+The following script is take from log-sample/src/app/bin/run-dataflow-chain.sh. It allows you to run deploy the dataflow package, run the message generator, run the dataflow chain and then run the validator
+
+``````````
+SHELL=./scribengin/bin/shell.sh
+
+
+#########################################################################################################################
+# Upload The App                                                                                                        #
+#########################################################################################################################
+$SHELL vm upload-app --local $APP_DIR --dfs /applications/log-sample
+
+#########################################################################################################################
+# Launch The Message Generator                                                                                          #
+#########################################################################################################################
+START_MESSAGE_GENERATION_TIME=$SECONDS
+$SHELL vm submit \
+   --dfs-app-home /applications/log-sample \
+   --registry-connect zookeeper-1:2181 --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
+   --name vm-log-generator-1  --role vm-log-generator --vm-application  com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp \
+   --prop:report-path=/applications/log-sample/reports --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE
+
+$SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 45000
+MESSAGE_GENERATION_ELAPSED_TIME=$(($SECONDS - $START_MESSAGE_GENERATION_TIME))
+echo "MESSAGE GENERATION TIME: $MESSAGE_GENERATION_ELAPSED_TIME" 
+#########################################################################################################################
+# Launch A Dataflow Chain                                                                                               #
+#########################################################################################################################
+START_DATAFLOW_CHAIN_TIME=$SECONDS
+$SHELL dataflow submit-chain \
+  --dfs-app-home /applications/log-sample \
+  --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --dataflow-max-runtime $MAX_RUNTIME
+
+$SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow --max-wait-time $MAX_RUNTIME --status TERMINATED
+$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-info  --status TERMINATED
+
+$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-warn  --status TERMINATED
+$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED
+DATAFLOW_CHAIN_ELAPSED_TIME=$(($SECONDS - $START_DATAFLOW_CHAIN_TIME))
+echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
+
+#########################################################################################################################
+# Launch Validator                                                                                                      #
+#########################################################################################################################
+START_MESSAGE_VALIDATION_TIME=$SECONDS
+$SHELL vm submit  \
+  --dfs-app-home /applications/log-sample \
+  --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
+  --name vm-log-validator-1 --role log-validator  --vm-application com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp \
+  --prop:report-path=/applications/log-sample/reports \
+  --prop:num-of-message-per-partition=$NUM_OF_MESSAGE \
+  --prop:wait-for-termination=3600000 \
+  $LOG_VALIDATOR_VALIDATE_OPT
+
+$SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 3600000
+
+MESSAGE_VALIDATION_ELAPSED_TIME=$(($SECONDS - $START_MESSAGE_VALIDATION_TIME))
+echo "MESSAGE VALIDATION TIME: $MESSAGE_VALIDATION_ELAPSED_TIME" 
+#########################################################################################################################
+# Dump the vm and registry info                                                                                         #
+#########################################################################################################################
+$SHELL vm info
+$SHELL registry dump --path /applications/log-sample
+
+echo "MESSAGE GENERATION TIME    : $MESSAGE_GENERATION_ELAPSED_TIME" 
+echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
+echo "MESSAGE VALIDATION TIME    : $MESSAGE_VALIDATION_ELAPSED_TIME" 
+``````````
+
+=================================================================================================
 
 Performance And Validation Test Requirements
 
