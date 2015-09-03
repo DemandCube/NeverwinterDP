@@ -72,6 +72,14 @@ Configure the dataflow
 
 #Develop A Dataflow Chain#
 
+Demo Requirements:
+
+1. Create a kafka log appender, configure hadoop, zookeeper, kafka ... to use the kafka log appender to collect the log data into a log topic
+2. Create a dummy server that is periodically output the log data to the kafka log topic as well.
+3. Create a splitter dataflow that split the log into 3 topics: INFO, WARNING, ERROR
+4. Create a persister dataflow that save the log into the HDFS or S3. All the log should be output to elasticsearch as well.
+5. Each dataflow should enhanced the message with perfix or suffix "Processed by the dataflow ${dataflowId}"
+6. Create a chain framework that allow to chain multiple dataflow into one configuration and run by a single command
 
 
 
@@ -102,14 +110,111 @@ Log Appender ===> | Kafka Log Topic | Dataflow | ---------|---------------------
                                                                                                    |-------------------------
 `````````
 
-Demo Requirements:
+Configuration
 
-1. Create a kafka log appender, configure hadoop, zookeeper, kafka ... to use the kafka log appender to collect the log data into a log topic
-2. Create a dummy server that is periodically output the log data to the kafka log topic as well.
-3. Create a splitter dataflow that split the log into 3 topics: INFO, WARNING, ERROR
-4. Create a persister dataflow that save the log into the HDFS or S3. All the log should be output to elasticsearch as well.
-5. Each dataflow should enhanced the message with perfix or suffix "Processed by the dataflow ${dataflowId}"
-6. Create a chain framework that allow to chain multiple dataflow into one configuration and run by a single command
+`````````
+  {
+    "submitter": "Order",
+
+    "descriptors": [
+      {
+        "id" :   "log-splitter-dataflow",
+        "name" : "log-splitter-dataflow",
+
+        "numberOfWorkers" : 2,
+        "numberOfExecutorsPerWorker" : 3,
+        "maxRunTime": 4800000,
+        "taskSwitchingPeriod" : 30000,
+        "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessageSplitter",
+
+        "sourceDescriptor" : {
+          "type" : "kafka", "topic" : "log4j", "zk.connect" : "zookeeper-1:2181", "reader" : "raw", "name" : "LogSplitterDataflow"
+        },
+
+        "sinkDescriptors" : {
+          "default" : {
+            "type" : "elasticsearch", 
+            "address" : "elasticsearch-1:9300", "indexName": "dataflow_app_log", "mappingType": "com.neverwinterdp.util.log.Log4jRecord"
+          },
+
+          "warn" : {
+            "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "zookeeper-1:2181", "name" : "LogSplitterDataflow"
+          },
+
+          "error" : {
+            "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "zookeeper-1:2181", "name" : "LogSplitterDataflow"
+          },
+
+          "info" : {
+            "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "zookeeper-1:2181", "name" : "LogSplitterDataflow"
+          }
+        }
+      },
+
+      {
+        "id" :   "log-persister-dataflow-info",
+        "name" : "log-persister-dataflow",
+        "numberOfWorkers" : 2,
+        "numberOfExecutorsPerWorker" : 3,
+        "maxRunTime": 5400000,
+        "taskSwitchingPeriod" : 30000,
+        "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessagePerister",
+
+        "sourceDescriptor" : {
+          "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "zookeeper-1:2181", "reader" : "record", "name" : "LogSampleDataflow"
+        },
+
+        "sinkDescriptors" : {
+          "hdfs" : {
+            "type" : "HDFS", "location" : "/log-sample/hdfs/info"
+          }
+        }
+      },
+
+      {
+        "id" :   "log-persister-dataflow-warn",
+        "name" : "log-persister-dataflow",
+        "numberOfWorkers" : 2,
+        "numberOfExecutorsPerWorker" : 3,
+        "maxRunTime": 5400000,
+        "taskSwitchingPeriod" : 30000,
+        "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessagePerister",
+
+        "sourceDescriptor" : {
+          "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "zookeeper-1:2181", "reader" : "record", "name" : "LogSampleDataflow"
+        },
+
+        "sinkDescriptors" : {
+          "hdfs" : {
+            "type" : "HDFS", "location" : "/log-sample/hdfs/warn"
+          }
+        }
+      },
+
+      {
+        "id" :   "log-persister-dataflow-error",
+        "name" : "log-persister-dataflow",
+        "numberOfWorkers" : 2,
+        "numberOfExecutorsPerWorker" : 3,
+        "maxRunTime": 5400000,
+        "taskSwitchingPeriod" : 30000,
+        "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessagePerister",
+
+        "sourceDescriptor" : {
+          "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "zookeeper-1:2181", "reader" : "record", "name" : "LogSampleDataflow"
+        },
+
+        "sinkDescriptors" : {
+          "hdfs" : {
+            "type" : "HDFS", "location" : "/log-sample/hdfs/error"
+          }
+        }
+      }
+    ]
+  }
+
+`````````
+
 
 
 Performance And Validation Test Requirements

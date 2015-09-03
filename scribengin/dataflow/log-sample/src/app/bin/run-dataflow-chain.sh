@@ -77,17 +77,22 @@ $SHELL vm upload-app --local $APP_DIR --dfs /applications/log-sample
 #########################################################################################################################
 # Launch The Message Generator                                                                                          #
 #########################################################################################################################
+START_MESSAGE_GENERATION_TIME=$SECONDS
 $SHELL vm submit \
    --dfs-app-home /applications/log-sample \
    --registry-connect zookeeper-1:2181 --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
    --name vm-log-generator-1  --role vm-log-generator --vm-application  com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp \
    --prop:report-path=/applications/log-sample/reports --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE
 
+$SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 45000
+MESSAGE_GENERATION_ELAPSED_TIME=$(($SECONDS - $START_MESSAGE_GENERATION_TIME))
+echo "MESSAGE GENERATION TIME: $MESSAGE_GENERATION_ELAPSED_TIME" 
 #########################################################################################################################
 # Launch A Dataflow Chain                                                                                               #
 #########################################################################################################################
+START_DATAFLOW_CHAIN_TIME=$SECONDS
 $SHELL dataflow submit-chain \
-   --dfs-app-home /applications/log-sample \
+  --dfs-app-home /applications/log-sample \
   --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --dataflow-max-runtime $MAX_RUNTIME
 
 $SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow --max-wait-time $MAX_RUNTIME --status TERMINATED
@@ -95,10 +100,13 @@ $SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-info  --sta
 
 $SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-warn  --status TERMINATED
 $SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED
+DATAFLOW_CHAIN_ELAPSED_TIME=$(($SECONDS - $START_DATAFLOW_CHAIN_TIME))
+echo "Dataflow Chain ElAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
 
 #########################################################################################################################
 # Launch Validator                                                                                                      #
 #########################################################################################################################
+START_MESSAGE_VALIDATION_TIME=$SECONDS
 $SHELL vm submit  \
   --dfs-app-home /applications/log-sample \
   --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
@@ -110,6 +118,8 @@ $SHELL vm submit  \
 
 $SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 3600000
 
+MESSAGE_VALIDATION_ELAPSED_TIME=$(($SECONDS - $START_MESSAGE_VALIDATION_TIME))
+echo "MESSAGE GENERATION TIME: $MESSAGE_VALIDATION_ELAPSED_TIME" 
 #########################################################################################################################
 # Dump the vm and registry info                                                                                         #
 #########################################################################################################################
