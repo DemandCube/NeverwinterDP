@@ -26,7 +26,8 @@ You can find the log sample code in the NeverwinterDP/scribengin/dataflow/log-sa
 
 ##The Log Splitter Diagram##
 
-````````                                                  Scribe Engine
+````````                                                  
+                                                           Scribe Engine
                                                .........................................
                                                .                                       .
                                                .                                       .       .............
@@ -42,6 +43,7 @@ You can find the log sample code in the NeverwinterDP/scribengin/dataflow/log-sa
                                                .                        | - - - - - -  . - - > .    Error  .
                                                .                                       .       .............
                                                .........................................
+
 `````````
 
 ##Implement The Dataflow Log Splitter Scribe##
