@@ -101,7 +101,7 @@ $SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-info  --sta
 $SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-warn  --status TERMINATED
 $SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED
 DATAFLOW_CHAIN_ELAPSED_TIME=$(($SECONDS - $START_DATAFLOW_CHAIN_TIME))
-echo "Dataflow Chain ElAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
+echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
 
 #########################################################################################################################
 # Launch Validator                                                                                                      #
@@ -119,7 +119,7 @@ $SHELL vm submit  \
 $SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 3600000
 
 MESSAGE_VALIDATION_ELAPSED_TIME=$(($SECONDS - $START_MESSAGE_VALIDATION_TIME))
-echo "MESSAGE GENERATION TIME: $MESSAGE_VALIDATION_ELAPSED_TIME" 
+echo "MESSAGE VALIDATION TIME: $MESSAGE_VALIDATION_ELAPSED_TIME" 
 #########################################################################################################################
 # Dump the vm and registry info                                                                                         #
 #########################################################################################################################
@@ -127,5 +127,5 @@ $SHELL vm info
 $SHELL registry dump --path /applications/log-sample
 
 echo "MESSAGE GENERATION TIME    : $MESSAGE_GENERATION_ELAPSED_TIME" 
-echo "Dataflow Chain ElAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
-echo "MESSAGE GENERATION TIME    : $MESSAGE_VALIDATION_ELAPSED_TIME" 
+echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
+echo "MESSAGE VALIDATION TIME    : $MESSAGE_VALIDATION_ELAPSED_TIME" 

@@ -1,17 +1,52 @@
 #Overview#
 
-#Develop A Dataflow#
+This howto will show you how to create a single dataflow, how to configure and how to run
 
-Dataflow Sample For Log Splitter
+In order to create a dataflow  or dataflow chain you need to have the data, understand your data structure, come up an idea how do you want to transform your data and where do you want to store the transformed data.
 
-##Diagram##
+The following log splitter sample will show you how to create a dataflow, a dataflow chain with the requirements:
+
+1. Prepare the data:
+ - Create a kafka log appender, configure hadoop, zookeeper, kafka ... to use the kafka log appender to collect the log data into a log topic
+ - Create a dummy server that is periodically output the log data to the kafka log topic as well.
+2. Implement the log splitter dataflow
+  - Create a splitter dataflow that split the log into 3 categories info, warn, error according to the log level
+  - Store each log category in 3 different kafka topic info, warn, error
+3. Implement the log splitter dataflow chain
+  - Reuse the log splitter as 2
+  - Create a persister dataflow, the persister should take the message output by (2) and store to kafka, hdfs or s3
+4. Configure, deploy and run
+  - Create a configuration for the single dataflow and dataflow chain
+  - Deploy the dataflow or dataflow chain to scribengin
+  - Run the dataflow or the dataflow chain
+
+You can find the log sample code in the NeverwinterDP/scribengin/dataflow/log-sample project. The code come with unit test, release script, and run script that allow you to deploy and run the sample in a single command.
+
+#Develop The Log Splitter Dataflow#
+
+##The Log Splitter Diagram##
+
+````````                                                  Scribe Engine
+                                               .........................................
+                                               .                                       .
+                                               .                                       .       .............
+                                               .                        - - - - - -  - . - - > .    Info   .
+                                               .                        |              .       .............
+                                               .                                       .
+   ................       ...............      .      ...............   |              .       .............
+   . Log Generator. - ->  . Kafka Topic . - -  . - -> . Log Splitter. -  - - - - - - - . - - > .    Warn   .
+   ................       ...............      .      . .............   |              .       .............
+                                               .                                       .
+                                               .                        |              .
+                                               .                                       .       .............
+                                               .                        | - - - - - -  . - - > .    Error  .
+                                               .                                       .       .............
+                                               .........................................
 `````````
-Draw the dataflow diagram here
-`````````
 
-##Implement A Scribe##
+##Implement The Dataflow Log Splitter Scribe##
 
-Implementation of the LogMessageSplitter class
+A Dataflow Scribe is a class that allow you to customize how to transform the data and how to and where to stored the transformed data.
 
 `````````
   public class LogMessageSplitter extends ScribeAbstract {
@@ -31,11 +66,17 @@ Implementation of the LogMessageSplitter class
 
 `````````
 
-Configure the dataflow
+DataflowMessage:     is an object that hold your data in byte format.
+DataflowTaskContext: is an object that hold the dataflow running environment and resources 
+
+
+##Configure The Dataflow Log Splitter##
+
+The configuration look as follows
 
 `````````
   {
-    "id" :   "log-splitter-dataflow-1",
+    "id" :   "log-splitter-dataflow",
     "name" : "log-splitter-dataflow",
 
     "numberOfWorkers" : 1,
@@ -69,6 +110,17 @@ Configure the dataflow
   }
 
 `````````
+
+Where:
+
+id                        :   
+name                      : 
+numberOfWorkers           :
+numberOfExecutorsPerWorker:
+taskSwitchingPeriod       :
+maxRunTime                :
+scribe                    : com.neverwinterdp.dataflow.logsample.LogMessageSplitter
+
 
 #Develop A Dataflow Chain#
 
