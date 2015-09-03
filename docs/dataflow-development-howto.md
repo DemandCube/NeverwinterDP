@@ -113,22 +113,18 @@ The configuration look as follows
 
 Where:
 
-````````
-id                        : The unique identifier for the dataflow. You cannot have 2 dataflow with the same id running at the same time.
-name                      : The name of the dataflow, you can have one or more dataflow with the same name
-numberOfWorkers           : The number of vm or server the scribengin should allocate for your dataflow
-numberOfExecutorsPerWorker: The number of executor or thread to run the dataflow task per worker
-taskSwitchingPeriod       : How long an executor should work on a task before it switches to the other one
-maxRunTime                : You can control how long your dataflow should run. -1 value will make the dataflow run forever
-scribe                    : The scribe logic class that you can control how to transform your data and where to output the transformed data
+* id                        : The unique identifier for the dataflow. You cannot have 2 dataflow with the same id running at the same time.
+* name                      : The name of the dataflow, you can have one or more dataflow with the same name
+* numberOfWorkers           : The number of vm or server the scribengin should allocate for your dataflow
+* numberOfExecutorsPerWorker: The number of executor or thread to run the dataflow task per worker
+* taskSwitchingPeriod       : How long an executor should work on a task before it switches to the other one
+* maxRunTime                : You can control how long your dataflow should run. -1 value will make the dataflow run forever
+* scribe                    : The scribe logic class that you can control how to transform your data and where to output the transformed data
+* sourceDescriptor          : The configuration for the data source. Depending on the source type, you have the different configuration and parameter
+** Kafka                    :
+** HDFS                     :
+* sinkDescriptors           : The list of the configuration for the data sink. Depending on the sink type you have different configuration and parameter
 
-
-sourceDescriptor          : The configuration for the data source. Depending on the source type, you have the different configuration and parameter
-  
-
-sinkDescriptors           : The list of the configuration for the data sink. Depending on the sink type you have different configuration and parameter
-
-````````
 
 
 #Develop A Dataflow Chain#
