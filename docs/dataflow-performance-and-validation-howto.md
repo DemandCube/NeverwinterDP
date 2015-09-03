@@ -1,30 +1,26 @@
-Performance And Validation Test Requirements
-
-1. Create 1 or multiple vm, using our vm framework. The vm will generate the log. Each log message should include an id and later can validate by our validator tool.
-2. The VM should periodically save the status and progress report to the registry in a hierachy structure. Remember that we can have more than one vm that 
-generate the log message. 
-3. Create 1 or multiple vm, using our vm framework to validate output data, base on the information and report in the registry.
-4. The test should be able to simulate different kind of server failure such kafka restart, kafka replace, worker and master failure for each dataflow(remember 
-    that chain many dataflow together).
-5. Should be able to launch and monitor from the swingui. Should be able to monitor with kibana
-6. Need more powerful hardware to test
-7. Ideally by september, the demo test has to be able to run smoothly for at least 12h with dataflow worker and master failure simulation.
-
-
-Technique
+#Message Generation And Validation#
 
 1. Technique to track the messages
-- The vm that run the log generator should include the vm id or host id and an unique sequence number into the log message
-- The log generator should save the information such the host id, the number of messages it generates and all the other necessary information
+- The message generator should include the vm id or host id and an unique sequence number into the message
+- The message generator should save the information such the host id, the number of messages it generates and all the other necessary information
 in order the validate tool can retrieve and assert
-- The design should allow more than one vm can run at the same time and store the information in a hierarchy that the validate tool can aggregate the information 
+- The design should allow more than one vm can run the message generator at the same time and store the information in a hierarchy that the validate tool can aggregate the information 
 
 2. Technique to validate the messages
-- Create 1 vm or multiple vm, each vm should run one or more validate tool that validate 1 stream. The validate tool should parse the log message to extract the vm id and the sequence number. The final result should be stored into the registry.
+- Create 1 vm or multiple vm, each vm should run one or more validate tool that validate 1 stream. The validate tool should parse the  message to extract the vm id and the sequence number. The final result should be stored into the registry.
 - There should be a client that wait for all the validate tool vm terminate, compare the validate result with the generated information. Report the comparison result or all the error or unexpected result.
-- Our current tracking framework can validate and detect the lost or duplicated message. 
+- Our current tracking framework can validate and detect the lost or duplicated message.
 
-3. Metric Collection
+
+#Performance And Validation Test Requirements#
+
+1. The performance test should run with different number of messages 1M, 10M, 100M ... messages
+2. The performance test should run with different message size 256, 512, 1024.................
+3. The permance test should allocate memory heap to zookeeper, kafka, hadoop services correctly and optimized
+4. The performance test be run with different number of kafka and hadoop worker. Usually double number of hadoop worker and kafka should gain at least 65% - 90%. The level of parallelism, number of worker and executor, number of the kafka partitions should be configured correctly in order to use the allocated hardware.For example if we have 6 kafka instances and we create a topic with 3 partitions so only 3 kafka instances are used. Same for number of workers and executors.
+5. For the performance test, the validated data has to be correct first, before the number of throughput, elapsed time... are considered
+
+#Metric Collection#
 
 Here is sample of metric that we should collect at a specific point of time. We can add more detail metric later.
 
