@@ -132,6 +132,8 @@ Where:
 
 ##Package The Dataflow Log Splitter##
 
+The dataflow should be packaged as show below
+
 `````````
   log-sample
     ├── bin
@@ -159,6 +161,17 @@ Where:
       └── scribengin.dataflow.log-sample-1.0-SNAPSHOT.jar
 
 `````````
+
+Where the conf and lib directory are mandatory and the bin directory is optional
+
+* conf:
+* lib: 
+* bin:
+
+
+##Run The Dataflow Log Splitter##
+
+Run the log splitter dataflow
 
 #Develop A Dataflow Chain#
 
