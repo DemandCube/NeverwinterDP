@@ -125,3 +125,7 @@ echo "MESSAGE GENERATION TIME: $MESSAGE_VALIDATION_ELAPSED_TIME"
 #########################################################################################################################
 $SHELL vm info
 $SHELL registry dump --path /applications/log-sample
+
+echo "MESSAGE GENERATION TIME    : $MESSAGE_GENERATION_ELAPSED_TIME" 
+echo "Dataflow Chain ElAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
+echo "MESSAGE GENERATION TIME    : $MESSAGE_VALIDATION_ELAPSED_TIME" 
