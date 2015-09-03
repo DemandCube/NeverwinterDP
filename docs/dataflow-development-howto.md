@@ -113,13 +113,15 @@ The configuration look as follows
 
 Where:
 
-* id                        :   
-* name                      : 
-* numberOfWorkers           :
-* numberOfExecutorsPerWorker:
-* taskSwitchingPeriod       :
-* maxRunTime                :
-* scribe                    : com.neverwinterdp.dataflow.logsample.LogMessageSplitter
+````````
+id                        :   
+name                      : 
+numberOfWorkers           :
+numberOfExecutorsPerWorker:
+taskSwitchingPeriod       :
+maxRunTime                :
+scribe                    : com.neverwinterdp.dataflow.logsample.LogMessageSplitter
+````````
 
 
 #Develop A Dataflow Chain#
