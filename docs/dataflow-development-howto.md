@@ -123,7 +123,11 @@ Where:
 * sourceDescriptor          : The configuration for the data source. Depending on the source type, you have the different configuration and parameter
  * Kafka                    :
  * HDFS                     :
+ * S3                       :
 * sinkDescriptors           : The list of the configuration for the data sink. Depending on the sink type you have different configuration and parameter
+ * Kafka                    :
+ * HDFS                     :
+ * S3                       :
 
 
 
