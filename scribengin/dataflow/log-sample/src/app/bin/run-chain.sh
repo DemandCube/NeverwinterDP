@@ -84,7 +84,7 @@ if [ "$PROFILE" = "performance" ] ; then
     $LOG_VALIDATOR_VALIDATE_OPT \
     \
     --dataflow-descriptor $DATAFLOW_DESCRIPTOR_FILE  \
-    --dataflow-num-of-worker $NUM_OF_WORKER --dataflow-num-of-executor-per-worker $NUM_OF_EXECUTOR_PER_WORKER
+    --dataflow-num-of-worker $NUM_OF_WORKER --dataflow-num-of-executor-per-worker $NUM_OF_EXECUTOR_PER_WORKER \
     --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-task-dedicated-executor $DEDICATED_EXECUTOR \
     --dataflow-task-debug
