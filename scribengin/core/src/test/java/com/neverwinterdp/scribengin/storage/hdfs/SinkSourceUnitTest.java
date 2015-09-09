@@ -44,22 +44,26 @@ public class SinkSourceUnitTest {
     SinkStream[] streams = sink.getStreams();
     Assert.assertEquals(0, streams.length);
     
+    int NUM_OF_COMMIT = 5;
+    int NUM_OF_RECORD_PER_COMMIT = 100;
+    int NUM_OF_RECORDS = NUM_OF_COMMIT * NUM_OF_RECORD_PER_COMMIT; 
+    
     SinkStream stream = sink.newStream();
     SinkStreamWriter writer = stream.getWriter();
-    for(int i = 0; i < 5; i++) {
-      for(int j = 0; j < 100; j ++) {
+    for(int i = 0; i < NUM_OF_COMMIT; i++) {
+      for(int j = 0; j < NUM_OF_RECORD_PER_COMMIT; j ++) {
         String key = "stream=" + stream.getDescriptor().getId() +",buffer=" + i + ",record=" + j;
         writer.append(DataflowMessage.create(key, key));
       }
       writer.commit();
     }
-    System.out.println("Before close");
-    Assert.assertEquals(5 * 100, count(DATA_DIRECTORY));
     HDFSUtil.dump(fs, DATA_DIRECTORY);
+    Assert.assertEquals(NUM_OF_RECORDS, count(DATA_DIRECTORY));
+   
 
     writer.close();
-    System.out.println("After close");
-    Assert.assertEquals(5 * 100, count(DATA_DIRECTORY));
+    stream.optimize();
+    Assert.assertEquals(NUM_OF_RECORDS, count(DATA_DIRECTORY));
     System.out.println("\n\n") ;
     HDFSUtil.dump(fs, DATA_DIRECTORY);
   }

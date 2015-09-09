@@ -1,6 +1,5 @@
 package com.neverwinterdp.scribengin.storage.es.sink;
 
-import com.neverwinterdp.es.ESClient;
 import com.neverwinterdp.es.ESObjectClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;

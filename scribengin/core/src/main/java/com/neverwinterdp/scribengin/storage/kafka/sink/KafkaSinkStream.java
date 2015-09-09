@@ -22,4 +22,7 @@ public class KafkaSinkStream implements SinkStream {
   public SinkStreamWriter getWriter() throws Exception {
     return new KafkaSinkStreamWriter(descriptor);
   }
+  
+  public void optimize() throws Exception {
+  }
 }

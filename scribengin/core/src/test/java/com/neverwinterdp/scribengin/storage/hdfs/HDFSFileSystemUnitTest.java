@@ -22,6 +22,7 @@ public class HDFSFileSystemUnitTest {
   public void setup() throws Exception {
     FileUtil.removeIfExist("./build/hdfs", false);
     fs = FileSystem.getLocal(new Configuration()) ;
+    //org.apache.hadoop.fs.FileUtil.copyMerge(fs, srcDir, dstFS, dstFile, deleteSource, conf, addString)
   }
   
   @After

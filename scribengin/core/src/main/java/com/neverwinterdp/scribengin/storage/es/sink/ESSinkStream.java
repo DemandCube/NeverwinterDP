@@ -22,4 +22,8 @@ public class ESSinkStream implements SinkStream {
   public SinkStreamWriter getWriter() throws Exception { 
     return new ESStreamWriter(descriptor); 
   }
+
+  @Override
+  public void optimize() throws Exception {
+  }
 }

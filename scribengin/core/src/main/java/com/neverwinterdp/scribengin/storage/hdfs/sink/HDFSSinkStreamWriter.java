@@ -1,13 +1,13 @@
 package com.neverwinterdp.scribengin.storage.hdfs.sink;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.storage.hdfs.segment.Segment;
 import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 import com.neverwinterdp.util.JSONSerializer;
 
@@ -75,16 +75,17 @@ public class HDFSSinkStreamWriter implements SinkStreamWriter {
   }
   
   class SinkBuffer {
-    private Path writingPath;
-    private Path completePath;
+    private Path bufferingPath;
+    private Path dataPath;
+    private Segment segment;
     private FSDataOutputStream output;
-    private int count = 0 ;
+    private int  count = 0 ;
     
     public SinkBuffer() throws IOException {
-      String name  = "data-" + UUID.randomUUID().toString() ;
-      writingPath  = new Path(location + "/" + name + ".writing") ;
-      completePath = new Path(location + "/"  + name + ".dat") ;
-      output       = fs.create(writingPath) ;
+      segment = new Segment();
+      bufferingPath  = new Path(segment.toBufferingPath(location)) ;
+      dataPath       = new Path(segment.toDataPath(location)) ;
+      output         = fs.create(bufferingPath) ;
     }
     
     public void append(DataflowMessage dataflowMessage) throws IOException {
@@ -96,17 +97,16 @@ public class HDFSSinkStreamWriter implements SinkStreamWriter {
     
     public void rollback() throws IOException {
       output.close();
-      fs.delete(writingPath, true) ;
-      count = 0;
-      output = fs.create(writingPath, true) ;
+      fs.delete(bufferingPath, true) ;
+      count = 0 ;
     }
     
     public void commit() throws IOException {
       output.close();
       if(count <= 0) {
-        fs.delete(writingPath, true) ;
+        fs.delete(bufferingPath, true) ;
       } else {
-        fs.rename(writingPath, completePath);
+        fs.rename(bufferingPath, dataPath);
       }
     }
   }

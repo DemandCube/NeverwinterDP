@@ -52,6 +52,7 @@ public class DataflowClient {
       if(currentStatus.equalOrGreaterThan(status)) return;
       Thread.sleep(checkPeriod);
     }
-    throw new Exception("Cannot get the equal or greater than " + status + " after " + timeout + "ms");
+    String dataflowId = dflRegistry.getDataflowDescriptor(false).getId();
+    throw new Exception("Cannot get the equal or greater than " + status + " after " + timeout + "ms for the dataflow " + dataflowId);
   }
 }

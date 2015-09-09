@@ -1,11 +1,16 @@
 package com.neverwinterdp.scribengin.storage.hdfs.sink;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.hdfs.segment.Segment;
+import com.neverwinterdp.scribengin.storage.hdfs.segment.SegmentOptimizer;
 import com.neverwinterdp.scribengin.storage.sink.SinkStream;
 import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
@@ -40,6 +45,11 @@ public class HDFSSinkStream implements SinkStream {
   @Override
   synchronized public SinkStreamWriter getWriter() throws IOException {
     return new HDFSSinkStreamWriter(fs, descriptor.getLocation());
+  }
+  
+  public void optimize() throws Exception {
+    SegmentOptimizer optimizer = new SegmentOptimizer(fs, descriptor);
+    optimizer.optimize();
   }
   
   synchronized public void fsCheck() throws Exception {

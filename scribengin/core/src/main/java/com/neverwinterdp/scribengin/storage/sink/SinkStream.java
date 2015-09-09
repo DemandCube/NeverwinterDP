@@ -6,4 +6,5 @@ public interface SinkStream {
   public StreamDescriptor getDescriptor();
   public void delete() throws Exception;
   public SinkStreamWriter getWriter() throws Exception ;
+  public void optimize() throws Exception ;
 }

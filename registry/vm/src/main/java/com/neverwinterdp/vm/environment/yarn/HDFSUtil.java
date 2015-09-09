@@ -16,32 +16,7 @@ public class HDFSUtil {
     return Integer.parseInt(name.substring(dashIdx + 1)) ;
   }
   
-//  static public void concat(FileSystem fs, Path dest, Path[] src, boolean deleteSrc) throws IOException {
-//    if(LocalFileSystem.class == fs.getClass()) {
-//      OutputStream output = fs.create(dest) ;
-//      for(int i = 0; i < src.length; i++) {
-//        FSDataInputStream is = fs.open(src[i]);
-//        BufferedInputStream buffer = new BufferedInputStream(is);
-//        byte[] data = new byte[4912];
-//        int available = -1;
-//        while ((available = buffer.read(data)) > -1) {
-//          output.write(data, 0, available);
-//        }
-//        is.close();
-//      }
-//      output.close();
-//    } else {
-//      fs.concat(dest, src);
-//    }
-//    
-//    if(deleteSrc) {
-//      for(int i = 0; i < src.length; i++) {
-//        fs.delete(src[i], true);
-//      }
-//    }
-//  }
-  
-  static public void concat(FileSystem fs, Path dest, Path[] src, boolean deleteSrc) throws IOException {
+  static public void concat(FileSystem fs, Path dest, Path[] src) throws IOException {
     OutputStream output = fs.create(dest) ;
     for(int i = 0; i < src.length; i++) {
       FSDataInputStream is = fs.open(src[i]);
@@ -54,7 +29,10 @@ public class HDFSUtil {
       is.close();
     }
     output.close();
-
+  }
+  
+  static public void concat(FileSystem fs, Path dest, Path[] src, boolean deleteSrc) throws IOException {
+    concat(fs, dest, src);
     if(deleteSrc) {
       for(int i = 0; i < src.length; i++) {
         fs.delete(src[i], true);

@@ -33,6 +33,9 @@ public class S3SinkStream implements SinkStream {
     return new S3SinkStreamWriter(s3StreamFolder);
   }
 
+  public void optimize() throws Exception {
+  }
+  
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
