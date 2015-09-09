@@ -50,6 +50,12 @@ public class LogSampleChainConfig {
   @Parameter(names = "--dataflow-descriptor", description = "Debug the dataflow task!")
   public String dataflowDescriptor = "src/app/conf/local/log-dataflow-chain.json";
  
+  @Parameter(names = "--dataflow-num-of-worker", description = "Dataflow number of worker!")
+  public int dataflowNumOfWorker = 2;
+ 
+  @Parameter(names = "--dataflow-num-of-executor-per-worker", description = "Dataflow number of executor per worker!")
+  public int dataflowNumOfExecutorPerWorker = 2;
+  
   @Parameter(names = "--dataflow-wait-for-submit-timeout", description = "Debug the dataflow task!")
   public long dataflowWaitForSubmitTimeout = 60000;
  

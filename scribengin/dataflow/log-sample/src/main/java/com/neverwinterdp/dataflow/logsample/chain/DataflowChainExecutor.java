@@ -28,6 +28,8 @@ public class DataflowChainExecutor extends Executor {
       long maxRuntime = config.dataflowWaitForTerminationTimeout - stopTime;
       if(maxRuntime < 30000) maxRuntime = 30000;
       descriptor.setMaxRunTime(maxRuntime);
+      descriptor.setNumberOfWorkers(config.dataflowNumOfWorker);
+      descriptor.setNumberOfExecutorsPerWorker(config.dataflowNumOfExecutorPerWorker);
       if(config.dataflowTaskDedicatedExecutor) {
         descriptor.setDataflowTaskExecutorType(DataflowDescriptor.DataflowTaskExecutorType.Dedicated);
       }

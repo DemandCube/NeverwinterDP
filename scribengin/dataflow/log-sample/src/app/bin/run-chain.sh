@@ -47,6 +47,8 @@ MAIN_CLASS="com.neverwinterdp.dataflow.logsample.chain.LogSampleChainClient"
 PROFILE=$(get_opt --profile 'performance' $@)
 MESSAGE_SIZE=$(get_opt --message-size '128' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
+NUM_OF_WORKER=$(get_opt --num-of-worker '2' $@)
+NUM_OF_EXECUTOR_PER_WORKER=$(get_opt --num-of-executor-per-worker '2' $@)
 DEDICATED_EXECUTOR=$(get_opt --dedicated-executor 'false' $@)
 
 STORAGE=$(get_opt --storage 'kafka' $@)
@@ -82,6 +84,7 @@ if [ "$PROFILE" = "performance" ] ; then
     $LOG_VALIDATOR_VALIDATE_OPT \
     \
     --dataflow-descriptor $DATAFLOW_DESCRIPTOR_FILE  \
+    --dataflow-num-of-worker $NUM_OF_WORKER --dataflow-num-of-executor-per-worker $NUM_OF_EXECUTOR_PER_WORKER
     --dataflow-wait-for-submit-timeout 210000 --dataflow-wait-for-termination-timeout $MAX_RUN_TIME \
     --dataflow-task-dedicated-executor $DEDICATED_EXECUTOR \
     --dataflow-task-debug
