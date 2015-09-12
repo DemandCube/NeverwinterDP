@@ -46,9 +46,9 @@ public class Segment {
   
   final static public SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss");
   
-  static public long SMALL_DATASIZE_THRESHOLD  = 1024 * 1024 * 1024;
-  static public long MEDIUM_DATASIZE_THRESHOLD = SMALL_DATASIZE_THRESHOLD  * 4;
-  static public long LARGE_DATASIZE_THRESHOLD  = MEDIUM_DATASIZE_THRESHOLD * 8;
+  static public long SMALL_DATASIZE_THRESHOLD  = 64 * 1024 * 1024;
+  static public long MEDIUM_DATASIZE_THRESHOLD = 16 * SMALL_DATASIZE_THRESHOLD;
+  static public long LARGE_DATASIZE_THRESHOLD  = 8  * MEDIUM_DATASIZE_THRESHOLD ;
   
   private Type   type;
   private String createdTime;
