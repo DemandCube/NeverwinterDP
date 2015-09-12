@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.shell;
+package com.neverwinterdp.scribengin.client.shell;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import com.neverwinterdp.scribengin.dataflow.test.ExecuteLog;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.text.TabularFormater;
 
-public class StartStopDataflowExecutor extends Executor {
+public class StartStopDataflowExecutor implements Runnable {
   @Parameter(names = "--wait-before-start", description = "The command should repeat in this failurePeriod of time")
   public long waitBeforeSimulateFailure = -1;
   
@@ -38,9 +38,13 @@ public class StartStopDataflowExecutor extends Executor {
   private int resumeCount              = 0 ;
   private int resumeCompleteCount      = 0;
   
-  public StartStopDataflowExecutor(ScribenginShell shell, String dataflowId) {
-    super(shell);
-    this.dataflowId = dataflowId ;
+  ScribenginShell shell;
+  
+  public StartStopDataflowExecutor() {
+  }
+  
+  public void init(ScribenginShell shell) {
+    this.shell = shell;
   }
   
   @Override
