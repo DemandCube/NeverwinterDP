@@ -97,7 +97,7 @@ $SHELL dataflow submit-chain \
 
 $SHELL dataflow monitor \
   --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
-  --show-tasks --stop-on-status FINISH --dump-period 15000 --timeout $MAX_RUNTIME
+  --show-tasks --show-workers --stop-on-status FINISH --dump-period 15000 --timeout $MAX_RUNTIME
 
 #$SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow --max-wait-time $MAX_RUNTIME --status TERMINATED
 #$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-info  --status TERMINATED
