@@ -1,5 +1,8 @@
 package com.neverwinterdp.scribengin.client.shell;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
@@ -24,6 +27,7 @@ import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 public class DataflowCommand extends Command {
   public DataflowCommand() {
     add("info",            Info.class) ;
+    add("monitor",         Monitor.class) ;
     add("submit",          Submit.class) ;
     add("submit-chain",    SubmitChain.class) ;
     add("wait-for-status", WaitForStatus.class) ;
@@ -58,10 +62,17 @@ public class DataflowCommand extends Command {
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
       ScribenginShell scribenginShell = (ScribenginShell) shell;
       ScribenginClient scribenginClient= scribenginShell.getScribenginClient();
-      DataflowRegistry dRegistry = scribenginClient.getDataflowRegistry(dataflowId);
+      Console console = shell.console();
+      String[] dflId = this.dataflowId.split(",");
+      for(int i = 0; i < dflId.length; i++) {
+        DataflowRegistry dRegistry = scribenginClient.getDataflowRegistry(dflId[i]);
+        info(dRegistry, console, dflId[i]);
+      }
+    }
+    
+    public void info(DataflowRegistry dRegistry, Console console, String dflId) throws Exception {
       DataflowFormater dflFormater = new DataflowFormater(dRegistry) ;
       
-      Console console = shell.console();
       console.h1("Dataflow " + dRegistry.getDataflowPath());
       
       console.println(dflFormater.getInfo());
@@ -77,10 +88,58 @@ public class DataflowCommand extends Command {
         console.println(MetricRegistrySnapshot.getFormattedText(snapshots));
       }
     }
-
+    
     @Override
     public String getDescription() {
       return "display more info about dataflows";
+    }
+  }
+  
+  static public class Monitor extends Info {
+    @Parameter(names = "--stop-on-status",  required=true , description = "Stop on the dataflow status")
+    private String stopOnStatus ;
+    
+    @Parameter(names = "--dump-period", description = "Dump the information period")
+    private long period = 15000;
+    
+    @Parameter(names = "--timeout",  required=true , description = "Dump the information period")
+    private long timeout = 3 * 60 * 60 * 1000;
+    
+    @Override
+    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
+      ScribenginShell scribenginShell = (ScribenginShell) shell;
+      ScribenginClient scribenginClient= scribenginShell.getScribenginClient();
+      Console console = shell.console();
+      List<String> dataflowIdHolder = 
+        new ArrayList<String>(Arrays.asList(dataflowId.split(",")));
+      DataflowLifecycleStatus stopOnDflStatus = null; 
+      if(stopOnStatus != null) {
+        stopOnDflStatus = DataflowLifecycleStatus.valueOf(stopOnStatus);
+      }
+      long stopTime = System.currentTimeMillis() + timeout;
+      while(dataflowIdHolder.size() > 0) {
+        Iterator<String> i = dataflowIdHolder.iterator();
+        while(i.hasNext()) {
+          String selDflId = i.next();
+          DataflowRegistry dRegistry = scribenginClient.getDataflowRegistry(selDflId);
+          info(dRegistry, console, selDflId);
+          if(stopOnDflStatus != null) {
+            DataflowLifecycleStatus dflStatus = dRegistry.getStatus();
+            if(dflStatus.equalOrGreaterThan(stopOnDflStatus)) {
+              i.remove();  //monitor dataflow done
+            }
+          }
+          if(System.currentTimeMillis() > stopTime) {
+            i.remove();  //monitor dataflow done
+          }
+        }
+        Thread.sleep(period);
+      }
+    }
+    
+    @Override
+    public String getDescription() {
+      return "monitor and display more info about dataflows";
     }
   }
   

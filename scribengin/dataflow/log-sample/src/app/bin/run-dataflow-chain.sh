@@ -95,11 +95,15 @@ $SHELL dataflow submit-chain \
   --dfs-app-home /applications/log-sample \
   --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --dataflow-max-runtime $MAX_RUNTIME
 
-$SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow --max-wait-time $MAX_RUNTIME --status TERMINATED
-$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-info  --status TERMINATED
+$SHELL dataflow monitor \
+  --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
+  --show-all --stop-on-status FINISH --dump-period 15000 --timeout $MAX_RUNTIME
 
-$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-warn  --status TERMINATED
-$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED
+#$SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow --max-wait-time $MAX_RUNTIME --status TERMINATED
+#$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-info  --status TERMINATED
+
+#$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-warn  --status TERMINATED
+#$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED
 DATAFLOW_CHAIN_ELAPSED_TIME=$(($SECONDS - $START_DATAFLOW_CHAIN_TIME))
 echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
 
@@ -127,10 +131,10 @@ echo "MESSAGE VALIDATION TIME: $MESSAGE_VALIDATION_ELAPSED_TIME"
 $SHELL vm info
 $SHELL registry dump --path /applications/log-sample
 
-$SHELL dataflow info --dataflow-id log-splitter-dataflow        --show-all
-$SHELL dataflow info --dataflow-id log-persister-dataflow-info  --show-all
-$SHELL dataflow info --dataflow-id log-persister-dataflow-warn  --show-all
-$SHELL dataflow info --dataflow-id log-persister-dataflow-error --show-all
+
+$SHELL dataflow info \
+  --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
+  --show-all 
 
 echo "MESSAGE GENERATION TIME    : $MESSAGE_GENERATION_ELAPSED_TIME" 
 echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
