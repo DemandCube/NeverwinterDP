@@ -16,6 +16,7 @@ import com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
+import com.neverwinterdp.scribengin.storage.hdfs.Segment;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.io.IOUtil;
@@ -28,6 +29,10 @@ public class HDFSLogSampleChainUnitTest  {
   
   @Before
   public void setup() throws Exception {
+    Segment.SMALL_DATASIZE_THRESHOLD =  1 * 1024 * 1024;
+    Segment.MEDIUM_DATASIZE_THRESHOLD = 4 * Segment.SMALL_DATASIZE_THRESHOLD;
+    Segment.LARGE_DATASIZE_THRESHOLD  = 4 * Segment.MEDIUM_DATASIZE_THRESHOLD;
+    
     FileUtil.removeIfExist("build/hdfs", false);
     FileUtil.removeIfExist("build/data", false);
     FileUtil.removeIfExist("build/logs", false);
@@ -65,7 +70,7 @@ public class HDFSLogSampleChainUnitTest  {
   
   @Test
   public void testLogSampleChain() throws Exception {
-    int NUM_OF_MESSAGE = 5000;
+    int NUM_OF_MESSAGE = 50000;
     String REPORT_PATH = "/applications/log-sample/reports";
     String logGeneratorSubmitCommand = 
         "vm submit " +

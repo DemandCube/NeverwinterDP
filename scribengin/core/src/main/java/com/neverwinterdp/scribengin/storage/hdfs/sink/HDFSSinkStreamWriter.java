@@ -17,8 +17,8 @@ public class HDFSSinkStreamWriter extends StorageWriter<DataflowMessage> impleme
   public HDFSSinkStreamWriter(Storage<DataflowMessage> storage, StreamDescriptor descriptor) throws IOException {
     super(storage);
     this.descriptor = descriptor ;
-    smallDataSizeAccumulate  = storage.getSmallSegments().dataSize();
-    mediumDataSizeAccumulate = storage.getMediumSegments().dataSize();
+    smallDataSizeAccumulate  = storage.getBufferSegments().dataSize();
+    mediumDataSizeAccumulate = storage.getSmallSegments().dataSize();
   }
 
   public StreamDescriptor getDescriptor() { return descriptor; }
