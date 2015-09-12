@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
@@ -31,6 +32,7 @@ public class DataflowCommand extends Command {
     add("submit",          Submit.class) ;
     add("submit-chain",    SubmitChain.class) ;
     add("wait-for-status", WaitForStatus.class) ;
+    add("random-kill-worker"    , RandomKillWorker.class) ;
   }
   
   @Override
@@ -244,5 +246,19 @@ public class DataflowCommand extends Command {
     
     @Override
     public String getDescription() { return "wait for the dataflow status"; }
+  }
+  
+  static public class RandomKillWorker extends SubCommand {
+    @ParametersDelegate
+    RandomKillDataflowWorkerExecutor executor = new RandomKillDataflowWorkerExecutor();
+    
+    @Override
+    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
+      executor.init((ScribenginShell) shell);
+      executor.run();
+    }
+    
+    @Override
+    public String getDescription() { return "Kill Worker"; }
   }
 }

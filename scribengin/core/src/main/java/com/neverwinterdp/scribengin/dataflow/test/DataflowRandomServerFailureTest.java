@@ -17,14 +17,13 @@ public class DataflowRandomServerFailureTest extends DataflowCommandTest {
   final static public String TEST_NAME = "random-server-failure";
 
   @Parameter(names = "--dataflow-id", required=true, description = "The command should repeat in this period of time")
-  String dataflowId = "DataflowRandomServerFailureTest-unknown";
+  String dataflowId ;
   
   @Parameter(names = "--wait-for-running-dataflow", description = "The command should repeat in this failurePeriod of time")
   long waitForRunningDataflow = 180000;
   
   @Parameter(names = "--wait-before-simulate-failure", description = "Wait before simulate")
   long waitBeforeSimulateFailure = 15000;
-  
   
   @Parameter(names = "--failure-period", description = "The command should repeat in this period of time")
   long failurePeriod = 15000;
