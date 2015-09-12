@@ -98,7 +98,7 @@ $SHELL dataflow submit-chain \
 
 if [ "$RANDOM_KILL_WORKER" = "true" ] ; then
   echo "RANDOM KILL WORKER"
-  $SHELL random-kill-worker \
+  $SHELL dataflow random-kill-worker \
     --dataflow-id log-splitter-dataflow \
     --wait-before-simulate-failure 60000 --failure-period 60000 --max-kill 3 &
 fi

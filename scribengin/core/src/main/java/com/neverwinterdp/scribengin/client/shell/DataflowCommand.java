@@ -27,12 +27,12 @@ import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 
 public class DataflowCommand extends Command {
   public DataflowCommand() {
-    add("info",            Info.class) ;
-    add("monitor",         Monitor.class) ;
-    add("submit",          Submit.class) ;
-    add("submit-chain",    SubmitChain.class) ;
-    add("wait-for-status", WaitForStatus.class) ;
-    add("random-kill-worker"    , RandomKillWorker.class) ;
+    add("info",               Info.class) ;
+    add("monitor",            Monitor.class) ;
+    add("submit",             Submit.class) ;
+    add("submit-chain",       SubmitChain.class) ;
+    add("wait-for-status",    WaitForStatus.class) ;
+    add("random-kill-worker", RandomKillWorker.class) ;
   }
   
   @Override
