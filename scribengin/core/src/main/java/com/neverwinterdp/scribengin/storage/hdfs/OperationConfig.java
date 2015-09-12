@@ -1,22 +1,26 @@
-package com.neverwinterdp.scribengin.storage.hdfs.segment;
+package com.neverwinterdp.scribengin.storage.hdfs;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.text.StringUtil;
 
 public class OperationConfig {
+  private long                startTime;
+  private long                maxLockTime;
   private String              name;
   private String              description;
-  private String              operationClass;
   private Map<String, String> attributes = new HashMap<>();
+  private String              executor ;
   
   public OperationConfig() {}
   
-  public OperationConfig(String name, Class<?> opClass) {
+  public OperationConfig(String name,  long maxLockTime) {
     this.name = name;
-    this.operationClass = opClass.getName();
+    this.startTime = System.currentTimeMillis();
+    this.maxLockTime = maxLockTime;
   }
   
   public String getName() { return name; }
@@ -27,6 +31,14 @@ public class OperationConfig {
     return this;
   }
   
+  public long getStartTime() { return startTime; }
+  public void setStartTime(long startTime) { this.startTime = startTime; }
+
+  public long getMaxLockTime() { return maxLockTime; }
+  public void setMaxLockTime(long maxLockTime) {
+    this.maxLockTime = maxLockTime;
+  }
+
   public String getDescription() { return description; }
   public void setDescription(String description) { this.description = description; }
   
@@ -35,13 +47,17 @@ public class OperationConfig {
     return this; 
   }
   
-  public String getOperationClass() { return operationClass; }
-  public void setOperationClass(String operationClass) { this.operationClass = operationClass; }
-  
-  public OperationConfig withOperationClass(Class<?> type) {
-    this.operationClass = type.getName();
-    return this;
+  public String getExecutor() { return executor; }
+
+  public void setExecutor(String executor) {
+    this.executor = executor;
   }
+
+  public OperationConfig withExecutor(Class<?> type) {
+    this.executor = type.getName();
+    return this; 
+  }
+
   
   public Map<String, String> getAttributes() { return attributes; }
   public void setAttributes(Map<String, String> attributes) { this.attributes = attributes; }
@@ -52,6 +68,18 @@ public class OperationConfig {
   
   public OperationConfig withAttribute(String name, String value) {
     attributes.put(name, value);
+    return this;
+  }
+  
+  public <T> T attribute(String name, Class<T> type) {
+    String json = attributes.get(name);
+    if(json == null) return null ;
+    return JSONSerializer.INSTANCE.fromString(json, type);
+  }
+  
+  public <T> OperationConfig withAttribute(String name, T value) {
+    String json = JSONSerializer.INSTANCE.toString(value);
+    attributes.put(name, json);
     return this;
   }
   

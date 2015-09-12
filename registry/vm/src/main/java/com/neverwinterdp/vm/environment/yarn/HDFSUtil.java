@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -17,17 +18,19 @@ public class HDFSUtil {
   }
   
   static public void concat(FileSystem fs, Path dest, Path[] src) throws IOException {
-    OutputStream output = fs.create(dest) ;
+    FSDataOutputStream output = fs.create(dest) ;
     for(int i = 0; i < src.length; i++) {
       FSDataInputStream is = fs.open(src[i]);
-      BufferedInputStream buffer = new BufferedInputStream(is);
+      //BufferedInputStream buffer = new BufferedInputStream(is);
       byte[] data = new byte[4912];
       int available = -1;
-      while ((available = buffer.read(data)) > -1) {
+      while ((available = is.read(data)) > -1) {
         output.write(data, 0, available);
       }
       is.close();
+      //buffer.close();
     }
+    output.hflush();
     output.close();
   }
   

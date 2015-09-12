@@ -64,8 +64,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     MessageReportRegistry appRegistry = null;
     try {
       Registry registry = getVM().getVMRegistry().getRegistry();
-      appRegistry = 
-        new MessageReportRegistry(registry, reportPath, true);
+      appRegistry = new MessageReportRegistry(registry, reportPath, true);
       appRegistry.addGenerateReport(report);
     } catch (RegistryException e) {
       if(appRegistry != null) {

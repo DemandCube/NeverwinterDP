@@ -43,4 +43,9 @@ public class DataflowMessage {
     DataflowMessage dataflowMessage = new DataflowMessage(key, data) ;
     return dataflowMessage;
   }
+  
+  static public DataflowMessage create(String key, byte[] data) {
+    DataflowMessage dataflowMessage = new DataflowMessage(key, data) ;
+    return dataflowMessage;
+  }
 }
