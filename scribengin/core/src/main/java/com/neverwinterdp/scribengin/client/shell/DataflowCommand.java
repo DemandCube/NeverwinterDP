@@ -1,5 +1,7 @@
 package com.neverwinterdp.scribengin.client.shell;
 
+import java.util.List;
+
 import com.beust.jcommander.Parameter;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
@@ -17,6 +19,7 @@ import com.neverwinterdp.vm.client.shell.CommandInput;
 import com.neverwinterdp.vm.client.shell.Console;
 import com.neverwinterdp.vm.client.shell.Shell;
 import com.neverwinterdp.vm.client.shell.SubCommand;
+import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 
 public class DataflowCommand extends Command {
   public DataflowCommand() {
@@ -44,6 +47,10 @@ public class DataflowCommand extends Command {
     @Parameter(names = "--show-activities", description = "The history dataflow id")
     boolean activities = false;
     
+    @Parameter(names = "--show-metric", description = "The metric report")
+    boolean metricReport = false;
+    
+    
     @Parameter(names = "--show-all", description = "The history dataflow id")
     boolean all = false;
     
@@ -64,6 +71,11 @@ public class DataflowCommand extends Command {
       if(all || workers) console.println(dflFormater.getDataflowWorkerInfo());
       
       if(all || activities) console.println(dflFormater.getActivitiesInfo());
+      
+      if(all || metricReport) {
+        List<MetricRegistrySnapshot> snapshots = dRegistry.getMetrics();
+        console.println(MetricRegistrySnapshot.getFormattedText(snapshots));
+      }
     }
 
     @Override
