@@ -130,7 +130,7 @@ public class RandomKillDataflowWorkerExecutor implements Runnable {
             notifier.info("after-simulate-kill", "After simulate kill " + selWorker.getId());
           } else {
             notifier.info("before-kill", "Before kill " + selWorker.getId());
-            dflClient.getScribenginClient().getVMClient().kill(selWorker);
+            dflClient.getScribenginClient().getVMClient().kill(selWorker, 120000);
             notifier.info("after-kill", "After kill " + selWorker.getId());
           }
         } else {

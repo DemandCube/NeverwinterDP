@@ -111,8 +111,6 @@ public class VMClient {
   }
   
   public boolean kill(VMDescriptor vmDescriptor) throws Exception {
-    //CommandResult<?> result = execute(vmDescriptor, new VMCommand.Kill());
-    
     Command command = new VMCommand.Kill();
     CommandPayload payload = new CommandPayload(command, null) ;
     Node node = registry.create(vmDescriptor.getRegistryPath() + "/commands/command-", payload, NodeCreateMode.PERSISTENT_SEQUENTIAL);
