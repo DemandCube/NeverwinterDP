@@ -99,7 +99,7 @@ $SHELL dataflow submit-chain \
 if [ "$RANDOM_KILL_WORKER" = "true" ] ; then
   $SHELL dataflow random-kill-worker \
     --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
-    --wait-before-simulate-failure 60000 --failure-period 30 --max-kill 15 &
+    --wait-before-simulate-failure 60000 --failure-period 60 --max-kill 15 &
 fi
 
 $SHELL dataflow monitor \
@@ -135,13 +135,11 @@ echo "MESSAGE VALIDATION TIME: $MESSAGE_VALIDATION_ELAPSED_TIME"
 #########################################################################################################################
 # Dump the vm and registry info                                                                                         #
 #########################################################################################################################
-$SHELL vm info
-$SHELL registry dump --path /applications/log-sample
-
-
 $SHELL dataflow info \
   --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
   --show-all 
+
+$SHELL registry dump --path /applications/log-sample
 
 echo "MESSAGE GENERATION TIME    : $MESSAGE_GENERATION_ELAPSED_TIME" 
 echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
