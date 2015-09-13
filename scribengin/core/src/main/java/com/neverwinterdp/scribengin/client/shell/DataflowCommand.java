@@ -32,7 +32,7 @@ public class DataflowCommand extends Command {
     add("submit",             Submit.class) ;
     add("submit-chain",       SubmitChain.class) ;
     add("wait-for-status",    WaitForStatus.class) ;
-    add("random-kill-worker", RandomKillWorker.class) ;
+    add("kill-worker-random", KillWorkerRandom.class) ;
   }
   
   @Override
@@ -248,7 +248,7 @@ public class DataflowCommand extends Command {
     public String getDescription() { return "wait for the dataflow status"; }
   }
   
-  static public class RandomKillWorker extends SubCommand {
+  static public class KillWorkerRandom extends SubCommand {
     @ParametersDelegate
     RandomKillDataflowWorkerExecutor executor = new RandomKillDataflowWorkerExecutor();
     

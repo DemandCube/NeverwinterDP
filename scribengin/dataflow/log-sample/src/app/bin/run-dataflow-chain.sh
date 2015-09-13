@@ -106,11 +106,6 @@ $SHELL dataflow monitor \
   --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
   --show-tasks --show-workers --stop-on-status FINISH --dump-period 15000 --timeout $MAX_RUNTIME
 
-#$SHELL dataflow wait-for-status --dataflow-id log-splitter-dataflow --max-wait-time $MAX_RUNTIME --status TERMINATED
-#$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-info  --status TERMINATED
-
-#$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-warn  --status TERMINATED
-#$SHELL dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED
 DATAFLOW_CHAIN_ELAPSED_TIME=$(($SECONDS - $START_DATAFLOW_CHAIN_TIME))
 echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
 
