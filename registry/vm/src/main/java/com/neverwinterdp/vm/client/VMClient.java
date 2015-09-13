@@ -201,7 +201,7 @@ public class VMClient {
     synchronized public CommandResult<?> waitForResult(long timeout) throws Exception {
       if(result == null) { //try to fix the lost event, when the event is notified before the watcher is registered
         CommandPayload payload = registry.getDataAs(path, CommandPayload.class) ;
-        if(payload != null) {
+        if(payload != null && payload.getResult() != null) {
           result = payload.getResult() ;
           registry.delete(path);
         }
