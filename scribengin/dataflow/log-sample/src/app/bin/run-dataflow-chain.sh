@@ -97,10 +97,9 @@ $SHELL dataflow submit-chain \
   --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --dataflow-max-runtime $MAX_RUNTIME
 
 if [ "$RANDOM_KILL_WORKER" = "true" ] ; then
-  echo "RANDOM KILL WORKER"
   $SHELL dataflow random-kill-worker \
-    --dataflow-id log-splitter-dataflow \
-    --wait-before-simulate-failure 60000 --failure-period 60000 --max-kill 3 &
+    --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
+    --wait-before-simulate-failure 60000 --failure-period 30 --max-kill 15 &
 fi
 
 $SHELL dataflow monitor \

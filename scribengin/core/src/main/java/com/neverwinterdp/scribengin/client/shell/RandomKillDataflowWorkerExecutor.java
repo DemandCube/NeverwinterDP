@@ -18,7 +18,7 @@ import com.neverwinterdp.vm.VMDescriptor;
 
 public class RandomKillDataflowWorkerExecutor implements Runnable {
   @Parameter(names = "--dataflow-id",  required=true , description = "Specify the id for the dataflow")
-  private String dataflowId ;
+  private String dataflowIds ;
   
   @Parameter(names = "--wait-before-simulate-failure", description = "Wait before simulate")
   long waitBeforeSimulateFailure = 60000;
@@ -63,9 +63,14 @@ public class RandomKillDataflowWorkerExecutor implements Runnable {
     shell.console().println("RandomDataflowWorkerKiller: start") ;
     ScribenginClient scribenginClient = shell.getScribenginClient() ;
     
+    List<KillDataflowContext> dflKillContextAll = new ArrayList<>();
     List<KillDataflowContext> dflKillContextHolder = new ArrayList<>();
-    dflKillContextHolder.add(new KillDataflowContext(scribenginClient, dataflowId));
-    
+    String[] dataflowId = dataflowIds.split(",");
+    for(int i = 0; i < dataflowId.length; i++) {
+      KillDataflowContext dflKillContext = new KillDataflowContext(scribenginClient, dataflowId[i]);
+      dflKillContextHolder.add(dflKillContext);
+      dflKillContextAll.add(dflKillContext);
+    }
     shell.console().println("RandomDataflowWorkerKiller: waitBeforeSimulateFailure") ;
     if(waitBeforeSimulateFailure > 0) {
       Thread.sleep(waitBeforeSimulateFailure);
@@ -73,7 +78,7 @@ public class RandomKillDataflowWorkerExecutor implements Runnable {
     
     int simulationCount = 0 ;
     Random rand = new Random();
-    while(simulationCount < maxKill) {
+    while(simulationCount < maxKill && dflKillContextHolder.size() > 0) {
       int selectIdx = rand.nextInt(dflKillContextHolder.size());
       KillDataflowContext dflKillContext = dflKillContextHolder.get(selectIdx);
       if(!dflKillContext.isKillable()) {
@@ -83,6 +88,9 @@ public class RandomKillDataflowWorkerExecutor implements Runnable {
       dflKillContext.kill();
       Thread.sleep(failurePeriod);
       simulationCount++ ;
+    }
+    for(KillDataflowContext sel : dflKillContextAll) {
+      sel.report(shell);
     }
   }
 
