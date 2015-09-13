@@ -60,25 +60,30 @@ public class RandomKillDataflowWorkerExecutor implements Runnable {
   }
   
   void execute(ScribenginShell shell) throws Exception {
-    System.err.println("RandomDataflowWorkerKiller: start") ;
+    shell.console().println("RandomDataflowWorkerKiller: start") ;
     ScribenginClient scribenginClient = shell.getScribenginClient() ;
-    KillDataflowContext dflKillContext = new KillDataflowContext(scribenginClient, dataflowId) ;
     
-    System.err.println("RandomDataflowWorkerKiller: waitBeforeSimulateFailure") ;
+    List<KillDataflowContext> dflKillContextHolder = new ArrayList<>();
+    dflKillContextHolder.add(new KillDataflowContext(scribenginClient, dataflowId));
+    
+    shell.console().println("RandomDataflowWorkerKiller: waitBeforeSimulateFailure") ;
     if(waitBeforeSimulateFailure > 0) {
       Thread.sleep(waitBeforeSimulateFailure);
     }
-    int simulationCount = 0 ;
     
+    int simulationCount = 0 ;
+    Random rand = new Random();
     while(simulationCount < maxKill) {
+      int selectIdx = rand.nextInt(dflKillContextHolder.size());
+      KillDataflowContext dflKillContext = dflKillContextHolder.get(selectIdx);
       if(!dflKillContext.isKillable()) {
-        break;
+        dflKillContextHolder.remove(selectIdx);
+        continue;
       }
       dflKillContext.kill();
       Thread.sleep(failurePeriod);
       simulationCount++ ;
     }
-    dflKillContext.report(shell);
   }
 
   public class KillDataflowContext {
