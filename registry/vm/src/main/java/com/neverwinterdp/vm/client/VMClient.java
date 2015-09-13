@@ -97,7 +97,6 @@ public class VMClient {
     return result.getResult();
   }
   
-  
   public boolean shutdown(VMDescriptor vmDescriptor) throws Exception {
     CommandResult<?> result = execute(vmDescriptor, new VMCommand.Shutdown());
     if(result.isDiscardResult()) return true;
@@ -174,7 +173,8 @@ public class VMClient {
     }
     
     @Override
-    public void onEvent(NodeEvent event) {
+    synchronized public void onEvent(NodeEvent event) {
+      if(isComplete()) return;
       String path = event.getPath();
       try {
         if(event.getType() == NodeEvent.Type.DELETE) {
@@ -199,6 +199,13 @@ public class VMClient {
     }
     
     synchronized public CommandResult<?> waitForResult(long timeout) throws Exception {
+      if(result == null) {
+        CommandPayload payload = registry.getDataAs(path, CommandPayload.class) ;
+        if(payload != null) {
+          result = payload.getResult() ;
+          registry.delete(path);
+        }
+      }
       if(result == null) {
         wait(timeout);
       }
