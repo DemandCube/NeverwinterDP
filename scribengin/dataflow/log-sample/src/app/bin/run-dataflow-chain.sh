@@ -46,8 +46,11 @@ APP_OPT="-Dapp.dir=$APP_DIR -Duser.dir=$APP_DIR"
 APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
 
 STORAGE=$(get_opt --storage 'kafka' $@)
-MESSAGE_SIZE=$(get_opt --message-size '128' $@)
+
+NUM_OF_STREAM=$(get_opt --num-of-stream '10' $@)
+MESSAGE_SIZE=$(get_opt  --message-size '128' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
+
 KILL_WORKER_RANDOM=$(get_opt --kill-worker-random 'false' $@)
 KILL_WORKER_MAX=$(get_opt --kill-worker-max '5' $@)
 
@@ -83,7 +86,9 @@ $SHELL vm submit \
    --dfs-app-home /applications/log-sample \
    --registry-connect zookeeper-1:2181 --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
    --name vm-log-generator-1  --role vm-log-generator --vm-application  com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp \
-   --prop:report-path=/applications/log-sample/reports --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE
+   --prop:report-path=/applications/log-sample/reports \
+   --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE \
+   --prop:num-of-stream=$NUM_OF_STREAM \
 
 $SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 45000
 
