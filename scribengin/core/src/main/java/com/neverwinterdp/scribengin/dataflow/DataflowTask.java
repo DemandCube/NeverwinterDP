@@ -68,9 +68,7 @@ public class DataflowTask {
       } else {
         report.setLastAssignedWithNoMessageProcess(0);
       }
-      if(context.isEndOfDataStream()) {
-        context.setComplete();
-      } else if(report.getLastAssignedWithNoMessageProcess() >= 3) {
+      if(context.isEndOfDataStream() || report.getLastAssignedWithNoMessageProcess() >= 3) {
         context.setComplete();
       }
     } catch(InterruptedException ex) {

@@ -49,7 +49,8 @@ PROFILE=$(get_opt --profile 'kafka-to-kafka' $@)
 STORAGE=$(get_opt --storage 'kafka' $@)
 MESSAGE_SIZE=$(get_opt --message-size '128' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
-RANDOM_KILL_WORKER=$(get_opt --random-kill-worker 'false' $@)
+KILL_WORKER_RANDOM=$(get_opt --kill-worker-random 'false' $@)
+KILL_WORKER_MAX=$(get_opt --kill-worker-max '5' $@)
 
 
 DATAFLOW_DESCRIPTOR_FILE=""
@@ -96,10 +97,10 @@ $SHELL dataflow submit-chain \
   --dfs-app-home /applications/log-sample \
   --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --dataflow-max-runtime $MAX_RUNTIME
 
-if [ "$RANDOM_KILL_WORKER" = "true" ] ; then
-  $SHELL dataflow random-kill-worker \
+if [ "$KILL_WORKER_RANDOM" = "true" ] ; then
+  $SHELL dataflow kill-worker-random \
     --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
-    --wait-before-simulate-failure 60000 --failure-period 60000 --max-kill 15 &
+    --wait-before-simulate-failure 60000 --failure-period 60000 --max-kill $KILL_WORKER_MAX &
 fi
 
 $SHELL dataflow monitor \
