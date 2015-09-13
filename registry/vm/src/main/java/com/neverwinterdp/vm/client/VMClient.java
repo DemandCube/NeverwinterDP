@@ -204,6 +204,7 @@ public class VMClient {
         if(payload != null && payload.getResult() != null) {
           result = payload.getResult() ;
           registry.delete(path);
+          setComplete();
         }
       }
       if(result == null) {
