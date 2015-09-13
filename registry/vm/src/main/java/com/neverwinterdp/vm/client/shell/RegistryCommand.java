@@ -4,15 +4,51 @@ import java.io.IOException;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.client.VMClient;
 
 public class RegistryCommand extends Command {
   public RegistryCommand() {
     add("dump", Dump.class);
+    add("info", NodeInfo.class);
   }
 
+  static public class NodeInfo extends SubCommand {
+    @Parameter(names = "--path", description = "The path to dump, the default path is root /")
+    private String path = "/";
+    
+    @Parameter(names = "--print-data-as-json", description = "Print data as json")
+    private boolean printDataAsJson = false;
+    
+    @Override
+    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
+      VMClient vmClient = shell.getVMClient();
+      Registry registry = vmClient.getRegistry();
+      shell.console.println("Node " + path);
+      boolean exists = registry.exists(path);
+      shell.console.println("  Exists: " + exists);
+      if(!exists) return ;
+      if(printDataAsJson) {
+        Node node = registry.get(path);
+        byte[] data = node.getData();
+        if(data != null && data.length > 0) {
+          JsonNode jsonNode = JSONSerializer.INSTANCE.fromString(new String(data));
+          String prettyJson = JSONSerializer.INSTANCE.toString(jsonNode);
+          shell.console.println(prettyJson);
+        }
+      }
+    }
+    
+    @Override
+    public String getDescription() {
+      return "dump contents of the registry path";
+    }
+  }
+  
   static public class Dump extends SubCommand {
     @Parameter(names = "--path", description = "The path to dump, the default path is root /")
     private String path = "/";

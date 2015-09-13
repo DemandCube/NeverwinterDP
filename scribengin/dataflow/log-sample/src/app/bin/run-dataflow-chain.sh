@@ -139,7 +139,8 @@ $SHELL dataflow info \
   --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
   --show-all 
 
-$SHELL registry dump --path /applications/log-sample
+$SHELL registry info --path /applications/log-sample/reports/generate/reports/vm-log-generator-1 --print-data-as-json
+$SHELL registry info --path /applications/log-sample/reports/validate/reports/vm-log-generator-1 --print-data-as-json
 
 echo "MESSAGE GENERATION TIME    : $MESSAGE_GENERATION_ELAPSED_TIME" 
 echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
