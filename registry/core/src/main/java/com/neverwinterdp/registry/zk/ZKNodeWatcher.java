@@ -20,7 +20,8 @@ public class ZKNodeWatcher implements Watcher {
     NodeEvent nEvent = new NodeEvent(realPath(event.getPath()), eventType(event)) ;
     try {
       nodeWatcher.onEvent(nEvent);
-    } catch (Exception e) {
+    } catch (Throwable e) {
+      System.err.println("bassePath = " + basePath + ", event path = " + event.getPath());
       e.printStackTrace();
     }
   }
