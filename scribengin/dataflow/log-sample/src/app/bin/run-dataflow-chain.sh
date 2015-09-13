@@ -45,7 +45,6 @@ JAVA_OPTS="-Xshare:auto -Xms128m -Xmx1024m -XX:-UseSplitVerifier"
 APP_OPT="-Dapp.dir=$APP_DIR -Duser.dir=$APP_DIR"
 APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
 
-PROFILE=$(get_opt --profile 'kafka-to-kafka' $@)
 STORAGE=$(get_opt --storage 'kafka' $@)
 MESSAGE_SIZE=$(get_opt --message-size '128' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
