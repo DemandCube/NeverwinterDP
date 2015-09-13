@@ -99,7 +99,7 @@ $SHELL dataflow submit-chain \
 if [ "$RANDOM_KILL_WORKER" = "true" ] ; then
   $SHELL dataflow random-kill-worker \
     --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
-    --wait-before-simulate-failure 60000 --failure-period 60 --max-kill 15 &
+    --wait-before-simulate-failure 60000 --failure-period 60000 --max-kill 15 &
 fi
 
 $SHELL dataflow monitor \

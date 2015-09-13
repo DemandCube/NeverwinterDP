@@ -89,6 +89,7 @@ public class RandomKillDataflowWorkerExecutor implements Runnable {
       Thread.sleep(failurePeriod);
       simulationCount++ ;
     }
+    
     for(KillDataflowContext sel : dflKillContextAll) {
       sel.report(shell);
     }
