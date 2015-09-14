@@ -47,7 +47,7 @@ APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hado
 
 STORAGE=$(get_opt --storage 'kafka' $@)
 
-NUM_OF_STREAM=$(get_opt --num-of-stream '10' $@)
+NUM_OF_STREAM=$(get_opt --num-of-stream '8' $@)
 MESSAGE_SIZE=$(get_opt  --message-size '128' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
 
