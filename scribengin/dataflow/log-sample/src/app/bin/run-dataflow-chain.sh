@@ -55,6 +55,7 @@ NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
 
 KILL_WORKER_RANDOM=$(get_opt --kill-worker-random 'false' $@)
 KILL_WORKER_MAX=$(get_opt --kill-worker-max '5' $@)
+KILL_WORKER_PERIOD=$(get_opt --kill-worker-period '60000' $@)
 
 
 DATAFLOW_DESCRIPTOR_FILE=""
@@ -110,7 +111,7 @@ $SHELL dataflow submit-chain \
 if [ "$KILL_WORKER_RANDOM" = "true" ] ; then
   $SHELL dataflow kill-worker-random \
     --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
-    --wait-before-simulate-failure 60000 --failure-period 60000 --max-kill $KILL_WORKER_MAX &
+    --wait-before-simulate-failure 60000 --failure-period $KILL_WORKER_PERIOD --max-kill $KILL_WORKER_MAX &
 fi
 
 $SHELL dataflow monitor \
