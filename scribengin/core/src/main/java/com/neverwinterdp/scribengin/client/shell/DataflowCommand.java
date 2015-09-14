@@ -182,6 +182,9 @@ public class DataflowCommand extends Command {
   }
   
   static public class SubmitChain extends SubCommand {
+    @Parameter(names = "--dfs-app-home",  description = "DFS App Home Path")
+    private String dfsAppHome ;
+    
     @Parameter(names = "--dataflow-chain-config",  description = "The dataflow descriptor path in the json format")
     private String dataflowChainConfig ;
     
@@ -190,9 +193,13 @@ public class DataflowCommand extends Command {
    
     @Parameter(names = "--dataflow-task-switching-period",  description = "Dataflow task switching period")
     private long dataflowTaskSwitchingPeriod =  -1;
-   
-    @Parameter(names = "--dfs-app-home",  description = "DFS App Home Path")
-    private String dfsAppHome ;
+
+    @Parameter(names = "--dataflow-num-of-worker",  description = "Num of worker")
+    private int numOfWorker = -1;
+
+    @Parameter(names = "--dataflow-num-of-executor-per-worker",  description = "Num of executor")
+    private int numOfExecutorPerWorker = -1;
+
     
     @Parameter(names = "--wait-for-running-timeout", description = "The dataflow path to deploy")
     private long waitForRunningTimeout = 120000;
@@ -210,6 +217,8 @@ public class DataflowCommand extends Command {
       for(DataflowDescriptor sel : config.getDescriptors()) {
         if(dataflowMaxRunTime > 0) sel.setMaxRunTime(dataflowMaxRunTime);
         if(dataflowTaskSwitchingPeriod > 0) sel.setTaskSwitchingPeriod(dataflowTaskSwitchingPeriod);
+        if(numOfWorker > 0) sel.setNumberOfWorkers(numOfWorker);
+        if(numOfExecutorPerWorker > 0) sel.setNumberOfExecutorsPerWorker(numOfExecutorPerWorker);
       }
       OrderDataflowChainSubmitter submitter = new OrderDataflowChainSubmitter(client, dfsAppHome, config);
       submitter.submit(waitForRunningTimeout);
