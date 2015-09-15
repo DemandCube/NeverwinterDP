@@ -74,7 +74,7 @@ public class AppClient {
       appContext.setApplicationName(vmConfig.getName()); // application name
       appContext.setAMContainerSpec(amContainer);
       appContext.setResource(resource);
-      appContext.setQueue("default"); // queue 
+      appContext.setQueue("neverwinterdp"); // queue 
 
       // Submit application
       ApplicationId applicationId = appContext.getApplicationId();
