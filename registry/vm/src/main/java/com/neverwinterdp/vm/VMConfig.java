@@ -40,7 +40,7 @@ public class VMConfig {
   @Parameter(names = "--cpu-cores", description = "The request number of cpu cores")
   private int                 requestCpuCores  = 1;
   @Parameter(names = "--memory", description = "The request amount of memory in MB")
-  private int                 requestMemory    = 128;
+  private int                 requestMemory    = 256;
 
   @Parameter(names = "--app-home", description = "App Home")
   private String              appHome;

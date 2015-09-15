@@ -83,7 +83,7 @@ public class VMClient {
   }
   
   public VMDescriptor allocate(VMConfig vmConfig) throws Exception {
-    return allocate(vmConfig, this.waitForResultTimeout);
+    return allocate(vmConfig, waitForResultTimeout);
   }
   
   public VMDescriptor allocate(VMConfig vmConfig, long timeout) throws Exception {

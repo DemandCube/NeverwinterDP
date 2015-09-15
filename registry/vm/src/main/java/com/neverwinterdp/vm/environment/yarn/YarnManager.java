@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.hadoop.conf.Configuration;
@@ -52,6 +53,8 @@ public class YarnManager {
   private AMRMClientAsync<ContainerRequest> amrmClientAsync ;
   private NMClient nmClient;
   private ContainerRequestQueue containerRequestQueue = new ContainerRequestQueue ();
+  
+  private AtomicInteger countContainerRequest = new AtomicInteger();
   
   public Map<String, String> getYarnConfig() { return this.yarnConfig ; }
   
@@ -116,14 +119,11 @@ public class YarnManager {
   }
   
   public void asyncAdd(ContainerRequest containerReq, ContainerRequestCallback callback) {
-    logger.info("Start asyncAdd(ContainerRequest containerReq, ContainerRequestCallback callback)");
-    System.err.println("Start asyncAdd(ContainerRequest containerReq, ContainerRequestCallback callback)");
-    System.err.println(" container request hash code = " + containerReq.hashCode());
+    logger.info("Start asyncAdd count = " + countContainerRequest.incrementAndGet());
     containerReq.setCallback(callback);
     containerRequestQueue.offer(containerReq);
     amrmClientAsync.addContainerRequest(containerReq);
-    System.err.println("Finish asyncAdd(ContainerRequest containerReq, ContainerRequestCallback callback)");
-    logger.info("Finish asyncAdd(ContainerRequest containerReq, ContainerRequestCallback callback)");
+    logger.info("Finish asyncAdd");
   }
   
   public List<Container> getAllocatedContainers() throws YarnException, IOException {
