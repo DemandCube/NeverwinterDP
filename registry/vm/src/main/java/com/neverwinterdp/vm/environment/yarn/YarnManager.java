@@ -32,6 +32,7 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.Apps;
 import org.apache.hadoop.yarn.util.Records;
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,6 +183,8 @@ public class YarnManager {
   }
   
   class AMRMCallbackHandler implements AMRMClientAsync.CallbackHandler {
+    private AtomicInteger countContainerAllocate = new AtomicInteger();
+    
     public void onContainersCompleted(List<ContainerStatus> statuses) {
       logger.info("Start onContainersCompleted(List<ContainerStatus> statuses)");
       for (ContainerStatus status: statuses) {
@@ -196,8 +199,7 @@ public class YarnManager {
     }
 
     public void onContainersAllocated(List<Container> containers) {
-      logger.info("Start onContainersAllocated(List<Container> containers)");
-      System.err.println("Start onContainersAllocated(List<Container> containers)");
+      logger.info("Start onContainersAllocated count = " + countContainerAllocate.incrementAndGet());
       //TODO: review on allocated container code
       Container container = containers.get(0) ;
       ContainerRequest containerReq = containerRequestQueue.take(container);
@@ -206,7 +208,6 @@ public class YarnManager {
         //http://hadoop.apache.org/docs/r2.6.0/api/org/apache/hadoop/yarn/client/api/AMRMClient.html#removeContainerRequest(T)
         return;
       }
-      System.err.println(" container request hash code = " + containerReq.hashCode());
       containerReq.getCallback().onAllocate(YarnManager.this, containerReq, container);
       amrmClientAsync.removeContainerRequest(containerReq);
       
@@ -217,8 +218,7 @@ public class YarnManager {
 //        callback.onAllocate(YarnManager.this, container);
 //        amrmClientAsync.removeContainerRequest(callback.getContainerRequest());
 //      }
-      System.err.println("Finish onContainersAllocated(List<Container> containers)");
-      logger.info("Finish onContainersAllocated(List<Container> containers)");
+      logger.info("Finish onContainersAllocated");
     }
 
 
