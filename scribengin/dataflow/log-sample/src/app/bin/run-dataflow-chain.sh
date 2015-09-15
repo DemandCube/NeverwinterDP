@@ -93,7 +93,7 @@ $SHELL vm submit \
    --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE \
    --prop:num-of-stream=$NUM_OF_STREAM \
 
-$SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 600000
+$SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 30000
 
 $SHELL registry info --path /applications/log-sample/reports/generate/reports/vm-log-generator-1 --print-data-as-json
 
