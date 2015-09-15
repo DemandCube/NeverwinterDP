@@ -184,9 +184,10 @@ public class YarnManager {
   
   class AMRMCallbackHandler implements AMRMClientAsync.CallbackHandler {
     private AtomicInteger countContainerAllocate = new AtomicInteger();
+    private AtomicInteger countContainerComplete = new AtomicInteger();
     
     public void onContainersCompleted(List<ContainerStatus> statuses) {
-      logger.info("Start onContainersCompleted(List<ContainerStatus> statuses)");
+      logger.info("Start onContainersCompleted count = " + countContainerComplete.incrementAndGet());
       for (ContainerStatus status: statuses) {
         assert (status.getState() == ContainerState.COMPLETE);
         int exitStatus = status.getExitStatus();
