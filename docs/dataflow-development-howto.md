@@ -1,21 +1,21 @@
 **Table of Contents**  
 <!--*generated with [DocToc](http://doctoc.herokuapp.com/)* -->
 
-- [Introduction](#)
-  - [Sample code](#)
-  - [Overview](#)
-- [Develop The Log Splitter Dataflow](#)
-  - [The Log Splitter Diagram](#)
-  - [Implement The Dataflow Log Splitter Scribe](#)
-  - [Configure The Dataflow Log Splitter](#)
-  - [Package The Dataflow Log Splitter](#)
-  - [Deploy And Run The Dataflow Log Splitter](#)
-- [Develop A Dataflow Chain](#)
-  - [The Log Splitter Dataflow Chain Diagran](#)
-  - [Implement The Dataflow Log Splitter And Persister Scribe](#)
-  - [Dataflow Chain Configuration](#)
-  - [Package The Dataflow Chain](#)
-  - [Run The Dataflow Chain](#)
+- [Introduction](#introduction)
+  - [Sample code](#sample-code)
+  - [Overview](#overview)
+- [Develop The Log Splitter Dataflow](#develop-the-log-splitter-dataflow)
+  - [The Log Splitter Diagram](#the-log-splitter-diagram)
+  - [Implement The Dataflow Log Splitter Scribe](#implement-the-dataflow-log-splitter-scribe)
+  - [Configure The Dataflow Log Splitter](#configure-the-dataflow-log-splitter)
+  - [Package The Dataflow Log Splitter](#package-the-dataflow-log-splitter)
+  - [Deploy And Run The Dataflow Log Splitter](#deploy-and-run-the-dataflow-log-splitter)
+- [Develop A Dataflow Chain](#develop-a-dataflow-chain)
+  - [The Log Splitter Dataflow Chain Diagram](#the-log-splitter-dataflow-chain-diagram)
+  - [Implement The Dataflow Log Splitter And Persister Scribe](#implement-the-dataflow-log-splitter-and-persister-scribe)
+  - [Dataflow Chain Configuration](#dataflow-chain-configuration)
+  - [Package The Dataflow Chain](#package-the-dataflow-chain)
+  - [Run The Dataflow Chain](#run-the-dataflow-chain)
 
 #Introduction#
 
@@ -315,7 +315,7 @@ $SHELL registry dump --path /applications/log-sample
 
 The dataflow chain is designed in a way that the output of the previous dataflow is the input of the next dataflow.
 
-##The Log Splitter Dataflow Chain Diagran##
+##The Log Splitter Dataflow Chain Diagram##
 
 `````````
 
