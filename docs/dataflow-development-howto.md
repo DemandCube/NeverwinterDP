@@ -1,6 +1,26 @@
-#How to develop a Scribengin Dataflow#
+**Table of Contents**  
+<!--*generated with [DocToc](http://doctoc.herokuapp.com/)* -->
+
+- [Introduction](#)
+  - [Sample code](#)
+  - [Overview](#)
+- [Develop The Log Splitter Dataflow](#)
+  - [The Log Splitter Diagram](#)
+  - [Implement The Dataflow Log Splitter Scribe](#)
+  - [Configure The Dataflow Log Splitter](#)
+  - [Package The Dataflow Log Splitter](#)
+  - [Deploy And Run The Dataflow Log Splitter](#)
+- [Develop A Dataflow Chain](#)
+  - [The Log Splitter Dataflow Chain Diagran](#)
+  - [Implement The Dataflow Log Splitter And Persister Scribe](#)
+  - [Dataflow Chain Configuration](#)
+  - [Package The Dataflow Chain](#)
+  - [Run The Dataflow Chain](#)
+
+#Introduction#
 
 This howto will show you how to create, configure, and run a single, reliable dataflow
+
 
 ##Sample code##
 [You can find lots of sample code here](https://github.com/Nventdata/NeverwinterDP/tree/master/scribengin/dataflow/log-sample).  The code comes complete with unit tests, a release script, and a run script that allows you to deploy and run the sample in a single command.
@@ -20,7 +40,7 @@ In order to create a dataflow (or chain of dataflows) you need to prepare your s
   - Deploy the dataflow or dataflow chain to Scribengin
   - Run the dataflow or the dataflow chain
 
-
+###
 
 #Develop The Log Splitter Dataflow#
 
@@ -288,6 +308,8 @@ $SHELL vm info
 $SHELL registry dump --path /applications/log-sample
 
 ````````
+
+###
 
 #Develop A Dataflow Chain#
 
