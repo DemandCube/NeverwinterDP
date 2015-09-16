@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.hadoop.conf.Configuration;
@@ -31,6 +32,7 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.Apps;
 import org.apache.hadoop.yarn.util.Records;
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +54,8 @@ public class YarnManager {
   private AMRMClientAsync<ContainerRequest> amrmClientAsync ;
   private NMClient nmClient;
   private ContainerRequestQueue containerRequestQueue = new ContainerRequestQueue ();
+  
+  private AtomicInteger countContainerRequest = new AtomicInteger();
   
   public Map<String, String> getYarnConfig() { return this.yarnConfig ; }
   
@@ -116,14 +120,11 @@ public class YarnManager {
   }
   
   public void asyncAdd(ContainerRequest containerReq, ContainerRequestCallback callback) {
-    logger.info("Start asyncAdd(ContainerRequest containerReq, ContainerRequestCallback callback)");
-    System.err.println("Start asyncAdd(ContainerRequest containerReq, ContainerRequestCallback callback)");
-    System.err.println(" container request hash code = " + containerReq.hashCode());
+    logger.info("Start asyncAdd count = " + countContainerRequest.incrementAndGet());
     containerReq.setCallback(callback);
     containerRequestQueue.offer(containerReq);
     amrmClientAsync.addContainerRequest(containerReq);
-    System.err.println("Finish asyncAdd(ContainerRequest containerReq, ContainerRequestCallback callback)");
-    logger.info("Finish asyncAdd(ContainerRequest containerReq, ContainerRequestCallback callback)");
+    logger.info("Finish asyncAdd");
   }
   
   public List<Container> getAllocatedContainers() throws YarnException, IOException {
@@ -182,8 +183,11 @@ public class YarnManager {
   }
   
   class AMRMCallbackHandler implements AMRMClientAsync.CallbackHandler {
+    private AtomicInteger countContainerAllocate = new AtomicInteger();
+    private AtomicInteger countContainerComplete = new AtomicInteger();
+    
     public void onContainersCompleted(List<ContainerStatus> statuses) {
-      logger.info("Start onContainersCompleted(List<ContainerStatus> statuses)");
+      logger.info("Start onContainersCompleted count = " + countContainerComplete.incrementAndGet());
       for (ContainerStatus status: statuses) {
         assert (status.getState() == ContainerState.COMPLETE);
         int exitStatus = status.getExitStatus();
@@ -196,8 +200,7 @@ public class YarnManager {
     }
 
     public void onContainersAllocated(List<Container> containers) {
-      logger.info("Start onContainersAllocated(List<Container> containers)");
-      System.err.println("Start onContainersAllocated(List<Container> containers)");
+      logger.info("Start onContainersAllocated count = " + countContainerAllocate.incrementAndGet());
       //TODO: review on allocated container code
       Container container = containers.get(0) ;
       ContainerRequest containerReq = containerRequestQueue.take(container);
@@ -206,7 +209,6 @@ public class YarnManager {
         //http://hadoop.apache.org/docs/r2.6.0/api/org/apache/hadoop/yarn/client/api/AMRMClient.html#removeContainerRequest(T)
         return;
       }
-      System.err.println(" container request hash code = " + containerReq.hashCode());
       containerReq.getCallback().onAllocate(YarnManager.this, containerReq, container);
       amrmClientAsync.removeContainerRequest(containerReq);
       
@@ -217,8 +219,7 @@ public class YarnManager {
 //        callback.onAllocate(YarnManager.this, container);
 //        amrmClientAsync.removeContainerRequest(callback.getContainerRequest());
 //      }
-      System.err.println("Finish onContainersAllocated(List<Container> containers)");
-      logger.info("Finish onContainersAllocated(List<Container> containers)");
+      logger.info("Finish onContainersAllocated");
     }
 
 

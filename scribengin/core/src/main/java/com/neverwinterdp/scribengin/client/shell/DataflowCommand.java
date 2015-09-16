@@ -216,7 +216,7 @@ public class DataflowCommand extends Command {
       for(DataflowDescriptor sel : config.getDescriptors()) {
         if(dataflowMaxRunTime > 0) sel.setMaxRunTime(dataflowMaxRunTime);
         if(dataflowTaskSwitchingPeriod > 0) sel.setTaskSwitchingPeriod(dataflowTaskSwitchingPeriod);
-        if(numOfWorker > 0) sel.setNumberOfWorkers(numOfWorker);
+        if(numOfWorker >= 0) sel.setNumberOfWorkers(numOfWorker);
         if(numOfExecutorPerWorker > 0) sel.setNumberOfExecutorsPerWorker(numOfExecutorPerWorker);
       }
       OrderDataflowChainSubmitter submitter = new OrderDataflowChainSubmitter(client, dfsAppHome, config);

@@ -1,6 +1,7 @@
 package com.neverwinterdp.vm.environment.yarn;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.exceptions.YarnException;
