@@ -1,26 +1,26 @@
-#Overview#
+#How to develop a Scribengin Dataflow#
 
-This howto will show you how to create a single dataflow, how to configure and how to run
+This howto will show you how to create, configure, and run a single, reliable dataflow
 
-In order to create a dataflow  or dataflow chain you need to have the data, understand your data structure, come up an idea how do you want to transform your data and where do you want to store the transformed data.
+##Sample code##
+[You can find lots of sample code here](https://github.com/Nventdata/NeverwinterDP/tree/master/scribengin/dataflow/log-sample).  The code comes complete with unit tests, a release script, and a run script that allows you to deploy and run the sample in a single command.
 
-The following log splitter sample will show you how to create a dataflow, a dataflow chain with the requirements:
+##Overview##
+In order to create a dataflow (or chain of dataflows) you need to prepare your sources and sinks, have data in the source, understand your data structure, and decide how to transform the data.
 
-1. Prepare the data:
- - Create a kafka log appender, configure hadoop, zookeeper, kafka ... to use the kafka log appender to collect the log data into a log topic
- - Create a dummy server that is periodically output the log data to the kafka log topic as well.
-2. Implement the log splitter dataflow
-  - Create a splitter dataflow that split the log into 3 categories info, warn, error according to the log level
-  - Store each log category in 3 different kafka topic info, warn, error
-3. Implement the log splitter dataflow chain
-  - Reuse the log splitter as 2
-  - Create a persister dataflow, the persister should take the message output by (2) and store to kafka, hdfs or s3
-4. Configure, deploy and run
+1. Implement the log splitter dataflow
+  - Create a dataflow that reads in logs from Kafka
+  - Based on the log level, write that log to a corresponding kafka topic - info, warn, and error
+1. Implement the log splitter dataflow chain
+  - Create a persister dataflow
+  - The persister should read in logs from the kafka topics info, warn, and error 
+  - The persister will then move the logs to permanent storage - kafka, hdfs or s3
+1. Configure, deploy and run
   - Create a configuration for the single dataflow and dataflow chain
-  - Deploy the dataflow or dataflow chain to scribengin
+  - Deploy the dataflow or dataflow chain to Scribengin
   - Run the dataflow or the dataflow chain
 
-You can find the log sample code in the NeverwinterDP/scribengin/dataflow/log-sample project. The code come with unit test, release script, and run script that allow you to deploy and run the sample in a single command.
+
 
 #Develop The Log Splitter Dataflow#
 
@@ -46,7 +46,7 @@ You can find the log sample code in the NeverwinterDP/scribengin/dataflow/log-sa
 
 ##Implement The Dataflow Log Splitter Scribe##
 
-A Dataflow Scribe is a class that allow you to customize how to transform the data and how to and where to stored the transformed data.
+A Scribe is the class that allows you to customize the transformation of your data.  It lets your dataflow choose how and where to store the transformed data.
 
 `````````
   public class LogMessageSplitter extends ScribeAbstract {
@@ -66,13 +66,15 @@ A Dataflow Scribe is a class that allow you to customize how to transform the da
 
 `````````
 
-DataflowMessage:     is an object that hold your data in byte format.
-DataflowTaskContext: is an object that hold the dataflow running environment and resources 
+DataflowMessage:     the object that holds your data in byte format.
+DataflowTaskContext: the object that hold the dataflow running environment and resources 
 
 
 ##Configure The Dataflow Log Splitter##
 
-The configuration look as follows
+The Log Splitter configuration.  
+This is required for Scribengin to parse and create the dataflow
+
 
 `````````
   {
@@ -113,18 +115,18 @@ The configuration look as follows
 
 Where:
 
-* id                        : The unique identifier for the dataflow. You cannot have 2 dataflow with the same id running at the same time.
-* name                      : The name of the dataflow, you can have one or more dataflow with the same name
-* numberOfWorkers           : The number of vm or server the scribengin should allocate for your dataflow
-* numberOfExecutorsPerWorker: The number of executor or thread to run the dataflow task per worker
+* id                        : The unique identifier for the dataflow. Every dataflow running on Scribengin MUST have a unique ID.
+* name                      : The name of the dataflow.  This does not need to be unique.
+* numberOfWorkers           : The number of vm/containers Scribengin should allocate for the dataflow
+* numberOfExecutorsPerWorker: The number of executors (threads) to run per worker
 * taskSwitchingPeriod       : How long an executor should work on a task before it switches to the other one
-* maxRunTime                : You can control how long your dataflow should run. -1 value will make the dataflow run forever
-* scribe                    : The scribe logic class that you can control how to transform your data and where to output the transformed data
-* sourceDescriptor          : The configuration for the data source. Depending on the source type, you have the different configuration and parameter
+* maxRunTime                : How long the dataflow should run. Setting to -1 will make the dataflow run forever.
+* scribe                    : The scribe class to use. Controls how to transform your data and where to output the transformed data
+* sourceDescriptor          : The configuration for the data source. Depending on the source type, there are different configurations and parameters
  * Kafka                    :
  * HDFS                     :
  * S3                       :
-* sinkDescriptors           : The list of the configuration for the data sink. Depending on the sink type you have different configuration and parameter
+* sinkDescriptors           : The list of the configurations for the data sink. Depending on the sink type you have different configurations and parameters.  Multiple sinks can easily be configured.
  * Kafka                    :
  * HDFS                     :
  * S3                       :
@@ -164,9 +166,21 @@ The dataflow should be packaged as show below
 
 Where the conf and lib directory are mandatory and the bin directory is optional
 
-* conf: The dataflow configuration, dataflow chain configuration, log4j configuration ... should be placed in this directory
+* conf: Dataflow configuration, dataflow chain configuration, log4j configuration ... should be placed in this directory
 * lib:  The lib directory should contain the library of your scribe class and its dependencies
 * bin:  This is an optional directory. In order to a dataflow, you may need many extra steps such launch the data generator, deploy the dataflow package... and then run. You may want to write a script to simplify the launch process and the script should be placed in the bin directory
+
+To automatically build the [log-sample](https://github.com/Nventdata/NeverwinterDP/tree/master/scribengin/dataflow/log-sample):
+```
+cd NeverwinterDP
+gradle clean build install release -x test
+
+cd NeverwinterDP/scribengin/dataflow/log-sample/
+gradle clean build install release -x test
+
+#Your $APP_DIR will now be set up here:
+#NeverwinterDP/scribengin/dataflow/log-sample/build/release/dataflow/log-sample/
+```
 
 ##Deploy And Run The Dataflow Log Splitter##
 
@@ -176,15 +190,16 @@ Make sure that your scribengin cluster is running:
 
 1. Make sure zookeeper is running
 2. Make sure hadoop-master and hadoop-worker are running
-3. The command $path/scribengin/bin/shell.sh scribengin info should give a good report and status
+3. The command ```$path/scribengin/bin/shell.sh scribengin info``` should give a good report and healthy status
 
 To run a dataflow , you will need to upload the dataflow app to dfs and then submit the dataflow to the scribengin. The scribengin service will be responsible to init and launch the dataflow master according to the dataflow configuration. The dataflow master will continue to init the registry and launch the dataflow tasl worker.
 
 
-Command to upload and run the dataflow
+Commands to upload and run the dataflow
 
 ````````
-SHELL=./scribengin/bin/shell.sh
+SHELL=NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh
+APP_DIR=../dataflow/log-sample/
 
 #########################################################################################################################
 # Upload The App                                                                                                        #
@@ -195,29 +210,32 @@ $SHELL vm upload-app --local $APP_DIR --dfs /applications/log-sample
 #########################################################################################################################
 # Launch A Single Dataflow                                                                                              #
 #########################################################################################################################
+#Choose any of the splitter dataflows (or any dataflow json configuration)
+DATAFLOW_DESCRIPTOR_FILE=NeverwinterDP/scribengin/dataflow/log-sample/build/release/dataflow/log-sample/conf/splitter/kafka-to-kafka-log-splitter-dataflow.json
+
 $SHELL dataflow submit \
   --dfs-app-home /applications/log-sample \
   --dataflow-config $DATAFLOW_DESCRIPTOR_FILE \
   --dataflow-id log-splitter-dataflow-1 --max-run-time 180000
 ````````
 
-In the log sample program , You can find the log splitter script log-sample/src/app/bin/run-splitter.sh. The script does:
+In the [sample code](https://github.com/Nventdata/NeverwinterDP/tree/master/scribengin/dataflow/log-sample) , You can find the log splitter automation script log-sample/src/app/bin/run-splitter.sh. The script does:
 
 1. Upload the dataflow package
-2. Generate the message
- * Submit the log generator app 
- * Wait the log generator app to terminate
+2. Generate messages into Kafka via the log generator app
+ * Submit the log generator app to YARN
+ * Wait for the log generator app to terminate
 3. Run the log splitter dataflow
  * Submit the log splitter dataflow
  * Wait for the dataflow termination
  * Print the dataflow splitter info
 4. Run the log message validator
- * Submit the log validator app
+ * Submit the log validator app to YARN
  * Wait for the log validator app terminates.
 5. Print scribengin , registry and dataflow information
 
 ````````
-
+#run-splitter.sh
 SHELL=./scribengin/bin/shell.sh
 
 #########################################################################################################################
@@ -302,7 +320,7 @@ The dataflow chain is designed in a way that the output of the previous dataflow
 ##Implement The Dataflow Log Splitter And Persister Scribe##
 
 1. We can reuse the log message splitter from the previous dataflow
-2. Implement a log persister that will save the log message to the different location according to the sink configuration.
+2. Implement a log persister that will save the log message to a different location according to the sink configuration.
 
 ``````
   public class LogMessageSplitter extends ScribeAbstract {
@@ -340,7 +358,7 @@ The dataflow chain is designed in a way that the output of the previous dataflow
 
 ##Dataflow Chain Configuration##
 
-The dataflow chain configuration is quite similar to the dataflow configuration. The different in the configuration is in the chain configuration, you have a list of dataflow configuration and you have to make sure that the output (sink) of one dataflow is the input (source) of the other dataflow. 
+The dataflow chain configuration is similar to the dataflow configuration. The difference in configuration is in the chain configuration; There is a list of dataflow configurations and you have to make sure that the output (sink) of one dataflow is the input (source) of the other dataflow. 
 
 `````````
 {
@@ -445,27 +463,28 @@ The dataflow chain configuration is quite similar to the dataflow configuration.
 
 `````````
 
-* submitter: allow you to select the submitter type , either order or parallel
- * order make sure that the dataflow submit in the order, the dataflow has to successfull submit and have the running status before the next one is submitted
- * parallel allow all the dataflows are submitted in the same time by a isolated thread.
+* submitter: allows you to select the submitter type , either order or parallel
+  * order - the dataflows will submit in the order; each dataflow must successfully submit and start running before the next dataflow is submitted.  For a chain, it is recommended to submit in order
+  * parallel - allow all the dataflows are submitted at the same time by a isolated thread.
 * descriptors: The list of the dataflow descriptor
 
 ##Package The Dataflow Chain##
 
-Same as the dataflow package.  In fact you can package multiple dataflow or a dataflow chain into one package and deploy once.
+Same as the dataflow package.  You can package multiple dataflows or dataflow chains into one package and deploy them all at once.
 
 
 ##Run The Dataflow Chain##
 
-As running the dataflow, you have to make sure that your scribengin cluster is running:
+While running the dataflow, you have to make sure that your scribengin cluster is running:
 
 * Make sure zookeeper is running
 * Make sure hadoop-master and hadoop-worker are running
-* The command $path/scribengin/bin/shell.sh scribengin info should give a good report and status
+* The command ```$path/scribengin/bin/shell.sh scribengin info``` should give a good report and healthy status
 
-The following script is take from log-sample/src/app/bin/run-dataflow-chain.sh. It allows you to run deploy the dataflow package, run the message generator, run the dataflow chain and then run the validator
+The following script is taken from log-sample/src/app/bin/run-dataflow-chain.sh. It allows you to deploy the dataflow package, run the message generator, run the dataflow chain, and then run the validator
 
 ``````````
+#run-dataflow-chain.sh
 SHELL=./scribengin/bin/shell.sh
 
 
