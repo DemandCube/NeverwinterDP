@@ -202,7 +202,7 @@ public class DataflowCommand extends Command {
 
     
     @Parameter(names = "--wait-for-running-timeout", description = "The dataflow path to deploy")
-    private long waitForRunningTimeout = 120000;
+    private long waitForRunningTimeout = 180000;
     
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
