@@ -200,25 +200,19 @@ public class YarnManager {
     }
 
     public void onContainersAllocated(List<Container> containers) {
-      logger.info("Start onContainersAllocated count = " + countContainerAllocate.incrementAndGet());
-      //TODO: review on allocated container code
-      Container container = containers.get(0) ;
-      ContainerRequest containerReq = containerRequestQueue.take(container);
-      if(containerReq ==null) {
-        //TODO: research on this issue
-        //http://hadoop.apache.org/docs/r2.6.0/api/org/apache/hadoop/yarn/client/api/AMRMClient.html#removeContainerRequest(T)
-        return;
+      logger.info("Start onContainersAllocated count = " + countContainerAllocate.addAndGet(containers.size()));
+      for (int i = 0; i < containers.size(); i++) {
+        //TODO: review on allocated container code
+        Container container = containers.get(i) ;
+        ContainerRequest containerReq = containerRequestQueue.take(container);
+        if(containerReq ==null) {
+          //TODO: research on this issue
+          //http://hadoop.apache.org/docs/r2.6.0/api/org/apache/hadoop/yarn/client/api/AMRMClient.html#removeContainerRequest(T)
+          return;
+        }
+        containerReq.getCallback().onAllocate(YarnManager.this, containerReq, container);
+        amrmClientAsync.removeContainerRequest(containerReq);
       }
-      containerReq.getCallback().onAllocate(YarnManager.this, containerReq, container);
-      amrmClientAsync.removeContainerRequest(containerReq);
-      
-//      for (int i = 0; i < containers.size(); i++) {
-//        System.err.println("  container " + i);
-//        Container container = containers.get(i) ;
-//        ContainerRequestCallback callback = containerRequestQueue.take(container);
-//        callback.onAllocate(YarnManager.this, container);
-//        amrmClientAsync.removeContainerRequest(callback.getContainerRequest());
-//      }
       logger.info("Finish onContainersAllocated");
     }
 
