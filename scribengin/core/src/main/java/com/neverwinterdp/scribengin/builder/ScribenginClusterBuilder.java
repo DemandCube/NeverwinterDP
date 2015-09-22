@@ -55,15 +55,15 @@ public class ScribenginClusterBuilder {
     info.setTitle("Wait for scribengin master 1 events to make sure it is launched properly");
     System.out.println(info.getFormatText());
     
-    h1("Create Scribengin Master 2");
-    sribenginWaitingEvents = 
-        new ScribenginWaitingEventListener(vmClusterBuilder.getVMClient().getRegistry());
-    sribenginWaitingEvents.waitVMStatus("vm-scribengin-master-2 running", "vm-scribengin-master-2", VMStatus.RUNNING);
-    scribenginClient.createVMScribenginMaster(vmClient, "vm-scribengin-master-2") ;
-    sribenginWaitingEvents.waitForEvents(60000);
-    info = sribenginWaitingEvents.getTabularFormaterEventLogInfo();
-    info.setTitle("Wait for scribengin master 2 events to make sure it is launched properly");
-    System.out.println(info.getFormatText());
+//    h1("Create Scribengin Master 2");
+//    sribenginWaitingEvents = 
+//        new ScribenginWaitingEventListener(vmClusterBuilder.getVMClient().getRegistry());
+//    sribenginWaitingEvents.waitVMStatus("vm-scribengin-master-2 running", "vm-scribengin-master-2", VMStatus.RUNNING);
+//    scribenginClient.createVMScribenginMaster(vmClient, "vm-scribengin-master-2") ;
+//    sribenginWaitingEvents.waitForEvents(60000);
+//    info = sribenginWaitingEvents.getTabularFormaterEventLogInfo();
+//    info.setTitle("Wait for scribengin master 2 events to make sure it is launched properly");
+//    System.out.println(info.getFormatText());
   }
 
   public void shutdown() throws Exception {

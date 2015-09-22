@@ -28,14 +28,14 @@ public class YarnVMServicePlugin implements VMServicePlugin {
   
   @Override
   synchronized public void allocateVM(VMService vmService, final VMConfig vmConfig) throws RegistryException, Exception {
-    logger.info("Start allocate(VMService vmService, VMDescriptor vmDescriptor)");
+    logger.info("Start allocate request for " + vmConfig.getName());
     final ContainerRequest containerReq = 
       yarnManager.createContainerRequest(0, vmConfig.getRequestCpuCores(), vmConfig.getRequestMemory());
     
     YarnManager.ContainerRequestCallback callback = new YarnManager.ContainerRequestCallback() {
       @Override
       public void onAllocate(YarnManager manager, ContainerRequest containerRequest, Container container) {
-        logger.info("Start onAllocate(Container container)");
+        logger.info("Start onAllocate for " + vmConfig.getName());
         vmConfig.
           setSelfRegistration(false).
           addHadoopProperty(manager.getYarnConfig());
@@ -44,7 +44,7 @@ public class YarnVMServicePlugin implements VMServicePlugin {
         } catch (YarnException | IOException e) {
           logger.error("Cannot start the container", e);
         }
-        logger.info("Finish onAllocate(Container container)");
+        logger.info("Finish onAllocate  for " + vmConfig.getName());
       }
       
       public String toString() {
@@ -54,7 +54,7 @@ public class YarnVMServicePlugin implements VMServicePlugin {
       }
     };
     yarnManager.asyncAdd(containerReq, callback);
-    logger.info("Finish allocate(VMService vmService, VMDescriptor vmDescriptor)");
+    logger.info("Finish allocate request for " + vmConfig.getName());
   }
 
   @Override

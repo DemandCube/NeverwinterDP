@@ -120,7 +120,9 @@ public class RegistryImpl implements Registry {
   }
   
   @Override
-  public boolean isConnect() { return zkClient != null && zkClient.getState().isConnected(); }
+  public boolean isConnect() { 
+    return zkClient != null && zkClient.getState().isConnected(); 
+  }
   
   
   @Override
