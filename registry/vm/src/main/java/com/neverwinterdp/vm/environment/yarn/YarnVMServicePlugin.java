@@ -13,7 +13,6 @@ import com.mycila.jmx.annotation.JmxBean;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
-import com.neverwinterdp.vm.environment.yarn.YarnManager.ContainerRequest;
 import com.neverwinterdp.vm.service.VMService;
 import com.neverwinterdp.vm.service.VMServicePlugin;
 

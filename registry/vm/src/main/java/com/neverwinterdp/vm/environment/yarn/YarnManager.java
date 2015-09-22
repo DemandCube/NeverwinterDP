@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
@@ -240,64 +239,64 @@ public class YarnManager {
     synchronized public void offer(ContainerRequest request) {
       queues.add(request);
     }
-    
     synchronized public ContainerRequest take(Container container) {
-      ContainerRequest containerReq = null ;
-      System.err.println("  take for container " + container) ;
-      System.err.println("    callback in queues " + queues.size()) ;
       int cpuCores = container.getResource().getVirtualCores();
       int memory = container.getResource().getMemory();
-      System.err.println("    container allocate cpu  " + cpuCores) ;
-      System.err.println("    container allocate memory " + memory) ;
       for(int i = 0; i < queues.size(); i++) {
         ContainerRequest sel = queues.get(i);
-        System.err.println("    check container request cpu = " + sel.getCapability().getVirtualCores()) ;
-        if(cpuCores < sel.getCapability().getVirtualCores()) continue;
-        System.err.println("    check container request memory = " + sel.getCapability().getMemory()) ;
-        if(memory < sel.getCapability().getMemory()) continue;
-        if(containerReq == null) {
-          containerReq = sel;
-        } else {
-          int callbackMemory = containerReq.getCapability().getMemory();
-          int callbackCpuCores = containerReq.getCapability().getVirtualCores();
-          //Select closest match memory and cpu cores requirement
-          if(sel.getCapability().getMemory() < callbackMemory && 
-             sel.getCapability().getVirtualCores() < callbackCpuCores) {
-            containerReq = sel;
-            continue;
-          }
-          if(sel.getCapability().getVirtualCores() < callbackCpuCores) {
-            containerReq = sel;
-            continue;
-          }
-          if(sel.getCapability().getMemory() < callbackMemory) {
-            containerReq = sel;
-            continue;
-          }
+        if(cpuCores == sel.getCapability().getVirtualCores() && 
+            memory  == sel.getCapability().getMemory()) {
+          queues.remove(sel);
+          return sel;
         }
       }
-      if(containerReq != null) queues.remove(containerReq);
-      return containerReq;
+      if(queues.size() > 0) {
+        ContainerRequest sel = queues.get(0);
+        return sel;
+      }
+      return null;
     }
+    
+//    synchronized public ContainerRequest take(Container container) {
+//      ContainerRequest containerReq = null ;
+//      System.err.println("  take for container " + container) ;
+//      System.err.println("    callback in queues " + queues.size()) ;
+//      int cpuCores = container.getResource().getVirtualCores();
+//      int memory = container.getResource().getMemory();
+//      System.err.println("    container allocate cpu  " + cpuCores) ;
+//      System.err.println("    container allocate memory " + memory) ;
+//      for(int i = 0; i < queues.size(); i++) {
+//        ContainerRequest sel = queues.get(i);
+//        System.err.println("    check container request cpu = " + sel.getCapability().getVirtualCores()) ;
+//        if(cpuCores < sel.getCapability().getVirtualCores()) continue;
+//        System.err.println("    check container request memory = " + sel.getCapability().getMemory()) ;
+//        if(memory < sel.getCapability().getMemory()) continue;
+//        if(containerReq == null) {
+//          containerReq = sel;
+//        } else {
+//          int callbackMemory = containerReq.getCapability().getMemory();
+//          int callbackCpuCores = containerReq.getCapability().getVirtualCores();
+//          //Select closest match memory and cpu cores requirement
+//          if(sel.getCapability().getMemory() < callbackMemory && 
+//             sel.getCapability().getVirtualCores() < callbackCpuCores) {
+//            containerReq = sel;
+//            continue;
+//          }
+//          if(sel.getCapability().getVirtualCores() < callbackCpuCores) {
+//            containerReq = sel;
+//            continue;
+//          }
+//          if(sel.getCapability().getMemory() < callbackMemory) {
+//            containerReq = sel;
+//            continue;
+//          }
+//        }
+//      }
+//      if(containerReq != null) queues.remove(containerReq);
+//      return containerReq;
+//    }
   }
   
-  static public class ContainerRequest extends org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest {
-    static public AtomicLong idTracker = new AtomicLong() ;
-    private long id ;
-    private ContainerRequestCallback callback ;
-    
-    public ContainerRequest(Resource capability, String[] nodes, String[] racks, Priority priority) {
-      super(capability, nodes, racks, priority);
-      id = idTracker.getAndIncrement();
-    }
-
-    public long getId() { return id; }
-
-    public ContainerRequestCallback getCallback() { return callback; }
-    public void setCallback(ContainerRequestCallback callback) {
-      this.callback = callback;
-    }
-  }
   
   static public interface ContainerRequestCallback {
     public void onAllocate(YarnManager manager, ContainerRequest request, Container container) ;
