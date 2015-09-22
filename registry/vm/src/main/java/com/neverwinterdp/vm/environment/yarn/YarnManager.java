@@ -201,7 +201,7 @@ public class YarnManager {
 
     public void onContainersAllocated(List<Container> containers) {
       int numOfContainer = containers.size();
-      logger.info("Start onContainersAllocated count = " + countContainerAllocate.addAndGet(numOfContainer) + ", containers = " + numOfContainer);
+      logger.info("Start onContainersAllocated containers = " + numOfContainer);
       for (int i = 0; i < containers.size(); i++) {
         //TODO: review on allocated container code
         Container container = containers.get(i) ;
@@ -214,6 +214,7 @@ public class YarnManager {
         }
         containerReq.getCallback().onAllocate(YarnManager.this, containerReq, container);
         amrmClientAsync.removeContainerRequest(containerReq);
+        logger.info("  onContainersAllocated count = " + countContainerAllocate.incrementAndGet());
       }
       logger.info("Finish onContainersAllocated");
     }
