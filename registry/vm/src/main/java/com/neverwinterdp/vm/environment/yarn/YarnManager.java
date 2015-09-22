@@ -252,6 +252,7 @@ public class YarnManager {
       }
       if(queues.size() > 0) {
         ContainerRequest sel = queues.get(0);
+        queues.remove(sel);
         return sel;
       }
       return null;
