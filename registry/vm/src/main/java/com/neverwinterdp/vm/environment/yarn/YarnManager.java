@@ -200,12 +200,14 @@ public class YarnManager {
     }
 
     public void onContainersAllocated(List<Container> containers) {
-      logger.info("Start onContainersAllocated count = " + countContainerAllocate.addAndGet(containers.size()));
+      int numOfContainer = containers.size();
+      logger.info("Start onContainersAllocated count = " + countContainerAllocate.addAndGet(numOfContainer) + ", containers = " + numOfContainer);
       for (int i = 0; i < containers.size(); i++) {
         //TODO: review on allocated container code
         Container container = containers.get(i) ;
         ContainerRequest containerReq = containerRequestQueue.take(container);
         if(containerReq ==null) {
+          logger.info("  onContainersAllocated: ignore container " + i);
           //TODO: research on this issue
           //http://hadoop.apache.org/docs/r2.6.0/api/org/apache/hadoop/yarn/client/api/AMRMClient.html#removeContainerRequest(T)
           continue;
