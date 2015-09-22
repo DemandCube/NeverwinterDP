@@ -208,7 +208,7 @@ public class YarnManager {
         if(containerReq ==null) {
           //TODO: research on this issue
           //http://hadoop.apache.org/docs/r2.6.0/api/org/apache/hadoop/yarn/client/api/AMRMClient.html#removeContainerRequest(T)
-          return;
+          continue;
         }
         containerReq.getCallback().onAllocate(YarnManager.this, containerReq, container);
         amrmClientAsync.removeContainerRequest(containerReq);
