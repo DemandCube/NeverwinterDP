@@ -39,7 +39,8 @@ public class KafkaPartitionReader {
   private ByteBufferMessageSet       currentMessageSet;
   private Iterator<MessageAndOffset> currentMessageSetIterator;
 
-  public KafkaPartitionReader(String name, String zkConnect, String topic, PartitionMetadata partitionMetadata) {
+  public KafkaPartitionReader(String name, String zkConnect, String topic, 
+      PartitionMetadata partitionMetadata) throws Exception {
     this.name = name;
     this.zkConnect = zkConnect;
     this.topic = topic;
@@ -54,10 +55,37 @@ public class KafkaPartitionReader {
   
   public void setFetchSize(int size) { this.fetchSize = size; }
   
-  public void reconnect() {
+  public void reconnect() throws Exception {
     if(consumer != null) consumer.close();
     Broker broker = partitionMetadata.leader();
-    consumer = new SimpleConsumer(broker.host(), broker.port(), 100000, 64 * 1024, name);
+    if(broker != null) {
+      consumer = new SimpleConsumer(broker.host(), broker.port(), 100000, 64 * 1024, name);
+    } else {
+      reconnect(3, 5000);
+    }
+  }
+  
+  public void reconnect(int retry, long retryDelay) throws Exception {
+    if(consumer != null) consumer.close();
+    Exception error = null ;
+    for(int i = 0; i < retry; i++) {
+      Thread.sleep(retryDelay);
+      //Refresh the partition metadata
+      try {
+      KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnect);
+      kafkaTool.connect();
+      this.partitionMetadata = kafkaTool.findPartitionMetadata(topic, partitionMetadata.partitionId());
+      kafkaTool.close();
+      Broker broker = partitionMetadata.leader();
+      if(broker != null) {
+        consumer = new SimpleConsumer(broker.host(), broker.port(), 100000, 64 * 1024, name);
+        return;
+      }
+      } catch(Exception ex) {
+        error = ex ;
+      }
+    }
+    throw new Exception("Cannot connect after " + retry + " times", error);
   }
   
   public void commit() throws Exception {
@@ -174,18 +202,11 @@ public class KafkaPartitionReader {
     for(int i = 0; i < retry; i++) {
       try {
         if(error != null) {
-            Thread.sleep(retryDelay);
-            //Refresh the partition metadata
-            KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnect);
-            kafkaTool.connect();
-            this.partitionMetadata = kafkaTool.findPartitionMetadata(topic, partitionMetadata.partitionId());
-            kafkaTool.close();
-            reconnect();
-          }
+          reconnect(1, retryDelay);
+        }
         return op.execute();
       } catch(Exception ex) {
         error = ex;
-        System.err.println(op.getClass().getSimpleName() + " try " + (i + 1) + " error: " + ex.getMessage()) ;
         //ex.printStackTrace();
       }
     }
