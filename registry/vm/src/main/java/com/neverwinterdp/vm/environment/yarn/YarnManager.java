@@ -72,9 +72,6 @@ public class YarnManager {
       vmConfig.overrideHadoopConfiguration(conf);
       
       amrmClient = AMRMClient.createAMRMClient();
-      amrmClient.init(conf);
-      amrmClient.start();
-
       
       amrmClientAsync = AMRMClientAsync.createAMRMClientAsync(amrmClient, 1000, new AMRMCallbackHandler());
       amrmClientAsync.init(conf);
