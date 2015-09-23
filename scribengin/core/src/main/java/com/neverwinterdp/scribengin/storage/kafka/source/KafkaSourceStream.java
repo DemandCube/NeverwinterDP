@@ -11,10 +11,6 @@ public class KafkaSourceStream implements SourceStream {
   private StreamDescriptor descriptor;
   private PartitionMetadata partitionMetadata;
   
-  public KafkaSourceStream(StreamDescriptor descriptor) {
-    this.descriptor = descriptor;
-  }
-  
   public KafkaSourceStream(StorageDescriptor storageDescriptor, PartitionMetadata metadata) {
     descriptor = new StreamDescriptor(storageDescriptor);
     descriptor.setId(metadata.partitionId());

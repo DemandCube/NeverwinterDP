@@ -16,7 +16,8 @@ public class RawKafkaSourceStreamReader implements SourceStreamReader {
   private KafkaPartitionReader partitionReader ;
   private CommitPoint lastCommitInfo ;
   
-  public RawKafkaSourceStreamReader(StreamDescriptor descriptor, PartitionMetadata partitionMetadata) {
+  public RawKafkaSourceStreamReader(StreamDescriptor descriptor, 
+      PartitionMetadata partitionMetadata) throws Exception {
     this.descriptor = descriptor;
     this.partitionReader = 
         new KafkaPartitionReader(descriptor.attribute("name"), descriptor.attribute("zk.connect"), descriptor.attribute("topic"), partitionMetadata);
