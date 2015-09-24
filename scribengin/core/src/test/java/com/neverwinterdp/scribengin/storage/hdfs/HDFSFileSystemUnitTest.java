@@ -76,6 +76,6 @@ public class HDFSFileSystemUnitTest {
       System.err.println("TODO: test concat method with real HDFS");
     }
     
-    HDFSUtil.concat(fs, concatPath, path, true);
+    HDFSUtil.concat(fs, concatPath, path);
   }
 }

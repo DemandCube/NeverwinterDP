@@ -58,7 +58,7 @@ public class HDFSSequenceFileUnitTest {
     
     Path[] allSeqPath = seqPathHolder.toArray(new Path[seqPathHolder.size()]);
     Path all = new Path("./build/hdfs/seqfiles/all.seq") ;
-    HDFSUtil.concat(fs, all, allSeqPath, true);
+    HDFSUtil.concat(fs, all, allSeqPath);
   
     SequenceFile.Reader reader = new SequenceFile.Reader(conf, SequenceFile.Reader.file(all));
     while (reader.next(key, value)) {

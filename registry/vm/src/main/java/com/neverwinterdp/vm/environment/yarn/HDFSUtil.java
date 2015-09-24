@@ -34,18 +34,12 @@ public class HDFSUtil {
       }
       output.hflush();
       output.close();
-    } else {
-      fs.createNewFile(dest);
-      fs.concat(dest, src);
-    }
-  }
-  
-  static public void concat(FileSystem fs, Path dest, Path[] src, boolean deleteSrc) throws IOException {
-    concat(fs, dest, src);
-    if(deleteSrc) {
       for(int i = 0; i < src.length; i++) {
         fs.delete(src[i], true);
       }
+    } else {
+      fs.createNewFile(dest);
+      fs.concat(dest, src);
     }
   }
   
