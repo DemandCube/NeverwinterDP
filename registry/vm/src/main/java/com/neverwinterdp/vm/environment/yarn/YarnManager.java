@@ -76,7 +76,6 @@ public class YarnManager {
       amrmClientAsync = AMRMClientAsync.createAMRMClientAsync(amrmClient, 1000, new AMRMCallbackHandler());
       amrmClientAsync.init(conf);
       amrmClientAsync.start();
-      
       nmClient = NMClient.createNMClient();
       nmClient.init(conf);
       nmClient.start();
@@ -115,11 +114,12 @@ public class YarnManager {
     Priority containerPriority = Priority.newInstance(priority);
     //Resource requirements for worker containers
     Resource resource = Resource.newInstance(memory, numOfCores);
-    ContainerRequest containerReq =  new ContainerRequest(resource, null /* hosts*/, null /*racks*/, containerPriority);
+    ContainerRequest containerReq =  
+        new ContainerRequest(resource, null /* hosts*/, null /*racks*/, containerPriority);
     return containerReq;
   }
   
-  public void asyncAdd(ContainerRequest containerReq, ContainerRequestCallback callback) {
+  synchronized public void asyncAdd(ContainerRequest containerReq, ContainerRequestCallback callback) {
     logger.info("Start asyncAdd count = " + countContainerRequest.incrementAndGet());
     containerReq.setCallback(callback);
     containerRequestQueue.offer(containerReq);
@@ -231,6 +231,7 @@ public class YarnManager {
       //TODO: handle shutdown request
     }
 
+    
     public float getProgress() { return 0; }
   }
   
