@@ -35,6 +35,7 @@ public class HDFSUtil {
       output.hflush();
       output.close();
     } else {
+      fs.createNewFile(dest);
       fs.concat(dest, src);
     }
   }
