@@ -1,13 +1,12 @@
 package com.neverwinterdp.vm.environment.yarn;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 
 public class HDFSUtil {
@@ -17,21 +16,27 @@ public class HDFSUtil {
     return Integer.parseInt(name.substring(dashIdx + 1)) ;
   }
   
+  
+  
   static public void concat(FileSystem fs, Path dest, Path[] src) throws IOException {
-    FSDataOutputStream output = fs.create(dest) ;
-    for(int i = 0; i < src.length; i++) {
-      FSDataInputStream is = fs.open(src[i]);
-      //BufferedInputStream buffer = new BufferedInputStream(is);
-      byte[] data = new byte[4912];
-      int available = -1;
-      while ((available = is.read(data)) > -1) {
-        output.write(data, 0, available);
+    if(fs instanceof LocalFileSystem) {
+      FSDataOutputStream output = fs.create(dest) ;
+      for(int i = 0; i < src.length; i++) {
+        FSDataInputStream is = fs.open(src[i]);
+        //BufferedInputStream buffer = new BufferedInputStream(is);
+        byte[] data = new byte[4912];
+        int available = -1;
+        while ((available = is.read(data)) > -1) {
+          output.write(data, 0, available);
+        }
+        is.close();
+        //buffer.close();
       }
-      is.close();
-      //buffer.close();
+      output.hflush();
+      output.close();
+    } else {
+      fs.concat(dest, src);
     }
-    output.hflush();
-    output.close();
   }
   
   static public void concat(FileSystem fs, Path dest, Path[] src, boolean deleteSrc) throws IOException {
