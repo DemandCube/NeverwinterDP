@@ -36,6 +36,19 @@ function get_opt() {
   echo $DEFAULT_VALUE
 }
 
+function has_opt() {
+  OPT_NAME=$1
+  shift
+  #Par the parameters
+  for i in "$@"; do
+    if [[ $i == $OPT_NAME ]] ; then
+      echo "true"
+      return
+    fi
+  done
+  echo "false"
+}
+
 
 #########################################################################################################################
 # Setup environment and collect the setup parameters                                                                    #
@@ -57,6 +70,8 @@ KILL_WORKER_RANDOM=$(get_opt --kill-worker-random 'false' $@)
 KILL_WORKER_MAX=$(get_opt --kill-worker-max '5' $@)
 KILL_WORKER_PERIOD=$(get_opt --kill-worker-period '60000' $@)
 
+DUMP_PERIOD=$(get_opt --dump-period '15000' $@)
+VALIDATOR_DISABLE=$(has_opt "--validator-disable" $@ )
 
 DATAFLOW_DESCRIPTOR_FILE=""
 LOG_VALIDATOR_VALIDATE=""
@@ -71,7 +86,8 @@ else
   LOG_VALIDATOR_VALIDATE_OPT="--prop:validate-kafka=log4j.aggregate"
 fi
 
-MAX_RUNTIME=$(( 180000 + ($NUM_OF_MESSAGE / 5) ))
+DEFAULT_RUNTIME=$(( 180000 + ($NUM_OF_MESSAGE / 5) ))
+MAX_RUNTIME=$(get_opt --max-run-time $DEFAULT_RUNTIME $@)
 
 SHELL=./scribengin/bin/shell.sh
 
@@ -116,7 +132,7 @@ fi
 
 $SHELL dataflow monitor \
   --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
-  --show-tasks --show-workers --stop-on-status FINISH --dump-period 15000 --timeout $MAX_RUNTIME
+  --show-tasks --show-workers --stop-on-status FINISH --dump-period $DUMP_PERIOD --timeout $MAX_RUNTIME
 
 DATAFLOW_CHAIN_ELAPSED_TIME=$(($SECONDS - $START_DATAFLOW_CHAIN_TIME))
 echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
@@ -124,20 +140,22 @@ echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME"
 #########################################################################################################################
 # Launch Validator                                                                                                      #
 #########################################################################################################################
-START_MESSAGE_VALIDATION_TIME=$SECONDS
-$SHELL vm submit  \
-  --dfs-app-home /applications/log-sample \
-  --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
-  --name vm-log-validator-1 --role log-validator  --vm-application com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp \
-  --prop:report-path=/applications/log-sample/reports \
-  --prop:num-of-message-per-partition=$NUM_OF_MESSAGE \
-  --prop:wait-for-termination=3600000 \
-  $LOG_VALIDATOR_VALIDATE_OPT
+if [ $VALIDATOR_DISABLE == "false" ] ; then
+  START_MESSAGE_VALIDATION_TIME=$SECONDS
+  $SHELL vm submit  \
+    --dfs-app-home /applications/log-sample \
+    --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
+    --name vm-log-validator-1 --role log-validator  --vm-application com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp \
+    --prop:report-path=/applications/log-sample/reports \
+    --prop:num-of-message-per-partition=$NUM_OF_MESSAGE \
+    --prop:wait-for-termination=3600000 \
+    $LOG_VALIDATOR_VALIDATE_OPT
 
-$SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 3600000
+  $SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 3600000
 
-MESSAGE_VALIDATION_ELAPSED_TIME=$(($SECONDS - $START_MESSAGE_VALIDATION_TIME))
-echo "MESSAGE VALIDATION TIME: $MESSAGE_VALIDATION_ELAPSED_TIME" 
+  MESSAGE_VALIDATION_ELAPSED_TIME=$(($SECONDS - $START_MESSAGE_VALIDATION_TIME))
+  echo "MESSAGE VALIDATION TIME: $MESSAGE_VALIDATION_ELAPSED_TIME" 
+fi
 
 #########################################################################################################################
 # Dump the vm and registry info                                                                                         #
@@ -151,4 +169,7 @@ $SHELL registry info --path /applications/log-sample/reports/validate/reports/vm
 
 echo "MESSAGE GENERATION TIME    : $MESSAGE_GENERATION_ELAPSED_TIME" 
 echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
-echo "MESSAGE VALIDATION TIME    : $MESSAGE_VALIDATION_ELAPSED_TIME" 
+
+if [ $VALIDATOR_DISABLE == "false" ] ; then
+  echo "MESSAGE VALIDATION TIME    : $MESSAGE_VALIDATION_ELAPSED_TIME" 
+fi
