@@ -52,6 +52,7 @@ NUM_OF_EXECUTOR_PER_WORKER=$(get_opt --num-of-executor-per-worker '2' $@)
 NUM_OF_STREAM=$(get_opt --num-of-stream '8' $@)
 MESSAGE_SIZE=$(get_opt  --message-size '128' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
+GENERATOR_SEND_PERIOD=$(get_opt --generator-send-period '-1' $@)
 
 KILL_WORKER_RANDOM=$(get_opt --kill-worker-random 'false' $@)
 KILL_WORKER_MAX=$(get_opt --kill-worker-max '5' $@)
@@ -92,6 +93,7 @@ $SHELL vm submit \
    --prop:report-path=/applications/log-sample/reports \
    --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE \
    --prop:num-of-stream=$NUM_OF_STREAM \
+   --prop:send-period=$GENERATOR_SEND_PERIOD
 
 $SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 180000
 
