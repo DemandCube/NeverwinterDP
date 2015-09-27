@@ -118,7 +118,10 @@ public class VMConfig {
   public void setAppDataDir(String appDataDir) { this.appHome = appDataDir; }
   
   public String getLog4jConfigUrl() { return log4jConfigUrl; }
-  public void   setLog4jConfigUrl(String url) { this.log4jConfigUrl = url; }
+  public void   setLog4jConfigUrl(String url) { 
+    if(url == null || url.length() == 0) return;
+    log4jConfigUrl = url; 
+  }
   
   public Map<String, String> getVmResources() { return vmResources; }
   public void setVmResources(Map<String, String> vmResources) { this.vmResources = vmResources; }

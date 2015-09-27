@@ -89,7 +89,8 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
         setRegistryConfig(registryConfig).
         setVmApplication(VMDataflowWorkerApp.class.getName()).
         addProperty("dataflow.registry.path", dataflowRegistry.getDataflowPath()).
-        setHadoopProperties(service.getVMConfig().getHadoopProperties());
+        setHadoopProperties(service.getVMConfig().getHadoopProperties()).
+        setLog4jConfigUrl(dflDescriptor.getLog4jConfigUrl());
 
       String dataflowAppHome = dflDescriptor.getDataflowAppHome();
       if(dataflowAppHome != null) {
