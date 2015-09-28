@@ -68,15 +68,15 @@ public class MergeOperation<T> implements OperationExecutor<T> {
   }
   
   void commit(Storage<T> storage, Lock lock, OperationConfig config) throws Exception {
-    SegmentSet segSet = config.attribute("sources", SegmentSet.class);
-    Path[] srcPath  = segSet.toHDFSDataPath(storage);
     FileSystem fs = storage.getFileSystem();
-    for(int i = 0; i < srcPath.length; i++) {
-      boolean deleted = fs.delete(srcPath[i], false);
-      if(!deleted) {
-        throw new IOException("Cannot delete " + srcPath[i]) ;
-      }
-    }
+//    SegmentSet segSet = config.attribute("sources", SegmentSet.class);
+//    Path[] srcPath  = segSet.toHDFSDataPath(storage);
+//    for(int i = 0; i < srcPath.length; i++) {
+//      boolean deleted = fs.delete(srcPath[i], false);
+//      if(!deleted) {
+//        throw new IOException("Cannot delete " + srcPath[i]) ;
+//      }
+//    }
     
     Segment destSegment = config.attribute("destination", Segment.class);
     Path completePath = new Path(destSegment.toCompletePath(storage.getLocation()));

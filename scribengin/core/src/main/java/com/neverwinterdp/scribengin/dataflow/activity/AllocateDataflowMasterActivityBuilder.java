@@ -99,6 +99,7 @@ public class AllocateDataflowMasterActivityBuilder extends ActivityBuilder {
       dfVMConfig.setVmApplication(VMDataflowServiceApp.class.getName());
       dfVMConfig.addProperty("dataflow.registry.path", dataflowNode.getPath());
       dfVMConfig.setHadoopProperties(vmConfig.getHadoopProperties());
+      dfVMConfig.setLog4jConfigUrl(descriptor.getLog4jConfigUrl());
       VMClient vmClient = new VMClient(registry);
       VMDescriptor vmDescriptor = vmClient.allocate(dfVMConfig);
     }

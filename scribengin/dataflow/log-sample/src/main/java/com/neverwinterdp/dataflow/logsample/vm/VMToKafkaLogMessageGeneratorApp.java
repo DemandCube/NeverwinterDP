@@ -28,6 +28,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
   private Logger logger ;
   private int numOfMessage ;
   private int messageSize;
+  private long sendPeriod ;
   private String reportPath ;
   private String zkConnects ;
   private String topic ;
@@ -45,6 +46,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     numOfMessage = vmConfig.getPropertyAsInt("num-of-message", 5000);
     messageSize = vmConfig.getPropertyAsInt("message-size", 256);
     int numOfStream = vmConfig.getPropertyAsInt("num-of-stream", 10);
+    sendPeriod = vmConfig.getPropertyAsLong("send-period", -1);
     
     KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
     kafkaTool.connect();
@@ -111,6 +113,9 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
           else logWriter.write("LogSample", "INFO", jsonMessage);
           if(count % 1000 == 0) {
             logger.info("Generate " + count+ " messages for partition " + partitionMetadata.partitionId());
+          }
+          if(sendPeriod > 0) {
+            Thread.sleep(sendPeriod);
           }
         }
         logWriter.write("LogSample", "INFO",  "EOS");

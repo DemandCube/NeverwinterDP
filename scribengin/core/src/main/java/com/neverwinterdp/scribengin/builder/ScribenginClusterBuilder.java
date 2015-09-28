@@ -5,7 +5,6 @@ import static com.neverwinterdp.vm.tool.VMClusterBuilder.h1;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.event.ScribenginWaitingEventListener;
 import com.neverwinterdp.util.text.TabularFormater;
-import com.neverwinterdp.vm.VMStatus;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.tool.VMClusterBuilder;
 

@@ -6,6 +6,8 @@ public interface Transaction {
 
   public <T> Transaction create(final String path, T obj, NodeCreateMode mode);
   
+  public <T> Transaction create(Node node, T obj, NodeCreateMode mode);
+  
   public Transaction delete(final String path) ;
   
   public void rcopy(String path, String toPath) throws RegistryException ;

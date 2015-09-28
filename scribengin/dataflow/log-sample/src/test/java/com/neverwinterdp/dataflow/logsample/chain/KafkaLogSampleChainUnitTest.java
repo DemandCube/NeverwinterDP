@@ -77,7 +77,8 @@ public class KafkaLogSampleChainUnitTest  {
         "  --vm-application " + VMToKafkaLogMessageGeneratorApp.class.getName() + 
         "  --prop:report-path=" +    REPORT_PATH +
         "  --prop:num-of-message=" + NUM_OF_MESSAGE +
-        "  --prop:message-size=512";
+        "  --prop:message-size=512" +
+        "  --prop:send-period=-1";
     shell.execute(logGeneratorSubmitCommand);
     shell.execute(
       "vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 25000"
