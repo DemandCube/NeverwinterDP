@@ -1,8 +1,6 @@
 package com.neverwinterdp.scribengin.dataflow;
 
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +43,6 @@ public class DataflowKafkaToKafkaUnitTest {
 
     try {
       ScribenginClient scribenginClient = shell.getScribenginClient();
-      assertEquals(2, scribenginClient.getScribenginMasters().size());
       submitter.waitForTermination(120000);
     } catch(Throwable err) {
       throw err;

@@ -17,7 +17,6 @@ import com.neverwinterdp.registry.txevent.TXEventNotification;
 import com.neverwinterdp.registry.txevent.TXEventWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.DataflowTaskDescriptor;
-import com.neverwinterdp.scribengin.dataflow.activity.AllocateDataflowMasterActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.activity.DataflowActivityService;
 import com.neverwinterdp.scribengin.dataflow.activity.DataflowInitActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.activity.DataflowPauseActivityBuilder;
