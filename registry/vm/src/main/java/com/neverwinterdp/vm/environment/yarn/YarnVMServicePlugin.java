@@ -51,7 +51,7 @@ public class YarnVMServicePlugin implements VMServicePlugin {
         return b.toString();
       }
     };
-    yarnManager.asyncAdd(containerReq, callback);
+    yarnManager.add(containerReq, callback);
     logger.info("Finish allocate request for " + vmConfig.getName());
   }
 

@@ -115,7 +115,7 @@ public class VMConfig {
   public void setAppHome(String appHome) { this.appHome = appHome; }
   
   public String getAppDataDir() { return appDataDir; }
-  public void setAppDataDir(String appDataDir) { this.appHome = appDataDir; }
+  public void   setAppDataDir(String appDataDir) { this.appDataDir = appDataDir; }
   
   public String getLog4jConfigUrl() { return log4jConfigUrl; }
   public void   setLog4jConfigUrl(String url) { 
