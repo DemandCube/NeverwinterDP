@@ -2,111 +2,61 @@ package com.neverwinterdp.vm.environment.yarn;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.api.ApplicationConstants.Environment;
-import org.apache.hadoop.yarn.api.protocolrecords.AllocateResponse;
-import org.apache.hadoop.yarn.api.protocolrecords.RegisterApplicationMasterResponse;
 import org.apache.hadoop.yarn.api.records.Container;
-import org.apache.hadoop.yarn.api.records.ContainerExitStatus;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
-import org.apache.hadoop.yarn.api.records.ContainerState;
-import org.apache.hadoop.yarn.api.records.ContainerStatus;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.api.records.NodeReport;
 import org.apache.hadoop.yarn.api.records.Priority;
 import org.apache.hadoop.yarn.api.records.Resource;
-import org.apache.hadoop.yarn.client.api.AMRMClient;
 import org.apache.hadoop.yarn.client.api.NMClient;
-import org.apache.hadoop.yarn.client.api.async.AMRMClientAsync;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.Apps;
 import org.apache.hadoop.yarn.util.Records;
-import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.mycila.jmx.annotation.JmxBean;
 import com.neverwinterdp.vm.VMConfig;
 
-@Singleton
-@JmxBean("role=vm-manager, type=YarnManager, name=YarnManager")
-public class YarnManager {
-  private Logger logger = LoggerFactory.getLogger(YarnManager.class.getName());
+abstract public class YarnManager {
+  protected Logger logger = LoggerFactory.getLogger(YarnManager.class.getName());
 
-  private VMConfig vmConfig ;
-  private Map<String, String> yarnConfig;
+  protected VMConfig vmConfig ;
+  protected Map<String, String> yarnConfig;
 
-  private Configuration conf ;
-  private AMRMClient<ContainerRequest> amrmClient ;
-  private AMRMClientAsync<ContainerRequest> amrmClientAsync ;
-  private NMClient nmClient;
-  private ContainerRequestQueue containerRequestQueue = new ContainerRequestQueue ();
-  
-  private AtomicInteger countContainerRequest = new AtomicInteger();
+  protected Configuration conf ;
+  protected NMClient nmClient;
   
   public Map<String, String> getYarnConfig() { return this.yarnConfig ; }
   
-  public AMRMClient<ContainerRequest> getAMRMClient() { return this.amrmClient ; }
-  
   public NMClient getNMClient() { return this.nmClient ; }
   
-  @Inject
   public void onInit(VMConfig vmConfig) throws Exception {
-    logger.info("Start init(VMConfig vmConfig)");
     this.vmConfig = vmConfig;
-    try {
-      this.yarnConfig = vmConfig.getHadoopProperties();
-      conf = new YarnConfiguration() ;
-      vmConfig.overrideHadoopConfiguration(conf);
-      
-      amrmClient = AMRMClient.createAMRMClient();
-      
-      amrmClientAsync = AMRMClientAsync.createAMRMClientAsync(amrmClient, 1000, new AMRMCallbackHandler());
-      amrmClientAsync.init(conf);
-      amrmClientAsync.start();
-      nmClient = NMClient.createNMClient();
-      nmClient.init(conf);
-      nmClient.start();
-      // Register with RM
-      String appHostName = InetAddress.getLocalHost().getHostAddress()  ;
+    this.yarnConfig = vmConfig.getHadoopProperties();
+    conf = new YarnConfiguration() ;
+    vmConfig.overrideHadoopConfiguration(conf);
 
-      RegisterApplicationMasterResponse registerResponse = amrmClientAsync.registerApplicationMaster(appHostName, 0, "");
-      System.out.println("amrmClientAsync.registerApplicationMaster");
-    } catch(Throwable t) {
-      logger.error("Error: " , t);
-      t.printStackTrace();
-    }
-    logger.info("Finish init(VMConfig vmConfig)");
+    nmClient = NMClient.createNMClient();
+    nmClient.init(conf);
+    nmClient.start();
   }
 
-  public void onDestroy()  {
-    logger.info("Start onDestroy()");
+  public void onDestroy() {
     try {
-      if(amrmClientAsync != null) {
-        amrmClientAsync.unregisterApplicationMaster(FinalApplicationStatus.SUCCEEDED, "", "");
-        amrmClientAsync.stop();
-        amrmClientAsync.close(); 
-      }
       if(nmClient != null) {
         nmClient.stop();
         nmClient.close();
       }
-    } catch(Exception ex) {
-      logger.error("Cannot destroy YarnManager properly", ex);
+    } catch (IOException e) {
+      logger.error("Destroy error:", e);
     }
-    logger.info("Finish onDestroy()");
   }
   
   public ContainerRequest createContainerRequest(int priority, int numOfCores, int memory) {
@@ -119,18 +69,7 @@ public class YarnManager {
     return containerReq;
   }
   
-  synchronized public void asyncAdd(ContainerRequest containerReq, ContainerRequestCallback callback) {
-    logger.info("Start asyncAdd count = " + countContainerRequest.incrementAndGet());
-    containerReq.setCallback(callback);
-    containerRequestQueue.offer(containerReq);
-    amrmClientAsync.addContainerRequest(containerReq);
-    logger.info("Finish asyncAdd");
-  }
-  
-  public List<Container> getAllocatedContainers() throws YarnException, IOException {
-    AllocateResponse response = amrmClient.allocate(0);
-    return response.getAllocatedContainers() ;
-  }
+  abstract public void add(ContainerRequest containerReq, ContainerRequestCallback callback) throws Exception ;
   
   public void startContainer(Container container, VMConfig appVMConfig) throws YarnException, IOException {
     String command = appVMConfig.buildCommand();
@@ -153,10 +92,9 @@ public class YarnManager {
     );
     ctx.setCommands(commands);
     nmClient.startContainer(container, ctx);
-    //TODO: update vm descriptor status
   }
   
-  void setupAppClasspath(boolean miniClusterEnv, Configuration conf, Map<String, String> appMasterEnv) {
+  protected void setupAppClasspath(boolean miniClusterEnv, Configuration conf, Map<String, String> appMasterEnv) {
     if(miniClusterEnv) {
       String cps = System.getProperty("java.class.path") ;
       String[] cp = cps.split(":") ;
@@ -181,86 +119,6 @@ public class YarnManager {
     }
     Apps.addToEnvironment(appMasterEnv, Environment.CLASSPATH.name(), Environment.PWD.$() + File.separator + "*", ":");
   }
-  
-  class AMRMCallbackHandler implements AMRMClientAsync.CallbackHandler {
-    private AtomicInteger countContainerAllocate = new AtomicInteger();
-    private AtomicInteger countContainerComplete = new AtomicInteger();
-    
-    public void onContainersCompleted(List<ContainerStatus> statuses) {
-      logger.info("Start onContainersCompleted count = " + countContainerComplete.incrementAndGet());
-      for (ContainerStatus status: statuses) {
-        assert (status.getState() == ContainerState.COMPLETE);
-        int exitStatus = status.getExitStatus();
-        //TODO: update vm descriptor status
-        if (exitStatus != ContainerExitStatus.SUCCESS) {
-        } else {
-        }
-      }
-      logger.info("Finish onContainersCompleted(List<ContainerStatus> statuses)");
-    }
-
-    public void onContainersAllocated(List<Container> containers) {
-      int numOfContainer = containers.size();
-      logger.info("Start onContainersAllocated containers = " + numOfContainer);
-      for (int i = 0; i < containers.size(); i++) {
-        //TODO: review on allocated container code
-        Container container = containers.get(i) ;
-        ContainerRequest containerReq = containerRequestQueue.take(container);
-        if(containerReq ==null) {
-          logger.info("  onContainersAllocated: ignore container " + i);
-          //TODO: research on this issue
-          //http://hadoop.apache.org/docs/r2.6.0/api/org/apache/hadoop/yarn/client/api/AMRMClient.html#removeContainerRequest(T)
-          continue;
-        }
-        containerReq.getCallback().onAllocate(YarnManager.this, containerReq, container);
-        amrmClientAsync.removeContainerRequest(containerReq);
-        logger.info("  onContainersAllocated count = " + countContainerAllocate.incrementAndGet());
-      }
-      logger.info("Finish onContainersAllocated");
-    }
-
-
-    public void onNodesUpdated(List<NodeReport> updated) {
-    }
-
-    public void onError(Throwable e) {
-      amrmClientAsync.stop();
-    }
-
-    public void onShutdownRequest() {
-      //TODO: handle shutdown request
-    }
-
-    
-    public float getProgress() { return 0; }
-  }
-  
-  class ContainerRequestQueue {
-    private List<ContainerRequest> queues = new ArrayList<>();
-    
-    synchronized public void offer(ContainerRequest request) {
-      queues.add(request);
-    }
-    synchronized public ContainerRequest take(Container container) {
-      int cpuCores = container.getResource().getVirtualCores();
-      int memory = container.getResource().getMemory();
-      for(int i = 0; i < queues.size(); i++) {
-        ContainerRequest sel = queues.get(i);
-        if(cpuCores == sel.getCapability().getVirtualCores() && 
-            memory  == sel.getCapability().getMemory()) {
-          queues.remove(sel);
-          return sel;
-        }
-      }
-      if(queues.size() > 0) {
-        ContainerRequest sel = queues.get(0);
-        queues.remove(sel);
-        return sel;
-      }
-      return null;
-    }
-  }
-  
   
   static public interface ContainerRequestCallback {
     public void onAllocate(YarnManager manager, ContainerRequest request, Container container) ;

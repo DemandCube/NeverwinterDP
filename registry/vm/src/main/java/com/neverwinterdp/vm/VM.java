@@ -1,5 +1,6 @@
 package com.neverwinterdp.vm;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -222,13 +223,17 @@ public class VM {
   }
   
   static public void main(String[] args) throws Exception {
-    
     long start = System.currentTimeMillis() ;
     System.out.println("VM: main(..) start");
     VMConfig vmConfig = new VMConfig(args);
-    String vmDir = "/opt/hadoop/vm/" + vmConfig.getName();
-    System.setProperty("vm.app.dir", vmDir);
-    
+    File hadoopDir = new File("/opt/hadoop");
+    if(hadoopDir.exists()) {
+      String vmDir = "/opt/hadoop/vm/" + vmConfig.getName();
+      System.setProperty("vm.app.dir", vmDir);
+    } else {
+      String vmDir = "target/vm/" + vmConfig.getName();
+      System.setProperty("vm.app.dir", vmDir);
+    }
     Properties log4jProps = new Properties();
     log4jProps.load(IOUtil.loadRes(vmConfig.getLog4jConfigUrl()));
     LoggerFactory.log4jConfigure(log4jProps);
