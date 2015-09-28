@@ -72,6 +72,7 @@ KILL_WORKER_PERIOD=$(get_opt --kill-worker-period '60000' $@)
 
 DUMP_PERIOD=$(get_opt --dump-period '15000' $@)
 VALIDATOR_DISABLE=$(has_opt "--validator-disable" $@ )
+GENERATOR_MAX_WAIT_TIME=$(get_opt --generator-max-wait-time '180000' $@)
 
 DATAFLOW_DESCRIPTOR_FILE=""
 LOG_VALIDATOR_VALIDATE=""
@@ -109,7 +110,7 @@ $SHELL vm submit \
    --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE \
    --prop:num-of-stream=$NUM_OF_STREAM \
 
-$SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 180000
+$SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time $GENERATOR_MAX_WAIT_TIME
 
 $SHELL registry info --path /applications/log-sample/reports/generate/reports/vm-log-generator-1 --print-data-as-json
 
