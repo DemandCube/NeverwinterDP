@@ -64,8 +64,8 @@ public class SyncYarnManager extends YarnManager {
     logger.info("Start add count = " + countContainerRequest.incrementAndGet());
     containerReq.setCallback(callback);
     Container container = null ;
-    for(int i = 0; i < 5; i++) {
-      container = allocate(containerReq, 5000);
+    for(int i = 0; i < 10; i++) {
+      container = allocate(containerReq, 2500);
       if(container != null) {
         break;
       }
