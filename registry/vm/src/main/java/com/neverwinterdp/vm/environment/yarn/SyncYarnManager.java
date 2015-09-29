@@ -1,3 +1,4 @@
+
 package com.neverwinterdp.vm.environment.yarn;
 
 import java.net.InetAddress;
@@ -9,6 +10,7 @@ import org.apache.hadoop.yarn.api.protocolrecords.RegisterApplicationMasterRespo
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.client.api.AMRMClient;
+import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -60,7 +62,7 @@ public class SyncYarnManager extends YarnManager {
     logger.info("Finish onDestroy()");
   }
   
-  synchronized public void add(ContainerRequest containerReq, ContainerRequestCallback callback) throws Exception {
+  synchronized public void add(VMRequest containerReq, ContainerRequestCallback callback) throws Exception {
     logger.info("Start add count = " + countContainerRequest.incrementAndGet());
     containerReq.setCallback(callback);
     Container container = null ;
@@ -74,7 +76,9 @@ public class SyncYarnManager extends YarnManager {
     logger.info("Finish add");
   }
   
-  private Container allocateAndRun(ContainerRequest containerReq, long timeout) throws Exception {
+  private Container allocateAndRun(VMRequest vmReq, long timeout) throws Exception {
+    vmReq.reset();
+    ContainerRequest containerReq = vmReq.getContainerRequest();
     amrmClient.addContainerRequest(containerReq);
     long stopTime = System.currentTimeMillis() + timeout;
     int retry = 0;
@@ -93,7 +97,7 @@ public class SyncYarnManager extends YarnManager {
       Thread.sleep(500);
     }
     if(selContainer != null) {
-      containerReq.getCallback().onAllocate(this, containerReq, selContainer);
+      vmReq.getCallback().onAllocate(this, vmReq, selContainer);
     }
     amrmClient.removeContainerRequest(containerReq);
     return selContainer ;

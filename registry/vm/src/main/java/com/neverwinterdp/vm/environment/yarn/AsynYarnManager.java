@@ -13,6 +13,7 @@ import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.NodeReport;
 import org.apache.hadoop.yarn.client.api.AMRMClient;
+import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.apache.hadoop.yarn.client.api.async.AMRMClientAsync;
 
 import com.google.inject.Inject;
@@ -68,11 +69,11 @@ public class AsynYarnManager extends YarnManager {
     logger.info("Finish onDestroy()");
   }
   
-  synchronized public void add(ContainerRequest containerReq, ContainerRequestCallback callback) {
+  synchronized public void add(VMRequest vmReq, ContainerRequestCallback callback) {
     logger.info("Start add count = " + countContainerRequest.incrementAndGet());
-    containerReq.setCallback(callback);
-    containerRequestQueue.offer(containerReq);
-    amrmClientAsync.addContainerRequest(containerReq);
+    vmReq.setCallback(callback);
+    containerRequestQueue.offer(vmReq);
+    amrmClientAsync.addContainerRequest(vmReq.getContainerRequest());
     logger.info("Finish add");
   }
   
@@ -99,7 +100,7 @@ public class AsynYarnManager extends YarnManager {
       for (int i = 0; i < containers.size(); i++) {
         //TODO: review on allocated container code
         Container container = containers.get(i) ;
-        ContainerRequest containerReq = containerRequestQueue.take(container);
+        VMRequest containerReq = containerRequestQueue.take(container);
         if(containerReq ==null) {
           logger.info("  onContainersAllocated: ignore container " + i);
           //TODO: research on this issue
@@ -107,7 +108,7 @@ public class AsynYarnManager extends YarnManager {
           continue;
         }
         containerReq.getCallback().onAllocate(AsynYarnManager.this, containerReq, container);
-        amrmClientAsync.removeContainerRequest(containerReq);
+        amrmClientAsync.removeContainerRequest(containerReq.getContainerRequest());
         logger.info("  onContainersAllocated count = " + countContainerAllocate.incrementAndGet());
       }
       logger.info("Finish onContainersAllocated");
@@ -130,16 +131,16 @@ public class AsynYarnManager extends YarnManager {
   }
   
   class ContainerRequestQueue {
-    private List<ContainerRequest> queues = new ArrayList<>();
+    private List<VMRequest> queues = new ArrayList<>();
     
-    synchronized public void offer(ContainerRequest request) {
+    synchronized public void offer(VMRequest request) {
       queues.add(request);
     }
-    synchronized public ContainerRequest take(Container container) {
+    synchronized public VMRequest take(Container container) {
       int cpuCores = container.getResource().getVirtualCores();
       int memory = container.getResource().getMemory();
       for(int i = 0; i < queues.size(); i++) {
-        ContainerRequest sel = queues.get(i);
+        VMRequest sel = queues.get(i);
         if(cpuCores == sel.getCapability().getVirtualCores() && 
             memory  == sel.getCapability().getMemory()) {
           queues.remove(sel);
@@ -147,7 +148,7 @@ public class AsynYarnManager extends YarnManager {
         }
       }
       if(queues.size() > 0) {
-        ContainerRequest sel = queues.get(0);
+        VMRequest sel = queues.get(0);
         queues.remove(sel);
         return sel;
       }

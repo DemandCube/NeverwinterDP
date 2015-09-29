@@ -27,12 +27,12 @@ public class YarnVMServicePlugin implements VMServicePlugin {
   @Override
   synchronized public void allocateVM(VMService vmService, final VMConfig vmConfig) throws RegistryException, Exception {
     logger.info("Start allocate request for " + vmConfig.getName());
-    final ContainerRequest containerReq = 
+    final VMRequest containerReq = 
       yarnManager.createContainerRequest(0, vmConfig.getRequestCpuCores(), vmConfig.getRequestMemory());
     
     YarnManager.ContainerRequestCallback callback = new YarnManager.ContainerRequestCallback() {
       @Override
-      public void onAllocate(YarnManager manager, ContainerRequest containerRequest, Container container) {
+      public void onAllocate(YarnManager manager, VMRequest containerRequest, Container container) {
         logger.info("Start onAllocate for " + vmConfig.getName());
         vmConfig.
           setSelfRegistration(false).

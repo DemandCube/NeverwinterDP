@@ -59,17 +59,17 @@ abstract public class YarnManager {
     }
   }
   
-  public ContainerRequest createContainerRequest(int priority, int numOfCores, int memory) {
+  public VMRequest createContainerRequest(int priority, int numOfCores, int memory) {
     //Priority for worker containers - priorities are intra-application
     Priority containerPriority = Priority.newInstance(priority);
     //Resource requirements for worker containers
     Resource resource = Resource.newInstance(memory, numOfCores);
-    ContainerRequest containerReq =  
-        new ContainerRequest(resource, null /* hosts*/, null /*racks*/, containerPriority);
+    VMRequest containerReq =  
+        new VMRequest(resource, null /* hosts*/, null /*racks*/, containerPriority);
     return containerReq;
   }
   
-  abstract public void add(ContainerRequest containerReq, ContainerRequestCallback callback) throws Exception ;
+  abstract public void add(VMRequest containerReq, ContainerRequestCallback callback) throws Exception ;
   
   public void startContainer(Container container, VMConfig appVMConfig) throws YarnException, IOException {
     String command = appVMConfig.buildCommand();
@@ -121,6 +121,6 @@ abstract public class YarnManager {
   }
   
   static public interface ContainerRequestCallback {
-    public void onAllocate(YarnManager manager, ContainerRequest request, Container container) ;
+    public void onAllocate(YarnManager manager, VMRequest request, Container container) ;
   }
 }
