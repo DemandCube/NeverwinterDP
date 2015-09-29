@@ -95,7 +95,7 @@ $SHELL vm submit \
    --prop:num-of-stream=$NUM_OF_STREAM \
    --prop:send-period=$GENERATOR_SEND_PERIOD
 
-$SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 180000
+$SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 15000
 
 $SHELL registry info --path /applications/log-sample/reports/generate/reports/vm-log-generator-1 --print-data-as-json
 
@@ -107,7 +107,7 @@ echo "MESSAGE GENERATION TIME: $MESSAGE_GENERATION_ELAPSED_TIME"
 START_DATAFLOW_CHAIN_TIME=$SECONDS
 $SHELL dataflow submit-chain \
   --dfs-app-home /applications/log-sample \
-  --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --wait-for-running-timeout 120000 --dataflow-max-runtime $MAX_RUNTIME \
+  --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --wait-for-running-timeout 180000 --dataflow-max-runtime $MAX_RUNTIME \
   --dataflow-num-of-worker $NUM_OF_WORKER --dataflow-num-of-executor-per-worker $NUM_OF_EXECUTOR_PER_WORKER 
 
 if [ "$KILL_WORKER_RANDOM" = "true" ] ; then
