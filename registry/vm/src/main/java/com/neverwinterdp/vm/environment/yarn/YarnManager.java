@@ -69,7 +69,7 @@ abstract public class YarnManager {
     return containerReq;
   }
   
-  abstract public void add(VMRequest containerReq, ContainerRequestCallback callback) throws Exception ;
+  abstract public void allocate(VMRequest vmReq, ContainerRequestCallback cb) throws Exception ;
   
   public void startContainer(Container container, VMConfig appVMConfig) throws YarnException, IOException {
     String command = appVMConfig.buildCommand();

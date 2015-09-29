@@ -62,12 +62,12 @@ public class SyncYarnManager extends YarnManager {
     logger.info("Finish onDestroy()");
   }
   
-  synchronized public void add(VMRequest containerReq, ContainerRequestCallback callback) throws Exception {
+  synchronized public void allocate(VMRequest vmReq, ContainerRequestCallback cb) throws Exception {
     logger.info("Start add count = " + countContainerRequest.incrementAndGet());
-    containerReq.setCallback(callback);
+    vmReq.setCallback(cb);
     Container container = null ;
     for(int i = 0; i < 10; i++) {
-      container = allocateAndRun(containerReq, 2500);
+      container = allocateAndRun(vmReq, 2500);
       if(container != null) break;
     }
     if(container == null) {
@@ -82,24 +82,22 @@ public class SyncYarnManager extends YarnManager {
     amrmClient.addContainerRequest(containerReq);
     long stopTime = System.currentTimeMillis() + timeout;
     int retry = 0;
-    Container selContainer = null ;
-    while (selContainer == null && System.currentTimeMillis() < stopTime) {
+    Container allocatedContainer = null ;
+    while (allocatedContainer == null && System.currentTimeMillis() < stopTime) {
       retry++ ;
       AllocateResponse response = amrmClient.allocate(0 /*progress indicator*/);
-      response.getCompletedContainersStatuses();
-      response.getUpdatedNodes();
       List<Container> containers = response.getAllocatedContainers();
       logger.info("  " + retry + "  Allocate containers = " + containers.size() + ", retry = " + retry + ", duration = " + (retry * 500));
       for (Container container : containers) {
-        if(selContainer == null) selContainer = container;
+        if(allocatedContainer == null) allocatedContainer = container;
         //else amrmClient.releaseAssignedContainer(container.getId());
       }
       Thread.sleep(500);
     }
-    if(selContainer != null) {
-      vmReq.getCallback().onAllocate(this, vmReq, selContainer);
+    if(allocatedContainer != null) {
+      vmReq.getCallback().onAllocate(this, vmReq, allocatedContainer);
     }
-    amrmClient.removeContainerRequest(containerReq);
-    return selContainer ;
+    //amrmClient.removeContainerRequest(containerReq);
+    return allocatedContainer ;
   }
 }
