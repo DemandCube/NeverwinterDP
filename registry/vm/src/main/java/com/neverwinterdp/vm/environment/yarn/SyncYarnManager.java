@@ -1,20 +1,14 @@
 package com.neverwinterdp.vm.environment.yarn;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hadoop.yarn.api.protocolrecords.AllocateResponse;
 import org.apache.hadoop.yarn.api.protocolrecords.RegisterApplicationMasterResponse;
 import org.apache.hadoop.yarn.api.records.Container;
-import org.apache.hadoop.yarn.api.records.ContainerExitStatus;
-import org.apache.hadoop.yarn.api.records.ContainerState;
-import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.api.records.NodeReport;
 import org.apache.hadoop.yarn.client.api.AMRMClient;
-import org.apache.hadoop.yarn.client.api.async.AMRMClientAsync;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -69,26 +63,36 @@ public class SyncYarnManager extends YarnManager {
   synchronized public void add(ContainerRequest containerReq, ContainerRequestCallback callback) throws Exception {
     logger.info("Start add count = " + countContainerRequest.incrementAndGet());
     containerReq.setCallback(callback);
+    Container container = null ;
+    for(int i = 0; i < 5; i++) {
+      container = allocate(containerReq, 5000);
+      if(container != null) {
+        break;
+      }
+    }
+    if(container != null) {
+      callback.onAllocate(this, containerReq, container);
+    } else {
+      throw new Exception("Cannot allocate the container");
+    }
+    logger.info("Finish add");
+  }
+  
+  private Container allocate(ContainerRequest containerReq, long timeout) throws Exception {
     amrmClient.addContainerRequest(containerReq);
-    int allocatedContainers = 0;
-    long stopTime = System.currentTimeMillis() + 180000;
+    long stopTime = System.currentTimeMillis() + timeout;
     int retry = 0;
-    while (allocatedContainers < 1 && System.currentTimeMillis() < stopTime) {
+    while (System.currentTimeMillis() < stopTime) {
       retry++ ;
       AllocateResponse response = amrmClient.allocate(0 /*progress indicator*/);
       List<Container> containers = response.getAllocatedContainers();
       logger.info("  " + retry + "  Allocate containers = " + containers.size() + ", retry = " + retry + ", duration = " + (retry * 500));
       for (Container container : containers) {
-        callback.onAllocate(this, containerReq, container);
-        allocatedContainers++;
-        break;
+        return container;
       }
       Thread.sleep(500);
     }
     amrmClient.removeContainerRequest(containerReq);
-    if(allocatedContainers == 0) {
-      throw new Exception("Cannot allocate the container");
-    }
-    logger.info("Finish add");
+    return null ;
   }
 }
