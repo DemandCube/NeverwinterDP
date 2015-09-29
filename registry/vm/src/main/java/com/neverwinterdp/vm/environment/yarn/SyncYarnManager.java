@@ -82,17 +82,19 @@ public class SyncYarnManager extends YarnManager {
     amrmClient.addContainerRequest(containerReq);
     long stopTime = System.currentTimeMillis() + timeout;
     int retry = 0;
-    while (System.currentTimeMillis() < stopTime) {
+    Container selContainer = null ;
+    while (selContainer == null && System.currentTimeMillis() < stopTime) {
       retry++ ;
       AllocateResponse response = amrmClient.allocate(0 /*progress indicator*/);
       List<Container> containers = response.getAllocatedContainers();
       logger.info("  " + retry + "  Allocate containers = " + containers.size() + ", retry = " + retry + ", duration = " + (retry * 500));
       for (Container container : containers) {
-        return container;
+        if(selContainer == null) selContainer = container;
+        else amrmClient.releaseAssignedContainer(container.getId());
       }
       Thread.sleep(500);
     }
     amrmClient.removeContainerRequest(containerReq);
-    return null ;
+    return selContainer ;
   }
 }
