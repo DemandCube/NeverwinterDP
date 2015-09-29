@@ -90,7 +90,9 @@ public class SyncYarnManager extends YarnManager {
       }
       Thread.sleep(500);
     }
-    containerReq.getCallback().onAllocate(this, containerReq, selContainer);
+    if(selContainer != null) {
+      containerReq.getCallback().onAllocate(this, containerReq, selContainer);
+    }
     amrmClient.removeContainerRequest(containerReq);
     return selContainer ;
   }
