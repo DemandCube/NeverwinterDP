@@ -32,7 +32,9 @@ public class VMRequest {
   
   public ContainerRequest getContainerRequest() {
     if(containerRequest == null) {
-      containerRequest = new ContainerRequest(capability, nodes, racks, priority);
+      Resource cloneCapability = Resource.newInstance(capability.getMemory(), capability.getVirtualCores());
+      Priority clonePriority = Priority.newInstance(priority.getPriority());
+      containerRequest = new ContainerRequest(cloneCapability, nodes, racks, clonePriority);
     }
     return containerRequest;
   }
