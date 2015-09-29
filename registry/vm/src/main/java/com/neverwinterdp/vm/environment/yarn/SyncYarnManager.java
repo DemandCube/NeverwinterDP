@@ -65,7 +65,7 @@ public class SyncYarnManager extends YarnManager {
     containerReq.setCallback(callback);
     Container container = null ;
     for(int i = 0; i < 10; i++) {
-      container = allocate(containerReq, 2500);
+      container = allocateAndRun(containerReq, 2500);
       if(container != null) break;
     }
     if(container == null) {
@@ -74,7 +74,7 @@ public class SyncYarnManager extends YarnManager {
     logger.info("Finish add");
   }
   
-  private Container allocate(ContainerRequest containerReq, long timeout) throws Exception {
+  private Container allocateAndRun(ContainerRequest containerReq, long timeout) throws Exception {
     amrmClient.addContainerRequest(containerReq);
     long stopTime = System.currentTimeMillis() + timeout;
     int retry = 0;
