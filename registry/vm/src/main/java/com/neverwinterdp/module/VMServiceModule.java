@@ -16,8 +16,8 @@ public class VMServiceModule extends ServiceModule {
     try {
       String vmServicePlugin = properties.get("module.vm.vmservice.plugin");
       if(vmServicePlugin.indexOf("Yarn") >= 0) {
-        bindType(YarnManager.class, SyncYarnManager.class);
-        //bindType(YarnManager.class, AsynYarnManager.class);
+        //bindType(YarnManager.class, SyncYarnManager.class);
+        bindType(YarnManager.class, AsynYarnManager.class);
       }
       bindType(VMServicePlugin.class, vmServicePlugin);
     } catch (ClassNotFoundException e) {

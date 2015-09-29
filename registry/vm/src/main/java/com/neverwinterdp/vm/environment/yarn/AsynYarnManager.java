@@ -69,7 +69,7 @@ public class AsynYarnManager extends YarnManager {
     logger.info("Finish onDestroy()");
   }
   
-  synchronized public void add(VMRequest vmReq, ContainerRequestCallback callback) {
+  synchronized public void allocate(VMRequest vmReq, ContainerRequestCallback callback) {
     logger.info("Start add count = " + countContainerRequest.incrementAndGet());
     vmReq.setCallback(callback);
     containerRequestQueue.offer(vmReq);
