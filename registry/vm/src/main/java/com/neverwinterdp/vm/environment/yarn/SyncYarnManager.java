@@ -73,10 +73,13 @@ public class SyncYarnManager extends YarnManager {
     int allocatedContainers = 0;
     long stopTime = System.currentTimeMillis() + 180000;
     while (allocatedContainers < 1 && System.currentTimeMillis() < stopTime) {
-      AllocateResponse response = amrmClient.allocate(0);
-      for (Container container : response.getAllocatedContainers()) {
+      AllocateResponse response = amrmClient.allocate(0 /*progress indicator*/);
+      List<Container> containers = response.getAllocatedContainers();
+      for (Container container : containers) {
         callback.onAllocate(this, containerReq, container);
         allocatedContainers++;
+        amrmClient.removeContainerRequest(containerReq);
+        break;
       }
       Thread.sleep(250);
     }
