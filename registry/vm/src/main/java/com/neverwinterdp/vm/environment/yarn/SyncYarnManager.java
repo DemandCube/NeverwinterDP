@@ -66,13 +66,9 @@ public class SyncYarnManager extends YarnManager {
     Container container = null ;
     for(int i = 0; i < 10; i++) {
       container = allocate(containerReq, 2500);
-      if(container != null) {
-        break;
-      }
+      if(container != null) break;
     }
-    if(container != null) {
-      callback.onAllocate(this, containerReq, container);
-    } else {
+    if(container == null) {
       throw new Exception("Cannot allocate the container");
     }
     logger.info("Finish add");
@@ -94,6 +90,7 @@ public class SyncYarnManager extends YarnManager {
       }
       Thread.sleep(500);
     }
+    containerReq.getCallback().onAllocate(this, containerReq, selContainer);
     amrmClient.removeContainerRequest(containerReq);
     return selContainer ;
   }
