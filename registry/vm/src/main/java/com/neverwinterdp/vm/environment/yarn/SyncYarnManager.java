@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.hadoop.yarn.api.protocolrecords.AllocateResponse;
 import org.apache.hadoop.yarn.api.protocolrecords.RegisterApplicationMasterResponse;
 import org.apache.hadoop.yarn.api.records.Container;
+import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.client.api.AMRMClient;
 import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
@@ -86,6 +87,10 @@ public class SyncYarnManager extends YarnManager {
     while (allocatedContainer == null && System.currentTimeMillis() < stopTime) {
       retry++ ;
       AllocateResponse response = amrmClient.allocate(0 /*progress indicator*/);
+      List<ContainerStatus> completed = response.getCompletedContainersStatuses();
+      for(ContainerStatus sel : completed) {
+        logger.info("  complete container " + sel.getContainerId() + ", status = " + sel.getState() + ", exit = " + sel.getExitStatus());
+      }
       List<Container> containers = response.getAllocatedContainers();
       logger.info("  " + retry + "  Allocate containers = " + containers.size() + ", retry = " + retry + ", duration = " + (retry * 500));
       for (Container container : containers) {
@@ -97,7 +102,7 @@ public class SyncYarnManager extends YarnManager {
     if(allocatedContainer != null) {
       vmReq.getCallback().onAllocate(this, vmReq, allocatedContainer);
     }
-    //amrmClient.removeContainerRequest(containerReq);
+    amrmClient.removeContainerRequest(containerReq);
     return allocatedContainer ;
   }
 }
