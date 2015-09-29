@@ -90,7 +90,7 @@ public class SyncYarnManager extends YarnManager {
       logger.info("  " + retry + "  Allocate containers = " + containers.size() + ", retry = " + retry + ", duration = " + (retry * 500));
       for (Container container : containers) {
         if(selContainer == null) selContainer = container;
-        else amrmClient.releaseAssignedContainer(container.getId());
+        //else amrmClient.releaseAssignedContainer(container.getId());
       }
       Thread.sleep(500);
     }
