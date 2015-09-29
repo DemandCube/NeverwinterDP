@@ -60,7 +60,8 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
       executorService.submit(new RunnableLogMessageGenerator(partitionMetadataHolder.get(i)));
     }
     executorService.shutdown();
-    executorService.awaitTermination(60, TimeUnit.MINUTES);
+    //Hard coded to run for a week at maximum
+    executorService.awaitTermination(7*24*60, TimeUnit.MINUTES);
     String vmId = getVM().getDescriptor().getId();
     MessageReport report = new MessageReport(vmId, messageGenerator.getCurrentSequenceId(vmId), 0, 0) ;
     MessageReportRegistry appRegistry = null;
