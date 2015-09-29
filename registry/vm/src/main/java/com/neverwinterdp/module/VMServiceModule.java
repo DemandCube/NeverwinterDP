@@ -2,6 +2,7 @@ package com.neverwinterdp.module;
 
 import java.util.Map;
 
+import com.neverwinterdp.vm.environment.yarn.AsynYarnManager;
 import com.neverwinterdp.vm.environment.yarn.SyncYarnManager;
 import com.neverwinterdp.vm.environment.yarn.YarnManager;
 import com.neverwinterdp.vm.service.VMServicePlugin;
@@ -16,6 +17,7 @@ public class VMServiceModule extends ServiceModule {
       String vmServicePlugin = properties.get("module.vm.vmservice.plugin");
       if(vmServicePlugin.indexOf("Yarn") >= 0) {
         bindType(YarnManager.class, SyncYarnManager.class);
+        //bindType(YarnManager.class, AsynYarnManager.class);
       }
       bindType(VMServicePlugin.class, vmServicePlugin);
     } catch (ClassNotFoundException e) {

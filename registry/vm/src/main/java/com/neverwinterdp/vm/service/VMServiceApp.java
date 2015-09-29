@@ -44,9 +44,11 @@ public class VMServiceApp extends VMApp {
     };
 
     try {
+      getVM().getLogger().info("Wait for terminate.....");
       waitForTerminate();
     } catch(InterruptedException ex) {
     } finally {
+      getVM().getLogger().info("Terminate, start cleaning........");
       if(election != null && election.getLeaderId() != null) {
         election.stop();
       }

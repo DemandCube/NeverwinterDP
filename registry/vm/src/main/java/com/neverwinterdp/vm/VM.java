@@ -226,14 +226,18 @@ public class VM {
     long start = System.currentTimeMillis() ;
     System.out.println("VM: main(..) start");
     VMConfig vmConfig = new VMConfig(args);
+    String vmDir = null ;
     File hadoopDir = new File("/opt/hadoop");
     if(hadoopDir.exists()) {
-      String vmDir = "/opt/hadoop/vm/" + vmConfig.getName();
+      vmDir = "/opt/hadoop/vm/" + vmConfig.getName();
       System.setProperty("vm.app.dir", vmDir);
+      System.setProperty("app.home", vmDir);
     } else {
-      String vmDir = "target/vm/" + vmConfig.getName();
+      vmDir = "target/vm/" + vmConfig.getName();
       System.setProperty("vm.app.dir", vmDir);
+      System.setProperty("app.home", vmDir);
     }
+    vmConfig.setAppDataDir(vmDir + "/data");
     Properties log4jProps = new Properties();
     log4jProps.load(IOUtil.loadRes(vmConfig.getLog4jConfigUrl()));
     LoggerFactory.log4jConfigure(log4jProps);
