@@ -82,6 +82,8 @@ public class SyncYarnManager extends YarnManager {
     while (selContainer == null && System.currentTimeMillis() < stopTime) {
       retry++ ;
       AllocateResponse response = amrmClient.allocate(0 /*progress indicator*/);
+      response.getCompletedContainersStatuses();
+      response.getUpdatedNodes();
       List<Container> containers = response.getAllocatedContainers();
       logger.info("  " + retry + "  Allocate containers = " + containers.size() + ", retry = " + retry + ", duration = " + (retry * 500));
       for (Container container : containers) {
