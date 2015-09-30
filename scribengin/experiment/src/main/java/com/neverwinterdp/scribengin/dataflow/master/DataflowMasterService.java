@@ -4,11 +4,15 @@ import org.slf4j.Logger;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.neverwinterdp.registry.RegistryException;
+import com.google.inject.Singleton;
+import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowInitActivityBuilder;
+import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowMasterActivityService;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
+import com.neverwinterdp.scribengin.storage.StorageService;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMConfig;
 
+@Singleton
 public class DataflowMasterService {
   private Logger logger ;
   
@@ -19,13 +23,23 @@ public class DataflowMasterService {
   private DataflowRegistry dflRegistry;
   
   @Inject
+  private StorageService storageService ;
+  
+  
+  private DataflowMasterActivityService activityService;
+  
+  public StorageService getStorageService() { return storageService; }
+
+  @Inject
   public void onInject(Injector container, LoggerFactory lfactory) throws Exception {
     logger = lfactory.getLogger(DataflowMasterService.class);
+    activityService = new DataflowMasterActivityService(container, dflRegistry) ;
   }
   
-  public void init() throws RegistryException {
+  public void init() throws Exception {
     System.out.println("DataflowMasterService: init()");
     dflRegistry.initRegistry();
+    activityService.queue(new DataflowInitActivityBuilder().build());
   }
   
   public void run() {
@@ -34,5 +48,10 @@ public class DataflowMasterService {
   
   public void waitForTermination() {
     System.out.println("DataflowMasterService: waitForTermination()");
+    try {
+      Thread.sleep(5000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 }

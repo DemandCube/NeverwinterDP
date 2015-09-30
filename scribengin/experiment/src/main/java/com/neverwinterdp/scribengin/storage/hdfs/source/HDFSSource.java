@@ -8,9 +8,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.PartitionDescriptor;
 import com.neverwinterdp.scribengin.storage.source.Source;
-import com.neverwinterdp.scribengin.storage.source.SourceStream;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
 /**
@@ -19,13 +19,13 @@ import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 public class HDFSSource implements Source {
   private FileSystem fs;
   private StorageDescriptor descriptor ;
-  private Map<Integer,HDFSSourceStream> streams = new LinkedHashMap<Integer, HDFSSourceStream>();
+  private Map<Integer,HDFSSourcePartitionStream> streams = new LinkedHashMap<Integer, HDFSSourcePartitionStream>();
   
   public HDFSSource(FileSystem fs, String location) throws Exception {
     this(fs, new StorageDescriptor("HDFS", location));
   }
   
-  public HDFSSource(FileSystem fs, StreamDescriptor streamDescriptor) throws Exception {
+  public HDFSSource(FileSystem fs, PartitionDescriptor streamDescriptor) throws Exception {
     this(fs, getSourceDescriptor(streamDescriptor)) ;
   }
   
@@ -39,32 +39,32 @@ public class HDFSSource implements Source {
     
     FileStatus[] status = fs.listStatus(new Path(descriptor.getLocation())) ;
     for(int i = 0; i < status.length; i++) {
-      StreamDescriptor sDescriptor = new StreamDescriptor();
+      PartitionDescriptor sDescriptor = new PartitionDescriptor();
       sDescriptor.setType(descriptor.getType());
       sDescriptor.setLocation(status[i].getPath().toString());
       sDescriptor.setId(HDFSUtil.getStreamId(status[i].getPath()));
-      HDFSSourceStream stream = new HDFSSourceStream(fs, sDescriptor);
+      HDFSSourcePartitionStream stream = new HDFSSourcePartitionStream(fs, sDescriptor);
       streams.put(sDescriptor.getId(), stream);
     }
   }
   
   public StorageDescriptor getDescriptor() { return descriptor; }
 
-  public SourceStream   getStream(int id) { return streams.get(id) ; }
+  public SourcePartitionStream   getStream(int id) { return streams.get(id) ; }
   
-  public SourceStream   getStream(StreamDescriptor descriptor) { 
+  public SourcePartitionStream   getStream(PartitionDescriptor descriptor) { 
     return streams.get(descriptor.getId()) ; 
   }
   
-  public SourceStream[] getStreams() {
-    SourceStream[] array = new SourceStream[streams.size()];
+  public SourcePartitionStream[] getStreams() {
+    SourcePartitionStream[] array = new SourcePartitionStream[streams.size()];
     return streams.values().toArray(array);
   }
   
   public void close() throws Exception {
   }
   
-  static StorageDescriptor getSourceDescriptor(StreamDescriptor streamDescriptor) {
+  static StorageDescriptor getSourceDescriptor(PartitionDescriptor streamDescriptor) {
     StorageDescriptor descriptor = new StorageDescriptor();
     descriptor.setType(streamDescriptor.getType());
     String location = streamDescriptor.getLocation();

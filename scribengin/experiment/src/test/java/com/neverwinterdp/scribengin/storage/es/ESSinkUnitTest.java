@@ -8,10 +8,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.es.sink.ESSink;
-import com.neverwinterdp.scribengin.storage.sink.SinkStream;
-import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.log.Log4jRecord;
@@ -39,14 +39,14 @@ public class ESSinkUnitTest {
   @Test
   public void testKafkaSource() throws Exception {
     ESSink sink = new ESSink(new String[] {"127.0.0.1:9300"}, "log4j", Log4jRecord.class) ;
-    SinkStream stream = sink.newStream();
-    SinkStreamWriter writer = stream.getWriter();
+    SinkPartitionStream stream = sink.newStream();
+    SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < 10; i++) {
       Log4jRecord log4jRec = new Log4jRecord() ;
       log4jRec.withTimestamp(System.currentTimeMillis());
       log4jRec.setLevel("INFO");
       log4jRec.setMessage("message " + i);
-      DataflowMessage dataflowMessage = new DataflowMessage("key-" + i, JSONSerializer.INSTANCE.toBytes(log4jRec));
+      Record dataflowMessage = new Record("key-" + i, JSONSerializer.INSTANCE.toBytes(log4jRec));
       writer.append(dataflowMessage);
     }
     writer.close();

@@ -3,7 +3,7 @@ package com.neverwinterdp.scribengin.dataflow;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
-import com.neverwinterdp.scribengin.dataflow.master.VMDataflowServiceApp;
+import com.neverwinterdp.scribengin.dataflow.master.VMDataflowMasterApp;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
@@ -26,7 +26,7 @@ public class DataflowSubmitter {
       setName(config.getId()).
       addRoles("dataflow-master").
       setRegistryConfig(vmClient.getRegistry().getRegistryConfig()).
-      setVmApplication(VMDataflowServiceApp.class.getName()).
+      setVmApplication(VMDataflowMasterApp.class.getName()).
       addProperty("dataflow.registry.path", dataflowPath);
     vmClient.configureEnvironment(vmConfig);
     VMDescriptor vmDescriptor = vmClient.allocate(vmConfig);

@@ -5,7 +5,7 @@ import org.apache.hadoop.fs.FileSystem;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.PartitionDescriptor;
 import com.neverwinterdp.scribengin.storage.es.sink.ESSink;
 import com.neverwinterdp.scribengin.storage.hdfs.sink.HDFSSink;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
@@ -46,7 +46,7 @@ public class SinkFactory {
     throw new Exception("Unknown sink type " + descriptor.getType());
   }
   
-  public Sink create(StreamDescriptor descriptor) throws Exception {
+  public Sink create(PartitionDescriptor descriptor) throws Exception {
     if ("hdfs".equalsIgnoreCase(descriptor.getType())) {
       return new HDFSSink(fs, descriptor);
     } else if ("kafka".equalsIgnoreCase(descriptor.getType())) {

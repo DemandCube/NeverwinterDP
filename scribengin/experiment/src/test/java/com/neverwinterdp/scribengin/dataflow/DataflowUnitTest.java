@@ -35,7 +35,6 @@ public class DataflowUnitTest {
   
   @Test
   public void testDataflow() throws Exception {
-    System.out.println("Test Dataflow");
     ScribenginClient scribenginClient = clusterBuilder.getScribenginClient();
     Registry registry = scribenginClient.getRegistry();
     

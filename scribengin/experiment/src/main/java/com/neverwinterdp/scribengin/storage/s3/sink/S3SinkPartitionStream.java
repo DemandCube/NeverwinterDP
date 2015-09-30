@@ -1,16 +1,16 @@
 package com.neverwinterdp.scribengin.storage.s3.sink;
 
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.PartitionDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.S3Folder;
 import com.neverwinterdp.scribengin.storage.s3.S3Storage;
-import com.neverwinterdp.scribengin.storage.sink.SinkStream;
-import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 
-public class S3SinkStream implements SinkStream {
+public class S3SinkPartitionStream implements SinkPartitionStream {
   private S3Folder s3StreamFolder ;
-  private StreamDescriptor descriptor;
+  private PartitionDescriptor descriptor;
   
-  public S3SinkStream(S3Folder s3SinkFolder, StreamDescriptor descriptor) {
+  public S3SinkPartitionStream(S3Folder s3SinkFolder, PartitionDescriptor descriptor) {
     this.descriptor = descriptor;
     S3Storage storage = new S3Storage(descriptor);
     String streamKey = storage.getStreamKey(descriptor);
@@ -22,15 +22,15 @@ public class S3SinkStream implements SinkStream {
   }
   
   @Override
-  public StreamDescriptor getDescriptor() { return descriptor; }
+  public PartitionDescriptor getDescriptor() { return descriptor; }
 
   @Override
   public void delete() throws Exception {
   }
 
   @Override
-  public SinkStreamWriter getWriter() throws Exception {
-    return new S3SinkStreamWriter(s3StreamFolder);
+  public SinkPartitionStreamWriter getWriter() throws Exception {
+    return new S3SinkPartitionStreamWriter(s3StreamFolder);
   }
 
   public void optimize() throws Exception {

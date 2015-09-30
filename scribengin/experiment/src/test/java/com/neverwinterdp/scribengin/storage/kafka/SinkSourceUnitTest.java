@@ -5,13 +5,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
 import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSource;
-import com.neverwinterdp.scribengin.storage.sink.SinkStream;
-import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
-import com.neverwinterdp.scribengin.storage.source.SourceStream;
-import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 
 public class SinkSourceUnitTest {
@@ -39,23 +39,25 @@ public class SinkSourceUnitTest {
     String zkConnect = cluster.getZKConnect();
     System.out.println("zkConnect = " + zkConnect);
     String TOPIC = "hello.topic" ;
-    KafkaSink sink = new KafkaSink("hello", zkConnect, TOPIC) ;
-    SinkStream stream = sink.newStream();
-    SinkStreamWriter writer = stream.getWriter();
+    KafkaStorage storage = new KafkaStorage("hello", cluster.getZKConnect(), TOPIC);
+    KafkaSink sink = (KafkaSink) storage.getSink();
+    
+    SinkPartitionStream stream = sink.newStream();
+    SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < 10; i++) {
       String hello = "Hello " + i ;
-      DataflowMessage dataflowMessage = new DataflowMessage("key-" + i, hello.getBytes());
+      Record dataflowMessage = new Record("key-" + i, hello.getBytes());
       writer.append(dataflowMessage);
     }
     writer.close();
     
     KafkaSource source = new KafkaSource("hello", cluster.getZKConnect(), TOPIC);
-    SourceStream[] streams = source.getStreams();
+    SourcePartitionStream[] streams = source.getStreams();
     Assert.assertEquals(5, streams.length);
     for(int i = 0; i < streams.length; i++) {
       System.out.println("Stream id: " + streams[i].getDescriptor().getId());
-      SourceStreamReader reader = streams[i].getReader("kafka");
-      DataflowMessage dataflowMessage = null;
+      SourcePartitionStreamReader reader = streams[i].getReader("kafka");
+      Record dataflowMessage = null;
       while((dataflowMessage = reader.next(1000)) != null) {
         System.out.println("Record: " + new String(dataflowMessage.getData()));
       }

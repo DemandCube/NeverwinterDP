@@ -2,18 +2,18 @@ package com.neverwinterdp.scribengin.storage;
 
 import java.util.Map;
 
-public class StreamDescriptor extends StorageDescriptor {
+public class PartitionDescriptor extends StorageDescriptor {
 
-  public StreamDescriptor() {
+  public PartitionDescriptor() {
   }
   
-  public StreamDescriptor(String type, int id, String location) {
+  public PartitionDescriptor(String type, int id, String location) {
     setType(type);
     setId(id);
     setLocation(location);
   }
   
-  public StreamDescriptor(Map<String, String> props) {
+  public PartitionDescriptor(Map<String, String> props) {
     putAll(props);
   }
   

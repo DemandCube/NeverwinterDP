@@ -2,29 +2,29 @@ package com.neverwinterdp.scribengin.storage.hdfs.sink;
 
 import java.io.IOException;
 
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.Record;
+import com.neverwinterdp.scribengin.storage.PartitionDescriptor;
 import com.neverwinterdp.scribengin.storage.hdfs.Segment;
 import com.neverwinterdp.scribengin.storage.hdfs.Storage;
 import com.neverwinterdp.scribengin.storage.hdfs.StorageWriter;
-import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 
-public class HDFSSinkStreamWriter extends StorageWriter<DataflowMessage> implements SinkStreamWriter {
-  private StreamDescriptor descriptor ;
+public class HDFSSinkPartitionStreamWriter extends StorageWriter<Record> implements SinkPartitionStreamWriter {
+  private PartitionDescriptor descriptor ;
   private long             smallDataSizeAccumulate  = 0;
   private long             mediumDataSizeAccumulate = 0;
   
-  public HDFSSinkStreamWriter(Storage<DataflowMessage> storage, StreamDescriptor descriptor) throws IOException {
+  public HDFSSinkPartitionStreamWriter(Storage<Record> storage, PartitionDescriptor descriptor) throws IOException {
     super(storage);
     this.descriptor = descriptor ;
     smallDataSizeAccumulate  = storage.getBufferSegments().dataSize();
     mediumDataSizeAccumulate = storage.getSmallSegments().dataSize();
   }
 
-  public StreamDescriptor getDescriptor() { return descriptor; }
+  public PartitionDescriptor getDescriptor() { return descriptor; }
   
   @Override
-  public void append(DataflowMessage obj) throws Exception {
+  public void append(Record obj) throws Exception {
     super.append(obj);
     long dataSize = obj.getData().length + obj.getKey().length() ;
     smallDataSizeAccumulate  += dataSize ;

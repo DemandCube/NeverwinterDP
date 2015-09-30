@@ -12,12 +12,14 @@ public class MasterRegistry {
   
   private Node     masterNode ;
   private Node     masterLeaderNode ;
+  private Node     activitiesNode;
   
   public MasterRegistry(Registry registry, String dataflowPath) throws RegistryException {
     this.registry         = registry;
     this.dataflowPath     = dataflowPath;
     this.masterNode       = registry.get(dataflowPath + "/master");
     this.masterLeaderNode = registry.get(dataflowPath + "/master/leader");
+    this.activitiesNode   = registry.get(dataflowPath + "/master/activities");
   }
   
   void create(Transaction transaction) throws RegistryException {
@@ -27,4 +29,9 @@ public class MasterRegistry {
   
   void initRegistry(Transaction transaction) throws RegistryException {
   }
+  
+  public String getActivitiesNodePath() { return activitiesNode.getPath(); }
+  
+  public Node getActivitiesNode() { return activitiesNode ; }
+  
 }

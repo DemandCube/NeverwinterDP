@@ -1,13 +1,13 @@
-package com.neverwinterdp.scribengin.storage.es.sink;
+package com.neverwinterdp.scribengin.storage.kafka.sink;
 
 import com.neverwinterdp.scribengin.storage.PartitionDescriptor;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 
-public class ESSinkStream implements SinkPartitionStream {
+public class KafkaSinkPartitionStream implements SinkPartitionStream {
   private PartitionDescriptor descriptor;
   
-  public ESSinkStream(PartitionDescriptor descriptor) {
+  public KafkaSinkPartitionStream(PartitionDescriptor descriptor) {
     this.descriptor = descriptor;
   }
   
@@ -19,11 +19,10 @@ public class ESSinkStream implements SinkPartitionStream {
   }
 
   @Override
-  public SinkPartitionStreamWriter getWriter() throws Exception { 
-    return new ESStreamWriter(descriptor); 
+  public SinkPartitionStreamWriter getWriter() throws Exception {
+    return new KafkaSinkPartitionStreamWriter(descriptor);
   }
-
-  @Override
+  
   public void optimize() throws Exception {
   }
 }

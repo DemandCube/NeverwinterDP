@@ -3,7 +3,7 @@ package com.neverwinterdp.scribengin.storage.es;
 import com.neverwinterdp.es.ESClient;
 import com.neverwinterdp.es.ESObjectClient;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.PartitionDescriptor;
 import com.neverwinterdp.util.text.StringUtil;
 
 public class ESStorage {
@@ -21,7 +21,7 @@ public class ESStorage {
     fromStorageDescriptor(descriptor);
   }
   
-  public ESStorage(StreamDescriptor descriptor) {
+  public ESStorage(PartitionDescriptor descriptor) {
     fromStorageDescriptor(descriptor);
   }
   
@@ -33,8 +33,8 @@ public class ESStorage {
   
   public StorageDescriptor getStorageDescriptor() { return toStorageDesciptor();  }
   
-  public StreamDescriptor newStreamDescriptor() {
-    StreamDescriptor descriptor = new StreamDescriptor(getStorageDescriptor()) ;
+  public PartitionDescriptor newStreamDescriptor() {
+    PartitionDescriptor descriptor = new PartitionDescriptor(getStorageDescriptor()) ;
     return descriptor;
   }
   

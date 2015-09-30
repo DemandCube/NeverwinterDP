@@ -3,16 +3,16 @@ package com.neverwinterdp.scribengin.storage.kafka.source;
 import kafka.javaapi.PartitionMetadata;
 
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
-import com.neverwinterdp.scribengin.storage.source.SourceStream;
-import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.scribengin.storage.PartitionDescriptor;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 
-public class KafkaSourceStream implements SourceStream {
-  private StreamDescriptor descriptor;
+public class KafkaSourceStream implements SourcePartitionStream {
+  private PartitionDescriptor descriptor;
   private PartitionMetadata partitionMetadata;
   
   public KafkaSourceStream(StorageDescriptor storageDescriptor, PartitionMetadata metadata) {
-    descriptor = new StreamDescriptor(storageDescriptor);
+    descriptor = new PartitionDescriptor(storageDescriptor);
     descriptor.setId(metadata.partitionId());
     this.partitionMetadata = metadata;
   }
@@ -20,10 +20,10 @@ public class KafkaSourceStream implements SourceStream {
   public int getId() { return descriptor.getId(); }
   
   @Override
-  public StreamDescriptor getDescriptor() { return descriptor; }
+  public PartitionDescriptor getDescriptor() { return descriptor; }
 
   @Override
-  public SourceStreamReader getReader(String name) throws Exception {
+  public SourcePartitionStreamReader getReader(String name) throws Exception {
     String readerType = descriptor.attribute("reader") ;
     if("raw".equalsIgnoreCase(readerType)) {
       return new RawKafkaSourceStreamReader(descriptor, partitionMetadata); 

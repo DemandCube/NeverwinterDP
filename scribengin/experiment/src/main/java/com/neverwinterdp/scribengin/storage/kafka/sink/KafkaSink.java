@@ -4,31 +4,23 @@ import java.util.LinkedHashMap;
 
 import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.kafka.KafkaStorage;
+import com.neverwinterdp.scribengin.storage.PartitionDescriptor;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
-import com.neverwinterdp.scribengin.storage.sink.SinkStream;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
 
 public class KafkaSink implements Sink {
   private StorageDescriptor descriptor;
   
   private int idTracker = 0;
-  private LinkedHashMap<Integer, KafkaSinkStream> streams = new LinkedHashMap<Integer, KafkaSinkStream>() ;
+  private LinkedHashMap<Integer, KafkaSinkPartitionStream> streams = new LinkedHashMap<Integer, KafkaSinkPartitionStream>() ;
   
   public KafkaSink(StorageDescriptor descriptor) throws Exception {
     init(descriptor) ;
   }
   
-  public KafkaSink(String name, String zkConnect, String topic) throws Exception {
-    StorageDescriptor descriptor = new StorageDescriptor("kafka");
-    descriptor.attribute("name", name);
-    descriptor.attribute("topic", topic);
-    descriptor.attribute("zk.connect", zkConnect);
-    init(descriptor);
-  }
-  
   private void init(StorageDescriptor descriptor) throws Exception {
-    KafkaTool kafkaTool = new KafkaTool(descriptor.attribute("name"), descriptor.attribute("zk.connect")) ;
-    kafkaTool.connect();
+    KafkaTool kafkaTool = KafkaStorage.getKafkaTool(descriptor) ;
     descriptor.attribute("broker.list", kafkaTool.getKafkaBrokerList());
     this.descriptor  = descriptor ;
     kafkaTool.close();
@@ -38,23 +30,23 @@ public class KafkaSink implements Sink {
   public StorageDescriptor getDescriptor() { return descriptor; }
 
   @Override
-  public SinkStream getStream(StreamDescriptor descriptor) throws Exception {
-    SinkStream stream = streams.get(descriptor.getId());
+  public SinkPartitionStream getStream(PartitionDescriptor descriptor) throws Exception {
+    SinkPartitionStream stream = streams.get(descriptor.getId());
     if(stream != null) return stream ;
-    KafkaSinkStream newStream= new KafkaSinkStream(descriptor) ;
+    KafkaSinkPartitionStream newStream= new KafkaSinkPartitionStream(descriptor) ;
     streams.put(descriptor.getId(), newStream) ;
     return newStream;
   }
 
   @Override
-  public SinkStream[] getStreams() {
-    SinkStream[] array = new SinkStream[streams.size()];
+  public SinkPartitionStream[] getStreams() {
+    SinkPartitionStream[] array = new SinkPartitionStream[streams.size()];
     return streams.values().toArray(array);
   }
 
   @Override
-  public void delete(SinkStream stream) throws Exception {
-    SinkStream found = streams.get(stream.getDescriptor().getId());
+  public void delete(SinkPartitionStream stream) throws Exception {
+    SinkPartitionStream found = streams.get(stream.getDescriptor().getId());
     if(found != null) {
       found.delete();
       streams.remove(stream.getDescriptor().getId());
@@ -64,15 +56,15 @@ public class KafkaSink implements Sink {
   }
 
   @Override
-  public SinkStream newStream() throws Exception {
-    StreamDescriptor streamDescriptor = new StreamDescriptor(this.descriptor);
+  public SinkPartitionStream newStream() throws Exception {
+    PartitionDescriptor streamDescriptor = new PartitionDescriptor(this.descriptor);
     streamDescriptor.setId(idTracker++);
-    return new KafkaSinkStream(streamDescriptor);
+    return new KafkaSinkPartitionStream(streamDescriptor);
   }
 
   @Override
   public void close() throws Exception {
-    for(KafkaSinkStream sel : streams.values()) {
+    for(KafkaSinkPartitionStream sel : streams.values()) {
     }
   }
 }

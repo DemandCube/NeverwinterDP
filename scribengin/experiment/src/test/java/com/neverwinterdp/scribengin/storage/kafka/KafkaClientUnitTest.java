@@ -9,8 +9,8 @@ import org.junit.Test;
 import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.kafka.tool.ZKTool;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
-import com.neverwinterdp.scribengin.storage.sink.SinkStream;
-import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 
 public class KafkaClientUnitTest {
@@ -33,10 +33,11 @@ public class KafkaClientUnitTest {
   }
 
   @Test
-  public void testKafkaClient() throws Exception {
-    KafkaSink sink = new KafkaSink("writer", cluster.getZKConnect(), "hello");
-    SinkStream stream = sink.newStream();
-    SinkStreamWriter writer = stream.getWriter();
+  public void testKafkaSink() throws Exception {
+    KafkaStorage storage = new KafkaStorage("writer", cluster.getZKConnect(), "hello");
+    KafkaSink sink = (KafkaSink) storage.getSink();
+    SinkPartitionStream stream = sink.newStream();
+    SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < 10; i++) {
     }
     writer.close();

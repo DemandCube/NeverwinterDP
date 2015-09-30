@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class S3ObjectReader implements Closeable {
@@ -24,8 +24,8 @@ public class S3ObjectReader implements Closeable {
     this.inputStream = inputStream;
   }
 
-  public DataflowMessage next() {
-    return JSONSerializer.INSTANCE.fromString(streamReader.next(), DataflowMessage.class);
+  public Record next() {
+    return JSONSerializer.INSTANCE.fromString(streamReader.next(), Record.class);
   }
 
   public boolean hasNext() {

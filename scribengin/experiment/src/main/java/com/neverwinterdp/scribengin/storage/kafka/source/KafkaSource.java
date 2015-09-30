@@ -9,9 +9,9 @@ import kafka.javaapi.TopicMetadata;
 
 import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.PartitionDescriptor;
 import com.neverwinterdp.scribengin.storage.source.Source;
-import com.neverwinterdp.scribengin.storage.source.SourceStream;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
 
 public class KafkaSource implements Source {
   private StorageDescriptor descriptor;
@@ -47,16 +47,16 @@ public class KafkaSource implements Source {
    * The stream id is equivalent to the partition id of the kafka
    */
   @Override
-  public SourceStream getStream(int id) {  return sourceStreams.get(id); }
+  public SourcePartitionStream getStream(int id) {  return sourceStreams.get(id); }
 
   @Override
-  public SourceStream getStream(StreamDescriptor descriptor) {
+  public SourcePartitionStream getStream(PartitionDescriptor descriptor) {
     return sourceStreams.get(descriptor.getId());
   }
 
   @Override
-  public SourceStream[] getStreams() {
-    SourceStream[] array = new SourceStream[sourceStreams.size()];
+  public SourcePartitionStream[] getStreams() {
+    SourcePartitionStream[] array = new SourcePartitionStream[sourceStreams.size()];
     return sourceStreams.values().toArray(array);
   }
   

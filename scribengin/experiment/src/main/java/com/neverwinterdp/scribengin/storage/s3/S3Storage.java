@@ -1,7 +1,7 @@
 package com.neverwinterdp.scribengin.storage.s3;
 
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.PartitionDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.sink.S3Sink;
 import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
 
@@ -18,7 +18,7 @@ public class S3Storage {
     fromStorageDescriptor(descriptor);
   }
   
-  public S3Storage(StreamDescriptor descriptor) {
+  public S3Storage(PartitionDescriptor descriptor) {
     fromStorageDescriptor(descriptor);
   }
   
@@ -28,20 +28,20 @@ public class S3Storage {
   
   public StorageDescriptor getStorageDescriptor() { return toStorageDesciptor();  }
   
-  public StreamDescriptor createStreamDescriptor(String streamKey) {
+  public PartitionDescriptor createStreamDescriptor(String streamKey) {
     int id = Integer.parseInt(streamKey.substring(streamKey.lastIndexOf('-') + 1)) ;
-    StreamDescriptor descriptor = new StreamDescriptor("S3", id, bucketName) ;
+    PartitionDescriptor descriptor = new PartitionDescriptor("S3", id, bucketName) ;
     descriptor.attribute("s3.bucket.name", bucketName);
     descriptor.attribute("s3.storage.path", storageFolder);
     return descriptor;
   }
   
-  public String getStreamKey(StreamDescriptor descriptor) {
+  public String getStreamKey(PartitionDescriptor descriptor) {
     return this.storageFolder + "/stream-" + descriptor.getId();
   }
   
-  public StreamDescriptor createStreamDescriptor(int id) {
-    StreamDescriptor descriptor = new StreamDescriptor("S3", id, bucketName) ;
+  public PartitionDescriptor createStreamDescriptor(int id) {
+    PartitionDescriptor descriptor = new PartitionDescriptor("S3", id, bucketName) ;
     descriptor.attribute("s3.bucket.name", bucketName);
     descriptor.attribute("s3.storage.path", storageFolder);
     descriptor.attribute("s3.storage.stream", "stream-" + id);

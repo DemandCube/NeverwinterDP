@@ -1,6 +1,7 @@
 package com.neverwinterdp.scribengin.dataflow.registry;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
@@ -10,6 +11,7 @@ import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
 
+@Singleton
 public class DataflowRegistry {
   final static public String SCRIBENGIN_PATH       = "/scribengin";
   final static public String DATAFLOW_ALL_PATH     = SCRIBENGIN_PATH + "/dataflows/all";
@@ -22,8 +24,9 @@ public class DataflowRegistry {
   @Inject
   private Registry           registry;
   
+  private StreamRegistry     streamRegistry;
+  private OperatorRegistry   operatorRegistry;
   private MasterRegistry     masterRegistry;
-  
   private WorkerRegistry     workerRegistry ;
   
   public DataflowRegistry() {
@@ -35,8 +38,15 @@ public class DataflowRegistry {
   }
   
   void init() throws RegistryException {
-    masterRegistry = new MasterRegistry(registry, dataflowPath);
-    workerRegistry = new WorkerRegistry(registry, dataflowPath);
+    streamRegistry   = new StreamRegistry(registry, dataflowPath);
+    operatorRegistry = new OperatorRegistry(registry, dataflowPath);
+    masterRegistry   = new MasterRegistry(registry, dataflowPath);
+    workerRegistry   = new WorkerRegistry(registry, dataflowPath);
+  }
+  
+  @Inject
+  public void inInject() throws RegistryException {
+    init();
   }
   
   public String create(Registry registry, DataflowConfig config) throws RegistryException {
@@ -48,6 +58,8 @@ public class DataflowRegistry {
     Transaction transaction = registry.getTransaction();
     transaction.createChild(dataflowNode, "status", DataflowLifecycleStatus.CREATE, NodeCreateMode.PERSISTENT);
     transaction.createChild(dataflowNode, "config", config, NodeCreateMode.PERSISTENT);
+    streamRegistry.create(transaction);
+    operatorRegistry.create(transaction);
     masterRegistry.create(transaction);
     workerRegistry.create(transaction);
     transaction.commit();
@@ -57,10 +69,20 @@ public class DataflowRegistry {
   public void initRegistry() throws RegistryException {
     init();
     Transaction transaction = registry.getTransaction();
+    streamRegistry.initRegistry(transaction);
+    operatorRegistry.initRegistry(transaction);
     masterRegistry.initRegistry(transaction);
     workerRegistry.initRegistry(transaction);
     transaction.commit();
   }
+  
+  public MasterRegistry getMasterRegistry() { return this.masterRegistry; }
+  
+  public WorkerRegistry getWorkerRegistry() { return this.workerRegistry; }
+  
+  public StreamRegistry getStreamRegistry() { return this.streamRegistry ; }
+  
+  public OperatorRegistry getOperatorRegistry() { return this.operatorRegistry ; }
   
   static  public DataflowLifecycleStatus getStatus(Registry registry, String dataflowPath) throws RegistryException {
     return registry.getDataAs(dataflowPath + "/status" , DataflowLifecycleStatus.class) ;

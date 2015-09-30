@@ -13,12 +13,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.sink.S3Sink;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
-import com.neverwinterdp.scribengin.storage.sink.SinkStream;
-import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 
 public class SinkExperimentTest {
 
@@ -63,18 +63,18 @@ public class SinkExperimentTest {
     descriptor.attribute("s3.storage.path", folderName);
 
     S3Sink sink = new S3Sink(s3Client, descriptor);
-    SinkStream[] streams = sink.getStreams();
+    SinkPartitionStream[] streams = sink.getStreams();
     assertEquals(0, streams.length);
 
-    SinkStream stream = sink.newStream();
+    SinkPartitionStream stream = sink.newStream();
     assertEquals(1, sink.getStreams().length);
 
-    SinkStreamWriter writer = stream.getWriter();
+    SinkPartitionStreamWriter writer = stream.getWriter();
     int numBuffers = 5;
     for (int i = 0; i < numBuffers; i++) {
       for (int j = 0; j < 100; j++) {
         String key = "stream=" + stream.getDescriptor().getId() + ",buffer=" + i + ",record=" + j;
-        writer.append(DataflowMessage.create(key, key));
+        writer.append(Record.create(key, key));
       }
       writer.commit();
       System.out.println("during the write.");
@@ -99,10 +99,10 @@ public class SinkExperimentTest {
 
     S3Sink sink = new S3Sink(s3Client, descriptor);
 
-    SinkStream stream0 = sink.newStream();
-    SinkStreamWriter writer = stream0.getWriter();
+    SinkPartitionStream stream0 = sink.newStream();
+    SinkPartitionStreamWriter writer = stream0.getWriter();
     for (int i = 0; i < 100; i++) {
-      writer.append(DataflowMessage.create("key-" + i, "record " + i));
+      writer.append(Record.create("key-" + i, "record " + i));
     }
     System.out.println("\nbefore roll back");
     S3Util.listStructure(s3Client, bucketName);
@@ -149,12 +149,12 @@ public class SinkExperimentTest {
     @Override
     public void run() {
       try {
-        SinkStream stream = sink.newStream();
-        SinkStreamWriter writer = stream.getWriter();
+        SinkPartitionStream stream = sink.newStream();
+        SinkPartitionStreamWriter writer = stream.getWriter();
         Random random = new Random();
         for (int i = 0; i < 5; i++) {
           for (int j = 0; j < 100; j++) {
-            writer.append(DataflowMessage.create("key-" + i, "record " + i));
+            writer.append(Record.create("key-" + i, "record " + i));
             Thread.sleep(random.nextInt(10));
           }
           writer.commit();

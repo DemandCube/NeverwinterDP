@@ -19,7 +19,7 @@ import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMConfig.ClusterEnvironment;
 
-public class VMDataflowServiceApp extends VMApp {
+public class VMDataflowMasterApp extends VMApp {
   private Logger                logger;
   private String                dataflowRegistryPath;
   private LeaderElection        election;
@@ -28,7 +28,7 @@ public class VMDataflowServiceApp extends VMApp {
 
   @Override
   public void run() throws Exception {
-    logger = getVM().getLoggerFactory().getLogger(VMDataflowServiceApp.class);
+    logger = getVM().getLoggerFactory().getLogger(VMDataflowMasterApp.class);
     logger.info("Start run()");
     Registry registry = getVM().getVMRegistry().getRegistry();
     VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
@@ -55,8 +55,7 @@ public class VMDataflowServiceApp extends VMApp {
       System.err.println("VMDataflowServiceApp: on elected " + getVM().getDescriptor().getId() + "with registry " + registry.hashCode()) ;
       try {
         if(registry.exists(dataflowRegistryPath + "/status")) {
-          DataflowLifecycleStatus currentStatus = 
-            DataflowRegistry.getStatus(registry, dataflowRegistryPath);
+          DataflowLifecycleStatus currentStatus =  DataflowRegistry.getStatus(registry, dataflowRegistryPath);
           if(currentStatus == DataflowLifecycleStatus.FINISH) {
             terminate(TerminateEvent.Shutdown);
             return;

@@ -11,11 +11,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
-import com.neverwinterdp.scribengin.storage.source.SourceStream;
-import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 import com.neverwinterdp.tool.message.Message;
 import com.neverwinterdp.tool.message.MessageExtractor;
 import com.neverwinterdp.tool.message.MessageTracker;
@@ -73,12 +73,12 @@ public class SourceExperimentTest {
     MessageTracker messageTracker = new MessageTracker();
     MessageExtractor messageExtractor = MessageExtractor.DEFAULT_MESSAGE_EXTRACTOR;
 
-    SourceStream[] streams = source.getStreams();
+    SourcePartitionStream[] streams = source.getStreams();
 
     assertEquals(numOfBuffersPerStream, streams.length);
-    for (SourceStream stream : streams) {
-      SourceStreamReader reader = stream.getReader("test");
-      DataflowMessage dataflowMessage;
+    for (SourcePartitionStream stream : streams) {
+      SourcePartitionStreamReader reader = stream.getReader("test");
+      Record dataflowMessage;
       while ((dataflowMessage = reader.next(1000)) != null) {
         Message message = messageExtractor.extract(dataflowMessage.getData());
         messageTracker.log(message);

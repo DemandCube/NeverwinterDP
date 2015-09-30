@@ -5,16 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.amazonaws.services.s3.model.S3Object;
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.Record;
+import com.neverwinterdp.scribengin.storage.PartitionDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.scribengin.storage.s3.S3Folder;
 import com.neverwinterdp.scribengin.storage.s3.S3Storage;
 import com.neverwinterdp.scribengin.storage.s3.S3Util;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;
-import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 
-public class S3SourceStreamReader implements SourceStreamReader {
+public class S3SourcePartitionStreamReader implements SourcePartitionStreamReader {
   private String name;
   private S3Storage storage ;
   private S3Client s3Client;
@@ -29,7 +29,7 @@ public class S3SourceStreamReader implements SourceStreamReader {
   private int currPosition;
   private CommitPoint lastCommitInfo;
 
-  public S3SourceStreamReader(String name, S3Client client, StreamDescriptor descriptor) throws Exception {
+  public S3SourcePartitionStreamReader(String name, S3Client client, PartitionDescriptor descriptor) throws Exception {
     this.name = name;
     this.s3Client = client;
     
@@ -41,7 +41,7 @@ public class S3SourceStreamReader implements SourceStreamReader {
 
   public String getName() { return name; }
 
-  public DataflowMessage next(long maxWait) throws Exception {
+  public Record next(long maxWait) throws Exception {
     if (currentSegmenttReader == null) {
       currentSegmenttReader = nextSegmentReader();
     }
@@ -56,11 +56,11 @@ public class S3SourceStreamReader implements SourceStreamReader {
     }
   }
 
-  public DataflowMessage[] next(int size, long maxWait) throws Exception {
-    List<DataflowMessage> holder = new ArrayList<DataflowMessage>();
-    DataflowMessage[] array = new DataflowMessage[holder.size()];
+  public Record[] next(int size, long maxWait) throws Exception {
+    List<Record> holder = new ArrayList<Record>();
+    Record[] array = new Record[holder.size()];
     for (int i = 0; i < size; i++) {
-      DataflowMessage dataflowMessage = next(maxWait);
+      Record dataflowMessage = next(maxWait);
       if (dataflowMessage != null) holder.add(dataflowMessage);
       else break;
     }

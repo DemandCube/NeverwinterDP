@@ -5,13 +5,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.common.base.Stopwatch;
-import com.neverwinterdp.scribengin.dataflow.DataflowInstruction;
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.storage.StorageInstruction;
+import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.sink.S3Sink;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
-import com.neverwinterdp.scribengin.storage.sink.SinkStream;
-import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.tool.message.MessageGenerator;
 import com.neverwinterdp.util.JSONSerializer;
 
@@ -39,8 +39,8 @@ public class S3SourceGenerator {
   }
 
   void generateStream(Sink sink) throws Exception {
-    SinkStream stream = sink.newStream();
-    SinkStreamWriter writer = stream.getWriter();
+    SinkPartitionStream stream = sink.newStream();
+    SinkPartitionStreamWriter writer = stream.getWriter();
     for (int i = 0; i < numOfBufferPerStream; i++) {
       for (int j = 0; j < numOfRecordPerBuffer; j++) {
         String partition = Integer.toString(i);
@@ -60,14 +60,14 @@ public class S3SourceGenerator {
     }
     
     public byte[] eosMessage() {
-      DataflowMessage dflMessage = new DataflowMessage(DataflowInstruction.END_OF_DATASTREAM) ;
+      Record dflMessage = new Record(StorageInstruction.END_OF_DATASTREAM) ;
       return JSONSerializer.INSTANCE.toBytes(dflMessage);
     }
     
-    public DataflowMessage nextRecord(String partition, int messageSize) {
+    public Record nextRecord(String partition, int messageSize) {
       byte[] messagePayload = defaultMessageGenerator.nextMessage(partition, messageSize);
       String key = "partition=" + partition + ",id=" + idTracker.getAndIncrement();
-      return new DataflowMessage(key, messagePayload);
+      return new Record(key, messagePayload);
     }
     
     @Override

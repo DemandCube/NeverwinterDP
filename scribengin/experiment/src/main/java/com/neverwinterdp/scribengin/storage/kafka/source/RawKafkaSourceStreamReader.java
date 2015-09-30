@@ -6,17 +6,17 @@ import kafka.javaapi.PartitionMetadata;
 import kafka.message.Message;
 
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.Record;
+import com.neverwinterdp.scribengin.storage.PartitionDescriptor;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;
-import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 
-public class RawKafkaSourceStreamReader implements SourceStreamReader {
-  private StreamDescriptor descriptor;
+public class RawKafkaSourceStreamReader implements SourcePartitionStreamReader {
+  private PartitionDescriptor descriptor;
   private KafkaPartitionReader partitionReader ;
   private CommitPoint lastCommitInfo ;
   
-  public RawKafkaSourceStreamReader(StreamDescriptor descriptor, 
+  public RawKafkaSourceStreamReader(PartitionDescriptor descriptor, 
       PartitionMetadata partitionMetadata) throws Exception {
     this.descriptor = descriptor;
     this.partitionReader = 
@@ -27,7 +27,7 @@ public class RawKafkaSourceStreamReader implements SourceStreamReader {
   public String getName() { return descriptor.attribute("name"); }
 
   @Override
-  public DataflowMessage next(long maxWait) throws Exception {
+  public Record next(long maxWait) throws Exception {
     Message message = partitionReader.nextMessage(maxWait) ;
     if(message == null) return null ;
     ByteBuffer payload = message.payload();
@@ -37,12 +37,12 @@ public class RawKafkaSourceStreamReader implements SourceStreamReader {
     ByteBuffer key = message.key();
     byte[] keyBytes = new byte[key.limit()];
     key.get(keyBytes);
-    DataflowMessage dataflowMessage = new DataflowMessage(new String(keyBytes), messageBytes) ;
+    Record dataflowMessage = new Record(new String(keyBytes), messageBytes) ;
     return dataflowMessage;
   }
 
   @Override
-  public DataflowMessage[] next(int size, long maxWait) throws Exception {
+  public Record[] next(int size, long maxWait) throws Exception {
     throw new Exception("To implement") ;
   }
   

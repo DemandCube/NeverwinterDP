@@ -4,10 +4,10 @@ import java.util.LinkedHashMap;
 
 import com.neverwinterdp.es.ESObjectClient;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.PartitionDescriptor;
 import com.neverwinterdp.scribengin.storage.es.ESStorage;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
-import com.neverwinterdp.scribengin.storage.sink.SinkStream;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
 
 public class ESSink implements Sink {
   private ESStorage storage ;
@@ -36,8 +36,8 @@ public class ESSink implements Sink {
   public StorageDescriptor getDescriptor() { return storage.getStorageDescriptor(); }
 
   @Override
-  public SinkStream getStream(StreamDescriptor descriptor) throws Exception {
-    SinkStream stream = streams.get(descriptor.getId());
+  public SinkPartitionStream getStream(PartitionDescriptor descriptor) throws Exception {
+    SinkPartitionStream stream = streams.get(descriptor.getId());
     if(stream != null) return stream ;
     ESSinkStream newStream= new ESSinkStream(descriptor) ;
     streams.put(descriptor.getId(), newStream) ;
@@ -45,14 +45,14 @@ public class ESSink implements Sink {
   }
 
   @Override
-  public SinkStream[] getStreams() {
-    SinkStream[] array = new SinkStream[streams.size()];
+  public SinkPartitionStream[] getStreams() {
+    SinkPartitionStream[] array = new SinkPartitionStream[streams.size()];
     return streams.values().toArray(array);
   }
 
   @Override
-  public void delete(SinkStream stream) throws Exception {
-    SinkStream found = streams.get(stream.getDescriptor().getId());
+  public void delete(SinkPartitionStream stream) throws Exception {
+    SinkPartitionStream found = streams.get(stream.getDescriptor().getId());
     if(found != null) {
       found.delete();
       streams.remove(stream.getDescriptor().getId());
@@ -62,8 +62,8 @@ public class ESSink implements Sink {
   }
 
   @Override
-  public SinkStream newStream() throws Exception {
-    StreamDescriptor streamDescriptor = new StreamDescriptor(storage.newStreamDescriptor());
+  public SinkPartitionStream newStream() throws Exception {
+    PartitionDescriptor streamDescriptor = new PartitionDescriptor(storage.newStreamDescriptor());
     streamDescriptor.setId(idTracker++);
     return new ESSinkStream(streamDescriptor);
   }
