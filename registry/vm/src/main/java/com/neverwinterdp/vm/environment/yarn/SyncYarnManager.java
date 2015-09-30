@@ -3,6 +3,9 @@ package com.neverwinterdp.vm.environment.yarn;
 
 import java.net.InetAddress;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hadoop.yarn.api.protocolrecords.AllocateResponse;
@@ -22,6 +25,7 @@ import com.neverwinterdp.vm.VMConfig;
 @JmxBean("role=vm-manager, type=YarnManager, name=AsynYarnManager")
 public class SyncYarnManager extends YarnManager {
   private AMRMClient<ContainerRequest> amrmClient ;
+  private HeartbeatThread heartbeatThread;
   
   private AtomicInteger countContainerRequest = new AtomicInteger();
   
@@ -40,6 +44,8 @@ public class SyncYarnManager extends YarnManager {
       // Register with RM
       String appHostName = InetAddress.getLocalHost().getHostAddress()  ;
       RegisterApplicationMasterResponse registerResponse = amrmClient.registerApplicationMaster(appHostName, 0, "");
+      heartbeatThread = new HeartbeatThread();
+      heartbeatThread.start();
     } catch(Throwable t) {
       logger.error("Error: " , t);
       t.printStackTrace();
@@ -51,6 +57,11 @@ public class SyncYarnManager extends YarnManager {
   public void onDestroy()  {
     logger.info("Start onDestroy()");
     try {
+      if(heartbeatThread != null) {
+        heartbeatThread.interrupt();
+        heartbeatThread = null;
+      }
+      
       if(amrmClient != null) {
         amrmClient.unregisterApplicationMaster(FinalApplicationStatus.SUCCEEDED, "", "");
         amrmClient.stop();
@@ -80,29 +91,54 @@ public class SyncYarnManager extends YarnManager {
   private Container allocateAndRun(VMRequest vmReq, long timeout) throws Exception {
     vmReq.reset();
     ContainerRequest containerReq = vmReq.getContainerRequest();
-    amrmClient.addContainerRequest(containerReq);
+    heartbeatThread.add(containerReq);
     long stopTime = System.currentTimeMillis() + timeout;
     int retry = 0;
     Container allocatedContainer = null ;
     while (allocatedContainer == null && System.currentTimeMillis() < stopTime) {
       retry++ ;
-      AllocateResponse response = amrmClient.allocate(0 /*progress indicator*/);
-      List<ContainerStatus> completed = response.getCompletedContainersStatuses();
-      for(ContainerStatus sel : completed) {
-        logger.info("  complete container " + sel.getContainerId() + ", status = " + sel.getState() + ", exit = " + sel.getExitStatus());
-      }
+      AllocateResponse response = heartbeatThread.nextResponse();
       List<Container> containers = response.getAllocatedContainers();
       logger.info("  " + retry + "  Allocate containers = " + containers.size() + ", retry = " + retry + ", duration = " + (retry * 500));
       for (Container container : containers) {
         if(allocatedContainer == null) allocatedContainer = container;
-        //else amrmClient.releaseAssignedContainer(container.getId());
       }
-      Thread.sleep(500);
     }
     if(allocatedContainer != null) {
       vmReq.getCallback().onAllocate(this, vmReq, allocatedContainer);
     }
-    amrmClient.removeContainerRequest(containerReq);
+    heartbeatThread.remove(containerReq);
     return allocatedContainer ;
+  }
+  
+  public class HeartbeatThread extends Thread {
+    private BlockingQueue<AllocateResponse> responseQueue = new LinkedBlockingQueue<AllocateResponse>();
+    
+    public void add(ContainerRequest containerReq) {
+      amrmClient.addContainerRequest(containerReq);
+    }
+    
+    public void remove(ContainerRequest containerReq) {
+      amrmClient.removeContainerRequest(containerReq);
+    }
+    
+    
+    public AllocateResponse nextResponse() throws InterruptedException {
+      return responseQueue.take();
+    }
+    
+    public void run() {
+      while(true) {
+        try {
+          AllocateResponse response = amrmClient.allocate(0);
+          responseQueue.put(response);
+          Thread.sleep(500);
+        } catch(InterruptedException ex) {
+          return;
+        } catch(Exception ex) {
+          logger.error("Error:", ex);
+        }
+      }
+    }
   }
 }
