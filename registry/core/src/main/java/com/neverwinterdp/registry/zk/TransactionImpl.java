@@ -28,20 +28,19 @@ public class TransactionImpl implements Transaction {
 
   @Override
   public <T> Transaction create(String path, T obj, NodeCreateMode mode) {
-    zkTransaction.create(registry.realPath(path), JSONSerializer.INSTANCE.toBytes(obj), RegistryImpl.DEFAULT_ACL, RegistryImpl.toCreateMode(mode));
-    return this;
-  }
-  
-  @Override
-  public <T> Transaction create(Node node, T obj, NodeCreateMode mode) {
     byte[] data = null; ;
     if(obj != null) {
       data = JSONSerializer.INSTANCE.toBytes(obj);
     } else {
       data = new byte[0] ;
     }
-    zkTransaction.create(registry.realPath(node.getPath()), data, RegistryImpl.DEFAULT_ACL, RegistryImpl.toCreateMode(mode));
+    zkTransaction.create(registry.realPath(path), data, RegistryImpl.DEFAULT_ACL, RegistryImpl.toCreateMode(mode));
     return this;
+  }
+  
+  @Override
+  public <T> Transaction create(Node node, T obj, NodeCreateMode mode) {
+    return create(node.getPath(), obj, mode) ;
   }
   
   @Override
