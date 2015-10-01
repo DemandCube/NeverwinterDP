@@ -18,7 +18,7 @@
 
       "sinkDescriptors" : {
         "default" : {
-          type" : "kafka", "topic" : "log4j.default", "zk.connect" : "zookeeper-1:2181", "name" : "LogSplitterDataflow"
+          "type" : "kafka", "topic" : "log4j.default", "zk.connect" : "zookeeper-1:2181", "name" : "LogSplitterDataflow"
         },
 
         "warn" : {
