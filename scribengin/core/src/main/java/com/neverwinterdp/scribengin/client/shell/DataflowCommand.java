@@ -188,7 +188,7 @@ public class DataflowCommand extends Command {
     @Parameter(names = "--dataflow-chain-config",  description = "The dataflow descriptor path in the json format")
     private String dataflowChainConfig ;
     
-    @Parameter(names = "--dataflow-max-run-time",  description = "Dataflow max run time")
+    @Parameter(names = "--dataflow-max-runtime",  description = "Dataflow max run time")
     private long dataflowMaxRunTime =  -1;
    
     @Parameter(names = "--dataflow-task-switching-period",  description = "Dataflow task switching period")
