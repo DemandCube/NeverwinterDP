@@ -43,9 +43,9 @@ public class S3Sink implements Sink {
     for (String streamName : streamNames) {
       StreamDescriptor streamDescriptor = storage.createStreamDescriptor(streamName);
       S3SinkStream stream = new S3SinkStream(sinkFolder, streamDescriptor);
-      streams.put(stream.getDescriptor().getId(), stream);
-      if (streamIdTracker < stream.getDescriptor().getId()) {
-        streamIdTracker = stream.getDescriptor().getId();
+      streams.put(stream.getPartitionConfig().getId(), stream);
+      if (streamIdTracker < stream.getPartitionConfig().getId()) {
+        streamIdTracker = stream.getPartitionConfig().getId();
       }
     }
   }
@@ -69,7 +69,7 @@ public class S3Sink implements Sink {
   //TODO: Should consider a sort of transaction to make the operation reliable
   @Override
   synchronized public void delete(SinkStream stream) throws Exception {
-    SinkStream found = streams.remove(stream.getDescriptor().getId());
+    SinkStream found = streams.remove(stream.getPartitionConfig().getId());
     if (found != null) {
       found.delete();
     }

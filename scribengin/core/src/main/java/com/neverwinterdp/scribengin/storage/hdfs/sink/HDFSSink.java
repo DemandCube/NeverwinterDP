@@ -39,7 +39,7 @@ public class HDFSSink implements Sink {
     FileStatus[] status = fs.listStatus(fsLoc) ;
     for(int i = 0; i < status.length; i++) {
       HDFSSinkStream stream = new HDFSSinkStream(fs, status[i].getPath());
-      streams.put(stream.getDescriptor().getId(), stream);
+      streams.put(stream.getPartitionConfig().getId(), stream);
     }
   }
   
@@ -61,9 +61,9 @@ public class HDFSSink implements Sink {
 
   @Override
   synchronized public void delete(SinkStream stream) throws Exception {
-    SinkStream foundStream = streams.remove(stream.getDescriptor().getId()) ;
+    SinkStream foundStream = streams.remove(stream.getPartitionConfig().getId()) ;
     if(foundStream == null) {
-      throw new Exception("Cannot find the stream " + stream.getDescriptor().getId()) ;
+      throw new Exception("Cannot find the stream " + stream.getPartitionConfig().getId()) ;
     }
   }
   

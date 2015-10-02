@@ -214,14 +214,14 @@ public class DataflowTaskContext {
       assignedSinkStreamWriter.close();
     }
     
-    public StreamDescriptor getStreamDescriptor() { return this.assignedSinkStream.getDescriptor() ;}
+    public StreamDescriptor getStreamDescriptor() { return this.assignedSinkStream.getPartitionConfig() ;}
     
     public String toString() {
       StringBuilder b = new StringBuilder();
       b.append("Sink:\n").
         append("  Type = ").append(sink.getDescriptor().getType()).
-        append("  Stream Id = ").append(assignedSinkStream.getDescriptor().getId()).
-        append("  Location = ").append(assignedSinkStream.getDescriptor().getLocation());
+        append("  Stream Id = ").append(assignedSinkStream.getPartitionConfig().getId()).
+        append("  Location = ").append(assignedSinkStream.getPartitionConfig().getLocation());
       return b.toString();
     }
     

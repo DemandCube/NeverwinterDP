@@ -95,34 +95,36 @@ public class KafkaTool implements Closeable {
       "--replication-factor", String.valueOf(numOfReplication),
       "--zookeeper", zkConnects
     };
-    createTopic(args);
+    int sessionTimeoutMs = 10000;
+    int connectionTimeoutMs = 10000;
+
+    TopicCommandOptions options = new TopicCommandOptions(args);
+    ZkClient client = new ZkClient(zkConnects, sessionTimeoutMs, connectionTimeoutMs, ZKStringSerializer$.MODULE$);
+    TopicCommand.createTopic(client, options);
+    int count = 0;
+    while(count < 30) {
+      count++;
+      TopicMetadata tmetadata = findTopicMetadata(topicName);
+      if(tmetadata.partitionsMetadata().size() == numPartitions) {
+        break ;
+      } else {
+        Thread.sleep(100);
+      }
+    }
+    client.close();
   }
   
-  /**
-   * Create a topic. This method will not create a topic that is currently scheduled for deletion.
-   * For valid configs see https://cwiki.apache.org/confluence/display/KAFKA/Replication+tools#Replicationtools-Howtousethetool?.3
-   *
-   * @See https://kafka.apache.org/documentation.html#topic-config 
-   * for more valid configs
-   * */
   public void createTopic(String[] args) throws Exception {
     int sessionTimeoutMs = 10000;
     int connectionTimeoutMs = 10000;
 
     TopicCommandOptions options = new TopicCommandOptions(args);
     ZkClient client = new ZkClient(zkConnects, sessionTimeoutMs, connectionTimeoutMs, ZKStringSerializer$.MODULE$);
-    if (topicExits(name)) {
-      TopicCommand.deleteTopic(client, options);
-    }
-
     TopicCommand.createTopic(client, options);
-    try {
-      Thread.sleep(3000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+    Thread.sleep(1000);
     client.close();
   }
+  
 
   /**
    * This method works if cluster has "delete.topic.enable" = "true".
@@ -150,9 +152,6 @@ public class KafkaTool implements Closeable {
     int connectionTimeoutMs = 10000;
     ZkClient zkClient = new ZkClient(zkConnects, sessionTimeoutMs, connectionTimeoutMs, ZKStringSerializer$.MODULE$);
     boolean exists = AdminUtils.topicExists(zkClient, topicName);
-    if (exists && ZkUtils.pathExists(zkClient, ZkUtils.getDeleteTopicPath(topicName))) {
-      System.err.println("Topic "+topicName+" exists but is scheduled for deletion!");
-    }
     zkClient.close();
     return exists;
   }
@@ -183,7 +182,7 @@ public class KafkaTool implements Closeable {
   }
 
   public TopicMetadata findTopicMetadata(final String topic) throws Exception {
-    return this.findTopicMetadata(topic, 1);
+    return findTopicMetadata(topic, 1);
   }
 
   public TopicMetadata findTopicMetadata(final String topic, int retries) throws Exception {
@@ -198,7 +197,6 @@ public class KafkaTool implements Closeable {
         if (topicMetadatas.size() != 1) {
           throw new Exception("Expect to find 1 topic " + topic + ", but found " + topicMetadatas.size());
         }
-
         return topicMetadatas.get(0);
       }
     };

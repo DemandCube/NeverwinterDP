@@ -73,7 +73,7 @@ public class SinkExperimentTest {
     int numBuffers = 5;
     for (int i = 0; i < numBuffers; i++) {
       for (int j = 0; j < 100; j++) {
-        String key = "stream=" + stream.getDescriptor().getId() + ",buffer=" + i + ",record=" + j;
+        String key = "stream=" + stream.getPartitionConfig().getId() + ",buffer=" + i + ",record=" + j;
         writer.append(DataflowMessage.create(key, key));
       }
       writer.commit();

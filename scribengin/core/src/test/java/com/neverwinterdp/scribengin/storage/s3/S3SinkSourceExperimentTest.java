@@ -62,7 +62,7 @@ public class S3SinkSourceExperimentTest {
       SinkStream stream = sink.newStream();
       SinkStreamWriter writer = stream.getWriter();
       for (int j = 0; j < NUM_MESSAGE_PER_STREAM; j++) {
-        String key = "stream=" + stream.getDescriptor().getId() + ",buffer=" + j + ",record=" + j;
+        String key = "stream=" + stream.getPartitionConfig().getId() + ",buffer=" + j + ",record=" + j;
         key = key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key;
         writer.append(DataflowMessage.create(key, key));
         if((j + 1) % 1000 == 0) {
@@ -76,7 +76,7 @@ public class S3SinkSourceExperimentTest {
     assertEquals(2, streams.length);
 
     for (SinkStream sinkStream : streams) {
-      assertNotNull(sinkStream.getDescriptor());
+      assertNotNull(sinkStream.getPartitionConfig());
       assertNotNull(sinkStream.getWriter());
     }
 

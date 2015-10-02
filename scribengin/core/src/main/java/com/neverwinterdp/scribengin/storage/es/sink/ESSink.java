@@ -52,12 +52,12 @@ public class ESSink implements Sink {
 
   @Override
   public void delete(SinkStream stream) throws Exception {
-    SinkStream found = streams.get(stream.getDescriptor().getId());
+    SinkStream found = streams.get(stream.getPartitionConfig().getId());
     if(found != null) {
       found.delete();
-      streams.remove(stream.getDescriptor().getId());
+      streams.remove(stream.getPartitionConfig().getId());
     } else {
-      throw new Exception("Cannot find the stream " + stream.getDescriptor().getId());
+      throw new Exception("Cannot find the stream " + stream.getPartitionConfig().getId());
     }
   }
 

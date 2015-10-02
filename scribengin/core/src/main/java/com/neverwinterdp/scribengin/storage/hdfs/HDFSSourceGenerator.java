@@ -28,7 +28,7 @@ public class HDFSSourceGenerator {
     SinkStreamWriter writer = stream.getWriter();
     for(int i = 0; i < numOfBufferPerStream; i++) {
       for(int j = 0; j < numOfRecordPerBuffer; j ++) {
-        String key = "stream:" + stream.getDescriptor().getId() +",buffer:" + i + ",record:" + j;
+        String key = "stream:" + stream.getPartitionConfig().getId() +",buffer:" + i + ",record:" + j;
  
         writer.append(DataflowMessage.create(key, key));
       }

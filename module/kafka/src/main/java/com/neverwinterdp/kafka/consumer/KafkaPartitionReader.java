@@ -39,8 +39,7 @@ public class KafkaPartitionReader {
   private ByteBufferMessageSet       currentMessageSet;
   private Iterator<MessageAndOffset> currentMessageSetIterator;
 
-  public KafkaPartitionReader(String name, String zkConnect, String topic, 
-      PartitionMetadata partitionMetadata) throws Exception {
+  public KafkaPartitionReader(String name, String zkConnect, String topic, PartitionMetadata partitionMetadata) throws Exception {
     this.name = name;
     this.zkConnect = zkConnect;
     this.topic = topic;

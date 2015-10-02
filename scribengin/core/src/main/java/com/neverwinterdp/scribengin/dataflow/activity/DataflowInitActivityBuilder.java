@@ -78,6 +78,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
         Sink sink = sinkFactory.create(entry.getValue());
         sinks.put(entry.getKey(), sink);
       }
+      
       DecimalFormat seqIdFormatter = new DecimalFormat("00000");
       for(int i = 0; i < sourceStream.length; i++) {
         String taskId =  "task-" + seqIdFormatter.format(i);
@@ -86,7 +87,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
         descriptor.setScribe(dflDescriptor.getScribe());
         descriptor.setSourceStreamDescriptor(sourceStream[i].getDescriptor());
         for(Map.Entry<String, Sink> entry : sinks.entrySet()) {
-          descriptor.add(entry.getKey(), entry.getValue().newStream().getDescriptor());
+          descriptor.add(entry.getKey(), entry.getValue().newStream().getPartitionConfig());
         }
         service.addAvailableTask(descriptor);
       }

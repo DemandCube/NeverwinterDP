@@ -23,7 +23,6 @@ public class TaskRegistry<T> {
       int taskIdSeq2 = Integer.parseInt(taskId_2.substring(taskId_2.lastIndexOf('-') + 1));
       return taskIdSeq1 - taskIdSeq2;
     }
-    
   };
   
   final static public String TASK_LIST_PATH          = "task-list";

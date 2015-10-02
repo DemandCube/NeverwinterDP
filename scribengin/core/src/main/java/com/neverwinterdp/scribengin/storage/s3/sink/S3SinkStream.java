@@ -22,7 +22,7 @@ public class S3SinkStream implements SinkStream {
   }
   
   @Override
-  public StreamDescriptor getDescriptor() { return descriptor; }
+  public StreamDescriptor getPartitionConfig() { return descriptor; }
 
   @Override
   public void delete() throws Exception {
