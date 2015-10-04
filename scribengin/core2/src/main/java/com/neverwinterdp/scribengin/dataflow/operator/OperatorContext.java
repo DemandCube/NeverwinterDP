@@ -3,6 +3,7 @@ package com.neverwinterdp.scribengin.dataflow.operator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.WorkerService;
@@ -26,7 +27,7 @@ public class OperatorContext {
 
   private InputContext               inputContext;
   private Map<String, OutputContext> outputContexts = new HashMap<>();
-
+  
   private boolean complete = false;
   private Meter   dataflowReadMeter;
   private Meter   dataflowRecordMeter;
@@ -67,6 +68,8 @@ public class OperatorContext {
   public boolean isComplete() { return this.complete ; }
   
   public void setComplete() { this.complete = true; }
+  
+  public Set<String> getAvailableOutputs() { return taskConfig.getOutputs(); }
   
   public Record nextRecord(long maxWaitForDataRead) throws Exception {
     Record dataflowMessage = inputContext.assignedPartitionReader.next(maxWaitForDataRead);
