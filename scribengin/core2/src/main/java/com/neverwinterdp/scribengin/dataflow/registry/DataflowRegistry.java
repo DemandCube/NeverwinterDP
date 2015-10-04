@@ -50,9 +50,10 @@ public class DataflowRegistry {
   public DataflowRegistry() {
   }
   
-  public DataflowRegistry(Registry registry, String dataflowPath) {
+  public DataflowRegistry(Registry registry, String dataflowPath) throws RegistryException {
     this.registry     = registry;
     this.dataflowPath = dataflowPath;
+    init();
   }
   
   void init() throws RegistryException {
@@ -135,6 +136,10 @@ public class DataflowRegistry {
   public Notifier getDataflowTaskNotifier() { return this.dataflowTaskNotifier ; }
   
   public Notifier getDataflowWorkerNotifier() { return this.dataflowWorkerNotifier ; }
+  
+  public DataflowLifecycleStatus getStatus() throws RegistryException {
+    return statusNode.getDataAs(DataflowLifecycleStatus.class) ;
+  }
   
   public void setStatus(DataflowLifecycleStatus status) throws RegistryException {
     statusNode.setData(status);

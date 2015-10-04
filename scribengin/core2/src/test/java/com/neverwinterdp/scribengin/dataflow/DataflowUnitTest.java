@@ -40,8 +40,8 @@ public class DataflowUnitTest {
     
     String json = IOUtil.getFileContentAsString("src/test/resources/dataflow-config.json");
     DataflowConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowConfig.class);
-    DataflowSubmitter submitter = new DataflowSubmitter(scribenginClient);
-    submitter.submit(config);
+    DataflowSubmitter submitter = new DataflowSubmitter(scribenginClient, config);
+    submitter.submit();
     Thread.sleep(15000);
     registry.get("/").dump(System.out);
   }

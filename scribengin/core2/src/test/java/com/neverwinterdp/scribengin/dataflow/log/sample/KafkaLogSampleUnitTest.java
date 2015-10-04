@@ -82,6 +82,11 @@ public class KafkaLogSampleUnitTest  {
       "vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 25000"
     );
     
+    String dataflowChainSubmitCommand = 
+        "dataflow submit " + 
+        "  --dataflow-config src/test/resources/dataflow-config.json";
+    shell.execute(dataflowChainSubmitCommand);
+    
     Thread.sleep(10000);
     
     shell.execute("registry dump --path /applications/log-sample");

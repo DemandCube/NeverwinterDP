@@ -11,12 +11,14 @@ import com.neverwinterdp.vm.client.VMClient;
 
 public class DataflowSubmitter {
   private ScribenginClient scribenginClient;
+  private DataflowConfig   dflConfig;
   
-  public DataflowSubmitter(ScribenginClient scribenginClient) {
+  public DataflowSubmitter(ScribenginClient scribenginClient, DataflowConfig dflConfig) {
     this.scribenginClient = scribenginClient;
+    this.dflConfig = dflConfig;
   }
   
-  public void submit(DataflowConfig dflConfig) throws Exception {
+  public void submit() throws Exception {
     VMClient vmClient = scribenginClient.getVMClient();
     Registry registry = scribenginClient.getRegistry();
     DataflowRegistry dflRegistry = new DataflowRegistry();
@@ -30,5 +32,18 @@ public class DataflowSubmitter {
       addProperty("dataflow.registry.path", dataflowPath);
     vmClient.configureEnvironment(vmConfig);
     VMDescriptor vmDescriptor = vmClient.allocate(vmConfig);
+  }
+  
+  void waitForEqualOrGreaterThanStatus(long timeout, DataflowLifecycleStatus status) throws Exception {
+    DataflowClient dflClient = scribenginClient.getDataflowClient(dflConfig.getId(), timeout);
+    dflClient.waitForEqualOrGreaterThanStatus(3000, timeout, status);
+  }
+  
+  public void waitForRunning(long timeout) throws Exception {
+    waitForEqualOrGreaterThanStatus(timeout, DataflowLifecycleStatus.RUNNING) ;
+  }
+  
+  public void waitForFinish(long timeout) throws Exception {
+    waitForEqualOrGreaterThanStatus(timeout, DataflowLifecycleStatus.FINISH) ;
   }
 }

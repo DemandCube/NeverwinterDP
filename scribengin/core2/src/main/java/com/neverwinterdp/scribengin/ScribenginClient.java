@@ -4,11 +4,9 @@ import java.util.List;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
-import com.neverwinterdp.scribengin.dataflow.master.VMMasterApp;
+import com.neverwinterdp.scribengin.dataflow.DataflowClient;
+import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
-import com.neverwinterdp.vm.VMConfig;
-import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.vm.client.VMClient;
 
 public class ScribenginClient {
@@ -34,9 +32,30 @@ public class ScribenginClient {
     return vmClient.getRegistry().getChildren(DataflowRegistry.DATAFLOW_HISTORY_PATH) ;
   }
   
-  public DataflowRegistry getDataflowRegistry(String dataflowId) throws Exception {
+  public DataflowClient getDataflowClient(String dataflowId) throws Exception {
+    return getDataflowClient(dataflowId,DataflowLifecycleStatus.RUNNING, 1000, 60000) ;
+  }
+  
+  public DataflowClient getDataflowClient(String dataflowId, long timeout) throws Exception {
+    return getDataflowClient(dataflowId,DataflowLifecycleStatus.RUNNING, 1000, timeout) ;
+  }
+  
+  public DataflowClient getDataflowClient(String dataflowId, DataflowLifecycleStatus exepectStatus, long checkPeriod, long timeout) throws Exception {
+    Registry registry = getRegistry() ;
     String dataflowPath = DataflowRegistry.DATAFLOW_ALL_PATH + "/" + dataflowId;
-    DataflowRegistry dataflowRegistry = new DataflowRegistry(getRegistry(), dataflowPath);
-    return dataflowRegistry;
+    DataflowLifecycleStatus status = null;
+    long stopTime = System.currentTimeMillis() + timeout;
+    while(System.currentTimeMillis() < stopTime) {
+      String statusPath = dataflowPath + "/status";
+      if(getRegistry().exists(statusPath)) {
+        status = registry.get(statusPath).getDataAs(DataflowLifecycleStatus.class) ;
+        if(status != null && status.equalOrGreaterThan(exepectStatus)) {
+          DataflowClient dataflowClient = new DataflowClient(this, dataflowPath);
+          return dataflowClient ;
+        }
+      }
+      Thread.sleep(checkPeriod);
+    }
+    throw new Exception("The dataflow " + dataflowId + " is " +  status + " after " + timeout + "ms");
   }
 }
