@@ -88,7 +88,7 @@ public class KafkaLogSampleUnitTest  {
         "  --dataflow-config src/test/resources/dataflow-config.json";
     shell.execute(dataflowChainSubmitCommand);
     
-    Thread.sleep(30000);
+    Thread.sleep(45000);
     
     shell.execute("registry dump --path /");
     

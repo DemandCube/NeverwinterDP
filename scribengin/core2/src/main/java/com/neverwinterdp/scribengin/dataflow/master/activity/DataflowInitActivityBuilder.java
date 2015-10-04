@@ -134,7 +134,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
           taskConfig.setInputPartitionId(pConfig.getPartitionId());
           taskConfig.setOutputs(opConfig.getOutputs());
           taskConfig.setOperator(opConfig.getOperator());
-          taskRegistry.offer(taskId, taskConfig);
+          taskRegistry.offer(taskConfig);
         }
       }
     }

@@ -9,6 +9,7 @@ import com.neverwinterdp.scribengin.storage.PartitionConfig;
 import com.neverwinterdp.scribengin.storage.Storage;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
+import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSource;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.source.Source;
 
@@ -78,7 +79,7 @@ public class KafkaStorage extends Storage {
 
   @Override
   public Source getSource() throws Exception {
-    return null;
+    return new KafkaSource(getStorageConfig());
   }
 
   static StorageConfig createStorageConfig(String name, String zkConnect, String topic) {

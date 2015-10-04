@@ -13,26 +13,30 @@
     "numOfInstances": 2,
     "memory": 128,
     "cpuCores": 1,
-    "numOfExecutor": 2,
+    "numOfExecutor": 4,
     "taskSwitchingPeriod" : 5000,
     "maxRunTime": 90000
   },
 
   "streams": {
     "log4j": {
-      "type" : "kafka", "topic" : "log4j", "zk.connect" : "127.0.0.1:2181", "reader" : "raw", "name" : "LogSplitterDataflow"
+      "type" : "kafka", "topic" : "log4j", "zk.connect" : "127.0.0.1:2181", "reader" : "raw", "name" : "log4j"
     },
 
     "log4j.info" : {
-      "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "127.0.0.1:2181", "name" : "LogSplitterDataflow"
+      "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.info"
     },
 
     "log4j.warn" : {
-      "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "127.0.0.1:2181", "name" : "LogSplitterDataflow"
+      "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.warn"
     },
 
     "log4j.error" : {
-      "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "127.0.0.1:2181", "name" : "LogSplitterDataflow"
+      "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.error"
+    },
+
+    "log4j.aggregate" : {
+      "type" : "kafka", "topic" : "log4j.aggregate", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.aggregate"
     }
   },
 
@@ -40,7 +44,7 @@
     "splitter": {
       "operator" : "com.neverwinterdp.scribengin.dataflow.sample.log.LogSplitterOperator",
       "inputs": ["log4j"],
-      "outputs": ["default", "log4j.info", "log4j.warn", "log4j.error"]
+      "outputs": ["log4j.info", "log4j.warn", "log4j.error"]
     },
 
     "info": {
