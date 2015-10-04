@@ -6,23 +6,24 @@ import java.util.List;
 import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 
-public class TaskExecutorService {
+public class TaskExecutors {
+  private WorkerService    workerService;
   private DataflowRegistry dflRegistry ;
   private List<TaskExecutorThread> taskExecutorThreads;
   private TaskExecutorMonitorThread monitorThread;
-  private long taskSwitchingPeriod ;
   
-  public TaskExecutorService(DataflowRegistry dflRegistry) {
-    this.dflRegistry = dflRegistry;
+  public TaskExecutors(WorkerService workerService) {
+    this.workerService = workerService;
+    this.dflRegistry = workerService.getDataflowRegistry();
   }
   
   synchronized public void start() throws Exception {
     DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
-    taskSwitchingPeriod = dflConfig.getWorker().getTaskSwitchingPeriod();
     int numOfExecutor = dflConfig.getWorker().getNumOfExecutor();
     taskExecutorThreads = new ArrayList<>();
     for(int i = 0; i < numOfExecutor; i++) {
-      TaskExecutorThread thread = new TaskExecutorThread();
+      TaskExecutorDescriptor descriptor = new TaskExecutorDescriptor("executor-" + (i + 1));
+      TaskExecutorThread thread = new TaskExecutorThread(workerService, descriptor);
       thread.start();
       taskExecutorThreads.add(thread);
     }

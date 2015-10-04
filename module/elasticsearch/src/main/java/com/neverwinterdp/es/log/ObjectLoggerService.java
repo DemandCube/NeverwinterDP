@@ -1,5 +1,6 @@
 package com.neverwinterdp.es.log;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,8 +45,13 @@ public class ObjectLoggerService {
     return count;
   }
   
-  public void close() {
-    
+  public void close() throws IOException {
+    if(this.flushThread != null || flushThread.isAlive()) {
+      flushThread.interrupt();
+    }
+    for(ObjectLogger<?> logger : loggers.values()) {
+      logger.close();
+    }
   }
   
   public class FlushThread extends Thread {

@@ -191,7 +191,6 @@ public class VM {
       } catch (InterruptedException e) {
         e.printStackTrace();
       } catch (Exception e) {
-        e.printStackTrace();
         logger.error("Error in vm application", e);
       } finally {
         try {
@@ -200,7 +199,6 @@ public class VM {
           System.err.println("Destroyed: " + vmDescriptor.getId() );
         } catch (RegistryException e) {
           System.err.println("Set terminated vm status for " + vmDescriptor.getId() );
-          e.printStackTrace();
           logger.error("Error in vm registry", e);
         }
         notifyComplete();

@@ -11,6 +11,7 @@ import com.neverwinterdp.registry.task.TaskContext;
 import com.neverwinterdp.registry.task.TaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskReport;
+import com.neverwinterdp.vm.VMDescriptor;
 
 public class DataflowTaskRegistry extends TaskRegistry<OperatorTaskConfig> {
   
@@ -41,6 +42,11 @@ public class DataflowTaskRegistry extends TaskRegistry<OperatorTaskConfig> {
   public void create(OperatorTaskConfig taskConfig, OperatorTaskReport report) throws RegistryException {
     Node taskNode = getTasksListNode().getChild(taskConfig.getTaskId());
     taskNode.createChild("report", report, NodeCreateMode.PERSISTENT);
+  }
+  
+  public TaskContext<OperatorTaskConfig> take(final VMDescriptor vmDescriptor) throws RegistryException  {
+    TaskContext<OperatorTaskConfig> tContext = take(vmDescriptor.getRegistryPath());
+    return tContext;
   }
   
   public void suspend(String refWorker, TaskContext<OperatorTaskConfig> context) throws RegistryException {

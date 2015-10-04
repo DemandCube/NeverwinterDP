@@ -35,6 +35,7 @@ public class KafkaLogSampleUnitTest  {
     FileUtil.removeIfExist("build/scribengin", false);
     
     System.setProperty("vm.app.dir", "build/scribengin");
+    
     Properties log4jProps = new Properties() ;
     log4jProps.load(IOUtil.loadRes("classpath:scribengin/log4j/vm-log4j.properties"));
     log4jProps.setProperty("log4j.rootLogger", "INFO, file");
@@ -87,7 +88,9 @@ public class KafkaLogSampleUnitTest  {
         "  --dataflow-config src/test/resources/dataflow-config.json";
     shell.execute(dataflowChainSubmitCommand);
     
-    Thread.sleep(10000);
+    Thread.sleep(30000);
+    
+    shell.execute("registry dump --path /");
     
     shell.execute("registry dump --path /applications/log-sample");
   }

@@ -38,25 +38,25 @@
 
   "operators": {
     "splitter": {
-      "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessageSplitter",
+      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.log.LogSplitterOperator",
       "inputs": ["log4j"],
       "outputs": ["default", "log4j.info", "log4j.warn", "log4j.error"]
     },
 
     "info": {
-      "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessageSplitter",
+      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.log.LogPersisterOperator",
       "inputs": ["log4j.info"],
       "outputs": ["log4j.aggregate"]
     },
 
     "warn": {
-      "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessageSplitter",
+      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.log.LogPersisterOperator",
       "inputs": ["log4j.warn"],
       "outputs": ["log4j.aggregate"]
     },
 
     "error": {
-      "scribe" : "com.neverwinterdp.dataflow.logsample.LogMessageSplitter",
+      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.log.LogPersisterOperator",
       "inputs": ["log4j.error"],
       "outputs": ["log4j.aggregate"]
     }

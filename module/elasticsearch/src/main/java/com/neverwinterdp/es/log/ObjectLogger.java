@@ -50,6 +50,7 @@ public class ObjectLogger<T> {
   }
 
   synchronized public void close() throws IOException { 
+    esObjectClient.close();
     queue.close(); 
   }
   
