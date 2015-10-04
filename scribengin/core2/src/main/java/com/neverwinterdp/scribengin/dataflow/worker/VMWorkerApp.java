@@ -64,8 +64,11 @@ public class VMWorkerApp extends VMApp {
       dataflowTaskExecutorService.init();
       dataflowTaskExecutorService.run();
       dataflowTaskExecutorService.waitForTermination();
-      dflRegistry.getWorkerRegistry().setWorkerStatus(getVM().getDescriptor().getId(), DataflowWorkerStatus.TERMINATED);
-    } catch(InterruptedException ex) {
+    } catch(Exception ex) {
+      dflRegistry.
+        getWorkerRegistry().
+        setWorkerStatus(getVM().getDescriptor().getId(), DataflowWorkerStatus.TERMINATED_WITH_ERROR);
+      throw ex;
     } finally {
       System.out.println("Dataflow Worker Terminate");
     }

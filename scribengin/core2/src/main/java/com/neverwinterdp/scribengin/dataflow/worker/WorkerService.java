@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.storage.StorageService;
 import com.neverwinterdp.util.log.LoggerFactory;
@@ -44,21 +45,20 @@ private Logger logger ;
   
   public void init() throws Exception {
     System.out.println("DataflowWorkerService: init()");
+    dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, DataflowWorkerStatus.INIT);
     taskExecutors = new TaskExecutors(this);
   }
   
   public void run() throws Exception {
     System.out.println("DataflowMasterService: run()");
     taskExecutors.start();
+    dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, DataflowWorkerStatus.RUNNING);
   }
   
-  public void waitForTermination() {
+  public void waitForTermination() throws RegistryException, InterruptedException {
     System.out.println("DataflowWorkerService: waitForTermination()");
-    try {
-      taskExecutors.waitForTermination();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+    taskExecutors.waitForTermination();
+    dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor.getId(), DataflowWorkerStatus.TERMINATED);
   }
   
   public void shutdown() {

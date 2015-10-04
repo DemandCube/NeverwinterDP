@@ -85,7 +85,7 @@ public class WorkerRegistry {
     Transaction transaction = registry.getTransaction() ;
     RefNode refNode = new RefNode(vmDescriptor.getRegistryPath()) ;
     transaction.createChild(allWorkers, vmDescriptor.getId(), refNode, NodeCreateMode.PERSISTENT) ;
-    transaction.createDescendant(allWorkers, vmDescriptor.getId() + "/status", DataflowWorkerStatus.INIT, NodeCreateMode.PERSISTENT) ;
+    transaction.createDescendant(allWorkers, vmDescriptor.getId() + "/status", DataflowWorkerStatus.CREATE, NodeCreateMode.PERSISTENT) ;
     transaction.createChild(activeWorkers, vmDescriptor.getId(), NodeCreateMode.PERSISTENT) ;
     transaction.commit();
   }
