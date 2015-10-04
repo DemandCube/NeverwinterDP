@@ -17,10 +17,10 @@ public class LogSplitterOperator extends Operator {
   public void process(OperatorContext ctx, Record record) throws Exception {
     Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(record.getData(), Log4jRecord.class) ;
     if(log4jRec.getLoggerName().indexOf("LogSample") >= 0) {
-      String level = log4jRec.getLevel().toLowerCase();
       if("EOS".equals(log4jRec.getMessage())) {
-        ctx.setComplete();
+        //ctx.setComplete();
       } else {
+        String level = log4jRec.getLevel().toLowerCase();
         ctx.write(level, record);
       }
     }

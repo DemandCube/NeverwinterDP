@@ -76,6 +76,7 @@ public class KafkaLogSampleUnitTest  {
         "  --vm-application " + VMToKafkaLogMessageGeneratorApp.class.getName() + 
         "  --prop:report-path=" +    REPORT_PATH +
         "  --prop:num-of-message=" + NUM_OF_MESSAGE +
+        "  --prop:num-of-stream=5" +
         "  --prop:message-size=512" +
         "  --prop:send-period=-1";
     shell.execute(logGeneratorSubmitCommand);
@@ -88,7 +89,7 @@ public class KafkaLogSampleUnitTest  {
         "  --dataflow-config src/test/resources/dataflow-config.json";
     shell.execute(dataflowChainSubmitCommand);
     
-    Thread.sleep(60000);
+    Thread.sleep(90000);
     
     shell.execute("registry dump --path /");
     
