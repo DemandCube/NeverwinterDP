@@ -39,6 +39,13 @@ public class KafkaSink implements Sink {
   }
 
   @Override
+  public SinkPartitionStream getStream(int partitionId) throws Exception {
+    SinkPartitionStream stream = streams.get(partitionId);
+    return stream ;
+  }
+
+  
+  @Override
   public SinkPartitionStream[] getStreams() {
     SinkPartitionStream[] array = new SinkPartitionStream[streams.size()];
     return streams.values().toArray(array);
@@ -46,12 +53,12 @@ public class KafkaSink implements Sink {
 
   @Override
   public void delete(SinkPartitionStream stream) throws Exception {
-    SinkPartitionStream found = streams.get(stream.getDescriptor().getPartitionId());
+    SinkPartitionStream found = streams.get(stream.getParitionConfig().getPartitionId());
     if(found != null) {
       found.delete();
-      streams.remove(stream.getDescriptor().getPartitionId());
+      streams.remove(stream.getParitionConfig().getPartitionId());
     } else {
-      throw new Exception("Cannot find the stream " + stream.getDescriptor().getPartitionId());
+      throw new Exception("Cannot find the stream " + stream.getParitionConfig().getPartitionId());
     }
   }
 

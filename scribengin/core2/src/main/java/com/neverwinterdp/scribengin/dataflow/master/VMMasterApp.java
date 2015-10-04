@@ -19,16 +19,16 @@ import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMConfig.ClusterEnvironment;
 
-public class VMDataflowMasterApp extends VMApp {
+public class VMMasterApp extends VMApp {
   private Logger                logger;
   private String                dataflowRegistryPath;
   private LeaderElection        election;
-  private DataflowMasterService dataflowService;
+  private MasterService dataflowService;
   private ServiceRunnerThread   serviceRunnerThread;
 
   @Override
   public void run() throws Exception {
-    logger = getVM().getLoggerFactory().getLogger(VMDataflowMasterApp.class);
+    logger = getVM().getLoggerFactory().getLogger(VMMasterApp.class);
     logger.info("Start run()");
     Registry registry = getVM().getVMRegistry().getRegistry();
     VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
@@ -79,7 +79,7 @@ public class VMDataflowMasterApp extends VMApp {
 
         RefNode leaderRefNode = new RefNode(getVM().getDescriptor().getRegistryPath());
         registry.setData(dataflowRegistryPath + "/master/leader", leaderRefNode);
-        dataflowService = dataflowServiceModuleContainer.getInstance(DataflowMasterService.class);
+        dataflowService = dataflowServiceModuleContainer.getInstance(MasterService.class);
         serviceRunnerThread = new ServiceRunnerThread(dataflowService);
         serviceRunnerThread.start();
       } catch(Exception e) {
@@ -89,9 +89,9 @@ public class VMDataflowMasterApp extends VMApp {
   }
   
   public class ServiceRunnerThread extends Thread {
-    DataflowMasterService service;
+    MasterService service;
     
-    ServiceRunnerThread(DataflowMasterService service) {
+    ServiceRunnerThread(MasterService service) {
       this.service = service;
     }
     

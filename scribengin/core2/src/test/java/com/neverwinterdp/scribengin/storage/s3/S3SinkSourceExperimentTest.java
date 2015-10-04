@@ -62,7 +62,7 @@ public class S3SinkSourceExperimentTest {
       SinkPartitionStream stream = sink.newStream();
       SinkPartitionStreamWriter writer = stream.getWriter();
       for (int j = 0; j < NUM_MESSAGE_PER_STREAM; j++) {
-        String key = "stream=" + stream.getDescriptor().getPartitionId() + ",buffer=" + j + ",record=" + j;
+        String key = "stream=" + stream.getParitionConfig().getPartitionId() + ",buffer=" + j + ",record=" + j;
         key = key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key;
         writer.append(Record.create(key, key));
         if((j + 1) % 1000 == 0) {
@@ -76,7 +76,7 @@ public class S3SinkSourceExperimentTest {
     assertEquals(2, streams.length);
 
     for (SinkPartitionStream sinkStream : streams) {
-      assertNotNull(sinkStream.getDescriptor());
+      assertNotNull(sinkStream.getParitionConfig());
       assertNotNull(sinkStream.getWriter());
     }
 

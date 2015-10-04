@@ -12,7 +12,7 @@ public class KafkaSinkPartitionStream implements SinkPartitionStream {
   }
   
   @Override
-  public PartitionConfig getDescriptor() { return descriptor; }
+  public PartitionConfig getParitionConfig() { return descriptor; }
 
   @Override
   public void delete() throws Exception {

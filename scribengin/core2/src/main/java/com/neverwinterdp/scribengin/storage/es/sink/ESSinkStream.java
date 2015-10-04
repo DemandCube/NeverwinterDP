@@ -15,7 +15,7 @@ public class ESSinkStream implements SinkPartitionStream {
   }
   
   @Override
-  public PartitionConfig getDescriptor() { return partitionConfig; }
+  public PartitionConfig getParitionConfig() { return partitionConfig; }
 
   @Override
   public void delete() throws Exception {

@@ -35,7 +35,6 @@ import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 @Singleton
 public class DataflowRegistry {
   final static public String ACTIVITIES_PATH        = "activities";
-  
   final static public String NOTIFICATIONS_PATH     = "notifications";
   
   final static public DataMapperCallback<DataflowTaskDescriptor> TASK_DESCRIPTOR_DATA_MAPPER = new DataMapperCallback<DataflowTaskDescriptor>() {
@@ -97,7 +96,7 @@ public class DataflowRegistry {
     metricsNode = registry.get(dataflowPath + "/metrics");
     
     String notificationPath = getDataflowNotificationsPath() ;
-    dataflowTaskNotifier = new Notifier(registry, notificationPath, "dataflow-tasks");
+    dataflowTaskNotifier   = new Notifier(registry, notificationPath, "dataflow-tasks");
     dataflowWorkerNotifier = new Notifier(registry, notificationPath, "dataflow-workers");
   }
   

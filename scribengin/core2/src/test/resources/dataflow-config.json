@@ -10,7 +10,7 @@
   },
 
   "worker": {
-    "numOfInstances": 8,
+    "numOfInstances": 2,
     "memory": 128,
     "cpuCores": 1,
     "numOfExecutor": 2,

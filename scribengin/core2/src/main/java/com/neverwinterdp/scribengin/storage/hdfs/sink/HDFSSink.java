@@ -33,16 +33,20 @@ public class HDFSSink implements Sink {
     FileStatus[] status = fs.listStatus(fsLoc) ;
     for(int i = 0; i < status.length; i++) {
       HDFSSinkPartitionStream stream = new HDFSSinkPartitionStream(fs, status[i].getPath());
-      streams.put(stream.getDescriptor().getPartitionId(), stream);
+      streams.put(stream.getParitionConfig().getPartitionId(), stream);
     }
   }
   
   public StorageConfig getDescriptor() { return this.storageConfig; }
   
   public SinkPartitionStream  getStream(PartitionConfig descriptor) throws Exception {
-    SinkPartitionStream stream = streams.get(descriptor.getPartitionId());
+    return getStream(descriptor.getPartitionId());
+  }
+  
+  public SinkPartitionStream  getStream(int partitionId) throws Exception {
+    SinkPartitionStream stream = streams.get(partitionId);
     if(stream == null) {
-      throw new Exception("Cannot find the stream " + descriptor.getPartitionId()) ;
+      throw new Exception("Cannot find the stream " + partitionId) ;
     }
     return stream ;
   }
@@ -55,9 +59,9 @@ public class HDFSSink implements Sink {
 
   @Override
   synchronized public void delete(SinkPartitionStream stream) throws Exception {
-    SinkPartitionStream foundStream = streams.remove(stream.getDescriptor().getPartitionId()) ;
+    SinkPartitionStream foundStream = streams.remove(stream.getParitionConfig().getPartitionId()) ;
     if(foundStream == null) {
-      throw new Exception("Cannot find the stream " + stream.getDescriptor().getPartitionId()) ;
+      throw new Exception("Cannot find the stream " + stream.getParitionConfig().getPartitionId()) ;
     }
   }
   

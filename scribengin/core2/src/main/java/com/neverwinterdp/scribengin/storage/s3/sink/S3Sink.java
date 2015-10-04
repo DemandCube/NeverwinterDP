@@ -44,9 +44,9 @@ public class S3Sink implements Sink {
       PartitionConfig pConfig = storage.createPartitionConfig(streamName);
       S3SinkPartitionStream stream = 
           new S3SinkPartitionStream(sinkFolder, storage.getStorageDescriptor(), pConfig);
-      streams.put(stream.getDescriptor().getPartitionId(), stream);
-      if (streamIdTracker < stream.getDescriptor().getPartitionId()) {
-        streamIdTracker = stream.getDescriptor().getPartitionId();
+      streams.put(stream.getParitionConfig().getPartitionId(), stream);
+      if (streamIdTracker < stream.getParitionConfig().getPartitionId()) {
+        streamIdTracker = stream.getParitionConfig().getPartitionId();
       }
     }
   }
@@ -62,6 +62,12 @@ public class S3Sink implements Sink {
   }
 
   @Override
+  synchronized public SinkPartitionStream getStream(int partitionId) throws Exception {
+    return streams.get(partitionId);
+  }
+
+  
+  @Override
   synchronized public SinkPartitionStream[] getStreams() {
     SinkPartitionStream[] array = new SinkPartitionStream[streams.size()];
     return streams.values().toArray(array);
@@ -70,11 +76,12 @@ public class S3Sink implements Sink {
   //TODO: Should consider a sort of transaction to make the operation reliable
   @Override
   synchronized public void delete(SinkPartitionStream stream) throws Exception {
-    SinkPartitionStream found = streams.remove(stream.getDescriptor().getPartitionId());
+    SinkPartitionStream found = streams.remove(stream.getParitionConfig().getPartitionId());
     if (found != null) {
       found.delete();
     }
   }
+  
 
   @Override
   synchronized public SinkPartitionStream newStream() throws Exception {

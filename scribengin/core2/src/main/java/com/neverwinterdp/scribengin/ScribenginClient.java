@@ -5,7 +5,7 @@ import java.util.List;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
-import com.neverwinterdp.scribengin.dataflow.master.VMDataflowMasterApp;
+import com.neverwinterdp.scribengin.dataflow.master.VMMasterApp;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;

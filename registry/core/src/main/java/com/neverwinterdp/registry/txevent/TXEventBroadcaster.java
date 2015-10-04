@@ -4,6 +4,7 @@ import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.Transaction;
 
 public class TXEventBroadcaster {
   private Registry         registry;
@@ -30,6 +31,10 @@ public class TXEventBroadcaster {
   
   public void initRegistry() throws RegistryException {
     eventsNode.createIfNotExists();
+  }
+  
+  public void initRegistry(Transaction transaction) throws RegistryException {
+    transaction.create(eventsNode, null, NodeCreateMode.PERSISTENT);
   }
   
   public TXEventNotificationWatcher broadcast(TXEvent event) throws RegistryException {

@@ -8,6 +8,8 @@ public interface Sink {
   
   public SinkPartitionStream  getStream(PartitionConfig descriptor) throws Exception ;
   
+  public SinkPartitionStream  getStream(int partitionId) throws Exception ;
+  
   public SinkPartitionStream[] getStreams();
 
   public void delete(SinkPartitionStream stream) throws Exception;

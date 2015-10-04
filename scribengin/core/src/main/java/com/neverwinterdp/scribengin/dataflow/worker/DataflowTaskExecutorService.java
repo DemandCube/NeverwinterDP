@@ -23,7 +23,6 @@ import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.yara.MetricRegistry;
 
-//@JmxBean("role=dataflow-worker, type=DataflowTaskExecutorService, dataflowName=DataflowTaskExecutorService")
 @Singleton
 public class DataflowTaskExecutorService {
   private Logger logger ;

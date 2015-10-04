@@ -30,7 +30,7 @@ public class HDFSSinkPartitionStream implements SinkPartitionStream {
     storage = new Storage<>(fs, descriptor.getLocation(), Record.class);
   }
   
-  public PartitionConfig getDescriptor() { return this.descriptor ; }
+  public PartitionConfig getParitionConfig() { return this.descriptor ; }
   
   synchronized public void delete() throws Exception {
   }

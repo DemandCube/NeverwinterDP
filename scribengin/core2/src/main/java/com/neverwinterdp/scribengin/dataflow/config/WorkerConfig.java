@@ -1,13 +1,14 @@
 package com.neverwinterdp.scribengin.dataflow.config;
 
 public class WorkerConfig {
-  private int numOfInstances = 2;
-  private int memory   =  128;
-  private int cpuCores = 1;
-  private int numOfExecutor =  2;
-  private int taskSwitchingPeriod = 5000;
-  private int maxRunTime = 90000;
-  
+  private int  numOfInstances          = 2;
+  private int  memory                  = 128;
+  private int  cpuCores                = 1;
+  private int  numOfExecutor           = 2;
+  private int  taskSwitchingPeriod     = 5000;
+  private int  maxRunTime              = 90000;
+  private long maxWaitForRunningStatus = 60000;
+
   public int getNumOfInstances() { return numOfInstances; }
   public void setNumOfInstances(int numOfInstances) {
     this.numOfInstances = numOfInstances;
@@ -29,4 +30,9 @@ public class WorkerConfig {
   
   public int getMaxRunTime() { return maxRunTime; }
   public void setMaxRunTime(int maxRunTime) { this.maxRunTime = maxRunTime; }
+  
+  public long getMaxWaitForRunningStatus() { return maxWaitForRunningStatus; }
+  public void setMaxWaitForRunningStatus(long maxWaitForRunningStatus) {
+    this.maxWaitForRunningStatus = maxWaitForRunningStatus;
+  }
 }

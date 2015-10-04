@@ -18,12 +18,12 @@ import com.neverwinterdp.registry.activity.ActivityStepExecutor;
 import com.neverwinterdp.registry.task.TaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
 import com.neverwinterdp.scribengin.dataflow.config.OperatorConfig;
-import com.neverwinterdp.scribengin.dataflow.master.DataflowMasterService;
+import com.neverwinterdp.scribengin.dataflow.master.MasterService;
+import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.OperatorRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.StreamRegistry;
-import com.neverwinterdp.scribengin.dataflow.task.DataflowTaskConfig;
 import com.neverwinterdp.scribengin.storage.PartitionConfig;
 import com.neverwinterdp.scribengin.storage.Storage;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
@@ -54,7 +54,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
   @Singleton
   static public class InitStreamsExecutor implements ActivityStepExecutor {
     @Inject
-    DataflowMasterService service;
+    MasterService service;
     
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
@@ -81,7 +81,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
   @Singleton
   static public class InitOperatorExecutor implements ActivityStepExecutor {
     @Inject
-    DataflowMasterService service;
+    MasterService service;
     
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
@@ -101,7 +101,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
   @Singleton
   static public class InitDataflowTaskExecutor implements ActivityStepExecutor {
     @Inject
-    DataflowMasterService service;
+    MasterService service;
     
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
@@ -125,13 +125,13 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
         for(int i = 0; i < pConfigs.size(); i++) {
           PartitionConfig pConfig = pConfigs.get(i);
           String taskId =  opName + ":" + input + "-" + SEQ_ID_FORMATTER.format(pConfig.getPartitionId());
-          DataflowTaskConfig taskConfig = new DataflowTaskConfig();
+          OperatorTaskConfig taskConfig = new OperatorTaskConfig();
           taskConfig.setTaskId(taskId);
-          taskConfig.setOperator(opName);
+          taskConfig.setOperatorName(opName);
           taskConfig.setInput(input);
           taskConfig.setInputPartitionId(pConfig.getPartitionId());
           taskConfig.setOutputs(opConfig.getOutputs());
-          taskConfig.setScribe(opConfig.getScribe());
+          taskConfig.setOperator(opConfig.getScribe());
           taskRegistry.offer(taskId, taskConfig);
         }
       }

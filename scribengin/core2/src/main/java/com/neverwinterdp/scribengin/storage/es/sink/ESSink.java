@@ -44,6 +44,13 @@ public class ESSink implements Sink {
     streams.put(pConfig.getPartitionId(), newStream) ;
     return newStream;
   }
+  
+  @Override
+  public SinkPartitionStream getStream(int partitionId) throws Exception {
+    SinkPartitionStream stream = streams.get(partitionId);
+    if(stream != null) return stream ;
+    return null;
+  }
 
   @Override
   public SinkPartitionStream[] getStreams() {
@@ -53,12 +60,12 @@ public class ESSink implements Sink {
 
   @Override
   public void delete(SinkPartitionStream stream) throws Exception {
-    SinkPartitionStream found = streams.get(stream.getDescriptor().getPartitionId());
+    SinkPartitionStream found = streams.get(stream.getParitionConfig().getPartitionId());
     if(found != null) {
       found.delete();
-      streams.remove(stream.getDescriptor().getPartitionId());
+      streams.remove(stream.getParitionConfig().getPartitionId());
     } else {
-      throw new Exception("Cannot find the stream " + stream.getDescriptor().getPartitionId());
+      throw new Exception("Cannot find the stream " + stream.getParitionConfig().getPartitionId());
     }
   }
 

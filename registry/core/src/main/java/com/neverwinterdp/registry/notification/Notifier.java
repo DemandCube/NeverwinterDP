@@ -10,6 +10,7 @@ import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.util.ExceptionUtil;
 import com.neverwinterdp.util.JSONSerializer;
 
@@ -50,6 +51,11 @@ public class Notifier {
   public void initRegistry() throws RegistryException {
     eventsNode.createIfNotExists(); ;
   }
+  
+  public void initRegistry(Transaction transaction) throws RegistryException {
+    transaction.create(eventsNode, null, NodeCreateMode.PERSISTENT);
+  }
+  
   
   public void info(String name, String mesg) throws RegistryException {
     NotificationEvent notificationEvent = new NotificationEvent(NotificationEvent.Level.INFO, name, mesg) ;

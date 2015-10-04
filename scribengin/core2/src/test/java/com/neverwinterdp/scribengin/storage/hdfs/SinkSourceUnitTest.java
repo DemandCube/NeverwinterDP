@@ -54,7 +54,7 @@ public class SinkSourceUnitTest {
     SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < NUM_OF_COMMIT; i++) {
       for(int j = 0; j < NUM_OF_RECORD_PER_COMMIT; j ++) {
-        String key = "stream=" + stream.getDescriptor().getPartitionId() +",buffer=" + i + ",record=" + j;
+        String key = "stream=" + stream.getParitionConfig().getPartitionId() +",buffer=" + i + ",record=" + j;
         writer.append(Record.create(key, key));
       }
       writer.commit();
