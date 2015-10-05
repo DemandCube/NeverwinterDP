@@ -1,5 +1,6 @@
 package com.neverwinterdp.scribengin.dataflow.registry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.neverwinterdp.registry.Node;
@@ -12,6 +13,8 @@ import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.scribengin.dataflow.worker.TaskExecutorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
 import com.neverwinterdp.vm.VMDescriptor;
+import com.neverwinterdp.yara.MetricRegistry;
+import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 
 public class WorkerRegistry {
   final static public String ALL_WORKERS_PATH       = "workers/all";
@@ -143,5 +146,31 @@ public class WorkerRegistry {
       Thread.sleep(checkPeriod);
     }
     throw new Exception("Not all dataflow worker have the " + status + ", after " + timeout + "ms");
+  }
+  
+  public void createMetric(String vmName, MetricRegistry mRegistry) throws RegistryException {
+    MetricRegistrySnapshot mRegistrySnapshot = new MetricRegistrySnapshot(vmName, mRegistry) ;
+    allWorkers.getChild(vmName).createChild("metrics", mRegistrySnapshot, NodeCreateMode.PERSISTENT);
+  }
+  
+  public void saveMetric(String vmName, MetricRegistry mRegistry) throws RegistryException {
+    Node metricsNode = allWorkers.getDescendant(vmName + "/metrics");
+    MetricRegistrySnapshot mRegistrySnapshot = new MetricRegistrySnapshot(vmName, mRegistry) ;
+    metricsNode.setData( mRegistrySnapshot);
+  }
+  
+  public MetricRegistrySnapshot getMetric(String vmName) throws RegistryException {
+    Node metricsNode = allWorkers.getDescendant(vmName + "/metrics");
+    MetricRegistrySnapshot mRegistrySnapshot = metricsNode.getDataAs(MetricRegistrySnapshot.class) ;
+    return mRegistrySnapshot;
+  }
+  
+  public List<MetricRegistrySnapshot> getMetrics() throws RegistryException {
+    List<String> vmNames = allWorkers.getChildren() ;
+    List<String> paths = new ArrayList<>();
+    for(String vmName : vmNames) {
+      paths.add(allWorkers.getPath() + "/" + vmName + "/metrics");
+    }
+    return registry.getDataAs(paths, MetricRegistrySnapshot.class);
   }
 }

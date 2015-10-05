@@ -20,22 +20,22 @@
 
   "streams": {
     "log4j": {
-      "type" : "kafka", "topic" : "log4j", "zk.connect" : "127.0.0.1:2181", "reader" : "raw", "name" : "log4j"
+       "type" : "kafka", "topic" : "log4j", "zk.connect" : "127.0.0.1:2181", "reader" : "raw", "name" : "log4j"
     },
 
-    "log4j.info" : {
+    "info" : {
       "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.info"
     },
 
-    "log4j.warn" : {
+    "warn" : {
       "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.warn"
     },
 
-    "log4j.error" : {
+    "error" : {
       "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.error"
     },
 
-    "log4j.aggregate" : {
+    "aggregate" : {
       "type" : "kafka", "topic" : "log4j.aggregate", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.aggregate"
     }
   },
@@ -44,25 +44,25 @@
     "splitter": {
       "operator" : "com.neverwinterdp.scribengin.dataflow.sample.log.LogSplitterOperator",
       "inputs": ["log4j"],
-      "outputs": ["log4j.info", "log4j.warn", "log4j.error"]
+      "outputs": ["info", "warn", "error"]
     },
 
     "info": {
       "operator" : "com.neverwinterdp.scribengin.dataflow.sample.log.LogPersisterOperator",
-      "inputs": ["log4j.info"],
-      "outputs": ["log4j.aggregate"]
+      "inputs": ["info"],
+      "outputs": ["aggregate"]
     },
 
     "warn": {
       "operator" : "com.neverwinterdp.scribengin.dataflow.sample.log.LogPersisterOperator",
-      "inputs": ["log4j.warn"],
-      "outputs": ["log4j.aggregate"]
+      "inputs": ["warn"],
+      "outputs": ["aggregate"]
     },
 
     "error": {
       "operator" : "com.neverwinterdp.scribengin.dataflow.sample.log.LogPersisterOperator",
-      "inputs": ["log4j.error"],
-      "outputs": ["log4j.aggregate"]
+      "inputs": ["error"],
+      "outputs": ["aggregate"]
     }
   }  
 }

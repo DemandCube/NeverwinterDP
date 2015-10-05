@@ -13,6 +13,9 @@ import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMConfig.ClusterEnvironment;
+import com.neverwinterdp.vm.VMDescriptor;
+import com.neverwinterdp.yara.MetricPrinter;
+import com.neverwinterdp.yara.MetricRegistry;
 
 public class VMWorkerApp extends VMApp {
   private Logger logger  ;
@@ -21,7 +24,8 @@ public class VMWorkerApp extends VMApp {
   
   @Override
   public void run() throws Exception {
-    final VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
+    final VMDescriptor vmDescriptor = getVM().getDescriptor();
+    final VMConfig vmConfig = vmDescriptor.getVmConfig();
     logger = getVM().getLoggerFactory().getLogger(VMWorkerApp.class);
     
     AppContainer appContainer = getVM().getAppContainer();
@@ -41,6 +45,9 @@ public class VMWorkerApp extends VMApp {
     
     DataflowRegistry dflRegistry = workerModuleContainer.getInstance(DataflowRegistry.class);
     dflRegistry.getWorkerRegistry().addWorker(getVM().getDescriptor());
+    MetricRegistry mRegistry = workerModuleContainer.getInstance(MetricRegistry.class);
+    dflRegistry.getWorkerRegistry().createMetric(vmDescriptor.getId(), mRegistry);
+    
     dataflowTaskExecutorService = workerModuleContainer.getInstance(WorkerService.class);
     addListener(new VMApp.VMAppTerminateEventListener() {
       @Override
@@ -64,12 +71,17 @@ public class VMWorkerApp extends VMApp {
       dataflowTaskExecutorService.init();
       dataflowTaskExecutorService.run();
       dataflowTaskExecutorService.waitForTermination();
-    } catch(Exception ex) {
+    } catch(Throwable ex) {
+      ex.printStackTrace();
       dflRegistry.
         getWorkerRegistry().
         setWorkerStatus(getVM().getDescriptor().getId(), DataflowWorkerStatus.TERMINATED_WITH_ERROR);
       throw ex;
     } finally {
+      StringBuilder out = new StringBuilder() ;
+      MetricPrinter metricPrinter = new MetricPrinter(out) ;
+      dflRegistry.getWorkerRegistry().saveMetric(getVM().getDescriptor().getVmConfig().getName(), mRegistry);
+      metricPrinter.print(mRegistry);
       System.out.println("Dataflow Worker Terminate");
     }
   }

@@ -89,7 +89,11 @@ public class KafkaLogSampleUnitTest  {
         "  --dataflow-config src/test/resources/dataflow-config.json";
     shell.execute(dataflowChainSubmitCommand);
     
-    Thread.sleep(90000);
+    shell.execute(
+        "dataflow monitor " +
+        "  --dataflow-id log-dataflow --dump-period 15000 " + 
+        "  --show-tasks --show-workers --stop-on-status FINISH"
+    );
     
     shell.execute("registry dump --path /");
     

@@ -1,16 +1,23 @@
 package com.neverwinterdp.scribengin.dataflow.registry;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
+import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
+import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskRuntimeReport;
+import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerRuntimeReport;
 
 @Singleton
 public class DataflowRegistry {
@@ -105,11 +112,11 @@ public class DataflowRegistry {
       masterRegistry.initRegistry(transaction);
       workerRegistry.initRegistry(transaction);
       taskRegistry.initRegistry(transaction);
-//
-//      String notificationPath = dataflowPath +  "/" + NOTIFICATIONS_PATH;
-//      transaction.create(notificationPath, new byte[0], NodeCreateMode.PERSISTENT);
-//      dataflowTaskNotifier.initRegistry(transaction);
-//      dataflowWorkerNotifier.initRegistry(transaction);
+
+      String notificationPath = dataflowPath +  "/" + NOTIFICATIONS_PATH;
+      transaction.create(notificationPath, new byte[0], NodeCreateMode.PERSISTENT);
+      dataflowTaskNotifier.initRegistry(transaction);
+      dataflowWorkerNotifier.initRegistry(transaction);
       transaction.commit();
     } catch(Throwable ex) {
       ex.printStackTrace();
@@ -147,5 +154,51 @@ public class DataflowRegistry {
   
   static  public DataflowLifecycleStatus getStatus(Registry registry, String dataflowPath) throws RegistryException {
     return registry.getDataAs(dataflowPath + "/status" , DataflowLifecycleStatus.class) ;
+  }
+  
+  
+  static public List<OperatorTaskRuntimeReport> getDataflowTaskRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
+    String taskListPath = dataflowPath + "/tasks/task-list";
+    
+    List<String> taskIds = null;
+    try {
+      taskIds = registry.getChildren(taskListPath) ;
+      List<OperatorTaskRuntimeReport> holder = new ArrayList<>();
+      for(String selTaskId : taskIds) {
+        holder.add(new OperatorTaskRuntimeReport(registry, taskListPath + "/" + selTaskId));
+      }
+      return holder;
+    } catch(RegistryException ex) {
+      if(ex.getErrorCode() == ErrorCode.NoNode) return new ArrayList<>();
+      throw ex ;
+    }
+  }
+  
+  static public ActivityRegistry getMasterActivityRegistry(Registry registry, String dataflowPath) throws RegistryException {
+    return new ActivityRegistry(registry, dataflowPath + "/master/activities") ;
+  }
+  
+  static public List<DataflowWorkerRuntimeReport> getAllDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
+    String workerListPath = dataflowPath + "/workers/all";
+    return getDataflowWorkerRuntimeReports(registry, workerListPath);
+  }
+  
+  static public List<DataflowWorkerRuntimeReport> getActiveDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
+    String workerListPath = dataflowPath + "/workers/active";
+    return getDataflowWorkerRuntimeReports(registry, workerListPath);
+  }
+  
+  static public List<DataflowWorkerRuntimeReport> getDataflowWorkerRuntimeReports(Registry registry, String workerListPath) throws RegistryException {
+    try {
+      List<String> workerIds = registry.getChildren(workerListPath) ;
+      List<DataflowWorkerRuntimeReport> holder = new ArrayList<>();
+      for(String selWorkerId : workerIds) {
+        holder.add(new DataflowWorkerRuntimeReport(registry, workerListPath + "/" + selWorkerId));
+      }
+      return holder;
+    } catch(RegistryException ex) {
+      if(ex.getErrorCode() == ErrorCode.NoNode) return new ArrayList<>();
+      throw ex;
+    }
   }
 }
