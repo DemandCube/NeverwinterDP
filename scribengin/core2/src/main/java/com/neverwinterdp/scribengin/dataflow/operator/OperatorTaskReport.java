@@ -11,6 +11,8 @@ public class OperatorTaskReport {
   };
   
   private String taskId ;
+  private String operatorName;
+  
   private long   startTime  ;
   private long   finishTime ;
   
@@ -29,14 +31,18 @@ public class OperatorTaskReport {
   
   public OperatorTaskReport() {} 
   
-  public OperatorTaskReport(String taskId) {
+  public OperatorTaskReport(String taskId, String operatorName) {
     this.taskId = taskId ;
+    this.operatorName = operatorName;
     this.startTime = System.currentTimeMillis();
   }
   
   public String getTaskId() { return taskId; }
   public void setTaskId(String taskId) { this.taskId = taskId; }
   
+  public String getOperatorName() { return operatorName; }
+  public void setOperatorName(String operatorName) { this.operatorName = operatorName; }
+
   public long getStartTime() { return startTime; }
   public void setStartTime(long startTime) { this.startTime = startTime; }
   

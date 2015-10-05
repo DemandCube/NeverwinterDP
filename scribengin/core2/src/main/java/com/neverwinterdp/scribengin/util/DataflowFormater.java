@@ -1,6 +1,9 @@
 package com.neverwinterdp.scribengin.util;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.Registry;
@@ -51,10 +54,21 @@ public class DataflowFormater {
   }
   
   public String getDataflowTaskInfo() throws RegistryException {
-    List<OperatorTaskRuntimeReport> reports =  
-        DataflowRegistry.getDataflowTaskRuntimeReports(registry, dataflowPath);
+    List<OperatorTaskRuntimeReport> reports =  DataflowRegistry.getDataflowTaskRuntimeReports(registry, dataflowPath);
+    LinkedHashMap<String, List<OperatorTaskRuntimeReport>> groupByOperatorReports = new LinkedHashMap<>();
+    for(int i = 0; i < reports.size(); i++) {
+      OperatorTaskRuntimeReport rtReport = reports.get(i);
+      String operator = rtReport.getReport().getOperatorName();
+      List<OperatorTaskRuntimeReport> holder = groupByOperatorReports.get(operator);
+      if(holder == null) {
+        holder = new ArrayList<>();
+        groupByOperatorReports.put(operator, holder);
+      }
+      holder.add(rtReport);
+    }
+    
     String[] header = {
-      "Id", "Status", "Assigned", "AHE", "AWNM", "LAWNM", "AC", "CC", "CFC", "Last Commit Time", "Start Time", "Finish Time", "Exec Time", "Duration"
+      "Task Id", "Status", "Assigned", "AHE", "AWNM", "LAWNM", "AC", "CC", "CFC", "Last Commit Time", "Start Time", "Finish Time", "Exec Time", "Duration"
     } ;
     TabularFormater taskFt = new TabularFormater(header);
     taskFt.setTitle("Dataflow Task Info");
@@ -64,25 +78,30 @@ public class DataflowFormater {
     taskFt.addFooter("AC    = Accumulate Message Commit Count");
     taskFt.addFooter("CC    = Commit Count");
     taskFt.addFooter("CFC   = Commit Fail Count");
-    for(int i = 0; i < reports.size(); i++) {
-      OperatorTaskRuntimeReport rtReport = reports.get(i);
-      OperatorTaskReport report = rtReport.getReport();
-      taskFt.addRow(
-          report.getTaskId(), 
-          rtReport.getStatus(), 
-          report.getAssignedCount(),
-          report.getAssignedHasErrorCount(),
-          report.getAssignedWithNoMessageProcess(),
-          report.getLastAssignedWithNoMessageProcess(),
-          report.getAccCommitProcessCount(),
-          report.getCommitCount(),
-          report.getCommitFailCount(),
-          DateUtil.asCompactDateTime(report.getLastCommitTime()),
-          DateUtil.asCompactDateTime(report.getStartTime()),
-          DateUtil.asCompactDateTime(report.getFinishTime()),
-          report.getAccRuntime() + "ms",
-          report.durationTime() + "ms"
-      );
+    for(Map.Entry<String, List<OperatorTaskRuntimeReport>> entry : groupByOperatorReports.entrySet()) {
+      String operator = entry.getKey();
+      List<OperatorTaskRuntimeReport> operatorReports = entry.getValue();
+      taskFt.addRow(operator, "", "", "", "", "", "", "", "", "", "", "", "", "");
+      for(int i = 0; i < operatorReports.size(); i++) {
+        OperatorTaskRuntimeReport rtReport = operatorReports.get(i);
+        OperatorTaskReport report = rtReport.getReport();
+        taskFt.addRow(
+            "  " + report.getTaskId(), 
+            rtReport.getStatus(), 
+            report.getAssignedCount(),
+            report.getAssignedHasErrorCount(),
+            report.getAssignedWithNoMessageProcess(),
+            report.getLastAssignedWithNoMessageProcess(),
+            report.getAccCommitProcessCount(),
+            report.getCommitCount(),
+            report.getCommitFailCount(),
+            DateUtil.asCompactDateTime(report.getLastCommitTime()),
+            DateUtil.asCompactDateTime(report.getStartTime()),
+            DateUtil.asCompactDateTime(report.getFinishTime()),
+            report.getAccRuntime() + "ms",
+            report.durationTime() + "ms"
+        );
+      }
     }
     return taskFt.getFormattedText();
   }

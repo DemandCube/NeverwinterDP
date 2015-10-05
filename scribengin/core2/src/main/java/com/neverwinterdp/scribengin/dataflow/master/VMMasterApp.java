@@ -100,6 +100,7 @@ public class VMMasterApp extends VMApp {
         service.init();
         service.run();
         service. waitForTermination();
+        service.getDataflowRegistry().setStatus(DataflowLifecycleStatus.TERMINATED);
       } catch (Exception e) {
         logger.error("Error: ", e);
       } finally {

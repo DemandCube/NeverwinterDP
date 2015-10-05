@@ -73,7 +73,6 @@ public class MasterService {
   }
   
   public void waitForTermination() throws Exception {
-    System.out.println("DataflowMasterService: waitForTermination()");
     long maxRunTime = dflRegistry.getConfigRegistry().getDataflowConfig().getWorker().getMaxRunTime();
     if(!taskMonitor.waitForAllTaskFinish(maxRunTime)) {
 //      activityService.queue(new DataflowStopActivityBuilder().build());
@@ -82,6 +81,5 @@ public class MasterService {
     workerMonitor.waitForAllWorkerTerminated();
     //finish
     dflRegistry.setStatus(DataflowLifecycleStatus.FINISH);
-    System.out.println("DataflowMasterService: waitForTermination() done!!!");
   }
 }

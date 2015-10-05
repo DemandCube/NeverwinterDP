@@ -92,7 +92,7 @@ public class KafkaLogSampleUnitTest  {
     shell.execute(
         "dataflow monitor " +
         "  --dataflow-id log-dataflow --dump-period 15000 " + 
-        "  --show-tasks --show-workers --stop-on-status FINISH"
+        "  --show-tasks --show-workers --stop-on-status TERMINATED"
     );
     
     shell.execute("registry dump --path /");

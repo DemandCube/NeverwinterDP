@@ -21,7 +21,7 @@ public class DataflowTaskRegistry extends TaskRegistry<OperatorTaskConfig> {
 
   public void offer(OperatorTaskConfig taskConfig) throws RegistryException {
     super.offer(taskConfig.getTaskId(), taskConfig);
-    create(taskConfig, new OperatorTaskReport(taskConfig.getTaskId()));
+    create(taskConfig, new OperatorTaskReport(taskConfig.getTaskId(), taskConfig.getOperatorName()));
   }
   
   public OperatorTaskReport getTaskReport(OperatorTaskConfig descriptor) throws RegistryException {
