@@ -1,0 +1,68 @@
+{
+  "id" :   "log-dataflow",
+  "name" : "log-dataflow",
+  "parallelism": 8,
+  
+  "master": {
+    "numOfInstances": 1,
+    "memory": 128,
+    "cpuCores": 1
+  },
+
+  "worker": {
+    "numOfInstances": 3,
+    "memory": 256,
+    "cpuCores": 1,
+    "numOfExecutor": 3,
+    "taskSwitchingPeriod" : 5000,
+    "maxRunTime": 90000
+  },
+
+  "streams": {
+    "log4j": {
+       "type" : "kafka", "topic" : "log4j", "zk.connect" : "127.0.0.1:2181", "reader" : "raw", "name" : "log4j"
+    },
+
+    "info" : {
+      "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.info"
+    },
+
+    "warn" : {
+      "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.warn"
+    },
+
+    "error" : {
+      "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.error"
+    },
+
+    "aggregate" : {
+      "type" : "kafka", "topic" : "log4j.aggregate", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.aggregate"
+    }
+  },
+
+  "operators": {
+    "splitter": {
+      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.log.LogSplitterOperator",
+      "inputs": ["log4j"],
+      "outputs": ["info", "warn", "error"]
+    },
+
+    "info": {
+      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.log.LogPersisterOperator",
+      "inputs": ["info"],
+      "outputs": ["aggregate"]
+    },
+
+    "warn": {
+      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.log.LogPersisterOperator",
+      "inputs": ["warn"],
+      "outputs": ["aggregate"]
+    },
+
+    "error": {
+      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.log.LogPersisterOperator",
+      "inputs": ["error"],
+      "outputs": ["aggregate"]
+    }
+  }  
+}

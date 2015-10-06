@@ -41,7 +41,7 @@ configurations.all {
 }
 
 dependencies {
-  compile project(':scribengin/core')
+  compile project(':scribengin/core2')
   compile project(':scribengin/dataflow/log-sample')
 
   compile group: 'junit', name: 'junit', version: '4.11'
@@ -55,7 +55,7 @@ dependencies {
   scribenginDeployJars project(':module/elasticsearch')
   scribenginDeployJars project(':registry/core')
   scribenginDeployJars project(':registry/vm')
-  scribenginDeployJars project(':scribengin/core')
+  scribenginDeployJars project(':scribengin/core2')
 
   scribenginDeployJars group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.4.3'
   scribenginDeployJars group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.4.3'
