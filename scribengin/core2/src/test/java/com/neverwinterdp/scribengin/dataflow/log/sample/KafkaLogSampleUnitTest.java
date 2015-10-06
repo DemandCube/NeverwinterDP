@@ -3,6 +3,8 @@ package com.neverwinterdp.scribengin.dataflow.log.sample;
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.util.Properties;
 
 import org.elasticsearch.node.Node;
@@ -11,12 +13,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.neverwinterdp.os.MemoryInfo;
+import com.neverwinterdp.os.OSManagement;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.sample.log.VMLogMessageValidatorApp;
 import com.neverwinterdp.scribengin.dataflow.sample.log.VMToKafkaLogMessageGeneratorApp;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 import com.neverwinterdp.scribengin.tool.ScribenginClusterBuilder;
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
@@ -114,12 +119,12 @@ public class KafkaLogSampleUnitTest  {
         "  --prop:num-of-message-per-partition=" + NUM_OF_MESSAGE +
         "  --prop:wait-for-termination=180000" +
         "  --prop:validate-kafka=log4j.info,log4j.warn,log4j.error";
-      shell.execute(logValidatorSubmitCommand);
-      
-      shell.execute(
-        "vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 25000"
-      );
-    
+    shell.execute(logValidatorSubmitCommand);
+
+    shell.execute(
+      "vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 45000"
+    );
+     
     shell.execute("registry dump --path /applications/log-sample");
   }
 }

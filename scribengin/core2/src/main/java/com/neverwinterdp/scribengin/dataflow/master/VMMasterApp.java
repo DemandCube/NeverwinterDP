@@ -64,7 +64,7 @@ public class VMMasterApp extends VMApp {
         VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
         AppContainer appContainer = getVM().getAppContainer();
         Map<String, String> esLoggerModuleProps = new HashMap<String, String>();
-        appContainer.install(esLoggerModuleProps, ESOSMonitorLoggerModule.NAME);
+        //appContainer.install(esLoggerModuleProps, ESOSMonitorLoggerModule.NAME);
         
         Map<String, String> moduleProps = new HashMap<String, String>();
         moduleProps.putAll(vmConfig.getHadoopProperties());

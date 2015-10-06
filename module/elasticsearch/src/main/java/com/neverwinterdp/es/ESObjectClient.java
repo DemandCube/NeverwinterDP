@@ -73,9 +73,8 @@ public class ESObjectClient<T> {
       T idoc = entry.getValue();
       byte[] data = JSONSerializer.INSTANCE.toBytes(idoc);
       bulkRequest.add(
-          esclient.client.prepareIndex(index, mappingType.getSimpleName(), entry.getKey()).
-              setSource(data)
-          );
+        esclient.client.prepareIndex(index, mappingType.getSimpleName(), entry.getKey()).setSource(data)
+      );
     }
     BulkResponse bulkResponse = bulkRequest.execute().actionGet();
     if (bulkResponse.hasFailures()) {

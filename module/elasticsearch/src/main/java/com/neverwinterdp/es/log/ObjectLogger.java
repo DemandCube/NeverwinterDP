@@ -2,6 +2,8 @@ package com.neverwinterdp.es.log;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.elasticsearch.ElasticsearchException;
 
@@ -76,10 +78,18 @@ public class ObjectLogger<T> {
       Segment<LogWithId<T>> segment = null ;
       while((segment = queue.nextReadSegment(1000)) != null) {
         segment.open();
+        Map<String, T> holder = new HashMap<String, T>();
         while(segment.hasNext()) {
           LogWithId<T> record = segment.nextObject() ;
-          esObjectClient.put(record.getLog(), record.getId());
+          holder.put(record.getId(), record.getLog());
+          if(holder.size() == 100) {
+            esObjectClient.put(holder);
+            holder.clear();
+          }
           count++;
+        }
+        if(holder.size() > 0) {
+          esObjectClient.put(holder);
         }
         segment.close();
         queue.commitReadSegment(segment);

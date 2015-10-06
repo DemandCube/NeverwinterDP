@@ -30,7 +30,7 @@ public class VMWorkerApp extends VMApp {
     
     AppContainer appContainer = getVM().getAppContainer();
     Map<String, String> esLoggerModuleProps = new HashMap<String, String>();
-    appContainer.install(esLoggerModuleProps, ESOSMonitorLoggerModule.NAME);
+    //appContainer.install(esLoggerModuleProps, ESOSMonitorLoggerModule.NAME);
     
     Map<String, String> workerModuleProps = new HashMap<String, String>();
     workerModuleProps.putAll(vmConfig.getHadoopProperties());
