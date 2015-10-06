@@ -90,7 +90,7 @@ public class DataflowCommand extends Command {
       if(numOfExecutorPerWorker > 0) {
         dflConfig.getWorker().setNumOfExecutor(numOfExecutorPerWorker);
       }
-      
+      scala.Console.println(JSONSerializer.INSTANCE.toString(dflConfig));
       DataflowSubmitter submitter = new DataflowSubmitter(client, dflConfig);
       submitter.submit();
       submitter.waitForRunning(waitForRunningTimeout);
