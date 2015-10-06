@@ -15,7 +15,6 @@ import com.neverwinterdp.registry.activity.ActivityExecutionContext;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.activity.ActivityStepBuilder;
 import com.neverwinterdp.registry.activity.ActivityStepExecutor;
-import com.neverwinterdp.registry.task.TaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
 import com.neverwinterdp.scribengin.dataflow.config.OperatorConfig;
 import com.neverwinterdp.scribengin.dataflow.master.MasterService;
@@ -71,6 +70,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
         storage.refresh();
         if(!storage.exists()) {
           storage.drop();
+          storageConfig.setPartition(dflConfig.getParallelism());
           storage.create(storageConfig.getPartition(), storageConfig.getReplication());
         }
         storage.refresh();
