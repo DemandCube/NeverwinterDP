@@ -73,7 +73,7 @@ KILL_WORKER_PERIOD=$(get_opt --kill-worker-period '60000' $@)
 
 DUMP_PERIOD=$(get_opt --dump-period '15000' $@)
 VALIDATOR_DISABLE=$(has_opt "--validator-disable" $@ )
-GENERATOR_MAX_WAIT_TIME=$(get_opt --generator-max-wait-time '30000' $@)
+GENERATOR_MAX_WAIT_TIME=$(get_opt --generator-max-wait-time '60000' $@)
 
 DATAFLOW_DESCRIPTOR_FILE=""
 LOG_VALIDATOR_VALIDATE=""
