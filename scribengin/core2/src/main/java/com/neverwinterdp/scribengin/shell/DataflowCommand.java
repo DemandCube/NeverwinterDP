@@ -1,7 +1,5 @@
 package com.neverwinterdp.scribengin.shell;
 
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
@@ -125,6 +123,12 @@ public class DataflowCommand extends Command {
     
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
+      ScribenginShell scribenginShell = (ScribenginShell) shell;
+      Console console = shell.console();
+      ScribenginClient scribenginClient= scribenginShell.getScribenginClient();
+      DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId);
+      DataflowRegistry dRegistry = dflClient.getDataflowRegistry();
+      info(dRegistry, console, dataflowId);
     }
     
     public void info(DataflowRegistry dRegistry, Console console, String dflId) throws Exception {

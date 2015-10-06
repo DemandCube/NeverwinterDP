@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.scribengin.ScribenginClient;
+import com.neverwinterdp.scribengin.dataflow.sample.log.VMLogMessageValidatorApp;
 import com.neverwinterdp.scribengin.dataflow.sample.log.VMToKafkaLogMessageGeneratorApp;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
@@ -64,7 +65,7 @@ public class KafkaLogSampleUnitTest  {
   
   @Test
   public void testLogSampleChain() throws Exception {
-    int NUM_OF_MESSAGE = 5000;
+    int NUM_OF_MESSAGE = 25000;
     String REPORT_PATH = "/applications/log-sample/reports";
     String logGeneratorSubmitCommand = 
         "vm submit " +
@@ -81,21 +82,43 @@ public class KafkaLogSampleUnitTest  {
         "  --prop:send-period=-1";
     shell.execute(logGeneratorSubmitCommand);
     shell.execute(
-      "vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 25000"
+      "vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 3000"
     );
     
     String dataflowChainSubmitCommand = 
         "dataflow submit " + 
-        "  --dataflow-config src/test/resources/dataflow-config.json";
+        "  --dataflow-config src/test/resources/kafka-dataflow-config.json " +
+        "  --dataflow-task-switching-period 10000 " +
+        "  --dataflow-num-of-worker 2 --dataflow-num-of-executor-per-worker 4";
     shell.execute(dataflowChainSubmitCommand);
     
     shell.execute(
         "dataflow monitor " +
-        "  --dataflow-id log-dataflow --dump-period 15000 " + 
+        "  --dataflow-id log-dataflow --dump-period 5000 " + 
         "  --show-tasks --show-workers --stop-on-status TERMINATED"
     );
     
-    shell.execute("registry dump --path /");
+    shell.execute(
+        "dataflow info  --dataflow-id log-dataflow --show-all"
+    );
+    
+    String logValidatorSubmitCommand = 
+        "vm submit " +
+        "  --dfs-app-home /applications/log-sample" +
+        "  --registry-connect 127.0.0.1:2181" +
+        "  --registry-db-domain /NeverwinterDP" +
+        "  --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl" + 
+        "  --name vm-log-validator-1 --role log-validator" + 
+        "  --vm-application " + VMLogMessageValidatorApp.class.getName() + 
+        "  --prop:report-path=" +                  REPORT_PATH +
+        "  --prop:num-of-message-per-partition=" + NUM_OF_MESSAGE +
+        "  --prop:wait-for-termination=180000" +
+        "  --prop:validate-kafka=log4j.info,log4j.warn,log4j.error";
+      shell.execute(logValidatorSubmitCommand);
+      
+      shell.execute(
+        "vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 25000"
+      );
     
     shell.execute("registry dump --path /applications/log-sample");
   }
