@@ -164,10 +164,6 @@ fi
 #########################################################################################################################
 # Dump the vm and registry info                                                                                         #
 #########################################################################################################################
-$SHELL dataflow info \
-  --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
-  --show-all 
-
 $SHELL registry info --path /applications/log-sample/reports/generate/reports/vm-log-generator-1 --print-data-as-json
 $SHELL registry info --path /applications/log-sample/reports/validate/reports/vm-log-generator-1 --print-data-as-json
 
