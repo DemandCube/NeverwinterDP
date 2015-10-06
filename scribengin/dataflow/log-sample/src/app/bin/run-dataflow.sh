@@ -122,9 +122,9 @@ echo "MESSAGE GENERATION TIME: $MESSAGE_GENERATION_ELAPSED_TIME"
 # Launch A Dataflow Chain                                                                                               #
 #########################################################################################################################
 START_DATAFLOW_CHAIN_TIME=$SECONDS
-$SHELL dataflow submit-chain \
+$SHELL dataflow submit \
   --dfs-app-home /applications/log-sample \
-  --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --wait-for-running-timeout 180000 --dataflow-max-runtime $MAX_RUNTIME \
+  --dataflow-config $DATAFLOW_DESCRIPTOR_FILE --wait-for-running-timeout 180000 --dataflow-max-runtime $MAX_RUNTIME \
   --dataflow-num-of-worker $NUM_OF_WORKER --dataflow-num-of-executor-per-worker $NUM_OF_EXECUTOR_PER_WORKER 
 
 if [ "$KILL_WORKER_RANDOM" = "true" ] ; then
@@ -134,8 +134,9 @@ if [ "$KILL_WORKER_RANDOM" = "true" ] ; then
 fi
 
 $SHELL dataflow monitor \
-  --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
-  --show-tasks --show-workers --stop-on-status FINISH --dump-period $DUMP_PERIOD --timeout $MAX_RUNTIME
+  --dataflow-id log-dataflow  --show-tasks --show-workers --stop-on-status FINISH --dump-period $DUMP_PERIOD --timeout $MAX_RUNTIME
+
+$SHELL  dataflow info  --dataflow-id log-dataflow --show-all
 
 DATAFLOW_CHAIN_ELAPSED_TIME=$(($SECONDS - $START_DATAFLOW_CHAIN_TIME))
 echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 

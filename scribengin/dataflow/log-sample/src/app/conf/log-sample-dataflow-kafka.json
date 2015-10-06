@@ -20,23 +20,23 @@
 
   "streams": {
     "log4j": {
-       "type" : "kafka", "topic" : "log4j", "zk.connect" : "127.0.0.1:2181", "reader" : "raw", "name" : "log4j"
+       "type" : "kafka", "topic" : "log4j", "zk.connect" : "zookeeper-1:2181", "reader" : "raw", "name" : "log4j"
     },
 
     "info" : {
-      "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.info"
+      "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "zookeeper-1:2181", "name" : "log4j.info"
     },
 
     "warn" : {
-      "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.warn"
+      "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "zookeeper-1:2181", "name" : "log4j.warn"
     },
 
     "error" : {
-      "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.error"
+      "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "zookeeper-1:2181", "name" : "log4j.error"
     },
 
     "aggregate" : {
-      "type" : "kafka", "topic" : "log4j.aggregate", "zk.connect" : "127.0.0.1:2181", "name" : "log4j.aggregate"
+      "type" : "kafka", "topic" : "log4j.aggregate", "zk.connect" : "zookeeper-1:2181", "name" : "log4j.aggregate"
     }
   },
 
