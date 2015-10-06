@@ -78,13 +78,13 @@ GENERATOR_MAX_WAIT_TIME=$(get_opt --generator-max-wait-time '180000' $@)
 DATAFLOW_DESCRIPTOR_FILE=""
 LOG_VALIDATOR_VALIDATE=""
 if [ "$STORAGE" = "hdfs" ] ; then
-  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/hdfs-log-dataflow-chain.json"
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/log-sample-dataflow-hdfs.json"
   LOG_VALIDATOR_VALIDATE_OPT="--prop:validate-hdfs=/log-sample/hdfs/info,/log-sample/hdfs/warn,/log-sample/hdfs/error"
 elif [ "$STORAGE" = "s3" ] ; then
-  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/s3-log-dataflow-chain.json"
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/log-sample-dataflow-s3.json"
   LOG_VALIDATOR_VALIDATE_OPT="--prop:validate-s3=test-log-sample:info,test-log-sample:warn,test-log-sample:error" 
 else
-  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/kafka-log-dataflow-chain.json"
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/log-sample-dataflow-kafka.json"
   LOG_VALIDATOR_VALIDATE_OPT="--prop:validate-kafka=log4j.aggregate"
 fi
 
@@ -106,7 +106,7 @@ START_MESSAGE_GENERATION_TIME=$SECONDS
 $SHELL vm submit \
    --dfs-app-home /applications/log-sample \
    --registry-connect zookeeper-1:2181 --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
-   --name vm-log-generator-1  --role vm-log-generator --vm-application  com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp \
+   --name vm-log-generator-1  --role vm-log-generator --vm-application  com.neverwinterdp.scribengin.dataflow.sample.log.VMToKafkaLogMessageGeneratorApp \
    --prop:report-path=/applications/log-sample/reports \
    --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE \
    --prop:num-of-stream=$NUM_OF_STREAM \
@@ -148,7 +148,7 @@ if [ $VALIDATOR_DISABLE == "false" ] ; then
   $SHELL vm submit  \
     --dfs-app-home /applications/log-sample \
     --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
-    --name vm-log-validator-1 --role log-validator  --vm-application com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp \
+    --name vm-log-validator-1 --role log-validator  --vm-application com.neverwinterdp.scribengin.dataflow.sample.log.VMLogMessageValidatorApp \
     --prop:report-path=/applications/log-sample/reports \
     --prop:num-of-message-per-partition=$NUM_OF_MESSAGE \
     --prop:wait-for-termination=3600000 \
