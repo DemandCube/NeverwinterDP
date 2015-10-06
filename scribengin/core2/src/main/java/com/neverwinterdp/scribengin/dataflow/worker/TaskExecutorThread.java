@@ -38,6 +38,7 @@ public class TaskExecutorThread extends Thread {
     if(runtime < 0) runtime  = 0;
     if(runtime > taskSwitchPeriod) {
       operatorTask.interrupt();
+      System.out.println("Runtime = " + runtime + "ms, interrupt for switch");
     }
   }
 
@@ -71,6 +72,7 @@ public class TaskExecutorThread extends Thread {
         dataflowRegistry.
           getWorkerRegistry().
           updateWorkerTaskExecutor(vmDescriptor, taskExecutorDescriptor);
+        taskStartTime = System.currentTimeMillis();
         operatorTask = new OperatorTask(workerService, taskContext);
         operatorTask.init();
         operatorTask.execute();
