@@ -14,7 +14,7 @@
     "memory": 256,
     "cpuCores": 1,
     "numOfExecutor": 3,
-    "taskSwitchingPeriod" : 5000,
+    "taskSwitchingPeriod" : 30000,
     "maxRunTime": 90000
   },
 

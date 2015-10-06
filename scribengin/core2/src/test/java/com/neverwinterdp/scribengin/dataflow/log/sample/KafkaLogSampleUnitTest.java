@@ -90,12 +90,12 @@ public class KafkaLogSampleUnitTest  {
       "vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 3000"
     );
     
-    String dataflowChainSubmitCommand = 
+    String dataflowSubmitCommand = 
         "dataflow submit " + 
         "  --dataflow-config src/test/resources/kafka-dataflow-config.json " +
         "  --dataflow-task-switching-period 10000 " +
         "  --dataflow-num-of-worker 2 --dataflow-num-of-executor-per-worker 4";
-    shell.execute(dataflowChainSubmitCommand);
+    shell.execute(dataflowSubmitCommand);
     
     shell.execute(
         "dataflow monitor " +

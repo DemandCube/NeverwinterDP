@@ -24,6 +24,8 @@ public class TaskExecutorThread extends Thread {
   public TaskExecutorThread(WorkerService workerService, TaskExecutorDescriptor descriptor) throws RegistryException {
     this.workerService = workerService;
     this.taskExecutorDescriptor = descriptor;
+    this.taskSwitchPeriod = 
+      workerService.getDataflowRegistry().getConfigRegistry().getDataflowConfig().getWorker().getTaskSwitchingPeriod();
     workerService.
       getDataflowRegistry().
       getWorkerRegistry().
@@ -35,7 +37,7 @@ public class TaskExecutorThread extends Thread {
     long runtime = currentTime  - taskStartTime ;
     if(runtime < 0) runtime  = 0;
     if(runtime > taskSwitchPeriod) {
-      operatorTask.isIterrupted();
+      operatorTask.interrupt();
     }
   }
 
@@ -101,5 +103,4 @@ public class TaskExecutorThread extends Thread {
       workerService.getLogger().error("DataflowTaskExecutor Fail To Updat Status", ex);
     }
   }
-  
 }
