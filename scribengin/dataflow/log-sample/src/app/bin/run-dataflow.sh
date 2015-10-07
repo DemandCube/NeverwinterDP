@@ -124,13 +124,13 @@ echo "MESSAGE GENERATION TIME: $MESSAGE_GENERATION_ELAPSED_TIME"
 START_DATAFLOW_CHAIN_TIME=$SECONDS
 $SHELL dataflow submit \
   --dfs-app-home /applications/log-sample \
-  --dataflow-config $DATAFLOW_DESCRIPTOR_FILE --wait-for-running-timeout 180000 --dataflow-max-runtime $MAX_RUNTIME \
-  --dataflow-num-of-worker $NUM_OF_WORKER --dataflow-num-of-executor-per-worker $NUM_OF_EXECUTOR_PER_WORKER 
+  --dataflow-config $DATAFLOW_DESCRIPTOR_FILE --wait-for-running-timeout 90000 --dataflow-max-runtime $MAX_RUNTIME \
+  --dataflow-num-of-worker $NUM_OF_WORKER --dataflow-num-of-executor-per-worker $NUM_OF_EXECUTOR_PER_WORKER \
+  --dataflow-task-switching-period 15000
 
 if [ "$KILL_WORKER_RANDOM" = "true" ] ; then
   $SHELL dataflow kill-worker-random \
-    --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
-    --wait-before-simulate-failure 60000 --failure-period $KILL_WORKER_PERIOD --max-kill $KILL_WORKER_MAX &
+    --dataflow-id log-dataflow --wait-before-simulate-failure 60000 --failure-period $KILL_WORKER_PERIOD --max-kill $KILL_WORKER_MAX &
 fi
 
 $SHELL dataflow monitor \
