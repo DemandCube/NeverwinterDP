@@ -1,7 +1,7 @@
 {
   "id" :   "log-dataflow",
   "name" : "log-dataflow",
-  "parallelism": 8,
+  "maxRunTime": 90000,
   
   "master": {
     "numOfInstances": 1,
@@ -15,28 +15,32 @@
     "cpuCores": 1,
     "numOfExecutor": 3,
     "taskSwitchingPeriod" : 30000,
-    "maxRunTime": 90000
   },
 
-  "streams": {
-    "log4j": {
-       "type" : "kafka", "topic" : "log4j", "zk.connect" : "zookeeper-1:2181", "reader" : "raw", "name" : "log4j"
-    },
+  "streamConfig": {
+    "parallelism": 8,
+    "replication": 2,
 
-    "info" : {
-      "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "zookeeper-1:2181", "name" : "log4j.info"
-    },
+    "streams": {
+      "log4j": {
+         "type" : "kafka", "topic" : "log4j", "zk.connect" : "zookeeper-1:2181", "reader" : "raw", "name" : "log4j"
+      },
 
-    "warn" : {
-      "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "zookeeper-1:2181", "name" : "log4j.warn"
-    },
+      "info" : {
+        "type" : "kafka", "topic" : "log4j.info", "zk.connect" : "zookeeper-1:2181", "name" : "log4j.info"
+      },
 
-    "error" : {
-      "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "zookeeper-1:2181", "name" : "log4j.error"
-    },
+      "warn" : {
+        "type" : "kafka", "topic" : "log4j.warn", "zk.connect" : "zookeeper-1:2181", "name" : "log4j.warn"
+      },
 
-    "aggregate" : {
-      "type" : "kafka", "topic" : "log4j.aggregate", "zk.connect" : "zookeeper-1:2181", "name" : "log4j.aggregate"
+      "error" : {
+        "type" : "kafka", "topic" : "log4j.error", "zk.connect" : "zookeeper-1:2181", "name" : "log4j.error"
+      },
+
+      "aggregate" : {
+        "type" : "kafka", "topic" : "log4j.aggregate", "zk.connect" : "zookeeper-1:2181", "name" : "log4j.aggregate"
+      }
     }
   },
 
