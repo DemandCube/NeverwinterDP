@@ -6,7 +6,6 @@ public class WorkerConfig {
   private int  cpuCores                = 1;
   private int  numOfExecutor           = 2;
   private long taskSwitchingPeriod     = 5000;
-  private long maxRunTime              = 90000;
   private long maxWaitForRunningStatus = 60000;
 
   public int getNumOfInstances() { return numOfInstances; }
@@ -27,9 +26,6 @@ public class WorkerConfig {
   public void setTaskSwitchingPeriod(long taskSwitchingPeriod) {
     this.taskSwitchingPeriod = taskSwitchingPeriod;
   }
-  
-  public long getMaxRunTime() { return maxRunTime; }
-  public void setMaxRunTime(long maxRunTime) { this.maxRunTime = maxRunTime; }
   
   public long getMaxWaitForRunningStatus() { return maxWaitForRunningStatus; }
   public void setMaxWaitForRunningStatus(long maxWaitForRunningStatus) {

@@ -56,6 +56,7 @@ public class VMWorkerApp extends VMApp {
           if(terminateEvent == TerminateEvent.Shutdown) {
             dataflowTaskExecutorService.shutdown();
           } else if(terminateEvent == TerminateEvent.SimulateKill) {
+            logger.info("Execute the simulate kill event");
             dataflowTaskExecutorService.simulateKill();
           } else if(terminateEvent == TerminateEvent.Kill) {
             logger.info("Execute the kill event with Runtime.getRuntime().halt(0)");
@@ -77,12 +78,6 @@ public class VMWorkerApp extends VMApp {
         getWorkerRegistry().
         setWorkerStatus(getVM().getDescriptor().getId(), DataflowWorkerStatus.TERMINATED_WITH_ERROR);
       throw ex;
-    } finally {
-      StringBuilder out = new StringBuilder() ;
-      MetricPrinter metricPrinter = new MetricPrinter(out) ;
-      dflRegistry.getWorkerRegistry().saveMetric(getVM().getDescriptor().getVmConfig().getName(), mRegistry);
-      metricPrinter.print(mRegistry);
-      System.out.println("Dataflow Worker Terminate");
     }
   }
 }

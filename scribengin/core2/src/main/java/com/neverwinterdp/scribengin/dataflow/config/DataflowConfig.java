@@ -3,19 +3,17 @@ package com.neverwinterdp.scribengin.dataflow.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.neverwinterdp.scribengin.storage.StorageConfig;
-
 public class DataflowConfig {
   private String  id;
   private String  name;
   private String  dataflowAppHome;
-  private int     parallelism ;
+  private long    maxRunTime  = 90000;
   private String  log4jConfigUrl = "classpath:scribengin/log4j/vm-log4j.properties";
  
   private MasterConfig master;
   private WorkerConfig worker;
   
-  private Map<String, StorageConfig> streams;
+  private StreamConfig streamConfig;
   private Map<String, OperatorConfig> operators = new HashMap<>();
   
   public String getId() { return id; }
@@ -29,8 +27,8 @@ public class DataflowConfig {
     this.dataflowAppHome = dataflowAppHome;
   }
 
-  public int getParallelism() { return parallelism; }
-  public void setParallelism(int parallelism) { this.parallelism = parallelism; }
+  public long getMaxRunTime() { return maxRunTime; }
+  public void setMaxRunTime(long maxRunTime) { this.maxRunTime = maxRunTime; }
   
   public String getLog4jConfigUrl() { return log4jConfigUrl; }
   public void setLog4jConfigUrl(String log4jConfigUrl) {
@@ -43,8 +41,8 @@ public class DataflowConfig {
   public WorkerConfig getWorker() { return worker; }
   public void setWorker(WorkerConfig worker) { this.worker = worker; }
 
-  public Map<String, StorageConfig> getStreams() { return streams;}
-  public void setStreams(Map<String, StorageConfig> streams) { this.streams = streams;}
+  public StreamConfig getStreamConfig() { return streamConfig;}
+  public void setStreamConfig(StreamConfig streams) { this.streamConfig = streams;}
  
   public Map<String, OperatorConfig> getOperators() { return operators; }
   public void setOperators(Map<String, OperatorConfig> operators) { this.operators = operators; }

@@ -3,6 +3,7 @@ package com.neverwinterdp.scribengin.shell;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
@@ -21,10 +22,11 @@ import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 
 public class DataflowCommand extends Command {
   public DataflowCommand() {
-    add("list",    ListDataflow.class) ;
-    add("submit",  Submit.class) ;
-    add("info",    Info.class) ;
-    add("monitor", Monitor.class) ;
+    add("list",               ListDataflow.class) ;
+    add("submit",             Submit.class) ;
+    add("info",               Info.class) ;
+    add("monitor",            Monitor.class) ;
+    add("kill-worker-random", KillWorkerRandom.class) ;
   }
   
   @Override
@@ -80,7 +82,7 @@ public class DataflowCommand extends Command {
       DataflowConfig dflConfig = 
         JSONSerializer.INSTANCE.fromString(dataflowJson, DataflowConfig.class);
       if(dataflowId != null) dflConfig.setId(dataflowId);
-      if(maxRunTime > 0) dflConfig.getWorker().setMaxRunTime(maxRunTime);
+      if(maxRunTime > 0) dflConfig.setMaxRunTime(maxRunTime);
       if(dataflowTaskSwitchingPeriod > 0) {
         dflConfig.getWorker().setTaskSwitchingPeriod(dataflowTaskSwitchingPeriod);
       }
@@ -192,5 +194,19 @@ public class DataflowCommand extends Command {
     public String getDescription() {
       return "monitor and display more info about dataflows";
     }
+  }
+  
+  static public class KillWorkerRandom extends SubCommand {
+    @ParametersDelegate
+    RandomKillDataflowWorkerExecutor executor = new RandomKillDataflowWorkerExecutor();
+    
+    @Override
+    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
+      executor.init((ScribenginShell) shell);
+      executor.run();
+    }
+    
+    @Override
+    public String getDescription() { return "Kill Worker"; }
   }
 }

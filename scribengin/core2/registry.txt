@@ -100,7 +100,29 @@ registry
           all-output-kafka-queue-stream
 
 
+Task Registry
 
+  tasks
+    available
+      task-1
+      task-2
+      task-3
+      task-4
+      task-5
+      ......
+    executions
+      executor-1
+        heartbeat
+        task-1-ref
+        task-2-ref
+      executor-2
+        heartbeat
+        task-3-ref
+        task-4-ref
+      executor-3
+        heartbeat
+        task-5-ref
+        ..........
 
 QueueDataStream
   path: 

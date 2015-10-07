@@ -9,6 +9,7 @@ import com.neverwinterdp.registry.RefNode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
+import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.scribengin.dataflow.worker.TaskExecutorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
@@ -41,7 +42,6 @@ public class WorkerRegistry {
     historyWorkers = registry.get(dataflowPath + "/" + HISTORY_WORKERS_PATH);
     workerEventBroadcaster = 
         new TXEventBroadcaster(registry, dataflowPath + "/" + WORKER_EVENT_PATH, false);
-      
   }
   
   void create(Transaction transaction) throws RegistryException {

@@ -17,6 +17,7 @@ import com.neverwinterdp.registry.activity.ActivityStepBuilder;
 import com.neverwinterdp.registry.activity.ActivityStepExecutor;
 import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
 import com.neverwinterdp.scribengin.dataflow.config.OperatorConfig;
+import com.neverwinterdp.scribengin.dataflow.config.StreamConfig;
 import com.neverwinterdp.scribengin.dataflow.master.MasterService;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
@@ -57,20 +58,21 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
     
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
-      System.out.println("Init Stream Executor....");
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
       StreamRegistry streamRegistry = dflRegistry.getStreamRegistry();
       StorageService storageService = service.getStorageService();
       DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
-      Map<String, StorageConfig> storageDescriptors = dflConfig.getStreams();
-      for(Map.Entry<String, StorageConfig> entry : storageDescriptors.entrySet()) {
+      StreamConfig streamConfig  = dflConfig.getStreamConfig();
+      Map<String, StorageConfig> storageConfigs = streamConfig.getStreams();
+      for(Map.Entry<String, StorageConfig> entry : storageConfigs.entrySet()) {
         String name = entry.getKey();
         StorageConfig storageConfig = entry.getValue();
         Storage storage = storageService.getStorage(storageConfig);
         storage.refresh();
         if(!storage.exists()) {
           storage.drop();
-          storageConfig.setPartition(dflConfig.getParallelism());
+          storageConfig.setPartition(streamConfig.getParallelism());
+          storageConfig.setReplication(streamConfig.getReplication());
           storage.create(storageConfig.getPartition(), storageConfig.getReplication());
         }
         storage.refresh();
@@ -87,7 +89,6 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
     
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
-      System.out.println("Init Operator Executor....");
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
       OperatorRegistry operatorRegistry = dflRegistry.getOperatorRegistry();
       DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
@@ -107,7 +108,6 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
     
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
-      System.out.println("Init Dataflow Task Executor....");
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
       DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
       Map<String, OperatorConfig> operators = dflConfig.getOperators();

@@ -17,7 +17,7 @@ public class TaskExecutorThread extends Thread {
   private long         taskStartTime;
   private long         taskSwitchPeriod = 5000;
   
-  private boolean      kill = false;
+  private boolean      simulateKill = false;
   private boolean      interrupt = false;
   private OperatorTask operatorTask;
 
@@ -85,6 +85,7 @@ public class TaskExecutorThread extends Thread {
       }
       doExit(TaskExecutorDescriptor.Status.TERMINATED_WITH_INTERRUPT);
     } catch (Throwable e) {
+      if(simulateKill) return;
       e.printStackTrace();
       workerService.getLogger().error("DataflowTaskExecutor Error", e);
       doExit(TaskExecutorDescriptor.Status.TERMINATED_WITH_ERROR);
@@ -93,7 +94,7 @@ public class TaskExecutorThread extends Thread {
   }
   
   void doExit(TaskExecutorDescriptor.Status status) {
-    if(kill) return ;
+    if(simulateKill) return ;
     try {
       DataflowRegistry dflRegistry  = workerService.getDataflowRegistry();
       taskExecutorDescriptor.setStatus(status);
@@ -103,5 +104,10 @@ public class TaskExecutorThread extends Thread {
     } catch(Exception ex) {
       workerService.getLogger().error("DataflowTaskExecutor Fail To Updat Status", ex);
     }
+  }
+  
+  public void simulateKill() {
+    simulateKill = true;
+    interrupt();
   }
 }

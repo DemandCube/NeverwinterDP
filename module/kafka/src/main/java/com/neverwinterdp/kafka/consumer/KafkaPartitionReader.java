@@ -176,7 +176,8 @@ public class KafkaPartitionReader {
     
     FetchResponse fetchResponse = consumer.fetch(req);
     if(fetchResponse.hasError()) {
-      throw new Exception("TODO: handle the error, reset the consumer....");
+      int errorCode = fetchResponse.errorCode(topic, partitionMetadata.partitionId());
+      throw new Exception("TODO: handle the error, reset the consumer, error code = " + errorCode);
     }
     
     currentMessageSet = fetchResponse.messageSet(topic, partitionMetadata.partitionId());

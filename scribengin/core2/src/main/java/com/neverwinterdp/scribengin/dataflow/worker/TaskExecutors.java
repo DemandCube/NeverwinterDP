@@ -11,11 +11,14 @@ public class TaskExecutors {
   private DataflowRegistry dflRegistry ;
   private List<TaskExecutorThread> taskExecutorThreads;
   private TaskExecutorMonitorThread monitorThread;
+  private boolean simulateKill = false;
   
   public TaskExecutors(WorkerService workerService) {
     this.workerService = workerService;
     this.dflRegistry = workerService.getDataflowRegistry();
   }
+  
+  public boolean getSimulateKill() { return simulateKill; }
   
   synchronized public void start() throws Exception {
     DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
@@ -61,6 +64,18 @@ public class TaskExecutors {
         }
       }
     } catch (InterruptedException e) {
+      if(simulateKill) return;
+    }
+  }
+  
+  public void simulateKill() throws Exception {
+    simulateKill = true;
+    for(int i = 0; i < taskExecutorThreads.size(); i++) {
+      TaskExecutorThread thread = taskExecutorThreads.get(i);
+      if(thread.isAlive())thread.simulateKill();
+    }
+    if(monitorThread.isAlive()) {
+      monitorThread.interrupt();
     }
   }
   
