@@ -133,10 +133,12 @@ public class ActivityServiceUnitTest {
     Thread.sleep(3000);
     registry.connect();
     service1.onDestroy();
+    
     registry.get("/").dump(System.out);
     ActivityService service2 = new ActivityService(container, ACTIVITIES_PATH) ;
     Thread.sleep(5000);
     registry.get("/").dump(System.out);
+    service2.onDestroy();
   }
   
   static public class HelloActivityStepWorkerDescriptor {

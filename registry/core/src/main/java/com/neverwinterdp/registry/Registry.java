@@ -8,7 +8,7 @@ public interface Registry {
   public RegistryConfig getRegistryConfig() ;
   
   public Registry connect() throws RegistryException ;
-  public Registry connect(long timeout) throws RegistryException;
+  public Registry reconnect(long timeout) throws RegistryException;
   
   public void disconnect() throws RegistryException ;
   public boolean isConnect();

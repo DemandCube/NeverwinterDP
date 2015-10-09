@@ -54,9 +54,14 @@ public class ActivityService extends ActivityRegistry {
   }
 
   @PreDestroy
-  public void onDestroy() {
+  public void onDestroy() throws InterruptedException {
     queue.shutdown();
     activityScheduler.interrupt();
+    int count = 0 ;
+    while(activityScheduler.isAlive() && count < 30) {
+      Thread.sleep(100);
+      count++;
+    }
   }
 
   public Lock getLock() { return this.lock; }
@@ -188,6 +193,9 @@ public class ActivityService extends ActivityRegistry {
         doRun();
       } catch (InterruptedException e) {
       } catch (DistributedQueue.ShutdownException e) {
+      } catch (RegistryException e) {
+        if(e.getCause() instanceof InterruptedException) return;
+        e.printStackTrace();
       } catch (Exception e) {
         e.printStackTrace();
       }
