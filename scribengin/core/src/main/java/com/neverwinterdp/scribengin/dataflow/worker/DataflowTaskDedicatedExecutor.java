@@ -78,23 +78,23 @@ public class DataflowTaskDedicatedExecutor extends DataflowTaskExecutor {
         }
       } catch (Throwable e) {
         executorService.getLogger().error("DataflowTaskExecutor Error", e);
-        doExit(DataflowTaskExecutorDescriptor.Status.TERMINATED_WITH_ERROR);
+        try {
+          doExit(DataflowTaskExecutorDescriptor.Status.TERMINATED_WITH_ERROR);
+        } catch (RegistryException e1) {
+          executorService.getLogger().error("Cannot save task context", e1);
+        }
       } finally {
         notifyExecutorTermination();
       }
     }
     
-    void doExit(DataflowTaskExecutorDescriptor.Status status) {
+    void doExit(DataflowTaskExecutorDescriptor.Status status) throws RegistryException {
       if(kill) return ;
-      try {
-        executorDescriptor.setStatus(status);
-        DataflowRegistry dataflowRegistry = executorService.getDataflowRegistry();
-        dataflowRegistry.
-          getWorkerRegistry().
-          updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
-      } catch(Exception ex) {
-        executorService.getLogger().error("DataflowTaskExecutor Fail To Updat Status", ex);
-      }
+      executorDescriptor.setStatus(status);
+      DataflowRegistry dataflowRegistry = executorService.getDataflowRegistry();
+      dataflowRegistry.
+        getWorkerRegistry().
+        updateWorkerTaskExecutor(executorService.getVMDescriptor(), executorDescriptor);
     }
   }
 }
