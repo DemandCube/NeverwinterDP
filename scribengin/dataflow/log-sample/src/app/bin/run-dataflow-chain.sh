@@ -58,6 +58,9 @@ JAVA_OPTS="-Xshare:auto -Xms128m -Xmx1024m -XX:-UseSplitVerifier"
 APP_OPT="-Dapp.dir=$APP_DIR -Duser.dir=$APP_DIR"
 APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
 
+GENERATOR_SEND_PERIOD=$(get_opt --generator-send-period '-1' $@)
+GENERATOR_MAX_WAIT_TIME=$(get_opt --generator-max-wait-time '180000' $@)
+
 STORAGE=$(get_opt --storage 'kafka' $@)
 
 NUM_OF_WORKER=$(get_opt --num-of-worker '2' $@)
@@ -65,7 +68,6 @@ NUM_OF_EXECUTOR_PER_WORKER=$(get_opt --num-of-executor-per-worker '2' $@)
 NUM_OF_STREAM=$(get_opt --num-of-stream '8' $@)
 MESSAGE_SIZE=$(get_opt  --message-size '128' $@)
 NUM_OF_MESSAGE=$(get_opt --num-of-message '100000' $@)
-GENERATOR_SEND_PERIOD=$(get_opt --generator-send-period '-1' $@)
 
 KILL_WORKER_RANDOM=$(get_opt --kill-worker-random 'false' $@)
 KILL_WORKER_MAX=$(get_opt --kill-worker-max '5' $@)
@@ -73,7 +75,7 @@ KILL_WORKER_PERIOD=$(get_opt --kill-worker-period '60000' $@)
 
 DUMP_PERIOD=$(get_opt --dump-period '15000' $@)
 VALIDATOR_DISABLE=$(has_opt "--validator-disable" $@ )
-GENERATOR_MAX_WAIT_TIME=$(get_opt --generator-max-wait-time '180000' $@)
+
 
 DATAFLOW_DESCRIPTOR_FILE=""
 LOG_VALIDATOR_VALIDATE=""
