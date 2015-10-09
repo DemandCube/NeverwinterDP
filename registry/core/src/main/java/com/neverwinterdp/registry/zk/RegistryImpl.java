@@ -13,6 +13,7 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs.Perms;
 import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.ZooKeeper.States;
 import org.apache.zookeeper.common.PathUtils;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
@@ -114,7 +115,9 @@ public class RegistryImpl implements Registry {
   }
 
   @Override
-  public boolean isConnect() { return zkClient != null;}
+  public boolean isConnect() { 
+    return zkClient != null  && zkClient.getState() == States.CONNECTED ;
+  }
   
   
   @Override
@@ -517,8 +520,11 @@ public class RegistryImpl implements Registry {
   }
   
   @Override
-  public Transaction getTransaction() {
+  public Transaction getTransaction() throws RegistryException {
     if(zkClient == null) return null;
+    if(!isConnect()) {
+      reconnect(10000);
+    }
     return new TransactionImpl(this, zkClient.transaction());
   }
   
@@ -600,7 +606,7 @@ public class RegistryImpl implements Registry {
           String message = kEx.getMessage() + "\n" + "  path = " + nodeExistsEx.getPath();
           throw new RegistryException(ErrorCode.NodeExists, message, kEx) ;
         } else if(kEx.code() ==  KeeperException.Code.CONNECTIONLOSS) {
-          reconnect(5000);
+          reconnect(10000);
           error = new RegistryException(ErrorCode.ConnectionLoss, kEx.getMessage(), kEx) ;
         }
       } catch(RegistryException ex) {

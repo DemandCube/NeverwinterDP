@@ -72,7 +72,7 @@ public interface Registry {
   
   public void rcopy(String path, String toPath, PathFilter filter) throws RegistryException ;
   
-  public Transaction getTransaction() ;
+  public Transaction getTransaction() throws RegistryException ;
   
   public <T> T executeBatch(BatchOperations<T> ops, int retry, long timeoutThreshold) throws RegistryException ;
   
