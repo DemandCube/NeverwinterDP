@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,9 +11,9 @@ import javax.annotation.PreDestroy;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZKUtil;
 import org.apache.zookeeper.ZooDefs.Perms;
 import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.ZooKeeper.States;
 import org.apache.zookeeper.common.PathUtils;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
@@ -116,7 +115,9 @@ public class RegistryImpl implements Registry {
   }
 
   @Override
-  public boolean isConnect() { return zkClient != null;}
+  public boolean isConnect() { 
+    return zkClient != null  && zkClient.getState() == States.CONNECTED ;
+  }
   
   
   @Override
@@ -519,9 +520,10 @@ public class RegistryImpl implements Registry {
   }
   
   @Override
-  public Transaction getTransaction() {
-    if(zkClient == null) {
-      return null;
+  public Transaction getTransaction() throws RegistryException {
+    if(zkClient == null) return null;
+    if(!isConnect()) {
+      reconnect(10000);
     }
     return new TransactionImpl(this, zkClient.transaction());
   }
@@ -604,7 +606,7 @@ public class RegistryImpl implements Registry {
           String message = kEx.getMessage() + "\n" + "  path = " + nodeExistsEx.getPath();
           throw new RegistryException(ErrorCode.NodeExists, message, kEx) ;
         } else if(kEx.code() ==  KeeperException.Code.CONNECTIONLOSS) {
-          reconnect(5000);
+          reconnect(10000);
           error = new RegistryException(ErrorCode.ConnectionLoss, kEx.getMessage(), kEx) ;
         }
       } catch(RegistryException ex) {
