@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,7 +11,6 @@ import javax.annotation.PreDestroy;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZKUtil;
 import org.apache.zookeeper.ZooDefs.Perms;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.common.PathUtils;
@@ -520,9 +518,7 @@ public class RegistryImpl implements Registry {
   
   @Override
   public Transaction getTransaction() {
-    if(zkClient == null) {
-      return null;
-    }
+    if(zkClient == null) return null;
     return new TransactionImpl(this, zkClient.transaction());
   }
   
