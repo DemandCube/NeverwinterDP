@@ -90,7 +90,7 @@ public class KafkaPartitionReader {
   
   public void commit() throws Exception {
     CommitOperation commitOp = new CommitOperation(currentOffset, (short) 0) ;
-    execute(commitOp, 3, 500);
+    execute(commitOp, 3, 3000);
   }
   
   public void rollback() throws Exception  {
@@ -134,7 +134,7 @@ public class KafkaPartitionReader {
   
   public List<Message> fetch(int fetchSize, int maxRead, long maxWait, int numRetries) throws Exception {
     FetchMessageOperation fetchOperation = new FetchMessageOperation(fetchSize, maxRead, (int)maxWait);
-    return execute(fetchOperation, numRetries, 500);
+    return execute(fetchOperation, numRetries, 3000);
   }
   
  
@@ -160,9 +160,7 @@ public class KafkaPartitionReader {
     Exception error = null;
     for(int i = 0; i < retry; i++) {
       try {
-        if(error != null) {
-          reconnect(1, retryDelay);
-        }
+        if(error != null) reconnect(1, retryDelay);
         return op.execute();
       } catch(Exception ex) {
         error = ex;
