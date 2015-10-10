@@ -14,9 +14,8 @@ public class KafkaSinkStreamWriter implements SinkStreamWriter {
   
   public KafkaSinkStreamWriter(StreamDescriptor descriptor) {
     this.descriptor = descriptor;
-    this.writer = 
-      new DefaultKafkaWriter(descriptor.attribute("name"), descriptor.attribute("broker.list")) ;
     this.topic = descriptor.attribute("topic");
+    this.writer = new DefaultKafkaWriter("topic." + writer, descriptor.attribute("broker.list")) ;
   }
   
   @Override
@@ -37,16 +36,13 @@ public class KafkaSinkStreamWriter implements SinkStreamWriter {
 
   @Override
   public void commit() throws Exception {
-
   }
 
   @Override
   public void prepareCommit() {
-
   }
 
   @Override
   public void completeCommit() {
-
   }
 }

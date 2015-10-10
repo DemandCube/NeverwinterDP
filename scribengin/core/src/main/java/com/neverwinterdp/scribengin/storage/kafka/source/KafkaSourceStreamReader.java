@@ -13,8 +13,7 @@ public class KafkaSourceStreamReader implements SourceStreamReader {
   private KafkaPartitionReader partitionReader ;
   private CommitPoint lastCommitInfo ;
   
-  public KafkaSourceStreamReader(StreamDescriptor descriptor, 
-      PartitionMetadata partitionMetadata) throws Exception {
+  public KafkaSourceStreamReader(StreamDescriptor descriptor, PartitionMetadata partitionMetadata) throws Exception {
     this.descriptor = descriptor;
     this.partitionReader = 
         new KafkaPartitionReader(descriptor.attribute("name"), descriptor.attribute("zk.connect"), descriptor.attribute("topic"), partitionMetadata);
