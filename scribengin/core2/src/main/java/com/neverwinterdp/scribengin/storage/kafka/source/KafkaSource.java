@@ -47,11 +47,17 @@ public class KafkaSource implements Source {
    * The stream id is equivalent to the partition id of the kafka
    */
   @Override
-  public SourcePartitionStream getStream(int id) {  return sourceStreams.get(id); }
+  public SourcePartitionStream getStream(int id) {  
+    SourcePartitionStream stream = sourceStreams.get(id); 
+    if(stream == null) {
+      throw new RuntimeException("Cannot find the partition " + id + ", available streams = " + sourceStreams.size());
+    }
+    return stream;
+  }
 
   @Override
   public SourcePartitionStream getStream(PartitionConfig descriptor) {
-    return sourceStreams.get(descriptor.getPartitionId());
+    return getStream(descriptor.getPartitionId());
   }
 
   @Override
