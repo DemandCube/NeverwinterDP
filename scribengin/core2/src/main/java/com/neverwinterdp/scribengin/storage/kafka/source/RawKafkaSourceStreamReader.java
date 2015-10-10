@@ -78,5 +78,8 @@ public class RawKafkaSourceStreamReader implements SourcePartitionStreamReader {
   
   @Override
   public void close() throws Exception {
+    if(partitionReader != null) {
+      partitionReader.close();
+    }
   }
 }
