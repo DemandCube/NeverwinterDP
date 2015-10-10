@@ -65,7 +65,7 @@ public class WaitingNodeEventListenerUnitTest {
   
   @After
   public void teardown() throws Exception {
-    registry.disconnect();
+    registry.shutdown();
     container.getInstance(CloseableInjector.class).close();
   }
 

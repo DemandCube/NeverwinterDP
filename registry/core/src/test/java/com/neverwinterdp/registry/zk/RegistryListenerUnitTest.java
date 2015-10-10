@@ -44,7 +44,7 @@ public class RegistryListenerUnitTest {
   @After
   public void teardown() throws Exception {
     registry.rdelete(TEST_PATH);
-    registry.disconnect();
+    registry.shutdown();
   }
 
   @Test

@@ -49,7 +49,7 @@ public class RegistryTransactionUnitTest {
     Assert.assertTrue(registry.exists("/transaction/test"));
     Assert.assertTrue(registry.exists("/transaction/test/nested"));
     Assert.assertFalse(registry.exists("/transaction/test/delete"));
-    registry.disconnect();
+    registry.shutdown();
   }
   
   @Test
@@ -68,7 +68,7 @@ public class RegistryTransactionUnitTest {
     Assert.assertNotNull(expectError);
     Assert.assertTrue(expectError.getCause() instanceof KeeperException.NoNodeException);
     Assert.assertFalse(registry.exists("/transaction/good"));
-    registry.disconnect();
+    registry.shutdown();
   }
   
   private Registry newRegistry() {

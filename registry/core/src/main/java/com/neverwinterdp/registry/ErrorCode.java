@@ -10,6 +10,8 @@ public enum ErrorCode {
   NoNode(12, "No such node exists"),
   NodeExists(13, "A node is already existed"),
   
+  Closed(20, "The Registry object has been closed and no longer usable"),
+  
   Unknown(1000,  "Unclassified error");
   
   private int code;

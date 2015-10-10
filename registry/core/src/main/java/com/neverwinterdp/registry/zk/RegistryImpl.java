@@ -13,8 +13,6 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs.Perms;
 import org.apache.zookeeper.ZooKeeper;
-import org.apache.zookeeper.ZooKeeper.States;
-import org.apache.zookeeper.common.PathUtils;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.data.Stat;
@@ -44,7 +42,10 @@ public class RegistryImpl implements Registry {
   
   @Inject
   private RegistryConfig config;
+  
   private ZooKeeper zkClient ;
+  
+  private boolean closed = false;
   
   public RegistryImpl() {
   }
@@ -54,8 +55,6 @@ public class RegistryImpl implements Registry {
   }
   
   public RegistryConfig getRegistryConfig() { return config; }
-  
-  public ZooKeeper getZkClient() { return zkClient; }
   
   public String getSessionId() {
     if(zkClient == null) return null ;
@@ -69,15 +68,19 @@ public class RegistryImpl implements Registry {
   
   @Override
   public Registry connect() throws RegistryException {
+    closed = false;
     return reconnect(15000) ;
   }
   
   @Override
-  public Registry reconnect(long timeout) throws RegistryException {
+  synchronized public Registry reconnect(long timeout) throws RegistryException {
+    if(closed) {
+      throw new RegistryException(ErrorCode.Closed, "Registry has been closed");
+    }
     try {
       if(zkClient != null) zkClient.close();
       zkClient = new ZooKeeper(config.getConnect(), 15000, new RegistryWatcher());
-    } catch (IOException | InterruptedException ex) {
+    } catch(IOException | InterruptedException ex) {
       throw new RegistryException(ErrorCode.Connection, ex) ;
     }
     long waitTime = 0 ;
@@ -103,7 +106,9 @@ public class RegistryImpl implements Registry {
   }
 
   @Override
-  public void disconnect() throws RegistryException {
+  synchronized public void shutdown() throws RegistryException {
+    if(closed) return;
+    closed = true;
     if(zkClient != null) {
       try {
         zkClient.close();;
@@ -114,9 +119,16 @@ public class RegistryImpl implements Registry {
     }
   }
 
+  synchronized ZooKeeper getZKClient() throws RegistryException {
+    if(closed) {
+      throw new RegistryException(ErrorCode.Closed, "Registry has been closed");
+    }
+    return zkClient;
+  }
+  
   @Override
   public boolean isConnect() { 
-    return zkClient != null  && zkClient.getState() == States.CONNECTED ;
+    return zkClient != null  && zkClient.getState().isConnected() ;
   }
   
   
@@ -136,7 +148,7 @@ public class RegistryImpl implements Registry {
   public  Node create(final String path, final byte[] data, final NodeCreateMode mode) throws RegistryException {
     Operation<Node> create = new Operation<Node>() {
       @Override
-      public Node execute() throws InterruptedException, KeeperException {
+      public Node execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         String creationPath = path;
         String retPath = zkClient.create(realPath(path), data, DEFAULT_ACL, toCreateMode(mode)) ;
         if(mode == NodeCreateMode.PERSISTENT_SEQUENTIAL || mode == NodeCreateMode.EPHEMERAL_SEQUENTIAL) {
@@ -166,7 +178,7 @@ public class RegistryImpl implements Registry {
   public NodeInfo getInfo(final String path) throws RegistryException {
     Operation<NodeInfo> getInfo = new Operation<NodeInfo>() {
       @Override
-      public NodeInfo execute() throws InterruptedException, KeeperException {
+      public NodeInfo execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         Stat stat = zkClient.exists(realPath(path), false);
         return new ZKNodeInfo(stat);
       }
@@ -200,7 +212,7 @@ public class RegistryImpl implements Registry {
   public byte[] getData(final String path) throws RegistryException {
     Operation<byte[]> getData = new Operation<byte[]>() {
       @Override
-      public byte[] execute() throws InterruptedException, KeeperException {
+      public byte[] execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         return zkClient.getData(realPath(path), null, new Stat()) ;
       }
     };
@@ -215,7 +227,7 @@ public class RegistryImpl implements Registry {
   <T> T retrieveDataAs(final String path, final Class<T> type) throws RegistryException {
     Operation<T> retrieveDataAs = new Operation<T>() {
       @Override
-      public T execute() throws InterruptedException, KeeperException {
+      public T execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         byte[] bytes =  zkClient.getData(realPath(path), null, new Stat()) ;
         if(bytes == null || bytes.length == 0) return null;
         return JSONSerializer.INSTANCE.fromBytes(bytes, type);
@@ -227,7 +239,7 @@ public class RegistryImpl implements Registry {
   public <T> T getDataAs(final String path, final Class<T> type, final DataMapperCallback<T> mapper) throws RegistryException {
     Operation<T> getDataAs = new Operation<T>() {
       @Override
-      public T execute() throws InterruptedException, KeeperException {
+      public T execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         byte[] bytes =  zkClient.getData(realPath(path), null, new Stat()) ;
         if(bytes == null || bytes.length == 0) return null;
         return mapper.map(path, bytes, type);
@@ -245,7 +257,7 @@ public class RegistryImpl implements Registry {
   public <T> List<T> getDataAs(final List<String> paths, final Class<T> type, final boolean ignoreNoNodeError) throws RegistryException {
     Operation<List<T>> getDataAs = new Operation<List<T>>() {
       @Override
-      public List<T> execute() throws InterruptedException, KeeperException, RegistryException {
+      public List<T> execute(ZooKeeper zkClient) throws InterruptedException, KeeperException, RegistryException {
         List<T> holder = new ArrayList<T>();
         for(String path : paths) {
           T obj = retrieveDataAs(path, type);
@@ -274,7 +286,7 @@ public class RegistryImpl implements Registry {
   public NodeInfo setData(final String path, final byte[] data) throws RegistryException {
     Operation<NodeInfo> setData = new Operation<NodeInfo>() {
       @Override
-      public NodeInfo execute() throws InterruptedException, KeeperException {
+      public NodeInfo execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         Stat stat = zkClient.setData(realPath(path), data, -1) ;
         return new ZKNodeInfo(stat);
       }
@@ -290,7 +302,7 @@ public class RegistryImpl implements Registry {
   public List<String> getChildren(final String path) throws RegistryException {
     Operation<List<String>> getChildren = new Operation<List<String>>() {
       @Override
-      public List<String> execute() throws InterruptedException, KeeperException {
+      public List<String> execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         List<String> names = zkClient.getChildren(realPath(path), false);
         return names ;
       }
@@ -301,7 +313,7 @@ public class RegistryImpl implements Registry {
   public List<String> getChildrenPath(final String path) throws RegistryException {
     Operation<List<String>> getChildrenPath = new Operation<List<String>>() {
       @Override
-      public List<String> execute() throws InterruptedException, KeeperException {
+      public List<String> execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         List<String> names = zkClient.getChildren(realPath(path), false);
         List<String> paths = new ArrayList<String>() ;
         for(String name : names) {
@@ -316,7 +328,7 @@ public class RegistryImpl implements Registry {
   public List<String> getChildren(final String path, final boolean watch) throws RegistryException {
     Operation<List<String>> getChildren = new Operation<List<String>>() {
       @Override
-      public List<String> execute() throws InterruptedException, KeeperException, RegistryException {
+      public List<String> execute(ZooKeeper zkClient) throws InterruptedException, KeeperException, RegistryException {
         List<String> names = zkClient.getChildren(realPath(path), watch);
         return names ;
       }
@@ -331,7 +343,7 @@ public class RegistryImpl implements Registry {
   public <T> List<T> getChildrenAs(final String path, final Class<T> type, final boolean ignoreNoNodeError) throws RegistryException {
     Operation<List<T>> getChildrenAs = new Operation<List<T>>() {
       @Override
-      public List<T> execute() throws InterruptedException, KeeperException, RegistryException {
+      public List<T> execute(ZooKeeper zkClient) throws InterruptedException, KeeperException, RegistryException {
         List<T> holder = new ArrayList<T>();
         List<String> nodes = zkClient.getChildren(realPath(path), false);
         Collections.sort(nodes);
@@ -359,7 +371,7 @@ public class RegistryImpl implements Registry {
   public <T> List<T> getChildrenAs(final String path, final Class<T> type, final DataMapperCallback<T> callback, final boolean ignoreNoNodeError) throws RegistryException {
     Operation<List<T>> getChildrenAs = new Operation<List<T>>() {
       @Override
-      public List<T> execute() throws InterruptedException, KeeperException, RegistryException {
+      public List<T> execute(ZooKeeper zkClient) throws InterruptedException, KeeperException, RegistryException {
         List<T> holder = new ArrayList<T>();
         List<String> nodes = getChildren(path);
         Collections.sort(nodes);
@@ -404,7 +416,7 @@ public class RegistryImpl implements Registry {
   public boolean exists(final String path) throws RegistryException {
     Operation<Boolean> exists = new Operation<Boolean>() {
       @Override
-      public Boolean execute() throws InterruptedException, KeeperException {
+      public Boolean execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         Stat stat = zkClient.exists(realPath(path), false) ;
         if(stat != null) return true ;
         return false ;
@@ -417,7 +429,7 @@ public class RegistryImpl implements Registry {
   public void watchModify(final String path, final NodeWatcher watcher) throws RegistryException {
     Operation<Boolean> watchModify = new Operation<Boolean>() {
       @Override
-      public Boolean execute() throws InterruptedException, KeeperException {
+      public Boolean execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         zkClient.getData(realPath(path), new ZKNodeWatcher(config.getDbDomain(), watcher), new Stat()) ;
         return true;
       }
@@ -429,7 +441,7 @@ public class RegistryImpl implements Registry {
   public void watchExists(final String path, final NodeWatcher watcher) throws RegistryException {
     Operation<Boolean> watchExists = new Operation<Boolean>() {
       @Override
-      public Boolean execute() throws InterruptedException, KeeperException {
+      public Boolean execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         zkClient.exists(realPath(path), new ZKNodeWatcher(config.getDbDomain(), watcher)) ;
         return true;
       }
@@ -441,7 +453,7 @@ public class RegistryImpl implements Registry {
   public void watchChildren(final String path, final NodeWatcher watcher) throws RegistryException {
     Operation<Boolean> watchChildren = new Operation<Boolean>() {
       @Override
-      public Boolean execute() throws InterruptedException, KeeperException {
+      public Boolean execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         zkClient.getChildren(realPath(path), new ZKNodeWatcher(config.getDbDomain(), watcher)) ;
         return true;
       }
@@ -453,7 +465,7 @@ public class RegistryImpl implements Registry {
   public void delete(final String path) throws RegistryException {
     Operation<Boolean> delete = new Operation<Boolean>() {
       @Override
-      public Boolean execute() throws InterruptedException, KeeperException {
+      public Boolean execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         zkClient.delete(realPath(path), -1);
         return true;
       }
@@ -465,7 +477,7 @@ public class RegistryImpl implements Registry {
   public void rdelete(final String path) throws RegistryException {
     Operation<Boolean> rdelete = new Operation<Boolean>() {
       @Override
-      public Boolean execute() throws InterruptedException, KeeperException, RegistryException {
+      public Boolean execute(ZooKeeper zkClient) throws InterruptedException, KeeperException, RegistryException {
         Transaction transaction = getTransaction();
         transaction.rdelete(path);
         transaction.commit();
@@ -490,13 +502,52 @@ public class RegistryImpl implements Registry {
     return holder ;
   }
   
+  /**
+   * BFS Traversal of the system under pathRoot, with the entries in the list, in the 
+   * same order as that of the traversal.
+   * <p>
+   * <b>Important:</b> This is <i>not an atomic snapshot</i> of the tree ever, but the
+   *  state as it exists across multiple RPCs from zkClient to the ensemble.
+   * For practical purposes, it is suggested to bring the clients to the ensemble 
+   * down (i.e. prevent writes to pathRoot) to 'simulate' a snapshot behavior.   
+   * 
+   * @param zk the zookeeper handle
+   * @param pathRoot The znode path, for which the entire subtree needs to be listed.
+   * @throws InterruptedException 
+   * @throws KeeperException 
+   */
   List<String> findDencendantRealPaths(final String path, final PathFilter filter) throws RegistryException {
     Operation<List<String>> find = new Operation<List<String>>() {
       @Override
-      public List<String> execute() throws InterruptedException, KeeperException {
-        String realPath =  realPath(path);
-        PathUtils.validatePath(realPath);
-        return listSubTreeBFS(zkClient, realPath, filter);
+      public List<String> execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
+        String pathRoot =  realPath(path);
+        Deque<String> queue = new LinkedList<String>();
+        List<String> tree = new ArrayList<String>();
+        queue.add(pathRoot);
+        boolean accept = true;
+        if(filter != null) {
+          accept = filter.accept(pathRoot);
+        }
+        if(accept) tree.add(pathRoot);
+        while (true) {
+          String node = queue.pollFirst();
+          if (node == null) {
+            break;
+          }
+          List<String> children = zkClient.getChildren(node, false);
+          for (final String child : children) {
+            final String childPath = node + "/" + child;
+            accept = true;
+            if(filter != null) {
+              accept = filter.accept(childPath);
+            }
+            if(accept) {
+              queue.add(childPath);
+              tree.add(childPath);
+            }
+          }
+        }
+        return tree;
       }
     };
     return execute(find, 3);
@@ -509,7 +560,7 @@ public class RegistryImpl implements Registry {
   public void rcopy(final String path, final String toPath, final PathFilter filter) throws RegistryException {
     Operation<Boolean> rcopy = new Operation<Boolean>() {
       @Override
-      public Boolean execute() throws InterruptedException, KeeperException, RegistryException {
+      public Boolean execute(ZooKeeper zkClient) throws InterruptedException, KeeperException, RegistryException {
         Transaction transaction = getTransaction();
         transaction.rcopy(path, toPath, filter);
         transaction.commit();
@@ -521,25 +572,26 @@ public class RegistryImpl implements Registry {
   
   @Override
   public Transaction getTransaction() throws RegistryException {
-    if(zkClient == null) return null;
-    if(!isConnect()) {
-      reconnect(10000);
-    }
+    ZooKeeper zkClient = getZKClient();
     return new TransactionImpl(this, zkClient.transaction());
   }
   
   public <T> T executeBatch(BatchOperations<T> ops, int retry, long timeoutThreshold) throws RegistryException {
+    RegistryException error = null;
     for(int i = 0;i < retry; i++) {
       try {
         T result = ops.execute(this);
         return result;
       } catch (RegistryException e) {
-        if(e.getErrorCode() != ErrorCode.Timeout) throw e;
-      } catch (Exception e) {
-        throw toRegistryException("Cannot execute the batch operations", e);
+        if(e.getErrorCode().isConnectionProblem()) {
+          reconnect(10000);
+          error = e;
+        } else {
+          throw e;
+        }
       }
     }
-    throw new RegistryException(ErrorCode.Unknown, "Fail after " + retry + "tries");
+    throw error;
   }
   
   @Override
@@ -547,10 +599,10 @@ public class RegistryImpl implements Registry {
     return new RegistryImpl(config);
   }
   
-  private void zkCreateIfNotExist(final String path) throws RegistryException {
+  void zkCreateIfNotExist(final String path) throws RegistryException {
     Operation<Boolean> createIfNotExists = new Operation<Boolean>() {
       @Override
-      public Boolean execute() throws InterruptedException, KeeperException {
+      public Boolean execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
         if (zkClient.exists(path, false) != null) return true;
         StringBuilder pathB = new StringBuilder();
         String[] pathParts = path.split("/");
@@ -585,14 +637,15 @@ public class RegistryImpl implements Registry {
   
   @PreDestroy
   public void onDestroy() throws RegistryException {
-    disconnect();
+    shutdown();
   }
   
   <T> T execute(Operation<T> op, int retry) throws RegistryException {
     RegistryException error = null ;
     for(int i = 0; i < retry; i++) {
       try {
-        T result = op.execute();
+        ZooKeeper zkClient = getZKClient();
+        T result = op.execute(zkClient);
         return result;
       } catch(InterruptedException ex) {
         throw new RegistryException(ErrorCode.Timeout, "Interrupt Exception", ex) ;
@@ -617,7 +670,7 @@ public class RegistryImpl implements Registry {
   }
   
   static public interface Operation<T> {
-    public T execute() throws InterruptedException, KeeperException, RegistryException ;
+    public T execute(ZooKeeper zkClient) throws InterruptedException, KeeperException, RegistryException ;
   }
 
   static CreateMode toCreateMode(NodeCreateMode mode) {
@@ -646,49 +699,5 @@ public class RegistryImpl implements Registry {
       }
     }
     return new RegistryException(ErrorCode.Unknown, message, t) ;
-  }
-  
-  /**
-   * BFS Traversal of the system under pathRoot, with the entries in the list, in the 
-   * same order as that of the traversal.
-   * <p>
-   * <b>Important:</b> This is <i>not an atomic snapshot</i> of the tree ever, but the
-   *  state as it exists across multiple RPCs from zkClient to the ensemble.
-   * For practical purposes, it is suggested to bring the clients to the ensemble 
-   * down (i.e. prevent writes to pathRoot) to 'simulate' a snapshot behavior.   
-   * 
-   * @param zk the zookeeper handle
-   * @param pathRoot The znode path, for which the entire subtree needs to be listed.
-   * @throws InterruptedException 
-   * @throws KeeperException 
-   */
-  static List<String> listSubTreeBFS(ZooKeeper zk, final String pathRoot, PathFilter filter) throws KeeperException, InterruptedException {
-    Deque<String> queue = new LinkedList<String>();
-    List<String> tree = new ArrayList<String>();
-    queue.add(pathRoot);
-    boolean accept = true;
-    if(filter != null) {
-      accept = filter.accept(pathRoot);
-    }
-    if(accept) tree.add(pathRoot);
-    while (true) {
-      String node = queue.pollFirst();
-      if (node == null) {
-        break;
-      }
-      List<String> children = zk.getChildren(node, false);
-      for (final String child : children) {
-        final String childPath = node + "/" + child;
-        accept = true;
-        if(filter != null) {
-          accept = filter.accept(childPath);
-        }
-        if(accept) {
-          queue.add(childPath);
-          tree.add(childPath);
-        }
-      }
-    }
-    return tree;
   }
 }

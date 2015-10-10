@@ -39,11 +39,11 @@ public class ZookeeperMultiDataGet<T> implements MultiDataGet<T>, AsyncCallback.
   }
 
   @Override
-  synchronized public void get(String path) {
+  synchronized public void get(String path) throws RegistryException {
     if(shutdown) {
       throw new RuntimeException("MultiDataGet is already shutdown!");
     }
-    ZooKeeper zk = registry.getZkClient();
+    ZooKeeper zk = registry.getZKClient();
     String realPath = registry.realPath(path);
     DataGet<T> dataGet = new DataGet<T>(path, null);
     results.put(path, dataGet);
@@ -51,14 +51,14 @@ public class ZookeeperMultiDataGet<T> implements MultiDataGet<T>, AsyncCallback.
   }
 
   @Override
-  public void get(String... paths) {
+  public void get(String... paths) throws RegistryException {
     for (String selPath : paths) {
       get(selPath);
     }
   }
 
   @Override
-  public void get(List<String> paths) {
+  public void get(List<String> paths) throws RegistryException {
     for (int i = 0; i < paths.size(); i++)
       get(paths.get(i));
   }

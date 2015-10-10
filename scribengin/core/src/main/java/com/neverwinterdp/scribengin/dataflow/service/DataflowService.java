@@ -116,7 +116,7 @@ public class DataflowService {
   
   public void simulateKill() throws Exception {
     Registry registry = dflRegistry.getRegistry();
-    registry.disconnect();
+    registry.shutdown();
     Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
     String vmTGName = "VM-" + vmConfig.getName();
     for(Thread selThread : threadSet) {

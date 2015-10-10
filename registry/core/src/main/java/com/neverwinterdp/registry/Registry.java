@@ -10,7 +10,7 @@ public interface Registry {
   public Registry connect() throws RegistryException ;
   public Registry reconnect(long timeout) throws RegistryException;
   
-  public void disconnect() throws RegistryException ;
+  public void shutdown() throws RegistryException ;
   public boolean isConnect();
   
   public String getSessionId()  ;

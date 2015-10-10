@@ -39,7 +39,7 @@ public class SequenceNumberTrackerServiceUnitTest {
     service.createIntTrackerIfNotExist("test");
     Assert.assertEquals(1, service.nextInt("test"));
     Assert.assertEquals(2, service.nextInt("test"));
-    registry.disconnect();
+    registry.shutdown();
   }
   
   private RegistryImpl newRegistry() {

@@ -42,7 +42,7 @@ public class TXEventManagerUnitTest {
   @After
   public void teardown() throws Exception {
     registry.rdelete(TX_EVENTS_PATH);
-    registry.disconnect();
+    registry.shutdown();
   }
 
   @Test

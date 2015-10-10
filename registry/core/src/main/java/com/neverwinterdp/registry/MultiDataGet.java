@@ -3,11 +3,11 @@ package com.neverwinterdp.registry;
 import java.util.List;
 
 public interface MultiDataGet<T> {
-  public void get(String path) ;
+  public void get(String path) throws RegistryException ;
   
-  public void get(String ... path) ;
+  public void get(String ... path) throws RegistryException ;
   
-  public void get(List<String> paths) ;
+  public void get(List<String> paths) throws RegistryException ;
   
   public void getChildren(String path) throws RegistryException ;
   

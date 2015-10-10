@@ -67,7 +67,7 @@ public class LeaderElectionUnitTest {
       }
     });
     leader2.start();
-    registry1.disconnect();
+    registry1.shutdown();
     Thread.sleep(1000);
   }
   
@@ -86,7 +86,7 @@ public class LeaderElectionUnitTest {
     executorService.shutdown();
     executorService.awaitTermination(3 * 60 * 1000, TimeUnit.MILLISECONDS);
     System.err.println("End Test----------------------------------------------------");
-    registry.disconnect();
+    registry.shutdown();
   }
   
   public class Leader implements Runnable {
@@ -128,7 +128,7 @@ public class LeaderElectionUnitTest {
       } finally {
         if(registry != null) {
           try {
-            registry.disconnect();
+            registry.shutdown();
           } catch (RegistryException e) {
             e.printStackTrace();
           }

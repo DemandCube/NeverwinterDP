@@ -66,6 +66,7 @@ public class KafkaSourceStreamReader implements SourceStreamReader {
   
   @Override
   public void close() throws Exception {
+    partitionReader.close();
   }
  
 }

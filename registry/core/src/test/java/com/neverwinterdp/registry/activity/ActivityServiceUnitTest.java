@@ -62,7 +62,7 @@ public class ActivityServiceUnitTest {
   @After
   public void teardown() throws Exception {
     registry.rdelete(ACTIVITIES_PATH);
-    registry.disconnect();
+    registry.shutdown();
     container.getInstance(CloseableInjector.class).close();
   }
 
@@ -129,7 +129,7 @@ public class ActivityServiceUnitTest {
     Activity activity = new HelloActivityBuilder().build() ;
     service1.queue(activity);
     Thread.sleep(250);
-    registry.disconnect();
+    registry.shutdown();
     Thread.sleep(3000);
     registry.connect();
     service1.onDestroy();
