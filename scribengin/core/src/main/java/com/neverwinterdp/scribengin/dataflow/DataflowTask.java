@@ -94,14 +94,10 @@ public class DataflowTask {
     dflRegistry.dataflowTaskFinish(taskContext);
   }
   
-  void saveContext() {
-    try {
-      DataflowTaskReport report = context.getReport();
-      report.addAccRuntime(System.currentTimeMillis() - startTime);
-      context.commit();
-      context.close();
-    } catch(Exception ex) {
-      executorService.getLogger().error("Cannot save the executor context due to the error: " + ex);
-    }
+  void saveContext() throws Exception {
+    DataflowTaskReport report = context.getReport();
+    report.addAccRuntime(System.currentTimeMillis() - startTime);
+    context.commit();
+    context.close();
   }  
 }

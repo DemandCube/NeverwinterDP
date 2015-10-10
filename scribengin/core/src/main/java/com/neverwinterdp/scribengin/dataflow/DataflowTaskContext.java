@@ -154,7 +154,6 @@ public class DataflowTaskContext {
     while (i.hasNext()) {
       SinkContext ctx = i.next();
       ctx.close();
-      ;
     }
     sourceContext.close();
   }
