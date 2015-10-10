@@ -66,7 +66,7 @@ public class DebugRegistryListenerUnitTest {
   @After
   public void teardown() throws Exception {
     registry.rdelete(TEST_DEBUG_PATH);
-    registry.disconnect();
+    registry.shutdown();
     container.getInstance(CloseableInjector.class).close();
   }
 

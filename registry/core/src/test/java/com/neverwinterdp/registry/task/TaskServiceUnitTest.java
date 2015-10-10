@@ -71,7 +71,7 @@ public class TaskServiceUnitTest {
   @After
   public void teardown() throws Exception {
     registry.rdelete(TASKS_PATH);
-    registry.disconnect();
+    registry.shutdown();
     container.getInstance(CloseableInjector.class).close();
   }
 

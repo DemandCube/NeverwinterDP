@@ -29,7 +29,7 @@ public class LogSampleChainClient  {
   
   public void run() throws Exception {
     Registry registry = config.registryConfig.newInstance();
-    registry.reconnect(30000);
+    registry.connect();
     
     if(config.logValidatorValidateS3 != null) {
       S3Client s3Client = new S3Client();

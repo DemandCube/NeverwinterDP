@@ -21,7 +21,7 @@ public class ScribenginRemoteCluster extends ScribenginCluster {
 
   public void disconnect() throws Exception {
     if(shell == null) return ;
-    shell.getScribenginClient().getRegistry().disconnect();
+    shell.getScribenginClient().getRegistry().shutdown();
     shell = null ;
   }
 
