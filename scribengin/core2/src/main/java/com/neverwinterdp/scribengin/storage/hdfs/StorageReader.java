@@ -104,6 +104,9 @@ public class StorageReader<T> {
   }
 
   public void close() throws Exception {
+    if(currentDataPathInputStream != null) {
+      currentDataPathInputStream.close();
+    }
   }
 
   private FSDataInputStream nextDataPathInputStream() throws IOException {
