@@ -10,7 +10,6 @@ import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.scribengin.storage.s3.S3Folder;
 import com.neverwinterdp.scribengin.storage.s3.S3Storage;
-import com.neverwinterdp.scribengin.storage.s3.S3Util;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
 
