@@ -116,6 +116,9 @@ public class TopicWriter {
           DataflowMessage dflMessage = new DataflowMessage(key, data);
           currentWriter.append(dflMessage);
           if(id >= numOfMessages) break;
+          if(id % 50000 == 0) {
+            System.out.println("Write " + id + " messages");
+          }
         }
         currentWriter.close();
       }
