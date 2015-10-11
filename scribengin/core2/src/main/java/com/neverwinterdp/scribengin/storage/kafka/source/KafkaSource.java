@@ -29,7 +29,6 @@ public class KafkaSource implements Source {
   void init(StorageConfig descriptor) throws Exception {
     this.descriptor = descriptor;
     KafkaTool kafkaTool = new KafkaTool(descriptor.attribute("name"), descriptor.attribute("zk.connect"));
-    kafkaTool.connect(descriptor.attribute("zk.connect"));
     TopicMetadata topicMetdadata = kafkaTool.findTopicMetadata(descriptor.attribute("topic"));
     List<PartitionMetadata> partitionMetadatas = topicMetdadata.partitionsMetadata();
     for(int i = 0; i < partitionMetadatas.size(); i++) {
@@ -37,7 +36,6 @@ public class KafkaSource implements Source {
       KafkaSourceStream sourceStream = new KafkaSourceStream(descriptor, partitionMetadata);
       sourceStreams.put(sourceStream.getId(), sourceStream);
     }
-    kafkaTool.close();
   }
   
   @Override

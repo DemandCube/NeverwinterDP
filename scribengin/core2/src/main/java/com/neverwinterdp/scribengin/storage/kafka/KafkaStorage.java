@@ -33,7 +33,6 @@ public class KafkaStorage extends Storage {
     StorageConfig sConfig = getStorageConfig();
     KafkaTool kafkaTool = getKafkaTool(sConfig) ;
     TopicMetadata tMetadata = kafkaTool.findTopicMetadata(sConfig.attribute(TOPIC));
-    kafkaTool.close();
     List<PartitionConfig> pConfigs = new ArrayList<>();
     List<PartitionMetadata> partitions = tMetadata.partitionsMetadata();
     for(int i = 0; i < partitions.size(); i++) {
@@ -52,7 +51,6 @@ public class KafkaStorage extends Storage {
     StorageConfig sConfig = getStorageConfig();
     KafkaTool kafkaTool = getKafkaTool(sConfig) ;
     boolean exists = kafkaTool.topicExits(sConfig.attribute(TOPIC));
-    kafkaTool.close();
     return exists;
   }
   
@@ -61,7 +59,6 @@ public class KafkaStorage extends Storage {
     StorageConfig descriptor = getStorageConfig();
     KafkaTool kafkaTool = getKafkaTool(getStorageConfig()) ;
     kafkaTool.deleteTopic(descriptor.attribute(TOPIC));
-    kafkaTool.close();
   }
 
   @Override
@@ -69,7 +66,6 @@ public class KafkaStorage extends Storage {
     StorageConfig descriptor = getStorageConfig();
     KafkaTool kafkaTool = getKafkaTool(descriptor) ;
     kafkaTool.createTopic(descriptor.attribute(TOPIC), replication, numOfPartition);
-    kafkaTool.close();
   }
 
   @Override
@@ -94,7 +90,6 @@ public class KafkaStorage extends Storage {
     String name = descriptor.attribute(KafkaStorage.NAME);
     String zkConnect = descriptor.attribute(KafkaStorage.ZK_CONNECT);
     KafkaTool kafkaTool = new KafkaTool(name, zkConnect) ;
-    kafkaTool.connect();
     return kafkaTool;
   }
   

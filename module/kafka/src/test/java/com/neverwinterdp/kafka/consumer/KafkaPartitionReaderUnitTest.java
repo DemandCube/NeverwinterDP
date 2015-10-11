@@ -50,9 +50,7 @@ public class KafkaPartitionReaderUnitTest {
     }
     writer.close();
     KafkaTool kafkaTool = new KafkaTool(NAME, cluster.getZKConnect());
-    kafkaTool.connect();
     TopicMetadata topicMetadata = kafkaTool.findTopicMetadata("hello");
-    kafkaTool.close();
     PartitionMetadata partitionMetadata = findPartition(topicMetadata.partitionsMetadata(), 0);
     KafkaPartitionReader partitionReader = 
         new KafkaPartitionReader(NAME, cluster.getZKConnect(), "hello", partitionMetadata);
@@ -87,7 +85,6 @@ public class KafkaPartitionReaderUnitTest {
   private void readFromPartition(String consumerName, int partition, int maxRead, long maxWait) throws Exception {
     System.out.println("Read partition = " + partition + ", maxRead = " + maxRead + ", maxWait = " + maxWait);
     KafkaTool kafkaTool = new KafkaTool(consumerName, cluster.getZKConnect());
-    kafkaTool.connect();
     TopicMetadata topicMetadata = kafkaTool.findTopicMetadata("hello");
     PartitionMetadata partitionMetadata = findPartition(topicMetadata.partitionsMetadata(), partition);
     KafkaPartitionReader partitionReader = 
@@ -102,7 +99,6 @@ public class KafkaPartitionReaderUnitTest {
     }
     partitionReader.commit();
     partitionReader.close();
-    kafkaTool.close();
   }
   
   private PartitionMetadata findPartition(List<PartitionMetadata> list, int partition) {

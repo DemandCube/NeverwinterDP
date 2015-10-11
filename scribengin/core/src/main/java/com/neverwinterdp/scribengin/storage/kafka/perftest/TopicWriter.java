@@ -53,12 +53,10 @@ public class TopicWriter {
   
   public void start() throws Exception {
     KafkaTool tool = new KafkaTool(topic + ".writer", zkConnect);
-    tool.connect();
     if(tool.topicExits(topic)) {
       tool.deleteTopic(topic);
     }
     tool.createTopic(topic, numOfReplications, numOfPartitions);
-    tool.close();
     KafkaSink sink = new KafkaSink(topic + ".writer", zkConnect,  topic);
     executorService = Executors.newFixedThreadPool(numOfPartitions);
     for(int i = 0; i < numOfPartitions; i++) {

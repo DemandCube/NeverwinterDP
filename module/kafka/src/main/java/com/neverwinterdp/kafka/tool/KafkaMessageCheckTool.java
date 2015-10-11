@@ -98,13 +98,10 @@ public class KafkaMessageCheckTool implements Runnable {
     System.out.println("KafkaMessageCheckTool: Start running kafka message check tool.");
     readDuration.start();
     KafkaTool kafkaTool = new KafkaTool(NAME, topicConfig.zkConnect);
-    kafkaTool.connect();
     
     TopicMetadata topicMeta = kafkaTool.findTopicMetadata(topicConfig.topic, 3);
     List<PartitionMetadata> partitionMetas = topicMeta.partitionsMetadata();
     numOfPartitions = partitionMetas.size();
-    kafkaTool.close();
-    
     
     interrupt = false;
     int batchFetch = topicConfig.consumerConfig.consumeBatchFetch ;

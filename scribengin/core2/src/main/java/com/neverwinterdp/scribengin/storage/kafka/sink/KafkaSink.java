@@ -23,7 +23,6 @@ public class KafkaSink implements Sink {
     KafkaTool kafkaTool = KafkaStorage.getKafkaTool(descriptor) ;
     descriptor.attribute("broker.list", kafkaTool.getKafkaBrokerList());
     this.descriptor  = descriptor ;
-    kafkaTool.close();
   }
   
   @Override

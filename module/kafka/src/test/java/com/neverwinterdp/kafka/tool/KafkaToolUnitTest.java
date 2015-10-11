@@ -44,7 +44,6 @@ public class KafkaToolUnitTest {
     tool.deleteTopic(topic);
     Thread.sleep(1000);
     assertFalse(tool.topicExits(topic));
-    tool.close();
   }
 
   @Test
@@ -61,6 +60,5 @@ public class KafkaToolUnitTest {
     tool.deleteTopic(topic);
     Thread.sleep(1000);
     assertFalse(tool.topicExits(topic));
-    tool.close();
   }
 }

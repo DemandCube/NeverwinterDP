@@ -26,13 +26,10 @@ public class KafkaClusterTool {
   
   Server findLeader(String topic, int partition) throws Exception {
     KafkaTool kafkaTool = new KafkaTool("KafkaPartitionLeaderKiller", cluster.getZKConnect());
-    kafkaTool.connect();
     TopicMetadata topicMeta = kafkaTool.findTopicMetadata(topic);
     PartitionMetadata partitionMeta = findPartition(topicMeta, partition);
     Broker partitionLeader = partitionMeta.leader();
     Server kafkaServer = cluster.findKafkaServerByPort(partitionLeader.port());
-    System.out.println("Shutdown kafka server " + kafkaServer.getPort());
-    kafkaTool.close();
     return kafkaServer;
   }
   
