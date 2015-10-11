@@ -203,13 +203,15 @@ public class KafkaTool  {
   }
 
   public TopicMetadata findTopicMetadata(final String topic, int retries) throws Exception {
+    System.err.println("findTopicMetadata: start");
     SimpleConsumerOperation<TopicMetadata> findTopicOperation = new SimpleConsumerOperation<TopicMetadata>() {
       @Override
       public TopicMetadata execute(SimpleConsumer consumer) throws Exception {
+        System.err.println("findTopicMetadata: in execute");
         List<String> topics = Collections.singletonList(topic);
         TopicMetadataRequest req = new TopicMetadataRequest(topics);
         TopicMetadataResponse resp = consumer.send(req);
-
+        System.err.println("findTopicMetadata: send");
         List<TopicMetadata> topicMetadatas = resp.topicsMetadata();
         if (topicMetadatas.size() != 1) {
           throw new Exception("Expect to find 1 topic " + topic + ", but found " + topicMetadatas.size());
