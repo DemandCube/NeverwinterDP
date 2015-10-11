@@ -1,22 +1,15 @@
 #!/bin/bash
 
-cygwin=false
-ismac=false
-case "`uname`" in
-  CYGWIN*) cygwin=true;;
-  Darwin) ismac=true;;
-esac
-
 if [ "x$JAVA_HOME" == "x" ] ; then 
   echo "WARNING JAVA_HOME is not set"
 fi
 
-bin=`dirname "$0"`
-bin=`cd "$bin"; pwd`
-
 export HADOOP_USER_NAME="neverwinterdp"
 
-APP_DIR=`cd $bin/..; pwd; cd $bin`
+SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+APP_DIR=`cd $SCRIPT_DIR/..; pwd; cd $SCRIPT_DIR`
+NEVERWINTERDP_BUILD_DIR=`cd $APP_DIR/../..; pwd; cd $SCRIPT_DIR`
+
 JAVACMD=$JAVA_HOME/bin/java
 
 function get_opt() {
@@ -93,7 +86,7 @@ fi
 DEFAULT_RUNTIME=$(( 180000 + ($NUM_OF_MESSAGE / 5) ))
 MAX_RUNTIME=$(get_opt --max-run-time $DEFAULT_RUNTIME $@)
 
-SHELL=./scribengin/bin/shell.sh
+SHELL=$NEVERWINTERDP_BUILD_DIR/scribengin/bin/shell.sh
 
 
 #########################################################################################################################

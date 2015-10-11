@@ -36,14 +36,15 @@ public class KafkaPartitionReader {
   private int fetchSize = 100000;
   private SimpleConsumer consumer;
   private long currentOffset;
-  private ByteBufferMessageSet       currentMessageSet;
+  
+  private List<MessageAndOffset>     currentMessageSet;
   private Iterator<MessageAndOffset> currentMessageSetIterator;
 
-  public KafkaPartitionReader(String name, String zkConnect, String topic, PartitionMetadata partitionMetadata) throws Exception {
+  public KafkaPartitionReader(String name, String zkConnect, String topic, PartitionMetadata pMetadata) throws Exception {
     this.name = name;
     this.zkConnect = zkConnect;
     this.topic = topic;
-    this.partitionMetadata = partitionMetadata;
+    this.partitionMetadata = pMetadata;
     reconnect() ;
     currentOffset = getLastCommitOffset();
   }
@@ -89,14 +90,13 @@ public class KafkaPartitionReader {
   
   public void commit() throws Exception {
     CommitOperation commitOp = new CommitOperation(currentOffset, (short) 0) ;
-    execute(commitOp, 3, 500);
+    execute(commitOp, 3, 1500);
   }
   
   public void rollback() throws Exception  {
     currentOffset = getLastCommitOffset();
     currentMessageSet = null ;
     currentMessageSetIterator = null;
-    //commit() ;
   }
   
   public void close() throws Exception {
@@ -104,19 +104,28 @@ public class KafkaPartitionReader {
   }
   
   public byte[] next(long maxWait) throws Exception {
-    if(currentMessageSetIterator == null) nextMessageSet(maxWait);
-    byte[] payload = getCurrentMessagePayload();
-    if(payload != null) return payload;
-    nextMessageSet(maxWait);
-    return getCurrentMessagePayload();
+    MessageAndOffset messageAndOffset = nextMessageAndOffset(maxWait);
+    if(messageAndOffset == null) return null ;
+    ByteBuffer payload = messageAndOffset.message().payload();
+    byte[] bytes = new byte[payload.limit()];
+    payload.get(bytes);
+    return bytes;
   }
 
-  public Message nextMessage(long maxWait) throws Exception {
+  public MessageAndOffset nextMessageAndOffset(long maxWait) throws Exception {
     if(currentMessageSetIterator == null) nextMessageSet(maxWait);
-    Message message = getCurrentMessage();
-    if(message != null) return message;
+    if(currentMessageSetIterator.hasNext()) {
+      MessageAndOffset sel = currentMessageSetIterator.next();
+      currentOffset = sel.nextOffset();
+      return sel;
+    }
     nextMessageSet(maxWait);
-    return getCurrentMessage();
+    if(currentMessageSetIterator.hasNext()) {
+      MessageAndOffset sel = currentMessageSetIterator.next();
+      currentOffset = sel.nextOffset();
+      return sel;
+    }
+    return null;
   }
   
   public <T> T nextAs(Class<T> type, long maxWait) throws Exception {
@@ -125,62 +134,28 @@ public class KafkaPartitionReader {
     return JSONSerializer.INSTANCE.fromBytes(data, type);
   }
 
-  public List<byte[]> next(int maxRead, long maxWait) throws Exception {
-    List<byte[]> holder = new ArrayList<>() ;
-    for(int i = 0; i < maxRead; i++) {
-      byte[] payload = next(maxWait) ;
-      if(payload == null) return holder;
-      holder.add(payload);
-    }
-    return holder;
-  }
-  
-  public List<byte[]> fetch(int fetchSize, int maxRead, long maxWait) throws Exception {
+  public List<Message> fetch(int fetchSize, int maxRead, long maxWait) throws Exception {
     return fetch(fetchSize, maxRead, maxWait, 3) ;
   }
   
-  public List<byte[]> fetch(int fetchSize, int maxRead, long maxWait, int numRetries) throws Exception {
-    FetchOperation fetchOperation = new FetchOperation(fetchSize, maxRead, (int)maxWait);
-    return execute(fetchOperation, numRetries, 500);
-  }
-  
-  byte[] getCurrentMessagePayload() {
-    Message message = getCurrentMessage() ;
-    if(message == null) return null ;
-    ByteBuffer payload = message.payload();
-    byte[] bytes = new byte[payload.limit()];
-    payload.get(bytes);
-    return bytes;
-  }
- 
-  Message getCurrentMessage() {
-    while(currentMessageSetIterator.hasNext()) {
-      MessageAndOffset messageAndOffset = currentMessageSetIterator.next();
-      if (messageAndOffset.offset() < currentOffset) continue; //old offset, ignore
-      Message message = messageAndOffset.message();
-      currentOffset = messageAndOffset.nextOffset();
-      return message;
+  public List<Message> fetch(int fetchSize, int maxRead, long maxWait, int numRetries) throws Exception {
+    List<MessageAndOffset> holder = fetchMessageAndOffset(fetchSize, maxRead, maxWait, numRetries);
+    List<Message> messages = new ArrayList<>();
+    for(int i = 0; i < holder.size(); i++) {
+      MessageAndOffset sel = holder.get(i);
+      messages.add(sel.message());
+      currentOffset = sel.nextOffset();
     }
-    return null;
+    return messages;
+  }
+  
+  List<MessageAndOffset> fetchMessageAndOffset(int fetchSize, int maxRead, long maxWait, int numRetries) throws Exception {
+    FetchMessageOperation fetchOperation = new FetchMessageOperation(fetchSize, maxRead, (int)maxWait);
+    return execute(fetchOperation, numRetries, 1500);
   }
  
-  
   void nextMessageSet(long maxWait) throws Exception {
-    FetchRequest req = 
-        new FetchRequestBuilder().
-        clientId(name).
-        addFetch(topic, partitionMetadata.partitionId(), currentOffset, fetchSize).
-        minBytes(1).
-        maxWait((int)maxWait).
-        build();
-    
-    FetchResponse fetchResponse = consumer.fetch(req);
-    if(fetchResponse.hasError()) {
-      int errorCode = fetchResponse.errorCode(topic, partitionMetadata.partitionId());
-      throw new Exception("TODO: handle the error, reset the consumer, error code = " + errorCode);
-    }
-    
-    currentMessageSet = fetchResponse.messageSet(topic, partitionMetadata.partitionId());
+    currentMessageSet = fetchMessageAndOffset(fetchSize, 1000, maxWait, 3);
     currentMessageSetIterator = currentMessageSet.iterator();
   }
   
@@ -201,13 +176,10 @@ public class KafkaPartitionReader {
     Exception error = null;
     for(int i = 0; i < retry; i++) {
       try {
-        if(error != null) {
-          reconnect(1, retryDelay);
-        }
+        if(error != null) reconnect(1, retryDelay);
         return op.execute();
       } catch(Exception ex) {
         error = ex;
-        //ex.printStackTrace();
       }
     }
     throw error;
@@ -240,18 +212,18 @@ public class KafkaPartitionReader {
     }
   }
 
-  class FetchOperation implements Operation<List<byte[]>> {
+  class FetchMessageOperation implements Operation<List<MessageAndOffset>> {
     int fetchSize;
     int maxRead;
     int maxWait;
     
-    public FetchOperation(int fetchSize, int maxRead, int maxWait) {
+    public FetchMessageOperation(int fetchSize, int maxRead, int maxWait) {
       this.fetchSize = fetchSize;
       this.maxRead = maxRead ;
       this.maxWait = maxWait ;
     }
     
-    public List<byte[]> execute() throws Exception {
+    public List<MessageAndOffset> execute() throws Exception {
       FetchRequest req = 
           new FetchRequestBuilder().
           clientId(name).
@@ -266,16 +238,12 @@ public class KafkaPartitionReader {
         String msg = "Kafka error code = " + errorCode + ", Partition  " + partitionMetadata.partitionId() ;
         throw new Exception(msg);
       }
-      List<byte[]> holder = new ArrayList<byte[]>();
+      List<MessageAndOffset> holder = new ArrayList<>();
       ByteBufferMessageSet messageSet = fetchResponse.messageSet(topic, partitionMetadata.partitionId());
       int count = 0;
       for(MessageAndOffset messageAndOffset : messageSet) {
         if (messageAndOffset.offset() < currentOffset) continue; //old offset, ignore
-        ByteBuffer payload = messageAndOffset.message().payload();
-        byte[] bytes = new byte[payload.limit()];
-        payload.get(bytes);
-        holder.add(bytes);
-        currentOffset = messageAndOffset.nextOffset();
+        holder.add(messageAndOffset);
         count++;
         if(count == maxRead) break;
       }

@@ -1,10 +1,12 @@
 package com.neverwinterdp.kafka.consumer;
 
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import kafka.javaapi.PartitionMetadata;
 import kafka.javaapi.TopicMetadata;
+import kafka.message.Message;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -90,10 +92,13 @@ public class KafkaPartitionReaderUnitTest {
     PartitionMetadata partitionMetadata = findPartition(topicMetadata.partitionsMetadata(), partition);
     KafkaPartitionReader partitionReader = 
         new KafkaPartitionReader(consumerName, cluster.getZKConnect(), "hello", partitionMetadata);
-    List<byte[]> messages = partitionReader.fetch(10000, maxRead, maxWait);
+    List<Message> messages = partitionReader.fetch(10000, maxRead, maxWait);
     for(int i = 0; i < messages.size(); i++) {
-      byte[] message = messages.get(i) ;
-      System.out.println((i + 1) + ". " + new String(message));
+      Message message = messages.get(i) ;
+      ByteBuffer payload = message.payload();
+      byte[] bytes = new byte[payload.limit()];
+      payload.get(bytes);
+      System.out.println((i + 1) + ". " + new String(bytes));
     }
     partitionReader.commit();
     partitionReader.close();

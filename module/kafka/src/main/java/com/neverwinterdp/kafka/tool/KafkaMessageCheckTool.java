@@ -1,6 +1,7 @@
 package com.neverwinterdp.kafka.tool;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import kafka.javaapi.PartitionMetadata;
 import kafka.javaapi.TopicMetadata;
+import kafka.message.Message;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParametersDelegate;
@@ -224,10 +226,13 @@ public class KafkaMessageCheckTool implements Runnable {
       int total = 0, lastCount = 0, cannotReadCount = 0;
       int fetchRetries = topicConfig.consumerConfig.consumeFetchRetries;
       while(!interrupt ) {
-        List<byte[]> messages = partitionReader.fetch(fetchSize, batchFetch/*max read*/, 0 /*max wait*/,fetchRetries);
+        List<Message> messages = partitionReader.fetch(fetchSize, batchFetch/*max read*/, 0 /*max wait*/,fetchRetries);
         messageCounter.count(partitionReader.getPartition(), messages.size());
-        for(byte[] messagePayload : messages) {
-          messageTracker.log(messageExtractor.extract(messagePayload));
+        for(Message message : messages) {
+          ByteBuffer payload = message.payload();
+          byte[] bytes = new byte[payload.limit()];
+          payload.get(bytes);
+          messageTracker.log(messageExtractor.extract(bytes));
         }
         total += messages.size();
 
@@ -240,11 +245,14 @@ public class KafkaMessageCheckTool implements Runnable {
         if(cannotReadCount >= topicConfig.consumerConfig.consumeRetries) break;
         lastCount = total;
       } 
-      List<byte[]> messages = 
+      List<Message> messages = 
           partitionReader.fetch(fetchSize, batchFetch/*max read*/, 0 /*max wait*/,fetchRetries);
       messageCounter.count(partitionReader.getPartition(), messages.size());
-      for(byte[] messagePayload : messages) {
-        messageTracker.log(messageExtractor.extract(messagePayload));
+      for(Message message : messages) {
+        ByteBuffer payload = message.payload();
+        byte[] bytes = new byte[payload.limit()];
+        payload.get(bytes);
+        messageTracker.log(messageExtractor.extract(bytes));
       }
       total += messages.size();
     }
