@@ -8,7 +8,7 @@ export HADOOP_USER_NAME="neverwinterdp"
 
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 APP_DIR=`cd $SCRIPT_DIR/..; pwd; cd $SCRIPT_DIR`
-NEVERWINTERDP_BUILD_DIR=`cd $APP_DIR/..; pwd; cd $SCRIPT_DIR`
+NEVERWINTERDP_BUILD_DIR=`cd $APP_DIR/../..; pwd; cd $SCRIPT_DIR`
 
 JAVACMD=$JAVA_HOME/bin/java
 
