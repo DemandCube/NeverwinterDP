@@ -26,7 +26,7 @@ public class KafkaPerfTest {
   @Parameter(names = "--reader-read-per-reader", description = "max read per a reader")
   private int readerReadPerReader = 1000;
   
-  @Parameter(names = "--max-run-time", description = "Max Run Time")
+  @Parameter(names = "--max-runtime", description = "Max Run Time")
   private long maxRunTime = 3 * 60000;
   
   
@@ -44,7 +44,7 @@ public class KafkaPerfTest {
     topicReader.start();
     
     topicWriter.waitForTermination(maxRunTime);
-    topicReader.waitForTermination(10 * 60000);
+    topicReader.waitForTermination(60 * 60000);
     
     TabularFormater formater = new TabularFormater("Write", "Read");
     formater.setTitle("Topic Report");

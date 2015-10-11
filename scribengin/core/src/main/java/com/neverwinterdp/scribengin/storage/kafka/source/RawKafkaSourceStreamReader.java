@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import kafka.javaapi.PartitionMetadata;
 import kafka.message.Message;
+import kafka.message.MessageAndOffset;
 
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
@@ -28,8 +29,9 @@ public class RawKafkaSourceStreamReader implements SourceStreamReader {
 
   @Override
   public DataflowMessage next(long maxWait) throws Exception {
-    Message message = partitionReader.nextMessage(maxWait) ;
-    if(message == null) return null ;
+    MessageAndOffset messageAndOffset = partitionReader.nextMessageAndOffset(maxWait) ;
+    if(messageAndOffset == null) return null ;
+    Message message = messageAndOffset.message();
     ByteBuffer payload = message.payload();
     byte[] messageBytes = new byte[payload.limit()];
     payload.get(messageBytes);

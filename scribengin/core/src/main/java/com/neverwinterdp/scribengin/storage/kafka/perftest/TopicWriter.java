@@ -111,15 +111,16 @@ public class TopicWriter {
       while(idTracker.get() < numOfMessages) {
         currentWriter = stream.getWriter();
         for(int i = 0; i < writePerWriter; i++) {
+          if(idTracker.get() >= numOfMessages) break;
           long id  = idTracker.incrementAndGet();
           String key = "message-" + id;
           DataflowMessage dflMessage = new DataflowMessage(key, data);
           currentWriter.append(dflMessage);
-          if(id >= numOfMessages) break;
           if(id % 50000 == 0) {
             System.out.println("Write " + id + " messages");
           }
         }
+        System.out.println("Write " + idTracker.get() + " messages");
         currentWriter.close();
       }
     }

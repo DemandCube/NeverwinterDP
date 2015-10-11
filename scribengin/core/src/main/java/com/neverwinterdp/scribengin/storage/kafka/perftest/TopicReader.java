@@ -83,7 +83,7 @@ public class TopicReader {
       while(true) {
         currentReader = stream.getReader(topic + ".reader");
         for(int i = 0; i < readPerReader; i++) {
-          DataflowMessage dflMessage = currentReader.next(5000);
+          DataflowMessage dflMessage = currentReader.next(10000);
           if(dflMessage == null) {
             currentReader.commit();
             currentReader.close();
