@@ -97,7 +97,6 @@ public class AckKafkaWriterTestRunner {
       try {
         while (!exit) {
           KafkaTool kafkaTool = new KafkaTool(topic, cluster.getZKConnect());
-          kafkaTool.connect();
           TopicMetadata topicMeta = kafkaTool.findTopicMetadata(topic);
           PartitionMetadata partitionMeta = findPartition(topicMeta, partition);
           Broker partitionLeader = partitionMeta.leader();
@@ -107,7 +106,6 @@ public class AckKafkaWriterTestRunner {
           failureCount++;
           Thread.sleep(sleepBeforeRestart);
           kafkaServer.start();
-          kafkaTool.close();
           Thread.sleep(10000); //wait to make sure that the kafka server start
         }
       } catch (Exception e) {

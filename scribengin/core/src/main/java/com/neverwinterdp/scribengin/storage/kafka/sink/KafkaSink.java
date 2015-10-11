@@ -28,10 +28,8 @@ public class KafkaSink implements Sink {
   
   private void init(StorageDescriptor descriptor) throws Exception {
     KafkaTool kafkaTool = new KafkaTool(descriptor.attribute("name"), descriptor.attribute("zk.connect")) ;
-    kafkaTool.connect();
     descriptor.attribute("broker.list", kafkaTool.getKafkaBrokerList());
     this.descriptor  = descriptor ;
-    kafkaTool.close();
   }
   
   @Override

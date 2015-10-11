@@ -49,12 +49,10 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     sendPeriod = vmConfig.getPropertyAsLong("send-period", -1);
     
     KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
-    kafkaTool.connect();
     if(!kafkaTool.topicExits(topic)) kafkaTool.createTopic(topic, 1, numOfStream);
     
     TopicMetadata topicMetadata = kafkaTool.findTopicMetadata(topic);
     List<PartitionMetadata> partitionMetadataHolder = topicMetadata.partitionsMetadata();
-    kafkaTool.close();
     ExecutorService executorService = Executors.newFixedThreadPool(partitionMetadataHolder.size());
     for(int i = 0; i < partitionMetadataHolder.size(); i++) {
       executorService.submit(new RunnableLogMessageGenerator(partitionMetadataHolder.get(i)));
@@ -137,9 +135,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
       this.topic = topic ;
       this.partitionMetadata = partitionMetadata;
       KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
-      kafkaTool.connect();
       String kafkaConnects = kafkaTool.getKafkaBrokerList();
-      kafkaTool.close();
       kafkaWriter = new AckKafkaWriter("KafkaLogWriter", kafkaConnects) ;
       kafkaWriter.reconnect();
     }

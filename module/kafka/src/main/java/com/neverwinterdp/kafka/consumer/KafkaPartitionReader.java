@@ -73,9 +73,7 @@ public class KafkaPartitionReader {
       //Refresh the partition metadata
       try {
       KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnect);
-      kafkaTool.connect();
       this.partitionMetadata = kafkaTool.findPartitionMetadata(topic, partitionMetadata.partitionId());
-      kafkaTool.close();
       Broker broker = partitionMetadata.leader();
       if(broker != null) {
         consumer = new SimpleConsumer(broker.host(), broker.port(), 100000, 64 * 1024, name);

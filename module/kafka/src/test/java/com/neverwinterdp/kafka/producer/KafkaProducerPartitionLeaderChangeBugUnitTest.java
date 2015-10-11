@@ -49,7 +49,6 @@ public class KafkaProducerPartitionLeaderChangeBugUnitTest  {
       //"--partitions", "2", "--replication-factor", "2" parameters have no effect since --replica-assignment has higher priority 
     };
     KafkaTool kafkaTool = new KafkaTool("KafkaTool", cluster.getZKConnect());
-    kafkaTool.connect();
     kafkaTool.createTopic(args);
     info(kafkaTool.findTopicMetadata(TOPIC).partitionsMetadata());
 
@@ -80,7 +79,6 @@ public class KafkaProducerPartitionLeaderChangeBugUnitTest  {
     System.out.println("Sent failed count = " + sendTool.getSentFailedCount());
     System.out.println("Check count = " + checkTool.getMessageCounter().getTotal());
     Assert.assertTrue(checkTool.getMessageCounter().getTotal() < sendTool.getSentCount());
-    kafkaTool.close();
   }
   
   private void info(List<PartitionMetadata> holder) {

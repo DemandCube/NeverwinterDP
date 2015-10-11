@@ -102,9 +102,7 @@ public class KafkaMessageSendTool implements Runnable {
     }
     
     KafkaTool kafkaTool = new KafkaTool("KafkaTool", topicConfig.zkConnect);
-    kafkaTool.connect();
     String kafkaConnects = kafkaTool.getKafkaBrokerList();
-    kafkaTool.close();
     
     String[] args2 = {
         "--broker-list", kafkaConnects,
@@ -152,7 +150,6 @@ public class KafkaMessageSendTool implements Runnable {
     runDuration.start();
     ExecutorService writerService = Executors.newFixedThreadPool(topicConfig.numberOfPartition);
     KafkaTool kafkaTool = new KafkaTool("KafkaTool", topicConfig.zkConnect);
-    kafkaTool.connect();
     String kafkaConnects = kafkaTool.getKafkaBrokerList();
     //TODO: add option to delete topic if it exists
     //kafkaTool.deleteTopic(topicConfig.topic);
@@ -174,7 +171,6 @@ public class KafkaMessageSendTool implements Runnable {
     if (!writerService.isTerminated()) {
       writerService.shutdownNow();
     }
-    kafkaTool.close();
     runDuration.stop();
   }
 
