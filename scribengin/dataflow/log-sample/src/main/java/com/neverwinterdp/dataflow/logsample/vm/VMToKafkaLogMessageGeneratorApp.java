@@ -51,6 +51,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
     if(!kafkaTool.topicExits(topic)) kafkaTool.createTopic(topic, 1, numOfStream);
     
+    logger.info("Use the latest code................");
     TopicMetadata topicMetadata = kafkaTool.findTopicMetadata(topic);
     List<PartitionMetadata> partitionMetadataHolder = topicMetadata.partitionsMetadata();
     ExecutorService executorService = Executors.newFixedThreadPool(partitionMetadataHolder.size());
