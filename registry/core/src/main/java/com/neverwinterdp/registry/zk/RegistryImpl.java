@@ -647,6 +647,36 @@ public class RegistryImpl implements Registry {
   }
   
   <T> T execute(Operation<T> op, int retry) throws RegistryException {
+    if(closed) {
+      throw new RegistryException(ErrorCode.Closed, "Registry has been closed");
+    }
+    RegistryException error = null;
+    try {
+      ZooKeeper zkClient = getZKClient();
+      T result = op.execute(zkClient);
+      return result;
+    } catch(InterruptedException ex) {
+      error = new RegistryException(ErrorCode.Timeout, "Interrupt Exception", ex) ;
+    } catch(KeeperException kEx) {
+      if(kEx.code() ==  KeeperException.Code.NONODE) {
+        KeeperException.NoNodeException noNodeEx = (KeeperException.NoNodeException) kEx;
+        String message = kEx.getMessage() + "\n" + "  path = " + noNodeEx.getPath();
+        error = new RegistryException(ErrorCode.NoNode, message, kEx) ;
+      } else if(kEx.code() ==  KeeperException.Code.NODEEXISTS) {
+        KeeperException.NodeExistsException nodeExistsEx = (KeeperException.NodeExistsException) kEx;
+        String message = kEx.getMessage() + "\n" + "  path = " + nodeExistsEx.getPath();
+        error = new RegistryException(ErrorCode.NodeExists, message, kEx) ;
+      } else if(kEx.code() ==  KeeperException.Code.CONNECTIONLOSS) {
+        error = new RegistryException(ErrorCode.ConnectionLoss, kEx.getMessage(), kEx) ;
+      } else {
+        error = new RegistryException(ErrorCode.Unknown, "Unknown Error", kEx) ;
+      }
+    }
+    shutdown();
+    throw error;
+  }
+  
+  <T> T executeWithRetry(Operation<T> op, int retry) throws RegistryException {
     RegistryException error = null ;
     for(int i = 0; i < retry; i++) {
       try {
