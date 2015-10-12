@@ -95,7 +95,7 @@ public class RegistryImpl implements Registry {
         return this;
       }
       try {
-        Thread.sleep(100);
+        Thread.sleep(500);
       } catch (InterruptedException e) {
         throw new RegistryException(ErrorCode.Connection, "Cannot connect due to the interrupt") ;
       }
