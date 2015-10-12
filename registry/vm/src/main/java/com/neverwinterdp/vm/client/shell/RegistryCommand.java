@@ -53,6 +53,9 @@ public class RegistryCommand extends Command {
     @Parameter(names = "--path", description = "The path to dump, the default path is root /")
     private String path = "/";
 
+    @Parameter(names = "--max-print-data-length", description = "The max number of characters to print")
+    private int maxPrintDataLength = 80;
+    
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
       VMClient vmClient = shell.getVMClient();
@@ -83,8 +86,8 @@ public class RegistryCommand extends Command {
         stringData = " - " + new String(data);
         stringData = stringData.replace("\r\n", " ");
         stringData = stringData.replace("\n", " ");
-        if (stringData.length() > 80) {
-          stringData = stringData.substring(0, 80);
+        if (stringData.length() > maxPrintDataLength) {
+          stringData = stringData.substring(0, maxPrintDataLength);
         }
       }
       console.println(indentation + node + stringData);
