@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.registry.Registry;
+import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 import com.neverwinterdp.vm.client.VMClient;
@@ -34,7 +35,7 @@ public class HelpCommandUnitTest {
 
   @Test
   public void testCommands() throws Exception {
-    Registry registry = new RegistryImpl();
+    Registry registry = new RegistryImpl(RegistryConfig.getDefault());
     vmClient = new VMClient(registry);
     shell = new ScribenginShell(vmClient);
     shell.execute("help registry");

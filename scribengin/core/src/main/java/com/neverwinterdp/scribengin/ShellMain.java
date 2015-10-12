@@ -14,9 +14,9 @@ public class ShellMain {
     System.setProperty("HADOOP_USER_NAME", "neverwinterdp"); 
     if((args.length > 0 && args[0].equals("help")) || args.length < 1){
       if(args.length < 1){
-        args = new String[]{"help"};
+        args = new String[] { "help" };
       }
-      Registry registry = new RegistryImpl();
+      Registry registry = new RegistryImpl(RegistryConfig.getDefault());
       VMClient vmClient = new VMClient(registry);
       ScribenginShell shell = new ScribenginShell(vmClient) ;
       shell.execute(args);

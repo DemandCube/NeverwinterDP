@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PreDestroy;
 
@@ -16,9 +17,9 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.data.Stat;
+import org.slf4j.Logger;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.neverwinterdp.registry.BatchOperations;
 import com.neverwinterdp.registry.DataMapperCallback;
 import com.neverwinterdp.registry.ErrorCode;
@@ -34,21 +35,24 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.event.NodeWatcher;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.util.log.LoggerFactory;
 
-@Singleton
 public class RegistryImpl implements Registry {
   static public final Id ANYONE_ID = new Id("world", "anyone");
   static public final ArrayList<ACL> DEFAULT_ACL = new ArrayList<ACL>(Collections.singletonList(new ACL(Perms.ALL, ANYONE_ID)));
   
-  @Inject
+  static AtomicInteger idTracker = new AtomicInteger();
+  
+  private int clientId = idTracker.incrementAndGet();
+  
+  private Logger logger ;
+  
   private RegistryConfig config;
   
   private ZooKeeper zkClient ;
   
   private boolean closed = false;
-  
-  public RegistryImpl() {
-  }
+  private int     reconnectCount = 0;
   
   public RegistryImpl(RegistryConfig config) {
     this.config = config;
@@ -62,8 +66,8 @@ public class RegistryImpl implements Registry {
   }
   
   @Inject
-  public void init() throws RegistryException {
-    connect();
+  public void init(LoggerFactory lFactory) throws RegistryException {
+    logger = lFactory.getLogger(RegistryImpl.class);
   }
   
   @Override
@@ -77,6 +81,7 @@ public class RegistryImpl implements Registry {
     if(closed) {
       throw new RegistryException(ErrorCode.Closed, "Registry has been closed");
     }
+    info("Reconnect to the registry, connect count = " + ++reconnectCount);
     try {
       if(zkClient != null) zkClient.close();
       zkClient = new ZooKeeper(config.getConnect(), 15000, new RegistryWatcher());
@@ -118,6 +123,12 @@ public class RegistryImpl implements Registry {
       }
     }
   }
+  
+  @PreDestroy
+  public void onDestroy() throws RegistryException {
+    shutdown();
+  }
+  
 
   synchronized ZooKeeper getZKClient() throws RegistryException {
     if(closed) {
@@ -635,11 +646,6 @@ public class RegistryImpl implements Registry {
     return realPath.substring(config.getDbDomain().length());
   }
   
-  @PreDestroy
-  public void onDestroy() throws RegistryException {
-    shutdown();
-  }
-  
   <T> T execute(Operation<T> op, int retry) throws RegistryException {
     RegistryException error = null ;
     for(int i = 0; i < retry; i++) {
@@ -668,6 +674,22 @@ public class RegistryImpl implements Registry {
     }
     throw error;
   }
+  
+  void info(String message) {
+    if(logger != null) logger.info("[clientId = " + clientId + "] " + message);
+    else System.out.println("RegistryImpl[clientId = " + clientId + "] " + message);
+  }
+  
+  void error(String message, Throwable t) {
+    if(logger != null) {
+      logger.error("[clientId = " + clientId + "] " + message, t);
+    } else {
+      System.out.println("RegistryImpl[clientId = " + clientId + "] " + message);
+      t.printStackTrace();
+    }
+  }
+  
+  
   
   static public interface Operation<T> {
     public T execute(ZooKeeper zkClient) throws InterruptedException, KeeperException, RegistryException ;

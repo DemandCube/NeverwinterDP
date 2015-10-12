@@ -58,7 +58,8 @@ public class AppContainer {
   
   public void onInit() {
     Module[] modules = {
-      new CloseableModule(), new Jsr250Module(), new MycilaJmxModuleExt(getVMName()), appModule
+      new CloseableModule(), new Jsr250Module(), 
+      new MycilaJmxModuleExt(getVMName()), appModule
     };
     appContainer = Guice.createInjector(Stage.PRODUCTION, modules);
     logger = getLoggerFactory().getLogger(getClass());
