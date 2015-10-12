@@ -437,7 +437,7 @@ public class RegistryImpl implements Registry {
   }
   
   @Override
-  public void watchModify(final String path, final NodeWatcher watcher) throws RegistryException {
+  public boolean watchModify(final String path, final NodeWatcher watcher) throws RegistryException {
     Operation<Boolean> watchModify = new Operation<Boolean>() {
       @Override
       public Boolean execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
@@ -445,7 +445,7 @@ public class RegistryImpl implements Registry {
         return true;
       }
     };
-    execute(watchModify, 3);
+    return execute(watchModify, 3);
   }
   
   @Override
@@ -672,7 +672,7 @@ public class RegistryImpl implements Registry {
         error = new RegistryException(ErrorCode.Unknown, "Unknown Error", kEx) ;
       }
     }
-    shutdown();
+    if(error.getErrorCode().isConnectionProblem()) shutdown();
     throw error;
   }
   
