@@ -88,6 +88,7 @@ public class RandomKillDataflowWorkerExecutor implements Runnable {
     private boolean terminated = false;
     
     public KillDataflowContext(ScribenginClient scribenginClient, String dataflowId) throws Exception {
+      this.dataflowId = dataflowId;
       dflClient = scribenginClient.getDataflowClient(dataflowId, 180000);
     }
     
