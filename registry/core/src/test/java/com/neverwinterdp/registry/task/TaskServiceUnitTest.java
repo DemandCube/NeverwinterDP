@@ -56,11 +56,12 @@ public class TaskServiceUnitTest {
   
   @Before
   public void setup() throws Exception {
+    registry = RegistryConfig.getDefault().newInstance();
+    registry.connect();
     AppServiceModule module = new AppServiceModule(new HashMap<String, String>()) {
       @Override
       protected void configure(Map<String, String> properties) {
-        bindInstance(RegistryConfig.class, RegistryConfig.getDefault());
-        bindType(Registry.class, RegistryImpl.class);
+        bindInstance(Registry.class, registry);
       }
     };
     container = 

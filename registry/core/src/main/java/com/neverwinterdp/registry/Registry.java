@@ -61,7 +61,7 @@ public interface Registry {
   
   public boolean exists(String path) throws RegistryException ;
   
-  public void watchModify(String path, NodeWatcher watcher) throws RegistryException ;
+  public boolean watchModify(String path, NodeWatcher watcher) throws RegistryException ;
   public void watchExists(String path, NodeWatcher watcher) throws RegistryException ;
   public void watchChildren(String path, NodeWatcher watcher) throws RegistryException;
   

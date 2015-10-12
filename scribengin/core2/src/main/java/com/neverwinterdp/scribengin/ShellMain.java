@@ -16,7 +16,7 @@ public class ShellMain {
       if(args.length < 1){
         args = new String[]{"help"};
       }
-      Registry registry = new RegistryImpl();
+      Registry registry = RegistryConfig.getDefault().newInstance();
       VMClient vmClient = new VMClient(registry);
       ScribenginShell shell = new ScribenginShell(vmClient) ;
       shell.execute(args);

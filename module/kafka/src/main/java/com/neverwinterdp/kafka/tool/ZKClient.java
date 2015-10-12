@@ -51,7 +51,7 @@ public class ZKClient {
         return ;
       }
       try {
-        Thread.sleep(100);
+        Thread.sleep(500);
       } catch (InterruptedException e) {
         throw new Exception("Cannot connect due to the interrupt") ;
       }

@@ -209,7 +209,6 @@ public class KafkaTool  {
         List<String> topics = Collections.singletonList(topic);
         TopicMetadataRequest req = new TopicMetadataRequest(topics);
         TopicMetadataResponse resp = consumer.send(req);
-
         List<TopicMetadata> topicMetadatas = resp.topicsMetadata();
         if (topicMetadatas.size() != 1) {
           throw new Exception("Expect to find 1 topic " + topic + ", but found " + topicMetadatas.size());

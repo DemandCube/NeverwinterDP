@@ -68,7 +68,8 @@ public class VM {
   private VMDescriptor initContainer(VMDescriptor vmDescriptor, final VMConfig vmConfig) throws Exception {
     final String vmDescriptorPath = VMService.ALL_PATH + "/" + vmConfig.getName();
     final RegistryConfig rConfig = vmConfig.getRegistryConfig();
-    final Registry registry = rConfig.newInstance().reconnect(30000);
+    final Registry registry = rConfig.newInstance().reconnect(15000);
+    
     if(vmDescriptor == null) {
       vmDescriptor = registry.getDataAs(vmDescriptorPath, VMDescriptor.class);
     }
@@ -84,7 +85,6 @@ public class VM {
           bindInstance(VMConfig.class, vmConfig);
           bindInstance(VMDescriptor.class, finalVMDescriptor);
           
-          bindInstance(RegistryConfig.class, rConfig);
           bindInstance(Registry.class, registry);
         } catch(Exception e) {
           e.printStackTrace();
@@ -95,6 +95,7 @@ public class VM {
     appContainer.onInit();
     logger = appContainer.getLoggerFactory().getLogger(getClass());
     appContainer.install(new HashMap<String, String>(), VMModule.NAME) ;
+    
     vmModuleContainer = appContainer.getModule("VMModule");
     return finalVMDescriptor;
   }
@@ -196,7 +197,7 @@ public class VM {
         try {
           setVMStatus(VMStatus.TERMINATED);
           appContainer.getInstance(CloseableInjector.class).close();
-          System.err.println("Destroyed: " + vmDescriptor.getId() );
+          logger.info("Destroyed: " + vmDescriptor.getId() );
         } catch (RegistryException e) {
           System.err.println("Set terminated vm status for " + vmDescriptor.getId() );
           logger.error("Error in vm registry", e);

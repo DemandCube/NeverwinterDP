@@ -40,7 +40,7 @@ public class KafkaClientUnitTest {
     writer.close();
     
     ZKClient client = new ZKClient("127.0.0.1:2181");
-    client.connect(10000);
+    client.connect(5000);
     client.dump("/brokers");
     client.close();
   }

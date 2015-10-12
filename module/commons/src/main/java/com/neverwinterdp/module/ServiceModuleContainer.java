@@ -10,12 +10,10 @@ import javax.annotation.PreDestroy;
 import org.slf4j.Logger;
 
 import com.google.inject.Binding;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.neverwinterdp.module.ModuleRegistration.RunningStatus;
 import com.neverwinterdp.util.log.LoggerFactory;
-import com.neverwinterdp.yara.MetricRegistry;
 
 /**
  * @author Tuan Nguyen
