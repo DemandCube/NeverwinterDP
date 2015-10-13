@@ -27,7 +27,6 @@ public class KafkaLogSampleWithWorkerKillUnitTest  {
     killThread.start();
     
     runnerThread.waitForTermination();
-    System.out.println("DONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"); 
   }
  
   public class RunnerThread extends Thread {
@@ -55,7 +54,7 @@ public class KafkaLogSampleWithWorkerKillUnitTest  {
         String killCommand = 
             "dataflow kill-worker-random " +
             "  --dataflow-id " + logSampleRunner.dataflowId + 
-            "  --wait-before-simulate-failure 5000 --failure-period 10000 --max-kill 3 --simulate-kill";
+            "  --wait-before-simulate-failure 5000 --failure-period 15000 --max-kill 3 --simulate-kill";
         logSampleRunner.shell.execute(killCommand);
       } catch (Exception e) {
         e.printStackTrace();

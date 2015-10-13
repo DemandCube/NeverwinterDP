@@ -51,7 +51,8 @@ public class RandomKillDataflowWorkerExecutor implements Runnable {
     } catch (Exception e) {
       e.printStackTrace();
       try {
-        shell.execute("registry dump");
+        shell.execute("registry dump --path /scribengin/failure-simulation/log-dataflow --max-print-data-length 160");
+        shell.execute("registry dump --path /scribengin/dataflows/all/" + dataflowId + "/workers --max-print-data-length 160");
       } catch (Exception e1) {
       }
     }

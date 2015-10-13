@@ -11,7 +11,6 @@ import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.storage.StorageService;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMDescriptor;
-import com.neverwinterdp.yara.MetricPrinter;
 import com.neverwinterdp.yara.MetricRegistry;
 
 public class WorkerService {
