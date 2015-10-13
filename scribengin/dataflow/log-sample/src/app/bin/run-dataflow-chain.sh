@@ -133,7 +133,7 @@ if [ $VALIDATOR_DISABLE == "false" ] ; then
     --name vm-log-validator-1 --role log-validator  --vm-application com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp \
     --prop:report-path=$TRACKING_REPORT_PATH \
     --prop:num-of-message-per-partition=$NUM_OF_MESSAGE \
-    --prop:wait-for-termination=3600000 \
+    --prop:wait-for-termination=$MAX_RUNTIME \
     $LOG_VALIDATOR_VALIDATE_OPT
 
   $SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 5000
