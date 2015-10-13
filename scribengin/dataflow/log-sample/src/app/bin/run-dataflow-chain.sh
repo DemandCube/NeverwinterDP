@@ -86,6 +86,7 @@ fi
 
 DEFAULT_RUNTIME=$(( 180000 + ($NUM_OF_MESSAGE / 3) ))
 MAX_RUNTIME=$(get_opt --max-run-time $DEFAULT_RUNTIME $@)
+MAX_MONITOR_RUNTIME==$(get_opt --max-monitor-run-time '60000' $@)
 
 SHELL=$NEVERWINTERDP_BUILD_DIR/scribengin/bin/shell.sh
 
@@ -143,7 +144,7 @@ fi
 MONITOR_COMMAND="\
 $SHELL plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor \
   --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
-  --report-path $TRACKING_REPORT_PATH --max-runtime 60000 --print-period 10000"
+  --report-path $TRACKING_REPORT_PATH --max-runtime $MAX_MONITOR_RUNTIME --print-period 10000"
 
 echo -e "\n\n"
 echo "##To Tracking The Dataflow Progress##"
