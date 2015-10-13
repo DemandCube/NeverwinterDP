@@ -64,20 +64,21 @@ public class BitSetMessageTracker {
     synchronized public BitSetPartitionMessageReport getReport() {
       BitSetPartitionMessageReport report = new BitSetPartitionMessageReport();
       int lostCount = 0;
+      int noLostTo = -1;
       for(int i = 0; i < trackProgress; i++) {
-        if(!bitSet.get(i)) lostCount++ ;
+        if(!bitSet.get(i)) {
+          if(noLostTo < 0) noLostTo = i;
+          lostCount++ ;
+        }
       }
       report.setNumOfBits(numOfBits);
       report.setTrackProgress(trackProgress);
-      report.setDuplicatedCount(duplicatedCount);
+      report.setNoLostTo(noLostTo);
       report.setLostCount(lostCount);
+      report.setDuplicatedCount(duplicatedCount);
       return report;
     }
     
-    public int getExpect() { return numOfBits; }
-    
-    public int getDuplicatedCount() { return this.duplicatedCount ; }
-   
     public int getLostCount() {
       int lostCount = 0;
       for(int i = 0; i < numOfBits; i++) {
@@ -90,19 +91,22 @@ public class BitSetMessageTracker {
   static public class BitSetPartitionMessageReport {
     private int numOfBits;
     private int trackProgress;
-    private int duplicatedCount = 0;
+    private int noLostTo;
     private int lostCount       = 0;
+    private int duplicatedCount = 0;
 
     public int getNumOfBits() { return numOfBits; }
     public void setNumOfBits(int numOfBits) { this.numOfBits = numOfBits; }
     
     public int getTrackProgress() { return trackProgress ; }
     public void setTrackProgress(int trackProgress) { this.trackProgress = trackProgress;}
+
+    public int getNoLostTo() { return noLostTo; }
+    public void setNoLostTo(int pos) { this.noLostTo = pos; }
+    public int getLostCount() { return lostCount; }
+    public void setLostCount(int lostCount) { this.lostCount = lostCount;}
     
     public int getDuplicatedCount() { return duplicatedCount; }
     public void setDuplicatedCount(int duplicatedCount) { this.duplicatedCount = duplicatedCount; }
-    
-    public int getLostCount() { return lostCount; }
-    public void setLostCount(int lostCount) { this.lostCount = lostCount;}
   }
 }

@@ -51,7 +51,8 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     Registry registry = getVM().getVMRegistry().getRegistry();
     appRegistry = new TrackingRegistry(registry, reportPath, true);
     String vmId = getVM().getDescriptor().getId();
-    appRegistry.addGenerateReport(new TrackingReport(vmId, numOfMessage, messageGenerator.getCurrentSequenceId(vmId), 0, 0));
+    int currentId = messageGenerator.getCurrentSequenceId(vmId);
+    appRegistry.addGenerateReport(new TrackingReport(vmId, numOfMessage, currentId, currentId, 0, 0));
     
     
     KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
@@ -67,7 +68,8 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     //Hard coded to run for a week at maximum
     executorService.awaitTermination(7*24*60, TimeUnit.MINUTES);
     
-    TrackingReport finishReport = new TrackingReport(vmId, numOfMessage, messageGenerator.getCurrentSequenceId(vmId), 0, 0);
+    currentId = messageGenerator.getCurrentSequenceId(vmId);
+    TrackingReport finishReport = new TrackingReport(vmId, numOfMessage, currentId, currentId, 0, 0);
     appRegistry.updateGenerateReport(finishReport);
     System.out.println("LOG GENERATOR:");
     System.out.println("Report Path: " + reportPath);
@@ -106,7 +108,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
           String vmId = getVM().getDescriptor().getId();
           int currentSeqId = messageGenerator.getCurrentSequenceId(vmId);
           if(currentSeqId % 50000 == 0) {
-            TrackingReport finishReport = new TrackingReport(vmId, numOfMessage, currentSeqId, 0, 0);
+            TrackingReport finishReport = new TrackingReport(vmId, numOfMessage, currentSeqId, currentSeqId, 0, 0);
             appRegistry.updateGenerateReport(finishReport);
           }
           if(sendPeriod > 0) {
