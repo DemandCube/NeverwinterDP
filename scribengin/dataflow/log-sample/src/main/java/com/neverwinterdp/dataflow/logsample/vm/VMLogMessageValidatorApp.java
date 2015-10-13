@@ -223,7 +223,7 @@ public class VMLogMessageValidatorApp extends VMApp {
       String zkConnectUrls = getVM().getDescriptor().getVmConfig().getRegistryConfig().getConnect() ;
       KafkaMessageConsumerConnector connector = 
           new KafkaMessageConsumerConnector("LogValidator", zkConnectUrls).
-          withConsumerTimeoutMs(10000).
+          withConsumerTimeoutMs(300000).
           connect();
       MessageConsumerHandler handler = new MessageConsumerHandler() {
         @Override
