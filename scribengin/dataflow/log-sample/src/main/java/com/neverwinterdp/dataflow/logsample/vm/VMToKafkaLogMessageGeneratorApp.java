@@ -106,7 +106,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
           String vmId = getVM().getDescriptor().getId();
           int currentSeqId = messageGenerator.getCurrentSequenceId(vmId);
           if(currentSeqId % 50000 == 0) {
-            TrackingReport finishReport = new TrackingReport(vmId, currentSeqId, currentSeqId, 0, 0);
+            TrackingReport finishReport = new TrackingReport(vmId, numOfMessage, currentSeqId, 0, 0);
             appRegistry.updateGenerateReport(finishReport);
           }
           if(sendPeriod > 0) {
