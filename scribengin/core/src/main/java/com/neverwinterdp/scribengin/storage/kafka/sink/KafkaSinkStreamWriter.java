@@ -1,6 +1,6 @@
 package com.neverwinterdp.scribengin.storage.kafka.sink;
 
-import com.neverwinterdp.kafka.producer.DefaultKafkaWriter;
+import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.kafka.producer.KafkaWriter;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
@@ -15,7 +15,7 @@ public class KafkaSinkStreamWriter implements SinkStreamWriter {
   public KafkaSinkStreamWriter(StreamDescriptor descriptor) {
     this.descriptor = descriptor;
     this.topic = descriptor.attribute("topic");
-    this.writer = new DefaultKafkaWriter("topic." + writer, descriptor.attribute("broker.list")) ;
+    this.writer = new AckKafkaWriter("topic." + writer, descriptor.attribute("broker.list")) ;
   }
   
   @Override
