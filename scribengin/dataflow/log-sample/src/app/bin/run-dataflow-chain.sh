@@ -84,7 +84,7 @@ else
   LOG_VALIDATOR_VALIDATE_OPT="--prop:validate-kafka=log4j.aggregate"
 fi
 
-DEFAULT_RUNTIME=$(( 180000 + ($NUM_OF_MESSAGE / 5) ))
+DEFAULT_RUNTIME=$(( 180000 + ($NUM_OF_MESSAGE / 3) ))
 MAX_RUNTIME=$(get_opt --max-run-time $DEFAULT_RUNTIME $@)
 
 SHELL=$NEVERWINTERDP_BUILD_DIR/scribengin/bin/shell.sh
