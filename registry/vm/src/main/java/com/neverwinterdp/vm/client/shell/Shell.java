@@ -21,6 +21,7 @@ public class Shell {
     add("help", new HelpCommand());
     add("registry", new RegistryCommand());
     add("vm", new VMCommand());
+    add("plugin", new PluginCommand());
   }
 
   public Console console() { return this.console; }

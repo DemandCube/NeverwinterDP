@@ -3,16 +3,17 @@ package com.neverwinterdp.dataflow.logsample.vm;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 
-import com.neverwinterdp.dataflow.logsample.MessageReport;
-import com.neverwinterdp.dataflow.logsample.MessageReportRegistry;
 import com.neverwinterdp.kafka.consumer.KafkaMessageConsumerConnector;
 import com.neverwinterdp.kafka.consumer.MessageConsumerHandler;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingReport;
+import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingRegistry;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSource;
 import com.neverwinterdp.scribengin.storage.s3.S3Storage;
@@ -36,6 +37,8 @@ public class VMLogMessageValidatorApp extends VMApp {
   String validateS3 ;
   
   BitSetMessageTracker bitSetMessageTracker;
+  AtomicInteger messageCounter = new AtomicInteger();
+  TrackingRegistry appRegistry ;
   
   @Override
   public void run() throws Exception {
@@ -50,8 +53,11 @@ public class VMLogMessageValidatorApp extends VMApp {
     validateKafkaTopic =  vmConfig.getProperty("validate-kafka", null);
     validateHdfs =  vmConfig.getProperty("validate-hdfs", null);
     validateS3 =  vmConfig.getProperty("validate-s3", null);
-    
+
     bitSetMessageTracker = new BitSetMessageTracker(numOfMessagePerPartition);
+
+    appRegistry = new TrackingRegistry(getVM().getVMRegistry().getRegistry(), reportPath, true);
+    report(bitSetMessageTracker);
     
     if(validateKafkaTopic != null) {
       String[] topic = validateKafkaTopic.split(",");
@@ -89,12 +95,10 @@ public class VMLogMessageValidatorApp extends VMApp {
   }
   
   void report(BitSetMessageTracker tracker) throws Exception {
-    MessageReportRegistry appRegistry = null;
-    appRegistry = new MessageReportRegistry(getVM().getVMRegistry().getRegistry(),reportPath, true);
     for(String partition : tracker.getPartitions()) {
       BitSetMessageTracker.BitSetPartitionMessageTracker pTracker = tracker.getPartitionTracker(partition);
-      MessageReport report = new MessageReport(partition, pTracker.getExpect(), pTracker.getLostCount(), pTracker.getDuplicatedCount()) ;
-      appRegistry.addValidateReport(report);
+      TrackingReport mreport = new TrackingReport(partition, pTracker) ;
+      appRegistry.saveValidateReport(mreport);
     }
   }
   
@@ -132,6 +136,9 @@ public class VMLogMessageValidatorApp extends VMApp {
                 Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class);
                 Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
                 bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
+                if(messageCounter.incrementAndGet() % 500000 == 0) {
+                  report(bitSetMessageTracker);
+                }
               }
               streamReader.close();
             } catch(Exception ex) {
@@ -183,6 +190,9 @@ public class VMLogMessageValidatorApp extends VMApp {
                 Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class);
                 Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
                 bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
+                if(messageCounter.incrementAndGet() % 500000 == 0) {
+                  report(bitSetMessageTracker);
+                }
               }
               streamReader.close();
             } catch(Exception ex) {
@@ -224,6 +234,10 @@ public class VMLogMessageValidatorApp extends VMApp {
             Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
             //messageTracker.log(lMessage);
             bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
+            
+            if(messageCounter.incrementAndGet() % 500000 == 0) {
+              report(bitSetMessageTracker);
+            }
           } catch(Throwable t) {
             System.err.println(t.getMessage());
           }

@@ -6,23 +6,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import kafka.javaapi.PartitionMetadata;
-import kafka.javaapi.TopicMetadata;
-
 import org.slf4j.Logger;
 
-import com.neverwinterdp.dataflow.logsample.MessageReport;
-import com.neverwinterdp.dataflow.logsample.MessageReportRegistry;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingReport;
+import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingRegistry;
 import com.neverwinterdp.tool.message.MessageGenerator;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.log.Log4jRecord;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
+
+import kafka.javaapi.PartitionMetadata;
+import kafka.javaapi.TopicMetadata;
 
 public class VMToKafkaLogMessageGeneratorApp extends VMApp {
   private Logger logger ;
@@ -34,6 +33,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
   private String topic ;
   private MessageGenerator messageGenerator = new MessageGenerator.DefaultMessageGenerator() ;
   private int messageGeneratorCount ;
+  private TrackingRegistry appRegistry;
   
   @Override
   public void run() throws Exception {
@@ -47,6 +47,12 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     messageSize = vmConfig.getPropertyAsInt("message-size", 256);
     int numOfStream = vmConfig.getPropertyAsInt("num-of-stream", 10);
     sendPeriod = vmConfig.getPropertyAsLong("send-period", -1);
+
+    Registry registry = getVM().getVMRegistry().getRegistry();
+    appRegistry = new TrackingRegistry(registry, reportPath, true);
+    String vmId = getVM().getDescriptor().getId();
+    appRegistry.addGenerateReport(new TrackingReport(vmId, numOfMessage, messageGenerator.getCurrentSequenceId(vmId), 0, 0));
+    
     
     KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
     if(!kafkaTool.topicExits(topic)) kafkaTool.createTopic(topic, 1, numOfStream);
@@ -60,26 +66,12 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     executorService.shutdown();
     //Hard coded to run for a week at maximum
     executorService.awaitTermination(7*24*60, TimeUnit.MINUTES);
-    String vmId = getVM().getDescriptor().getId();
-    MessageReport report = new MessageReport(vmId, messageGenerator.getCurrentSequenceId(vmId), 0, 0) ;
-    MessageReportRegistry appRegistry = null;
-    try {
-      Registry registry = getVM().getVMRegistry().getRegistry();
-      appRegistry = new MessageReportRegistry(registry, reportPath, true);
-      appRegistry.addGenerateReport(report);
-    } catch (RegistryException e) {
-      if(appRegistry != null) {
-        try {
-          appRegistry.addGenerateError(vmId, e);
-        } catch (RegistryException error) {
-          logger.error("Log info to registry error", error) ;
-        }
-      }
-      logger.error("Log info to registry error", e) ;
-    }
+    
+    TrackingReport finishReport = new TrackingReport(vmId, numOfMessage, messageGenerator.getCurrentSequenceId(vmId), 0, 0);
+    appRegistry.updateGenerateReport(finishReport);
     System.out.println("LOG GENERATOR:");
     System.out.println("Report Path: " + reportPath);
-    System.out.println(JSONSerializer.INSTANCE.toString(report));
+    System.out.println(JSONSerializer.INSTANCE.toString(finishReport));
   }
   
   synchronized private String nextMessage() {
@@ -110,8 +102,12 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
           if(mod == 0) logWriter.write("LogSample", "ERROR", jsonMessage);
           else if (mod == 1) logWriter.write("LogSample", "WARN", jsonMessage);
           else logWriter.write("LogSample", "INFO", jsonMessage);
-          if(count % 1000 == 0) {
-            logger.info("Generate " + count+ " messages for partition " + partitionMetadata.partitionId());
+          
+          String vmId = getVM().getDescriptor().getId();
+          int currentSeqId = messageGenerator.getCurrentSequenceId(vmId);
+          if(count % 500000 == 0) {
+            TrackingReport finishReport = new TrackingReport(vmId, currentSeqId, currentSeqId, 0, 0);
+            appRegistry.updateGenerateReport(finishReport);
           }
           if(sendPeriod > 0) {
             Thread.sleep(sendPeriod);

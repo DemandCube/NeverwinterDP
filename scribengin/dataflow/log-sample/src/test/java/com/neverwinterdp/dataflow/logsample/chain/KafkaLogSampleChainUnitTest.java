@@ -81,31 +81,13 @@ public class KafkaLogSampleChainUnitTest  {
         "  --prop:send-period=-1";
     shell.execute(logGeneratorSubmitCommand);
     shell.execute(
-      "vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 25000"
+      "vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 5000"
     );
 
     String dataflowChainSubmitCommand = 
         "dataflow submit-chain " + 
         "  --dataflow-chain-config src/app/conf/chain/local/kafka-log-dataflow-chain.json";
     shell.execute(dataflowChainSubmitCommand);
-    
-    shell.execute(
-      "dataflow wait-for-status --dataflow-id log-splitter-dataflow --status TERMINATED"
-    );
-    shell.execute(
-      "dataflow wait-for-status --dataflow-id log-persister-dataflow-info --status TERMINATED"
-    );
-    shell.execute(
-      "dataflow wait-for-status --dataflow-id log-persister-dataflow-warn --status TERMINATED"
-    );
-    shell.execute(
-      "dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED"
-    );
-    
-    shell.execute("dataflow info --dataflow-id log-splitter-dataflow --show-all");
-    shell.execute("dataflow info --dataflow-id log-persister-dataflow-info --show-all");
-    shell.execute("dataflow info --dataflow-id log-persister-dataflow-warn --show-all");
-    shell.execute("dataflow info --dataflow-id log-persister-dataflow-error --show-all");
     
     String logValidatorSubmitCommand = 
       "vm submit " +
@@ -120,11 +102,15 @@ public class KafkaLogSampleChainUnitTest  {
       "  --prop:wait-for-termination=180000" +
       "  --prop:validate-kafka=log4j.info,log4j.warn,log4j.error";
     shell.execute(logValidatorSubmitCommand);
+
+    shell.execute(
+        "vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 5000"
+      );
     
     shell.execute(
-      "vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 25000"
+      "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor" +
+      "  --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error" +
+      "  --report-path " + REPORT_PATH + " --max-runtime 180000 --print-period 10000"
     );
-   
-    shell.execute("registry dump --path /applications/log-sample");
   }
 }
