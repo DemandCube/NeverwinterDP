@@ -214,7 +214,6 @@ public class VMLogMessageValidatorApp extends VMApp {
       this.topic = topic;
     }
     
-    
     public void run() {
       validate(topic);
     }
@@ -235,6 +234,7 @@ public class VMLogMessageValidatorApp extends VMApp {
             //messageTracker.log(lMessage);
             bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
             
+            int count = messageCounter.incrementAndGet();
             if(messageCounter.incrementAndGet() % 50000 == 0) {
               report(bitSetMessageTracker);
             }

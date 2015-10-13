@@ -135,7 +135,7 @@ if [ $VALIDATOR_DISABLE == "false" ] ; then
     --prop:wait-for-termination=3600000 \
     $LOG_VALIDATOR_VALIDATE_OPT
 
-  $SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 3600000
+  $SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 5000
 fi
 #########################################################################################################################
 # MONITOR                                                                                                               #
