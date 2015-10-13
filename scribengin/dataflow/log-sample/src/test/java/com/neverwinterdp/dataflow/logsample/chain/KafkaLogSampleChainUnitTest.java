@@ -65,7 +65,7 @@ public class KafkaLogSampleChainUnitTest  {
   
   @Test
   public void testLogSampleChain() throws Exception {
-    int NUM_OF_MESSAGE = 5000;
+    int NUM_OF_MESSAGE = 10000;
     String REPORT_PATH = "/applications/log-sample/reports";
     String logGeneratorSubmitCommand = 
         "vm submit " +
@@ -76,6 +76,7 @@ public class KafkaLogSampleChainUnitTest  {
         "  --name vm-log-generator-1  --role vm-log-generator" + 
         "  --vm-application " + VMToKafkaLogMessageGeneratorApp.class.getName() + 
         "  --prop:report-path=" +    REPORT_PATH +
+        "  --prop:num-of-stream=5" + 
         "  --prop:num-of-message=" + NUM_OF_MESSAGE +
         "  --prop:message-size=512" +
         "  --prop:send-period=-1";
@@ -113,5 +114,7 @@ public class KafkaLogSampleChainUnitTest  {
       "  --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error" +
       "  --report-path " + REPORT_PATH + " --max-runtime 180000 --print-period 10000"
     );
+    
+    shell.execute("dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED");
   }
 }

@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.mortbay.jetty.Connector;
 import org.slf4j.Logger;
 
 import com.neverwinterdp.kafka.consumer.KafkaMessageConsumerConnector;
@@ -39,6 +40,7 @@ public class VMLogMessageValidatorApp extends VMApp {
   private BitSetMessageTracker bitSetMessageTracker;
   private AtomicInteger        messageCounter = new AtomicInteger();
   private TrackingRegistry     appRegistry;
+  ExecutorService              validatorThreadService = null;
   
   @Override
   public void run() throws Exception {
@@ -61,31 +63,31 @@ public class VMLogMessageValidatorApp extends VMApp {
     
     if(validateKafkaTopic != null) {
       String[] topic = validateKafkaTopic.split(",");
-      ExecutorService executorService = Executors.newFixedThreadPool(topic.length);
+      validatorThreadService = Executors.newFixedThreadPool(topic.length);
       for(String selTopic : topic) {
-        executorService.submit(new KafkaMessageValidator(selTopic) );
+        validatorThreadService.submit(new KafkaMessageValidator(selTopic) );
       }
-      executorService.shutdown();
-      executorService.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
+      validatorThreadService.shutdown();
+      validatorThreadService.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
     } else if(validateHdfs != null) {
       String[] hdfsLoc = validateHdfs.split(",");
-      ExecutorService executorService = Executors.newFixedThreadPool(hdfsLoc.length);
+      validatorThreadService = Executors.newFixedThreadPool(hdfsLoc.length);
       for(String selHdfsLoc : hdfsLoc) {
-        executorService.submit(new HDFSMessageValidator(selHdfsLoc));
+        validatorThreadService.submit(new HDFSMessageValidator(selHdfsLoc));
       }
-      executorService.shutdown();
-      executorService.awaitTermination(waitForTermination + 90000, TimeUnit.MILLISECONDS);
+      validatorThreadService.shutdown();
+      validatorThreadService.awaitTermination(waitForTermination + 90000, TimeUnit.MILLISECONDS);
     } else if(validateS3 != null) {
       String[] s3Loc = validateS3.split(",");
-      ExecutorService executorService = Executors.newFixedThreadPool(s3Loc.length);
+      validatorThreadService = Executors.newFixedThreadPool(s3Loc.length);
       for(String selS3Loc : s3Loc) {
         int colonIdx = selS3Loc.indexOf(":");
         String bucketName = selS3Loc.substring(0, colonIdx);
         String folderPath = selS3Loc.substring(colonIdx + 1) ;
-        executorService.submit(new S3MessageValidator(bucketName, folderPath)) ;
+        validatorThreadService.submit(new S3MessageValidator(bucketName, folderPath)) ;
       }
-      executorService.shutdown();
-      executorService.awaitTermination(waitForTermination + 90000, TimeUnit.MILLISECONDS);
+      validatorThreadService.shutdown();
+      validatorThreadService.awaitTermination(waitForTermination + 90000, TimeUnit.MILLISECONDS);
     }
     
     report(bitSetMessageTracker);
@@ -136,9 +138,11 @@ public class VMLogMessageValidatorApp extends VMApp {
                 Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class);
                 Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
                 bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
-                if(messageCounter.incrementAndGet() % 50000 == 0) {
+                int messageCount = messageCounter.incrementAndGet();
+                if(messageCount % 50000 == 0) {
                   report(bitSetMessageTracker);
                 }
+                if(messageCount + 1 >= numOfMessagePerPartition) break;
               }
               streamReader.close();
             } catch(Exception ex) {
@@ -165,8 +169,11 @@ public class VMLogMessageValidatorApp extends VMApp {
     public void run() {
       try {
         validate() ;
+      } catch (InterruptedException e) {
       } catch (Exception e) {
         logger.error("Validate S3 Source error, bucketName=" + bucketName + ", folder = " + storageFolder, e) ;
+      } finally {
+        
       }
     }
     
@@ -209,6 +216,7 @@ public class VMLogMessageValidatorApp extends VMApp {
   
   public class KafkaMessageValidator implements Runnable {
     private String topic ;
+    KafkaMessageConsumerConnector connector;
     
     KafkaMessageValidator(String topic) {
       this.topic = topic;
@@ -220,7 +228,7 @@ public class VMLogMessageValidatorApp extends VMApp {
     
     public void validate(String topic) {
       String zkConnectUrls = getVM().getDescriptor().getVmConfig().getRegistryConfig().getConnect() ;
-      KafkaMessageConsumerConnector connector = 
+      connector = 
           new KafkaMessageConsumerConnector("LogValidator", zkConnectUrls).
           withConsumerTimeoutMs(300000).
           connect();
@@ -234,10 +242,11 @@ public class VMLogMessageValidatorApp extends VMApp {
             //messageTracker.log(lMessage);
             bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
             
-            int count = messageCounter.incrementAndGet();
-            if(messageCounter.incrementAndGet() % 50000 == 0) {
+            int messageCount = messageCounter.incrementAndGet();
+            if(messageCount % 50000 == 0) {
               report(bitSetMessageTracker);
             }
+            if(messageCount >= numOfMessagePerPartition) validatorThreadService.shutdownNow();
           } catch(Throwable t) {
             System.err.println(t.getMessage());
           }
@@ -246,8 +255,11 @@ public class VMLogMessageValidatorApp extends VMApp {
       try {
         connector.consume(topic, handler, 3 /*numOfThread*/);
         connector.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
+      } catch (InterruptedException e) {
       } catch(Exception ex) {
         getVM().getLoggerFactory().getLogger("REPORT").error("Error for waiting validation", ex);
+      } finally {
+        connector.close();
       }
     }
   }

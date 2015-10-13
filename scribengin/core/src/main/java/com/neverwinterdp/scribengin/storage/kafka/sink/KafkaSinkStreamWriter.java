@@ -1,6 +1,9 @@
 package com.neverwinterdp.scribengin.storage.kafka.sink;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
+import com.neverwinterdp.kafka.producer.DefaultKafkaWriter;
 import com.neverwinterdp.kafka.producer.KafkaWriter;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
@@ -8,6 +11,8 @@ import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 
 //TODO: Allow the writer write to the assigned partition and configure the send time out
 public class KafkaSinkStreamWriter implements SinkStreamWriter {
+  static AtomicInteger idTracker = new AtomicInteger();
+  
   private StreamDescriptor descriptor;
   private KafkaWriter writer ;
   private String topic;
@@ -15,7 +20,9 @@ public class KafkaSinkStreamWriter implements SinkStreamWriter {
   public KafkaSinkStreamWriter(StreamDescriptor descriptor) {
     this.descriptor = descriptor;
     this.topic = descriptor.attribute("topic");
-    this.writer = new AckKafkaWriter("topic." + writer, descriptor.attribute("broker.list")) ;
+    String brokerUrls = descriptor.attribute("broker.list");
+    writer = new AckKafkaWriter("topic." + writer, brokerUrls) ;
+    //writer = new DefaultKafkaWriter("topic." + writer, brokerUrls) ;
   }
   
   @Override
