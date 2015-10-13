@@ -58,7 +58,7 @@ public class TrackingReport {
     for(TrackingReport report : reports) {
       formater.addRow(
         report.getGroupId(), report.getNumOfMessage(), report.getProgress(), 
-        report.getLostCount(), report.getLostCount(), report.getDuplicatedCount()
+        report.getNoLostTo(), report.getLostCount(), report.getDuplicatedCount()
       );
     }
     return formater.getFormattedText() ;

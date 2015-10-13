@@ -71,6 +71,7 @@ public class BitSetMessageTracker {
           lostCount++ ;
         }
       }
+      if(noLostTo < 0) noLostTo = trackProgress;
       report.setNumOfBits(numOfBits);
       report.setTrackProgress(trackProgress);
       report.setNoLostTo(noLostTo);
