@@ -86,7 +86,8 @@ public class KafkaLogSampleChainUnitTest  {
 
     String dataflowChainSubmitCommand = 
         "dataflow submit-chain " + 
-        "  --dataflow-chain-config src/app/conf/chain/local/kafka-log-dataflow-chain.json";
+        "  --dataflow-chain-config src/app/conf/chain/local/kafka-log-dataflow-chain.json" +
+        "  --dataflow-max-runtime 180000";
     shell.execute(dataflowChainSubmitCommand);
     
     String logValidatorSubmitCommand = 

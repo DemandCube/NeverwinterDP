@@ -28,17 +28,17 @@ import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 
 public class VMLogMessageValidatorApp extends VMApp {
-  private Logger logger ;
-  int  numOfMessagePerPartition ;
-  long waitForTermination ;
-  String reportPath ;
-  String validateKafkaTopic ;
-  String validateHdfs ;
-  String validateS3 ;
-  
-  BitSetMessageTracker bitSetMessageTracker;
-  AtomicInteger messageCounter = new AtomicInteger();
-  TrackingRegistry appRegistry ;
+  private Logger logger;
+  private int    numOfMessagePerPartition;
+  private long   waitForTermination;
+  private String reportPath;
+  private String validateKafkaTopic;
+  private String validateHdfs;
+  private String validateS3;
+
+  private BitSetMessageTracker bitSetMessageTracker;
+  private AtomicInteger        messageCounter = new AtomicInteger();
+  private TrackingRegistry     appRegistry;
   
   @Override
   public void run() throws Exception {
@@ -112,7 +112,7 @@ public class VMLogMessageValidatorApp extends VMApp {
     public void run() {
       try {
         validate() ;
-      } catch (Exception e) {
+      } catch(Exception e) {
         logger.error("Validate HDFS Source error, hdfs loc=" + hdfsLoc, e) ;
       }
     }
@@ -190,7 +190,7 @@ public class VMLogMessageValidatorApp extends VMApp {
                 Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class);
                 Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
                 bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
-                if(messageCounter.incrementAndGet() % 500000 == 0) {
+                if(messageCounter.incrementAndGet() % 50000 == 0) {
                   report(bitSetMessageTracker);
                 }
               }
@@ -235,7 +235,7 @@ public class VMLogMessageValidatorApp extends VMApp {
             //messageTracker.log(lMessage);
             bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
             
-            if(messageCounter.incrementAndGet() % 500000 == 0) {
+            if(messageCounter.incrementAndGet() % 50000 == 0) {
               report(bitSetMessageTracker);
             }
           } catch(Throwable t) {

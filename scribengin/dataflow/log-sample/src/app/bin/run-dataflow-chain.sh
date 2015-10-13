@@ -157,5 +157,5 @@ $MONITOR_COMMAND
 echo -e "\n\n"
 echo "##To Tracking The Dataflow Progress##"
 echo "-------------------------------------"
-echo '$MONITOR_COMMAND'
+echo "$MONITOR_COMMAND"
 echo -e "\n\n"
