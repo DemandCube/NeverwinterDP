@@ -143,8 +143,17 @@ fi
 MONITOR_COMMAND="\
 $SHELL plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor \
   --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error
-  --report-path $TRACKING_REPORT_PATH --max-runtime 180000 --print-period 10000"
+  --report-path $TRACKING_REPORT_PATH --max-runtime 60000 --print-period 10000"
 
-echo $MONITOR_COMMAND
+echo "\n\n\n"
+echo "##To Tracking The Dataflow Progress##"
+echo "-------------------------------------"
+echo "$MONITOR_COMMAND \n\n"
 
 $MONITOR_COMMAND
+
+
+echo "\n\n\n"
+echo "##To Tracking The Dataflow Progress##"
+echo "-------------------------------------"
+echo "$MONITOR_COMMAND \n\n"

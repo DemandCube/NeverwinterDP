@@ -136,7 +136,7 @@ public class VMLogMessageValidatorApp extends VMApp {
                 Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class);
                 Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
                 bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
-                if(messageCounter.incrementAndGet() % 500000 == 0) {
+                if(messageCounter.incrementAndGet() % 50000 == 0) {
                   report(bitSetMessageTracker);
                 }
               }
