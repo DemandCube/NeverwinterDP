@@ -2,7 +2,6 @@ package com.neverwinterdp.kafka.producer;
 
 import java.nio.charset.Charset;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.kafka.clients.producer.Callback;
 

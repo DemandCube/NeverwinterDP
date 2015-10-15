@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingReport;
+import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMessageReport;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingRegistry;
 import com.neverwinterdp.tool.message.MessageGenerator;
 import com.neverwinterdp.util.JSONSerializer;
@@ -33,7 +33,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
   private String topic ;
   private MessageGenerator messageGenerator = new MessageGenerator.DefaultMessageGenerator() ;
   private int messageGeneratorCount ;
-  private TrackingRegistry appRegistry;
+  private TrackingRegistry trackingRegistry;
   
   @Override
   public void run() throws Exception {
@@ -49,10 +49,10 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     sendPeriod = vmConfig.getPropertyAsLong("send-period", -1);
 
     Registry registry = getVM().getVMRegistry().getRegistry();
-    appRegistry = new TrackingRegistry(registry, reportPath, true);
+    trackingRegistry = new TrackingRegistry(registry, reportPath, true);
     String vmId = getVM().getDescriptor().getId();
     int currentId = messageGenerator.getCurrentSequenceId(vmId);
-    appRegistry.addGenerateReport(new TrackingReport(vmId, numOfMessage, currentId, currentId, 0, 0));
+    trackingRegistry.addGeneratorReport(new TrackingMessageReport(vmId, numOfMessage, currentId, currentId, 0, 0));
     
     
     KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
@@ -69,8 +69,8 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     executorService.awaitTermination(7*24*60, TimeUnit.MINUTES);
     
     currentId = messageGenerator.getCurrentSequenceId(vmId);
-    TrackingReport finishReport = new TrackingReport(vmId, numOfMessage, currentId, currentId, 0, 0);
-    appRegistry.updateGenerateReport(finishReport);
+    TrackingMessageReport finishReport = new TrackingMessageReport(vmId, numOfMessage, currentId, currentId, 0, 0);
+    trackingRegistry.updateGeneratorReport(finishReport);
     System.out.println("LOG GENERATOR:");
     System.out.println("Report Path: " + reportPath);
     System.out.println(JSONSerializer.INSTANCE.toString(finishReport));
@@ -108,8 +108,8 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
           String vmId = getVM().getDescriptor().getId();
           int currentSeqId = messageGenerator.getCurrentSequenceId(vmId);
           if(currentSeqId % 50000 == 0) {
-            TrackingReport finishReport = new TrackingReport(vmId, numOfMessage, currentSeqId, currentSeqId, 0, 0);
-            appRegistry.updateGenerateReport(finishReport);
+            TrackingMessageReport finishReport = new TrackingMessageReport(vmId, numOfMessage, currentSeqId, currentSeqId, 0, 0);
+            trackingRegistry.updateGeneratorReport(finishReport);
           }
           if(sendPeriod > 0) {
             Thread.sleep(sendPeriod);

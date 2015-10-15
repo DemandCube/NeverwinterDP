@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.beust.jcommander.Parameter;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
-import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.client.shell.CommandInput;
 import com.neverwinterdp.vm.client.shell.Shell;
 import com.neverwinterdp.vm.client.shell.SubCommand;
@@ -48,14 +47,14 @@ public class TrackingMonitor extends SubCommand {
       shell.execute("dataflow info --dataflow-id " + selId[i] + " --show-tasks --show-workers");
     }
 
-    List<TrackingReport> generatedReports = trackingRegistry.getGeneratedReports();
-    List<TrackingReport> validatedReports = trackingRegistry.getValidateReports();
-    shell.console().print(TrackingReport.getFormattedReport("Generated Report", generatedReports));
-    shell.console().print(TrackingReport.getFormattedReport("Validated Report", validatedReports));
+    List<TrackingMessageReport> generatedReports = trackingRegistry.getGeneratorReports();
+    List<TrackingMessageReport> validatedReports = trackingRegistry.getValidatorReports();
+    shell.console().print(TrackingMessageReport.getFormattedReport("Generated Report", generatedReports));
+    shell.console().print(TrackingMessageReport.getFormattedReport("Validated Report", validatedReports));
 
     if(validatedReports.size() == 0) return false;
     boolean validateAllMessges = true;
-    for(TrackingReport selReport : validatedReports) {
+    for(TrackingMessageReport selReport : validatedReports) {
       if(selReport.getNumOfMessage() == selReport.getProgress()) {
         continue ;
       } else {

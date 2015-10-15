@@ -2,7 +2,7 @@ package com.neverwinterdp.dataflow.logsample.chain;
 
 import com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
-import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingReport;
+import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMessageReport;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingRegistry;
 import com.neverwinterdp.scribengin.shell.Executor;
 import com.neverwinterdp.vm.VMConfig;
@@ -49,8 +49,8 @@ public class VMLogValidatorExecutor extends Executor {
       System.out.println("Execute Time: " + (System.currentTimeMillis() - start) + "ms");
       TrackingRegistry appRegistry = 
         new TrackingRegistry(shell.getVMClient().getRegistry(), config.reportPath, false);
-      System.out.println(TrackingReport.getFormattedReport("Generated Report", appRegistry.getGeneratedReports()));
-      System.out.println(TrackingReport.getFormattedReport("Validate Report", appRegistry.getValidateReports()));
+      System.out.println(TrackingMessageReport.getFormattedReport("Generated Report", appRegistry.getGeneratorReports()));
+      System.out.println(TrackingMessageReport.getFormattedReport("Validate Report", appRegistry.getValidatorReports()));
     } catch(Exception ex) {
       ex.printStackTrace();
     }

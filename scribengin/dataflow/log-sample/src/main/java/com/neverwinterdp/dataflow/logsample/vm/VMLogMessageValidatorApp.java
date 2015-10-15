@@ -7,13 +7,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.mortbay.jetty.Connector;
 import org.slf4j.Logger;
 
 import com.neverwinterdp.kafka.consumer.KafkaMessageConsumerConnector;
 import com.neverwinterdp.kafka.consumer.MessageConsumerHandler;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
-import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingReport;
+import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMessageReport;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingRegistry;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSource;
@@ -99,8 +98,8 @@ public class VMLogMessageValidatorApp extends VMApp {
   void report(BitSetMessageTracker tracker) throws Exception {
     for(String partition : tracker.getPartitions()) {
       BitSetMessageTracker.BitSetPartitionMessageTracker pTracker = tracker.getPartitionTracker(partition);
-      TrackingReport mreport = new TrackingReport(partition, pTracker) ;
-      appRegistry.saveValidateReport(mreport);
+      TrackingMessageReport mreport = new TrackingMessageReport(partition, pTracker) ;
+      appRegistry.saveValidatorReport(mreport);
     }
   }
   
