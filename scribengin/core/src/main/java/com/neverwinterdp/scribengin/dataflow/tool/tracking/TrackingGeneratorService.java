@@ -15,7 +15,7 @@ public class TrackingGeneratorService {
   private Logger logger ;
 
   private ChunkGenerator chunkGenerator = new ChunkGenerator();
-  private long   sendPeriod  =   1;
+  private long   breakInPeriod  =   1;
   
   private TrackingRegistry trackingRegistry;
   private List<TrackingMessageWriter> writers = new ArrayList<>();
@@ -52,8 +52,8 @@ public class TrackingGeneratorService {
     return this;
   }
   
-  public TrackingGeneratorService withSendPeriod(long period) {
-    this.sendPeriod = period;
+  public TrackingGeneratorService withBreakInPeriod(long period) {
+    this.breakInPeriod = period;
     return this;
   }
   
@@ -125,8 +125,8 @@ public class TrackingGeneratorService {
       while((message = chunkGenerator.nextMessage()) != null) {
         writer.write(message);
         count++ ;
-        if(sendPeriod > 0 && count % 1000 == 0) {
-          Thread.sleep(sendPeriod);
+        if(breakInPeriod > 0 && count % 1000 == 0) {
+          Thread.sleep(breakInPeriod);
         }
       }
     }

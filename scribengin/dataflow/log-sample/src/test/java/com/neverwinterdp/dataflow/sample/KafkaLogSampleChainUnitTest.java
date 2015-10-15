@@ -80,7 +80,7 @@ public class KafkaLogSampleChainUnitTest  {
         "  --prop:tracking.num-of-writer=3" +
         "  --prop:tracking.num-of-chunk=10" +
         "  --prop:tracking.num-of-message-per-chunk=" + NUM_OF_MESSAGE_PER_CHUNK +
-        "  --prop:tracking.send-period=-1" +
+        "  --prop:tracking.break-in-period=10" +
         "  --prop:tracking.message-size=512" +
          
         "  --prop:kafka.zk-connects=127.0.0.1:2181" +

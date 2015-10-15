@@ -28,7 +28,7 @@ public class VMTMGeneratorKafkaApp extends VMApp {
     service = new TrackingGeneratorService(registry, reportPath);
     service.withNumOfChunk(vmConfig.getPropertyAsInt("tracking.num-of-chunk", 3));
     service.withChunkSize(vmConfig.getPropertyAsInt("tracking.num-of-message-per-chunk", 1000));
-    service.withSendPeriod(vmConfig.getPropertyAsLong("tracking.send-period", -1));
+    service.withBreakInPeriod(vmConfig.getPropertyAsLong("tracking.break-in-period", -1));
     service.withMessageSize(vmConfig.getPropertyAsInt("tracking.message-size", 512));
     service.withLogger(logger);
     

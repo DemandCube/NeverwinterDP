@@ -58,7 +58,7 @@ TRACKING_REPORT_PATH="/applications/tracking-sample/reports"
 GENERATOR_NUM_OF_CHUNK=$(get_opt --generator-num-of-chunk '10' $@)
 GENERATOR_NUM_OF_MESSAGE_PER_CHUNK=$(get_opt --generator-num-of-message-per-chunk '100000' $@)
 GENERATOR_NUM_OF_WRITER=$(get_opt --generator-num-of-writer '3' $@)
-GENERATOR_SEND_PERIOD=$(get_opt --generator-send-period '-1' $@)
+GENERATOR_BREAK_IN_PERIOD=$(get_opt --generator-break-in-period '50' $@)
 GENERATOR_MESSAGE_SIZE=$(get_opt  --generator-message-size '512' $@)
 GENERATOR_NUM_OF_KAFKA_PARTITION=$(get_opt --generator-num-of-kafka-partition '8' $@)
 GENERATOR_NUM_OF_KAFKA_REPLICATION=$(get_opt --generator-num-of-kafka-replication '2' $@)
@@ -115,7 +115,7 @@ $SHELL vm submit \
   --prop:tracking.num-of-writer=$GENERATOR_NUM_OF_WRITER \
   --prop:tracking.num-of-chunk=$GENERATOR_NUM_OF_CHUNK \
   --prop:tracking.num-of-message-per-chunk=$GENERATOR_NUM_OF_MESSAGE_PER_CHUNK \
-  --prop:tracking.send-period=$GENERATOR_SEND_PERIOD \
+  --prop:tracking.break-in-period=$GENERATOR_BREAK_IN_PERIOD \
   --prop:tracking.message-size=$GENERATOR_MESSAGE_SIZE \
   --prop:kafka.zk-connects=zookeeper-1:2181 \
   --prop:kafka.topic=tracking.input \

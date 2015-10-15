@@ -53,7 +53,7 @@ public class TrackingUnitTest {
     
     TrackingGeneratorService generatorService = 
         new TrackingGeneratorService(registry, TRACKING_REPORT_PATH).
-        withNumOfChunk(3).withChunkSize(NUM_OF_MESSAGE_PER_CHUNK).withSendPeriod(1);
+        withNumOfChunk(3).withChunkSize(NUM_OF_MESSAGE_PER_CHUNK).withBreakInPeriod(1);
     generatorService.
       addWriter(storage.newWriter()).
       addWriter(storage.newWriter());
