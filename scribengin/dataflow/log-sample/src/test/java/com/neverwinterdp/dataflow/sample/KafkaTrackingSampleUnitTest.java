@@ -21,7 +21,7 @@ import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 
-public class KafkaLogSampleChainUnitTest  {
+public class KafkaTrackingSampleUnitTest  {
   ScribenginClusterBuilder clusterBuilder ;
   Node esNode ;
   ScribenginShell shell;
