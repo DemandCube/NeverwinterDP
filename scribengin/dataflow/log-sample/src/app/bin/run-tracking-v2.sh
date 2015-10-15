@@ -129,7 +129,7 @@ $SHELL vm wait-for-vm-status --vm-id vm-tracking-generator-1 --vm-status TERMINA
 #########################################################################################################################
 $SHELL dataflow submit \
   --dfs-app-home $DFS_APP_HOME \
-  --dataflow-config $DATAFLOW_DESCRIPTOR_FILE 
+  --dataflow-config $DATAFLOW_DESCRIPTOR_FILE \
   --dataflow-id tracking-dataflow --dataflow-max-runtime $DATAFLOW_MAX_RUNTIME  \
   --dataflow-num-of-worker $DATAFLOW_NUM_OF_WORKER --dataflow-num-of-executor-per-worker $DATAFLOW_NUM_OF_EXECUTOR_PER_WORKER \
   --wait-for-running-timeout 180000 
@@ -152,6 +152,7 @@ if [ $VALIDATOR_DISABLE == "false" ] ; then
     --prop:tracking.num-of-reader=$VALIDATOR_NUM_OF_READER \
     --prop:tracking.expect-num-of-message-per-chunk=$GENERATOR_NUM_OF_MESSAGE_PER_CHUNK \
     --prop:tracking.max-runtime=$(( 180000 + $DATAFLOW_MAX_RUNTIME ))\
+    --prop:kafka.message-wait-timeout=900000 \
     $VALIDATOR_SOURCE_OPT
 
   $SHELL vm wait-for-vm-status --vm-id vm-tracking-validator-1 --vm-status TERMINATED --max-wait-time 5000
