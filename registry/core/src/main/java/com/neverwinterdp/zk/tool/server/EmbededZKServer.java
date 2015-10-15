@@ -39,7 +39,7 @@ public class EmbededZKServer implements Server {
   public EmbededZKServer(String dataDir) {
     this(dataDir, 2181);
   }
-
+  
   void init(Map<String, String> overrideProperties) {
     zkProperties.put("dataDir", "./build/data/zookeeper");
     // the port at which the clients will connect
@@ -50,7 +50,11 @@ public class EmbededZKServer implements Server {
     //disable the per-ip limit on the number of connections since this is a non-production config
     zkProperties.put("maxClientCnxns", "0");
   }
-
+  
+  public void setMaxClientCnxns(int num) {
+    zkProperties.put("maxClientCnxns", Integer.toString(num));
+  }
+  
   public void start() throws Exception {
     if (launcher != null) {
       throw new IllegalStateException("ZookeeperLaucher should be null");
