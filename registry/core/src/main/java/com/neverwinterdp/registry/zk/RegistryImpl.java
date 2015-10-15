@@ -646,7 +646,7 @@ public class RegistryImpl implements Registry {
     return realPath.substring(config.getDbDomain().length());
   }
   
-  synchronized <T> T execute(Operation<T> op, int retry) throws RegistryException {
+  <T> T execute(Operation<T> op, int retry) throws RegistryException {
     if(closed) {
       throw new RegistryException(ErrorCode.Closed, "Registry has been closed");
     }
