@@ -42,5 +42,6 @@ public class ShellMain {
     ScribenginShell shell = new ScribenginShell(vmClient) ;
     shell.attribute(HadoopProperties.class, hadoopProps);
     shell.execute(args);
+    shell.close();
   }
 }
