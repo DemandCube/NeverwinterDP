@@ -158,6 +158,10 @@ public class VMClient {
     throw new RuntimeException("This method need to override") ;
   }
   
+  public void close() throws Exception {
+    registry.shutdown();
+  }
+  
   static public class CommandReponseWatcher extends NodeWatcher {
     private Registry         registry;
     private String           path;

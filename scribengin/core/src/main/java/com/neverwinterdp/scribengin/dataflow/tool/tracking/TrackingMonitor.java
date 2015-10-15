@@ -30,9 +30,11 @@ public class TrackingMonitor extends SubCommand {
       report(scribenginShell, trackingRegistry);
     } else {
       long stopTime = System.currentTimeMillis() + maxRuntime;
-      while(stopTime > System.currentTimeMillis()) {
-        boolean finished = report(scribenginShell, trackingRegistry);
+      boolean finished = false;
+      while(!finished) {
+        finished = report(scribenginShell, trackingRegistry);
         if(finished) break;
+        if(stopTime < System.currentTimeMillis()) break;
         Thread.sleep(printPeriod);
       }
       //wait to make sure that all the messages are validated and print the report one more time 
