@@ -33,7 +33,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
     
     String kafkaZkConnects         = vmConfig.getProperty("kafka.zk-connects", "zookeeper-1:2181");
     String kafkaTopic              = vmConfig.getProperty("kafka.topic", null);
-    long   kafkaMessageWaitTimeout = vmConfig.getPropertyAsLong("kafka.message-wait-timeout", 30000);
+    long   kafkaMessageWaitTimeout = vmConfig.getPropertyAsLong("kafka.message-wait-timeout", 600000);
     
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, reportPath);
     validatorService.withExpectNumOfMessagePerChunk(expectNumOfMessagePerChunk);
