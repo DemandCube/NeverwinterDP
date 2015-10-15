@@ -121,9 +121,11 @@ public class TrackingGeneratorService {
     
     public void doRun() throws Exception {
       TrackingMessage message = null;
+      int count = 0 ;
       while((message = chunkGenerator.nextMessage()) != null) {
         writer.write(message);
-        if(sendPeriod > 0) {
+        count++ ;
+        if(sendPeriod > 0 && count % 1000 == 0) {
           Thread.sleep(sendPeriod);
         }
       }
