@@ -150,7 +150,7 @@ if [ $VALIDATOR_DISABLE == "false" ] ; then
     --prop:tracking.report-path=$TRACKING_REPORT_PATH \
     --prop:tracking.num-of-reader=$VALIDATOR_NUM_OF_READER \
     --prop:tracking.expect-num-of-message-per-chunk=$GENERATOR_NUM_OF_MESSAGE_PER_CHUNK \
-    --prop:tracking.max-runtime=300000 \
+    --prop:tracking.max-runtime=$(( 180000 + $DATAFLOW_MAX_RUNTIME ))\
     $VALIDATOR_SOURCE_OPT
 
   $SHELL vm wait-for-vm-status --vm-id vm-tracking-validator-1 --vm-status TERMINATED --max-wait-time 5000
