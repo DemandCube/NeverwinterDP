@@ -66,4 +66,8 @@ public class Shell {
     }
     command.execute(this, cmdInput);
   }
+  
+  public void close() throws Exception {
+    vmClient.close();
+  }
 }
