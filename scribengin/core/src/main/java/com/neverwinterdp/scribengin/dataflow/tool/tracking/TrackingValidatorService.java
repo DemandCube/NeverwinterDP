@@ -36,10 +36,10 @@ public class TrackingValidatorService {
   }
   
   public void start() throws Exception {
-    if(expectNumOfMessagePerChunk > 10000000) {
-      bitSetReports = new RollableTrackingMessageReportBitSetMap(5);
+    if(expectNumOfMessagePerChunk < 10000000) {
+      bitSetReports = new RollableTrackingMessageReportBitSetMap(500);
     } else {
-      bitSetReports = new RollableTrackingMessageReportBitSetMap(100);
+      bitSetReports = new RollableTrackingMessageReportBitSetMap(10);
     }
     executorService = Executors.newFixedThreadPool(readers.size());
     for(int i = 0; i < readers.size(); i++) {
