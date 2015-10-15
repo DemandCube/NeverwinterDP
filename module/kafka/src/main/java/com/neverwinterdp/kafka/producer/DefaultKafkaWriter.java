@@ -42,12 +42,6 @@ public class DefaultKafkaWriter extends AbstractKafkaWriter {
     producer = new KafkaProducer<byte[], byte[]>(kafkaProperties);
   }
   
-  public void send(String topic, int partition, String key, String data, Callback callback, long timeout) throws Exception {
-    byte[] keyBytes = key.getBytes(UTF8);
-    byte[] messageBytes = data.getBytes(UTF8);
-    send(topic, partition, keyBytes, messageBytes, callback, timeout);
-  }
-  
   public void send(String topic, int partition, byte[] key, byte[] data, Callback callback, long timeout) throws Exception {
     ProducerRecord<byte[], byte[]> record = null;
     if(partition >= 0) record = new ProducerRecord<byte[], byte[]>(topic, partition, key, data);

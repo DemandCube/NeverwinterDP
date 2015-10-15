@@ -93,19 +93,6 @@ public class HDFSLogSampleChainUnitTest  {
         "  --dataflow-chain-config src/app/conf/chain/local/hdfs-log-dataflow-chain.json";
     shell.execute(dataflowChainSubmitCommand);
     
-//    shell.execute(
-//      "dataflow wait-for-status --dataflow-id log-splitter-dataflow --status TERMINATED"
-//    );
-//    shell.execute(
-//      "dataflow wait-for-status --dataflow-id log-persister-dataflow-info --status TERMINATED"
-//    );
-//    shell.execute(
-//      "dataflow wait-for-status --dataflow-id log-persister-dataflow-warn --status TERMINATED"
-//    );
-//    shell.execute(
-//      "dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED"
-//    );
-//    
     shell.execute(
       "dataflow monitor " + 
       "  --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error" +  

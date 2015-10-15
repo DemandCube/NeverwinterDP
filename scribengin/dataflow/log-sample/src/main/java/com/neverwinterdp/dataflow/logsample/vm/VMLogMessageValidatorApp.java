@@ -3,16 +3,17 @@ package com.neverwinterdp.dataflow.logsample.vm;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 
-import com.neverwinterdp.dataflow.logsample.MessageReport;
-import com.neverwinterdp.dataflow.logsample.MessageReportRegistry;
 import com.neverwinterdp.kafka.consumer.KafkaMessageConsumerConnector;
 import com.neverwinterdp.kafka.consumer.MessageConsumerHandler;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMessageReport;
+import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingRegistry;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSource;
 import com.neverwinterdp.scribengin.storage.s3.S3Storage;
@@ -27,15 +28,18 @@ import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 
 public class VMLogMessageValidatorApp extends VMApp {
-  private Logger logger ;
-  int  numOfMessagePerPartition ;
-  long waitForTermination ;
-  String reportPath ;
-  String validateKafkaTopic ;
-  String validateHdfs ;
-  String validateS3 ;
-  
-  BitSetMessageTracker bitSetMessageTracker;
+  private Logger logger;
+  private int    numOfMessagePerPartition;
+  private long   waitForTermination;
+  private String reportPath;
+  private String validateKafkaTopic;
+  private String validateHdfs;
+  private String validateS3;
+
+  private BitSetMessageTracker bitSetMessageTracker;
+  private AtomicInteger        messageCounter = new AtomicInteger();
+  private TrackingRegistry     appRegistry;
+  ExecutorService              validatorThreadService = null;
   
   @Override
   public void run() throws Exception {
@@ -50,36 +54,39 @@ public class VMLogMessageValidatorApp extends VMApp {
     validateKafkaTopic =  vmConfig.getProperty("validate-kafka", null);
     validateHdfs =  vmConfig.getProperty("validate-hdfs", null);
     validateS3 =  vmConfig.getProperty("validate-s3", null);
-    
+
     bitSetMessageTracker = new BitSetMessageTracker(numOfMessagePerPartition);
+
+    appRegistry = new TrackingRegistry(getVM().getVMRegistry().getRegistry(), reportPath, true);
+    report(bitSetMessageTracker);
     
     if(validateKafkaTopic != null) {
       String[] topic = validateKafkaTopic.split(",");
-      ExecutorService executorService = Executors.newFixedThreadPool(topic.length);
+      validatorThreadService = Executors.newFixedThreadPool(topic.length);
       for(String selTopic : topic) {
-        executorService.submit(new KafkaMessageValidator(selTopic) );
+        validatorThreadService.submit(new KafkaMessageValidator(selTopic) );
       }
-      executorService.shutdown();
-      executorService.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
+      validatorThreadService.shutdown();
+      validatorThreadService.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
     } else if(validateHdfs != null) {
       String[] hdfsLoc = validateHdfs.split(",");
-      ExecutorService executorService = Executors.newFixedThreadPool(hdfsLoc.length);
+      validatorThreadService = Executors.newFixedThreadPool(hdfsLoc.length);
       for(String selHdfsLoc : hdfsLoc) {
-        executorService.submit(new HDFSMessageValidator(selHdfsLoc));
+        validatorThreadService.submit(new HDFSMessageValidator(selHdfsLoc));
       }
-      executorService.shutdown();
-      executorService.awaitTermination(waitForTermination + 90000, TimeUnit.MILLISECONDS);
+      validatorThreadService.shutdown();
+      validatorThreadService.awaitTermination(waitForTermination + 90000, TimeUnit.MILLISECONDS);
     } else if(validateS3 != null) {
       String[] s3Loc = validateS3.split(",");
-      ExecutorService executorService = Executors.newFixedThreadPool(s3Loc.length);
+      validatorThreadService = Executors.newFixedThreadPool(s3Loc.length);
       for(String selS3Loc : s3Loc) {
         int colonIdx = selS3Loc.indexOf(":");
         String bucketName = selS3Loc.substring(0, colonIdx);
         String folderPath = selS3Loc.substring(colonIdx + 1) ;
-        executorService.submit(new S3MessageValidator(bucketName, folderPath)) ;
+        validatorThreadService.submit(new S3MessageValidator(bucketName, folderPath)) ;
       }
-      executorService.shutdown();
-      executorService.awaitTermination(waitForTermination + 90000, TimeUnit.MILLISECONDS);
+      validatorThreadService.shutdown();
+      validatorThreadService.awaitTermination(waitForTermination + 90000, TimeUnit.MILLISECONDS);
     }
     
     report(bitSetMessageTracker);
@@ -89,12 +96,10 @@ public class VMLogMessageValidatorApp extends VMApp {
   }
   
   void report(BitSetMessageTracker tracker) throws Exception {
-    MessageReportRegistry appRegistry = null;
-    appRegistry = new MessageReportRegistry(getVM().getVMRegistry().getRegistry(),reportPath, true);
     for(String partition : tracker.getPartitions()) {
       BitSetMessageTracker.BitSetPartitionMessageTracker pTracker = tracker.getPartitionTracker(partition);
-      MessageReport report = new MessageReport(partition, pTracker.getExpect(), pTracker.getLostCount(), pTracker.getDuplicatedCount()) ;
-      appRegistry.addValidateReport(report);
+      TrackingMessageReport mreport = new TrackingMessageReport(partition, pTracker) ;
+      appRegistry.saveValidatorReport(mreport);
     }
   }
   
@@ -108,7 +113,7 @@ public class VMLogMessageValidatorApp extends VMApp {
     public void run() {
       try {
         validate() ;
-      } catch (Exception e) {
+      } catch(Exception e) {
         logger.error("Validate HDFS Source error, hdfs loc=" + hdfsLoc, e) ;
       }
     }
@@ -132,6 +137,11 @@ public class VMLogMessageValidatorApp extends VMApp {
                 Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class);
                 Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
                 bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
+                int messageCount = messageCounter.incrementAndGet();
+                if(messageCount % 50000 == 0) {
+                  report(bitSetMessageTracker);
+                }
+                if(messageCount + 1 >= numOfMessagePerPartition) break;
               }
               streamReader.close();
             } catch(Exception ex) {
@@ -158,8 +168,11 @@ public class VMLogMessageValidatorApp extends VMApp {
     public void run() {
       try {
         validate() ;
+      } catch (InterruptedException e) {
       } catch (Exception e) {
         logger.error("Validate S3 Source error, bucketName=" + bucketName + ", folder = " + storageFolder, e) ;
+      } finally {
+        
       }
     }
     
@@ -183,6 +196,9 @@ public class VMLogMessageValidatorApp extends VMApp {
                 Log4jRecord log4jRec = JSONSerializer.INSTANCE.fromBytes(dflMessage.getData(), Log4jRecord.class);
                 Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
                 bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
+                if(messageCounter.incrementAndGet() % 50000 == 0) {
+                  report(bitSetMessageTracker);
+                }
               }
               streamReader.close();
             } catch(Exception ex) {
@@ -199,11 +215,11 @@ public class VMLogMessageValidatorApp extends VMApp {
   
   public class KafkaMessageValidator implements Runnable {
     private String topic ;
+    KafkaMessageConsumerConnector connector;
     
     KafkaMessageValidator(String topic) {
       this.topic = topic;
     }
-    
     
     public void run() {
       validate(topic);
@@ -211,9 +227,9 @@ public class VMLogMessageValidatorApp extends VMApp {
     
     public void validate(String topic) {
       String zkConnectUrls = getVM().getDescriptor().getVmConfig().getRegistryConfig().getConnect() ;
-      KafkaMessageConsumerConnector connector = 
+      connector = 
           new KafkaMessageConsumerConnector("LogValidator", zkConnectUrls).
-          withConsumerTimeoutMs(10000).
+          withConsumerTimeoutMs(300000).
           connect();
       MessageConsumerHandler handler = new MessageConsumerHandler() {
         @Override
@@ -224,6 +240,12 @@ public class VMLogMessageValidatorApp extends VMApp {
             Message lMessage = JSONSerializer.INSTANCE.fromString(log4jRec.getMessage(), Message.class);
             //messageTracker.log(lMessage);
             bitSetMessageTracker.log(lMessage.getPartition(), lMessage.getTrackId());
+            
+            int messageCount = messageCounter.incrementAndGet();
+            if(messageCount % 50000 == 0) {
+              report(bitSetMessageTracker);
+            }
+            if(messageCount >= numOfMessagePerPartition) validatorThreadService.shutdownNow();
           } catch(Throwable t) {
             System.err.println(t.getMessage());
           }
@@ -232,8 +254,11 @@ public class VMLogMessageValidatorApp extends VMApp {
       try {
         connector.consume(topic, handler, 3 /*numOfThread*/);
         connector.awaitTermination(waitForTermination, TimeUnit.MILLISECONDS);
+      } catch (InterruptedException e) {
       } catch(Exception ex) {
         getVM().getLoggerFactory().getLogger("REPORT").error("Error for waiting validation", ex);
+      } finally {
+        connector.close();
       }
     }
   }

@@ -32,36 +32,54 @@ public class BitSetMessageTracker {
   public BitSetPartitionMessageTracker getPartitionTracker(String name) { return partitions.get(name); }
   
   public String getFormatedReport() {
-    TabularFormater formater = new TabularFormater("Partition", "Expect", "Lost", "Duplicated");
+    TabularFormater formater = new TabularFormater("Partition", "Expect", "Progress", "Lost", "Duplicated");
     for(Map.Entry<String, BitSetPartitionMessageTracker> entry : partitions.entrySet()) {
       BitSetPartitionMessageTracker tracker = entry.getValue();
-      formater.addRow(entry.getKey(), tracker.getExpect(), tracker.getLostCount(), tracker.getDuplicatedCount());
+      BitSetPartitionMessageReport report = tracker.getReport();
+      formater.addRow(entry.getKey(), report.getNumOfBits(), report.getTrackProgress(), report.getLostCount(), report.getDuplicatedCount());
     }
     return formater.getFormattedText();
   }
   
   static public class BitSetPartitionMessageTracker {
-    private BitSet bitSet ;
-    private int duplicatedCount = 0;
-    private int numOfBits ;
+    private BitSet bitSet;
+    private int    duplicatedCount = 0;
+    private int    numOfBits;
+    private int    trackProgress;
     
     public BitSetPartitionMessageTracker(int nBits) {
       this.numOfBits = nBits ;
       bitSet = new BitSet(nBits) ;
     }
     
-    public void log(int idx) {
+    synchronized public void log(int idx) {
       if(idx > numOfBits) {
         throw new RuntimeException("the index is bigger than expect num of bits " + numOfBits);
       }
+      if(idx > trackProgress) trackProgress = idx;
       if(bitSet.get(idx)) duplicatedCount++ ;
       bitSet.set(idx, true);
     }
     
-    public int getExpect() { return numOfBits; }
+    synchronized public BitSetPartitionMessageReport getReport() {
+      BitSetPartitionMessageReport report = new BitSetPartitionMessageReport();
+      int lostCount = 0;
+      int noLostTo = -1;
+      for(int i = 0; i < trackProgress; i++) {
+        if(!bitSet.get(i)) {
+          if(noLostTo < 0) noLostTo = i;
+          lostCount++ ;
+        }
+      }
+      if(noLostTo < 0) noLostTo = trackProgress;
+      report.setNumOfBits(numOfBits);
+      report.setTrackProgress(trackProgress);
+      report.setNoLostTo(noLostTo);
+      report.setLostCount(lostCount);
+      report.setDuplicatedCount(duplicatedCount);
+      return report;
+    }
     
-    public int getDuplicatedCount() { return this.duplicatedCount ; }
-   
     public int getLostCount() {
       int lostCount = 0;
       for(int i = 0; i < numOfBits; i++) {
@@ -69,5 +87,27 @@ public class BitSetMessageTracker {
       }
       return lostCount;
     }
+  }
+  
+  static public class BitSetPartitionMessageReport {
+    private int numOfBits;
+    private int trackProgress;
+    private int noLostTo;
+    private int lostCount       = 0;
+    private int duplicatedCount = 0;
+
+    public int getNumOfBits() { return numOfBits; }
+    public void setNumOfBits(int numOfBits) { this.numOfBits = numOfBits; }
+    
+    public int getTrackProgress() { return trackProgress ; }
+    public void setTrackProgress(int trackProgress) { this.trackProgress = trackProgress;}
+
+    public int getNoLostTo() { return noLostTo; }
+    public void setNoLostTo(int pos) { this.noLostTo = pos; }
+    public int getLostCount() { return lostCount; }
+    public void setLostCount(int lostCount) { this.lostCount = lostCount;}
+    
+    public int getDuplicatedCount() { return duplicatedCount; }
+    public void setDuplicatedCount(int duplicatedCount) { this.duplicatedCount = duplicatedCount; }
   }
 }

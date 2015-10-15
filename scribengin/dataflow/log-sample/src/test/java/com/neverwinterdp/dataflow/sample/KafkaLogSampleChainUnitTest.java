@@ -1,4 +1,4 @@
-package com.neverwinterdp.dataflow.logsample.chain;
+package com.neverwinterdp.dataflow.sample;
 
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
@@ -11,11 +11,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp;
-import com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.builder.ScribenginClusterBuilder;
 import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
+import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMGeneratorKafkaApp;
+import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.io.IOUtil;
@@ -65,55 +65,61 @@ public class KafkaLogSampleChainUnitTest  {
   
   @Test
   public void testLogSampleChain() throws Exception {
-    int NUM_OF_MESSAGE = 10000;
-    String REPORT_PATH = "/applications/log-sample/reports";
+    int NUM_OF_MESSAGE_PER_CHUNK = 1000;
+    String REPORT_PATH = "/applications/tracking-sample/reports";
     String logGeneratorSubmitCommand = 
         "vm submit " +
-        "  --dfs-app-home /applications/log-sample" +
+        "  --dfs-app-home /applications/tracking-sample" +
         "  --registry-connect 127.0.0.1:2181" +
         "  --registry-db-domain /NeverwinterDP" +
         "  --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl" + 
-        "  --name vm-log-generator-1  --role vm-log-generator" + 
-        "  --vm-application " + VMToKafkaLogMessageGeneratorApp.class.getName() + 
-        "  --prop:report-path=" +    REPORT_PATH +
-        "  --prop:num-of-message=" + NUM_OF_MESSAGE +
-        "  --prop:message-size=512" +
-        "  --prop:send-period=-1";
+        "  --name vm-tracking-generator-1 --role vm-tm-generator" + 
+        "  --vm-application " + VMTMGeneratorKafkaApp.class.getName() + 
+        
+        "  --prop:tracking.report-path=" + REPORT_PATH +
+        "  --prop:tracking.num-of-writer=3" +
+        "  --prop:tracking.num-of-chunk=10" +
+        "  --prop:tracking.num-of-message-per-chunk=" + NUM_OF_MESSAGE_PER_CHUNK +
+        "  --prop:tracking.break-in-period=10" +
+        "  --prop:tracking.message-size=512" +
+         
+        "  --prop:kafka.zk-connects=127.0.0.1:2181" +
+        "  --prop:kafka.topic=tracking.input" +
+        "  --prop:kafka.num-of-partition=5" +
+        "  --prop:kafka.replication=1" ;
     shell.execute(logGeneratorSubmitCommand);
-    shell.execute(
-      "vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time 5000"
-    );
-
+    
     String dataflowChainSubmitCommand = 
         "dataflow submit-chain " + 
-        "  --dataflow-chain-config src/app/conf/chain/local/kafka-log-dataflow-chain.json" +
+        "  --dataflow-chain-config src/app/conf/chain/local/kafka-tracking-dataflow-chain.json" +
         "  --dataflow-max-runtime 180000";
     shell.execute(dataflowChainSubmitCommand);
     
     String logValidatorSubmitCommand = 
       "vm submit " +
-      "  --dfs-app-home /applications/log-sample" +
+      "  --dfs-app-home /applications/tracking-sample" +
       "  --registry-connect 127.0.0.1:2181" +
       "  --registry-db-domain /NeverwinterDP" +
       "  --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl" + 
-      "  --name vm-log-validator-1 --role log-validator" + 
-      "  --vm-application " + VMLogMessageValidatorApp.class.getName() + 
-      "  --prop:report-path=" +                  REPORT_PATH +
-      "  --prop:num-of-message-per-partition=" + NUM_OF_MESSAGE +
-      "  --prop:wait-for-termination=180000" +
-      "  --prop:validate-kafka=log4j.info,log4j.warn,log4j.error";
+      "  --name vm-tracking-validator-1 --role tracking-validator" + 
+      "  --vm-application " + VMTMValidatorKafkaApp.class.getName() + 
+      
+      "  --prop:tracking.report-path=" + REPORT_PATH +
+      "  --prop:tracking.num-of-reader=3"  +
+      "  --prop:tracking.expect-num-of-message-per-chunk=" + NUM_OF_MESSAGE_PER_CHUNK +
+      "  --prop:tracking.max-runtime=120000"  +
+      "  --prop:kafka.zk-connects=127.0.0.1:2181"  +
+      "  --prop:kafka.topic=tracking.aggregate"  +
+      "  --prop:kafka.message-wait-timeout=30000" ;
+    
     shell.execute(logValidatorSubmitCommand);
 
     shell.execute(
-        "vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 5000"
-      );
-    
-    shell.execute(
       "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor" +
-      "  --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error" +
+      "  --dataflow-id tracking-splitter-dataflow,tracking-persister-dataflow-info,tracking-persister-dataflow-warn,tracking-persister-dataflow-error" +
       "  --report-path " + REPORT_PATH + " --max-runtime 180000 --print-period 10000"
     );
     
-    shell.execute("dataflow wait-for-status --dataflow-id log-persister-dataflow-error --status TERMINATED");
+    shell.execute("dataflow wait-for-status --dataflow-id tracking-persister-dataflow-error --status TERMINATED");
   }
 }

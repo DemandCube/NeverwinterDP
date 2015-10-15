@@ -69,6 +69,7 @@ KILL_WORKER_PERIOD=$(get_opt --kill-worker-period '60000' $@)
 DUMP_PERIOD=$(get_opt --dump-period '15000' $@)
 VALIDATOR_DISABLE=$(has_opt "--validator-disable" $@ )
 
+TRACKING_REPORT_PATH="/applications/log-sample/reports"
 
 DATAFLOW_DESCRIPTOR_FILE=""
 LOG_VALIDATOR_VALIDATE=""
@@ -83,8 +84,9 @@ else
   LOG_VALIDATOR_VALIDATE_OPT="--prop:validate-kafka=log4j.aggregate"
 fi
 
-DEFAULT_RUNTIME=$(( 180000 + ($NUM_OF_MESSAGE / 5) ))
+DEFAULT_RUNTIME=$(( 180000 + ($NUM_OF_MESSAGE / 3) ))
 MAX_RUNTIME=$(get_opt --max-run-time $DEFAULT_RUNTIME $@)
+MAX_MONITOR_RUNTIME=$(get_opt --monitor-max-runtime '60000' $@)
 
 SHELL=$NEVERWINTERDP_BUILD_DIR/scribengin/bin/shell.sh
 
@@ -97,26 +99,19 @@ $SHELL vm upload-app --local $APP_DIR --dfs /applications/log-sample
 #########################################################################################################################
 # Launch The Message Generator                                                                                          #
 #########################################################################################################################
-START_MESSAGE_GENERATION_TIME=$SECONDS
 $SHELL vm submit \
    --dfs-app-home /applications/log-sample \
    --registry-connect zookeeper-1:2181 --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
    --name vm-log-generator-1  --role vm-log-generator --vm-application  com.neverwinterdp.dataflow.logsample.vm.VMToKafkaLogMessageGeneratorApp \
-   --prop:report-path=/applications/log-sample/reports \
+   --prop:report-path=$TRACKING_REPORT_PATH \
    --prop:num-of-message=$NUM_OF_MESSAGE --prop:message-size=$MESSAGE_SIZE \
    --prop:num-of-stream=$NUM_OF_STREAM \
    --prop:send-period=$GENERATOR_SEND_PERIOD
 
 $SHELL vm wait-for-vm-status --vm-id vm-log-generator-1 --vm-status TERMINATED --max-wait-time $GENERATOR_MAX_WAIT_TIME
-
-$SHELL registry info --path /applications/log-sample/reports/generate/reports/vm-log-generator-1 --print-data-as-json
-
-MESSAGE_GENERATION_ELAPSED_TIME=$(($SECONDS - $START_MESSAGE_GENERATION_TIME))
-echo "MESSAGE GENERATION TIME: $MESSAGE_GENERATION_ELAPSED_TIME" 
 #########################################################################################################################
 # Launch A Dataflow Chain                                                                                               #
 #########################################################################################################################
-START_DATAFLOW_CHAIN_TIME=$SECONDS
 $SHELL dataflow submit-chain \
   --dfs-app-home /applications/log-sample \
   --dataflow-chain-config $DATAFLOW_DESCRIPTOR_FILE --wait-for-running-timeout 180000 --dataflow-max-runtime $MAX_RUNTIME \
@@ -128,46 +123,40 @@ if [ "$KILL_WORKER_RANDOM" = "true" ] ; then
     --wait-before-simulate-failure 60000 --failure-period $KILL_WORKER_PERIOD --max-kill $KILL_WORKER_MAX &
 fi
 
-$SHELL dataflow monitor \
-  --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
-  --show-tasks --show-workers --stop-on-status FINISH --dump-period $DUMP_PERIOD --timeout $MAX_RUNTIME
-
-DATAFLOW_CHAIN_ELAPSED_TIME=$(($SECONDS - $START_DATAFLOW_CHAIN_TIME))
-echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
-
 #########################################################################################################################
 # Launch Validator                                                                                                      #
 #########################################################################################################################
 if [ $VALIDATOR_DISABLE == "false" ] ; then
-  START_MESSAGE_VALIDATION_TIME=$SECONDS
   $SHELL vm submit  \
     --dfs-app-home /applications/log-sample \
     --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
     --name vm-log-validator-1 --role log-validator  --vm-application com.neverwinterdp.dataflow.logsample.vm.VMLogMessageValidatorApp \
-    --prop:report-path=/applications/log-sample/reports \
+    --prop:report-path=$TRACKING_REPORT_PATH \
     --prop:num-of-message-per-partition=$NUM_OF_MESSAGE \
-    --prop:wait-for-termination=3600000 \
+    --prop:wait-for-termination=$MAX_RUNTIME \
     $LOG_VALIDATOR_VALIDATE_OPT
 
-  $SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 3600000
-
-  MESSAGE_VALIDATION_ELAPSED_TIME=$(($SECONDS - $START_MESSAGE_VALIDATION_TIME))
-  echo "MESSAGE VALIDATION TIME: $MESSAGE_VALIDATION_ELAPSED_TIME" 
+  $SHELL vm wait-for-vm-status --vm-id vm-log-validator-1 --vm-status TERMINATED --max-wait-time 5000
 fi
-
 #########################################################################################################################
-# Dump the vm and registry info                                                                                         #
+# MONITOR                                                                                                               #
 #########################################################################################################################
-$SHELL dataflow info \
+MONITOR_COMMAND="\
+$SHELL plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor \
   --dataflow-id log-splitter-dataflow,log-persister-dataflow-info,log-persister-dataflow-warn,log-persister-dataflow-error \
-  --show-all 
+  --report-path $TRACKING_REPORT_PATH --max-runtime $MAX_MONITOR_RUNTIME --print-period 10000"
 
-$SHELL registry info --path /applications/log-sample/reports/generate/reports/vm-log-generator-1 --print-data-as-json
-$SHELL registry info --path /applications/log-sample/reports/validate/reports/vm-log-generator-1 --print-data-as-json
+echo -e "\n\n"
+echo "##To Tracking The Dataflow Progress##"
+echo "-------------------------------------"
+echo "$MONITOR_COMMAND"
+echo -e "\n\n"
 
-echo "MESSAGE GENERATION TIME    : $MESSAGE_GENERATION_ELAPSED_TIME" 
-echo "Dataflow Chain ELAPSED TIME: $DATAFLOW_CHAIN_ELAPSED_TIME" 
+$MONITOR_COMMAND
 
-if [ $VALIDATOR_DISABLE == "false" ] ; then
-  echo "MESSAGE VALIDATION TIME    : $MESSAGE_VALIDATION_ELAPSED_TIME" 
-fi
+
+echo -e "\n\n"
+echo "##To Tracking The Dataflow Progress##"
+echo "-------------------------------------"
+echo "$MONITOR_COMMAND"
+echo -e "\n\n"

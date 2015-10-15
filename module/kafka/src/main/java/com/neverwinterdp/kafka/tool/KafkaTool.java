@@ -185,8 +185,7 @@ public class KafkaTool  {
         List<BrokerRegistration> holder = new ArrayList<BrokerRegistration>();
         for (int i = 0; i < ids.size(); i++) {
           String brokerId = ids.get(i);
-          BrokerRegistration registration = 
-            getDataAs(zkClient, "/brokers/ids/" + brokerId, BrokerRegistration.class);
+          BrokerRegistration registration = getDataAs(zkClient, "/brokers/ids/" + brokerId, BrokerRegistration.class);
           registration.setBrokerId(brokerId);
           holder.add(registration);
         }
