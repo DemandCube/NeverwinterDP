@@ -1,21 +1,23 @@
-package com.neverwinterdp.scribengin.dataflow.log.sample;
+package com.neverwinterdp.scribengin.dataflow.sample;
 
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class KafkaLogSampleWithWorkerKillUnitTest  {
-  KafkaLogSampleRunner logSampleRunner = new KafkaLogSampleRunner();
+public class KafkaTrackingSampleWithWorkerKillUnitTest  {
+  KafkaTrackingSampleRunner trackingSampleRunner = new KafkaTrackingSampleRunner();
   
   @Before
   public void setup() throws Exception {
-    logSampleRunner.setup();
+    trackingSampleRunner.setup();
+    trackingSampleRunner.numOfMessagePerChunk = 10000;
+    trackingSampleRunner.dataflowMaxRuntime = 180000;
   }
   
   @After
   public void teardown() throws Exception {
-    logSampleRunner.teardown();
+    trackingSampleRunner.teardown();
   }
   
   @Test
@@ -32,7 +34,7 @@ public class KafkaLogSampleWithWorkerKillUnitTest  {
   public class RunnerThread extends Thread {
     public void run() {
       try {
-        logSampleRunner.runDataflow();
+        trackingSampleRunner.runDataflow();
       } catch (Exception e) {
         e.printStackTrace();
       } finally {
@@ -53,9 +55,9 @@ public class KafkaLogSampleWithWorkerKillUnitTest  {
       try {
         String killCommand = 
             "dataflow kill-worker-random " +
-            "  --dataflow-id " + logSampleRunner.dataflowId + 
+            "  --dataflow-id " + trackingSampleRunner.dataflowId + 
             "  --wait-before-simulate-failure 5000 --failure-period 15000 --max-kill 3 --simulate-kill";
-        logSampleRunner.shell.execute(killCommand);
+        trackingSampleRunner.shell.execute(killCommand);
       } catch (Exception e) {
         e.printStackTrace();
       } finally {

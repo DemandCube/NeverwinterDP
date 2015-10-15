@@ -3,7 +3,6 @@ package com.neverwinterdp.scribengin.dataflow.sample.log;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -92,8 +91,9 @@ public class VMLogMessageValidatorApp extends VMApp {
     appRegistry = new MessageReportRegistry(getVM().getVMRegistry().getRegistry(),reportPath, true);
     for(String partition : tracker.getPartitions()) {
       BitSetMessageTracker.BitSetPartitionMessageTracker pTracker = tracker.getPartitionTracker(partition);
-      MessageReport report = new MessageReport(partition, pTracker.getExpect(), pTracker.getLostCount(), pTracker.getDuplicatedCount()) ;
-      appRegistry.addValidateReport(report);
+      BitSetMessageTracker.BitSetPartitionMessageReport report = pTracker.getReport();
+      MessageReport mReport = new MessageReport(partition, report.getNumOfBits(), report.getLostCount(), report.getDuplicatedCount()) ;
+      appRegistry.addValidateReport(mReport);
     }
   }
   
