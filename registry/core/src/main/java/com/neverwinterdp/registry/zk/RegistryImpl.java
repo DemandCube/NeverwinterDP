@@ -101,6 +101,7 @@ public class RegistryImpl implements Registry {
 
   @Override
   synchronized public void shutdown() throws RegistryException {
+    error("Call shutdown", new Exception());
     if(closed) return;
     closed = true;
     if(zkClient != null) {
