@@ -68,7 +68,7 @@ public class VM {
   private VMDescriptor initContainer(VMDescriptor vmDescriptor, final VMConfig vmConfig) throws Exception {
     final String vmDescriptorPath = VMService.ALL_PATH + "/" + vmConfig.getName();
     final RegistryConfig rConfig = vmConfig.getRegistryConfig();
-    final Registry registry = rConfig.newInstance().reconnect(15000);
+    final Registry registry = rConfig.newInstance().connect();
     
     if(vmDescriptor == null) {
       vmDescriptor = registry.getDataAs(vmDescriptorPath, VMDescriptor.class);
