@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -40,6 +41,7 @@ public class ActivityServiceUnitTest {
     zkServerLauncher.start();
   }
   
+  @AfterClass
   static public void stopServer() throws Exception {
     zkServerLauncher.shutdown();
   }
@@ -96,6 +98,7 @@ public class ActivityServiceUnitTest {
     Assert.assertEquals(1, service.getHistoryActivities().size());
     registry.get("/").dump(System.out);
     service.onDestroy();
+    System.err.println("Done!!!!!!!!!!!");
   }
   
   @Test

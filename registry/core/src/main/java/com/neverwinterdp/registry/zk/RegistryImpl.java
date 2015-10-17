@@ -82,32 +82,21 @@ public class RegistryImpl implements Registry {
       throw new RegistryException(ErrorCode.Closed, "Registry has been closed");
     }
     info("Reconnect to the registry, connect count = " + ++reconnectCount);
+    
     try {
       if(zkClient != null) zkClient.close();
-      zkClient = new ZooKeeper(config.getConnect(), 15000, new RegistryWatcher());
+      ZkConnectedStateWatcher connectStateWatcher = new ZkConnectedStateWatcher();
+      zkClient = new ZooKeeper(config.getConnect(), 10000, connectStateWatcher);
+      if(!connectStateWatcher.waitForConnected(10000)) {
+        zkClient.close();
+        zkClient = null;
+        throw new RegistryException(ErrorCode.Connection, "Cannot connect due to the interrupt") ;
+      }
     } catch(IOException | InterruptedException ex) {
       throw new RegistryException(ErrorCode.Connection, ex) ;
     }
-    long waitTime = 0 ;
-    while(waitTime < timeout) {
-      if(zkClient.getState().isConnected()) {
-        zkCreateIfNotExist(config.getDbDomain()) ;
-        return this;
-      }
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-        throw new RegistryException(ErrorCode.Connection, "Cannot connect due to the interrupt") ;
-      }
-      waitTime += 500;
-    }
-    try {
-      zkClient.close();
-    } catch (InterruptedException e) {
-      throw new RegistryException(ErrorCode.Connection, "Cannot connect after " + timeout + "ms") ;
-    }
-    zkClient = null ;
-    throw new RegistryException(ErrorCode.Connection, "Cannot connect after " + timeout + "ms") ;
+    zkCreateIfNotExist(config.getDbDomain()) ;
+    return this;
   }
 
   @Override
@@ -128,9 +117,8 @@ public class RegistryImpl implements Registry {
   public void onDestroy() throws RegistryException {
     shutdown();
   }
-  
 
-  synchronized ZooKeeper getZKClient() throws RegistryException {
+  ZooKeeper getZKClient() throws RegistryException {
     if(closed) {
       throw new RegistryException(ErrorCode.Closed, "Registry has been closed");
     }
@@ -588,6 +576,11 @@ public class RegistryImpl implements Registry {
   }
   
   public <T> T executeBatch(BatchOperations<T> ops, int retry, long timeoutThreshold) throws RegistryException {
+    T result = ops.execute(this);
+    return result;
+  }
+  
+  public <T> T executeBatchWithRetry(BatchOperations<T> ops, int retry, long timeoutThreshold) throws RegistryException {
     RegistryException error = null;
     for(int i = 0;i < retry; i++) {
       try {
@@ -672,7 +665,10 @@ public class RegistryImpl implements Registry {
         error = new RegistryException(ErrorCode.Unknown, "Unknown Error", kEx) ;
       }
     }
-    if(error.getErrorCode().isConnectionProblem()) shutdown();
+    if(error.getErrorCode().isConnectionProblem()) {
+      error("Call shutdown", error);
+      shutdown();
+    }
     throw error;
   }
   

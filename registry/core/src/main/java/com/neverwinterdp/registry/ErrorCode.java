@@ -2,7 +2,6 @@ package com.neverwinterdp.registry;
 
 public enum ErrorCode {
   Connection(1, "Cannot connect to the registry server due to the error such the unavailable server, timeout.."),
-  Timeout(2, "Cannot wait for an event, or wait too long"),
   ConnectionLoss(3, "Loose the connection due to timeout or broken network"),
   
   NodeCreation(10, "Cannot create node due to certain error such, no parent node..."),
@@ -11,6 +10,7 @@ public enum ErrorCode {
   NodeExists(13, "A node is already existed"),
   
   Closed(20, "The Registry object has been closed and no longer usable"),
+  Timeout(21, "Cannot wait for an event, or wait too long"),
   
   Unknown(1000,  "Unclassified error");
   

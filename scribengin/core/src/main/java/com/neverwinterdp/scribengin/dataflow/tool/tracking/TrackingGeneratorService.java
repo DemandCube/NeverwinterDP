@@ -165,7 +165,7 @@ public class TrackingGeneratorService {
       TrackingMessage message = new TrackingMessage(vmId, currentChunkId, currentChunkMessageIdTracker++, data);
       currentReport.setProgress(currentChunkMessageIdTracker);
       currentReport.setNoLostTo(currentChunkMessageIdTracker);
-      if(currentChunkMessageIdTracker % 50000 == 0) {
+      if(currentChunkMessageIdTracker % 10000 == 0) {
         trackingRegistry.updateGeneratorReport(currentReport);
       }
       return message ;

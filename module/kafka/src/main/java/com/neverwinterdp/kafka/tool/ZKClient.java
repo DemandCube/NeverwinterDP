@@ -34,34 +34,22 @@ public class ZKClient {
     if(closed) {
       throw new RegistryException(ErrorCode.Closed, "Registry has been closed");
     }
-    try {
-      if(zkClient != null) zkClient.close();
-      Watcher watcher = new Watcher() {
-        @Override
-        public void process(WatchedEvent event) {
-        }
-      };
-      zkClient = new ZooKeeper(zkConnects, 15000, watcher);
-    } catch(IOException | InterruptedException ex) {
-      throw new RegistryException(ErrorCode.Connection, ex) ;
-    }
+    if(zkClient != null) zkClient.close();
+    Watcher watcher = new Watcher() {
+      @Override
+      public void process(WatchedEvent event) {
+      }
+    };
+    zkClient = new ZooKeeper(zkConnects, 15000, watcher);
     long waitTime = 0 ;
     while(waitTime < timeout) {
       if(zkClient.getState().isConnected()) {
         return ;
       }
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-        throw new Exception("Cannot connect due to the interrupt") ;
-      }
+      Thread.sleep(500);
       waitTime += 500;
     }
-    try {
-      zkClient.close();
-    } catch (InterruptedException e) {
-      throw new Exception("Cannot connect after " + timeout + "ms") ;
-    }
+    zkClient.close();
     zkClient = null ;
     throw new Exception("Cannot connect after " + timeout + "ms") ;
   }
