@@ -14,32 +14,32 @@ import com.neverwinterdp.scribengin.storage.source.Source;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
 
 public class KafkaSource implements Source {
-  private StorageConfig descriptor;
+  private StorageConfig storageConfig;
   private Map<Integer, KafkaSourceStream> sourceStreams = new HashMap<Integer, KafkaSourceStream>();
   
   public KafkaSource(String name, String zkConnect, String topic) throws Exception {
-    StorageConfig descriptor = createStorageDescriptor(name, topic, zkConnect, null);
+    StorageConfig descriptor = createStorageConfig(name, topic, zkConnect, null);
     init(descriptor);
   }
   
-  public KafkaSource(StorageConfig descriptor) throws Exception {
-    init(descriptor);
+  public KafkaSource(StorageConfig sconfig) throws Exception {
+    init(sconfig);
   }
 
-  void init(StorageConfig descriptor) throws Exception {
-    this.descriptor = descriptor;
-    KafkaTool kafkaTool = new KafkaTool(descriptor.attribute("name"), descriptor.attribute("zk.connect"));
-    TopicMetadata topicMetdadata = kafkaTool.findTopicMetadata(descriptor.attribute("topic"));
+  void init(StorageConfig sconfig) throws Exception {
+    this.storageConfig = sconfig;
+    KafkaTool kafkaTool = new KafkaTool(sconfig.attribute("name"), sconfig.attribute("zk.connect"));
+    TopicMetadata topicMetdadata = kafkaTool.findTopicMetadata(sconfig.attribute("topic"));
     List<PartitionMetadata> partitionMetadatas = topicMetdadata.partitionsMetadata();
     for(int i = 0; i < partitionMetadatas.size(); i++) {
       PartitionMetadata partitionMetadata = partitionMetadatas.get(i);
-      KafkaSourceStream sourceStream = new KafkaSourceStream(descriptor, partitionMetadata);
+      KafkaSourceStream sourceStream = new KafkaSourceStream(sconfig, partitionMetadata);
       sourceStreams.put(sourceStream.getId(), sourceStream);
     }
   }
   
   @Override
-  public StorageConfig getDescriptor() { return descriptor; }
+  public StorageConfig getStorageConfig() { return storageConfig; }
 
   /**
    * The stream id is equivalent to the partition id of the kafka
@@ -67,7 +67,7 @@ public class KafkaSource implements Source {
   public void close() throws Exception {
   }
   
-  static public StorageConfig createStorageDescriptor(String name, String topic, String zkConnect, String reader) {
+  static public StorageConfig createStorageConfig(String name, String topic, String zkConnect, String reader) {
     StorageConfig descriptor = new StorageConfig("kafka");
     descriptor.attribute("name", name);
     descriptor.attribute("topic", topic);
