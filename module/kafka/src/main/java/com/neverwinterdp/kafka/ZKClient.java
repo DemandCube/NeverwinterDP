@@ -30,7 +30,7 @@ public class ZKClient {
       public void process(WatchedEvent event) {
       }
     };
-    zkClient = new ZooKeeper(zkConnects, 10000, watcher);
+    zkClient = new ZooKeeper(zkConnects, 15000, watcher);
     long waitTime = 0 ;
     while(waitTime < timeout) {
       if(zkClient.getState().isConnected()) {
@@ -53,7 +53,7 @@ public class ZKClient {
 
   synchronized ZooKeeper getZKClient() throws KeeperException, InterruptedException, IOException {
     if(zkClient == null) {
-      reconnect(10000);
+      reconnect(15000);
     }
     return zkClient;
   }

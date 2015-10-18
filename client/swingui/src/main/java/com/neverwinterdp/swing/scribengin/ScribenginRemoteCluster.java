@@ -13,7 +13,7 @@ public class ScribenginRemoteCluster extends ScribenginCluster {
   
   public void connect(RegistryConfig config) throws Exception {
     Registry registry = new RegistryImpl(config);
-    registry.reconnect(1 * 30 * 1000);
+    registry.connect();
     VMClient vmClient = new VMClient(registry);
     vmClient.setWaitForResultTimeout(60000);
     shell = new ScribenginShell(vmClient) ;
