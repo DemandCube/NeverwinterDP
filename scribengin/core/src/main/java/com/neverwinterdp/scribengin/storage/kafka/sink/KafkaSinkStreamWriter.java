@@ -2,8 +2,8 @@ package com.neverwinterdp.scribengin.storage.kafka.sink;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
-import com.neverwinterdp.kafka.producer.DefaultKafkaWriter;
 import com.neverwinterdp.kafka.producer.KafkaWriter;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
@@ -13,11 +13,13 @@ import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 public class KafkaSinkStreamWriter implements SinkStreamWriter {
   static AtomicInteger idTracker = new AtomicInteger();
   
+  private KafkaClient kafkaClient;
   private StreamDescriptor descriptor;
   private KafkaWriter writer ;
   private String topic;
   
-  public KafkaSinkStreamWriter(StreamDescriptor descriptor) {
+  public KafkaSinkStreamWriter(KafkaClient kafkaClient, StreamDescriptor descriptor) {
+    this.kafkaClient = kafkaClient;
     this.descriptor = descriptor;
     this.topic = descriptor.attribute("topic");
     String brokerUrls = descriptor.attribute("broker.list");

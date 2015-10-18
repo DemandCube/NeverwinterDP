@@ -1,5 +1,6 @@
-package com.neverwinterdp.kafka.tool;
+package com.neverwinterdp.kafka;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.zookeeper.KeeperException;
@@ -14,11 +15,6 @@ public class ZKClient {
   private String zkConnects;
   private ZooKeeper zkClient ;
   
-  private boolean closed = false;
-  
-  public ZKClient() {
-  }
-  
   public ZKClient(String zkConnects) {
     this.zkConnects = zkConnects;
   }
@@ -27,17 +23,14 @@ public class ZKClient {
     reconnect(timeout) ;
   }
   
-  synchronized void reconnect(long timeout) throws Exception {
-    if(closed) {
-      throw new Exception("Zk connection has been closed");
-    }
+  synchronized void reconnect(long timeout) throws KeeperException, InterruptedException, IOException {
     if(zkClient != null) zkClient.close();
     Watcher watcher = new Watcher() {
       @Override
       public void process(WatchedEvent event) {
       }
     };
-    zkClient = new ZooKeeper(zkConnects, 15000, watcher);
+    zkClient = new ZooKeeper(zkConnects, 10000, watcher);
     long waitTime = 0 ;
     while(waitTime < timeout) {
       if(zkClient.getState().isConnected()) {
@@ -48,21 +41,19 @@ public class ZKClient {
     }
     zkClient.close();
     zkClient = null ;
-    throw new Exception("Cannot connect after " + timeout + "ms") ;
+    throw KeeperException.create(KeeperException.Code.OPERATIONTIMEOUT) ;
   }
 
   synchronized public void close() throws Exception {
-    if(closed) return;
-    closed = true;
     if(zkClient != null) {
       zkClient.close();;
       zkClient = null ;
     }
   }
 
-  synchronized ZooKeeper getZKClient() throws Exception {
-    if(closed) {
-      throw new Exception("Zk connection  has been closed");
+  synchronized ZooKeeper getZKClient() throws KeeperException, InterruptedException, IOException {
+    if(zkClient == null) {
+      reconnect(10000);
     }
     return zkClient;
   }
@@ -74,31 +65,35 @@ public class ZKClient {
   public void dump(final String path) throws Exception {
     Operation<Boolean> op = new Operation<Boolean>() {
       @Override
-      public Boolean execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
-        dump(zkClient, path);
+      public Boolean execute(ZooKeeper zkClient) throws InterruptedException, KeeperException, IOException {
+        dump(getZKClient(), path);
         return true;
       }
     };
     execute(op, 1);
   }
   
-  public <T> T execute(Operation<T> op, int retry) throws Exception {
-    Exception error = null;
+  public <T> T execute(Operation<T> op, int retry) throws InterruptedException, IOException, KeeperException  {
+    Throwable error = null;
     for (int i = 0; i < retry; i++) {
       try {
         ZooKeeper zkClient = getZKClient();
         T result = op.execute(zkClient);
         return result;
       } catch (KeeperException kEx) {
-        reconnect(10000);
-        error = kEx;
+        if(kEx.code() == KeeperException.Code.CONNECTIONLOSS) {
+          reconnect(10000);
+          error = kEx;
+        } else {
+          throw kEx;
+        }
       }
     }
-    throw error;
+    throw new IOException("Cannot execute the operation after " + retry + " retries", error);
   }
   
   static public abstract class Operation<T> {
-    abstract public T execute(ZooKeeper zkClient) throws InterruptedException, KeeperException ;
+    abstract public T execute(ZooKeeper zkClient) throws InterruptedException, KeeperException, IOException  ;
  
     protected <V> V getDataAs(ZooKeeper zkClient, String path, Class<V> type) throws KeeperException, InterruptedException {
       byte[] data = zkClient.getData(path, false, new Stat());

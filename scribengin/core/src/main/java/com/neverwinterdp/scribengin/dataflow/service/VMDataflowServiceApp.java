@@ -74,7 +74,9 @@ public class VMDataflowServiceApp extends VMApp {
           moduleProps.put("cluster.environment", "yarn");
         }
        
+        moduleProps.put("kafka.zk.connects", vmConfig.getRegistryConfig().getConnect());
         appContainer.install(moduleProps, DataflowServiceModule.NAME);
+        
         ServiceModuleContainer dataflowServiceModuleContainer = appContainer.getModule(DataflowServiceModule.NAME);
 
         RefNode leaderRefNode = new RefNode(getVM().getDescriptor().getRegistryPath());

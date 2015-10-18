@@ -39,6 +39,7 @@ public class VMDataflowWorkerApp extends VMApp {
       dataflowWorkerModuleProps.put("cluster.environment", "yarn");
     }
     
+    dataflowWorkerModuleProps.put("kafka.zk.connects", vmConfig.getRegistryConfig().getConnect());
     appContainer.install(dataflowWorkerModuleProps, DataflowWorkerModule.NAME);
     ServiceModuleContainer dataflowWorkerModuleContainer = appContainer.getModule(DataflowWorkerModule.NAME);
     

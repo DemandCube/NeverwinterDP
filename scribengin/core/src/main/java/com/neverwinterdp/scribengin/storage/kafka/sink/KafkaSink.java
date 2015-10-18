@@ -2,33 +2,35 @@ package com.neverwinterdp.scribengin.storage.kafka.sink;
 
 import java.util.LinkedHashMap;
 
-import com.neverwinterdp.kafka.tool.KafkaTool;
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkStream;
 
 public class KafkaSink implements Sink {
+  private KafkaClient kafkaClient;
   private StorageDescriptor descriptor;
   
   private int idTracker = 0;
   private LinkedHashMap<Integer, KafkaSinkStream> streams = new LinkedHashMap<Integer, KafkaSinkStream>() ;
   
-  public KafkaSink(StorageDescriptor descriptor) throws Exception {
+  public KafkaSink(KafkaClient kafkaClient, StorageDescriptor descriptor) throws Exception {
+    this.kafkaClient = kafkaClient;
     init(descriptor) ;
   }
   
-  public KafkaSink(String name, String zkConnect, String topic) throws Exception {
+  public KafkaSink(KafkaClient kafkaClient, String name, String topic) throws Exception {
+    this.kafkaClient = kafkaClient;
     StorageDescriptor descriptor = new StorageDescriptor("kafka");
     descriptor.attribute("name", name);
     descriptor.attribute("topic", topic);
-    descriptor.attribute("zk.connect", zkConnect);
+    descriptor.attribute("zk.connect", kafkaClient.getZkConnects());
     init(descriptor);
   }
   
   private void init(StorageDescriptor descriptor) throws Exception {
-    KafkaTool kafkaTool = new KafkaTool(descriptor.attribute("name"), descriptor.attribute("zk.connect")) ;
-    descriptor.attribute("broker.list", kafkaTool.getKafkaBrokerList());
+    descriptor.attribute("broker.list", kafkaClient.getKafkaBrokerList());
     this.descriptor  = descriptor ;
   }
   
@@ -39,7 +41,7 @@ public class KafkaSink implements Sink {
   public SinkStream getStream(StreamDescriptor descriptor) throws Exception {
     SinkStream stream = streams.get(descriptor.getId());
     if(stream != null) return stream ;
-    KafkaSinkStream newStream= new KafkaSinkStream(descriptor) ;
+    KafkaSinkStream newStream= new KafkaSinkStream(kafkaClient, descriptor) ;
     streams.put(descriptor.getId(), newStream) ;
     return newStream;
   }
@@ -65,7 +67,7 @@ public class KafkaSink implements Sink {
   public SinkStream newStream() throws Exception {
     StreamDescriptor streamDescriptor = new StreamDescriptor(this.descriptor);
     streamDescriptor.setId(idTracker++);
-    return new KafkaSinkStream(streamDescriptor);
+    return new KafkaSinkStream(kafkaClient, streamDescriptor);
   }
 
   @Override

@@ -11,8 +11,8 @@ import kafka.javaapi.TopicMetadata;
 
 import org.slf4j.Logger;
 
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
-import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.tool.message.MessageGenerator;
@@ -32,6 +32,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
   private String topic ;
   private MessageGenerator messageGenerator = new MessageGenerator.DefaultMessageGenerator() ;
   private int messageGeneratorCount ;
+  private KafkaClient kafkaClient;
   
   @Override
   public void run() throws Exception {
@@ -46,10 +47,12 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     int numOfStream = vmConfig.getPropertyAsInt("num-of-stream", 10);
     sendPeriod = vmConfig.getPropertyAsLong("send-period", -1);
     
-    KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
-    if(!kafkaTool.topicExits(topic)) kafkaTool.createTopic(topic, 1, numOfStream);
+    kafkaClient = new KafkaClient("KafkaTool", zkConnects);
+    if(!kafkaClient.getKafkaTool().topicExits(topic)) {
+      kafkaClient.getKafkaTool().createTopic(topic, 1, numOfStream);
+    }
     
-    TopicMetadata topicMetadata = kafkaTool.findTopicMetadata(topic);
+    TopicMetadata topicMetadata = kafkaClient.findTopicMetadata(topic);
     List<PartitionMetadata> partitionMetadataHolder = topicMetadata.partitionsMetadata();
     ExecutorService executorService = Executors.newFixedThreadPool(partitionMetadataHolder.size());
     for(int i = 0; i < partitionMetadataHolder.size(); i++) {
@@ -75,6 +78,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
       }
       logger.error("Log info to registry error", e) ;
     }
+    kafkaClient.close();
     System.out.println("LOG GENERATOR:");
     System.out.println("Report Path: " + reportPath);
     System.out.println(JSONSerializer.INSTANCE.toString(report));
@@ -99,7 +103,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     public void run() {
       logger.info("Start generate message for partition " + partitionMetadata.partitionId()); 
       try {
-        KafkaPartitionLogWriter logWriter = new KafkaPartitionLogWriter(zkConnects, topic, partitionMetadata);
+        KafkaPartitionLogWriter logWriter = new KafkaPartitionLogWriter(topic, partitionMetadata);
         String jsonMessage = null ;
         int count = 0 ;
         while((jsonMessage = nextMessage()) != null) {
@@ -129,11 +133,10 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     private PartitionMetadata partitionMetadata ;
     private AckKafkaWriter kafkaWriter;
     
-    public KafkaPartitionLogWriter(String zkConnects, String topic, PartitionMetadata partitionMetadata) throws Exception {
+    public KafkaPartitionLogWriter(String topic, PartitionMetadata partitionMetadata) throws Exception {
       this.topic = topic ;
       this.partitionMetadata = partitionMetadata;
-      KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
-      String kafkaConnects = kafkaTool.getKafkaBrokerList();
+      String kafkaConnects = kafkaClient.getKafkaBrokerList();
       kafkaWriter = new AckKafkaWriter("KafkaLogWriter", kafkaConnects) ;
       kafkaWriter.reconnect();
     }

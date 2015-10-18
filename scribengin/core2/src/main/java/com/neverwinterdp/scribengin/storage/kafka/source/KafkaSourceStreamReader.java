@@ -2,6 +2,7 @@ package com.neverwinterdp.scribengin.storage.kafka.source;
 
 import kafka.javaapi.PartitionMetadata;
 
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.PartitionConfig;
@@ -9,19 +10,17 @@ import com.neverwinterdp.scribengin.storage.source.CommitPoint;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 
 public class KafkaSourceStreamReader implements SourcePartitionStreamReader {
-  private PartitionConfig descriptor;
+  private PartitionConfig partitionConfig;
   private KafkaPartitionReader partitionReader ;
   private CommitPoint lastCommitInfo ;
   
-  public KafkaSourceStreamReader(PartitionConfig descriptor, 
-      PartitionMetadata partitionMetadata) throws Exception {
-    this.descriptor = descriptor;
-    this.partitionReader = 
-        new KafkaPartitionReader(descriptor.attribute("name"), descriptor.attribute("zk.connect"), descriptor.attribute("topic"), partitionMetadata);
+  public KafkaSourceStreamReader(KafkaClient kafkaClient, PartitionConfig pConfig, PartitionMetadata pmd) throws Exception {
+    this.partitionConfig = pConfig;
+    this.partitionReader = new KafkaPartitionReader(pConfig.attribute("name"), kafkaClient, pConfig.attribute("topic"), pmd);
   }
   
   @Override
-  public String getName() { return descriptor.attribute("name"); }
+  public String getName() { return partitionConfig.attribute("name"); }
 
   @Override
   public Record next(long maxWait) throws Exception {
@@ -68,5 +67,4 @@ public class KafkaSourceStreamReader implements SourcePartitionStreamReader {
   public void close() throws Exception {
     partitionReader.close();
   }
- 
 }

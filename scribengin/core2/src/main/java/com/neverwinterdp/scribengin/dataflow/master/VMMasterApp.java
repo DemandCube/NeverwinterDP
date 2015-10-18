@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 
 import com.neverwinterdp.module.AppContainer;
 import com.neverwinterdp.module.DataflowServiceModule;
-import com.neverwinterdp.module.ESOSMonitorLoggerModule;
 import com.neverwinterdp.module.ServiceModuleContainer;
 import com.neverwinterdp.registry.RefNode;
 import com.neverwinterdp.registry.Registry;
@@ -74,6 +73,7 @@ public class VMMasterApp extends VMApp {
           moduleProps.put("cluster.environment", "yarn");
         }
        
+        moduleProps.put("kafka.zk.connects", vmConfig.getRegistryConfig().getConnect());
         appContainer.install(moduleProps, DataflowServiceModule.NAME);
         ServiceModuleContainer dataflowServiceModuleContainer = appContainer.getModule(DataflowServiceModule.NAME);
 

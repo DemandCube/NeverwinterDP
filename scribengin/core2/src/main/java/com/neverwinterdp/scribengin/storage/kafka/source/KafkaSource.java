@@ -9,32 +9,34 @@ import kafka.javaapi.TopicMetadata;
 
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.kafka.KafkaStorage;
-import com.neverwinterdp.kafka.tool.KafkaTool;
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.scribengin.storage.PartitionConfig;
 import com.neverwinterdp.scribengin.storage.source.Source;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
 
 public class KafkaSource implements Source {
-  private StorageConfig storageConfig;
+  private KafkaClient                     kafkaClient;
+  private StorageConfig                   storageConfig;
   private Map<Integer, KafkaSourceStream> sourceStreams = new HashMap<Integer, KafkaSourceStream>();
-  
-  public KafkaSource(String name, String zkConnect, String topic) throws Exception {
-    StorageConfig descriptor = createStorageConfig(name, topic, zkConnect, null);
+
+  public KafkaSource(KafkaClient kafkaClient, String name, String topic) throws Exception {
+    this.kafkaClient = kafkaClient;
+    StorageConfig descriptor = createStorageConfig(name, topic, kafkaClient.getZkConnects(), null);
     init(descriptor);
   }
   
-  public KafkaSource(StorageConfig sconfig) throws Exception {
+  public KafkaSource(KafkaClient kafkaClient, StorageConfig sconfig) throws Exception {
+    this.kafkaClient = kafkaClient;
     init(sconfig);
   }
   
   void init(StorageConfig sconfig) throws Exception {
     this.storageConfig = sconfig;
-    KafkaTool kafkaTool = KafkaStorage.getKafkaTool(sconfig);
-    TopicMetadata topicMetdadata = kafkaTool.findTopicMetadata(sconfig.attribute("topic"));
+    TopicMetadata topicMetdadata = kafkaClient.findTopicMetadata(sconfig.attribute("topic"));
     List<PartitionMetadata> partitionMetadatas = topicMetdadata.partitionsMetadata();
     for(int i = 0; i < partitionMetadatas.size(); i++) {
       PartitionMetadata partitionMetadata = partitionMetadatas.get(i);
-      KafkaSourceStream sourceStream = new KafkaSourceStream(sconfig, partitionMetadata);
+      KafkaSourceStream sourceStream = new KafkaSourceStream(kafkaClient, sconfig, partitionMetadata);
       sourceStreams.put(sourceStream.getId(), sourceStream);
     }
   }

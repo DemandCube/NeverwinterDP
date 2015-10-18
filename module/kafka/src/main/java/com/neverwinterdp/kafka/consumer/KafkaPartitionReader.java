@@ -24,13 +24,14 @@ import kafka.javaapi.message.ByteBufferMessageSet;
 import kafka.message.Message;
 import kafka.message.MessageAndOffset;
 
-import com.neverwinterdp.kafka.tool.KafkaTool;
+import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.ZKClient;
 import com.neverwinterdp.util.JSONSerializer;
 
 
 public class KafkaPartitionReader {
-  private String name;
-  private String zkConnect;
+  private String   name;
+  private KafkaClient kafkaClient ;
   private String topic ;
   private PartitionMetadata partitionMetadata;
   private int fetchSize = 100000;
@@ -39,10 +40,10 @@ public class KafkaPartitionReader {
   
   private List<MessageAndOffset>     currentMessageSet;
   private Iterator<MessageAndOffset> currentMessageSetIterator;
-
-  public KafkaPartitionReader(String name, String zkConnect, String topic, PartitionMetadata pMetadata) throws Exception {
+  
+  public KafkaPartitionReader(String name, KafkaClient kafkaClient, String topic, PartitionMetadata pMetadata) throws Exception {
     this.name = name;
-    this.zkConnect = zkConnect;
+    this.kafkaClient = kafkaClient;
     this.topic = topic;
     this.partitionMetadata = pMetadata;
     reconnect() ;
@@ -72,8 +73,7 @@ public class KafkaPartitionReader {
       Thread.sleep(retryDelay);
       //Refresh the partition metadata
       try {
-      KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnect);
-      this.partitionMetadata = kafkaTool.findPartitionMetadata(topic, partitionMetadata.partitionId());
+      partitionMetadata = kafkaClient.findPartitionMetadata(topic, partitionMetadata.partitionId());
       Broker broker = partitionMetadata.leader();
       if(broker != null) {
         consumer = new SimpleConsumer(broker.host(), broker.port(), 100000, 64 * 1024, name);

@@ -64,7 +64,7 @@ public class KafkaTrackingSampleUnitTest  {
   }
   
   @Test
-  public void testLogSampleChain() throws Exception {
+  public void testTrackingSampleChain() throws Exception {
     int NUM_OF_MESSAGE_PER_CHUNK = 1000;
     String REPORT_PATH = "/applications/tracking-sample/reports";
     String logGeneratorSubmitCommand = 

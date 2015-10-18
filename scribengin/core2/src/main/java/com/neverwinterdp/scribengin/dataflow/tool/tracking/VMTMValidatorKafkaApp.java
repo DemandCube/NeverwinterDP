@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
-import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.util.JSONSerializer;
@@ -23,6 +23,7 @@ import kafka.message.Message;
 
 public class VMTMValidatorKafkaApp extends VMApp {
   private Logger logger;
+  private KafkaClient kafkaClient;
   
   @Override
   public void run() throws Exception {
@@ -41,6 +42,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
     String kafkaTopic              = vmConfig.getProperty("kafka.topic", null);
     long   kafkaMessageWaitTimeout = vmConfig.getPropertyAsLong("kafka.message-wait-timeout", 30000);
     
+    kafkaClient = new KafkaClient("KafkaClient", kafkaZkConnects);
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, reportPath);
     validatorService.withExpectNumOfMessagePerChunk(expectNumOfMessagePerChunk);
     validatorService.addReader(
@@ -48,6 +50,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
     );
     validatorService.start();
     validatorService.awaitForTermination(maxRuntime, TimeUnit.MILLISECONDS);
+    kafkaClient.close();
   }
 
   public class KafkaTrackingMessageReader extends TrackingMessageReader {
@@ -88,15 +91,13 @@ public class VMTMValidatorKafkaApp extends VMApp {
     private KafkaPartitionReader[] partitionReader;
     
     public KafkaTopicConnector(String kafkaZkConnects, String topic) throws Exception {
-      KafkaTool kafkaTool = new KafkaTool("VMTMValidatorKafkaApp", kafkaZkConnects);
-
-      TopicMetadata topicMeta = kafkaTool.findTopicMetadata(topic);
+      TopicMetadata topicMeta = kafkaClient.findTopicMetadata(topic);
       List<PartitionMetadata> partitionMetas = topicMeta.partitionsMetadata();
       int numOfPartitions = partitionMetas.size();
       
       partitionReader = new KafkaPartitionReader[numOfPartitions];
       for (int i = 0; i < numOfPartitions; i++) {
-        partitionReader[i] = new KafkaPartitionReader("VMTMValidatorKafkaApp", kafkaZkConnects, topic, partitionMetas.get(i));
+        partitionReader[i] = new KafkaPartitionReader("VMTMValidatorKafkaApp", kafkaClient, topic, partitionMetas.get(i));
       }
     }
     
