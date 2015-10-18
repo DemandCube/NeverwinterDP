@@ -666,7 +666,7 @@ public class RegistryImpl implements Registry {
       }
     }
     if(error.getErrorCode().isConnectionProblem()) {
-      error("Call shutdown", error);
+      error("Call shutdown, current state = " + zkClient.getState(), error);
       shutdown();
     }
     throw error;
