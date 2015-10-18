@@ -198,7 +198,7 @@ public class KafkaTool  {
   }
 
   public TopicMetadata findTopicMetadata(final String topic) throws Exception {
-    return findTopicMetadata(topic, 1);
+    return findTopicMetadata(topic, 3);
   }
 
   public TopicMetadata findTopicMetadata(final String topic, int retries) throws Exception {
@@ -212,7 +212,12 @@ public class KafkaTool  {
         if (topicMetadatas.size() != 1) {
           throw new Exception("Expect to find 1 topic " + topic + ", but found " + topicMetadatas.size());
         }
-        return topicMetadatas.get(0);
+        TopicMetadata topicMetadata = topicMetadatas.get(0);
+        List<PartitionMetadata> pMetadatas = topicMetadata.partitionsMetadata();
+        if(pMetadatas.isEmpty()) {
+          throw new Exception("Found the topic " + topic + ", but the partition list is empty ");
+        }
+        return topicMetadata;
       }
     };
     return execute(findTopicOperation, retries);

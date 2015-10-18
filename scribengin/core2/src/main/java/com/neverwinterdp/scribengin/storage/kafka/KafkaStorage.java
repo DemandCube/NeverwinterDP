@@ -21,6 +21,8 @@ public class KafkaStorage extends Storage {
   final static public String TOPIC      = "topic";
   final static public String ZK_CONNECT = "zk.connect";
   
+  private KafkaSource kafkaSource ;
+  
   public KafkaStorage(StorageConfig storageDescriptor) {
     super(storageDescriptor);
   }
@@ -45,6 +47,7 @@ public class KafkaStorage extends Storage {
 
   @Override
   public void refresh() throws Exception {
+    kafkaSource  = null ;
   }
 
   public boolean exists() throws Exception {
@@ -59,6 +62,7 @@ public class KafkaStorage extends Storage {
     StorageConfig descriptor = getStorageConfig();
     KafkaTool kafkaTool = getKafkaTool(getStorageConfig()) ;
     kafkaTool.deleteTopic(descriptor.attribute(TOPIC));
+    kafkaSource  = null ;
   }
 
   @Override
@@ -66,6 +70,7 @@ public class KafkaStorage extends Storage {
     StorageConfig descriptor = getStorageConfig();
     KafkaTool kafkaTool = getKafkaTool(descriptor) ;
     kafkaTool.createTopic(descriptor.attribute(TOPIC), replication, numOfPartition);
+    kafkaSource = null;
   }
 
   @Override
@@ -75,7 +80,10 @@ public class KafkaStorage extends Storage {
 
   @Override
   public Source getSource() throws Exception {
-    return new KafkaSource(getStorageConfig());
+    if(kafkaSource == null) {
+      kafkaSource = new KafkaSource(getStorageConfig());
+    }
+    return kafkaSource;
   }
 
   static StorageConfig createStorageConfig(String name, String zkConnect, String topic) {

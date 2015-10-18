@@ -7,8 +7,9 @@ import java.util.Map;
 import kafka.javaapi.PartitionMetadata;
 import kafka.javaapi.TopicMetadata;
 
-import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
+import com.neverwinterdp.scribengin.storage.kafka.KafkaStorage;
+import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.scribengin.storage.PartitionConfig;
 import com.neverwinterdp.scribengin.storage.source.Source;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
@@ -25,10 +26,10 @@ public class KafkaSource implements Source {
   public KafkaSource(StorageConfig sconfig) throws Exception {
     init(sconfig);
   }
-
+  
   void init(StorageConfig sconfig) throws Exception {
     this.storageConfig = sconfig;
-    KafkaTool kafkaTool = new KafkaTool(sconfig.attribute("name"), sconfig.attribute("zk.connect"));
+    KafkaTool kafkaTool = KafkaStorage.getKafkaTool(sconfig);
     TopicMetadata topicMetdadata = kafkaTool.findTopicMetadata(sconfig.attribute("topic"));
     List<PartitionMetadata> partitionMetadatas = topicMetdadata.partitionsMetadata();
     for(int i = 0; i < partitionMetadatas.size(); i++) {

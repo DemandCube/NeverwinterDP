@@ -1,6 +1,5 @@
 package com.neverwinterdp.kafka.tool;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.zookeeper.KeeperException;
@@ -9,8 +8,6 @@ import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 
-import com.neverwinterdp.registry.ErrorCode;
-import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class ZKClient {
@@ -32,7 +29,7 @@ public class ZKClient {
   
   synchronized void reconnect(long timeout) throws Exception {
     if(closed) {
-      throw new RegistryException(ErrorCode.Closed, "Registry has been closed");
+      throw new Exception("Zk connection has been closed");
     }
     if(zkClient != null) zkClient.close();
     Watcher watcher = new Watcher() {
@@ -63,9 +60,9 @@ public class ZKClient {
     }
   }
 
-  synchronized ZooKeeper getZKClient() throws RegistryException {
+  synchronized ZooKeeper getZKClient() throws Exception {
     if(closed) {
-      throw new RegistryException(ErrorCode.Closed, "Registry has been closed");
+      throw new Exception("Zk connection  has been closed");
     }
     return zkClient;
   }

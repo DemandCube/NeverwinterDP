@@ -90,7 +90,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
     public KafkaTopicConnector(String kafkaZkConnects, String topic) throws Exception {
       KafkaTool kafkaTool = new KafkaTool("VMTMValidatorKafkaApp", kafkaZkConnects);
 
-      TopicMetadata topicMeta = kafkaTool.findTopicMetadata(topic, 3);
+      TopicMetadata topicMeta = kafkaTool.findTopicMetadata(topic);
       List<PartitionMetadata> partitionMetas = topicMeta.partitionsMetadata();
       int numOfPartitions = partitionMetas.size();
       

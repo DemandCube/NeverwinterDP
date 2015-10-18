@@ -8,6 +8,7 @@ import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 
 public class KafkaSourceStream implements SourcePartitionStream {
+  private StorageConfig storageConfig;
   private PartitionConfig partitionConfig;
   private PartitionMetadata partitionMetadata;
   
