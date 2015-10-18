@@ -1,22 +1,16 @@
-package com.neverwinterdp.kafka.tool;
+package com.neverwinterdp.kafka;
 
 import static scala.collection.JavaConversions.asScalaBuffer;
 import static scala.collection.JavaConversions.asScalaMap;
 import static scala.collection.JavaConversions.asScalaSet;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.I0Itec.zkclient.ZkClient;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooKeeper;
-
-import com.neverwinterdp.kafka.BrokerRegistration;
 
 import kafka.admin.AdminUtils;
 import kafka.admin.PreferredReplicaLeaderElectionCommand;
@@ -24,11 +18,6 @@ import kafka.admin.ReassignPartitionsCommand;
 import kafka.admin.TopicCommand;
 import kafka.admin.TopicCommand.TopicCommandOptions;
 import kafka.common.TopicAndPartition;
-import kafka.javaapi.PartitionMetadata;
-import kafka.javaapi.TopicMetadata;
-import kafka.javaapi.TopicMetadataRequest;
-import kafka.javaapi.TopicMetadataResponse;
-import kafka.javaapi.consumer.SimpleConsumer;
 import kafka.utils.ZKStringSerializer$;
 import kafka.utils.ZkUtils;
 import scala.collection.Seq;
@@ -124,8 +113,7 @@ public class KafkaTool  {
     TopicAndPartition topicAndPartition = new TopicAndPartition(topic, partition);
     // move leader to broker 1
     Set<TopicAndPartition> topicsAndPartitions = asScalaSet(Collections.singleton(topicAndPartition));
-    PreferredReplicaLeaderElectionCommand commands =
-        new PreferredReplicaLeaderElectionCommand(client, topicsAndPartitions);
+    PreferredReplicaLeaderElectionCommand commands = new PreferredReplicaLeaderElectionCommand(client, topicsAndPartitions);
     commands.moveLeaderToPreferredReplica();
     client.close();
   }
@@ -162,96 +150,5 @@ public class KafkaTool  {
     map.put(topicAndPartition, seqs);
     ReassignPartitionsCommand command = new ReassignPartitionsCommand(client, asScalaMap(map));
     return command.reassignPartitions();
-  }
-
-  public String getKafkaBrokerList() throws Exception {
-    StringBuilder b = new StringBuilder();
-    List<BrokerRegistration> registrations = getBrokerRegistration();
-    for (int i = 0; i < registrations.size(); i++) {
-      BrokerRegistration registration = registrations.get(i);
-      if (i > 0) b.append(",");
-      b.append(registration.getHost()).append(":").append(registration.getPort());
-    }
-    return b.toString();
-  }
-
-  public List<BrokerRegistration> getBrokerRegistration() throws Exception {
-    ZKClient zkClient = new ZKClient(zkConnects);
-    zkClient.connect(15000);
-    ZKClient.Operation<List<BrokerRegistration>> op = new ZKClient.Operation<List<BrokerRegistration>>()  {
-      @Override
-      public List<BrokerRegistration> execute(ZooKeeper zkClient) throws InterruptedException, KeeperException {
-        List<String> ids = zkClient.getChildren("/brokers/ids", false);
-        List<BrokerRegistration> holder = new ArrayList<BrokerRegistration>();
-        for (int i = 0; i < ids.size(); i++) {
-          String brokerId = ids.get(i);
-          BrokerRegistration registration = getDataAs(zkClient, "/brokers/ids/" + brokerId, BrokerRegistration.class);
-          registration.setBrokerId(brokerId);
-          holder.add(registration);
-        }
-        return holder;
-      }
-    };
-    List<BrokerRegistration> result = zkClient.execute(op, 3);
-    zkClient.close();
-    return result;
-  }
-
-  public TopicMetadata findTopicMetadata(final String topic) throws Exception {
-    return findTopicMetadata(topic, 1);
-  }
-
-  public TopicMetadata findTopicMetadata(final String topic, int retries) throws Exception {
-    SimpleConsumerOperation<TopicMetadata> findTopicOperation = new SimpleConsumerOperation<TopicMetadata>() {
-      @Override
-      public TopicMetadata execute(SimpleConsumer consumer) throws Exception {
-        List<String> topics = Collections.singletonList(topic);
-        TopicMetadataRequest req = new TopicMetadataRequest(topics);
-        TopicMetadataResponse resp = consumer.send(req);
-        List<TopicMetadata> topicMetadatas = resp.topicsMetadata();
-        if (topicMetadatas.size() != 1) {
-          throw new Exception("Expect to find 1 topic " + topic + ", but found " + topicMetadatas.size());
-        }
-        return topicMetadatas.get(0);
-      }
-    };
-    return execute(findTopicOperation, retries);
-  }
-
-  public PartitionMetadata findPartitionMetadata(String topic, int partition) throws Exception {
-    TopicMetadata topicMetadata = findTopicMetadata(topic);
-    for (PartitionMetadata sel : topicMetadata.partitionsMetadata()) {
-      if (sel.partitionId() == partition)
-        return sel;
-    }
-    return null;
-  }
-
-  private SimpleConsumer nextConsumer() throws Exception {
-    List<BrokerRegistration> registrations = getBrokerRegistration();
-    if(registrations.size() == 0) return null;
-    Random random = new Random();
-    BrokerRegistration registration = registrations.get(random.nextInt(registrations.size()));
-    return new SimpleConsumer(registration.getHost(), registration.getPort(), 100000, 64 * 1024, name /*clientId*/);
-  }
-  
-  <T> T execute(SimpleConsumerOperation<T> op, int retries) throws Exception {
-    Exception error = null ;
-    for(int i = 0; i < retries; i++) {
-      SimpleConsumer consumer = null;
-      try {
-        consumer = nextConsumer();
-        return op.execute(consumer);
-      } catch(Exception ex) {
-        error = ex;
-      } finally {
-        if(consumer != null) consumer.close();
-      }
-    }
-    throw error ;
-  }
-  
-  static interface SimpleConsumerOperation<T> {
-    public T execute(SimpleConsumer consumer) throws Exception;
   }
 }

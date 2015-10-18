@@ -5,12 +5,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSource;
 import com.neverwinterdp.scribengin.storage.source.SourceStream;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
 
 public class TopicReader {
+  private KafkaClient kafkaClient ;
   private String topic;
   private String zkConnect;
   private int    readPerReader = 1000;
@@ -19,9 +21,9 @@ public class TopicReader {
   
   private ExecutorService executorService;
   
-  public TopicReader(String topic, String zkConnect) throws Exception {
+  public TopicReader(KafkaClient kafkaClient, String topic) throws Exception {
+    this.kafkaClient = kafkaClient;
     this.topic = topic ;
-    this.zkConnect = zkConnect;
   }
   
   public TopicReader setReadPerReader(int num) {
@@ -30,7 +32,7 @@ public class TopicReader {
   }
   
   public void start() throws Exception {
-    KafkaSource source = new KafkaSource(topic + ".reader", zkConnect,  topic) ;
+    KafkaSource source = new KafkaSource(kafkaClient, topic + ".reader",  topic) ;
     SourceStream[] streams = source.getStreams() ;
     executorService = Executors.newFixedThreadPool(streams.length);
     for(int i = 0; i < streams.length; i++) {

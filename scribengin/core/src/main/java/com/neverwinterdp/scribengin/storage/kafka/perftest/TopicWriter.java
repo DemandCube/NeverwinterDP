@@ -5,15 +5,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.neverwinterdp.kafka.tool.KafkaTool;
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
 import com.neverwinterdp.scribengin.storage.sink.SinkStream;
 import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 
 public class TopicWriter {
+  private KafkaClient kafkaClient;
   private String topic;
-  private String zkConnect ;
   private int    numOfPartitions   = 10;
   private int    numOfReplications = 1;
   private long   numOfMessages     = 10000;
@@ -23,8 +23,8 @@ public class TopicWriter {
   
   private AtomicLong idTracker = new AtomicLong();
 
-  public TopicWriter(String zkConnect, String topic, long numOfMessages) {
-    this.zkConnect = zkConnect;
+  public TopicWriter(KafkaClient kafkaClient, String topic, long numOfMessages) {
+    this.kafkaClient = kafkaClient;
     this.topic = topic ;
     this.numOfMessages = numOfMessages;
   }
@@ -52,12 +52,11 @@ public class TopicWriter {
   public long getTotalWrite() { return idTracker.get(); }
   
   public void start() throws Exception {
-    KafkaTool tool = new KafkaTool(topic + ".writer", zkConnect);
-    if(tool.topicExits(topic)) {
-      tool.deleteTopic(topic);
+    if(kafkaClient.getKafkaTool().topicExits(topic)) {
+      kafkaClient.getKafkaTool().deleteTopic(topic);
     }
-    tool.createTopic(topic, numOfReplications, numOfPartitions);
-    KafkaSink sink = new KafkaSink(topic + ".writer", zkConnect,  topic);
+    kafkaClient.getKafkaTool().createTopic(topic, numOfReplications, numOfPartitions);
+    KafkaSink sink = new KafkaSink(kafkaClient, topic + ".writer", topic);
     executorService = Executors.newFixedThreadPool(numOfPartitions);
     for(int i = 0; i < numOfPartitions; i++) {
       SinkStream stream = sink.newStream();

@@ -7,33 +7,35 @@ import java.util.Map;
 import kafka.javaapi.PartitionMetadata;
 import kafka.javaapi.TopicMetadata;
 
-import com.neverwinterdp.kafka.tool.KafkaTool;
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.scribengin.storage.StorageDescriptor;
 import com.neverwinterdp.scribengin.storage.StreamDescriptor;
 import com.neverwinterdp.scribengin.storage.source.Source;
 import com.neverwinterdp.scribengin.storage.source.SourceStream;
 
 public class KafkaSource implements Source {
+  private KafkaClient kafkaClient;
   private StorageDescriptor descriptor;
   private Map<Integer, KafkaSourceStream> sourceStreams = new HashMap<Integer, KafkaSourceStream>();
   
-  public KafkaSource(String name, String zkConnect, String topic) throws Exception {
-    StorageDescriptor descriptor = createStorageDescriptor(name, topic, zkConnect, null);
+  public KafkaSource(KafkaClient kafkaClient, String name, String topic) throws Exception {
+    this.kafkaClient = kafkaClient;
+    StorageDescriptor descriptor = createStorageDescriptor(name, topic, kafkaClient.getZkConnects(), null);
     init(descriptor);
   }
   
-  public KafkaSource(StorageDescriptor descriptor) throws Exception {
+  public KafkaSource(KafkaClient kafkaClient, StorageDescriptor descriptor) throws Exception {
+    this.kafkaClient = kafkaClient;
     init(descriptor);
   }
 
   void init(StorageDescriptor descriptor) throws Exception {
     this.descriptor = descriptor;
-    KafkaTool kafkaTool = new KafkaTool(descriptor.attribute("name"), descriptor.attribute("zk.connect"));
-    TopicMetadata topicMetdadata = kafkaTool.findTopicMetadata(descriptor.attribute("topic"));
+    TopicMetadata topicMetdadata = kafkaClient.findTopicMetadata(descriptor.attribute("topic"));
     List<PartitionMetadata> partitionMetadatas = topicMetdadata.partitionsMetadata();
     for(int i = 0; i < partitionMetadatas.size(); i++) {
       PartitionMetadata partitionMetadata = partitionMetadatas.get(i);
-      KafkaSourceStream sourceStream = new KafkaSourceStream(descriptor, partitionMetadata);
+      KafkaSourceStream sourceStream = new KafkaSourceStream(kafkaClient, descriptor, partitionMetadata);
       sourceStreams.put(sourceStream.getId(), sourceStream);
     }
   }

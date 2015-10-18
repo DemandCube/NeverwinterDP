@@ -46,7 +46,7 @@ public class DataflowTask {
     int dataflowMessageCount = 0;
     try {
       while(!interrupt && !context.isComplete() && !context.isEndOfDataStream()) {
-        DataflowMessage dataflowMessage = context.nextRecord(5000);
+        DataflowMessage dataflowMessage = context.nextRecord(1000);
         if(dataflowMessage == null) break ;
 
         dataflowMessageCount++;

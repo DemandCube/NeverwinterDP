@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
-import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
 import com.neverwinterdp.util.JSONSerializer;
@@ -23,6 +23,7 @@ import kafka.message.Message;
 
 public class VMTMValidatorKafkaApp extends VMApp {
   private Logger logger;
+  KafkaClient kafkaClient ;
   
   @Override
   public void run() throws Exception {
@@ -41,31 +42,29 @@ public class VMTMValidatorKafkaApp extends VMApp {
     String kafkaTopic              = vmConfig.getProperty("kafka.topic", null);
     long   kafkaMessageWaitTimeout = vmConfig.getPropertyAsLong("kafka.message-wait-timeout", 600000);
     
+    kafkaClient = new KafkaClient("VMTMValidatorKafkaApp", kafkaZkConnects);
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, reportPath);
     validatorService.withExpectNumOfMessagePerChunk(expectNumOfMessagePerChunk);
-    validatorService.addReader(
-        new KafkaTrackingMessageReader(kafkaZkConnects, kafkaTopic, numOfReader, kafkaMessageWaitTimeout)
-    );
+    validatorService.addReader(new KafkaTrackingMessageReader(kafkaTopic, numOfReader, kafkaMessageWaitTimeout));
     validatorService.start();
     validatorService.awaitForTermination(maxRuntime, TimeUnit.MILLISECONDS);
+    kafkaClient.close();
   }
 
   public class KafkaTrackingMessageReader extends TrackingMessageReader {
     private BlockingQueue<TrackingMessage> queue = new LinkedBlockingQueue<>(5000);
     
-    private String                kafkaZkConnects;
     private String                topic;
     private long                  maxMessageWaitTime;
     KafkaTopicConnector           connector;
     
-    KafkaTrackingMessageReader(String kafkaZkConnects, String topic, int numOfThread, long maxMessageWaitTime) {
-      this.kafkaZkConnects = kafkaZkConnects;
+    KafkaTrackingMessageReader(String topic, int numOfThread, long maxMessageWaitTime) {
       this.topic = topic;
       this.maxMessageWaitTime = maxMessageWaitTime;
     }
     
     public void onInit(TrackingRegistry registry) throws Exception {
-      connector = new KafkaTopicConnector(kafkaZkConnects, topic) {
+      connector = new KafkaTopicConnector(topic) {
         @Override
         public void onTrackingMessage(TrackingMessage tMesg) throws Exception {
           queue.offer(tMesg, maxMessageWaitTime, TimeUnit.MILLISECONDS);
@@ -87,16 +86,14 @@ public class VMTMValidatorKafkaApp extends VMApp {
   abstract public class KafkaTopicConnector extends Thread {
     private KafkaPartitionReader[] partitionReader;
     
-    public KafkaTopicConnector(String kafkaZkConnects, String topic) throws Exception {
-      KafkaTool kafkaTool = new KafkaTool("VMTMValidatorKafkaApp", kafkaZkConnects);
-
-      TopicMetadata topicMeta = kafkaTool.findTopicMetadata(topic, 3);
+    public KafkaTopicConnector(String topic) throws Exception {
+      TopicMetadata topicMeta = kafkaClient.findTopicMetadata(topic, 3);
       List<PartitionMetadata> partitionMetas = topicMeta.partitionsMetadata();
       int numOfPartitions = partitionMetas.size();
       
       partitionReader = new KafkaPartitionReader[numOfPartitions];
       for (int i = 0; i < numOfPartitions; i++) {
-        partitionReader[i] = new KafkaPartitionReader("VMTMValidatorKafkaApp", kafkaZkConnects, topic, partitionMetas.get(i));
+        partitionReader[i] = new KafkaPartitionReader("VMTMValidatorKafkaApp", kafkaClient, topic, partitionMetas.get(i));
       }
     }
     

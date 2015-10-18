@@ -21,7 +21,7 @@ import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 
-public class KafkaLogSampleChainUnitTest  {
+public class KafkaTrackingSampleUnitTest  {
   ScribenginClusterBuilder clusterBuilder ;
   Node esNode ;
   ScribenginShell shell;
@@ -64,7 +64,7 @@ public class KafkaLogSampleChainUnitTest  {
   }
   
   @Test
-  public void testLogSampleChain() throws Exception {
+  public void testTrackingSampleChain() throws Exception {
     int NUM_OF_MESSAGE_PER_CHUNK = 1000;
     String REPORT_PATH = "/applications/tracking-sample/reports";
     String logGeneratorSubmitCommand = 
