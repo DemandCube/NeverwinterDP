@@ -588,7 +588,7 @@ public class RegistryImpl implements Registry {
         return result;
       } catch (RegistryException e) {
         if(e.getErrorCode().isConnectionProblem()) {
-          reconnect(10000);
+          reconnect(15000);
           error = e;
         } else {
           throw e;

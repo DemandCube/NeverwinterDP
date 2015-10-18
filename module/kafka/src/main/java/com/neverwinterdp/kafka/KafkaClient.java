@@ -28,7 +28,7 @@ public class KafkaClient  {
     this.name = name;
     this.zkConnects = zkConnects;
     zkClient = new ZKClient(zkConnects);
-    zkClient.connect(10000);
+    zkClient.connect(15000);
   }
   
   @PreDestroy
