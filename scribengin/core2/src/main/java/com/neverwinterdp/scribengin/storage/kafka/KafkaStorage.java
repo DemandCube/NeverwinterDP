@@ -85,7 +85,7 @@ public class KafkaStorage extends Storage {
     return kafkaSource;
   }
 
-  static StorageConfig createStorageConfig(String name, String zkConnect, String topic) {
+  static public StorageConfig createStorageConfig(String name, String zkConnect, String topic) {
     StorageConfig descriptor = new StorageConfig("kafka");
     descriptor.attribute(NAME, name);
     descriptor.attribute(TOPIC, topic);

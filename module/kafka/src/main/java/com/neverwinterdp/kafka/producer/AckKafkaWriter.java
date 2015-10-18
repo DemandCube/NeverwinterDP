@@ -103,6 +103,7 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
     if(resendThread != null && resendThread.isAlive()) {
       resendThread.waitForTermination(90000);
     }
+    if(producer == null) return;
     producer.close(); 
     producer = null ;
   }

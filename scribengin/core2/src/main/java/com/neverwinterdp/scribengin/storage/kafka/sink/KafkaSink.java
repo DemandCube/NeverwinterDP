@@ -2,19 +2,24 @@ package com.neverwinterdp.scribengin.storage.kafka.sink;
 
 import java.util.LinkedHashMap;
 
-import com.neverwinterdp.scribengin.storage.StorageConfig;
-import com.neverwinterdp.scribengin.storage.kafka.KafkaStorage;
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.StorageConfig;
+import com.neverwinterdp.scribengin.storage.kafka.KafkaStorage;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
 
 public class KafkaSink implements Sink {
-  private StorageConfig descriptor;
+  private StorageConfig storageConfig;
   private KafkaClient   kafkaClient;
   
   private int idTracker = 0;
   private LinkedHashMap<Integer, KafkaSinkPartitionStream> streams = new LinkedHashMap<Integer, KafkaSinkPartitionStream>() ;
+  
+  public KafkaSink(KafkaClient kafkaClient, String name, String topic) throws Exception {
+    this.kafkaClient = kafkaClient;
+    init(KafkaStorage.createStorageConfig(name, kafkaClient.getZkConnects(), topic)) ;
+  }
   
   public KafkaSink(KafkaClient kafkaClient, StorageConfig descriptor) throws Exception {
     this.kafkaClient = kafkaClient;
@@ -23,11 +28,11 @@ public class KafkaSink implements Sink {
   
   private void init(StorageConfig descriptor) throws Exception {
     descriptor.attribute("broker.list", kafkaClient.getKafkaBrokerList());
-    this.descriptor  = descriptor ;
+    this.storageConfig  = descriptor ;
   }
   
   @Override
-  public StorageConfig getDescriptor() { return descriptor; }
+  public StorageConfig getDescriptor() { return storageConfig; }
 
   @Override
   public SinkPartitionStream getStream(PartitionConfig pConfig) throws Exception {
@@ -64,7 +69,7 @@ public class KafkaSink implements Sink {
 
   @Override
   public SinkPartitionStream newStream() throws Exception {
-    PartitionConfig streamDescriptor = new PartitionConfig(this.descriptor);
+    PartitionConfig streamDescriptor = new PartitionConfig(this.storageConfig);
     streamDescriptor.setPartitionId(idTracker++);
     return new KafkaSinkPartitionStream(streamDescriptor);
   }
