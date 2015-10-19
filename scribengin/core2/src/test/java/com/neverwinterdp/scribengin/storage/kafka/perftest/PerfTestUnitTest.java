@@ -29,15 +29,16 @@ public class PerfTestUnitTest {
         "--topics", "tracking.input,tracking.info,tracking.warn,tracking.error,tracking.aggregate",
 
         "--zk-connect", "127.0.0.1:2181",
-        "--topic-num-of-message", "10000",
-        "--topic-num-of-partition", "10",
+        "--topic-num-of-message",     "500000",
+        "--topic-num-of-partition",   "10",
         "--topic-num-of-replication", "1",
         
         "--writer-write-per-writer", "1000",
         "--writer-write-break-in-period", "25",
         
         "--reader-read-per-reader", "1000",
-        "--reader-run-delay", "5000"
+        "--reader-run-delay", "5000",
+        "--max-runtime", "600000"
     };
     KafkaPerfTest.main(args);
   }
