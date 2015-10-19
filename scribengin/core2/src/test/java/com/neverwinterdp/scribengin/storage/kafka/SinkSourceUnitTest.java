@@ -5,6 +5,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
 import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSource;
@@ -12,7 +14,6 @@ import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
-import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 
 public class SinkSourceUnitTest {
   static {
@@ -39,7 +40,8 @@ public class SinkSourceUnitTest {
     String zkConnect = cluster.getZKConnect();
     System.out.println("zkConnect = " + zkConnect);
     String TOPIC = "hello.topic" ;
-    KafkaStorage storage = new KafkaStorage("hello", cluster.getZKConnect(), TOPIC);
+    KafkaClient kafkaClient = new KafkaClient("KafkaClient", zkConnect);
+    KafkaStorage storage = new KafkaStorage(kafkaClient, "hello", TOPIC);
     KafkaSink sink = (KafkaSink) storage.getSink();
     
     SinkPartitionStream stream = sink.newStream();
@@ -51,7 +53,7 @@ public class SinkSourceUnitTest {
     }
     writer.close();
     
-    KafkaSource source = new KafkaSource("hello", cluster.getZKConnect(), TOPIC);
+    KafkaSource source = new KafkaSource(kafkaClient, "hello", TOPIC);
     SourcePartitionStream[] streams = source.getStreams();
     Assert.assertEquals(5, streams.length);
     for(int i = 0; i < streams.length; i++) {

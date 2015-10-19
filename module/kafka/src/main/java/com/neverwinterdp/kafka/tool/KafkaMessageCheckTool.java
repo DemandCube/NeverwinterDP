@@ -17,6 +17,7 @@ import kafka.message.Message;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.common.base.Stopwatch;
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.kafka.tool.KafkaTopicReport.ConsumerReport;
 import com.neverwinterdp.tool.message.MessageExtractor;
@@ -97,10 +98,11 @@ public class KafkaMessageCheckTool implements Runnable {
   public void check() throws Exception {
     System.out.println("KafkaMessageCheckTool: Start running kafka message check tool.");
     readDuration.start();
-    KafkaTool kafkaTool = new KafkaTool(NAME, topicConfig.zkConnect);
+    KafkaClient kafkaClient = new KafkaClient(NAME, topicConfig.zkConnect);
     
-    TopicMetadata topicMeta = kafkaTool.findTopicMetadata(topicConfig.topic, 3);
+    TopicMetadata topicMeta = kafkaClient.findTopicMetadata(topicConfig.topic, 3);
     List<PartitionMetadata> partitionMetas = topicMeta.partitionsMetadata();
+    kafkaClient.close();
     numOfPartitions = partitionMetas.size();
     
     interrupt = false;
@@ -111,8 +113,7 @@ public class KafkaMessageCheckTool implements Runnable {
 
     KafkaPartitionConsumer[] partitionConsumer = new KafkaPartitionConsumer[numOfPartitions];
     for (int i = 0; i < partitionConsumer.length; i++) {
-      KafkaPartitionReader partitionReader = 
-          new KafkaPartitionReader(NAME, topicConfig.zkConnect, topicConfig.topic, partitionMetas.get(i));
+      KafkaPartitionReader partitionReader = new KafkaPartitionReader(NAME, kafkaClient, topicConfig.topic, partitionMetas.get(i));
       partitionConsumer[i] = 
         new KafkaPartitionConsumer(partitionReader, batchFetch, fetchSize);
       executorService.submit(partitionConsumer[i]);
@@ -130,6 +131,7 @@ public class KafkaMessageCheckTool implements Runnable {
       System.err.println("KafkaMessageCheckTool: " + ex.getMessage()) ;
       throw ex ;
     } finally {
+      kafkaClient.close();
       System.out.println("KafkaMessageCheckTool: Final Read count " + messageCounter.getTotal() +"(Stop)") ;
       messageTracker.optimize();
       readDuration.stop();

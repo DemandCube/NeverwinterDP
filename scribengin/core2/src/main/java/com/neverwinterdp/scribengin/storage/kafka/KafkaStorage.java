@@ -3,8 +3,8 @@ package com.neverwinterdp.scribengin.storage.kafka;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
-import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.scribengin.storage.PartitionConfig;
 import com.neverwinterdp.scribengin.storage.Storage;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
@@ -21,18 +21,22 @@ public class KafkaStorage extends Storage {
   final static public String TOPIC      = "topic";
   final static public String ZK_CONNECT = "zk.connect";
   
-  public KafkaStorage(StorageConfig storageDescriptor) {
+  private KafkaClient kafkaClient ;
+  private KafkaSource kafkaSource ;
+  
+  public KafkaStorage(KafkaClient kafkaClient, StorageConfig storageDescriptor) {
     super(storageDescriptor);
+    this.kafkaClient = kafkaClient;
   }
   
-  public KafkaStorage(String name, String zkConnect, String topic) throws Exception {
-    super(createStorageConfig(name, zkConnect, topic));
+  public KafkaStorage(KafkaClient kafkaClient, String name, String topic) throws Exception {
+    super(createStorageConfig(name, kafkaClient.getZkConnects(), topic));
+    this.kafkaClient = kafkaClient;
   }
   
   public List<PartitionConfig> getPartitionConfigs() throws Exception {
     StorageConfig sConfig = getStorageConfig();
-    KafkaTool kafkaTool = getKafkaTool(sConfig) ;
-    TopicMetadata tMetadata = kafkaTool.findTopicMetadata(sConfig.attribute(TOPIC));
+    TopicMetadata tMetadata = kafkaClient.findTopicMetadata(sConfig.attribute(TOPIC));
     List<PartitionConfig> pConfigs = new ArrayList<>();
     List<PartitionMetadata> partitions = tMetadata.partitionsMetadata();
     for(int i = 0; i < partitions.size(); i++) {
@@ -45,40 +49,43 @@ public class KafkaStorage extends Storage {
 
   @Override
   public void refresh() throws Exception {
+    kafkaSource  = null ;
   }
 
   public boolean exists() throws Exception {
     StorageConfig sConfig = getStorageConfig();
-    KafkaTool kafkaTool = getKafkaTool(sConfig) ;
-    boolean exists = kafkaTool.topicExits(sConfig.attribute(TOPIC));
+    boolean exists = kafkaClient.getKafkaTool().topicExits(sConfig.attribute(TOPIC));
     return exists;
   }
   
   @Override
   public void drop() throws Exception {
     StorageConfig descriptor = getStorageConfig();
-    KafkaTool kafkaTool = getKafkaTool(getStorageConfig()) ;
-    kafkaTool.deleteTopic(descriptor.attribute(TOPIC));
+    kafkaClient.getKafkaTool().deleteTopic(descriptor.attribute(TOPIC));
+    kafkaSource  = null ;
   }
 
   @Override
   public void create(int numOfPartition, int replication) throws Exception {
     StorageConfig descriptor = getStorageConfig();
-    KafkaTool kafkaTool = getKafkaTool(descriptor) ;
-    kafkaTool.createTopic(descriptor.attribute(TOPIC), replication, numOfPartition);
+    kafkaClient.getKafkaTool().createTopic(descriptor.attribute(TOPIC), replication, numOfPartition);
+    kafkaSource = null;
   }
 
   @Override
   public Sink getSink() throws Exception {
-    return new KafkaSink(getStorageConfig());
+    return new KafkaSink(kafkaClient, getStorageConfig());
   }
 
   @Override
   public Source getSource() throws Exception {
-    return new KafkaSource(getStorageConfig());
+    if(kafkaSource == null) {
+      kafkaSource = new KafkaSource(kafkaClient, getStorageConfig());
+    }
+    return kafkaSource;
   }
 
-  static StorageConfig createStorageConfig(String name, String zkConnect, String topic) {
+  static public StorageConfig createStorageConfig(String name, String zkConnect, String topic) {
     StorageConfig descriptor = new StorageConfig("kafka");
     descriptor.attribute(NAME, name);
     descriptor.attribute(TOPIC, topic);
@@ -86,18 +93,11 @@ public class KafkaStorage extends Storage {
     return descriptor;
   }
   
-  static public KafkaTool getKafkaTool(StorageConfig descriptor) throws Exception {
-    String name = descriptor.attribute(KafkaStorage.NAME);
-    String zkConnect = descriptor.attribute(KafkaStorage.ZK_CONNECT);
-    KafkaTool kafkaTool = new KafkaTool(name, zkConnect) ;
-    return kafkaTool;
-  }
   
-  static public KafkaPartitionReader getKafkaPartitionReader(StorageConfig sconfig, PartitionMetadata metadata) throws Exception {
+  static public KafkaPartitionReader getKafkaPartitionReader(KafkaClient kafkaClient, StorageConfig sconfig, PartitionMetadata metadata) throws Exception {
     String name = sconfig.attribute(NAME);
-    String zkConnect = sconfig.attribute(ZK_CONNECT);
     String topic = sconfig.attribute(TOPIC);
-    KafkaPartitionReader partitionReader = new KafkaPartitionReader(name, zkConnect, topic, metadata);
+    KafkaPartitionReader partitionReader = new KafkaPartitionReader(name, kafkaClient, topic, metadata);
     return partitionReader;
   }
 }

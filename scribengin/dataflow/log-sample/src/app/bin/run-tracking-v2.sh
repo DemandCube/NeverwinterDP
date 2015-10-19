@@ -93,7 +93,7 @@ DATAFLOW_MAX_RUNTIME=$(get_opt --max-run-time $DATAFLOW_DEFAULT_RUNTIME $@)
 VALIDATOR_DISABLE=$(has_opt "--validator-disable" $@ )
 VALIDATOR_NUM_OF_READER=$(get_opt --validator-num-of-reader '3' $@)
 
-MONITOR_MAX_RUNTIME=$(get_opt --monitor-max-runtime '60000' $@)
+MONITOR_MAX_RUNTIME=$(get_opt --monitor-max-runtime '0' $@)
 
 
 SHELL=$NEVERWINTERDP_BUILD_DIR/scribengin/bin/shell.sh

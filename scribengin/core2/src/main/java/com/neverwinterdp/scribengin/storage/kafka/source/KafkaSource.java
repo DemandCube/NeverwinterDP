@@ -7,39 +7,42 @@ import java.util.Map;
 import kafka.javaapi.PartitionMetadata;
 import kafka.javaapi.TopicMetadata;
 
-import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
+import com.neverwinterdp.scribengin.storage.kafka.KafkaStorage;
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.scribengin.storage.PartitionConfig;
 import com.neverwinterdp.scribengin.storage.source.Source;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
 
 public class KafkaSource implements Source {
-  private StorageConfig descriptor;
+  private KafkaClient                     kafkaClient;
+  private StorageConfig                   storageConfig;
   private Map<Integer, KafkaSourceStream> sourceStreams = new HashMap<Integer, KafkaSourceStream>();
-  
-  public KafkaSource(String name, String zkConnect, String topic) throws Exception {
-    StorageConfig descriptor = createStorageDescriptor(name, topic, zkConnect, null);
-    init(descriptor);
-  }
-  
-  public KafkaSource(StorageConfig descriptor) throws Exception {
-    init(descriptor);
-  }
 
-  void init(StorageConfig descriptor) throws Exception {
-    this.descriptor = descriptor;
-    KafkaTool kafkaTool = new KafkaTool(descriptor.attribute("name"), descriptor.attribute("zk.connect"));
-    TopicMetadata topicMetdadata = kafkaTool.findTopicMetadata(descriptor.attribute("topic"));
+  public KafkaSource(KafkaClient kafkaClient, String name, String topic) throws Exception {
+    this.kafkaClient = kafkaClient;
+    StorageConfig descriptor = createStorageConfig(name, topic, kafkaClient.getZkConnects(), null);
+    init(descriptor);
+  }
+  
+  public KafkaSource(KafkaClient kafkaClient, StorageConfig sconfig) throws Exception {
+    this.kafkaClient = kafkaClient;
+    init(sconfig);
+  }
+  
+  void init(StorageConfig sconfig) throws Exception {
+    this.storageConfig = sconfig;
+    TopicMetadata topicMetdadata = kafkaClient.findTopicMetadata(sconfig.attribute("topic"));
     List<PartitionMetadata> partitionMetadatas = topicMetdadata.partitionsMetadata();
     for(int i = 0; i < partitionMetadatas.size(); i++) {
       PartitionMetadata partitionMetadata = partitionMetadatas.get(i);
-      KafkaSourceStream sourceStream = new KafkaSourceStream(descriptor, partitionMetadata);
+      KafkaSourceStream sourceStream = new KafkaSourceStream(kafkaClient, sconfig, partitionMetadata);
       sourceStreams.put(sourceStream.getId(), sourceStream);
     }
   }
   
   @Override
-  public StorageConfig getDescriptor() { return descriptor; }
+  public StorageConfig getStorageConfig() { return storageConfig; }
 
   /**
    * The stream id is equivalent to the partition id of the kafka
@@ -67,7 +70,7 @@ public class KafkaSource implements Source {
   public void close() throws Exception {
   }
   
-  static public StorageConfig createStorageDescriptor(String name, String topic, String zkConnect, String reader) {
+  static public StorageConfig createStorageConfig(String name, String topic, String zkConnect, String reader) {
     StorageConfig descriptor = new StorageConfig("kafka");
     descriptor.attribute("name", name);
     descriptor.attribute("topic", topic);

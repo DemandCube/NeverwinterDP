@@ -1,13 +1,15 @@
 package com.neverwinterdp.scribengin.dataflow.tool.tracking;
 
+import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
-import com.neverwinterdp.kafka.consumer.KafkaMessageConsumerConnector;
-import com.neverwinterdp.kafka.consumer.MessageConsumerHandler;
+import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.util.JSONSerializer;
@@ -15,8 +17,13 @@ import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
 
+import kafka.javaapi.PartitionMetadata;
+import kafka.javaapi.TopicMetadata;
+import kafka.message.Message;
+
 public class VMTMValidatorKafkaApp extends VMApp {
   private Logger logger;
+  private KafkaClient kafkaClient;
   
   @Override
   public void run() throws Exception {
@@ -35,6 +42,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
     String kafkaTopic              = vmConfig.getProperty("kafka.topic", null);
     long   kafkaMessageWaitTimeout = vmConfig.getPropertyAsLong("kafka.message-wait-timeout", 30000);
     
+    kafkaClient = new KafkaClient("KafkaClient", kafkaZkConnects);
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, reportPath);
     validatorService.withExpectNumOfMessagePerChunk(expectNumOfMessagePerChunk);
     validatorService.addReader(
@@ -42,6 +50,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
     );
     validatorService.start();
     validatorService.awaitForTermination(maxRuntime, TimeUnit.MILLISECONDS);
+    kafkaClient.close();
   }
 
   public class KafkaTrackingMessageReader extends TrackingMessageReader {
@@ -49,44 +58,91 @@ public class VMTMValidatorKafkaApp extends VMApp {
     
     private String                kafkaZkConnects;
     private String                topic;
-    private int                   numOfThread;
     private long                  maxMessageWaitTime;
-    KafkaMessageConsumerConnector connector;
+    KafkaTopicConnector           connector;
     
     KafkaTrackingMessageReader(String kafkaZkConnects, String topic, int numOfThread, long maxMessageWaitTime) {
       this.kafkaZkConnects = kafkaZkConnects;
       this.topic = topic;
-      this.numOfThread = numOfThread;
       this.maxMessageWaitTime = maxMessageWaitTime;
     }
     
     public void onInit(TrackingRegistry registry) throws Exception {
-      connector = 
-          new KafkaMessageConsumerConnector("VMTMValidatorKafkaApp", kafkaZkConnects).
-          withConsumerTimeoutMs(maxMessageWaitTime).
-          connect();
-      MessageConsumerHandler handler = new MessageConsumerHandler() {
+      connector = new KafkaTopicConnector(kafkaZkConnects, topic) {
         @Override
-        public void onMessage(String topic, byte[] key, byte[] message) {
-          try {
-            Record rec = JSONSerializer.INSTANCE.fromBytes(message, Record.class);
-            TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(rec.getData(), TrackingMessage.class);
-            queue.offer(tMesg, maxMessageWaitTime, TimeUnit.MILLISECONDS);
-          } catch(Throwable t) {
-            logger.error("Error", t);
-          }
+        public void onTrackingMessage(TrackingMessage tMesg) throws Exception {
+          queue.offer(tMesg, maxMessageWaitTime, TimeUnit.MILLISECONDS);
         }
       };
-      connector.consume(topic, handler, numOfThread);
+      connector.start();
     }
    
     public void onDestroy(TrackingRegistry registry) throws Exception{
-      connector.close();
+      connector.shutdown();
     }
     
     @Override
     public TrackingMessage next() throws Exception {
       return queue.poll(maxMessageWaitTime, TimeUnit.MILLISECONDS);
     }
+  }
+  
+  abstract public class KafkaTopicConnector extends Thread {
+    private KafkaPartitionReader[] partitionReader;
+    
+    public KafkaTopicConnector(String kafkaZkConnects, String topic) throws Exception {
+      TopicMetadata topicMeta = kafkaClient.findTopicMetadata(topic);
+      List<PartitionMetadata> partitionMetas = topicMeta.partitionsMetadata();
+      int numOfPartitions = partitionMetas.size();
+      
+      partitionReader = new KafkaPartitionReader[numOfPartitions];
+      for (int i = 0; i < numOfPartitions; i++) {
+        partitionReader[i] = new KafkaPartitionReader("VMTMValidatorKafkaApp", kafkaClient, topic, partitionMetas.get(i));
+      }
+    }
+    
+    public void run() {
+      try {
+        doRun() ;
+      } catch (InterruptedException e) {
+      } catch (Exception e) {
+        logger.error("Fail to load the data from kafka", e);
+      } finally {
+        try {
+          shutdown();
+        } catch (Exception e) {
+          logger.error("Fail to shutdown kafka connector", e);
+        }
+      }
+    }
+    
+    void doRun() throws Exception {
+      int batchFetch = 1024 ;
+      int fetchSize  = 1024 * batchFetch;
+      while(true) {
+        int count = 0 ;
+        for(int i = 0; i < partitionReader.length; i++) {
+          List<Message> messages = partitionReader[i].fetch(fetchSize, batchFetch/*max read*/, 0/*max wait*/, 3);
+          count +=  messages.size();
+          for(Message message : messages) {
+            ByteBuffer payload = message.payload();
+            byte[] bytes = new byte[payload.limit()];
+            payload.get(bytes);
+            Record rec = JSONSerializer.INSTANCE.fromBytes(bytes, Record.class);
+            TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(rec.getData(), TrackingMessage.class);
+            onTrackingMessage(tMesg);
+          }
+        }
+        if(count == 0) Thread.sleep(1000);
+      }
+    }
+    
+    public void shutdown() throws Exception {
+      for(int i = 0; i < partitionReader.length; i++) {
+        partitionReader[i].close();
+      }
+    }
+    
+    abstract public void onTrackingMessage(TrackingMessage tMesg) throws Exception ;
   }
 }

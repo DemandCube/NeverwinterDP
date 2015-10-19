@@ -2,6 +2,7 @@ package com.neverwinterdp.scribengin.storage.kafka.perftest;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.util.text.TabularFormater;
 
 public class KafkaPerfTest {
@@ -31,7 +32,8 @@ public class KafkaPerfTest {
   
   
   public void run() throws Exception {
-    TopicWriter topicWriter = new TopicWriter(zkConnect, topic, topicNumOfMessages);
+    KafkaClient kafkaClient = new KafkaClient("KafkaClient", zkConnect);
+    TopicWriter topicWriter = new TopicWriter(kafkaClient, topic, topicNumOfMessages);
     topicWriter.setNumOfPartitions(topicNumOfPartitions);
     topicWriter.setNumOfReplicatons(topicNumOfReplications);
     topicWriter.setWritePerWriter(writerWritePerWriter);
@@ -39,7 +41,7 @@ public class KafkaPerfTest {
     
     topicWriter.start();
     
-    TopicReader topicReader = new TopicReader(topic, zkConnect);
+    TopicReader topicReader = new TopicReader(kafkaClient, topic);
     topicReader.setReadPerReader(readerReadPerReader);
     topicReader.start();
     

@@ -7,7 +7,7 @@ import com.neverwinterdp.scribengin.storage.PartitionConfig;
  * @author Tuan Nguyen
  */
 public interface Source {
-  public StorageConfig getDescriptor() ;
+  public StorageConfig getStorageConfig() ;
   public SourcePartitionStream   getStream(int id) ;
   public SourcePartitionStream   getStream(PartitionConfig descriptor) ;
   

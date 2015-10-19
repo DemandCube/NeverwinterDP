@@ -12,6 +12,7 @@ import com.neverwinterdp.scribengin.storage.sink.SinkStream;
 import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
 import com.neverwinterdp.scribengin.storage.source.SourceStream;
 import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 
 public class SinkSourceUnitTest {
@@ -37,9 +38,10 @@ public class SinkSourceUnitTest {
   @Test
   public void testKafkaSource() throws Exception {
     String zkConnect = cluster.getZKConnect();
+    KafkaClient kafkaClient = new KafkaClient("KafkaClient", zkConnect);
     System.out.println("zkConnect = " + zkConnect);
     String TOPIC = "hello.topic" ;
-    KafkaSink sink = new KafkaSink("hello", zkConnect, TOPIC) ;
+    KafkaSink sink = new KafkaSink(kafkaClient, "hello", TOPIC) ;
     SinkStream stream = sink.newStream();
     SinkStreamWriter writer = stream.getWriter();
     for(int i = 0; i < 10; i++) {
@@ -49,7 +51,7 @@ public class SinkSourceUnitTest {
     }
     writer.close();
     
-    KafkaSource source = new KafkaSource("hello", cluster.getZKConnect(), TOPIC);
+    KafkaSource source = new KafkaSource(kafkaClient, "hello", TOPIC);
     SourceStream[] streams = source.getStreams();
     Assert.assertEquals(5, streams.length);
     for(int i = 0; i < streams.length; i++) {

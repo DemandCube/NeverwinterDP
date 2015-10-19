@@ -43,7 +43,7 @@ public class HDFSSource implements Source {
     }
   }
   
-  public StorageConfig getDescriptor() { return descriptor; }
+  public StorageConfig getStorageConfig() { return descriptor; }
 
   public SourcePartitionStream   getStream(int id) { return streams.get(id) ; }
   

@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
-import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMessageReport;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingRegistry;
@@ -34,6 +34,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
   private MessageGenerator messageGenerator = new MessageGenerator.DefaultMessageGenerator() ;
   private int messageGeneratorCount ;
   private TrackingRegistry trackingRegistry;
+  private KafkaClient kafkaClient;
   
   @Override
   public void run() throws Exception {
@@ -55,10 +56,12 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     trackingRegistry.addGeneratorReport(new TrackingMessageReport(vmId, numOfMessage, currentId, currentId, 0, 0));
     
     
-    KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
-    if(!kafkaTool.topicExits(topic)) kafkaTool.createTopic(topic, 1, numOfStream);
+    kafkaClient = new KafkaClient("KafkaTool", zkConnects);
+    if(!kafkaClient.getKafkaTool().topicExits(topic)) {
+      kafkaClient.getKafkaTool().createTopic(topic, 1, numOfStream);
+    }
     
-    TopicMetadata topicMetadata = kafkaTool.findTopicMetadata(topic);
+    TopicMetadata topicMetadata = kafkaClient.findTopicMetadata(topic);
     List<PartitionMetadata> partitionMetadataHolder = topicMetadata.partitionsMetadata();
     ExecutorService executorService = Executors.newFixedThreadPool(partitionMetadataHolder.size());
     for(int i = 0; i < partitionMetadataHolder.size(); i++) {
@@ -74,6 +77,11 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     System.out.println("LOG GENERATOR:");
     System.out.println("Report Path: " + reportPath);
     System.out.println(JSONSerializer.INSTANCE.toString(finishReport));
+    onDestroy();
+  }
+  
+  public void onDestroy() throws Exception {
+    kafkaClient.close();
   }
   
   synchronized private String nextMessage() {
@@ -132,8 +140,7 @@ public class VMToKafkaLogMessageGeneratorApp extends VMApp {
     public KafkaPartitionLogWriter(String zkConnects, String topic, PartitionMetadata partitionMetadata) throws Exception {
       this.topic = topic ;
       this.partitionMetadata = partitionMetadata;
-      KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
-      String kafkaConnects = kafkaTool.getKafkaBrokerList();
+      String kafkaConnects = kafkaClient.getKafkaBrokerList();
       kafkaWriter = new AckKafkaWriter("KafkaLogWriter", kafkaConnects) ;
       kafkaWriter.reconnect();
     }

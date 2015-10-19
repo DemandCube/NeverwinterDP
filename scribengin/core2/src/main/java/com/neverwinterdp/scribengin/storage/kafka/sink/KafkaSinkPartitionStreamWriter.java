@@ -32,7 +32,6 @@ public class KafkaSinkPartitionStreamWriter implements SinkPartitionStreamWriter
 
   @Override
   public void rollback() throws Exception {
-
   }
 
   @Override

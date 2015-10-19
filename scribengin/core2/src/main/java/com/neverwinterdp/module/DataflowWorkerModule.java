@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.FileSystem;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.google.inject.name.Names;
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.vm.VMConfig;
 
@@ -28,10 +29,14 @@ public class DataflowWorkerModule extends ServiceModule {
       FileSystem fs = FileSystem.get(conf);
       bindInstance(FileSystem.class, fs);
       
+      String kafkaZkConnects = props.get("kafka.zk.connects");
+      KafkaClient kafkaClient = new KafkaClient("KafkaClient", kafkaZkConnects);
+      bindInstance(KafkaClient.class, kafkaClient);
+      
       S3Client s3Client = new S3Client();
       bindInstance(S3Client.class, s3Client);
-    } catch (IOException e) {
-      e.printStackTrace();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 }

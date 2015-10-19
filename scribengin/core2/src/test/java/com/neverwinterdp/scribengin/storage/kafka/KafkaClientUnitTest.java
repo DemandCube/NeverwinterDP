@@ -5,7 +5,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.kafka.tool.ZKClient;
+import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.ZKClient;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
@@ -32,7 +33,8 @@ public class KafkaClientUnitTest {
 
   @Test
   public void testKafkaSink() throws Exception {
-    KafkaStorage storage = new KafkaStorage("writer", cluster.getZKConnect(), "hello");
+    KafkaClient kafkaClient = new KafkaClient("KafkaClient", cluster.getZKConnect());
+    KafkaStorage storage = new KafkaStorage(kafkaClient, "writer", "hello");
     KafkaSink sink = (KafkaSink) storage.getSink();
     SinkPartitionStream stream = sink.newStream();
     SinkPartitionStreamWriter writer = stream.getWriter();
@@ -44,5 +46,6 @@ public class KafkaClientUnitTest {
     client.connect(10000);
     client.dump("/brokers");
     client.close();
+    kafkaClient.close();
   }
 }
