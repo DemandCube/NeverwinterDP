@@ -2,22 +2,33 @@ package com.neverwinterdp.scribengin.storage.kafka.perftest;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.neverwinterdp.os.OSManagement;
 import com.neverwinterdp.util.text.TabularFormater;
 
 public class TopicPerfReporter {
-  private Map<String, TopicPerfReport> reports = new HashMap<>();
-  
+  private long                         startTime    = System.currentTimeMillis();
+  private OSManagement                 osManagement = new OSManagement();
+  private Map<String, TopicPerfReport> reports      = new HashMap<>();
+
   public String getFormattedText() {
-    TabularFormater formater = new TabularFormater("Topic", "Write", "Read");
+    StringBuilder fText = new StringBuilder();
+    long elapsedTime = System.currentTimeMillis() - startTime;
+    long elapsedTimeInSec = TimeUnit.MILLISECONDS.toSeconds(elapsedTime);
+    TabularFormater formater = new TabularFormater("Topic", "Write", "Read", "Elapsed Time(sec)");
     formater.setTitle("Topics Report");
     synchronized(reports) {
       for(TopicPerfReport sel : reports.values()) {
-        formater.addRow(sel.topic, sel.write.get(), sel.read.get());
+        formater.addRow(sel.topic, sel.write.get(), sel.read.get(), elapsedTimeInSec);
       }
     }
-    return formater.getFormattedText();
+    fText.append(formater.getFormattedText()).append("\n\n");
+    fText.append(osManagement.getOSInfoFormattedText()).append("\n\n");
+    fText.append(osManagement.getMemoryInfoFormattedText()).append("\n\n");
+    fText.append(osManagement.getGCInfoFormattedText()).append("\n\n");
+    return fText.toString();
   }
   
   public void incrRead(String topic, int incr) {
