@@ -26,11 +26,12 @@ public class KafkaPerfTest {
       executorService.submit(runner);
     }
     executorService.shutdown();
+    
     long stopTime = System.currentTimeMillis() + topicConfig.maxRunTime + 900000;
     while(!executorService.isTerminated()) {
+      Thread.sleep(15000);
       System.out.println(reporter.getFormattedText());
       if(System.currentTimeMillis() > stopTime) break;
-      Thread.sleep(15000);
     }
     System.out.println(reporter.getFormattedText());
   }

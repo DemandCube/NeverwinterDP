@@ -29,7 +29,7 @@ public class PerfTestUnitTest {
         "--topics", "tracking.input,tracking.info,tracking.warn,tracking.error,tracking.aggregate",
 
         "--zk-connect", "127.0.0.1:2181",
-        "--topic-num-of-message",     "500000",
+        "--topic-num-of-message",     "10000",
         "--topic-num-of-partition",   "10",
         "--topic-num-of-replication", "1",
         
