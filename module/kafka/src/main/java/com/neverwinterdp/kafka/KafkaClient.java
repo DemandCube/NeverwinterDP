@@ -75,7 +75,7 @@ public class KafkaClient  {
   }
 
   public TopicMetadata findTopicMetadata(final String topic) throws Exception {
-    return findTopicMetadata(topic, 1);
+    return findTopicMetadata(topic, 3);
   }
 
   public TopicMetadata findTopicMetadata(final String topic, int retries) throws Exception {
@@ -89,7 +89,11 @@ public class KafkaClient  {
         if (topicMetadatas.size() != 1) {
           throw new Exception("Expect to find 1 topic " + topic + ", but found " + topicMetadatas.size());
         }
-        return topicMetadatas.get(0);
+        TopicMetadata tMetadata = topicMetadatas.get(0);
+        if(tMetadata.partitionsMetadata().size() == 0) {
+          throw new Exception("Found the topic " + topic + ", but the partition metadata is empty!");
+        }
+        return tMetadata;
       }
     };
     return execute(findTopicOperation, retries);

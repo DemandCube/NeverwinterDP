@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.util.JSONSerializer;
+
 import kafka.api.FetchRequest;
 import kafka.api.FetchRequestBuilder;
 import kafka.cluster.Broker;
@@ -23,10 +26,6 @@ import kafka.javaapi.consumer.SimpleConsumer;
 import kafka.javaapi.message.ByteBufferMessageSet;
 import kafka.message.Message;
 import kafka.message.MessageAndOffset;
-
-import com.neverwinterdp.kafka.KafkaClient;
-import com.neverwinterdp.kafka.ZKClient;
-import com.neverwinterdp.util.JSONSerializer;
 
 
 public class KafkaPartitionReader {
