@@ -17,7 +17,6 @@ public class TopicPerfRunner implements Runnable {
     try {
       kafkaClient = new KafkaClient("KafkaClient", topicConfig.zkConnect);
       TopicWriter topicWriter = new TopicWriter(kafkaClient, topicConfig, reporter);
-
       topicWriter.start();
 
       TopicReader topicReader = new TopicReader(kafkaClient, topicConfig.topic, reporter);
@@ -26,9 +25,12 @@ public class TopicPerfRunner implements Runnable {
         Thread.sleep(topicConfig.readerRunDelay);
       }
       topicReader.start();
-
+      
+      long startTime = System.currentTimeMillis();
       topicWriter.waitForTermination(topicConfig.maxRunTime);
-      topicReader.waitForTermination(60 * 60000);
+      long remainWaitTime = topicConfig.maxRunTime - (System.currentTimeMillis() - startTime);
+      if(remainWaitTime > 0) topicReader.waitForTermination(remainWaitTime);
+    
     } catch(Exception ex) {
       ex.printStackTrace();
     } finally {
