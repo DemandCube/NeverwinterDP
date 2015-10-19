@@ -69,9 +69,9 @@ DATAFLOW_STORAGE=$(get_opt --dataflow-storage 'kafka' $@)
 DATAFLOW_NUM_OF_WORKER=$(get_opt --dataflow-num-of-worker '2' $@)
 DATAFLOW_NUM_OF_EXECUTOR_PER_WORKER=$(get_opt --dataflow-num-of-executor-per-worker '2' $@)
 
-DATAFLOW_KILL_WORKER_RANDOM=$(get_opt --kill-worker-random 'false' $@)
-DATAFLOW_KILL_WORKER_MAX=$(get_opt --kill-worker-max '5' $@)
-DATAFLOW_KILL_WORKER_PERIOD=$(get_opt --kill-worker-period '60000' $@)
+DATAFLOW_KILL_WORKER_RANDOM=$(get_opt --dataflow-kill-worker-random 'false' $@)
+DATAFLOW_KILL_WORKER_MAX=$(get_opt --dataflow-kill-worker-max '5' $@)
+DATAFLOW_KILL_WORKER_PERIOD=$(get_opt --dataflow-kill-worker-period '60000' $@)
 
 
 DATAFLOW_DESCRIPTOR_FILE=""
@@ -135,9 +135,8 @@ $SHELL dataflow submit \
   --wait-for-running-timeout 180000 
 
 if [ "$DATAFLOW_KILL_WORKER_RANDOM" = "true" ] ; then
-  $SHELL dataflow kill-worker-random \
-    --dataflow-id tracking-splitter-dataflow,tracking-persister-dataflow-info,tracking-persister-dataflow-warn,tracking-persister-dataflow-error \
-    --wait-before-simulate-failure 60000 --failure-period $DATAFLOW_KILL_WORKER_PERIOD --max-kill $DATAFLOW_KILL_WORKER_MAX &
+  $SHELL dataflow kill-worker-random  --dataflow-id tracking-dataflow \
+    --wait-before-simulate-failure 180000 --failure-period $DATAFLOW_KILL_WORKER_PERIOD --max-kill $DATAFLOW_KILL_WORKER_MAX &
 fi
 
 #########################################################################################################################
