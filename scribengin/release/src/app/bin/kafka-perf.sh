@@ -25,7 +25,9 @@ ARGS="\
   \
   --writer-write-per-writer 50000  --writer-write-break-in-period 100 \
   \
-  --reader-read-per-reader 50000 --reader-run-delay 30000"
+  --reader-read-per-reader 50000 --reader-run-delay 30000 \
+  \
+  --max-runtime 7200000"
 
 MAIN_CLASS="com.neverwinterdp.scribengin.storage.kafka.perftest.KafkaPerfTest"
 
