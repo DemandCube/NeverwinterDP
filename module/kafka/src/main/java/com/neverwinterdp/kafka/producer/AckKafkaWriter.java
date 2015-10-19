@@ -35,13 +35,15 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
   public AckKafkaWriter(String name, Map<String, String> props, String kafkaBrokerUrls) {
     super(name);
     Properties kafkaProps = new Properties();
-    kafkaProps.put("bootstrap.servers", kafkaBrokerUrls);
-    kafkaProps.put("value.serializer", ByteArraySerializer.class.getName());
-    kafkaProps.put("key.serializer",   ByteArraySerializer.class.getName());
+    kafkaProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBrokerUrls);
+    kafkaProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
+    kafkaProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,   ByteArraySerializer.class.getName());
     
     kafkaProps.setProperty(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, "100");
     kafkaProps.setProperty(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, "10");
-
+    
+    kafkaProps.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
+    
     if (props != null) {
       kafkaProps.putAll(props);
     }

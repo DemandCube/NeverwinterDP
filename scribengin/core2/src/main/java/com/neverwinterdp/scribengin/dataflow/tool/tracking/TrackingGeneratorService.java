@@ -2,6 +2,7 @@ package com.neverwinterdp.scribengin.dataflow.tool.tracking;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -143,6 +144,7 @@ public class TrackingGeneratorService {
     private int    currentChunkMessageIdTracker = 0;
     
     private TrackingMessageReport currentReport ;
+    private Random  random = new Random();
     
     synchronized public TrackingMessage nextMessage() throws Exception {
       if(currentChunkMessageIdTracker == numOfMessage) {
@@ -161,7 +163,7 @@ public class TrackingGeneratorService {
         trackingRegistry.addGeneratorReport(currentReport);
       }
       
-      byte[] data = new byte[messageSize];
+      byte[] data = randomData(messageSize);
       TrackingMessage message = new TrackingMessage(vmId, currentChunkId, currentChunkMessageIdTracker++, data);
       currentReport.setProgress(currentChunkMessageIdTracker);
       currentReport.setNoLostTo(currentChunkMessageIdTracker);
@@ -169,6 +171,12 @@ public class TrackingGeneratorService {
         trackingRegistry.updateGeneratorReport(currentReport);
       }
       return message ;
+    }
+    
+    byte[] randomData(int size) {
+      byte[] data = new byte[size];
+      random.nextBytes(data);
+      return data;
     }
   }
 }
