@@ -21,6 +21,7 @@ public class DataflowServiceModule extends ServiceModule {
     try {
       FileSystem fs = FileSystem.get(conf);
       bindInstance(FileSystem.class, fs);
+      
       String kafkaZkConnects = props.get("kafka.zk.connects");
       KafkaClient kafkaClient = new KafkaClient("KafkaClient", kafkaZkConnects);
       bindInstance(KafkaClient.class, kafkaClient);

@@ -3,7 +3,7 @@ package com.neverwinterdp.scribengin.dataflow.tool.tracking;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
-import com.neverwinterdp.scribengin.client.shell.ScribenginShell;
+import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.vm.client.shell.CommandInput;
 import com.neverwinterdp.vm.client.shell.Shell;
 import com.neverwinterdp.vm.client.shell.SubCommand;
@@ -57,7 +57,7 @@ public class TrackingMonitor extends SubCommand {
     if(validatedReports.size() == 0) return false;
     boolean validateAllMessges = true;
     for(TrackingMessageReport selReport : validatedReports) {
-      if(selReport.getNumOfMessage() == selReport.getProgress()) {
+      if(selReport.getNumOfMessage() == selReport.getNoLostTo()) {
         continue ;
       } else {
         validateAllMessges = false;

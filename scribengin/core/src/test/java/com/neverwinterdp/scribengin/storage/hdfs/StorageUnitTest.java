@@ -37,7 +37,7 @@ public class StorageUnitTest {
   @Test
   public void test() throws Exception {
     int NUM_OF_WRITER             = 5;
-    int NUM_OF_SEG_PER_WRITER     = 100;
+    int NUM_OF_SEG_PER_WRITER     = 10;
     int NUM_OF_RECORD_PER_SEGMENT = 5000;
     int TOTAL = NUM_OF_WRITER * NUM_OF_SEG_PER_WRITER * NUM_OF_RECORD_PER_SEGMENT;
     Segment.SMALL_DATASIZE_THRESHOLD =  32 * 1024 * 1024;

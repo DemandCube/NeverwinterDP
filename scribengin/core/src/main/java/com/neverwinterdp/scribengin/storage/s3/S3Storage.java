@@ -1,7 +1,7 @@
 package com.neverwinterdp.scribengin.storage.s3;
 
-import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.StorageConfig;
+import com.neverwinterdp.scribengin.storage.PartitionConfig;
 import com.neverwinterdp.scribengin.storage.s3.sink.S3Sink;
 import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
 
@@ -14,11 +14,7 @@ public class S3Storage {
     this.storageFolder = storageFolder;
   }
   
-  public S3Storage(StorageDescriptor descriptor) {
-    fromStorageDescriptor(descriptor);
-  }
-  
-  public S3Storage(StreamDescriptor descriptor) {
+  public S3Storage(StorageConfig descriptor) {
     fromStorageDescriptor(descriptor);
   }
   
@@ -26,22 +22,22 @@ public class S3Storage {
   
   public String getStorageFolder() { return this.storageFolder ; }
   
-  public StorageDescriptor getStorageDescriptor() { return toStorageDesciptor();  }
+  public StorageConfig getStorageDescriptor() { return toStorageDesciptor();  }
   
-  public StreamDescriptor createStreamDescriptor(String streamKey) {
+  public PartitionConfig createPartitionConfig(String streamKey) {
     int id = Integer.parseInt(streamKey.substring(streamKey.lastIndexOf('-') + 1)) ;
-    StreamDescriptor descriptor = new StreamDescriptor("S3", id, bucketName) ;
+    PartitionConfig descriptor = new PartitionConfig(id, bucketName) ;
     descriptor.attribute("s3.bucket.name", bucketName);
     descriptor.attribute("s3.storage.path", storageFolder);
     return descriptor;
   }
   
-  public String getStreamKey(StreamDescriptor descriptor) {
-    return this.storageFolder + "/stream-" + descriptor.getId();
+  public String getPartitionKey(PartitionConfig pConfig) {
+    return this.storageFolder + "/stream-" + pConfig.getPartitionId();
   }
   
-  public StreamDescriptor createStreamDescriptor(int id) {
-    StreamDescriptor descriptor = new StreamDescriptor("S3", id, bucketName) ;
+  public PartitionConfig createPartitionConfig(int id) {
+    PartitionConfig descriptor = new PartitionConfig(id, bucketName) ;
     descriptor.attribute("s3.bucket.name", bucketName);
     descriptor.attribute("s3.storage.path", storageFolder);
     descriptor.attribute("s3.storage.stream", "stream-" + id);
@@ -69,14 +65,14 @@ public class S3Storage {
     return new S3Source(getS3Client(), toStorageDesciptor()); 
   }
   
-  StorageDescriptor toStorageDesciptor() {
-    StorageDescriptor descriptor = new StorageDescriptor("S3") ;
+  StorageConfig toStorageDesciptor() {
+    StorageConfig descriptor = new StorageConfig("S3") ;
     descriptor.attribute("s3.bucket.name", bucketName);
     descriptor.attribute("s3.storage.path", storageFolder);
     return descriptor ;
  }
   
-  void fromStorageDescriptor(StorageDescriptor descriptor) {
+  void fromStorageDescriptor(StorageConfig descriptor) {
     bucketName = descriptor.attribute("s3.bucket.name");
     storageFolder = descriptor.attribute("s3.storage.path");
   }

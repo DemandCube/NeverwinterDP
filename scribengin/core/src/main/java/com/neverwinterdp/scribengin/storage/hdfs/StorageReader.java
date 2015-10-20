@@ -10,7 +10,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;
 import com.neverwinterdp.util.JSONSerializer;
 
@@ -65,9 +65,9 @@ public class StorageReader<T> {
     return JSONSerializer.INSTANCE.fromBytes(data, type);
   }
 
-  public DataflowMessage[] next(int size, long maxWait) throws Exception {
+  public Record[] next(int size, long maxWait) throws Exception {
     List<T> holder = new ArrayList<>();
-    DataflowMessage[] array = new DataflowMessage[holder.size()];
+    Record[] array = new Record[holder.size()];
     for (int i = 0; i < size; i++) {
       T dataflowMessage = next(maxWait);
       if (dataflowMessage != null)

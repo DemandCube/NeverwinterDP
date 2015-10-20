@@ -4,32 +4,31 @@ import kafka.javaapi.PartitionMetadata;
 
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.Record;
+import com.neverwinterdp.scribengin.storage.PartitionConfig;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;
-import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 
-public class KafkaSourceStreamReader implements SourceStreamReader {
-  private StreamDescriptor descriptor;
+public class KafkaSourceStreamReader implements SourcePartitionStreamReader {
+  private PartitionConfig partitionConfig;
   private KafkaPartitionReader partitionReader ;
   private CommitPoint lastCommitInfo ;
   
-  public KafkaSourceStreamReader(KafkaClient kafkaClient, StreamDescriptor descriptor, PartitionMetadata partitionMetadata) throws Exception {
-    this.descriptor = descriptor;
-    this.partitionReader = 
-        new KafkaPartitionReader(descriptor.attribute("name"), kafkaClient, descriptor.attribute("topic"), partitionMetadata);
+  public KafkaSourceStreamReader(KafkaClient kafkaClient, PartitionConfig pConfig, PartitionMetadata pmd) throws Exception {
+    this.partitionConfig = pConfig;
+    this.partitionReader = new KafkaPartitionReader(pConfig.attribute("name"), kafkaClient, pConfig.attribute("topic"), pmd);
   }
   
   @Override
-  public String getName() { return descriptor.attribute("name"); }
+  public String getName() { return partitionConfig.attribute("name"); }
 
   @Override
-  public DataflowMessage next(long maxWait) throws Exception {
-    return partitionReader.nextAs(DataflowMessage.class, maxWait);
+  public Record next(long maxWait) throws Exception {
+    return partitionReader.nextAs(Record.class, maxWait);
   }
 
   @Override
-  public DataflowMessage[] next(int size, long maxWait) throws Exception {
+  public Record[] next(int size, long maxWait) throws Exception {
     throw new Exception("To implement") ;
   }
 
@@ -68,5 +67,4 @@ public class KafkaSourceStreamReader implements SourceStreamReader {
   public void close() throws Exception {
     partitionReader.close();
   }
- 
 }

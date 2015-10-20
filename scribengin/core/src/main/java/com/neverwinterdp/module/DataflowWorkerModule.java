@@ -1,10 +1,13 @@
 package com.neverwinterdp.module;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 import com.google.inject.name.Names;
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
@@ -33,7 +36,7 @@ public class DataflowWorkerModule extends ServiceModule {
       S3Client s3Client = new S3Client();
       bindInstance(S3Client.class, s3Client);
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 }

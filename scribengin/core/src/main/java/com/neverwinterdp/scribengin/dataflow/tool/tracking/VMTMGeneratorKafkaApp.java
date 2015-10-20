@@ -15,6 +15,7 @@ import com.neverwinterdp.vm.VMDescriptor;
 public class VMTMGeneratorKafkaApp extends VMApp {
   private Logger logger ;
   private TrackingGeneratorService service ;
+  private KafkaClient kafkaClient;
   
   @Override
   public void run() throws Exception {
@@ -42,7 +43,7 @@ public class VMTMGeneratorKafkaApp extends VMApp {
       service.addWriter(new KafkaTrackingMessageWriter(kafkaZkConnects, kafkaTopic));
     }
     
-    KafkaClient kafkaClient = new KafkaClient("KafkaTool", kafkaZkConnects);
+    kafkaClient = new KafkaClient("KafkaClient", kafkaZkConnects);
     if(!kafkaClient.getKafkaTool().topicExits(kafkaTopic)) {
       kafkaClient.getKafkaTool().createTopic(kafkaTopic, kafkaReplication, kafkaNumOfPartition);
     }
@@ -61,8 +62,7 @@ public class VMTMGeneratorKafkaApp extends VMApp {
     }
     
     public void onInit(TrackingRegistry registry) throws Exception {
-      KafkaClient kafkaTool = new KafkaClient("KafkaTool", kafkaZkConnects);
-      String kafkaConnects = kafkaTool.getKafkaBrokerList();
+      String kafkaConnects = kafkaClient.getKafkaBrokerList();
       kafkaWriter = new AckKafkaWriter("KafkaLogWriter", kafkaConnects) ;
       kafkaWriter.reconnect();
     }

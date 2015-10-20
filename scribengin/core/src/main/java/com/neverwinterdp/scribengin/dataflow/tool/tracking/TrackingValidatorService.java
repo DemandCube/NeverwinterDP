@@ -121,7 +121,7 @@ public class TrackingValidatorService {
     public void run() {
       try {
         while(true) {
-          Thread.sleep(10000);
+          Thread.sleep(15000);
           bitSetReports.update();
         }
       } catch (InterruptedException e) {

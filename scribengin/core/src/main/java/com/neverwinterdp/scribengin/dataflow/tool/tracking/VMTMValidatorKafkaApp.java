@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
@@ -23,7 +23,7 @@ import kafka.message.Message;
 
 public class VMTMValidatorKafkaApp extends VMApp {
   private Logger logger;
-  KafkaClient kafkaClient ;
+  private KafkaClient kafkaClient;
   
   @Override
   public void run() throws Exception {
@@ -40,12 +40,14 @@ public class VMTMValidatorKafkaApp extends VMApp {
     
     String kafkaZkConnects         = vmConfig.getProperty("kafka.zk-connects", "zookeeper-1:2181");
     String kafkaTopic              = vmConfig.getProperty("kafka.topic", null);
-    long   kafkaMessageWaitTimeout = vmConfig.getPropertyAsLong("kafka.message-wait-timeout", 600000);
+    long   kafkaMessageWaitTimeout = vmConfig.getPropertyAsLong("kafka.message-wait-timeout", 30000);
     
-    kafkaClient = new KafkaClient("VMTMValidatorKafkaApp", kafkaZkConnects);
+    kafkaClient = new KafkaClient("KafkaClient", kafkaZkConnects);
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, reportPath);
     validatorService.withExpectNumOfMessagePerChunk(expectNumOfMessagePerChunk);
-    validatorService.addReader(new KafkaTrackingMessageReader(kafkaTopic, numOfReader, kafkaMessageWaitTimeout));
+    validatorService.addReader(
+        new KafkaTrackingMessageReader(kafkaZkConnects, kafkaTopic, numOfReader, kafkaMessageWaitTimeout)
+    );
     validatorService.start();
     validatorService.awaitForTermination(maxRuntime, TimeUnit.MILLISECONDS);
     kafkaClient.close();
@@ -54,17 +56,19 @@ public class VMTMValidatorKafkaApp extends VMApp {
   public class KafkaTrackingMessageReader extends TrackingMessageReader {
     private BlockingQueue<TrackingMessage> queue = new LinkedBlockingQueue<>(5000);
     
+    private String                kafkaZkConnects;
     private String                topic;
     private long                  maxMessageWaitTime;
     KafkaTopicConnector           connector;
     
-    KafkaTrackingMessageReader(String topic, int numOfThread, long maxMessageWaitTime) {
+    KafkaTrackingMessageReader(String kafkaZkConnects, String topic, int numOfThread, long maxMessageWaitTime) {
+      this.kafkaZkConnects = kafkaZkConnects;
       this.topic = topic;
       this.maxMessageWaitTime = maxMessageWaitTime;
     }
     
     public void onInit(TrackingRegistry registry) throws Exception {
-      connector = new KafkaTopicConnector(topic) {
+      connector = new KafkaTopicConnector(kafkaZkConnects, topic) {
         @Override
         public void onTrackingMessage(TrackingMessage tMesg) throws Exception {
           queue.offer(tMesg, maxMessageWaitTime, TimeUnit.MILLISECONDS);
@@ -86,8 +90,8 @@ public class VMTMValidatorKafkaApp extends VMApp {
   abstract public class KafkaTopicConnector extends Thread {
     private KafkaPartitionReader[] partitionReader;
     
-    public KafkaTopicConnector(String topic) throws Exception {
-      TopicMetadata topicMeta = kafkaClient.findTopicMetadata(topic, 3);
+    public KafkaTopicConnector(String kafkaZkConnects, String topic) throws Exception {
+      TopicMetadata topicMeta = kafkaClient.findTopicMetadata(topic);
       List<PartitionMetadata> partitionMetas = topicMeta.partitionsMetadata();
       int numOfPartitions = partitionMetas.size();
       
@@ -124,7 +128,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
             ByteBuffer payload = message.payload();
             byte[] bytes = new byte[payload.limit()];
             payload.get(bytes);
-            DataflowMessage rec = JSONSerializer.INSTANCE.fromBytes(bytes, DataflowMessage.class);
+            Record rec = JSONSerializer.INSTANCE.fromBytes(bytes, Record.class);
             TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(rec.getData(), TrackingMessage.class);
             onTrackingMessage(tMesg);
           }

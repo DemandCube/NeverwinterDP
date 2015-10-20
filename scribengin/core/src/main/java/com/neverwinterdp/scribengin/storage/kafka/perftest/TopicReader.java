@@ -6,24 +6,26 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.neverwinterdp.kafka.KafkaClient;
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSource;
-import com.neverwinterdp.scribengin.storage.source.SourceStream;
-import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 
 public class TopicReader {
-  private KafkaClient kafkaClient ;
-  private String topic;
-  private String zkConnect;
-  private int    readPerReader = 1000;
+  private KafkaClient kafkaClient;
+  private String      topic;
+  private String      zkConnect;
+  private int         readPerReader = 1000;
   
   private AtomicLong readCounter = new AtomicLong();
+  private TopicPerfReporter reporter;
   
   private ExecutorService executorService;
   
-  public TopicReader(KafkaClient kafkaClient, String topic) throws Exception {
+  public TopicReader(KafkaClient kafkaClient, String topic, TopicPerfReporter reporter) throws Exception {
     this.kafkaClient = kafkaClient;
     this.topic = topic ;
+    this.reporter = reporter;
   }
   
   public TopicReader setReadPerReader(int num) {
@@ -33,7 +35,7 @@ public class TopicReader {
   
   public void start() throws Exception {
     KafkaSource source = new KafkaSource(kafkaClient, topic + ".reader",  topic) ;
-    SourceStream[] streams = source.getStreams() ;
+    SourcePartitionStream[] streams = source.getStreams() ;
     executorService = Executors.newFixedThreadPool(streams.length);
     for(int i = 0; i < streams.length; i++) {
       TopicPartitionReader partitionReader = new TopicPartitionReader(streams[i]);
@@ -55,10 +57,10 @@ public class TopicReader {
   public long getTotalRead() { return readCounter.get(); }
   
   public class TopicPartitionReader implements Runnable {
-    SourceStream       stream;
-    SourceStreamReader currentReader ;
+    SourcePartitionStream       stream;
+    SourcePartitionStreamReader currentReader ;
     
-    TopicPartitionReader(SourceStream stream) {
+    TopicPartitionReader(SourcePartitionStream stream) {
       this.stream = stream;
     }
     
@@ -85,12 +87,13 @@ public class TopicReader {
       while(true) {
         currentReader = stream.getReader(topic + ".reader");
         for(int i = 0; i < readPerReader; i++) {
-          DataflowMessage dflMessage = currentReader.next(10000);
-          if(dflMessage == null) {
+          Record record = currentReader.next(10000);
+          if(record == null) {
             currentReader.commit();
             currentReader.close();
             return;
           }
+          reporter.incrRead(topic, 1);
           readCounter.incrementAndGet();
         }
         currentReader.commit();

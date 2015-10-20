@@ -1,16 +1,19 @@
 package com.neverwinterdp.scribengin.dataflow.sample;
 
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
-import com.neverwinterdp.scribengin.dataflow.DataflowTaskContext;
-import com.neverwinterdp.scribengin.scribe.ScribeAbstract;
+import java.util.Set;
 
-public class TrackingMessagePerister extends ScribeAbstract {
+import com.neverwinterdp.scribengin.dataflow.operator.Operator;
+import com.neverwinterdp.scribengin.dataflow.operator.OperatorContext;
+import com.neverwinterdp.scribengin.storage.Record;
+
+public class TrackingMessagePerister extends Operator {
   int count = 0 ;
   
-  public void process(DataflowMessage dflMessage, DataflowTaskContext ctx) throws Exception {
-    String[] sink = ctx.getAvailableSinks();
+  @Override
+  public void process(OperatorContext ctx, Record record) throws Exception {
+    Set<String> sink = ctx.getAvailableOutputs();
     for(String selSink : sink) {
-      ctx.write(selSink, dflMessage);
+      ctx.write(selSink, record);
     }
     
     count++;

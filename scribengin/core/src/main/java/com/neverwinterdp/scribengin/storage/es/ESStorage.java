@@ -2,8 +2,8 @@ package com.neverwinterdp.scribengin.storage.es;
 
 import com.neverwinterdp.es.ESClient;
 import com.neverwinterdp.es.ESObjectClient;
-import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.StorageConfig;
+import com.neverwinterdp.scribengin.storage.PartitionConfig;
 import com.neverwinterdp.util.text.StringUtil;
 
 public class ESStorage {
@@ -17,11 +17,7 @@ public class ESStorage {
     this.mappingType = type ;
   }
   
-  public ESStorage(StorageDescriptor descriptor) {
-    fromStorageDescriptor(descriptor);
-  }
-  
-  public ESStorage(StreamDescriptor descriptor) {
+  public ESStorage(StorageConfig descriptor) {
     fromStorageDescriptor(descriptor);
   }
   
@@ -31,10 +27,10 @@ public class ESStorage {
   
   public Class<?> getMappingType() { return mappingType; }
   
-  public StorageDescriptor getStorageDescriptor() { return toStorageDesciptor();  }
+  public StorageConfig getStorageConfig() { return toStorageConfig();  }
   
-  public StreamDescriptor newStreamDescriptor() {
-    StreamDescriptor descriptor = new StreamDescriptor(getStorageDescriptor()) ;
+  public PartitionConfig newStreamDescriptor() {
+    PartitionConfig descriptor = new PartitionConfig(getStorageConfig()) ;
     return descriptor;
   }
   
@@ -43,15 +39,15 @@ public class ESStorage {
     return esObjClient;
   }
 
-  StorageDescriptor toStorageDesciptor() {
-    StorageDescriptor descriptor = new StorageDescriptor("elasticsearch") ;
+  StorageConfig toStorageConfig() {
+    StorageConfig descriptor = new StorageConfig("elasticsearch") ;
     descriptor.attribute("address", StringUtil.joinStringArray(address)) ;
     descriptor.attribute("indexName", indexName) ;
     descriptor.attribute("mappingType", mappingType.getName()) ;
     return descriptor ;
  }
   
-  void fromStorageDescriptor(StorageDescriptor descriptor) {
+  void fromStorageDescriptor(StorageConfig descriptor) {
     try {
       address = StringUtil.toStringArray(descriptor.attribute("address"));
       indexName = descriptor.attribute("indexName");

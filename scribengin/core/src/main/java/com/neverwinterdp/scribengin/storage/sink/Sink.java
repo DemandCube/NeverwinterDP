@@ -1,18 +1,20 @@
 package com.neverwinterdp.scribengin.storage.sink;
 
-import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.StorageConfig;
+import com.neverwinterdp.scribengin.storage.PartitionConfig;
 
 public interface Sink {
-  public StorageDescriptor getDescriptor();
+  public StorageConfig getDescriptor();
   
-  public SinkStream  getStream(StreamDescriptor descriptor) throws Exception ;
+  public SinkPartitionStream  getStream(PartitionConfig descriptor) throws Exception ;
   
-  public SinkStream[] getStreams();
+  public SinkPartitionStream  getStream(int partitionId) throws Exception ;
+  
+  public SinkPartitionStream[] getStreams();
 
-  public void delete(SinkStream stream) throws Exception;
+  public void delete(SinkPartitionStream stream) throws Exception;
 
-  public SinkStream newStream() throws Exception ;
+  public SinkPartitionStream newStream() throws Exception ;
 
   public void close() throws Exception ;
 }

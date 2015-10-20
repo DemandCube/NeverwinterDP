@@ -7,64 +7,71 @@ import java.util.Map;
 import kafka.javaapi.PartitionMetadata;
 import kafka.javaapi.TopicMetadata;
 
+import com.neverwinterdp.scribengin.storage.StorageConfig;
+import com.neverwinterdp.scribengin.storage.kafka.KafkaStorage;
 import com.neverwinterdp.kafka.KafkaClient;
-import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.PartitionConfig;
 import com.neverwinterdp.scribengin.storage.source.Source;
-import com.neverwinterdp.scribengin.storage.source.SourceStream;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
 
 public class KafkaSource implements Source {
-  private KafkaClient kafkaClient;
-  private StorageDescriptor descriptor;
+  private KafkaClient                     kafkaClient;
+  private StorageConfig                   storageConfig;
   private Map<Integer, KafkaSourceStream> sourceStreams = new HashMap<Integer, KafkaSourceStream>();
-  
+
   public KafkaSource(KafkaClient kafkaClient, String name, String topic) throws Exception {
     this.kafkaClient = kafkaClient;
-    StorageDescriptor descriptor = createStorageDescriptor(name, topic, kafkaClient.getZkConnects(), null);
+    StorageConfig descriptor = createStorageConfig(name, topic, kafkaClient.getZkConnects(), null);
     init(descriptor);
   }
   
-  public KafkaSource(KafkaClient kafkaClient, StorageDescriptor descriptor) throws Exception {
+  public KafkaSource(KafkaClient kafkaClient, StorageConfig sconfig) throws Exception {
     this.kafkaClient = kafkaClient;
-    init(descriptor);
+    init(sconfig);
   }
-
-  void init(StorageDescriptor descriptor) throws Exception {
-    this.descriptor = descriptor;
-    TopicMetadata topicMetdadata = kafkaClient.findTopicMetadata(descriptor.attribute("topic"));
+  
+  void init(StorageConfig sconfig) throws Exception {
+    this.storageConfig = sconfig;
+    TopicMetadata topicMetdadata = kafkaClient.findTopicMetadata(sconfig.attribute("topic"));
     List<PartitionMetadata> partitionMetadatas = topicMetdadata.partitionsMetadata();
     for(int i = 0; i < partitionMetadatas.size(); i++) {
       PartitionMetadata partitionMetadata = partitionMetadatas.get(i);
-      KafkaSourceStream sourceStream = new KafkaSourceStream(kafkaClient, descriptor, partitionMetadata);
+      KafkaSourceStream sourceStream = new KafkaSourceStream(kafkaClient, sconfig, partitionMetadata);
       sourceStreams.put(sourceStream.getId(), sourceStream);
     }
   }
   
   @Override
-  public StorageDescriptor getDescriptor() { return descriptor; }
+  public StorageConfig getStorageConfig() { return storageConfig; }
 
   /**
    * The stream id is equivalent to the partition id of the kafka
    */
   @Override
-  public SourceStream getStream(int id) {  return sourceStreams.get(id); }
-
-  @Override
-  public SourceStream getStream(StreamDescriptor descriptor) {
-    return sourceStreams.get(descriptor.getId());
+  public SourcePartitionStream getStream(int id) {  
+    SourcePartitionStream stream = sourceStreams.get(id); 
+    if(stream == null) {
+      throw new RuntimeException("Cannot find the partition " + id + ", available streams = " + sourceStreams.size());
+    }
+    return stream;
   }
 
   @Override
-  public SourceStream[] getStreams() {
-    SourceStream[] array = new SourceStream[sourceStreams.size()];
+  public SourcePartitionStream getStream(PartitionConfig descriptor) {
+    return getStream(descriptor.getPartitionId());
+  }
+
+  @Override
+  public SourcePartitionStream[] getStreams() {
+    SourcePartitionStream[] array = new SourcePartitionStream[sourceStreams.size()];
     return sourceStreams.values().toArray(array);
   }
   
   public void close() throws Exception {
   }
   
-  static public StorageDescriptor createStorageDescriptor(String name, String topic, String zkConnect, String reader) {
-    StorageDescriptor descriptor = new StorageDescriptor("kafka");
+  static public StorageConfig createStorageConfig(String name, String topic, String zkConnect, String reader) {
+    StorageConfig descriptor = new StorageConfig("kafka");
     descriptor.attribute("name", name);
     descriptor.attribute("topic", topic);
     descriptor.attribute("zk.connect", zkConnect);

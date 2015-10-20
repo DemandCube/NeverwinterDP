@@ -3,76 +3,80 @@ package com.neverwinterdp.scribengin.storage.kafka.sink;
 import java.util.LinkedHashMap;
 
 import com.neverwinterdp.kafka.KafkaClient;
-import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.StorageConfig;
+import com.neverwinterdp.scribengin.storage.kafka.KafkaStorage;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
-import com.neverwinterdp.scribengin.storage.sink.SinkStream;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
 
 public class KafkaSink implements Sink {
-  private KafkaClient kafkaClient;
-  private StorageDescriptor descriptor;
+  private StorageConfig storageConfig;
+  private KafkaClient   kafkaClient;
   
   private int idTracker = 0;
-  private LinkedHashMap<Integer, KafkaSinkStream> streams = new LinkedHashMap<Integer, KafkaSinkStream>() ;
+  private LinkedHashMap<Integer, KafkaSinkPartitionStream> streams = new LinkedHashMap<Integer, KafkaSinkPartitionStream>() ;
   
-  public KafkaSink(KafkaClient kafkaClient, StorageDescriptor descriptor) throws Exception {
+  public KafkaSink(KafkaClient kafkaClient, String name, String topic) throws Exception {
+    this.kafkaClient = kafkaClient;
+    init(KafkaStorage.createStorageConfig(name, kafkaClient.getZkConnects(), topic)) ;
+  }
+  
+  public KafkaSink(KafkaClient kafkaClient, StorageConfig descriptor) throws Exception {
     this.kafkaClient = kafkaClient;
     init(descriptor) ;
   }
   
-  public KafkaSink(KafkaClient kafkaClient, String name, String topic) throws Exception {
-    this.kafkaClient = kafkaClient;
-    StorageDescriptor descriptor = new StorageDescriptor("kafka");
-    descriptor.attribute("name", name);
-    descriptor.attribute("topic", topic);
-    descriptor.attribute("zk.connect", kafkaClient.getZkConnects());
-    init(descriptor);
-  }
-  
-  private void init(StorageDescriptor descriptor) throws Exception {
+  private void init(StorageConfig descriptor) throws Exception {
     descriptor.attribute("broker.list", kafkaClient.getKafkaBrokerList());
-    this.descriptor  = descriptor ;
+    this.storageConfig  = descriptor ;
   }
   
   @Override
-  public StorageDescriptor getDescriptor() { return descriptor; }
+  public StorageConfig getDescriptor() { return storageConfig; }
 
   @Override
-  public SinkStream getStream(StreamDescriptor descriptor) throws Exception {
-    SinkStream stream = streams.get(descriptor.getId());
+  public SinkPartitionStream getStream(PartitionConfig pConfig) throws Exception {
+    SinkPartitionStream stream = streams.get(pConfig.getPartitionId());
     if(stream != null) return stream ;
-    KafkaSinkStream newStream= new KafkaSinkStream(kafkaClient, descriptor) ;
-    streams.put(descriptor.getId(), newStream) ;
+    KafkaSinkPartitionStream newStream= new KafkaSinkPartitionStream(pConfig) ;
+    streams.put(pConfig.getPartitionId(), newStream) ;
     return newStream;
   }
 
   @Override
-  public SinkStream[] getStreams() {
-    SinkStream[] array = new SinkStream[streams.size()];
+  public SinkPartitionStream getStream(int partitionId) throws Exception {
+    SinkPartitionStream stream = streams.get(partitionId);
+    return stream ;
+  }
+
+  
+  @Override
+  public SinkPartitionStream[] getStreams() {
+    SinkPartitionStream[] array = new SinkPartitionStream[streams.size()];
     return streams.values().toArray(array);
   }
 
   @Override
-  public void delete(SinkStream stream) throws Exception {
-    SinkStream found = streams.get(stream.getPartitionConfig().getId());
+  public void delete(SinkPartitionStream stream) throws Exception {
+    SinkPartitionStream found = streams.get(stream.getParitionConfig().getPartitionId());
     if(found != null) {
       found.delete();
-      streams.remove(stream.getPartitionConfig().getId());
+      streams.remove(stream.getParitionConfig().getPartitionId());
     } else {
-      throw new Exception("Cannot find the stream " + stream.getPartitionConfig().getId());
+      throw new Exception("Cannot find the stream " + stream.getParitionConfig().getPartitionId());
     }
   }
 
   @Override
-  public SinkStream newStream() throws Exception {
-    StreamDescriptor streamDescriptor = new StreamDescriptor(this.descriptor);
-    streamDescriptor.setId(idTracker++);
-    return new KafkaSinkStream(kafkaClient, streamDescriptor);
+  public SinkPartitionStream newStream() throws Exception {
+    PartitionConfig streamDescriptor = new PartitionConfig(this.storageConfig);
+    streamDescriptor.setPartitionId(idTracker++);
+    return new KafkaSinkPartitionStream(streamDescriptor);
   }
 
   @Override
   public void close() throws Exception {
-    for(KafkaSinkStream sel : streams.values()) {
+    for(KafkaSinkPartitionStream sel : streams.values()) {
     }
   }
 }

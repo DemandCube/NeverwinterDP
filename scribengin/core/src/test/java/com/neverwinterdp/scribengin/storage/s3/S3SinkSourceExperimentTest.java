@@ -11,13 +11,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.s3.sink.S3Sink;
 import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
-import com.neverwinterdp.scribengin.storage.sink.SinkStream;
-import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
-import com.neverwinterdp.scribengin.storage.source.SourceStream;
-import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 
 public class S3SinkSourceExperimentTest {
 
@@ -59,12 +59,12 @@ public class S3SinkSourceExperimentTest {
     assertNotNull(sink.getSinkFolder());
     int NUM_MESSAGE_PER_STREAM = 1500;
     for(int i = 0; i < 2; i++) {
-      SinkStream stream = sink.newStream();
-      SinkStreamWriter writer = stream.getWriter();
+      SinkPartitionStream stream = sink.newStream();
+      SinkPartitionStreamWriter writer = stream.getWriter();
       for (int j = 0; j < NUM_MESSAGE_PER_STREAM; j++) {
-        String key = "stream=" + stream.getPartitionConfig().getId() + ",buffer=" + j + ",record=" + j;
+        String key = "stream=" + stream.getParitionConfig().getPartitionId() + ",buffer=" + j + ",record=" + j;
         key = key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key + key;
-        writer.append(DataflowMessage.create(key, key));
+        writer.append(Record.create(key, key));
         if((j + 1) % 1000 == 0) {
           writer.commit();
         }
@@ -72,11 +72,11 @@ public class S3SinkSourceExperimentTest {
       writer.commit();
       writer.close();
     }
-    SinkStream[] streams = sink.getStreams();
+    SinkPartitionStream[] streams = sink.getStreams();
     assertEquals(2, streams.length);
 
-    for (SinkStream sinkStream : streams) {
-      assertNotNull(sinkStream.getPartitionConfig());
+    for (SinkPartitionStream sinkStream : streams) {
+      assertNotNull(sinkStream.getParitionConfig());
       assertNotNull(sinkStream.getWriter());
     }
 
@@ -84,13 +84,13 @@ public class S3SinkSourceExperimentTest {
     sink.close();
     
     S3Source source = storage.getSource(s3Client);
-    SourceStream[] sourceStreams = source.getStreams();
+    SourcePartitionStream[] sourceStreams = source.getStreams();
     assertEquals(2, streams.length);
 
     int recordCount = 0 ;
     for (int i = 0; i < streams.length; i++) {
-      SourceStream stream = sourceStreams[i];
-      SourceStreamReader reader = stream.getReader(stream.getDescriptor().getLocation());
+      SourcePartitionStream stream = sourceStreams[i];
+      SourcePartitionStreamReader reader = stream.getReader(stream.getDescriptor().getLocation());
 
       while (reader.next(1000) != null) {
         recordCount++;

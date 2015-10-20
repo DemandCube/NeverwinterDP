@@ -1,57 +1,39 @@
 package com.neverwinterdp.scribengin.storage.kafka.perftest;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.neverwinterdp.kafka.KafkaClient;
-import com.neverwinterdp.util.text.TabularFormater;
+import com.beust.jcommander.ParametersDelegate;
 
 public class KafkaPerfTest {
-  @Parameter(names = "--zk-connect", description = "Zk connect")
-  private String zkConnect ;
+  @Parameter(names = "--topics", description = "The topic")
+  private String topics ;
   
-  @Parameter(names = "--topic", description = "The topic")
-  private String topic ;
-  
-  @Parameter(names = "--topic-num-of-message", description = "Num Of Message")
-  private long topicNumOfMessages = 10000;
-  
-  @Parameter(names = "--topic-num-of-partition", description = "Topic Num Of Partition")
-  private int topicNumOfPartitions = 10;
-  
-  @Parameter(names = "--topic-num-of-replication", description = "Topic Num Of Replication")
-  private int topicNumOfReplications = 1;
-  
-  @Parameter(names = "--writer-write-per-writer", description = "max writer per a writer")
-  private int writerWritePerWriter = 1000;
-  
-  @Parameter(names = "--reader-read-per-reader", description = "max read per a reader")
-  private int readerReadPerReader = 1000;
-  
-  @Parameter(names = "--max-runtime", description = "Max Run Time")
-  private long maxRunTime = 3 * 60000;
+  @ParametersDelegate
+  private TopicPerfConfig topicConfig = new TopicPerfConfig();
   
   
   public void run() throws Exception {
-    KafkaClient kafkaClient = new KafkaClient("KafkaClient", zkConnect);
-    TopicWriter topicWriter = new TopicWriter(kafkaClient, topic, topicNumOfMessages);
-    topicWriter.setNumOfPartitions(topicNumOfPartitions);
-    topicWriter.setNumOfReplicatons(topicNumOfReplications);
-    topicWriter.setWritePerWriter(writerWritePerWriter);
-    topicWriter.setNumOfMessages(topicNumOfMessages);
+    String[] topic = topics.split(",");
+    TopicPerfReporter reporter = new TopicPerfReporter();
+    ExecutorService executorService = Executors.newFixedThreadPool(topic.length);
+    for(String selTopic : topic) {
+      TopicPerfConfig selTopicConfig = topicConfig.clone();
+      selTopicConfig.topic = selTopic;
+      TopicPerfRunner runner = new TopicPerfRunner(selTopicConfig, reporter);
+      executorService.submit(runner);
+    }
+    executorService.shutdown();
     
-    topicWriter.start();
-    
-    TopicReader topicReader = new TopicReader(kafkaClient, topic);
-    topicReader.setReadPerReader(readerReadPerReader);
-    topicReader.start();
-    
-    topicWriter.waitForTermination(maxRunTime);
-    topicReader.waitForTermination(60 * 60000);
-    
-    TabularFormater formater = new TabularFormater("Write", "Read");
-    formater.setTitle("Topic Report");
-    formater.addRow(topicWriter.getTotalWrite(), topicReader.getTotalRead());
-    System.out.println(formater.getFormattedText());
+    long stopTime = System.currentTimeMillis() + topicConfig.maxRunTime + 900000;
+    while(!executorService.isTerminated()) {
+      Thread.sleep(15000);
+      System.out.println(reporter.getFormattedText());
+      if(System.currentTimeMillis() > stopTime) break;
+    }
+    System.out.println(reporter.getFormattedText());
   }
   
   static public void main(String[] args) throws Exception {

@@ -4,10 +4,7 @@ import java.util.List;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.registry.txevent.TXEvent;
-import com.neverwinterdp.registry.txevent.TXEventNotificationWatcher;
 import com.neverwinterdp.scribengin.ScribenginClient;
-import com.neverwinterdp.scribengin.dataflow.event.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.vm.VMDescriptor;
 
@@ -35,12 +32,6 @@ public class DataflowClient {
     return dflRegistry.getWorkerRegistry().countActiveDataflowWorkers();
   }
   
-  public TXEventNotificationWatcher broadcastDataflowEvent(DataflowEvent event) throws Exception {
-    String eventName = event.toString().toLowerCase();
-    TXEvent txEvent = new TXEvent(eventName, event) ;
-    return dflRegistry.getMasterRegistry().getMasterEventBroadcaster().broadcast(txEvent);
-  }
-  
   public DataflowLifecycleStatus getStatus() throws RegistryException {
     return dflRegistry.getStatus() ;
   }
@@ -52,7 +43,7 @@ public class DataflowClient {
       if(currentStatus.equalOrGreaterThan(status)) return;
       Thread.sleep(checkPeriod);
     }
-    String dataflowId = dflRegistry.getDataflowDescriptor(false).getId();
+    String dataflowId = dflRegistry.getConfigRegistry().getDataflowConfig().getId();
     throw new Exception("Cannot get the equal or greater than " + status + " after " + timeout + "ms for the dataflow " + dataflowId);
   }
 }
