@@ -39,9 +39,9 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
     kafkaProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
     kafkaProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,   ByteArraySerializer.class.getName());
     
-    kafkaProps.put("producer.type", "sync");
-    kafkaProps.put("queue.enqueue.timeout.ms", "-1");
-    kafkaProps.put("batch.num.messages", "300");
+    //kafkaProps.put("producer.type", "sync");
+    //kafkaProps.put("queue.enqueue.timeout.ms", "-1");
+    //kafkaProps.put("batch.num.messages", "300");
 
     kafkaProps.setProperty(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, "100");
     kafkaProps.setProperty(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, "10");

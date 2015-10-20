@@ -17,6 +17,7 @@ public class KafkaToolUnitTest {
   static {
     System.setProperty("log4j.configuration", "file:src/test/resources/log4j.properties");
   }
+  
   static private KafkaCluster cluster;
 
   @BeforeClass
