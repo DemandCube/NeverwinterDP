@@ -1,0 +1,14 @@
+apply plugin: 'maven-publish'
+
+archivesBaseName = 'module.zookeeper'
+
+eclipse {
+  project {
+    name = 'module.kafka'
+  }
+}
+
+dependencies {
+  compile project(':module/commons')
+
+}
