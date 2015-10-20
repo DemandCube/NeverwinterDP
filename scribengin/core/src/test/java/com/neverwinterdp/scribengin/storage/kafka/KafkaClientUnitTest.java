@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.kafka.KafkaClient;
-import com.neverwinterdp.kafka.ZKClient;
+import com.neverwinterdp.zookeeper.ZKClient;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;

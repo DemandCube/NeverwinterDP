@@ -17,7 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.util.io.FileUtil;
-import com.neverwinterdp.zk.tool.server.EmbededZKServer;
+import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
 
 public class BugUnitTest {
   public final Id ANYONE_ID = new Id("world", "anyone");

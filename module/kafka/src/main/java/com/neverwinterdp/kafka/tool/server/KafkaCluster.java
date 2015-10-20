@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.neverwinterdp.tool.server.Server;
 import com.neverwinterdp.util.io.FileUtil;
-import com.neverwinterdp.zk.tool.server.EmbededZKServerSet;
+import com.neverwinterdp.zookeeper.tool.server.EmbededZKServerSet;
 
 public class KafkaCluster {
   private EmbededZKServerSet zkServers ;

@@ -1,4 +1,4 @@
-package com.neverwinterdp.zk.tool.server;
+package com.neverwinterdp.zookeeper.tool.server;
 
 import java.io.IOException;
 import java.util.HashMap;

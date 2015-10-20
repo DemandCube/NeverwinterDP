@@ -4,7 +4,7 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.vm.client.LocalVMClient;
 import com.neverwinterdp.vm.client.VMClient;
-import com.neverwinterdp.zk.tool.server.EmbededZKServer;
+import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
 
 public class VMZKClusterBuilder extends VMClusterBuilder {
   private String baseDir = "./build/cluster";

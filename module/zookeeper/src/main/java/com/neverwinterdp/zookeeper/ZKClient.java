@@ -1,4 +1,4 @@
-package com.neverwinterdp.kafka;
+package com.neverwinterdp.zookeeper;
 
 import java.io.IOException;
 import java.util.List;

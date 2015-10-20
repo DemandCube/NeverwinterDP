@@ -4,6 +4,7 @@ include 'lib/buffer'
 
 include 'module/commons'
 include 'module/elasticsearch'
+include 'module/zookeeper'
 include 'module/kafka'
 
 include 'registry/core'
