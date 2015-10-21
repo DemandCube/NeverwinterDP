@@ -60,11 +60,12 @@ public class HelloActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) {
       System.out.println("pause activity executor,  step = " + step.getId() + ", pause = 3s") ;
+      System.out.println("  pause = 500ms") ;
       try {
         Thread.sleep(500);
       } catch (InterruptedException e) {
       }
-      System.out.println("pause activity executor,  step = " + step.getId() + ", resume") ;
+      System.out.println("  resume") ;
     }
   }
 }

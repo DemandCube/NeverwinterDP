@@ -1,6 +1,7 @@
 package com.neverwinterdp.kafka.tool;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,10 +12,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import kafka.javaapi.PartitionMetadata;
 import kafka.javaapi.TopicMetadata;
+import kafka.message.Message;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.common.base.Stopwatch;
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.kafka.tool.KafkaTopicReport.ConsumerReport;
 import com.neverwinterdp.tool.message.MessageExtractor;
@@ -95,14 +98,12 @@ public class KafkaMessageCheckTool implements Runnable {
   public void check() throws Exception {
     System.out.println("KafkaMessageCheckTool: Start running kafka message check tool.");
     readDuration.start();
-    KafkaTool kafkaTool = new KafkaTool(NAME, topicConfig.zkConnect);
-    kafkaTool.connect();
+    KafkaClient kafkaClient = new KafkaClient(NAME, topicConfig.zkConnect);
     
-    TopicMetadata topicMeta = kafkaTool.findTopicMetadata(topicConfig.topic, 3);
+    TopicMetadata topicMeta = kafkaClient.findTopicMetadata(topicConfig.topic, 3);
     List<PartitionMetadata> partitionMetas = topicMeta.partitionsMetadata();
+    kafkaClient.close();
     numOfPartitions = partitionMetas.size();
-    kafkaTool.close();
-    
     
     interrupt = false;
     int batchFetch = topicConfig.consumerConfig.consumeBatchFetch ;
@@ -112,8 +113,7 @@ public class KafkaMessageCheckTool implements Runnable {
 
     KafkaPartitionConsumer[] partitionConsumer = new KafkaPartitionConsumer[numOfPartitions];
     for (int i = 0; i < partitionConsumer.length; i++) {
-      KafkaPartitionReader partitionReader = 
-          new KafkaPartitionReader(NAME, topicConfig.zkConnect, topicConfig.topic, partitionMetas.get(i));
+      KafkaPartitionReader partitionReader = new KafkaPartitionReader(NAME, kafkaClient, topicConfig.topic, partitionMetas.get(i));
       partitionConsumer[i] = 
         new KafkaPartitionConsumer(partitionReader, batchFetch, fetchSize);
       executorService.submit(partitionConsumer[i]);
@@ -131,6 +131,7 @@ public class KafkaMessageCheckTool implements Runnable {
       System.err.println("KafkaMessageCheckTool: " + ex.getMessage()) ;
       throw ex ;
     } finally {
+      kafkaClient.close();
       System.out.println("KafkaMessageCheckTool: Final Read count " + messageCounter.getTotal() +"(Stop)") ;
       messageTracker.optimize();
       readDuration.stop();
@@ -224,10 +225,13 @@ public class KafkaMessageCheckTool implements Runnable {
       int total = 0, lastCount = 0, cannotReadCount = 0;
       int fetchRetries = topicConfig.consumerConfig.consumeFetchRetries;
       while(!interrupt ) {
-        List<byte[]> messages = partitionReader.fetch(fetchSize, batchFetch/*max read*/, 0 /*max wait*/,fetchRetries);
+        List<Message> messages = partitionReader.fetch(fetchSize, batchFetch/*max read*/, 0 /*max wait*/,fetchRetries);
         messageCounter.count(partitionReader.getPartition(), messages.size());
-        for(byte[] messagePayload : messages) {
-          messageTracker.log(messageExtractor.extract(messagePayload));
+        for(Message message : messages) {
+          ByteBuffer payload = message.payload();
+          byte[] bytes = new byte[payload.limit()];
+          payload.get(bytes);
+          messageTracker.log(messageExtractor.extract(bytes));
         }
         total += messages.size();
 
@@ -240,11 +244,14 @@ public class KafkaMessageCheckTool implements Runnable {
         if(cannotReadCount >= topicConfig.consumerConfig.consumeRetries) break;
         lastCount = total;
       } 
-      List<byte[]> messages = 
+      List<Message> messages = 
           partitionReader.fetch(fetchSize, batchFetch/*max read*/, 0 /*max wait*/,fetchRetries);
       messageCounter.count(partitionReader.getPartition(), messages.size());
-      for(byte[] messagePayload : messages) {
-        messageTracker.log(messageExtractor.extract(messagePayload));
+      for(Message message : messages) {
+        ByteBuffer payload = message.payload();
+        byte[] bytes = new byte[payload.limit()];
+        payload.get(bytes);
+        messageTracker.log(messageExtractor.extract(bytes));
       }
       total += messages.size();
     }

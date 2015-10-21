@@ -42,7 +42,7 @@ configurations.all {
 
 dependencies {
   compile project(':scribengin/core')
-  compile project(':scribengin/dataflow/log-sample')
+  compile project(':scribengin/dataflow/tracking-sample')
 
   compile group: 'junit', name: 'junit', version: '4.11'
 
@@ -51,6 +51,7 @@ dependencies {
   scribenginDeployJars project(':lib/buffer')
   scribenginDeployJars project(':lib/yara')
   scribenginDeployJars project(':module/commons')
+  scribenginDeployJars project(':module/zookeeper')
   scribenginDeployJars project(':module/kafka')
   scribenginDeployJars project(':module/elasticsearch')
   scribenginDeployJars project(':registry/core')
@@ -92,8 +93,8 @@ dependencies {
   scribenginDeployJars group: 'javax.inject', name: 'javax.inject', version: '1'
   scribenginDeployJars group: 'com.beust', name: 'jcommander', version: '1.35'
   scribenginDeployJars group: 'junit', name: 'junit', version: '4.11'
-  scribenginDeployJars group: 'org.apache.kafka', name: 'kafka-clients', version: '0.8.2.0'
-  scribenginDeployJars group: 'org.apache.kafka', name: 'kafka_2.10', version: '0.8.2.0'
+  scribenginDeployJars group: 'org.apache.kafka', name: 'kafka-clients', version: '0.8.2.2'
+  scribenginDeployJars group: 'org.apache.kafka', name: 'kafka_2.10', version: '0.8.2.2'
   scribenginDeployJars group: 'log4j', name: 'log4j', version: '1.2.17'
   scribenginDeployJars group: 'com.yammer.metrics', name: 'metrics-core', version: '2.2.0'
   scribenginDeployJars group: 'com.mycila.guice', name: 'mycila-guice-all', version: '3.2.ga'
@@ -104,7 +105,7 @@ dependencies {
   scribenginDeployJars group: 'org.scala-lang', name: 'scala-library', version: '2.10.4'
   scribenginDeployJars group: 'org.tap4j', name: 'tap4j', version: '4.1'
   scribenginDeployJars group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '3.2'
-  scribenginDeployJars group: 'org.xerial.snappy', name: 'snappy-java', version: '1.1.1.6'
+  scribenginDeployJars group: 'org.xerial.snappy', name: 'snappy-java', version: '1.1.2'
   scribenginDeployJars group: 'joda-time', name: 'joda-time', version: '2.7'
 
   scribenginDeployJars group: 'net.openhft', name: 'chronicle', version: '3.2.2'

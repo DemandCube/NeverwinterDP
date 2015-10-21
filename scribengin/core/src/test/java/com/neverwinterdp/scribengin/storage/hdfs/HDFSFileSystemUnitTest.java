@@ -1,6 +1,8 @@
 package com.neverwinterdp.scribengin.storage.hdfs;
 
 
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -16,17 +18,30 @@ import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
 public class HDFSFileSystemUnitTest {
+  static String TEST_DIR = "./build/hdfs" ;
   private FileSystem fs ;
   
   @Before
   public void setup() throws Exception {
-    FileUtil.removeIfExist("./build/hdfs", false);
+    FileUtil.removeIfExist(TEST_DIR, false);
     fs = FileSystem.getLocal(new Configuration()) ;
+    //org.apache.hadoop.fs.FileUtil.copyMerge(fs, srcDir, dstFS, dstFile, deleteSource, conf, addString)
   }
   
   @After
   public void teardown() throws Exception {
     fs.close();
+  }
+  
+  @Test
+  public void testOverwrite() throws Exception {
+    Path path = new Path(TEST_DIR + "/test");
+    FSDataOutputStream out1 = fs.create(path, false);
+    try {
+      FSDataOutputStream out2 = fs.create(path, false);
+      Assert.fail();
+    } catch(IOException ex) {
+    } 
   }
   
   @Test
@@ -61,6 +76,6 @@ public class HDFSFileSystemUnitTest {
       System.err.println("TODO: test concat method with real HDFS");
     }
     
-    HDFSUtil.concat(fs, concatPath, path, true);
+    HDFSUtil.concat(fs, concatPath, path);
   }
 }

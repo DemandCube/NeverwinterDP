@@ -23,27 +23,31 @@ public class TaskRegistry<T> {
       int taskIdSeq2 = Integer.parseInt(taskId_2.substring(taskId_2.lastIndexOf('-') + 1));
       return taskIdSeq1 - taskIdSeq2;
     }
-    
   };
   
   final static public String TASK_LIST_PATH          = "task-list";
-  final static public String AVAILABLE_PATH          = "executions/available";
-  final static public String ASSIGNED_PATH           = "executions/assigned/task-ids";
-  final static public String ASSIGNED_HEARTBEAT_PATH = "executions/assigned/task-heartbeats";
-  final static public String FINISHED_PATH           = "executions/finished";
-  final static public String LOCK_PATH               = "executions/lock";
+  final static public String EXECUTIONS_PATH         = "executions";
+  final static public String AVAILABLE_PATH          = EXECUTIONS_PATH + "/available";
+  final static public String ASSIGNED_PATH           = EXECUTIONS_PATH + "/assigned";
+  final static public String ASSIGNED_TASK_ID_PATH   = ASSIGNED_PATH + "/task-ids";
+  final static public String ASSIGNED_HEARTBEAT_PATH = ASSIGNED_PATH + "/task-heartbeats";
+  final static public String FINISHED_PATH           = EXECUTIONS_PATH + "/finished";
+  final static public String LOCK_PATH               = EXECUTIONS_PATH + "/lock";
   final static public String NOTIFICATIONS_PATH      = "notifications";
   
   final static public String TASK_STATUS_PATH        = "status";
-  
+
   private Registry registry ;
   private String   path ;
   private Class<T> taskDescriptorType;
   
   private Node     tasksRootNode ;
   private Node     tasksListNode ;
+  
+  private Node     executionsNode ;
   private Node     tasksAvailableNode ;
   private Node     tasksAssignedNode ;
+  private Node     tasksAssignedIdNode ;
   private Node     tasksAssignedHeartbeatNode ;
   private Node     tasksFinishedNode ;
   private Node     tasksLockNode ; 
@@ -65,9 +69,15 @@ public class TaskRegistry<T> {
     
     tasksRootNode = registry.get(path) ;
     tasksListNode = tasksRootNode.getDescendant(TASK_LIST_PATH); 
+    
+    executionsNode = tasksRootNode.getDescendant(EXECUTIONS_PATH);
+    
     tasksAvailableNode = tasksRootNode.getDescendant(AVAILABLE_PATH);
+    
     tasksAssignedNode = tasksRootNode.getDescendant(ASSIGNED_PATH);
+    tasksAssignedIdNode = tasksRootNode.getDescendant(ASSIGNED_TASK_ID_PATH);
     tasksAssignedHeartbeatNode = tasksRootNode.getDescendant(ASSIGNED_HEARTBEAT_PATH);
+    
     tasksFinishedNode = tasksRootNode.getDescendant(FINISHED_PATH);
     tasksLockNode = tasksRootNode.getDescendant(LOCK_PATH);
     
@@ -79,13 +89,33 @@ public class TaskRegistry<T> {
     tasksRootNode.createIfNotExists() ;
     tasksListNode.createIfNotExists(); 
     tasksAvailableNode.createIfNotExists();
-    tasksAssignedNode.createIfNotExists();
+    tasksAssignedIdNode.createIfNotExists();
     tasksAssignedHeartbeatNode.createIfNotExists();
     tasksFinishedNode.createIfNotExists();
     tasksLockNode.createIfNotExists();
     
     taskExecutionNotifier.initRegistry();
     taskCoordinationNotifier.initRegistry();
+  }
+  
+  public void initRegistry(Transaction transaction) throws RegistryException {
+    transaction.create(tasksRootNode, null, NodeCreateMode.PERSISTENT);
+    transaction.create(tasksListNode, null, NodeCreateMode.PERSISTENT);
+    
+    transaction.create(executionsNode, null, NodeCreateMode.PERSISTENT);
+    
+    transaction.create(tasksAvailableNode, null, NodeCreateMode.PERSISTENT);
+
+    transaction.create(tasksAssignedNode, null, NodeCreateMode.PERSISTENT);
+    transaction.create(tasksAssignedIdNode, null, NodeCreateMode.PERSISTENT);
+    transaction.create(tasksAssignedHeartbeatNode, null, NodeCreateMode.PERSISTENT);
+    
+    transaction.create(tasksFinishedNode, null, NodeCreateMode.PERSISTENT);
+    transaction.create(tasksLockNode, null, NodeCreateMode.PERSISTENT);
+    
+    transaction.create(path + "/" + NOTIFICATIONS_PATH, null, NodeCreateMode.PERSISTENT);
+    taskExecutionNotifier.initRegistry(transaction);
+    taskCoordinationNotifier.initRegistry(transaction);
   }
   
   public Registry getRegistry() { return registry; }
@@ -98,7 +128,7 @@ public class TaskRegistry<T> {
 
   public Node getTasksAvailableNode() { return tasksAvailableNode; }
 
-  public Node getTasksAssignedNode() { return tasksAssignedNode; }
+  public Node getTasksAssignedNode() { return tasksAssignedIdNode; }
   
   public Node getTasksAssignedHeartbeatNode() { return tasksAssignedHeartbeatNode; }
   
@@ -139,7 +169,7 @@ public class TaskRegistry<T> {
           TaskTransactionId taskTransactionID = new TaskTransactionId(taskId, Math.abs(transaction.hashCode()) + "");
           
           transaction.setData(taskNode.getChild(TASK_STATUS_PATH), TaskStatus.PROCESSING);
-          transaction.createChild(tasksAssignedNode, taskTransactionID.getTaskTransactionId(), NodeCreateMode.PERSISTENT);
+          transaction.createChild(tasksAssignedIdNode, taskTransactionID.getTaskTransactionId(), NodeCreateMode.PERSISTENT);
           transaction.createChild(tasksAssignedHeartbeatNode, taskTransactionID.getTaskTransactionId(), new RefNode(executorRefPath), NodeCreateMode.EPHEMERAL);
           transaction.deleteChild(tasksAvailableNode, taskIdSeq);
           transaction.commit();
@@ -149,7 +179,7 @@ public class TaskRegistry<T> {
           String errorMessage = "Fail to grab task " + taskId + " for the executor " + executorRefPath;
           StringBuilder registryDump = new StringBuilder() ;
           try {
-            tasksAssignedNode.getParentNode().dump(registryDump);
+            tasksAssignedIdNode.getParentNode().dump(registryDump);
           } catch (IOException e) {
           }
           errorMessage += "\n" + registryDump.toString();
@@ -180,7 +210,7 @@ public class TaskRegistry<T> {
           Node taskNode = tasksListNode.getChild(taskTransactionID.getTaskId()) ;
           Transaction transaction = registry.getTransaction();
           transaction.setData(taskNode.getChild(TASK_STATUS_PATH), TaskStatus.SUSPENDED);
-          transaction.deleteChild(tasksAssignedNode, taskTransactionID.getTaskTransactionId()) ;
+          transaction.deleteChild(tasksAssignedIdNode, taskTransactionID.getTaskTransactionId()) ;
           if(!disconnectHeartbeat) {
             transaction.deleteChild(tasksAssignedHeartbeatNode, taskTransactionID.getTaskTransactionId()) ;
           }
@@ -191,7 +221,7 @@ public class TaskRegistry<T> {
           String errorMessage = "Fail to suspend the task " + taskTransactionID.getTaskTransactionId();
           StringBuilder registryDump = new StringBuilder() ;
           try {
-            tasksAssignedNode.getParentNode().dump(registryDump);
+            tasksAssignedIdNode.getParentNode().dump(registryDump);
           } catch (IOException e) {
           }
           errorMessage += "\n" + registryDump.toString();
@@ -220,7 +250,7 @@ public class TaskRegistry<T> {
           //update the task descriptor
           transaction.setData(taskNode.getChild(TASK_STATUS_PATH), TaskStatus.TERMINATED);
           transaction.createChild(tasksFinishedNode, taskTransactionID.getTaskId(), NodeCreateMode.PERSISTENT);
-          transaction.deleteChild(tasksAssignedNode, taskTransactionID.getTaskTransactionId());
+          transaction.deleteChild(tasksAssignedIdNode, taskTransactionID.getTaskTransactionId());
           transaction.deleteChild(tasksAssignedHeartbeatNode, taskTransactionID.getTaskTransactionId());
           transaction.commit();
           return true;

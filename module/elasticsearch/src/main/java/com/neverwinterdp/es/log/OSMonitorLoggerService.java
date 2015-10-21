@@ -1,5 +1,9 @@
 package com.neverwinterdp.es.log;
 
+import java.io.IOException;
+
+import javax.annotation.PreDestroy;
+
 import com.google.inject.Inject;
 import com.neverwinterdp.os.DetailThreadInfo;
 import com.neverwinterdp.os.FileStoreInfo;
@@ -30,6 +34,11 @@ public class OSMonitorLoggerService extends ObjectLoggerService {
     
     metricCollectorThread = new MetricInfoCollectorThread();
     metricCollectorThread.start();
+  }
+  
+  @PreDestroy
+  public void onDestroy() throws IOException {
+    close();
   }
   
   public class MetricInfoCollectorThread extends Thread {

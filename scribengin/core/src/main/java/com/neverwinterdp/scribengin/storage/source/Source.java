@@ -1,17 +1,17 @@
 package com.neverwinterdp.scribengin.storage.source;
 
-import com.neverwinterdp.scribengin.storage.StorageDescriptor;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.StorageConfig;
+import com.neverwinterdp.scribengin.storage.PartitionConfig;
 
 /**
  * @author Tuan Nguyen
  */
 public interface Source {
-  public StorageDescriptor getDescriptor() ;
-  public SourceStream   getStream(int id) ;
-  public SourceStream   getStream(StreamDescriptor descriptor) ;
+  public StorageConfig getStorageConfig() ;
+  public SourcePartitionStream   getStream(int id) ;
+  public SourcePartitionStream   getStream(PartitionConfig descriptor) ;
   
-  public SourceStream[] getStreams() ;
+  public SourcePartitionStream[] getStreams() ;
   
   public void close() throws Exception ;
 }

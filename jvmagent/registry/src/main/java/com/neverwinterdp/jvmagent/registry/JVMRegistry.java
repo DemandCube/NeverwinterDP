@@ -19,7 +19,7 @@ public class JVMRegistry {
   }
   
   public void connect(long timeout) throws RegistryException {
-    registry.connect(timeout);
+    registry.reconnect(timeout);
     registry.createIfNotExist(JVM_REGISTRY_PATH) ;
   }
   

@@ -5,6 +5,7 @@ import kafka.javaapi.PartitionMetadata;
 import kafka.javaapi.TopicMetadata;
 
 import com.neverwinterdp.tool.server.Server;
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 
 public class KafkaClusterTool {
@@ -25,14 +26,11 @@ public class KafkaClusterTool {
   }
   
   Server findLeader(String topic, int partition) throws Exception {
-    KafkaTool kafkaTool = new KafkaTool("KafkaPartitionLeaderKiller", cluster.getZKConnect());
-    kafkaTool.connect();
+    KafkaClient kafkaTool = new KafkaClient("KafkaPartitionLeaderKiller", cluster.getZKConnect());
     TopicMetadata topicMeta = kafkaTool.findTopicMetadata(topic);
     PartitionMetadata partitionMeta = findPartition(topicMeta, partition);
     Broker partitionLeader = partitionMeta.leader();
     Server kafkaServer = cluster.findKafkaServerByPort(partitionLeader.port());
-    System.out.println("Shutdown kafka server " + kafkaServer.getPort());
-    kafkaTool.close();
     return kafkaServer;
   }
   

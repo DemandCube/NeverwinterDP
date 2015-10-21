@@ -1,0 +1,15 @@
+apply plugin: 'maven-publish'
+
+archivesBaseName = 'module.zookeeper'
+
+eclipse {
+  project {
+    name = 'module.zookeeper'
+  }
+}
+
+dependencies {
+  compile project(':module/commons')
+
+  compile group: 'org.apache.zookeeper', name: 'zookeeper', version: '3.4.6'
+}

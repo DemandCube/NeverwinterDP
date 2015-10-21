@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -19,9 +20,8 @@ import com.mycila.guice.ext.jsr250.Jsr250Module;
 import com.neverwinterdp.module.AppServiceModule;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
-import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.util.io.FileUtil;
-import com.neverwinterdp.zk.tool.server.EmbededZKServer;
+import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
 
 public class ActivityServiceUnitTest {
   static {
@@ -41,17 +41,19 @@ public class ActivityServiceUnitTest {
     zkServerLauncher.start();
   }
   
+  @AfterClass
   static public void stopServer() throws Exception {
     zkServerLauncher.shutdown();
   }
   
   @Before
   public void setup() throws Exception {
+    registry = RegistryConfig.getDefault().newInstance();
+    registry.connect();
     AppServiceModule module = new AppServiceModule(new HashMap<String, String>()) {
       @Override
       protected void configure(Map<String, String> properties) {
-        bindInstance(RegistryConfig.class, RegistryConfig.getDefault());
-        bindType(Registry.class, RegistryImpl.class);
+        bindInstance(Registry.class, registry);
       }
     };
     container = 
@@ -62,7 +64,7 @@ public class ActivityServiceUnitTest {
   @After
   public void teardown() throws Exception {
     registry.rdelete(ACTIVITIES_PATH);
-    registry.disconnect();
+    registry.shutdown();
     container.getInstance(CloseableInjector.class).close();
   }
 
@@ -96,6 +98,7 @@ public class ActivityServiceUnitTest {
     Assert.assertEquals(1, service.getHistoryActivities().size());
     registry.get("/").dump(System.out);
     service.onDestroy();
+    System.err.println("Done!!!!!!!!!!!");
   }
   
   @Test
@@ -118,9 +121,27 @@ public class ActivityServiceUnitTest {
     Activity activity = new HelloActivityBuilder().build() ;
     
     service.queue(activity);
-    Thread.sleep(5000);
+    Thread.sleep(3000);
     registry.get("/").dump(System.out);
     service.onDestroy();
+  }
+  
+  @Test
+  public void testResumeActivity() throws Exception {
+    ActivityService service1 = new ActivityService(container, ACTIVITIES_PATH) ;
+    Activity activity = new HelloActivityBuilder().build() ;
+    service1.queue(activity);
+    Thread.sleep(250);
+    registry.shutdown();
+    Thread.sleep(3000);
+    registry.connect();
+    service1.onDestroy();
+    
+    registry.get("/").dump(System.out);
+    ActivityService service2 = new ActivityService(container, ACTIVITIES_PATH) ;
+    Thread.sleep(5000);
+    registry.get("/").dump(System.out);
+    service2.onDestroy();
   }
   
   static public class HelloActivityStepWorkerDescriptor {

@@ -4,6 +4,7 @@ include 'lib/buffer'
 
 include 'module/commons'
 include 'module/elasticsearch'
+include 'module/zookeeper'
 include 'module/kafka'
 
 include 'registry/core'
@@ -11,10 +12,9 @@ include 'registry/vm'
 include 'registry/vm-sample'
 
 include 'scribengin/core'
-include 'scribengin/dataflow/log-sample'
+include 'scribengin/experiment'
+include 'scribengin/dataflow/tracking-sample'
 include 'scribengin/release'
-
-include 'client/swingui'
 
 include 'jvmagent/bootstrap'
 include 'jvmagent/registry'

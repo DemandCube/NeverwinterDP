@@ -17,11 +17,11 @@ public class RegistryConfig {
   
   @JmxField
   @Parameter(names = "--registry-db-domain", description = "The registry partition or table")
-  private String dbDomain ;
+  private String dbDomain = "/NeverwinterDP";
   
   @JmxField
   @Parameter(names = "--registry-implementation", description = "The registry implementation class")
-  private String registryImplementation ;
+  private String registryImplementation = RegistryImpl.class.getName();
   
   public String getConnect() { return connect; }
   public void setConnect(String connect) { this.connect = connect; }

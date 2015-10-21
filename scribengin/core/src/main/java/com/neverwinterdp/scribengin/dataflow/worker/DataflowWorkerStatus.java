@@ -1,9 +1,9 @@
 package com.neverwinterdp.scribengin.dataflow.worker;
 
 public enum DataflowWorkerStatus {
-  INIT((byte)0), RUNNING((byte)1), 
+  CREATE((byte)0), INIT((byte)1), RUNNING((byte)2), 
   PAUSING((byte)3), PAUSE((byte)4), 
-  TERMINATING((byte)5), TERMINATED((byte)6), TERMINATED_WITH_ERROR((byte)7);
+  TERMINATED((byte)5), TERMINATED_WITH_ERROR((byte)6);
   
   private byte level;
   

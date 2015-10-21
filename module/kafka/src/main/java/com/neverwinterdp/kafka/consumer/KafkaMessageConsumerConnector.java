@@ -80,6 +80,10 @@ public class KafkaMessageConsumerConnector  {
     }
   }
   
+  public void shutdownNow() {
+    executorService.shutdownNow();
+  }
+  
   public void awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
     executorService.awaitTermination(timeout, unit) ;
   }

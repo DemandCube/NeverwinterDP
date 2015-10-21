@@ -8,9 +8,9 @@ public interface Registry {
   public RegistryConfig getRegistryConfig() ;
   
   public Registry connect() throws RegistryException ;
-  public Registry connect(long timeout) throws RegistryException;
+  public Registry reconnect(long timeout) throws RegistryException;
   
-  public void disconnect() throws RegistryException ;
+  public void shutdown() throws RegistryException ;
   public boolean isConnect();
   
   public String getSessionId()  ;
@@ -61,7 +61,7 @@ public interface Registry {
   
   public boolean exists(String path) throws RegistryException ;
   
-  public void watchModify(String path, NodeWatcher watcher) throws RegistryException ;
+  public boolean watchModify(String path, NodeWatcher watcher) throws RegistryException ;
   public void watchExists(String path, NodeWatcher watcher) throws RegistryException ;
   public void watchChildren(String path, NodeWatcher watcher) throws RegistryException;
   
@@ -72,7 +72,7 @@ public interface Registry {
   
   public void rcopy(String path, String toPath, PathFilter filter) throws RegistryException ;
   
-  public Transaction getTransaction() ;
+  public Transaction getTransaction() throws RegistryException ;
   
   public <T> T executeBatch(BatchOperations<T> ops, int retry, long timeoutThreshold) throws RegistryException ;
   

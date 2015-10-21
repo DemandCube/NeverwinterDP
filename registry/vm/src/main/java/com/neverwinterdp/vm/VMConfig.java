@@ -27,6 +27,9 @@ public class VMConfig {
       return null;
     }
   }
+
+  @Parameter(names = "--description", description = "Description")
+  private String              description;
   
   @Parameter(names = "--name", description = "The registry partition or table")
   private String              name;
@@ -37,13 +40,16 @@ public class VMConfig {
   @Parameter(names = "--cpu-cores", description = "The request number of cpu cores")
   private int                 requestCpuCores  = 1;
   @Parameter(names = "--memory", description = "The request amount of memory in MB")
-  private int                 requestMemory    = 128;
+  private int                 requestMemory    = 256;
 
   @Parameter(names = "--app-home", description = "App Home")
   private String              appHome;
 
   @Parameter(names = "--app-data-dir", description = "App Data Dir")
   private String              appDataDir = "build/vm";
+  
+  @Parameter(names = "--log4j-config-url", description = "Log4j Config Url")
+  private String              log4jConfigUrl = "classpath:vm-log4j.properties";
   
   @DynamicParameter(names = "--vm-resource:", description = "The resources for the vm")
   private Map<String, String> vmResources      = new LinkedHashMap<String, String>();
@@ -65,15 +71,9 @@ public class VMConfig {
   @DynamicParameter(names = "--hadoop:", description = "The application configuration properties")
   private HadoopProperties    hadoopProperties = new HadoopProperties();
 
-  @Parameter(names = "--description", description = "Description")
-  private String              description;
-
   @Parameter(names = "--environment", description = "Environement YARN, YARN_MINICLUSTER, JVM")
   private ClusterEnvironment         clusterEnvironment      = ClusterEnvironment.JVM;
 
-  @ParametersDelegate
-  private LoggerConfig        loggerConfig     = new LoggerConfig();
-  
   public VMConfig() {} 
   
   public VMConfig(String[] args) {
@@ -115,7 +115,13 @@ public class VMConfig {
   public void setAppHome(String appHome) { this.appHome = appHome; }
   
   public String getAppDataDir() { return appDataDir; }
-  public void setAppDataDir(String appDataDir) { this.appHome = appDataDir; }
+  public void   setAppDataDir(String appDataDir) { this.appDataDir = appDataDir; }
+  
+  public String getLog4jConfigUrl() { return log4jConfigUrl; }
+  public void   setLog4jConfigUrl(String url) { 
+    if(url == null || url.length() == 0) return;
+    log4jConfigUrl = url; 
+  }
   
   public Map<String, String> getVmResources() { return vmResources; }
   public void setVmResources(Map<String, String> vmResources) { this.vmResources = vmResources; }
@@ -229,11 +235,6 @@ public class VMConfig {
     return this;
   }
   
-  public LoggerConfig getLoggerConfig() { return loggerConfig; }
-  public void setLoggerConfig(LoggerConfig loggerConfig) {
-    this.loggerConfig = loggerConfig;
-  }
-  
   public String buildCommand() {
     StringBuilder b = new StringBuilder() ;
     b.append("java ").append(" -Xmx" + requestMemory + "m ").append(VM.class.getName()) ;
@@ -278,6 +279,8 @@ public class VMConfig {
     
     b.append(" --environment ").append(clusterEnvironment) ;
     
+    b.append(" --log4j-config-url ").append(log4jConfigUrl) ;
+    
     for(Map.Entry<String, String> entry : properties.entrySet()) {
       b.append(" --prop:").append(entry.getKey()).append("=").append(entry.getValue()) ;
     }
@@ -285,8 +288,6 @@ public class VMConfig {
     for(Map.Entry<String, String> entry : hadoopProperties.entrySet()) {
       b.append(" --hadoop:").append(entry.getKey()).append("=").append(entry.getValue()) ;
     }
-    
-    b.append(loggerConfig.buildParameters());
   }
   
   static public void overrideHadoopConfiguration(Map<String, String> props, Configuration aconf) {

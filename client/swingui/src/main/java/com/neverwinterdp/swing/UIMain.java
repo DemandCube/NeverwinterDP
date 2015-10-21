@@ -2,6 +2,7 @@ package com.neverwinterdp.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -14,6 +15,7 @@ import org.jdesktop.swingx.MultiSplitLayout;
 
 import com.neverwinterdp.swing.console.UIShellConsole;
 import com.neverwinterdp.util.io.FileUtil;
+import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.LoggerConfig;
 
@@ -77,15 +79,14 @@ public class UIMain extends JPanel {
     FileUtil.removeIfExist("build/logs", false);
     FileUtil.removeIfExist("build/elasticsearch", false);
     FileUtil.removeIfExist("build/cluster", false);
+    FileUtil.removeIfExist("build/scribengin", false);
     
-    LoggerConfig loggerConfig = new LoggerConfig() ;
-    
-    loggerConfig.getConsoleAppender().setEnable(false);
-    loggerConfig.getFileAppender().initLocalEnvironment();
-    loggerConfig.getEsAppender().initLocalEnvironment();
-    loggerConfig.getKafkaAppender().initLocalEnvironment();
-    LoggerFactory.log4jConfigure(loggerConfig.getLog4jConfiguration());
-    
+    System.setProperty("vm.app.dir", "build/scribengin");
+    Properties log4jProps = new Properties() ;
+    log4jProps.load(IOUtil.loadRes("classpath:scribengin/log4j/vm-log4j.properties"));
+    log4jProps.setProperty("log4j.rootLogger", "INFO, file");
+    LoggerFactory.log4jConfigure(log4jProps);
+
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {

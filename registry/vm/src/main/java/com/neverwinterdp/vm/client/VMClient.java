@@ -83,7 +83,7 @@ public class VMClient {
   }
   
   public VMDescriptor allocate(VMConfig vmConfig) throws Exception {
-    return allocate(vmConfig, this.waitForResultTimeout);
+    return allocate(vmConfig, waitForResultTimeout);
   }
   
   public VMDescriptor allocate(VMConfig vmConfig, long timeout) throws Exception {
@@ -96,7 +96,6 @@ public class VMClient {
     }
     return result.getResult();
   }
-  
   
   public boolean shutdown(VMDescriptor vmDescriptor) throws Exception {
     CommandResult<?> result = execute(vmDescriptor, new VMCommand.Shutdown());
@@ -111,8 +110,6 @@ public class VMClient {
   }
   
   public boolean kill(VMDescriptor vmDescriptor) throws Exception {
-    //CommandResult<?> result = execute(vmDescriptor, new VMCommand.Kill());
-    
     Command command = new VMCommand.Kill();
     CommandPayload payload = new CommandPayload(command, null) ;
     Node node = registry.create(vmDescriptor.getRegistryPath() + "/commands/command-", payload, NodeCreateMode.PERSISTENT_SEQUENTIAL);
@@ -161,6 +158,10 @@ public class VMClient {
     throw new RuntimeException("This method need to override") ;
   }
   
+  public void close() throws Exception {
+    registry.shutdown();
+  }
+  
   static public class CommandReponseWatcher extends NodeWatcher {
     private Registry         registry;
     private String           path;
@@ -176,7 +177,8 @@ public class VMClient {
     }
     
     @Override
-    public void onEvent(NodeEvent event) {
+    synchronized public void onEvent(NodeEvent event) {
+      if(isComplete()) return;
       String path = event.getPath();
       try {
         if(event.getType() == NodeEvent.Type.DELETE) {
@@ -201,6 +203,14 @@ public class VMClient {
     }
     
     synchronized public CommandResult<?> waitForResult(long timeout) throws Exception {
+      if(result == null) { //try to fix the lost event, when the event is notified before the watcher is registered
+        CommandPayload payload = registry.getDataAs(path, CommandPayload.class) ;
+        if(payload != null && payload.getResult() != null) {
+          result = payload.getResult() ;
+          registry.delete(path);
+          setComplete();
+        }
+      }
       if(result == null) {
         wait(timeout);
       }

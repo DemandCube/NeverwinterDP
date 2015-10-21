@@ -4,6 +4,7 @@ import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.Transaction;
 
 public class TXEventBroadcaster {
   private Registry         registry;
@@ -27,6 +28,14 @@ public class TXEventBroadcaster {
   public String getEventPath() { return this.eventPath ; }
   
   public Registry getRegistry() { return this.registry ; }
+  
+  public void initRegistry() throws RegistryException {
+    eventsNode.createIfNotExists();
+  }
+  
+  public void initRegistry(Transaction transaction) throws RegistryException {
+    transaction.create(eventsNode, null, NodeCreateMode.PERSISTENT);
+  }
   
   public TXEventNotificationWatcher broadcast(TXEvent event) throws RegistryException {
     eventsNode.createChild(event.getId(), event, NodeCreateMode.PERSISTENT);

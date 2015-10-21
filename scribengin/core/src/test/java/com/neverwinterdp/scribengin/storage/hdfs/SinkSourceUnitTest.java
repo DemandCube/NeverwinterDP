@@ -11,24 +11,27 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
+import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.hdfs.sink.HDFSSink;
 import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSource;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
-import com.neverwinterdp.scribengin.storage.sink.SinkStream;
-import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
-import com.neverwinterdp.scribengin.storage.source.SourceStream;
-import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
 public class SinkSourceUnitTest {
-  static String DATA_DIRECTORY = "./build/sinkhdfs" ;
+  static String DATA_DIRECTORY = "./build/hdfs/sink" ;
   
   private FileSystem fs ;
   
   @Before
   public void setup() throws Exception {
+    Segment.SMALL_DATASIZE_THRESHOLD =  8 *  1024 * 1024;
+    Segment.MEDIUM_DATASIZE_THRESHOLD = 8 * Segment.SMALL_DATASIZE_THRESHOLD;
+    Segment.LARGE_DATASIZE_THRESHOLD  = 8 * Segment.MEDIUM_DATASIZE_THRESHOLD;
     FileUtil.removeIfExist(DATA_DIRECTORY, false);
     fs = FileSystem.getLocal(new Configuration()) ;
   }
@@ -41,25 +44,29 @@ public class SinkSourceUnitTest {
   @Test
   public void testSink() throws Exception {
     HDFSSink sink = new HDFSSink(fs, DATA_DIRECTORY);
-    SinkStream[] streams = sink.getStreams();
+    SinkPartitionStream[] streams = sink.getStreams();
     Assert.assertEquals(0, streams.length);
     
-    SinkStream stream = sink.newStream();
-    SinkStreamWriter writer = stream.getWriter();
-    for(int i = 0; i < 5; i++) {
-      for(int j = 0; j < 100; j ++) {
-        String key = "stream=" + stream.getDescriptor().getId() +",buffer=" + i + ",record=" + j;
-        writer.append(DataflowMessage.create(key, key));
+    int NUM_OF_COMMIT = 5;
+    int NUM_OF_RECORD_PER_COMMIT = 1000;
+    int NUM_OF_RECORDS = NUM_OF_COMMIT * NUM_OF_RECORD_PER_COMMIT; 
+    SinkPartitionStream stream = sink.newStream();
+    SinkPartitionStreamWriter writer = stream.getWriter();
+    for(int i = 0; i < NUM_OF_COMMIT; i++) {
+      for(int j = 0; j < NUM_OF_RECORD_PER_COMMIT; j ++) {
+        String key = "stream=" + stream.getParitionConfig().getPartitionId() +",buffer=" + i + ",record=" + j;
+        writer.append(Record.create(key, key));
       }
       writer.commit();
     }
-    System.out.println("Before close");
-    Assert.assertEquals(5 * 100, count(DATA_DIRECTORY));
     HDFSUtil.dump(fs, DATA_DIRECTORY);
+    writer.close();
+    Assert.assertEquals(NUM_OF_RECORDS, count(DATA_DIRECTORY));
+   
 
     writer.close();
-    System.out.println("After close");
-    Assert.assertEquals(5 * 100, count(DATA_DIRECTORY));
+    stream.optimize();
+    Assert.assertEquals(NUM_OF_RECORDS, count(DATA_DIRECTORY));
     System.out.println("\n\n") ;
     HDFSUtil.dump(fs, DATA_DIRECTORY);
   }
@@ -67,10 +74,10 @@ public class SinkSourceUnitTest {
   @Test
   public void testRollback() throws Exception {
     HDFSSink sink = new HDFSSink(fs, DATA_DIRECTORY);
-    SinkStream stream0 = sink.newStream();
-    SinkStreamWriter writer = stream0.getWriter();
+    SinkPartitionStream stream0 = sink.newStream();
+    SinkPartitionStreamWriter writer = stream0.getWriter();
     for(int i = 0; i < 10; i ++) {
-      writer.append(DataflowMessage.create("key-" + i, "record " + i));
+      writer.append(Record.create("key-" + i, "record " + i));
     }
     writer.rollback();
     writer.close();
@@ -79,38 +86,43 @@ public class SinkSourceUnitTest {
   
   @Test
   public void testMultiThread() throws Exception {
+    int NUM_OF_WRITER = 5;
+    int NUM_OF_SEG_PER_WRITER = 50;
+    int TOTAL_NUM_OF_MESSAGE = NUM_OF_WRITER * NUM_OF_SEG_PER_WRITER * 5000;
     HDFSSink sink = new HDFSSink(fs, DATA_DIRECTORY);
-    SinkStreamWriterTask[] task = new SinkStreamWriterTask[5]; 
+    SinkStreamWriterTask[] task = new SinkStreamWriterTask[NUM_OF_WRITER]; 
     ExecutorService service = Executors.newFixedThreadPool(task.length);
     for(int i = 0; i < task.length; i++) {
-      service.execute(new SinkStreamWriterTask(sink));
+      service.execute(new SinkStreamWriterTask(sink, NUM_OF_SEG_PER_WRITER));
     }
     service.shutdown();
     while(!service.isTerminated()) {
       HDFSUtil.dump(fs, DATA_DIRECTORY);
       System.out.println("----------------------------------------");
-      Thread.sleep(2000);
+      Thread.sleep(10000);
     }
     HDFSUtil.dump(fs, DATA_DIRECTORY);
+    Assert.assertEquals(TOTAL_NUM_OF_MESSAGE, count(DATA_DIRECTORY));
   }
   
   public class SinkStreamWriterTask implements Runnable {
     private Sink sink ;
+    private int  numOfSegment ;
     
-    public SinkStreamWriterTask(Sink sink) {
+    public SinkStreamWriterTask(Sink sink, int  numOfSegment) {
       this.sink = sink ;
+      this.numOfSegment = numOfSegment;
     }
     
     @Override
     public void run() {
       try {
-        SinkStream stream = sink.newStream();
-        SinkStreamWriter writer = stream.getWriter();
-        Random random = new Random() ;
-        for(int i = 0; i < 5; i++) {
-          for(int j = 0; j < 100; j ++) {
-            writer.append(DataflowMessage.create("key-" + i, "record " + i));
-            Thread.sleep(random.nextInt(10));
+        SinkPartitionStream stream = sink.newStream();
+        SinkPartitionStreamWriter writer = stream.getWriter();
+        byte[] data = new byte[512];
+        for(int i = 0; i < numOfSegment; i++) {
+          for(int j = 0; j < 5000; j ++) {
+            writer.append(Record.create("key-" + i, data));
           }
           writer.commit();
         }
@@ -123,11 +135,10 @@ public class SinkSourceUnitTest {
   
   private int count(String hdfsDir) throws Exception {
     HDFSSource source = new HDFSSource(fs, hdfsDir);
-    SourceStream[] stream = source.getStreams();
+    SourcePartitionStream[] stream = source.getStreams();
     int count  = 0; 
     for(int  i = 0; i < stream.length; i++) {
-      SourceStreamReader reader = stream[i].getReader("test") ;
-      System.out.println("stream " + stream[i].getDescriptor().getId());
+      SourcePartitionStreamReader reader = stream[i].getReader("test") ;
       while(reader.next(1000) != null) {
         count++ ;
       }

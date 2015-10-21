@@ -35,14 +35,19 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
   public AckKafkaWriter(String name, Map<String, String> props, String kafkaBrokerUrls) {
     super(name);
     Properties kafkaProps = new Properties();
-    kafkaProps.put("bootstrap.servers", kafkaBrokerUrls);
-    kafkaProps.put("value.serializer", ByteArraySerializer.class.getName());
-    kafkaProps.put("key.serializer",   ByteArraySerializer.class.getName());
-    //kafkaProps.setProperty(ProducerConfig.METADATA_FETCH_TIMEOUT_CONFIG, "300");
-    //kafkaProps.setProperty(ProducerConfig.TIMEOUT_CONFIG, "300");
-    kafkaProps.setProperty(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, "10000");
-    kafkaProps.setProperty(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, "10000");
+    kafkaProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBrokerUrls);
+    kafkaProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
+    kafkaProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,   ByteArraySerializer.class.getName());
+    
+    //kafkaProps.put("producer.type", "sync");
+    //kafkaProps.put("queue.enqueue.timeout.ms", "-1");
+    //kafkaProps.put("batch.num.messages", "300");
 
+    kafkaProps.setProperty(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, "100");
+    kafkaProps.setProperty(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, "10");
+    
+    kafkaProps.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
+    
     if (props != null) {
       kafkaProps.putAll(props);
     }
@@ -55,26 +60,11 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
     producer = new KafkaProducer<byte[], byte[]>(kafkaProperties);
   }
   
-  
-  public void send(String topic, int partition, String key, String message, Callback callback, long timeout) throws Exception {
-    byte[] keyBytes = key.getBytes();
-    byte[] messageBytes = message.getBytes();
-    send(topic, partition, keyBytes, messageBytes, callback, timeout);
-  }
-  
-  public void send(String topic, byte[] key, byte[] message, Callback callback, long timeout) throws Exception {
-    ProducerRecord<byte[], byte[]> record = new ProducerRecord<byte[], byte[]>(topic, key, message);
-    long id = idTracker.incrementAndGet();
-    WaittingAckProducerRecord<byte[], byte[]> ackRecord = new WaittingAckProducerRecord<byte[], byte[]>(id, record, callback);
-    waittingAckBuffer.add(ackRecord, timeout);
-    AckCallback ackCallback = new AckCallback(id);
-    producer.send(record, ackCallback);
-  }
-  
   public void send(String topic, int partition, byte[] key, byte[] message, Callback callback, long timeout) throws Exception  {
-    Integer partitionId = null ;
-    if(partition >= 0) partitionId = new Integer(partition) ;
-    ProducerRecord<byte[], byte[]> record = new ProducerRecord<byte[], byte[]>(topic, partitionId, key, message);
+    ProducerRecord<byte[], byte[]> record = null;
+    if(partition >= 0) record = new ProducerRecord<byte[], byte[]>(topic, partition, key, message);
+    else record = new ProducerRecord<byte[], byte[]>(topic, key, message);
+    
     long id = idTracker.incrementAndGet();
     WaittingAckProducerRecord<byte[], byte[]> ackRecord = new WaittingAckProducerRecord<byte[], byte[]>(id, record, callback);
     waittingAckBuffer.add(ackRecord, timeout);
@@ -119,6 +109,7 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
     if(resendThread != null && resendThread.isAlive()) {
       resendThread.waitForTermination(90000);
     }
+    if(producer == null) return;
     producer.close(); 
     producer = null ;
   }

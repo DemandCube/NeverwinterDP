@@ -19,12 +19,8 @@ import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
-import com.neverwinterdp.registry.util.NodeDebugger;
-import com.neverwinterdp.registry.util.RegistryDebugger;
-import com.neverwinterdp.registry.util.NodeFormatter;
-import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.util.io.FileUtil;
-import com.neverwinterdp.zk.tool.server.EmbededZKServer;
+import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
 
 public class DebugRegistryListenerUnitTest {
   static {
@@ -51,11 +47,12 @@ public class DebugRegistryListenerUnitTest {
   
   @Before
   public void setup() throws Exception {
+    registry = RegistryConfig.getDefault().newInstance();
+    registry.connect();
     AppServiceModule module = new AppServiceModule(new HashMap<String, String>()) {
       @Override
       protected void configure(Map<String, String> properties) {
-        bindInstance(RegistryConfig.class, RegistryConfig.getDefault());
-        bindType(Registry.class, RegistryImpl.class);
+        bindInstance(Registry.class, registry);
       }
     };
     container = 
@@ -66,7 +63,7 @@ public class DebugRegistryListenerUnitTest {
   @After
   public void teardown() throws Exception {
     registry.rdelete(TEST_DEBUG_PATH);
-    registry.disconnect();
+    registry.shutdown();
     container.getInstance(CloseableInjector.class).close();
   }
 

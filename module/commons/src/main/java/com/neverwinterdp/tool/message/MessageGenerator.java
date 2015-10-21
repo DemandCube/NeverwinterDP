@@ -28,9 +28,7 @@ public interface MessageGenerator {
     }
   
     @Override
-    public byte[] eosMessage() {
-      return  null ;
-    }
+    public byte[] eosMessage() { return  null ; }
     
     public int getCurrentSequenceId(String partition) {
       AtomicInteger idTracker = getIdTracker(partition) ;

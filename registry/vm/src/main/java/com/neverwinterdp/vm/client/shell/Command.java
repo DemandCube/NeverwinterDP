@@ -12,7 +12,6 @@ public abstract class Command {
   
   public void execute(Shell shell, CommandInput cmdInput) throws Exception {
     Class<? extends SubCommand> type = subcommands.get(cmdInput.getSubCommand()) ;
-    System.out.println("type "+ type);
     SubCommand subcommand = type.newInstance();
     if(subcommand == null) {
       throw new Exception("Unkown sub command for: " + cmdInput.getCommandLine()) ;

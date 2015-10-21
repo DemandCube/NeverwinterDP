@@ -10,9 +10,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.tool.KafkaMessageCheckTool;
 import com.neverwinterdp.kafka.tool.KafkaMessageSendTool;
-import com.neverwinterdp.kafka.tool.KafkaTool;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 import com.neverwinterdp.util.text.TabularFormater;
 
@@ -48,10 +48,9 @@ public class KafkaProducerPartitionLeaderChangeBugUnitTest  {
       "--create", "--topic", TOPIC, "--zookeeper", cluster.getZKConnect(), "--replica-assignment", "1:2,2:1"
       //"--partitions", "2", "--replication-factor", "2" parameters have no effect since --replica-assignment has higher priority 
     };
-    KafkaTool kafkaTool = new KafkaTool("KafkaTool", cluster.getZKConnect());
-    kafkaTool.connect();
-    kafkaTool.createTopic(args);
-    info(kafkaTool.findTopicMetadata(TOPIC).partitionsMetadata());
+    KafkaClient kafkaClient = new KafkaClient("KafkaTool", cluster.getZKConnect());
+    kafkaClient.getKafkaTool().createTopic(args);
+    info(kafkaClient.findTopicMetadata(TOPIC).partitionsMetadata());
 
     String[] sendArgs = {
       "--topic" , TOPIC, "--num-partition", "3", "--replication", "2", 
@@ -61,11 +60,11 @@ public class KafkaProducerPartitionLeaderChangeBugUnitTest  {
     sendTool.runAsDeamon();
 
     while(sendTool.getSentCount() <= 0) Thread.sleep(50); //wait to make sure that send tool send some messages
-    kafkaTool.reassignPartitionReplicas(TOPIC, 0, 4, 3, 2);
+    kafkaClient.getKafkaTool().reassignPartitionReplicas(TOPIC, 0, 4, 3, 2);
     //It seems that we do not instruct to change the leader, we loose more messages ?
-    kafkaTool.moveLeaderToPreferredReplica(TOPIC, 0);
+    kafkaClient.getKafkaTool().moveLeaderToPreferredReplica(TOPIC, 0);
     Thread.sleep(500);
-    info(kafkaTool.findTopicMetadata(TOPIC).partitionsMetadata());
+    info(kafkaClient.findTopicMetadata(TOPIC).partitionsMetadata());
     
     sendTool.waitForTermination();
     
@@ -80,7 +79,6 @@ public class KafkaProducerPartitionLeaderChangeBugUnitTest  {
     System.out.println("Sent failed count = " + sendTool.getSentFailedCount());
     System.out.println("Check count = " + checkTool.getMessageCounter().getTotal());
     Assert.assertTrue(checkTool.getMessageCounter().getTotal() < sendTool.getSentCount());
-    kafkaTool.close();
   }
   
   private void info(List<PartitionMetadata> holder) {

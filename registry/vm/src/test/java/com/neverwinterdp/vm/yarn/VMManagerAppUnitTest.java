@@ -23,10 +23,8 @@ import com.neverwinterdp.vm.command.CommandResult;
 import com.neverwinterdp.vm.command.VMCommand;
 import com.neverwinterdp.vm.environment.yarn.AppClient;
 import com.neverwinterdp.vm.environment.yarn.MiniClusterUtil;
-import com.neverwinterdp.vm.environment.yarn.YarnVMServicePlugin;
 import com.neverwinterdp.vm.service.VMServiceApp;
 import com.neverwinterdp.vm.service.VMServiceCommand;
-import com.neverwinterdp.vm.service.VMServicePlugin;
 import com.neverwinterdp.vm.tool.VMZKClusterBuilder;
 
 public class VMManagerAppUnitTest {
@@ -106,7 +104,6 @@ public class VMManagerAppUnitTest {
         "--registry-db-domain", "/NeverwinterDP", 
         "--registry-implementation", RegistryImpl.class.getName(),
         "--vm-application",VMServiceApp.class.getName(),
-        "--prop:implementation:" + VMServicePlugin.class.getName() + "=" + YarnVMServicePlugin.class.getName(),
         "--hadoop:yarn.resourcemanager.scheduler.address=0.0.0.0:8030"
     } ;
     return args;

@@ -1,9 +1,9 @@
 package com.neverwinterdp.scribengin.dataflow;
 
 public enum DataflowLifecycleStatus { 
-  INIT((byte)0), RUNNING((byte)1), 
-  PAUSE((byte)2), STOP((byte)3), 
-  FINISH((byte)4), TERMINATED((byte)5) ;
+  CREATE((byte)0), INIT((byte)1),   RUNNING((byte)2), 
+  PAUSE((byte)3),  STOP((byte)4), 
+  FINISH((byte)5), TERMINATED((byte)6) ;
   
   private byte level ;
   

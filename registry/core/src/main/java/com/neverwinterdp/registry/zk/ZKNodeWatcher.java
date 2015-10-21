@@ -17,10 +17,13 @@ public class ZKNodeWatcher implements Watcher {
   
   public void process(WatchedEvent event) {
     if(nodeWatcher.isComplete()) return ;
-    NodeEvent nEvent = new NodeEvent(realPath(event.getPath()), eventType(event)) ;
+    String path = event.getPath();
+    if(path == null) return;
+    NodeEvent nEvent = new NodeEvent(realPath(path), eventType(event)) ;
     try {
       nodeWatcher.onEvent(nEvent);
-    } catch (Exception e) {
+    } catch (Throwable e) {
+      System.err.println("bassePath = " + basePath + ", event path = " + event.getPath());
       e.printStackTrace();
     }
   }

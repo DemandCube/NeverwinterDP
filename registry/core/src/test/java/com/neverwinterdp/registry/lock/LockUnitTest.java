@@ -19,7 +19,7 @@ import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.util.io.FileUtil;
-import com.neverwinterdp.zk.tool.server.EmbededZKServer;
+import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
 
 public class LockUnitTest {
   static {
@@ -54,7 +54,7 @@ public class LockUnitTest {
     Registry registry = newRegistry().connect(); 
 
     Node lockDir = registry.create(LOCK_DIR, DATA.getBytes(), NodeCreateMode.PERSISTENT) ;
-    registry.disconnect();
+    registry.shutdown();
     Worker[] worker = new Worker[50];
     ExecutorService executorPool = Executors.newFixedThreadPool(worker.length);
     for(int i = 0; i < worker.length; i++) {
@@ -94,7 +94,7 @@ public class LockUnitTest {
         lock.unlock();
         System.out.println("Worker " + name + " releases the lock: " + lockId);
         complete = true ;
-        registry.disconnect();
+        registry.shutdown();
       } catch(RegistryException e) {
         if(e.getErrorCode() == ErrorCode.Timeout) {
           complete = true ;

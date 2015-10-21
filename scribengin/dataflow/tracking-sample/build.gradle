@@ -1,0 +1,37 @@
+archivesBaseName = 'scribengin.dataflow.tracking-sample'
+
+eclipse {
+  project {
+    name = 'scribengin.dataflow.tracking-sample'
+  }
+}
+
+project.ext {
+  releaseDir = "${buildDir}/release"
+}
+
+dependencies {
+  compile project(':registry/core')
+  compile project(':registry/vm')
+  compile project(':scribengin/core')
+  compile project(':module/elasticsearch')
+  compile project(':module/kafka')
+}
+
+task release(dependsOn: 'build') << {
+  println "\n\n"
+  println "*************************************************"
+  println "Build release for ${name} and deploy to ${releaseDir}"
+  println "*************************************************"
+
+  copy {
+    from "${buildDir}/libs"
+    into "${releaseDir}/dataflow/tracking-sample/libs"
+  }
+
+  def appHome = "src/app";
+  copy {
+    from appHome
+      into "${releaseDir}/dataflow/tracking-sample"
+  }
+}

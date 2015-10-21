@@ -44,17 +44,10 @@ public class ActivityRegistry {
     return allNode.getChildrenAs(Activity.class) ;
   }
   
+  
   static public List<Activity> getActivities(Registry registry, List<String> paths) throws RegistryException {
     MultiDataGet<Activity> multiGet = registry.createMultiDataGet(Activity.class);
     multiGet.get(paths);
-    multiGet.shutdown();
-    multiGet.waitForAllGet(30000);
-    return multiGet.getResults();
-  }
-  
-  static public List<ActivityStep> getActivitySteps(Registry registry, String path) throws RegistryException {
-    MultiDataGet<ActivityStep> multiGet = registry.createMultiDataGet(ActivityStep.class);
-    multiGet.getChildren(path);
     multiGet.shutdown();
     multiGet.waitForAllGet(30000);
     return multiGet.getResults();
@@ -103,5 +96,13 @@ public class ActivityRegistry {
   
   private Node activityStepNode(String activityId, String stepId) throws RegistryException {
     return allNode.getDescendant(activityId + "/activity-steps/" + stepId);
+  }
+  
+  static public List<ActivityStep> getActivitySteps(Registry registry, String path) throws RegistryException {
+    MultiDataGet<ActivityStep> multiGet = registry.createMultiDataGet(ActivityStep.class);
+    multiGet.getChildren(path);
+    multiGet.shutdown();
+    multiGet.waitForAllGet(30000);
+    return multiGet.getResults();
   }
 }

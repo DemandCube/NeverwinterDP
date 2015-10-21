@@ -29,7 +29,7 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.text.TabularFormater;
-import com.neverwinterdp.zk.tool.server.EmbededZKServer;
+import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
 
 public class TaskServiceUnitTest {
   static {
@@ -56,11 +56,12 @@ public class TaskServiceUnitTest {
   
   @Before
   public void setup() throws Exception {
+    registry = RegistryConfig.getDefault().newInstance();
+    registry.connect();
     AppServiceModule module = new AppServiceModule(new HashMap<String, String>()) {
       @Override
       protected void configure(Map<String, String> properties) {
-        bindInstance(RegistryConfig.class, RegistryConfig.getDefault());
-        bindType(Registry.class, RegistryImpl.class);
+        bindInstance(Registry.class, registry);
       }
     };
     container = 
@@ -71,7 +72,7 @@ public class TaskServiceUnitTest {
   @After
   public void teardown() throws Exception {
     registry.rdelete(TASKS_PATH);
-    registry.disconnect();
+    registry.shutdown();
     container.getInstance(CloseableInjector.class).close();
   }
 

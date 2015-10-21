@@ -19,6 +19,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.common.base.Stopwatch;
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.kafka.producer.DefaultKafkaWriter;
 import com.neverwinterdp.kafka.producer.KafkaWriter;
@@ -101,10 +102,8 @@ public class KafkaMessageSendTool implements Runnable {
       System.out.println("Partition " + entry.getKey() + " count " + entry.getValue().get());
     }
     
-    KafkaTool kafkaTool = new KafkaTool("KafkaTool", topicConfig.zkConnect);
-    kafkaTool.connect();
+    KafkaClient kafkaTool = new KafkaClient("KafkaTool", topicConfig.zkConnect);
     String kafkaConnects = kafkaTool.getKafkaBrokerList();
-    kafkaTool.close();
     
     String[] args2 = {
         "--broker-list", kafkaConnects,
@@ -151,16 +150,15 @@ public class KafkaMessageSendTool implements Runnable {
     System.out.println("KafkaMessageSendTool: Start sending the message to kafka");
     runDuration.start();
     ExecutorService writerService = Executors.newFixedThreadPool(topicConfig.numberOfPartition);
-    KafkaTool kafkaTool = new KafkaTool("KafkaTool", topicConfig.zkConnect);
-    kafkaTool.connect();
-    String kafkaConnects = kafkaTool.getKafkaBrokerList();
+    KafkaClient kafkaClient = new KafkaClient("KafkaTool", topicConfig.zkConnect);
+    String kafkaConnects = kafkaClient.getKafkaBrokerList();
     //TODO: add option to delete topic if it exists
     //kafkaTool.deleteTopic(topicConfig.topic);
-    if(!kafkaTool.topicExits(topicConfig.topic)) {
-      kafkaTool.createTopic(topicConfig.topic, topicConfig.replication, topicConfig.numberOfPartition);
+    if(!kafkaClient.getKafkaTool().topicExits(topicConfig.topic)) {
+      kafkaClient.getKafkaTool().createTopic(topicConfig.topic, topicConfig.replication, topicConfig.numberOfPartition);
     }
    
-    TopicMetadata topicMetadata = kafkaTool.findTopicMetadata(topicConfig.topic);
+    TopicMetadata topicMetadata = kafkaClient.findTopicMetadata(topicConfig.topic);
     List<PartitionMetadata> partitionMetadataHolder = topicMetadata.partitionsMetadata();
     
     for (PartitionMetadata sel : partitionMetadataHolder) {
@@ -174,7 +172,6 @@ public class KafkaMessageSendTool implements Runnable {
     if (!writerService.isTerminated()) {
       writerService.shutdownNow();
     }
-    kafkaTool.close();
     runDuration.stop();
   }
 

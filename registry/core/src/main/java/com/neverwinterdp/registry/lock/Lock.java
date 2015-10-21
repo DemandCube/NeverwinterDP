@@ -145,7 +145,10 @@ public class Lock {
     synchronized public void waitForLock() throws RegistryException {
       if(obtainedLock) return;
       try {
-        wait(timeout - (System.currentTimeMillis() - startTime));
+        long waitTime = timeout - (System.currentTimeMillis() - startTime);
+        if(waitTime > 0) {
+          wait(waitTime);
+        }
       } catch (InterruptedException e) {
         setComplete() ;
         unlock();

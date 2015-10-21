@@ -17,7 +17,7 @@ import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.event.NodeWatcher;
 import com.neverwinterdp.util.io.FileUtil;
-import com.neverwinterdp.zk.tool.server.EmbededZKServer;
+import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
 
 public class RegistryUnitTest {
   static {
@@ -48,7 +48,7 @@ public class RegistryUnitTest {
     Assert.assertEquals("/persistent", pNode.getPath()) ;
     Assert.assertTrue(pNode.exists());
     Assert.assertEquals(DATA, new String(pNode.getData())) ;
-    registry.disconnect();
+    registry.shutdown();
     
     registry = newRegistry().connect();
     pNode = registry.get("/persistent") ;
@@ -62,7 +62,7 @@ public class RegistryUnitTest {
     Thread.sleep(1000); //wait to make sure that the watcher is invoked
     Assert.assertEquals(pNode.getPath(), pNodeEventCatcher.getNodeEvent().getPath());
     Assert.assertEquals(NodeEvent.Type.DELETE, pNodeEventCatcher.getNodeEvent().getType());
-    registry.disconnect();
+    registry.shutdown();
   }
   
   @Test
@@ -73,7 +73,7 @@ public class RegistryUnitTest {
     Node seqNode1 = registry.create("/sequential/node-", NodeCreateMode.PERSISTENT_SEQUENTIAL) ;
     seqNode1.createChild("report", registry.getRegistryConfig(), NodeCreateMode.PERSISTENT);
     Assert.assertTrue(seqNode1.getPath().matches("/sequential/node-0+")) ;
-    registry.disconnect();
+    registry.shutdown();
   }
   
   @Test
@@ -83,12 +83,12 @@ public class RegistryUnitTest {
     Node ephemeralNode = registry.create("/ephemeral/node", NodeCreateMode.EPHEMERAL) ;
     Assert.assertEquals("/ephemeral/node", ephemeralNode.getPath()) ;
     Assert.assertTrue(ephemeralNode.exists()) ;
-    registry.disconnect();
+    registry.shutdown();
     
     registry = newRegistry().connect();
     Assert.assertTrue(registry.get("/ephemeral").exists());
     Assert.assertFalse(registry.get(ephemeralNode.getPath()).exists());
-    registry.disconnect();
+    registry.shutdown();
   }
   
   @Test
@@ -99,11 +99,11 @@ public class RegistryUnitTest {
     Node seqNode = registry.create("/ephemeral-sequential/node", NodeCreateMode.EPHEMERAL_SEQUENTIAL) ;
     Assert.assertTrue(seqNode.getPath().matches("/ephemeral-sequential/node0+")) ;
     Assert.assertTrue(seqNode.exists()) ;
-    registry.disconnect();
+    registry.shutdown();
     
     registry = newRegistry().connect();
     Assert.assertFalse(registry.get(seqNode.getPath()).exists());
-    registry.disconnect();
+    registry.shutdown();
   }
   
   @Test
@@ -120,7 +120,7 @@ public class RegistryUnitTest {
     registry.createIfNotExist(watchPath);
     existsSignal.await(1, TimeUnit.SECONDS);
     Assert.assertEquals(0,existsSignal.getCount());
-    registry.disconnect();
+    registry.shutdown();
   }
   
   
@@ -144,7 +144,7 @@ public class RegistryUnitTest {
     modifySignal.await(500, TimeUnit.MILLISECONDS);
     Assert.assertEquals(1, modifySignal.getCount());
     
-    registry.disconnect();
+    registry.shutdown();
   }
   
   @Test
@@ -158,7 +158,7 @@ public class RegistryUnitTest {
     }
     registry.rcopy("/from", "/to");
     registry.get("/").dump(System.out);
-    registry.disconnect();
+    registry.shutdown();
   }
   
   @Test
@@ -182,7 +182,7 @@ public class RegistryUnitTest {
       HelloData sel = holder.get(i);
       System.out.println(sel.getDescription());
     }
-    registry.disconnect();
+    registry.shutdown();
   }
   
   private Registry newRegistry() {

@@ -1,7 +1,9 @@
 package com.neverwinterdp.vm;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -16,6 +18,7 @@ import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.io.NetworkUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMApp.TerminateEvent;
@@ -65,7 +68,8 @@ public class VM {
   private VMDescriptor initContainer(VMDescriptor vmDescriptor, final VMConfig vmConfig) throws Exception {
     final String vmDescriptorPath = VMService.ALL_PATH + "/" + vmConfig.getName();
     final RegistryConfig rConfig = vmConfig.getRegistryConfig();
-    final Registry registry = rConfig.newInstance().connect(30000);
+    final Registry registry = rConfig.newInstance().connect();
+    
     if(vmDescriptor == null) {
       vmDescriptor = registry.getDataAs(vmDescriptorPath, VMDescriptor.class);
     }
@@ -81,7 +85,6 @@ public class VM {
           bindInstance(VMConfig.class, vmConfig);
           bindInstance(VMDescriptor.class, finalVMDescriptor);
           
-          bindInstance(RegistryConfig.class, rConfig);
           bindInstance(Registry.class, registry);
         } catch(Exception e) {
           e.printStackTrace();
@@ -92,6 +95,7 @@ public class VM {
     appContainer.onInit();
     logger = appContainer.getLoggerFactory().getLogger(getClass());
     appContainer.install(new HashMap<String, String>(), VMModule.NAME) ;
+    
     vmModuleContainer = appContainer.getModule("VMModule");
     return finalVMDescriptor;
   }
@@ -132,7 +136,8 @@ public class VM {
     VMApp vmApp = vmAppType.newInstance();
     vmApp.setVM(this);
     setVMStatus(VMStatus.RUNNING);
-    vmApplicationRunner = new VMApplicationRunner(vmApp, vmConfig.getProperties()) ;
+    String threadName = "VM-" + vmApp.getVM().getDescriptor().getId();
+    vmApplicationRunner = new VMApplicationRunner(threadName, vmApp, vmConfig.getProperties()) ;
     vmApplicationRunner.start();
     logger.info("Finish run()");
   }
@@ -175,8 +180,8 @@ public class VM {
     VMApp vmApplication;
     Map<String, String> properties;
     
-    public VMApplicationRunner(VMApp vmApplication, Map<String, String> props) {
-      setName("VM-" + vmApplication.getVM().getDescriptor().getId());
+    public VMApplicationRunner(String threadName, VMApp vmApplication, Map<String, String> props) {
+      super(new ThreadGroup(threadName), threadName);
       this.vmApplication = vmApplication;
       this.properties = props;
     }
@@ -187,15 +192,14 @@ public class VM {
       } catch (InterruptedException e) {
         e.printStackTrace();
       } catch (Exception e) {
-        e.printStackTrace();
         logger.error("Error in vm application", e);
       } finally {
         try {
           setVMStatus(VMStatus.TERMINATED);
           appContainer.getInstance(CloseableInjector.class).close();
+          logger.info("Destroyed: " + vmDescriptor.getId() );
         } catch (RegistryException e) {
           System.err.println("Set terminated vm status for " + vmDescriptor.getId() );
-          e.printStackTrace();
           logger.error("Error in vm registry", e);
         }
         notifyComplete();
@@ -221,12 +225,20 @@ public class VM {
     long start = System.currentTimeMillis() ;
     System.out.println("VM: main(..) start");
     VMConfig vmConfig = new VMConfig(args);
-    vmConfig.getLoggerConfig().getConsoleAppender().setEnable(false);
-    String vmDir = "/opt/hadoop/vm/" + vmConfig.getName();
-    vmConfig.getLoggerConfig().getFileAppender().setFilePath(vmDir + "/logs/vm.log");
-    vmConfig.getLoggerConfig().getEsAppender().setBufferDir(vmDir + "/buffer/es/log4j");
-    vmConfig.getLoggerConfig().getKafkaAppender().setBufferDir(vmDir + "/buffer/kafka/log4j");
-    Map<String, String> log4jProps = vmConfig.getLoggerConfig().getLog4jConfiguration() ;
+    String vmDir = null ;
+    File hadoopDir = new File("/opt/hadoop");
+    if(hadoopDir.exists()) {
+      vmDir = "/opt/hadoop/vm/" + vmConfig.getName();
+      System.setProperty("vm.app.dir", vmDir);
+      System.setProperty("app.home", vmDir);
+    } else {
+      vmDir = "target/vm/" + vmConfig.getName();
+      System.setProperty("vm.app.dir", vmDir);
+      System.setProperty("app.home", vmDir);
+    }
+    vmConfig.setAppDataDir(vmDir + "/data");
+    Properties log4jProps = new Properties();
+    log4jProps.load(IOUtil.loadRes(vmConfig.getLog4jConfigUrl()));
     LoggerFactory.log4jConfigure(log4jProps);
     
     VM vm = new VM(vmConfig);

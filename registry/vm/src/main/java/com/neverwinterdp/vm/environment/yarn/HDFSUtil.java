@@ -1,12 +1,12 @@
 package com.neverwinterdp.vm.environment.yarn;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 
 public class HDFSUtil {
@@ -16,49 +16,30 @@ public class HDFSUtil {
     return Integer.parseInt(name.substring(dashIdx + 1)) ;
   }
   
-//  static public void concat(FileSystem fs, Path dest, Path[] src, boolean deleteSrc) throws IOException {
-//    if(LocalFileSystem.class == fs.getClass()) {
-//      OutputStream output = fs.create(dest) ;
-//      for(int i = 0; i < src.length; i++) {
-//        FSDataInputStream is = fs.open(src[i]);
-//        BufferedInputStream buffer = new BufferedInputStream(is);
-//        byte[] data = new byte[4912];
-//        int available = -1;
-//        while ((available = buffer.read(data)) > -1) {
-//          output.write(data, 0, available);
-//        }
-//        is.close();
-//      }
-//      output.close();
-//    } else {
-//      fs.concat(dest, src);
-//    }
-//    
-//    if(deleteSrc) {
-//      for(int i = 0; i < src.length; i++) {
-//        fs.delete(src[i], true);
-//      }
-//    }
-//  }
   
-  static public void concat(FileSystem fs, Path dest, Path[] src, boolean deleteSrc) throws IOException {
-    OutputStream output = fs.create(dest) ;
-    for(int i = 0; i < src.length; i++) {
-      FSDataInputStream is = fs.open(src[i]);
-      BufferedInputStream buffer = new BufferedInputStream(is);
-      byte[] data = new byte[4912];
-      int available = -1;
-      while ((available = buffer.read(data)) > -1) {
-        output.write(data, 0, available);
+  
+  static public void concat(FileSystem fs, Path dest, Path[] src) throws IOException {
+    if(fs instanceof LocalFileSystem) {
+      FSDataOutputStream output = fs.create(dest) ;
+      for(int i = 0; i < src.length; i++) {
+        FSDataInputStream is = fs.open(src[i]);
+        //BufferedInputStream buffer = new BufferedInputStream(is);
+        byte[] data = new byte[4912];
+        int available = -1;
+        while ((available = is.read(data)) > -1) {
+          output.write(data, 0, available);
+        }
+        is.close();
+        //buffer.close();
       }
-      is.close();
-    }
-    output.close();
-
-    if(deleteSrc) {
+      output.hflush();
+      output.close();
       for(int i = 0; i < src.length; i++) {
         fs.delete(src[i], true);
       }
+    } else {
+      fs.createNewFile(dest);
+      fs.concat(dest, src);
     }
   }
   

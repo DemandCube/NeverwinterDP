@@ -13,7 +13,7 @@ import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.event.NodeWatcher;
 import com.neverwinterdp.registry.event.RegistryListener;
 import com.neverwinterdp.util.io.FileUtil;
-import com.neverwinterdp.zk.tool.server.EmbededZKServer;
+import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
 
 public class RegistryListenerUnitTest {
   static {
@@ -44,7 +44,7 @@ public class RegistryListenerUnitTest {
   @After
   public void teardown() throws Exception {
     registry.rdelete(TEST_PATH);
-    registry.disconnect();
+    registry.shutdown();
   }
 
   @Test

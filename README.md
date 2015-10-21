@@ -35,8 +35,11 @@ The core problem is how to reliably and at scale have a distributed application 
 
 
 ####Design
-![Scribengin Cluster Design](/ScribenginCluster.png "Scribengin Cluster Design")
+![Scribengin Cluster Design](/docs/ScribenginCluster.png "Scribengin Cluster Design")
 
+
+####Dataflow Submission
+![Scribengin Dataflow Submission Design](/docs/dataflowsubmission.png "Scribengin Dataflow Submission Design")
 
 
 ####Developer Setup
@@ -44,7 +47,7 @@ The core problem is how to reliably and at scale have a distributed application 
 git clone https://github.com/Nventdata/NeverwinterDP/
 git checkout dev/master
 cd NeverwinterDP
-./gradlew eclipse clean build install -x test
+./gradlew clean build install eclipse  -x test
 
 #Now you can import the project into Eclipse
 ```

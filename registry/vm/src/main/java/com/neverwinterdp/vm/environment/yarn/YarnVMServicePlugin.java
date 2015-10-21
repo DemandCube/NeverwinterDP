@@ -13,7 +13,6 @@ import com.mycila.jmx.annotation.JmxBean;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
-import com.neverwinterdp.vm.environment.yarn.YarnManager.ContainerRequest;
 import com.neverwinterdp.vm.service.VMService;
 import com.neverwinterdp.vm.service.VMServicePlugin;
 
@@ -27,14 +26,14 @@ public class YarnVMServicePlugin implements VMServicePlugin {
   
   @Override
   synchronized public void allocateVM(VMService vmService, final VMConfig vmConfig) throws RegistryException, Exception {
-    logger.info("Start allocate(VMService vmService, VMDescriptor vmDescriptor)");
-    final ContainerRequest containerReq = 
+    logger.info("Start allocate request for " + vmConfig.getName());
+    final VMRequest containerReq = 
       yarnManager.createContainerRequest(0, vmConfig.getRequestCpuCores(), vmConfig.getRequestMemory());
     
     YarnManager.ContainerRequestCallback callback = new YarnManager.ContainerRequestCallback() {
       @Override
-      public void onAllocate(YarnManager manager, ContainerRequest containerRequest, Container container) {
-        logger.info("Start onAllocate(Container container)");
+      public void onAllocate(YarnManager manager, VMRequest containerRequest, Container container) {
+        logger.info("Start onAllocate for " + vmConfig.getName());
         vmConfig.
           setSelfRegistration(false).
           addHadoopProperty(manager.getYarnConfig());
@@ -43,7 +42,7 @@ public class YarnVMServicePlugin implements VMServicePlugin {
         } catch (YarnException | IOException e) {
           logger.error("Cannot start the container", e);
         }
-        logger.info("Finish onAllocate(Container container)");
+        logger.info("Finish onAllocate  for " + vmConfig.getName());
       }
       
       public String toString() {
@@ -52,8 +51,8 @@ public class YarnVMServicePlugin implements VMServicePlugin {
         return b.toString();
       }
     };
-    yarnManager.asyncAdd(containerReq, callback);
-    logger.info("Finish allocate(VMService vmService, VMDescriptor vmDescriptor)");
+    yarnManager.allocate(containerReq, callback);
+    logger.info("Finish allocate request for " + vmConfig.getName());
   }
 
   @Override

@@ -21,6 +21,7 @@ public class Shell {
     add("help", new HelpCommand());
     add("registry", new RegistryCommand());
     add("vm", new VMCommand());
+    add("plugin", new PluginCommand());
   }
 
   public Console console() { return this.console; }
@@ -64,5 +65,9 @@ public class Shell {
       throw new Exception("Unkown command " + cmdInput.getCommand());
     }
     command.execute(this, cmdInput);
+  }
+  
+  public void close() throws Exception {
+    vmClient.close();
   }
 }

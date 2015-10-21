@@ -1,17 +1,16 @@
 package com.neverwinterdp.scribengin.storage.kafka;
 
 
-import org.apache.zookeeper.ZooKeeper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.kafka.tool.KafkaTool;
-import com.neverwinterdp.kafka.tool.ZKTool;
-import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
-import com.neverwinterdp.scribengin.storage.sink.SinkStream;
-import com.neverwinterdp.scribengin.storage.sink.SinkStreamWriter;
+import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.zookeeper.ZKClient;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
+import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
+import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 
 public class KafkaClientUnitTest {
   static {
@@ -33,18 +32,20 @@ public class KafkaClientUnitTest {
   }
 
   @Test
-  public void testKafkaClient() throws Exception {
-    KafkaSink sink = new KafkaSink("writer", cluster.getZKConnect(), "hello");
-    SinkStream stream = sink.newStream();
-    SinkStreamWriter writer = stream.getWriter();
+  public void testKafkaSink() throws Exception {
+    KafkaClient kafkaClient = new KafkaClient("KafkaClient", cluster.getZKConnect());
+    KafkaStorage storage = new KafkaStorage(kafkaClient, "writer", "hello");
+    KafkaSink sink = (KafkaSink) storage.getSink();
+    SinkPartitionStream stream = sink.newStream();
+    SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < 10; i++) {
     }
     writer.close();
     
-    KafkaTool client = new KafkaTool("test", "127.0.0.1:2181");
-    client.connect();
-    ZooKeeper zkClient = client.getZookeeper();
-    ZKTool.dump(zkClient, "/brokers");
+    ZKClient client = new ZKClient("127.0.0.1:2181");
+    client.connect(10000);
+    client.dump("/brokers");
     client.close();
+    kafkaClient.close();
   }
 }

@@ -12,8 +12,11 @@ dependencies {
   compile project(':lib/buffer')
   compile project(':lib/yara')
   compile project(':module/commons')
-  compile project(':registry/core')
+  compile project(':module/zookeeper')
 
   compile group: 'com.google.guava', name: 'guava', version: '18.0'
-  testCompile "org.apache.kafka:kafka_2.10:0.8.2.0:test"
+  compile group: 'org.apache.kafka', name: 'kafka_2.10', version: "0.8.2.2"
+
+  compile group: 'org.xerial.snappy', name: 'snappy-java', version: "1.1.2"
+
 }

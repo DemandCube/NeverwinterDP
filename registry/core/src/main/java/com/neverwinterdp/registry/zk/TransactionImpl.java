@@ -7,6 +7,7 @@ import org.apache.zookeeper.OpResult;
 
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
+import com.neverwinterdp.registry.PathFilter;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.util.JSONSerializer;
@@ -28,8 +29,19 @@ public class TransactionImpl implements Transaction {
 
   @Override
   public <T> Transaction create(String path, T obj, NodeCreateMode mode) {
-    zkTransaction.create(registry.realPath(path), JSONSerializer.INSTANCE.toBytes(obj), RegistryImpl.DEFAULT_ACL, RegistryImpl.toCreateMode(mode));
+    byte[] data = null; ;
+    if(obj != null) {
+      data = JSONSerializer.INSTANCE.toBytes(obj);
+    } else {
+      data = new byte[0] ;
+    }
+    zkTransaction.create(registry.realPath(path), data, RegistryImpl.DEFAULT_ACL, RegistryImpl.toCreateMode(mode));
     return this;
+  }
+  
+  @Override
+  public <T> Transaction create(Node node, T obj, NodeCreateMode mode) {
+    return create(node.getPath(), obj, mode) ;
   }
   
   @Override
@@ -69,7 +81,7 @@ public class TransactionImpl implements Transaction {
 
   @Override
   public Transaction rdelete(String path) throws RegistryException {
-    List<String> tree = registry.findDencendantRealPaths(path);
+    List<String> tree = registry.findDencendantRealPaths(path, null);
     for (int i = tree.size() - 1; i >= 0 ; --i) {
       //Delete the leaves first and eventually get rid of the root
       zkTransaction.delete(tree.get(i), -1);
@@ -78,7 +90,11 @@ public class TransactionImpl implements Transaction {
   }
   
   public void rcopy(String path, String toPath) throws RegistryException {
-    List<String> tree = registry.findDencendantPaths(path);
+    rcopy(path, toPath, null);
+  }
+  
+  public void rcopy(String path, String toPath, PathFilter filter) throws RegistryException {
+    List<String> tree = registry.findDencendantPaths(path, filter);
     for (int i = 0; i < tree.size(); i++) {
       String selPath = tree.get(i);
       String selToPath = selPath.replace(path, toPath);

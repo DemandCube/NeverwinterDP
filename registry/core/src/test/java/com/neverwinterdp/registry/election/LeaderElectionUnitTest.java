@@ -16,7 +16,7 @@ import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.util.io.FileUtil;
-import com.neverwinterdp.zk.tool.server.EmbededZKServer;
+import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
 
 public class LeaderElectionUnitTest {
   static {
@@ -44,6 +44,34 @@ public class LeaderElectionUnitTest {
   }
   
   @Test
+  public void testDisconnect() throws Exception {
+    Registry registry1 = newRegistry().connect();
+    registry1.createIfNotExist(ELECTION_PATH) ;
+    
+    Node leader1Path =  registry1.get(ELECTION_PATH) ;
+    LeaderElection leader1 = leader1Path.getLeaderElection();
+    leader1.setListener(new LeaderElectionListener() {
+      public void onElected() {
+        System.out.println("Elected leader 1");
+      }
+    });
+    leader1.start();
+
+    Registry registry2   = newRegistry().connect();
+    Node     leader2Path =  registry2.get(ELECTION_PATH) ;
+
+    LeaderElection leader2 = leader2Path.getLeaderElection();
+    leader2.setListener(new LeaderElectionListener() {
+      public void onElected() {
+        System.out.println("Elected leader 2");
+      }
+    });
+    leader2.start();
+    registry1.shutdown();
+    Thread.sleep(1000);
+  }
+  
+  @Test
   public void testElection() throws Exception {
     Registry registry = newRegistry().connect(); 
     registry.createIfNotExist(ELECTION_PATH) ;
@@ -58,7 +86,7 @@ public class LeaderElectionUnitTest {
     executorService.shutdown();
     executorService.awaitTermination(3 * 60 * 1000, TimeUnit.MILLISECONDS);
     System.err.println("End Test----------------------------------------------------");
-    registry.disconnect();
+    registry.shutdown();
   }
   
   public class Leader implements Runnable {
@@ -100,7 +128,7 @@ public class LeaderElectionUnitTest {
       } finally {
         if(registry != null) {
           try {
-            registry.disconnect();
+            registry.shutdown();
           } catch (RegistryException e) {
             e.printStackTrace();
           }

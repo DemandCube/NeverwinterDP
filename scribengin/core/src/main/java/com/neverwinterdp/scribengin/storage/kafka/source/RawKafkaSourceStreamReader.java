@@ -4,31 +4,34 @@ import java.nio.ByteBuffer;
 
 import kafka.javaapi.PartitionMetadata;
 import kafka.message.Message;
+import kafka.message.MessageAndOffset;
 
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
-import com.neverwinterdp.scribengin.dataflow.DataflowMessage;
-import com.neverwinterdp.scribengin.storage.StreamDescriptor;
+import com.neverwinterdp.scribengin.storage.Record;
+import com.neverwinterdp.scribengin.storage.PartitionConfig;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;
-import com.neverwinterdp.scribengin.storage.source.SourceStreamReader;
+import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 
-public class RawKafkaSourceStreamReader implements SourceStreamReader {
-  private StreamDescriptor descriptor;
+public class RawKafkaSourceStreamReader implements SourcePartitionStreamReader {
+  private PartitionConfig partitionConfig;
   private KafkaPartitionReader partitionReader ;
   private CommitPoint lastCommitInfo ;
   
-  public RawKafkaSourceStreamReader(StreamDescriptor descriptor, PartitionMetadata partitionMetadata) {
-    this.descriptor = descriptor;
+  public RawKafkaSourceStreamReader(KafkaClient kafkaClient, PartitionConfig pConfig, PartitionMetadata pmd) throws Exception {
+    this.partitionConfig = pConfig;
     this.partitionReader = 
-        new KafkaPartitionReader(descriptor.attribute("name"), descriptor.attribute("zk.connect"), descriptor.attribute("topic"), partitionMetadata);
+        new KafkaPartitionReader(pConfig.attribute("name"), kafkaClient, pConfig.attribute("topic"), pmd);
   }
   
   @Override
-  public String getName() { return descriptor.attribute("name"); }
+  public String getName() { return partitionConfig.attribute("name"); }
 
   @Override
-  public DataflowMessage next(long maxWait) throws Exception {
-    Message message = partitionReader.nextMessage(maxWait) ;
-    if(message == null) return null ;
+  public Record next(long maxWait) throws Exception {
+    MessageAndOffset messageAndOffSet = partitionReader.nextMessageAndOffset(maxWait) ;
+    if(messageAndOffSet == null) return null ;
+    Message message = messageAndOffSet.message();
     ByteBuffer payload = message.payload();
     byte[] messageBytes = new byte[payload.limit()];
     payload.get(messageBytes);
@@ -36,12 +39,12 @@ public class RawKafkaSourceStreamReader implements SourceStreamReader {
     ByteBuffer key = message.key();
     byte[] keyBytes = new byte[key.limit()];
     key.get(keyBytes);
-    DataflowMessage dataflowMessage = new DataflowMessage(new String(keyBytes), messageBytes) ;
+    Record dataflowMessage = new Record(new String(keyBytes), messageBytes) ;
     return dataflowMessage;
   }
 
   @Override
-  public DataflowMessage[] next(int size, long maxWait) throws Exception {
+  public Record[] next(int size, long maxWait) throws Exception {
     throw new Exception("To implement") ;
   }
   
@@ -78,5 +81,8 @@ public class RawKafkaSourceStreamReader implements SourceStreamReader {
   
   @Override
   public void close() throws Exception {
+    if(partitionReader != null) {
+      partitionReader.close();
+    }
   }
 }
