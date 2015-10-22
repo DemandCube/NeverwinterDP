@@ -129,25 +129,35 @@ public class DataflowFormater {
     return b.toString();
   }
   
-  public String getDataflowWorkerInfo() throws RegistryException {
-    List<DataflowWorkerRuntimeReport> reports =  DataflowRegistry.getAllDataflowWorkerRuntimeReports(registry, dataflowPath);
+  public String getDataflowActiveWorkerInfo() throws RegistryException {
+    List<DataflowWorkerRuntimeReport> reports =  DataflowRegistry.getActiveDataflowWorkerRuntimeReports(registry, dataflowPath);
+    return createDataflowWorkerReport("Dataflow Active Workers", reports);
+  }
+  
+  public String getDataflowHistoryWorkerInfo() throws RegistryException {
+    List<DataflowWorkerRuntimeReport> reports =  
+        DataflowRegistry.getHistoryDataflowWorkerRuntimeReports(registry, dataflowPath);
+    return createDataflowWorkerReport("Dataflow History Workers", reports);
+  }
+  
+  private String createDataflowWorkerReport(String title, List<DataflowWorkerRuntimeReport> reports) {
     String[] header = {
-      "Worker", "Status", "Executor", "Executor Status", "Executor Assigned Tasks"
+        "Worker", "Status", "Executor", "Executor Status", "Executor Assigned Tasks"
     } ;
     TabularFormater taskFt = new TabularFormater(header);
-    taskFt.setTitle("Dataflow Worker Info");
+    taskFt.setTitle(title);
     for(int i = 0; i < reports.size(); i++) {
       DataflowWorkerRuntimeReport rtReport = reports.get(i);
       taskFt.addRow(
-        rtReport.getWorker(), 
-        rtReport.getStatus(),
-        "", "", ""
-      );
+          rtReport.getWorker(), 
+          rtReport.getStatus(),
+          "", "", ""
+          );
       for(TaskExecutorDescriptor selExecutor : rtReport.getExecutors()) {
         taskFt.addRow(
-          "", "",
-          selExecutor.getId(), selExecutor.getStatus(), StringUtil.join(selExecutor.getAssignedTaskIds(), ",")
-        );
+            "", "",
+            selExecutor.getId(), selExecutor.getStatus(), StringUtil.join(selExecutor.getAssignedTaskIds(), ",")
+            );
       }
     }
     return taskFt.getFormattedText();

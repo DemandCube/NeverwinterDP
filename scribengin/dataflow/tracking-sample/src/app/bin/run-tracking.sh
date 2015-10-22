@@ -162,8 +162,7 @@ fi
 #########################################################################################################################
 MONITOR_COMMAND="\
 $SHELL plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor \
-  --dataflow-id tracking-dataflow --report-path $TRACKING_REPORT_PATH --max-runtime $MONITOR_MAX_RUNTIME --print-period 15000"
-
+  --dataflow-id tracking-dataflow --report-path $TRACKING_REPORT_PATH --max-runtime $MONITOR_MAX_RUNTIME --print-period 15000 --show-history-workers"
 
 echo -e "\n\n"
 echo "##To Tracking The Dataflow Progress##"

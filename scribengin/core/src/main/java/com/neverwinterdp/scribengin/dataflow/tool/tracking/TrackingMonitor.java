@@ -15,6 +15,9 @@ public class TrackingMonitor extends SubCommand {
   @Parameter(names = "--report-path", required=true, description = "The report path in the registry")
   private String reportPath ;
   
+  @Parameter(names = "--show-history-workers", description = "Show the history dataflow worker")
+  boolean historyWorkers = false;
+  
   @Parameter(names = "--print-period", description = "Pring the report")
   private long printPeriod = 15000;
   
@@ -41,10 +44,12 @@ public class TrackingMonitor extends SubCommand {
   }
   
   boolean report(ScribenginShell shell, TrackingRegistry trackingRegistry) throws Exception {
-    String[] selId = dataflowId.split(",");
-    for(int i = 0; i < selId.length; i++) {
-      shell.execute("dataflow info --dataflow-id " + selId[i] + " --show-tasks --show-workers");
+    StringBuilder command = new StringBuilder();
+    command.append("dataflow info --dataflow-id " + dataflowId + " --show-tasks --show-workers");
+    if(historyWorkers) {
+      command.append(" --show-history-workers ");
     }
+    shell.execute(command.toString());
 
     List<TrackingMessageReport> generatedReports = trackingRegistry.getGeneratorReports();
     List<TrackingMessageReport> validatedReports = trackingRegistry.getValidatorReports();

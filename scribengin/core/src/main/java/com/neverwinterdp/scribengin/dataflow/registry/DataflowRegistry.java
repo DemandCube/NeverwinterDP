@@ -188,6 +188,11 @@ public class DataflowRegistry {
     return getDataflowWorkerRuntimeReports(registry, workerListPath);
   }
   
+  static public List<DataflowWorkerRuntimeReport> getHistoryDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
+    String workerListPath = dataflowPath + "/workers/history";
+    return getDataflowWorkerRuntimeReports(registry, workerListPath);
+  }
+  
   static public List<DataflowWorkerRuntimeReport> getDataflowWorkerRuntimeReports(Registry registry, String workerListPath) throws RegistryException {
     try {
       List<String> workerIds = registry.getChildren(workerListPath) ;
