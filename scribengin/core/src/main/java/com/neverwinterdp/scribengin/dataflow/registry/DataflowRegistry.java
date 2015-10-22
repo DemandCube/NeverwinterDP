@@ -179,26 +179,25 @@ public class DataflowRegistry {
   }
   
   static public List<DataflowWorkerRuntimeReport> getAllDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
-    String workerListPath = dataflowPath + "/workers/all";
-    return getDataflowWorkerRuntimeReports(registry, workerListPath);
+    return getDataflowWorkerRuntimeReports(registry, dataflowPath, "all");
   }
   
   static public List<DataflowWorkerRuntimeReport> getActiveDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
-    String workerListPath = dataflowPath + "/workers/active";
-    return getDataflowWorkerRuntimeReports(registry, workerListPath);
+    return getDataflowWorkerRuntimeReports(registry, dataflowPath, "active");
   }
   
   static public List<DataflowWorkerRuntimeReport> getHistoryDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
-    String workerListPath = dataflowPath + "/workers/history";
-    return getDataflowWorkerRuntimeReports(registry, workerListPath);
+    return getDataflowWorkerRuntimeReports(registry, dataflowPath, "history");
   }
   
-  static public List<DataflowWorkerRuntimeReport> getDataflowWorkerRuntimeReports(Registry registry, String workerListPath) throws RegistryException {
+  static public List<DataflowWorkerRuntimeReport> getDataflowWorkerRuntimeReports(Registry registry, String dataflowPath, String category) throws RegistryException {
     try {
+      String workerAllPath = dataflowPath + "/workers/all";
+      String workerListPath = dataflowPath + "/workers/" + category;
       List<String> workerIds = registry.getChildren(workerListPath) ;
       List<DataflowWorkerRuntimeReport> holder = new ArrayList<>();
       for(String selWorkerId : workerIds) {
-        holder.add(new DataflowWorkerRuntimeReport(registry, workerListPath + "/" + selWorkerId));
+        holder.add(new DataflowWorkerRuntimeReport(registry, workerAllPath + "/" + selWorkerId));
       }
       return holder;
     } catch(RegistryException ex) {
