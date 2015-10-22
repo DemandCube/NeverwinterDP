@@ -19,7 +19,7 @@ public class KafkaTrackingSampleUnitTest  {
   }
   
   @Test
-  public void testLogSampleChain() throws Exception {
+  public void testTrackingSample() throws Exception {
     trackingSampleRunner.runDataflow();
   }
 }

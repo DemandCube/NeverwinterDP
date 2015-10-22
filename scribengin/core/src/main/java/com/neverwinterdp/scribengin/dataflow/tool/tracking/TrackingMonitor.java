@@ -37,9 +37,6 @@ public class TrackingMonitor extends SubCommand {
         if(stopTime < System.currentTimeMillis()) break;
         Thread.sleep(printPeriod);
       }
-      //wait to make sure that all the messages are validated and print the report one more time 
-      Thread.sleep(5000);
-      Thread.sleep(printPeriod);
     }
   }
   

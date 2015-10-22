@@ -81,7 +81,16 @@ public class WorkerRegistry {
   public int countActiveDataflowWorkers() throws RegistryException {
     return activeWorkers.getChildren().size();
   }
+  
+  public List<VMDescriptor> getAllWorkers() throws RegistryException {
+    List<String> activeWorkerIds = allWorkers.getChildren();
+    return allWorkers.getSelectRefChildrenAs(activeWorkerIds, VMDescriptor.class) ;
+  }
 
+  public List<String> getAllWorkerIds() throws RegistryException {
+    return allWorkers.getChildren();
+  }
+  
   public void addWorker(VMDescriptor vmDescriptor) throws RegistryException {
     Transaction transaction = registry.getTransaction() ;
     RefNode refNode = new RefNode(vmDescriptor.getRegistryPath()) ;

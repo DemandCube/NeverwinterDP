@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import com.neverwinterdp.registry.event.WaitingNodeEventListener;
 import com.neverwinterdp.registry.event.WaitingRandomNodeEventListener;
-import com.neverwinterdp.registry.util.RegistryDebugger;
 import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.util.text.TabularFormater;
 import com.neverwinterdp.vm.VMConfig;
@@ -23,7 +22,6 @@ import com.neverwinterdp.vm.event.VMWaitingEventListener;
 import com.neverwinterdp.vm.service.VMService;
 import com.neverwinterdp.vm.service.VMServiceCommand;
 import com.neverwinterdp.vm.tool.VMZKClusterBuilder;
-import com.neverwinterdp.vm.util.VMNodeDebugger;
 
 public class VMManagerAppUnitTest  {
   static {
@@ -33,7 +31,6 @@ public class VMManagerAppUnitTest  {
   VMZKClusterBuilder  vmCluster ;
   Shell      shell;
   VMClient   vmClient;
-  private    RegistryDebugger debugger ;
   
   @Before
   public void setup() throws Exception {
@@ -41,9 +38,6 @@ public class VMManagerAppUnitTest  {
     vmCluster.clean();
     vmCluster.startZookeeper();
     Thread.sleep(5000);
-    
-    debugger = new RegistryDebugger(System.err, vmCluster.getVMClient().getRegistry().connect());
-    debugger.watch("/vm/all/vm-master-1", new VMNodeDebugger(), true);
   }
   
   @After

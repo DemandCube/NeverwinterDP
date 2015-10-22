@@ -95,6 +95,7 @@ VALIDATOR_NUM_OF_READER=$(get_opt --validator-num-of-reader '3' $@)
 
 MONITOR_MAX_RUNTIME=$(get_opt --monitor-max-runtime '0' $@)
 
+JUNIT_REPORT_FILE=$(get_opt --junit-report-file '' $@)
 
 SHELL=$NEVERWINTERDP_BUILD_DIR/scribengin/bin/shell.sh
 
@@ -163,6 +164,7 @@ MONITOR_COMMAND="\
 $SHELL plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor \
   --dataflow-id tracking-dataflow --report-path $TRACKING_REPORT_PATH --max-runtime $MONITOR_MAX_RUNTIME --print-period 15000"
 
+
 echo -e "\n\n"
 echo "##To Tracking The Dataflow Progress##"
 echo "-------------------------------------"
@@ -176,3 +178,8 @@ echo "##To Tracking The Dataflow Progress##"
 echo "-------------------------------------"
 echo "$MONITOR_COMMAND"
 echo -e "\n\n"
+
+if [ ! -z "$JUNIT_REPORT_FILE" ]
+  $SHELL plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingJUnitShellPlugin \
+    --dataflow-id tracking-dataflow --report-path $TRACKING_REPORT_PATH --junit-report-file $JUNIT_REPORT_FILE
+fi

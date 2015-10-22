@@ -115,5 +115,10 @@ public class KafkaTrackingSampleRunner  {
       "  --dataflow-id " + dataflowId +
       "  --report-path " + REPORT_PATH + " --max-runtime " + dataflowMaxRuntime +"  --print-period 10000"
     );
+    
+    shell.execute(
+      "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingJUnitShellPlugin" +
+      "  --dataflow-id " + dataflowId + "  --report-path " + REPORT_PATH + " --junit-report-file build/junit-report.xml"
+    );
   }
 }
