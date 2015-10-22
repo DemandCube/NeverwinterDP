@@ -178,7 +178,7 @@ echo "-------------------------------------"
 echo "$MONITOR_COMMAND"
 echo -e "\n\n"
 
-if [ ! -z "$JUNIT_REPORT_FILE" ]
+if [ ! -z "$JUNIT_REPORT_FILE" ] ; then
   $SHELL plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingJUnitShellPlugin \
     --dataflow-id tracking-dataflow --report-path $TRACKING_REPORT_PATH --junit-report-file $JUNIT_REPORT_FILE
 fi
