@@ -40,7 +40,8 @@ public class DataflowFormater {
     StringBuilder b = new StringBuilder();
     b.append(getInfo()).append("\n");
     b.append(getDataflowTaskInfo()).append("\n");
-    b.append(getDataflowWorkerInfo()).append("\n");
+    b.append(getDataflowActiveWorkerInfo()).append("\n");
+    b.append(getDataflowHistoryWorkerInfo()).append("\n");
     return b.toString();
   }
   
