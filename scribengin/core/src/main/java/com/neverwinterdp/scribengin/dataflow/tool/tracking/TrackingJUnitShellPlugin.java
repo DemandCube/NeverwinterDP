@@ -46,7 +46,8 @@ public class TrackingJUnitShellPlugin extends SubCommand {
     List<String> allWorkerIds = workerRegistry.getAllWorkerIds();
     for(String workerId : allWorkerIds) {
       DataflowWorkerStatus workerStatus = workerRegistry.getDataflowWorkerStatus(workerId);
-      testSetResult.add("Expect worker " + workerId + " TERMINATED status, status = " + workerStatus, workerStatus == DataflowWorkerStatus.TERMINATED);
+      boolean ok = workerStatus.equalOrGreaterThan(DataflowWorkerStatus.TERMINATED);
+      testSetResult.add("Expect worker " + workerId + " TERMINATED status, status = " + workerStatus, ok);
     }
     
     TrackingRegistry trackingRegistry = new TrackingRegistry(scribenginShell.getVMClient().getRegistry(), reportPath, false);
