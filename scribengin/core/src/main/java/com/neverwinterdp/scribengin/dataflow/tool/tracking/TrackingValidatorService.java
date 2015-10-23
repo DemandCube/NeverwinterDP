@@ -82,7 +82,7 @@ public class TrackingValidatorService {
       trackingRegistry.addValidatorReport(bitSetReport.getReport());
       System.err.println("Create Report " + reportName);
     }
-    bitSetReport.log(message.getTrackId());
+    bitSetReport.log(message);
   }
   
   @SuppressWarnings("serial")

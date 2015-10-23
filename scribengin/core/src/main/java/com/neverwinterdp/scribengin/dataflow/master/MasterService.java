@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.registry.task.TaskService;
+import com.neverwinterdp.registry.task.switchable.SwitchableTaskService;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowInitActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowMasterActivityService;
@@ -34,7 +34,7 @@ public class MasterService {
   private DataflowWorkerMonitor workerMonitor;
   
   private DataflowTaskMonitor  taskMonitor;
-  private TaskService<OperatorTaskConfig> taskService ;
+  private SwitchableTaskService<OperatorTaskConfig> taskService ;
   
   public VMConfig getVMConfig() { return vmConfig; }
   
@@ -62,7 +62,7 @@ public class MasterService {
     workerMonitor = new DataflowWorkerMonitor(dflRegistry, activityService);
    
     taskMonitor = new DataflowTaskMonitor();
-    taskService = new TaskService<>(dflRegistry.getTaskRegistry());
+    taskService = new SwitchableTaskService<>(dflRegistry.getTaskRegistry());
     taskService.addTaskMonitor(taskMonitor);
   }
   

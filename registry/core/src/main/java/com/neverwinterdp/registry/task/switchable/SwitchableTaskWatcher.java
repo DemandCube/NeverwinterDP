@@ -1,4 +1,4 @@
-package com.neverwinterdp.registry.task;
+package com.neverwinterdp.registry.task.switchable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,18 +7,19 @@ import java.util.concurrent.LinkedBlockingQueue;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.notification.Notifier;
+import com.neverwinterdp.registry.task.TaskTransactionId;
 
-class TaskWatcher<T> {
+class SwitchableTaskWatcher<T> {
   private AddRemoveNodeChildrenWatcher<T> availableTaskWatcher;
   private AddRemoveNodeChildrenWatcher<T> assignedTaskWatcher;
   private AddRemoveNodeChildrenWatcher<T> finishedTaskWatcher;
   
-  private TaskRegistry<T> taskRegistry ;
-  private List<TaskMonitor<T>> taskMonitors = new ArrayList<TaskMonitor<T>>();
+  private SwitchableTaskRegistry<T> taskRegistry ;
+  private List<SwitchableTaskMonitor<T>> taskMonitors = new ArrayList<SwitchableTaskMonitor<T>>();
   private LinkedBlockingQueue<TaskOperation<T>> taskOperationQueue = new LinkedBlockingQueue<TaskOperation<T>>() ;
   private TaskOperationExecutor taskOperationExecutor ;
   
-  public TaskWatcher(TaskRegistry<T> tRegistry) throws RegistryException {
+  public SwitchableTaskWatcher(SwitchableTaskRegistry<T> tRegistry) throws RegistryException {
     this.taskRegistry = tRegistry;
     Registry registry = tRegistry.getRegistry() ;
     availableTaskWatcher = new AddRemoveNodeChildrenWatcher<T>(registry, tRegistry.getTasksAvailableNode()) {
@@ -48,9 +49,9 @@ class TaskWatcher<T> {
     taskOperationExecutor.start();
   }
   
-  public List<TaskMonitor<T>> getTaskMonitors() { return this.taskMonitors; }
+  public List<SwitchableTaskMonitor<T>> getTaskMonitors() { return this.taskMonitors; }
   
-  public void addTaskMonitor(TaskMonitor<T> monitor) {
+  public void addTaskMonitor(SwitchableTaskMonitor<T> monitor) {
     taskMonitors.add(monitor);
   }
   
@@ -78,9 +79,9 @@ class TaskWatcher<T> {
   }
   
   static abstract public class TaskOperation<T> {
-    protected TaskContext<T> taskContext ;
+    protected SwitchableTaskContext<T> taskContext ;
     
-    public TaskOperation<T> init(TaskContext<T> taskContext) {
+    public TaskOperation<T> init(SwitchableTaskContext<T> taskContext) {
       this.taskContext = taskContext;
       return this;
     }
@@ -90,7 +91,7 @@ class TaskWatcher<T> {
 
   class  OnAvailableTaskOperation extends TaskOperation<T> {
     public void execute() {
-      for(TaskMonitor<T> sel : taskMonitors) {
+      for(SwitchableTaskMonitor<T> sel : taskMonitors) {
         sel.onAvailable(taskContext);
       }
     }
@@ -98,7 +99,7 @@ class TaskWatcher<T> {
   
   class  OnAssignTaskOperation extends TaskOperation<T> {
     public void execute() {
-      for(TaskMonitor<T> sel : taskMonitors) {
+      for(SwitchableTaskMonitor<T> sel : taskMonitors) {
         sel.onAssign(taskContext);
       }
     }
@@ -122,7 +123,7 @@ class TaskWatcher<T> {
       }
 
       if(failTask) {
-        for(TaskMonitor<T> sel : taskMonitors) {
+        for(SwitchableTaskMonitor<T> sel : taskMonitors) {
           sel.onFail(taskContext);
         }
       }
@@ -131,7 +132,7 @@ class TaskWatcher<T> {
   
   class  OnFinishTaskOperation extends TaskOperation<T> {
     public void execute() {
-      for(TaskMonitor<T> sel : taskMonitors) {
+      for(SwitchableTaskMonitor<T> sel : taskMonitors) {
         sel.onFinish(taskContext);
       }
     }

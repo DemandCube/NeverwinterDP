@@ -1,20 +1,20 @@
 package com.neverwinterdp.scribengin.dataflow.operator;
 
-import com.neverwinterdp.registry.task.TaskContext;
+import com.neverwinterdp.registry.task.switchable.SwitchableTaskContext;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.WorkerService;
 import com.neverwinterdp.scribengin.storage.Record;
 
 public class OperatorTask {
   private WorkerService                         workerService;
-  private final TaskContext<OperatorTaskConfig> taskContext;
+  private final SwitchableTaskContext<OperatorTaskConfig> taskContext;
   private OperatorTaskConfig                    operatorTaskConfig;
   private Operator                              operator;
   private OperatorContext                       context;
   private boolean                               interrupt = false;
   private long                                  startTime = 0;
   
-  public OperatorTask(WorkerService service, TaskContext<OperatorTaskConfig> taskContext) throws Exception {
+  public OperatorTask(WorkerService service, SwitchableTaskContext<OperatorTaskConfig> taskContext) throws Exception {
     this.workerService = service;
     this.taskContext     = taskContext;
     this.operatorTaskConfig      = taskContext.getTaskDescriptor(false);
@@ -22,7 +22,7 @@ public class OperatorTask {
     operator = opType.newInstance();
   }
   
-  public TaskContext<OperatorTaskConfig> getTaskContext() { return this.taskContext; }
+  public SwitchableTaskContext<OperatorTaskConfig> getTaskContext() { return this.taskContext; }
   
   public OperatorTaskConfig getDescriptor() { return operatorTaskConfig ; }
   

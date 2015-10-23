@@ -13,6 +13,8 @@ public class TrackingMessageSplitter extends Operator {
   public void process(OperatorContext ctx, Record record) throws Exception {
     TrackingMessage tMessage = JSONSerializer.INSTANCE.fromBytes(record.getData(), TrackingMessage.class) ;
     int remain = tMessage.getTrackId() % 3;
+    tMessage.setStartDeliveryTime(System.currentTimeMillis());
+    record.setData(JSONSerializer.INSTANCE.toBytes(tMessage));
     if(remain == 0) {
       ctx.write("error", record);
     } else if(remain == 1) {

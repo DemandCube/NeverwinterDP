@@ -1,7 +1,7 @@
 package com.neverwinterdp.scribengin.dataflow.worker;
 
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.registry.task.TaskContext;
+import com.neverwinterdp.registry.task.switchable.SwitchableTaskContext;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTask;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
@@ -53,7 +53,7 @@ public class TaskExecutorThread extends Thread {
       VMDescriptor   vmDescriptor = workerService.getVMDescriptor();
       while(!interrupt) {
         Timer.Context dataflowTaskTimerGrabCtx = dataflowTaskTimerGrab.time() ;
-        TaskContext<OperatorTaskConfig> taskContext = dataflowRegistry.getTaskRegistry().take(vmDescriptor);
+        SwitchableTaskContext<OperatorTaskConfig> taskContext = dataflowRegistry.getTaskRegistry().take(vmDescriptor);
         dataflowTaskTimerGrabCtx.stop();
         if(interrupt) {
           taskRegistry.suspend(vmDescriptor.getRegistryPath(), taskContext);

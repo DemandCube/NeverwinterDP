@@ -13,6 +13,10 @@ public class TrackingMessageReport {
   private int    noLostTo;
   private int    lostCount;
   private int    duplicatedCount;
+  
+  private long   minDeliveryTime;
+  private long   maxDeliveryTime;
+  private long   avgDeliveryTime;
 
   public TrackingMessageReport() {} 
   
@@ -62,16 +66,29 @@ public class TrackingMessageReport {
   public int getDuplicatedCount() { return duplicatedCount; }
   public void setDuplicatedCount(int duplicatedCount) { this.duplicatedCount = duplicatedCount; }
   
+  public long getMinDeliveryTime() { return minDeliveryTime; }
+  public void setMinDeliveryTime(long minDeliveryTime) { this.minDeliveryTime = minDeliveryTime; }
+
+  public long getMaxDeliveryTime() { return maxDeliveryTime; }
+  public void setMaxDeliveryTime(long maxDeliveryTime) { this.maxDeliveryTime = maxDeliveryTime; }
+
+  public long getAvgDeliveryTime() { return avgDeliveryTime; }
+  public void setAvgDeliveryTime(long avgDeliveryTime) { this.avgDeliveryTime = avgDeliveryTime; }
+
   public String reportName() { return vmId + "." + chunkId; }
   
   static public String getFormattedReport(String title, List<TrackingMessageReport> reports) {
-    
-    TabularFormater formater = new TabularFormater("Chunk Id", "Num Of Message", "Progress", "No Lost To", "Lost", "Duplicated");
+    String[] header = {
+      "Chunk Id", "Num Of Message", "Progress", "No Lost To", "Lost", "Duplicated", 
+      "Min D Time", "Max D Time", "Avg D Time"
+    };
+    TabularFormater formater = new TabularFormater(header);
     formater.setTitle(title);
     for(TrackingMessageReport report : reports) {
       formater.addRow(
         report.getChunkId(), report.getNumOfMessage(), report.getProgress(), 
-        report.getNoLostTo(), report.getLostCount(), report.getDuplicatedCount()
+        report.getNoLostTo(), report.getLostCount(), report.getDuplicatedCount(),
+        report.getMinDeliveryTime(), report.getMaxDeliveryTime(), report.getAvgDeliveryTime()
       );
     }
     return formater.getFormattedText() ;

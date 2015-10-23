@@ -7,13 +7,13 @@ import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.registry.task.TaskContext;
-import com.neverwinterdp.registry.task.TaskRegistry;
+import com.neverwinterdp.registry.task.switchable.SwitchableTaskContext;
+import com.neverwinterdp.registry.task.switchable.SwitchableTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskReport;
 import com.neverwinterdp.vm.VMDescriptor;
 
-public class DataflowTaskRegistry extends TaskRegistry<OperatorTaskConfig> {
+public class DataflowTaskRegistry extends SwitchableTaskRegistry<OperatorTaskConfig> {
   
   public DataflowTaskRegistry(Registry registry, String path) throws RegistryException {
     init(registry, path, OperatorTaskConfig.class) ;
@@ -49,20 +49,20 @@ public class DataflowTaskRegistry extends TaskRegistry<OperatorTaskConfig> {
     taskNode.createChild("report", report, NodeCreateMode.PERSISTENT);
   }
   
-  public TaskContext<OperatorTaskConfig> take(final VMDescriptor vmDescriptor) throws RegistryException  {
-    TaskContext<OperatorTaskConfig> tContext = take(vmDescriptor.getRegistryPath());
+  public SwitchableTaskContext<OperatorTaskConfig> take(final VMDescriptor vmDescriptor) throws RegistryException  {
+    SwitchableTaskContext<OperatorTaskConfig> tContext = take(vmDescriptor.getRegistryPath());
     return tContext;
   }
   
-  public void suspend(String refWorker, TaskContext<OperatorTaskConfig> context) throws RegistryException {
+  public void suspend(String refWorker, SwitchableTaskContext<OperatorTaskConfig> context) throws RegistryException {
     suspend(refWorker, context, false) ;
   }
   
-  public void suspend(String refWorker, TaskContext<OperatorTaskConfig> context, final boolean disconnectHeartbeat) throws RegistryException {
+  public void suspend(String refWorker, SwitchableTaskContext<OperatorTaskConfig> context, final boolean disconnectHeartbeat) throws RegistryException {
     suspend(refWorker, context.getTaskTransactionId(), disconnectHeartbeat);
   }
 
-  public void finish(String refWorker, TaskContext<OperatorTaskConfig> context) throws RegistryException {
+  public void finish(String refWorker, SwitchableTaskContext<OperatorTaskConfig> context) throws RegistryException {
     finish(refWorker, context.getTaskTransactionId());
   }
 }

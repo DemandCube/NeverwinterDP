@@ -1,4 +1,4 @@
-package com.neverwinterdp.registry.task;
+package com.neverwinterdp.registry.task.switchable;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -14,8 +14,10 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.lock.Lock;
 import com.neverwinterdp.registry.notification.Notifier;
+import com.neverwinterdp.registry.task.TaskStatus;
+import com.neverwinterdp.registry.task.TaskTransactionId;
 
-public class TaskRegistry<T> {
+public class SwitchableTaskRegistry<T> {
   static public Comparator<String> TASK_ID_SEQ_COMPARATOR = new Comparator<String>() {
     @Override
     public int compare(String taskId_1, String taskId_2) {
@@ -29,8 +31,8 @@ public class TaskRegistry<T> {
   final static public String EXECUTIONS_PATH         = "executions";
   final static public String AVAILABLE_PATH          = EXECUTIONS_PATH + "/available";
   final static public String ASSIGNED_PATH           = EXECUTIONS_PATH + "/assigned";
-  final static public String ASSIGNED_TASK_ID_PATH   = ASSIGNED_PATH + "/task-ids";
-  final static public String ASSIGNED_HEARTBEAT_PATH = ASSIGNED_PATH + "/task-heartbeats";
+  final static public String ASSIGNED_TASK_ID_PATH   = ASSIGNED_PATH   + "/task-ids";
+  final static public String ASSIGNED_HEARTBEAT_PATH = ASSIGNED_PATH   + "/task-heartbeats";
   final static public String FINISHED_PATH           = EXECUTIONS_PATH + "/finished";
   final static public String LOCK_PATH               = EXECUTIONS_PATH + "/lock";
   final static public String NOTIFICATIONS_PATH      = "notifications";
@@ -55,9 +57,9 @@ public class TaskRegistry<T> {
   private Notifier taskExecutionNotifier ;
   private Notifier taskCoordinationNotifier ;
 
-  public TaskRegistry() { }
+  public SwitchableTaskRegistry() { }
   
-  public TaskRegistry(Registry registry, String path, Class<T> taskDescriptorType) throws RegistryException {
+  public SwitchableTaskRegistry(Registry registry, String path, Class<T> taskDescriptorType) throws RegistryException {
     init(registry, path, taskDescriptorType) ;
   }
   
@@ -154,10 +156,10 @@ public class TaskRegistry<T> {
     transaction.commit();
   }
   
-  public TaskContext<T> take(final String executorRefPath) throws RegistryException {
-    BatchOperations<TaskContext<T>> takeOp = new BatchOperations<TaskContext<T>>() {
+  public SwitchableTaskContext<T> take(final String executorRefPath) throws RegistryException {
+    BatchOperations<SwitchableTaskContext<T>> takeOp = new BatchOperations<SwitchableTaskContext<T>>() {
       @Override
-      public TaskContext<T> execute(Registry registry) throws RegistryException {
+      public SwitchableTaskContext<T> execute(Registry registry) throws RegistryException {
         List<String> availableTasks = tasksAvailableNode.getChildren() ;
         if(availableTasks.size() == 0) return null ;
         Collections.sort(availableTasks, TASK_ID_SEQ_COMPARATOR);
@@ -173,7 +175,7 @@ public class TaskRegistry<T> {
           transaction.createChild(tasksAssignedHeartbeatNode, taskTransactionID.getTaskTransactionId(), new RefNode(executorRefPath), NodeCreateMode.EPHEMERAL);
           transaction.deleteChild(tasksAvailableNode, taskIdSeq);
           transaction.commit();
-          TaskContext<T> taskContext = createTaskContext(taskTransactionID, null) ;
+          SwitchableTaskContext<T> taskContext = createTaskContext(taskTransactionID, null) ;
           return taskContext;
         } catch(Exception ex) {
           String errorMessage = "Fail to grab task " + taskId + " for the executor " + executorRefPath;
@@ -271,12 +273,12 @@ public class TaskRegistry<T> {
     }
   }
   
-  public TaskContext<T> createTaskContext(String taskTransactionId) throws RegistryException {
+  public SwitchableTaskContext<T> createTaskContext(String taskTransactionId) throws RegistryException {
     return createTaskContext(new TaskTransactionId(taskTransactionId), null) ;
   }
   
-  public TaskContext<T> createTaskContext(TaskTransactionId taskTransactionId, T taskDescriptor) throws RegistryException {
-    TaskContext<T> taskContext = new TaskContext<T>(this, taskTransactionId, taskDescriptor);
+  public SwitchableTaskContext<T> createTaskContext(TaskTransactionId taskTransactionId, T taskDescriptor) throws RegistryException {
+    SwitchableTaskContext<T> taskContext = new SwitchableTaskContext<T>(this, taskTransactionId, taskDescriptor);
     return taskContext;
   }
 }

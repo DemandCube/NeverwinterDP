@@ -4,6 +4,10 @@ public class TrackingMessage {
   private String vmId ;
   private String chunkId ;
   private int    trackId ;
+  
+  private long   startDeliveryTime;
+  private long   endDeliveryTime;
+  
   private byte[] data ;
   
   public TrackingMessage() { }
@@ -21,6 +25,12 @@ public class TrackingMessage {
   public String getChunkId() { return chunkId;}
   public void setChunkId(String chunkId) { this.chunkId = chunkId; }
 
+  public long getStartDeliveryTime() { return startDeliveryTime; }
+  public void setStartDeliveryTime(long time) { this.startDeliveryTime = time; }
+
+  public long getEndDeliveryTime() { return endDeliveryTime; }
+  public void setEndDeliveryTime(long time) { this.endDeliveryTime = time; }
+
   public int getTrackId() { return trackId; }
   public void setTrackId(int trackId) { this.trackId = trackId;}
 
@@ -30,4 +40,6 @@ public class TrackingMessage {
   public String messageKey() { return vmId + ":" + chunkId + ":" + trackId; }
   
   public String reportName() {  return vmId + "." + chunkId ; }
+  
+  public long deliveryTime() { return endDeliveryTime - startDeliveryTime; }
 }

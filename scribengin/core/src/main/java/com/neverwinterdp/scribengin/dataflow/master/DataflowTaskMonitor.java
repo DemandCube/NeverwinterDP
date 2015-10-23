@@ -2,25 +2,25 @@ package com.neverwinterdp.scribengin.dataflow.master;
 
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.notification.Notifier;
-import com.neverwinterdp.registry.task.TaskContext;
-import com.neverwinterdp.registry.task.TaskMonitor;
-import com.neverwinterdp.registry.task.TaskRegistry;
+import com.neverwinterdp.registry.task.switchable.SwitchableTaskContext;
+import com.neverwinterdp.registry.task.switchable.SwitchableTaskMonitor;
+import com.neverwinterdp.registry.task.switchable.SwitchableTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 
-public class DataflowTaskMonitor implements TaskMonitor<OperatorTaskConfig> {
+public class DataflowTaskMonitor implements SwitchableTaskMonitor<OperatorTaskConfig> {
   private boolean finished = false;
   
   @Override
-  public void onAssign(TaskContext<OperatorTaskConfig> context) {
+  public void onAssign(SwitchableTaskContext<OperatorTaskConfig> context) {
   }
 
   @Override
-  public void onAvailable(TaskContext<OperatorTaskConfig> context) {
+  public void onAvailable(SwitchableTaskContext<OperatorTaskConfig> context) {
   }
 
   @Override
-  public void onFinish(TaskContext<OperatorTaskConfig> context) {
-    TaskRegistry<OperatorTaskConfig> taskRegistry = context.getTaskRegistry();
+  public void onFinish(SwitchableTaskContext<OperatorTaskConfig> context) {
+    SwitchableTaskRegistry<OperatorTaskConfig> taskRegistry = context.getTaskRegistry();
     try {
       int allTask = taskRegistry.getTasksListNode().getChildren().size();
       int finishTask = taskRegistry.getTasksFinishedNode().getChildren().size();
@@ -41,8 +41,8 @@ public class DataflowTaskMonitor implements TaskMonitor<OperatorTaskConfig> {
   }
   
   @Override
-  public void onFail(TaskContext<OperatorTaskConfig> context) {
-    TaskRegistry<OperatorTaskConfig> taskRegistry = context.getTaskRegistry();
+  public void onFail(SwitchableTaskContext<OperatorTaskConfig> context) {
+    SwitchableTaskRegistry<OperatorTaskConfig> taskRegistry = context.getTaskRegistry();
     try {
       context.suspend("DataflowMasterService", true);
     } catch (RegistryException ex) {

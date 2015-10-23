@@ -1,32 +1,33 @@
-package com.neverwinterdp.registry.task;
+package com.neverwinterdp.registry.task.switchable;
 
 import javax.annotation.PreDestroy;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.task.TaskTransactionId;
 
-public class TaskService<T>{
-  private TaskRegistry<T> taskRegistry ;
-  private TaskWatcher<T>  taskWatcher ;
+public class SwitchableTaskService<T>{
+  private SwitchableTaskRegistry<T> taskRegistry ;
+  private SwitchableTaskWatcher<T>  taskWatcher ;
 
-  public TaskService() { }
+  public SwitchableTaskService() { }
   
-  public TaskService(TaskRegistry<T> taskRegistry) throws RegistryException {
+  public SwitchableTaskService(SwitchableTaskRegistry<T> taskRegistry) throws RegistryException {
     init(taskRegistry) ;
   }
   
-  public TaskService(Registry registry, String path, Class<T> taskDescriptorType) throws RegistryException {
+  public SwitchableTaskService(Registry registry, String path, Class<T> taskDescriptorType) throws RegistryException {
     init(registry, path, taskDescriptorType) ;
   }
   
   protected void init(Registry registry, String path, Class<T> taskDescriptorType) throws RegistryException {
-    init(new TaskRegistry<T>(registry, path, taskDescriptorType));
+    init(new SwitchableTaskRegistry<T>(registry, path, taskDescriptorType));
   }
   
-  protected void init(TaskRegistry<T> taskReg) throws RegistryException {
+  protected void init(SwitchableTaskRegistry<T> taskReg) throws RegistryException {
     taskRegistry = taskReg;
     taskReg.initRegistry();
-    taskWatcher = new TaskWatcher<T>(taskReg) ;
+    taskWatcher = new SwitchableTaskWatcher<T>(taskReg) ;
   }
   
   @PreDestroy
@@ -34,10 +35,10 @@ public class TaskService<T>{
     taskWatcher.onDestroy();
   }
   
-  public TaskRegistry<T> getTaskRegistry() { return taskRegistry; }
+  public SwitchableTaskRegistry<T> getTaskRegistry() { return taskRegistry; }
 
   
-  public void addTaskMonitor(TaskMonitor<T> monitor) {
+  public void addTaskMonitor(SwitchableTaskMonitor<T> monitor) {
     taskWatcher.addTaskMonitor(monitor);
   }
   
@@ -45,7 +46,7 @@ public class TaskService<T>{
     taskRegistry.offer(taskId, taskDescriptor);
   }
   
-  public TaskContext<T> take(final String executorRefPath) throws RegistryException {
+  public SwitchableTaskContext<T> take(final String executorRefPath) throws RegistryException {
     return taskRegistry.take(executorRefPath);
   }
   

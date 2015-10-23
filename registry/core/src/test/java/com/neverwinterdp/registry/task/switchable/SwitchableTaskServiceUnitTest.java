@@ -1,4 +1,4 @@
-package com.neverwinterdp.registry.task;
+package com.neverwinterdp.registry.task.switchable;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -26,12 +26,12 @@ import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.registry.zk.RegistryImpl;
+import com.neverwinterdp.registry.task.TaskDescriptor;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
 
-public class TaskServiceUnitTest {
+public class SwitchableTaskServiceUnitTest {
   static {
     System.setProperty("log4j.configuration", "file:src/test/resources/test-log4j.properties") ;
   }
@@ -78,7 +78,7 @@ public class TaskServiceUnitTest {
 
   @Test
   public void testTaskService() throws Exception {
-    TaskService<TaskDescriptor> service = new TaskService<>(registry, TASKS_PATH, TaskDescriptor.class);
+    SwitchableTaskService<TaskDescriptor> service = new SwitchableTaskService<>(registry, TASKS_PATH, TaskDescriptor.class);
     TestTaskMonitor<TaskDescriptor> monitor = new TestTaskMonitor<TaskDescriptor>();
     service.addTaskMonitor(monitor);
     
@@ -111,45 +111,32 @@ public class TaskServiceUnitTest {
     service.onDestroy();
   }
   
-  final static public class TaskDescriptor {
-    private String description;
-
-    public TaskDescriptor() { }
-    
-    public TaskDescriptor(String desc) {
-      this.description = desc;
-    }
-    
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-  }
-  
   static public class TaskLog {
     int availableCount, assignCount, finishCount, failCount ;
   }
   
-  static public class TestTaskMonitor<T> implements TaskMonitor<T> {
+  static public class TestTaskMonitor<T> implements SwitchableTaskMonitor<T> {
     TreeMap<String, TaskLog> taskLogs = new TreeMap<String, TaskLog>();
     int finishCounter = 0;
     
     @Override
-    public void onAvailable(TaskContext<T> context) {
+    public void onAvailable(SwitchableTaskContext<T> context) {
       getTaskLog(context).availableCount++;
     }
     
     @Override
-    public void onAssign(TaskContext<T> context) {
+    public void onAssign(SwitchableTaskContext<T> context) {
       getTaskLog(context).assignCount++ ;
     }
 
     @Override
-    public void onFinish(TaskContext<T> context) {
+    public void onFinish(SwitchableTaskContext<T> context) {
       finishCounter++ ;
       getTaskLog(context).finishCount++;
     }
     
     @Override
-    public void onFail(TaskContext<T> context) {
+    public void onFail(SwitchableTaskContext<T> context) {
       try {
         context.suspend("coordinator", true);
       } catch (RegistryException e) {
@@ -158,7 +145,7 @@ public class TaskServiceUnitTest {
       getTaskLog(context).failCount++;
     }
     
-    TaskLog getTaskLog(TaskContext<T> context) {
+    TaskLog getTaskLog(SwitchableTaskContext<T> context) {
       TaskLog taskLog = taskLogs.get(context.getTaskTransactionId().getTaskId()) ;
       if(taskLog == null) {
         taskLog = new TaskLog();
@@ -179,15 +166,15 @@ public class TaskServiceUnitTest {
   
   static public class TaskExecutor<T> implements Runnable {
     private String id;
-    private TaskService<T> taskService ;
+    private SwitchableTaskService<T> taskService ;
     
-    public TaskExecutor(String id, TaskService<T> taskService ) {
+    public TaskExecutor(String id, SwitchableTaskService<T> taskService ) {
       this.id = id;
       this.taskService = taskService;
     }
     
     public void run() {
-      TaskContext<T> tContext = null ;
+      SwitchableTaskContext<T> tContext = null ;
       try {
         Random rand = new Random();
         int count = 0 ;

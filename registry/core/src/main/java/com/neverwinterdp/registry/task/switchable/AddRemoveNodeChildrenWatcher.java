@@ -1,4 +1,4 @@
-package com.neverwinterdp.registry.task;
+package com.neverwinterdp.registry.task.switchable;
 
 import java.util.HashSet;
 import java.util.Iterator;

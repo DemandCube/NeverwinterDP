@@ -11,6 +11,10 @@ public class TrackingMessageReportBitSet {
   private int trackProgress = -1;
   private int logCount ;
   
+  private long minDeliveryTime;
+  private long maxDeliveryTime;
+  private long sumDeliveryTime ;
+  
   public TrackingMessageReportBitSet(String vmId, String chunkId, int expectNumOfMessage) {
     report = new TrackingMessageReport(vmId, chunkId, expectNumOfMessage);
     
@@ -18,7 +22,8 @@ public class TrackingMessageReportBitSet {
     bitSet = new BitSet(expectNumOfMessage) ;
   }
   
-  synchronized public int log(int idx) {
+  synchronized public int log(TrackingMessage message) {
+    int idx = message.getTrackId();
     if(idx > numOfBits) {
       throw new RuntimeException("the index is bigger than expect num of bits " + numOfBits);
     }
@@ -26,6 +31,10 @@ public class TrackingMessageReportBitSet {
     if(bitSet.get(idx)) duplicatedCount++ ;
     bitSet.set(idx, true);
     logCount++ ;
+    long deliveryTime = message.deliveryTime();
+    if(deliveryTime < minDeliveryTime) minDeliveryTime = deliveryTime;
+    if(deliveryTime > maxDeliveryTime) maxDeliveryTime = deliveryTime;
+    sumDeliveryTime += deliveryTime;
     return logCount;
   }
   
@@ -45,6 +54,12 @@ public class TrackingMessageReportBitSet {
     report.setNoLostTo(noLostTo + 1);
     report.setLostCount(lostCount);
     report.setDuplicatedCount(duplicatedCount);
+    
+    if(logCount > 0) {
+      report.setMinDeliveryTime(minDeliveryTime);
+      report.setMaxDeliveryTime(maxDeliveryTime);
+      report.setAvgDeliveryTime(sumDeliveryTime/logCount);
+    }
     return report;
   }
 }

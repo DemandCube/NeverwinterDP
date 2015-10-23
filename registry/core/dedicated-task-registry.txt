@@ -1,0 +1,21 @@
+tasks
+  task-list
+    task-1
+    task-2
+    ....
+  executions
+    task-groups
+      task-group-1
+        task-1
+        task-2
+    task-group-available
+      task-group-1
+    task-group-assigned
+      task-group-1
+        executor-1
+        heartbeat
+    task-group-finished
+      task-group-xyz
+    task-finished
+    
+
