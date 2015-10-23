@@ -3,8 +3,10 @@ package com.neverwinterdp.scribengin.dataflow.worker;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
+import com.neverwinterdp.vm.VMDescriptor;
 
 public class TaskExecutors {
   private WorkerService    workerService;
@@ -24,8 +26,10 @@ public class TaskExecutors {
     DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
     int numOfExecutor = dflConfig.getWorker().getNumOfExecutor();
     taskExecutorThreads = new ArrayList<>();
+    VMDescriptor vmDescriptor = workerService.getVMDescriptor();
     for(int i = 0; i < numOfExecutor; i++) {
-      TaskExecutorDescriptor descriptor = new TaskExecutorDescriptor("executor-" + (i + 1));
+      String executorId = vmDescriptor.getId() + "-executor-" + (i + 1) ;
+      TaskExecutorDescriptor descriptor = new TaskExecutorDescriptor(executorId, vmDescriptor.getRegistryPath());
       TaskExecutorThread thread = new TaskExecutorThread(workerService, descriptor);
       thread.start();
       taskExecutorThreads.add(thread);

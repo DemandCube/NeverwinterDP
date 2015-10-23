@@ -7,6 +7,7 @@ import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
 
 public class DataflowWorkerRuntimeReport {

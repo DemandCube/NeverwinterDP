@@ -4,6 +4,7 @@ import javax.annotation.PreDestroy;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.TaskTransactionId;
 
 public class SwitchableTaskService<T>{
@@ -46,8 +47,8 @@ public class SwitchableTaskService<T>{
     taskRegistry.offer(taskId, taskDescriptor);
   }
   
-  public SwitchableTaskContext<T> take(final String executorRefPath) throws RegistryException {
-    return taskRegistry.take(executorRefPath);
+  public SwitchableTaskContext<T> take(TaskExecutorDescriptor descriptor) throws RegistryException {
+    return taskRegistry.take(descriptor);
   }
   
   public void suspend(final String executorRef, TaskTransactionId id) throws RegistryException {

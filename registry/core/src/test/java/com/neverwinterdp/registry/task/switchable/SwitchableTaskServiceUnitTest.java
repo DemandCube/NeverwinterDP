@@ -27,6 +27,7 @@ import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskDescriptor;
+import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
@@ -165,11 +166,11 @@ public class SwitchableTaskServiceUnitTest {
   }
   
   static public class TaskExecutor<T> implements Runnable {
-    private String id;
     private SwitchableTaskService<T> taskService ;
+    private TaskExecutorDescriptor executor ;
     
     public TaskExecutor(String id, SwitchableTaskService<T> taskService ) {
-      this.id = id;
+      executor = new TaskExecutorDescriptor(id, "NA");
       this.taskService = taskService;
     }
     
@@ -178,16 +179,16 @@ public class SwitchableTaskServiceUnitTest {
       try {
         Random rand = new Random();
         int count = 0 ;
-        while((tContext = taskService.take(id)) != null) {
+        while((tContext = taskService.take(executor)) != null) {
           long processTime = rand.nextInt(500) + 1;
           Thread.sleep(processTime);
           int randNum = rand.nextInt(7);
           if(count > 10 || randNum  % 5 == 0) {
-            taskService.finish(id, tContext.getTaskTransactionId());
+            taskService.finish(executor.getId(), tContext.getTaskTransactionId());
           } else  if(randNum  % 3 == 0) {
             taskService.getTaskRegistry().getTasksAssignedHeartbeatNode().getChild(tContext.getTaskTransactionId().getTaskTransactionId()).delete();
           } else {
-            taskService.suspend(id, tContext.getTaskTransactionId());
+            taskService.suspend(executor.getId(), tContext.getTaskTransactionId());
           }
           count++ ;
         }

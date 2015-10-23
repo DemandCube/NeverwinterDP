@@ -1,6 +1,7 @@
 package com.neverwinterdp.scribengin.dataflow.worker;
 
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.switchable.SwitchableTaskContext;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTask;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
@@ -43,7 +44,7 @@ public class TaskExecutorThread extends Thread {
 
   
   public void run() {
-    taskExecutorDescriptor.setStatus(TaskExecutorDescriptor.Status.RUNNING);
+    taskExecutorDescriptor.setStatus(TaskExecutorDescriptor.TasExecutorStatus.ACTIVE);
     MetricRegistry metricRegistry = workerService.getMetricRegistry();
     DataflowRegistry dataflowRegistry = workerService.getDataflowRegistry();
     Timer dataflowTaskTimerGrab = metricRegistry.getTimer("dataflow-task.timer.grab") ;
@@ -53,16 +54,16 @@ public class TaskExecutorThread extends Thread {
       VMDescriptor   vmDescriptor = workerService.getVMDescriptor();
       while(!interrupt) {
         Timer.Context dataflowTaskTimerGrabCtx = dataflowTaskTimerGrab.time() ;
-        SwitchableTaskContext<OperatorTaskConfig> taskContext = dataflowRegistry.getTaskRegistry().take(vmDescriptor);
+        SwitchableTaskContext<OperatorTaskConfig> taskContext = dataflowRegistry.getTaskRegistry().take(taskExecutorDescriptor);
         dataflowTaskTimerGrabCtx.stop();
         if(interrupt) {
           taskRegistry.suspend(vmDescriptor.getRegistryPath(), taskContext);
-          doExit(TaskExecutorDescriptor.Status.TERMINATED_WITH_INTERRUPT);
+          doExit(TaskExecutorDescriptor.TasExecutorStatus.TERMINATED_WITH_INTERRUPT);
           return ;
         }
         
         if(taskContext == null) {
-          doExit(TaskExecutorDescriptor.Status.TERMINATED);
+          doExit(TaskExecutorDescriptor.TasExecutorStatus.TERMINATED);
           return;
         }
         
@@ -83,17 +84,17 @@ public class TaskExecutorThread extends Thread {
         operatorTask.isIterrupted();
         dataflowTaskTimerProcessCtx.stop();
       }
-      doExit(TaskExecutorDescriptor.Status.TERMINATED_WITH_INTERRUPT);
+      doExit(TaskExecutorDescriptor.TasExecutorStatus.TERMINATED_WITH_INTERRUPT);
     } catch (Throwable e) {
       if(simulateKill) return;
       e.printStackTrace();
       workerService.getLogger().error("DataflowTaskExecutor Error", e);
-      doExit(TaskExecutorDescriptor.Status.TERMINATED_WITH_ERROR);
+      doExit(TaskExecutorDescriptor.TasExecutorStatus.TERMINATED_WITH_ERROR);
     } finally {
     }
   }
   
-  void doExit(TaskExecutorDescriptor.Status status) {
+  void doExit(TaskExecutorDescriptor.TasExecutorStatus status) {
     if(simulateKill) return ;
     try {
       DataflowRegistry dflRegistry  = workerService.getDataflowRegistry();

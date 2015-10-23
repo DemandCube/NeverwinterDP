@@ -14,6 +14,7 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.lock.Lock;
 import com.neverwinterdp.registry.notification.Notifier;
+import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.TaskStatus;
 import com.neverwinterdp.registry.task.TaskTransactionId;
 
@@ -156,7 +157,7 @@ public class SwitchableTaskRegistry<T> {
     transaction.commit();
   }
   
-  public SwitchableTaskContext<T> take(final String executorRefPath) throws RegistryException {
+  public SwitchableTaskContext<T> take(final TaskExecutorDescriptor executor) throws RegistryException {
     BatchOperations<SwitchableTaskContext<T>> takeOp = new BatchOperations<SwitchableTaskContext<T>>() {
       @Override
       public SwitchableTaskContext<T> execute(Registry registry) throws RegistryException {
@@ -172,13 +173,13 @@ public class SwitchableTaskRegistry<T> {
           
           transaction.setData(taskNode.getChild(TASK_STATUS_PATH), TaskStatus.PROCESSING);
           transaction.createChild(tasksAssignedIdNode, taskTransactionID.getTaskTransactionId(), NodeCreateMode.PERSISTENT);
-          transaction.createChild(tasksAssignedHeartbeatNode, taskTransactionID.getTaskTransactionId(), new RefNode(executorRefPath), NodeCreateMode.EPHEMERAL);
+          transaction.createChild(tasksAssignedHeartbeatNode, taskTransactionID.getTaskTransactionId(), executor, NodeCreateMode.EPHEMERAL);
           transaction.deleteChild(tasksAvailableNode, taskIdSeq);
           transaction.commit();
           SwitchableTaskContext<T> taskContext = createTaskContext(taskTransactionID, null) ;
           return taskContext;
         } catch(Exception ex) {
-          String errorMessage = "Fail to grab task " + taskId + " for the executor " + executorRefPath;
+          String errorMessage = "Fail to grab task " + taskId + " for the executor " + executor.getId();
           StringBuilder registryDump = new StringBuilder() ;
           try {
             tasksAssignedIdNode.getParentNode().dump(registryDump);
@@ -191,7 +192,7 @@ public class SwitchableTaskRegistry<T> {
       }
     };
     try {
-      Lock lock = tasksLockNode.getLock("write", "Lock to grab a task for the executor " + executorRefPath) ;
+      Lock lock = tasksLockNode.getLock("write", "Lock to grab a task for the executor " + executor.getId()) ;
       return lock.execute(takeOp, 3, 3000);
     } catch(RegistryException ex) {
       String errorMessage = "Fail to assign the task after 3 tries";
@@ -234,7 +235,7 @@ public class SwitchableTaskRegistry<T> {
     };
     try {
       Lock lock = tasksLockNode.getLock("write", "Lock to move the task " + taskTransactionID.getTaskTransactionId() + " to suspend by " + executorRef) ;
-      lock.execute(suspendtOp, 5, 5000);
+      lock.execute(suspendtOp, 3, 5000);
     } catch(RegistryException ex) {
       String errorMessage = "Fail to suspend the task " + taskTransactionID.getTaskTransactionId();
       taskExecutionNotifier.error("fail-to-suspend-dataflow-task", errorMessage, ex);

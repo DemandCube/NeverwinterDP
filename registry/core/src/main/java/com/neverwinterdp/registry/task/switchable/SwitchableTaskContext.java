@@ -5,10 +5,10 @@ import com.neverwinterdp.registry.task.TaskStatus;
 import com.neverwinterdp.registry.task.TaskTransactionId;
 
 public class SwitchableTaskContext<T> {
-  private TaskTransactionId taskTransactionID;
-  private T                 taskDescriptor;
-  private TaskStatus        taskStatus;
-  private SwitchableTaskRegistry<T>   taskRegistry;
+  private TaskTransactionId         taskTransactionID;
+  private T                         taskDescriptor;
+  private TaskStatus                taskStatus;
+  private SwitchableTaskRegistry<T> taskRegistry;
 
   public SwitchableTaskContext(SwitchableTaskRegistry<T> taskRegistry, String taskTransactionId, T taskDescriptor) {
     this(taskRegistry, new TaskTransactionId(taskTransactionId), taskDescriptor) ;

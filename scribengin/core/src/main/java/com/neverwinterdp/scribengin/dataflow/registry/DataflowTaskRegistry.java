@@ -49,11 +49,6 @@ public class DataflowTaskRegistry extends SwitchableTaskRegistry<OperatorTaskCon
     taskNode.createChild("report", report, NodeCreateMode.PERSISTENT);
   }
   
-  public SwitchableTaskContext<OperatorTaskConfig> take(final VMDescriptor vmDescriptor) throws RegistryException  {
-    SwitchableTaskContext<OperatorTaskConfig> tContext = take(vmDescriptor.getRegistryPath());
-    return tContext;
-  }
-  
   public void suspend(String refWorker, SwitchableTaskContext<OperatorTaskConfig> context) throws RegistryException {
     suspend(refWorker, context, false) ;
   }
