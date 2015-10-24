@@ -67,9 +67,6 @@ public class DataflowCommand extends Command {
     @Parameter(names = "--dataflow-num-of-executor-per-worker",  description = "Num of executor")
     private int numOfExecutorPerWorker = -1;
     
-    @Parameter(names = "--dataflow-max-runtime", description = "Max Run Time")
-    private long maxRunTime = -1l;
-    
     @Parameter(names = "--wait-for-running-timeout", description = "The dataflow path to deploy")
     private long waitForRunningTimeout = 120000;
     
@@ -82,7 +79,7 @@ public class DataflowCommand extends Command {
       DataflowConfig dflConfig = 
         JSONSerializer.INSTANCE.fromString(dataflowJson, DataflowConfig.class);
       if(dataflowId != null) dflConfig.setId(dataflowId);
-      if(maxRunTime > 0) dflConfig.setMaxRunTime(maxRunTime);
+      if(dataflowMaxRunTime > 0) dflConfig.setMaxRunTime(dataflowMaxRunTime);
       if(dataflowTaskSwitchingPeriod > 0) {
         dflConfig.getWorker().setTaskSwitchingPeriod(dataflowTaskSwitchingPeriod);
       }
