@@ -67,7 +67,7 @@ public class DataflowCommand extends Command {
     @Parameter(names = "--dataflow-num-of-executor-per-worker",  description = "Num of executor")
     private int numOfExecutorPerWorker = -1;
     
-    @Parameter(names = "--max-run-time", description = "Max Run Time")
+    @Parameter(names = "--dataflow-max-runtime", description = "Max Run Time")
     private long maxRunTime = -1l;
     
     @Parameter(names = "--wait-for-running-timeout", description = "The dataflow path to deploy")

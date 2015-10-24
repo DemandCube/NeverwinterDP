@@ -88,7 +88,7 @@ else
 fi
 
 DATAFLOW_DEFAULT_RUNTIME=$(( 180000 + (($GENERATOR_NUM_OF_CHUNK * $GENERATOR_NUM_OF_MESSAGE_PER_CHUNK) / 3) ))
-DATAFLOW_MAX_RUNTIME=$(get_opt --max-run-time $DATAFLOW_DEFAULT_RUNTIME $@)
+DATAFLOW_MAX_RUNTIME=$(get_opt --dataflow-max-runtime $DATAFLOW_DEFAULT_RUNTIME $@)
 
 VALIDATOR_DISABLE=$(has_opt "--validator-disable" $@ )
 VALIDATOR_NUM_OF_READER=$(get_opt --validator-num-of-reader '3' $@)
