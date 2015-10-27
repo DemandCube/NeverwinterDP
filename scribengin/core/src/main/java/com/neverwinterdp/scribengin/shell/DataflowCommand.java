@@ -26,6 +26,7 @@ public class DataflowCommand extends Command {
     add("submit",             Submit.class) ;
     add("info",               Info.class) ;
     add("monitor",            Monitor.class) ;
+    add("wait-for-status",    WaitForStatus.class) ;
     add("kill-worker-random", KillWorkerRandom.class) ;
   }
   
@@ -195,6 +196,38 @@ public class DataflowCommand extends Command {
     @Override
     public String getDescription() {
       return "monitor and display more info about dataflows";
+    }
+  }
+  
+  static public class WaitForStatus extends SubCommand {
+    @Parameter(names = "--dataflow-id", required=true, description = "The dataflow id")
+    String dataflowId ;
+    
+    @Parameter(names = "--status", description = "Stop on the dataflow status")
+    private String stopOnStatus = "TERMINATED";
+    
+    @Parameter(names = "--timeout" , description = "Dump the information period")
+    private long timeout = 3 * 60 * 60 * 1000;
+    
+    @Override
+    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
+      ScribenginShell scribenginShell = (ScribenginShell) shell;
+      ScribenginClient scribenginClient= scribenginShell.getScribenginClient();
+      DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId);
+      DataflowRegistry dRegistry = dflClient.getDataflowRegistry();
+      
+      DataflowLifecycleStatus stopOnDflStatus = DataflowLifecycleStatus.valueOf(stopOnStatus);
+      long stopTime = System.currentTimeMillis() + timeout;
+      while(stopTime > System.currentTimeMillis()) {
+        DataflowLifecycleStatus dflStatus = dRegistry.getStatus();
+        if(dflStatus.equalOrGreaterThan(stopOnDflStatus)) break;
+        Thread.sleep(1000);
+      }
+    }
+    
+    @Override
+    public String getDescription() {
+      return "wait for the dataflow status";
     }
   }
   

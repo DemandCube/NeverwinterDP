@@ -7,12 +7,14 @@ import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.registry.task.switchable.SwitchableTaskContext;
-import com.neverwinterdp.registry.task.switchable.SwitchableTaskRegistry;
+import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
+import com.neverwinterdp.registry.task.TaskStatus;
+import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
+import com.neverwinterdp.registry.task.dedicated.DedicatedTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskReport;
 
-public class DataflowTaskRegistry extends SwitchableTaskRegistry<OperatorTaskConfig> {
+public class DataflowTaskRegistry extends DedicatedTaskRegistry<OperatorTaskConfig> {
   
   public DataflowTaskRegistry(Registry registry, String path) throws RegistryException {
     init(registry, path, OperatorTaskConfig.class) ;
@@ -48,15 +50,15 @@ public class DataflowTaskRegistry extends SwitchableTaskRegistry<OperatorTaskCon
     taskNode.createChild("report", report, NodeCreateMode.PERSISTENT);
   }
   
-  public void suspend(String refWorker, SwitchableTaskContext<OperatorTaskConfig> context) throws RegistryException {
-    suspend(refWorker, context, false) ;
+  public void suspend(DedicatedTaskContext<OperatorTaskConfig> context) throws RegistryException {
+    suspend(context.getTaskExecutorDescriptor(), context.getTaskId()) ;
   }
   
-  public void suspend(String refWorker, SwitchableTaskContext<OperatorTaskConfig> context, final boolean disconnectHeartbeat) throws RegistryException {
-    suspend(refWorker, context.getTaskTransactionId(), disconnectHeartbeat);
+  public void suspend(TaskExecutorDescriptor executor, DedicatedTaskContext<OperatorTaskConfig> context) throws RegistryException {
+    suspend(executor, context.getTaskId()) ;
   }
-
-  public void finish(String refWorker, SwitchableTaskContext<OperatorTaskConfig> context) throws RegistryException {
-    finish(refWorker, context.getTaskTransactionId());
+  
+  public void finish(DedicatedTaskContext<OperatorTaskConfig> context, TaskStatus taskStatus) throws RegistryException {
+    finish(context.getTaskExecutorDescriptor(), context.getTaskId(), taskStatus) ;
   }
 }

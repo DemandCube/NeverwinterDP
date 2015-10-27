@@ -6,11 +6,13 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.task.dedicated.DedicatedTaskService;
 import com.neverwinterdp.registry.task.switchable.SwitchableTaskService;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowInitActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowMasterActivityService;
 import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowRunActivityBuilder;
+import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowStopActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.storage.StorageService;
@@ -34,7 +36,7 @@ public class MasterService {
   private DataflowWorkerMonitor workerMonitor;
   
   private DataflowTaskMonitor  taskMonitor;
-  private SwitchableTaskService<OperatorTaskConfig> taskService ;
+  private DedicatedTaskService<OperatorTaskConfig> taskService ;
   
   public VMConfig getVMConfig() { return vmConfig; }
   
@@ -60,10 +62,11 @@ public class MasterService {
     dflRegistry.initRegistry();
     
     workerMonitor = new DataflowWorkerMonitor(dflRegistry, activityService);
-   
+    
+    taskService = new DedicatedTaskService<>(dflRegistry.getTaskRegistry(), null);
     taskMonitor = new DataflowTaskMonitor();
-    taskService = new SwitchableTaskService<>(dflRegistry.getTaskRegistry());
     taskService.addTaskMonitor(taskMonitor);
+    System.out.println("DataflowMasterService: init(), done!!!");
   }
   
   public void run() throws Exception {
@@ -74,12 +77,15 @@ public class MasterService {
   
   public void waitForTermination() throws Exception {
     long maxRunTime = dflRegistry.getConfigRegistry().getDataflowConfig().getMaxRunTime();
-    if(!taskMonitor.waitForAllTaskFinish(maxRunTime)) {
-//      activityService.queue(new DataflowStopActivityBuilder().build());
-//      dataflowTaskMonitor.waitForAllTaskFinish(-1);
-    }
+    System.out.println("DataflowMasterService: waitForTermination()");
+    taskMonitor.waitForAllTaskFinish(maxRunTime);
+    activityService.queue(new DataflowStopActivityBuilder().build());
+    
     workerMonitor.waitForAllWorkerTerminated();
+    taskService.onDestroy();
+    activityService.onDestroy();
     //finish
     dflRegistry.setStatus(DataflowLifecycleStatus.FINISH);
+    System.out.println("DataflowMasterService: waitForTermination(), done!!!");
   }
 }

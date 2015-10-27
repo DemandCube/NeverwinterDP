@@ -20,7 +20,7 @@ import com.neverwinterdp.util.log.LoggerFactory;
 
 public class KafkaTrackingSampleRunner  {
   String dataflowId           = "tracking-dataflow";
-  int    numOfMessagePerChunk = 1000;
+  int    numOfMessagePerChunk = 2000;
   long   dataflowMaxRuntime   = 90000;
   
   ScribenginClusterBuilder clusterBuilder ;
@@ -73,10 +73,10 @@ public class KafkaTrackingSampleRunner  {
         "  --vm-application " + VMTMGeneratorKafkaApp.class.getName() + 
         
         "  --prop:tracking.report-path=" + REPORT_PATH +
-        "  --prop:tracking.num-of-writer=3" +
+        "  --prop:tracking.num-of-writer=1" +
         "  --prop:tracking.num-of-chunk=10" +
         "  --prop:tracking.num-of-message-per-chunk=" + numOfMessagePerChunk +
-        "  --prop:tracking.break-in-period=10" +
+        "  --prop:tracking.break-in-period=500" +
         "  --prop:tracking.message-size=512" +
          
         "  --prop:kafka.zk-connects=127.0.0.1:2181" +
@@ -120,5 +120,9 @@ public class KafkaTrackingSampleRunner  {
       "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingJUnitShellPlugin" +
       "  --dataflow-id " + dataflowId + "  --report-path " + REPORT_PATH + " --junit-report-file build/junit-report.xml"
     );
+    
+    shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED") ;
+    
+    shell.execute("registry dump");
   }
 }

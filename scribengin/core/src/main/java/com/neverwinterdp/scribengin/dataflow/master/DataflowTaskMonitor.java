@@ -2,28 +2,31 @@ package com.neverwinterdp.scribengin.dataflow.master;
 
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.notification.Notifier;
-import com.neverwinterdp.registry.task.switchable.SwitchableTaskContext;
-import com.neverwinterdp.registry.task.switchable.SwitchableTaskMonitor;
-import com.neverwinterdp.registry.task.switchable.SwitchableTaskRegistry;
+import com.neverwinterdp.registry.task.dedicated.DedicatedTaskMonitor;
+import com.neverwinterdp.registry.task.dedicated.DedicatedTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 
-public class DataflowTaskMonitor implements SwitchableTaskMonitor<OperatorTaskConfig> {
+public class DataflowTaskMonitor implements DedicatedTaskMonitor<OperatorTaskConfig> {
   private boolean finished = false;
   
+  
   @Override
-  public void onAssign(SwitchableTaskContext<OperatorTaskConfig> context) {
+  public void onAddExecutor(DedicatedTaskRegistry<OperatorTaskConfig> taskRegistry, String executorId) {
   }
 
   @Override
-  public void onAvailable(SwitchableTaskContext<OperatorTaskConfig> context) {
+  public void onLostExecutor(DedicatedTaskRegistry<OperatorTaskConfig> taskRegistry, String executorId) {
   }
 
   @Override
-  public void onFinish(SwitchableTaskContext<OperatorTaskConfig> context) {
-    SwitchableTaskRegistry<OperatorTaskConfig> taskRegistry = context.getTaskRegistry();
+  public void onAvailable(DedicatedTaskRegistry<OperatorTaskConfig> taskRegistry, String taskId) {
+  }
+
+  @Override
+  public void onFinish(DedicatedTaskRegistry<OperatorTaskConfig> taskRegistry, String taskId) {
     try {
       int allTask = taskRegistry.getTasksListNode().getChildren().size();
-      int finishTask = taskRegistry.getTasksFinishedNode().getChildren().size();
+      int finishTask = taskRegistry.getTaskFinishedNode().getChildren().size();
       if(allTask == finishTask) {
         finished = true ;
         synchronized(this) {
@@ -31,24 +34,9 @@ public class DataflowTaskMonitor implements SwitchableTaskMonitor<OperatorTaskCo
         }
       }
     } catch(Exception ex) {
-      Notifier notifier = taskRegistry.getTaskCoordinationNotifier();
       try {
+        Notifier notifier = taskRegistry.getTaskCoordinationNotifier();
         notifier.error("fail-coodinate-a-finish-task", "Cannot coordinate a finished task", ex);
-      } catch (RegistryException e) {
-        e.printStackTrace();
-      }
-    }
-  }
-  
-  @Override
-  public void onFail(SwitchableTaskContext<OperatorTaskConfig> context) {
-    SwitchableTaskRegistry<OperatorTaskConfig> taskRegistry = context.getTaskRegistry();
-    try {
-      context.suspend("DataflowMasterService", true);
-    } catch (RegistryException ex) {
-      Notifier notifier = taskRegistry.getTaskCoordinationNotifier();
-      try {
-        notifier.error("fail-coodinate-a-fail-task", "Cannot coordinate a faild task", ex);
       } catch (RegistryException e) {
         e.printStackTrace();
       }
@@ -60,5 +48,5 @@ public class DataflowTaskMonitor implements SwitchableTaskMonitor<OperatorTaskCo
     else wait() ;
     return finished;
   }
-  
+
 }
