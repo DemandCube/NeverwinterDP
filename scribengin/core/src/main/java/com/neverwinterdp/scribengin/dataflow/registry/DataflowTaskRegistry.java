@@ -11,7 +11,6 @@ import com.neverwinterdp.registry.task.switchable.SwitchableTaskContext;
 import com.neverwinterdp.registry.task.switchable.SwitchableTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskReport;
-import com.neverwinterdp.vm.VMDescriptor;
 
 public class DataflowTaskRegistry extends SwitchableTaskRegistry<OperatorTaskConfig> {
   
