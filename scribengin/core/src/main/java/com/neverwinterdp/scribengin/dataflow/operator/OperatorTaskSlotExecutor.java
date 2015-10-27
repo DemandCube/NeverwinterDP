@@ -49,7 +49,7 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
     int recCount = 0;
     try {
       while(!interrupt && recCount <= 1000 && !context.isComplete()) {
-        Record record = context.nextRecord(0);
+        Record record = context.nextRecord(-1);
         if(record == null) break ;
 
         recCount++;
