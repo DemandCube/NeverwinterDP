@@ -58,7 +58,7 @@ public class ActivityService extends ActivityRegistry {
     queue.shutdown();
     activityScheduler.interrupt();
     int count = 0 ;
-    while(activityScheduler.isAlive() && count < 30) {
+    while(activeActivities.size() > 0 && count < 30) {
       Thread.sleep(100);
       count++;
     }
@@ -204,7 +204,7 @@ public class ActivityService extends ActivityRegistry {
     void doRun() throws Exception {
       Activity activity = null;
       while ((activity = queue.takeAs(Activity.class)) != null) {
-        create(activity);
+        activity = create(activity);
         ActivityExecutionContext context = new ActivityExecutionContext(activity, ActivityService.this);
         ActivityRunner runner = new ActivityRunner(context, activity, false);
         runner.start();

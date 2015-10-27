@@ -38,7 +38,4 @@ public class DedicatedTaskContext<T> {
     if(taskStatus == null || reload) taskStatus = taskRegistry.getTaskStatus(taskId) ;
     return taskStatus; 
   }
-  
-  public void suspend(String executorRef, boolean disconnectHeartbeat) throws RegistryException {
-  }
 }

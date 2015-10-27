@@ -1,13 +1,9 @@
 package com.neverwinterdp.registry.task.dedicated;
 
-import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
-
 abstract public class TaskSlotExecutor<T> {
-  private TaskExecutorDescriptor  executorDescriptor;
   private DedicatedTaskContext<T> taskContext;
 
-  public TaskSlotExecutor(TaskExecutorDescriptor  executor, DedicatedTaskContext<T> taskContext) {
-    this.executorDescriptor = executor;
+  public TaskSlotExecutor(DedicatedTaskContext<T> taskContext) {
     this.taskContext        = taskContext;
   }
 

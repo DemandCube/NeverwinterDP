@@ -8,8 +8,8 @@ import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 public class DummyTaskSlotExecutor extends TaskSlotExecutor<TaskDescriptor> {
   private Random random = new Random();
   
-  public DummyTaskSlotExecutor(TaskExecutorDescriptor  executor, DedicatedTaskContext<TaskDescriptor> taskContext) {
-    super(executor, taskContext);
+  public DummyTaskSlotExecutor(DedicatedTaskContext<TaskDescriptor> taskContext) {
+    super(taskContext);
   }
 
   @Override

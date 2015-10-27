@@ -7,11 +7,10 @@ import java.util.List;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.TaskStatus;
 
-abstract public class TaskExecutor<T> implements Runnable {
+public class TaskExecutor<T> implements Runnable {
   private DedicatedTaskService<T>       taskService;
   private TaskExecutorDescriptor        executor;
-  private List<TaskSlotExecutor<T>>     taskExecutors = new ArrayList<>();
-  private int                           maxNumOfTasks = 3;
+  private List<TaskSlotExecutor<T>>     taskSlotExecutors = new ArrayList<>();
   
   public TaskExecutor(String id, DedicatedTaskService<T> taskService) {
     executor = new TaskExecutorDescriptor(id, "NA");
@@ -20,36 +19,29 @@ abstract public class TaskExecutor<T> implements Runnable {
   
   public TaskExecutorDescriptor getTaskExecutorDescriptor () { return this.executor; }
   
+  public void add(TaskSlotExecutor<T> taskSlotExecutor) {
+    taskSlotExecutors.add(taskSlotExecutor);
+  }
+  
   public void run() {
     try {
       while(true) {
-        updateTaskExecutors();
-        if(taskExecutors.size() == 0) {
+        if(taskSlotExecutors.size() == 0) {
           taskService.idleExecutor(executor);
           Thread.sleep(5000);
         } else {
-          taskService.idleExecutor(executor);
+          taskService.activeExecutor(executor);
           runTaskExecutors();
         }
       }
+    } catch(InterruptedException e) {
     } catch(Exception e) {
       e.printStackTrace();
     }
   }
   
-  
-  void updateTaskExecutors() throws Exception {
-    int numOfTask = maxNumOfTasks - taskExecutors.size() ;
-    if(numOfTask > 0) {
-      List<DedicatedTaskContext<T>> contexts = taskService.getTaskRegistry().take(executor, maxNumOfTasks);
-      for(int i = 0; i < contexts.size(); i++) {
-        taskExecutors.add(createTaskSlotExecutor(executor, contexts.get(i)));
-      }
-    }
-  }
-  
   void runTaskExecutors() throws Exception {
-    Iterator<TaskSlotExecutor<T>> executorItr = taskExecutors.iterator();
+    Iterator<TaskSlotExecutor<T>> executorItr = taskSlotExecutors.iterator();
     while(executorItr.hasNext()) {
       TaskSlotExecutor<T> taskExecutor = executorItr.next();
       taskExecutor.onPreExecuteSlot();
@@ -63,7 +55,4 @@ abstract public class TaskExecutor<T> implements Runnable {
       }
     }
   }
-  
-  abstract protected TaskSlotExecutor<T> createTaskSlotExecutor(TaskExecutorDescriptor executor, DedicatedTaskContext<T> context) throws Exception ;
-  
 }

@@ -34,6 +34,7 @@ public class DedicatedTaskRegistry<T> {
   final static public String EXECUTIONS_TASK_AVAILABLE_PATH       = EXECUTIONS_PATH + "/task-available";
   
   final static public String EXECUTIONS_EXECUTORS_PATH            = EXECUTIONS_PATH + "/executors";
+  final static public String EXECUTIONS_EXECUTORS_HEARTBEAT_PATH  = EXECUTIONS_PATH + "/executors/heartbeat";
   final static public String EXECUTIONS_EXECUTORS_ALL_PATH        = EXECUTIONS_PATH + "/executors/all";
   final static public String EXECUTIONS_EXECUTORS_ACTIVE_PATH     = EXECUTIONS_PATH + "/executors/active";
   final static public String EXECUTIONS_EXECUTORS_IDLE_PATH       = EXECUTIONS_PATH + "/executors/idle";
@@ -60,6 +61,7 @@ public class DedicatedTaskRegistry<T> {
   private Node     executorsActiveNode;
   private Node     executorsIdleNode;
   private Node     executorsHistoryNode;
+  private Node     executorsHeartbeatNode;
   
   private Node     tasksLockNode ; 
   
@@ -89,6 +91,7 @@ public class DedicatedTaskRegistry<T> {
     executorsActiveNode = tasksRootNode.getDescendant(EXECUTIONS_EXECUTORS_ACTIVE_PATH);
     executorsIdleNode = tasksRootNode.getDescendant(EXECUTIONS_EXECUTORS_IDLE_PATH);
     executorsHistoryNode = tasksRootNode.getDescendant(EXECUTIONS_EXECUTORS_HISTORY_PATH);
+    executorsHeartbeatNode = tasksRootNode.getDescendant(EXECUTIONS_EXECUTORS_HEARTBEAT_PATH);
     
     tasksLockNode = tasksRootNode.getDescendant(EXECUTIONS_LOCK_PATH);
     
@@ -116,6 +119,7 @@ public class DedicatedTaskRegistry<T> {
     transaction.create(executorsActiveNode,  null, NodeCreateMode.PERSISTENT);
     transaction.create(executorsIdleNode,  null, NodeCreateMode.PERSISTENT);
     transaction.create(executorsHistoryNode,  null, NodeCreateMode.PERSISTENT);
+    transaction.create(executorsHeartbeatNode,  null, NodeCreateMode.PERSISTENT);
     
     transaction.create(tasksLockNode, null, NodeCreateMode.PERSISTENT);
     
@@ -131,7 +135,15 @@ public class DedicatedTaskRegistry<T> {
   public Node getTasksRootNode() { return tasksRootNode; }
   
   public Node getTasksListNode() { return tasksListNode; }
+  
+  public Node getTaskAvailableNode() { return taskAvailableNode; }
 
+  public Node getTaskFinishedNode() { return taskFinishedNode; }
+  
+  public Node getExecutorsHeartbeatNode() { return executorsHeartbeatNode; }
+  
+  public Notifier getTaskCoordinationNotifier() { return taskCoordinationNotifier; }
+  
   public T getTaskDescriptor(String taskId) throws RegistryException {
     return tasksListNode.getChild(taskId).getDataAs(taskDescriptorType) ;
   }
@@ -269,7 +281,7 @@ public class DedicatedTaskRegistry<T> {
         String executorId = executor.getId();
         transaction.createChild(executorsAllNode, executorId, executor, NodeCreateMode.PERSISTENT);
         transaction.createDescendant(executorsAllNode, executorId + "/tasks", NodeCreateMode.PERSISTENT);
-        transaction.createDescendant(executorsAllNode, executorId + "/heartbeat", NodeCreateMode.EPHEMERAL);
+        transaction.createDescendant(executorsHeartbeatNode, executorId, NodeCreateMode.EPHEMERAL);
         transaction.commit();
         return true;
       }
