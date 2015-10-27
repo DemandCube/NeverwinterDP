@@ -48,7 +48,7 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
     OperatorTaskReport report = context.getTaskReport();
     int recCount = 0;
     try {
-      while(!interrupt && recCount <= 100 && !context.isComplete()) {
+      while(!interrupt && recCount <= 1000 && !context.isComplete()) {
         Record record = context.nextRecord(50);
         if(record == null) break ;
 
@@ -68,9 +68,7 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
         context.setComplete();
       }
       
-      if(context.isComplete() || report.getProcessCount() >= 1000) {
-        updateContext();
-      }
+      updateContext();
     } catch(InterruptedException ex) {
       //kill simulation
       throw ex ;
