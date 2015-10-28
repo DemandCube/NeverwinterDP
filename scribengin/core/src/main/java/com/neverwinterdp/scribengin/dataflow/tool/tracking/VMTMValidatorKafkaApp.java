@@ -89,6 +89,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
   
   abstract public class KafkaTopicConnector extends Thread {
     private KafkaPartitionReader[] partitionReader;
+    private BlockingQueue<KafkaPartitionReader> readerQueue = new LinkedBlockingQueue<>();
     
     public KafkaTopicConnector(String kafkaZkConnects, String topic) throws Exception {
       TopicMetadata topicMeta = kafkaClient.findTopicMetadata(topic);
@@ -98,6 +99,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
       partitionReader = new KafkaPartitionReader[numOfPartitions];
       for (int i = 0; i < numOfPartitions; i++) {
         partitionReader[i] = new KafkaPartitionReader("VMTMValidatorKafkaApp", kafkaClient, topic, partitionMetas.get(i));
+        readerQueue.offer(partitionReader[i]);
       }
     }
     
@@ -121,7 +123,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
         for(int i = 0; i < partitionReader.length; i++) {
           Record rec = null;
           int count = 0;
-          while((rec = partitionReader[i].nextAs(Record.class, 100)) != null && count < 1500) {
+          while((rec = partitionReader[i].nextAs(Record.class, 1000)) != null && count < 1000) {
             TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(rec.getData(), TrackingMessage.class);
             onTrackingMessage(tMesg);
             count++;
