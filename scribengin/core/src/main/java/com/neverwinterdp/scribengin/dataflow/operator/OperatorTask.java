@@ -46,7 +46,7 @@ public class OperatorTask {
     int recCount = 0;
     try {
       while(!interrupt && !context.isComplete()) {
-        Record record = context.nextRecord(1000);
+        Record record = context.nextRecord(100);
         if(record == null) break ;
 
         recCount++;
