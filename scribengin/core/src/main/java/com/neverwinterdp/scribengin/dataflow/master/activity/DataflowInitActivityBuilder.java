@@ -70,12 +70,11 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
         Storage storage = storageService.getStorage(storageConfig);
         storage.refresh();
         if(!storage.exists()) {
-          storage.drop();
           storageConfig.setPartition(streamConfig.getParallelism());
           storageConfig.setReplication(streamConfig.getReplication());
           storage.create(storageConfig.getPartition(), storageConfig.getReplication());
+          storage.refresh();
         }
-        storage.refresh();
         List<PartitionConfig> pConfigs = storage.getPartitionConfigs();
         streamRegistry.create(name, storageConfig, pConfigs);
       }
