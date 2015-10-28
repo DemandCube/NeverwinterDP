@@ -114,7 +114,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
                 KafkaPartitionReader pReader = readerQueue.take();
                 Record rec = null;
                 int count = 0;
-                while((rec = pReader.nextAs(Record.class, 1000)) != null) {
+                while((rec = pReader.nextAs(Record.class, 100)) != null) {
                   TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(rec.getData(), TrackingMessage.class);
                   onTrackingMessage(tMesg);
                   count++;
