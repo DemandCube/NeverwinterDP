@@ -117,26 +117,15 @@ public class VMTMValidatorKafkaApp extends VMApp {
     }
     
     void doRun() throws Exception {
-//      int maxRead = 1024 ;
-//      int fetchSize  = 1024 * maxRead;
       while(true) {
         for(int i = 0; i < partitionReader.length; i++) {
           Record rec = null;
           int count = 0;
-          while((rec = partitionReader[i].nextAs(Record.class, 500)) != null && count < 5000) {
+          while((rec = partitionReader[i].nextAs(Record.class, 100)) != null && count < 1500) {
             TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(rec.getData(), TrackingMessage.class);
             onTrackingMessage(tMesg);
             count++;
           }
-//          List<Message> messages = partitionReader[i].fetch(fetchSize, maxRead/*max read*/, 250/*max wait*/, 3);
-//          for(Message message : messages) {
-//            ByteBuffer payload = message.payload();
-//            byte[] bytes = new byte[payload.limit()];
-//            payload.get(bytes);
-//            Record rec = JSONSerializer.INSTANCE.fromBytes(bytes, Record.class);
-//            TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(rec.getData(), TrackingMessage.class);
-//            onTrackingMessage(tMesg);
-//          }
         }
       }
     }
