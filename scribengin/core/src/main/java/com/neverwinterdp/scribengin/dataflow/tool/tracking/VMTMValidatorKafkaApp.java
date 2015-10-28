@@ -117,13 +117,11 @@ public class VMTMValidatorKafkaApp extends VMApp {
     }
     
     void doRun() throws Exception {
-      int batchFetch = 1024 ;
-      int fetchSize  = 1024 * batchFetch;
+      int maxRead = 1024 ;
+      int fetchSize  = 1024 * maxRead;
       while(true) {
-        int count = 0 ;
         for(int i = 0; i < partitionReader.length; i++) {
-          List<Message> messages = partitionReader[i].fetch(fetchSize, batchFetch/*max read*/, 100/*max wait*/, 3);
-          count +=  messages.size();
+          List<Message> messages = partitionReader[i].fetch(fetchSize, maxRead/*max read*/, 250/*max wait*/, 3);
           for(Message message : messages) {
             ByteBuffer payload = message.payload();
             byte[] bytes = new byte[payload.limit()];
@@ -133,7 +131,6 @@ public class VMTMValidatorKafkaApp extends VMApp {
             onTrackingMessage(tMesg);
           }
         }
-        if(count == 0) Thread.sleep(1000);
       }
     }
     
