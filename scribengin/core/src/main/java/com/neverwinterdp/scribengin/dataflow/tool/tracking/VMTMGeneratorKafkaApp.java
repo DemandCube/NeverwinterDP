@@ -64,7 +64,6 @@ public class VMTMGeneratorKafkaApp extends VMApp {
     public void onInit(TrackingRegistry registry) throws Exception {
       String kafkaConnects = kafkaClient.getKafkaBrokerList();
       kafkaWriter = new AckKafkaWriter("KafkaLogWriter", kafkaConnects) ;
-      kafkaWriter.reconnect();
     }
    
     public void onDestroy(TrackingRegistry registry) throws Exception{
