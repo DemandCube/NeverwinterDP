@@ -117,12 +117,12 @@ public class VMTMValidatorKafkaApp extends VMApp {
     }
     
     void doRun() throws Exception {
-      int batchFetch = 1024 ;
+      int batchFetch = 4 * 1024 ;
       int fetchSize  = 1024 * batchFetch;
       while(true) {
         int count = 0 ;
         for(int i = 0; i < partitionReader.length; i++) {
-          List<Message> messages = partitionReader[i].fetch(fetchSize, batchFetch/*max read*/, 100/*max wait*/, 3);
+          List<Message> messages = partitionReader[i].fetch(fetchSize, batchFetch/*max read*/, 250/*max wait*/, 3);
           count +=  messages.size();
           for(Message message : messages) {
             ByteBuffer payload = message.payload();
