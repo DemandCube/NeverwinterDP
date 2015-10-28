@@ -13,7 +13,7 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
   private OperatorTaskConfig                       operatorTaskConfig;
   private Operator                                 operator;
   private OperatorContext                          context;
-  private boolean                                  interrupt = false;
+  
   private long                                     startTime = 0;
 
   public OperatorTaskSlotExecutor(WorkerService service, DedicatedTaskContext<OperatorTaskConfig> taskContext) throws Exception {
@@ -39,17 +39,14 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
   
   public boolean isComplete() { return context.isComplete() ; }
   
-  public boolean isIterrupted() { return this.interrupt ; }
-  
-  public void interrupt() { interrupt = true; }
   
   @Override
   public void executeSlot() throws Exception {
     OperatorTaskReport report = context.getTaskReport();
     int recCount = 0;
     try {
-      while(!interrupt && recCount <= 1000 && !context.isComplete()) {
-        Record record = context.nextRecord(50);
+      while(!isInterrupted() && recCount <= 1000 && !context.isComplete()) {
+        Record record = context.nextRecord(100);
         if(record == null) break ;
 
         recCount++;

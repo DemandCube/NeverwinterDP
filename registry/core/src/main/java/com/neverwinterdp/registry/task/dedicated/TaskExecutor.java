@@ -11,6 +11,7 @@ public class TaskExecutor<T> implements Runnable {
   private DedicatedTaskService<T>       taskService;
   private TaskExecutorDescriptor        executor;
   private List<TaskSlotExecutor<T>>     taskSlotExecutors = new ArrayList<>();
+  private  TaskSlotExecutor<T>          currentRunningTaskSlotExecutor;
   
   public TaskExecutor(String id, DedicatedTaskService<T> taskService) {
     executor = new TaskExecutorDescriptor(id, "NA");
@@ -21,6 +22,10 @@ public class TaskExecutor<T> implements Runnable {
   
   public void add(TaskSlotExecutor<T> taskSlotExecutor) {
     taskSlotExecutors.add(taskSlotExecutor);
+  }
+  
+  public void onSwitchTaskSlot() {
+    if(currentRunningTaskSlotExecutor != null) currentRunningTaskSlotExecutor.interrupt();
   }
   
   public void run() {
@@ -43,12 +48,12 @@ public class TaskExecutor<T> implements Runnable {
   void runTaskExecutors() throws Exception {
     Iterator<TaskSlotExecutor<T>> executorItr = taskSlotExecutors.iterator();
     while(executorItr.hasNext()) {
-      TaskSlotExecutor<T> taskExecutor = executorItr.next();
-      taskExecutor.onPreExecuteSlot();
-      taskExecutor.executeSlot();
-      taskExecutor.onPostExecuteSlot();
+      currentRunningTaskSlotExecutor = executorItr.next();
+      currentRunningTaskSlotExecutor.onPreExecuteSlot();
+      currentRunningTaskSlotExecutor.executeSlot();
+      currentRunningTaskSlotExecutor.onPostExecuteSlot();
       
-      DedicatedTaskContext<T> context = taskExecutor.getTaskContext();
+      DedicatedTaskContext<T> context = currentRunningTaskSlotExecutor.getTaskContext();
       if(context.isComplete()) {
         executorItr.remove();
         taskService.finish(executor, context.getTaskId(), TaskStatus.TERMINATED);
