@@ -40,9 +40,9 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
     kafkaProps.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
     kafkaProps.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,   ByteArraySerializer.class.getName());
     
-    //kafkaProps.setProperty(ProducerConfig.ACKS_CONFIG, "1");
-    //kafkaProps.setProperty(ProducerConfig.RETRIES_CONFIG, "3");
-    kafkaProps.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, "65536");
+    kafkaProps.setProperty(ProducerConfig.ACKS_CONFIG, "1");
+    kafkaProps.setProperty(ProducerConfig.RETRIES_CONFIG, "3");
+    //kafkaProps.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, "65536");
     
     kafkaProps.setProperty(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, "100");
     kafkaProps.setProperty(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, "10");
