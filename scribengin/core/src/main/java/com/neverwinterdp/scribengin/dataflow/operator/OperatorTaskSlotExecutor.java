@@ -43,6 +43,7 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
   
   @Override
   public void executeSlot() throws Exception {
+    startTime = System.currentTimeMillis();
     OperatorTaskReport report = context.getTaskReport();
     int recCount = 0;
     try {
@@ -68,6 +69,7 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
         report.setLastAssignedWithNoMessageProcess(0);
         lastNoMessageTime = -1;
       }
+      report.addAccRuntime(currentTime - startTime);
       
       if(context.isComplete() || report.getProcessCount() > 5000 || lastFlushTime + 10000 < currentTime) {
         updateContext();
@@ -109,7 +111,6 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
   
   void updateContext() throws Exception {
     OperatorTaskReport report = context.getTaskReport();
-    report.addAccRuntime(System.currentTimeMillis() - startTime);
     context.commit();
   }
 }
