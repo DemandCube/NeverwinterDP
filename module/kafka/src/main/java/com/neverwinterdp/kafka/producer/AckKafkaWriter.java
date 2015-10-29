@@ -42,7 +42,7 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
     
     kafkaProps.setProperty(ProducerConfig.ACKS_CONFIG, "all");
     kafkaProps.setProperty(ProducerConfig.RETRIES_CONFIG, "3");
-    kafkaProps.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, "65536");
+    kafkaProps.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, "16384");
     kafkaProps.setProperty(ProducerConfig.BLOCK_ON_BUFFER_FULL_CONFIG, "true");
     
     kafkaProps.setProperty(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, "100");
