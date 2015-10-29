@@ -34,7 +34,7 @@ public class VMTMGeneratorKafkaApp extends VMApp {
     service.withLogger(logger);
     
     String kafkaZkConnects     = vmConfig.getProperty("kafka.zk-connects", "zookeeper-1:2181");
-    String kafkaTopic          = vmConfig.getProperty("kafka.topic", "log4j");
+    String kafkaTopic          = vmConfig.getProperty("kafka.topic", "tracking.input");
     int    kafkaNumOfPartition = vmConfig.getPropertyAsInt("kafka.num-of-partition", 5);
     int    kafkaReplication    = vmConfig.getPropertyAsInt("kafka.replication", 1);
     
