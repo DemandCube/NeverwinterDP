@@ -39,11 +39,12 @@ public class VMTMGeneratorKafkaApp extends VMApp {
     int    kafkaReplication    = vmConfig.getPropertyAsInt("kafka.replication", 1);
     
    
+    kafkaClient = new KafkaClient("KafkaClient", kafkaZkConnects);
+    
     for(int i = 0; i < numOfWriter; i++) {
-      service.addWriter(new KafkaTrackingMessageWriter(kafkaZkConnects, kafkaTopic));
+      service.addWriter(new KafkaTrackingMessageWriter(kafkaTopic));
     }
     
-    kafkaClient = new KafkaClient("KafkaClient", kafkaZkConnects);
     if(!kafkaClient.getKafkaTool().topicExits(kafkaTopic)) {
       kafkaClient.getKafkaTool().createTopic(kafkaTopic, kafkaReplication, kafkaNumOfPartition);
     }
@@ -52,12 +53,10 @@ public class VMTMGeneratorKafkaApp extends VMApp {
   }
   
   public class KafkaTrackingMessageWriter extends TrackingMessageWriter {
-    private String            kafkaZkConnects;
     private String            topic;
     private AckKafkaWriter    kafkaWriter;
     
-    KafkaTrackingMessageWriter(String kafkaZkConnects, String topic) {
-      this.kafkaZkConnects = kafkaZkConnects;
+    KafkaTrackingMessageWriter(String topic) {
       this.topic = topic;
     }
     
@@ -73,7 +72,7 @@ public class VMTMGeneratorKafkaApp extends VMApp {
     @Override
     public void write(TrackingMessage message) throws Exception {
       String json = JSONSerializer.INSTANCE.toString(message);
-      kafkaWriter.send(topic, json, 60 * 1000);
+      kafkaWriter.send(topic, json, 30 * 1000);
     }
   }
 }
