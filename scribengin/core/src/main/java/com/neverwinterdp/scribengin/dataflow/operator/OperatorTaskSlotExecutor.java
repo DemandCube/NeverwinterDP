@@ -61,7 +61,7 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
         if(lastNoMessageTime < 0) lastNoMessageTime = currentTime;
         report.setAssignedWithNoMessageProcess(report.getAssignedWithNoMessageProcess() + 1);
         report.setLastAssignedWithNoMessageProcess(report.getLastAssignedWithNoMessageProcess() + 1);
-        if(lastNoMessageTime + 90000 < currentTime) {
+        if(lastNoMessageTime + 15000 < currentTime) {
           getTaskContext().setComplete();
           context.setComplete();
         }
