@@ -15,7 +15,9 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
   private OperatorContext                          context;
   
   private long                                     startTime = 0;
-
+  private long                                     lastFlushTime = System.currentTimeMillis();
+  private long                                     lastNoMessageTime ;
+  
   public OperatorTaskSlotExecutor(WorkerService service, DedicatedTaskContext<OperatorTaskConfig> taskContext) throws Exception {
     super(taskContext);
     this.workerService = service;
@@ -39,7 +41,6 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
   
   public boolean isComplete() { return context.isComplete() ; }
   
-  
   @Override
   public void executeSlot() throws Exception {
     OperatorTaskReport report = context.getTaskReport();
@@ -54,18 +55,23 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
         operator.process(context, record);
       } //end while
       
+      long currentTime = System.currentTimeMillis();
       if(recCount == 0) {
+        if(lastNoMessageTime < 0) lastNoMessageTime = currentTime;
         report.setAssignedWithNoMessageProcess(report.getAssignedWithNoMessageProcess() + 1);
         report.setLastAssignedWithNoMessageProcess(report.getLastAssignedWithNoMessageProcess() + 1);
+        if(lastNoMessageTime + 15000 < currentTime) {
+          getTaskContext().setComplete();
+          context.setComplete();
+        }
       } else {
         report.setLastAssignedWithNoMessageProcess(0);
-      }
-      if(report.getLastAssignedWithNoMessageProcess() >= 3) {
-        getTaskContext().setComplete();
-        context.setComplete();
+        lastNoMessageTime = -1;
       }
       
-      updateContext();
+      if(context.isComplete() || report.getProcessCount() > 5000 || lastFlushTime + 10000 < currentTime) {
+        updateContext();
+      }
     } catch(InterruptedException ex) {
       //kill simulation
       throw ex ;
