@@ -44,9 +44,11 @@ public class TaskExecutorService<T> {
   public class TaskSlotTimerThread extends Thread {
     public void run() {
       try {
-        for(int i = 0; i < taskExecutors.size(); i++) {
-          Thread.sleep(3000);
-          taskExecutors.get(i).onSwitchTaskSlot();
+        while(true) {
+          for(int i = 0; i < taskExecutors.size(); i++) {
+            Thread.sleep(3000);
+            taskExecutors.get(i).onSwitchTaskSlot();
+          }
         }
       } catch (InterruptedException e) {
       }
