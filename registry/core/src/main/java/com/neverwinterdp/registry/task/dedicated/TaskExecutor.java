@@ -49,9 +49,12 @@ public class TaskExecutor<T> implements Runnable {
     Iterator<TaskSlotExecutor<T>> executorItr = taskSlotExecutors.iterator();
     while(executorItr.hasNext()) {
       currentRunningTaskSlotExecutor = executorItr.next();
+      currentRunningTaskSlotExecutor.clearInterrupt();
+
       currentRunningTaskSlotExecutor.onPreExecuteSlot();
       currentRunningTaskSlotExecutor.executeSlot();
       currentRunningTaskSlotExecutor.onPostExecuteSlot();
+      
       
       DedicatedTaskContext<T> context = currentRunningTaskSlotExecutor.getTaskContext();
       if(context.isComplete()) {
