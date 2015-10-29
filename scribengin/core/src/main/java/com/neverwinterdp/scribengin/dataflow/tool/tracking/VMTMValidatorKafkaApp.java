@@ -1,8 +1,9 @@
 package com.neverwinterdp.scribengin.dataflow.tool.tracking;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +20,6 @@ import com.neverwinterdp.vm.VMDescriptor;
 
 import kafka.javaapi.PartitionMetadata;
 import kafka.javaapi.TopicMetadata;
-import kafka.message.Message;
 
 public class VMTMValidatorKafkaApp extends VMApp {
   private Logger logger;
@@ -87,62 +87,69 @@ public class VMTMValidatorKafkaApp extends VMApp {
     }
   }
   
-  abstract public class KafkaTopicConnector extends Thread {
+  abstract public class KafkaTopicConnector {
     private KafkaPartitionReader[] partitionReader;
+    private BlockingQueue<KafkaPartitionReader> readerQueue = new LinkedBlockingQueue<>();
+    private ExecutorService executorService;
     
     public KafkaTopicConnector(String kafkaZkConnects, String topic) throws Exception {
       TopicMetadata topicMeta = kafkaClient.findTopicMetadata(topic);
       List<PartitionMetadata> partitionMetas = topicMeta.partitionsMetadata();
       int numOfPartitions = partitionMetas.size();
-      
       partitionReader = new KafkaPartitionReader[numOfPartitions];
       for (int i = 0; i < numOfPartitions; i++) {
         partitionReader[i] = new KafkaPartitionReader("VMTMValidatorKafkaApp", kafkaClient, topic, partitionMetas.get(i));
+        readerQueue.offer(partitionReader[i]);
       }
     }
     
-    public void run() {
-      try {
-        doRun() ;
-      } catch (InterruptedException e) {
-      } catch (Exception e) {
-        logger.error("Fail to load the data from kafka", e);
-      } finally {
-        try {
-          shutdown();
-        } catch (Exception e) {
-          logger.error("Fail to shutdown kafka connector", e);
-        }
-      }
-    }
-    
-    void doRun() throws Exception {
-      int batchFetch = 1024 ;
-      int fetchSize  = 1024 * batchFetch;
-      while(true) {
-        int count = 0 ;
-        for(int i = 0; i < partitionReader.length; i++) {
-          List<Message> messages = partitionReader[i].fetch(fetchSize, batchFetch/*max read*/, 500/*max wait*/, 3);
-          count +=  messages.size();
-          for(Message message : messages) {
-            ByteBuffer payload = message.payload();
-            byte[] bytes = new byte[payload.limit()];
-            payload.get(bytes);
-            Record rec = JSONSerializer.INSTANCE.fromBytes(bytes, Record.class);
-            TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(rec.getData(), TrackingMessage.class);
-            onTrackingMessage(tMesg);
+    public void start() {
+      int NUM_OF_THREAD = 3;
+      executorService = Executors.newFixedThreadPool(NUM_OF_THREAD);
+      for(int i = 0; i < NUM_OF_THREAD; i++) {
+        Runnable runnable = new Runnable() {
+          public void run() {
+            try {
+              while(true) {
+                KafkaPartitionReader pReader = readerQueue.take();
+                Record rec = null;
+                int count = 0;
+                while((rec = pReader.nextAs(Record.class, 100)) != null) {
+                  TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(rec.getData(), TrackingMessage.class);
+                  onTrackingMessage(tMesg);
+                  count++;
+                  if(count == 5000) break;
+                }
+                readerQueue.offer(pReader);
+              }
+            } catch (InterruptedException e) {
+            } catch (Exception e) {
+              logger.error("Fail to load the data from kafka", e);
+            } finally {
+              try {
+                shutdown();
+              } catch (Exception e) {
+                logger.error("Fail to shutdown kafka connector", e);
+              }
+            }
           }
-        }
-        if(count == 0) Thread.sleep(1000);
+        };
+        executorService.submit(runnable);
       }
+      executorService.shutdown();
     }
     
     public void shutdown() throws Exception {
+      executorService.shutdownNow();
       for(int i = 0; i < partitionReader.length; i++) {
         partitionReader[i].close();
       }
     }
     
     abstract public void onTrackingMessage(TrackingMessage tMesg) throws Exception ;
+  }
+  
+  abstract public class KafkaTopicReaderThread extends Thread {
+    
   }
 }

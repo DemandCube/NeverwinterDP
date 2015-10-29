@@ -69,7 +69,7 @@ public class KafkaSink implements Sink {
 
   @Override
   public SinkPartitionStream newStream() throws Exception {
-    PartitionConfig streamDescriptor = new PartitionConfig(this.storageConfig);
+    PartitionConfig streamDescriptor = new PartitionConfig(storageConfig);
     streamDescriptor.setPartitionId(idTracker++);
     return new KafkaSinkPartitionStream(streamDescriptor);
   }

@@ -14,8 +14,7 @@ public class KafkaSinkPartitionStreamWriter implements SinkPartitionStreamWriter
   
   public KafkaSinkPartitionStreamWriter(PartitionConfig descriptor) {
     this.descriptor = descriptor;
-    this.writer = 
-      new AckKafkaWriter(descriptor.attribute("name"), descriptor.attribute("broker.list")) ;
+    this.writer = new AckKafkaWriter(descriptor.attribute("name"), descriptor.attribute("broker.list")) ;
     this.topic = descriptor.attribute("topic");
   }
   
