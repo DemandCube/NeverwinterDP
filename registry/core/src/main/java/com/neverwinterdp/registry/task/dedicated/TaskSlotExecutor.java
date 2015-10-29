@@ -14,7 +14,7 @@ abstract public class TaskSlotExecutor<T> {
   
   public void interrupt() { interrupt = true; }
   
-  public void clearInterrupt() { interrupt = true; }
+  public void clearInterrupt() { interrupt = false; }
   
   public void onInit() throws Exception {
   }
