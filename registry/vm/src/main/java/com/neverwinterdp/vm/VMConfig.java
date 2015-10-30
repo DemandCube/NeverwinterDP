@@ -49,6 +49,9 @@ public class VMConfig {
   @Parameter(names = "--local-app-home", description = "Local App Home")
   private String  localAppHome  = null;
   
+  @Parameter(names = "--local-log-dir", description = "Local Log Dir")
+  private String  localLogDir  = "/opt/hadoop/vm-logs";
+  
   @Parameter(names = "--log4j-config-url", description = "Log4j Config Url")
   private String   log4jConfigUrl = "classpath:vm-log4j.properties";
   
@@ -123,9 +126,17 @@ public class VMConfig {
   public void setDfsAppHome(String dfsAppHome) { this.dfsAppHome = dfsAppHome; }
   
   public String getLocalAppHome() { return localAppHome; }
+  public VMConfig   setLocalAppHome(String localAppHome) { 
+    this.localAppHome = localAppHome;
+    return this;
+  }
   
-  public void   setLocalAppHome(String localAppHome) { this.localAppHome = localAppHome; }
-  
+  public String getLocalLogDir() { return localLogDir; }
+  public VMConfig setLocalLogDir(String localLogDir) {
+    this.localLogDir = localLogDir;
+    return this;
+  }
+
   public String getLog4jConfigUrl() { return log4jConfigUrl; }
   public VMConfig   setLog4jConfigUrl(String url) { 
     if(url != null && url.length() > 0) log4jConfigUrl = url; 
@@ -272,7 +283,7 @@ public class VMConfig {
     b.append("-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSScavengeBeforeRemark -XX:+DisableExplicitGC");
     
     if(enableGCLog) {
-      String logFile = ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/" + vmId + "-gc.log";
+      String logFile = localLogDir + "/" + vmId + "-gc.log";
       b.append(" -Xloggc:" + logFile + " -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps");
     }
     
