@@ -25,7 +25,7 @@ public class DataflowSubmitter {
     String dataflowPath = dflRegistry.create(registry, dflConfig);
     VMConfig vmConfig = new VMConfig() ;
     vmConfig.
-      setName(dflConfig.getId() + "-master").
+      setVmId(dflConfig.getId() + "-master").
       addRoles("dataflow-master").
       setRegistryConfig(vmClient.getRegistry().getRegistryConfig()).
       setVmApplication(VMMasterApp.class.getName()).

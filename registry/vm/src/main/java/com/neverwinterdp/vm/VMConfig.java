@@ -31,8 +31,8 @@ public class VMConfig {
   @Parameter(names = "--description", description = "Description")
   private String              description;
   
-  @Parameter(names = "--name", description = "The registry partition or table")
-  private String              name;
+  @Parameter(names = {"--name", "--vm-id"} , required=true, description = "The registry partition or table")
+  private String vmId;
 
   @Parameter(names = "--role", description = "The VM roles")
   private List<String>        roles            = new ArrayList<String>();
@@ -42,14 +42,21 @@ public class VMConfig {
   @Parameter(names = "--memory", description = "The request amount of memory in MB")
   private int                 requestMemory    = 256;
 
-  @Parameter(names = "--app-home", description = "App Home")
-  private String              appHome;
+  @Parameter(names = "--dfs-app-home", description = "DFS App Home")
+  private String dfsAppHome;
 
-  @Parameter(names = "--app-data-dir", description = "App Data Dir")
-  private String              appDataDir = "build/vm";
+  @Parameter(names = "--local-app-home", description = "Local App Home")
+  private String  localAppHome  = null;
   
   @Parameter(names = "--log4j-config-url", description = "Log4j Config Url")
-  private String              log4jConfigUrl = "classpath:vm-log4j.properties";
+  private String   log4jConfigUrl = "classpath:vm-log4j.properties";
+  
+  @Parameter(names = "--enable-gc-log", description = "Enable GC Log")
+  private boolean  enableGCLog = true;
+  
+  @Parameter(names = "--profiler-opts", description = "Options for profiler such yourkit")
+  private String profilerOpts ;
+  
   
   @DynamicParameter(names = "--vm-resource:", description = "The resources for the vm")
   private Map<String, String> vmResources      = new LinkedHashMap<String, String>();
@@ -80,9 +87,9 @@ public class VMConfig {
     new JCommander(this, args);
   }
   
-  public String getName() { return name; }
-  public VMConfig setName(String name) { 
-    this.name = name;
+  public String getVmId() { return vmId; }
+  public VMConfig setVmId(String vmId) { 
+    this.vmId = vmId;
     return this;
   }
   
@@ -111,18 +118,31 @@ public class VMConfig {
     return this;
   }
   
-  public String getAppHome() { return appHome; }
-  public void setAppHome(String appHome) { this.appHome = appHome; }
+  public String getDfsAppHome() { return dfsAppHome; }
+  public void setDfsAppHome(String dfsAppHome) { this.dfsAppHome = dfsAppHome; }
   
-  public String getAppDataDir() { return appDataDir; }
-  public void   setAppDataDir(String appDataDir) { this.appDataDir = appDataDir; }
+  public String getLocalAppHome() { return localAppHome; }
+  
+  public void   setLocalAppHome(String localAppHome) { this.localAppHome = localAppHome; }
   
   public String getLog4jConfigUrl() { return log4jConfigUrl; }
-  public void   setLog4jConfigUrl(String url) { 
-    if(url == null || url.length() == 0) return;
-    log4jConfigUrl = url; 
+  public VMConfig   setLog4jConfigUrl(String url) { 
+    if(url != null && url.length() > 0) log4jConfigUrl = url; 
+    return this;
   }
   
+  public boolean isEnableGCLog() { return enableGCLog; }
+  public VMConfig setEnableGCLog(boolean enableGCLog) { 
+    this.enableGCLog = enableGCLog; 
+    return this;
+  }
+
+  public String getProfilerOpts() { return profilerOpts; }
+  public VMConfig setProfilerOpts(String profilerOpts) { 
+    this.profilerOpts = profilerOpts; 
+    return this;
+  }
+
   public Map<String, String> getVmResources() { return vmResources; }
   public void setVmResources(Map<String, String> vmResources) { this.vmResources = vmResources; }
   public void addVMResource(String name, String resource) {
@@ -237,15 +257,27 @@ public class VMConfig {
   
   public String buildCommand() {
     StringBuilder b = new StringBuilder() ;
-    b.append("java ").append(" -Xmx" + requestMemory + "m ").append(VM.class.getName()) ;
+    b.append("java ").append(" -Xmx" + requestMemory + "m ");
+    addJVMOptions(b);
     addParameters(b);
+    b.append(VM.class.getName()) ;
     System.out.println("Command: " + b.toString());
     return b.toString() ;
   }
   
+  private void addJVMOptions(StringBuilder b) {
+    if(enableGCLog) {
+      b.append(" -Xloggc:" + localAppHome + "/logs/gc.log ");
+    }
+    
+    if(profilerOpts != null) {
+      //b.append(" -Xloggc:" + localAppHome + "/logs/gc.log ");
+    }
+  }
+   
   private void addParameters(StringBuilder b) {
-    if(name != null) {
-      b.append(" --name ").append(name) ;
+    if(vmId != null) {
+      b.append(" --vm-id ").append(vmId) ;
     }
     
     if(roles != null && roles.size() > 0) {
@@ -259,8 +291,12 @@ public class VMConfig {
     
     b.append(" --memory ").append(requestMemory) ;
     
-    if(appHome != null) {
-      b.append(" --app-home ").append(appHome) ;
+    if(dfsAppHome != null) {
+      b.append(" --dfs-app-home ").append(dfsAppHome) ;
+    }
+    
+    if(localAppHome != null) {
+      b.append(" --local-app-home ").append(localAppHome) ;
     }
     
     for(Map.Entry<String, String> entry : vmResources.entrySet()) {

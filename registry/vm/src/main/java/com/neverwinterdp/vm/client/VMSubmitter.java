@@ -40,7 +40,7 @@ public class VMSubmitter {
     }
     
     VMDescriptor masterVMDescriptor = vmClient.getMasterVMDescriptor();
-    vmConfig.setAppHome(dfsAppHome);
+    vmConfig.setDfsAppHome(dfsAppHome);
     vmConfig.addVMResource("vm.libs", dfsAppHome + "/libs");
     vmConfig.addVMResource("vm.config", dfsAppHome + "/config");
     CommandResult<?> result = vmClient.execute(masterVMDescriptor, new VMServiceCommand.Allocate(vmConfig));

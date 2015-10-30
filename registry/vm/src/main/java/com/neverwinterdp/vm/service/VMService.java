@@ -99,7 +99,7 @@ public class VMService {
         }
       }
     };
-    String heartbeatPath = getVMHeartbeatPath(vmDescriptor.getVmConfig().getName());
+    String heartbeatPath = getVMHeartbeatPath(vmDescriptor.getVmConfig().getVmId());
     registryListener.watch(heartbeatPath, heartbeatWatcher, true);
   }
   
@@ -112,13 +112,13 @@ public class VMService {
     //Copy the vm descriptor to the history path. This is not efficient, 
     //but zookeeper does not provide the move method
     Transaction transaction = registry.getTransaction();
-    transaction.create(HISTORY_PATH + "/" + descriptor.getVmConfig().getName(), new byte[0], NodeCreateMode.PERSISTENT);
-    transaction.delete(ACTIVE_PATH + "/" + descriptor.getVmConfig().getName());
+    transaction.create(HISTORY_PATH + "/" + descriptor.getVmConfig().getVmId(), new byte[0], NodeCreateMode.PERSISTENT);
+    transaction.delete(ACTIVE_PATH + "/" + descriptor.getVmConfig().getVmId());
     transaction.commit();
   }
   
   public boolean isRunning(VMDescriptor descriptor) throws Exception {
-    Node statusNode = registry.get(ALL_PATH + "/" + descriptor.getVmConfig().getName() + "/status");
+    Node statusNode = registry.get(ALL_PATH + "/" + descriptor.getVmConfig().getVmId() + "/status");
     if(!statusNode.exists()) return false;
     VMStatus status = statusNode.getDataAs(VMStatus.class);
     if(statusNode.hasChild("heartbeat")) {
@@ -170,7 +170,7 @@ public class VMService {
     registry.createIfNotExist(HISTORY_PATH) ;
     registry.createIfNotExist(LEADER_PATH) ;
     
-    String vmPath  = ALL_PATH + "/" + descriptor.getVmConfig().getName();
+    String vmPath  = ALL_PATH + "/" + descriptor.getVmConfig().getVmId();
     descriptor.setRegistryPath(vmPath);
     
     Transaction transaction = registry.getTransaction() ;
@@ -178,7 +178,7 @@ public class VMService {
     transaction.setData(vmPath, descriptor) ;
     transaction.create(vmPath + "/status", VMStatus.ALLOCATED, NodeCreateMode.PERSISTENT);
     transaction.create(vmPath + "/commands", new byte[0], NodeCreateMode.PERSISTENT) ;
-    transaction.create(ACTIVE_PATH + "/" + descriptor.getVmConfig().getName(), new byte[0], NodeCreateMode.PERSISTENT) ;
+    transaction.create(ACTIVE_PATH + "/" + descriptor.getVmConfig().getVmId(), new byte[0], NodeCreateMode.PERSISTENT) ;
     transaction.commit();
   }
 }

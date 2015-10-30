@@ -68,6 +68,8 @@ DATAFLOW_STORAGE=$(get_opt --dataflow-storage 'kafka' $@)
 
 DATAFLOW_NUM_OF_WORKER=$(get_opt --dataflow-num-of-worker '2' $@)
 DATAFLOW_NUM_OF_EXECUTOR_PER_WORKER=$(get_opt --dataflow-num-of-executor-per-worker '2' $@)
+DATAFLOW_WORKER_ENABLE_GC=$(has_opt "--dataflow-worker-enable-gc" $@ )
+DATAFLOW_WORKER_PROFILER_OPTS=$(get_opt --dataflow-worker-profiler-opts '' $@)
 
 DATAFLOW_KILL_WORKER_RANDOM=$(get_opt --dataflow-kill-worker-random 'false' $@)
 DATAFLOW_KILL_WORKER_MAX=$(get_opt --dataflow-kill-worker-max '5' $@)
@@ -134,6 +136,7 @@ $SHELL dataflow submit \
   --dataflow-config $DATAFLOW_DESCRIPTOR_FILE \
   --dataflow-id tracking-dataflow --dataflow-max-runtime $DATAFLOW_MAX_RUNTIME  \
   --dataflow-num-of-worker $DATAFLOW_NUM_OF_WORKER --dataflow-num-of-executor-per-worker $DATAFLOW_NUM_OF_EXECUTOR_PER_WORKER \
+  --dataflow-worker-enable-gc $DATAFLOW_WORKER_ENABLE_GC --dataflow-worker-profiler-opts $DATAFLOW_WORKER_PROFILER_OPTS \
   --wait-for-running-timeout 180000 
 
 if [ "$DATAFLOW_KILL_WORKER_RANDOM" = "true" ] ; then

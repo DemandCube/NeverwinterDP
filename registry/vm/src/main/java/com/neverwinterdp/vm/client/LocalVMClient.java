@@ -23,7 +23,7 @@ public class LocalVMClient extends VMClient {
   public void createVMMaster(String localAppHome, String name) throws Exception {
     VMConfig vmConfig = new VMConfig() ;
     vmConfig.
-      setName(name).
+      setVmId(name).
       addRoles("vm-master").
       setSelfRegistration(true).
       setVmApplication(VMServiceApp.class.getName()).

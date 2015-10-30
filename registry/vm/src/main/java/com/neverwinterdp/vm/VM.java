@@ -66,7 +66,7 @@ public class VM {
   public RuntimeEnv getRuntimeEnv() { return appContainer.getRuntimeEnv(); }
   
   private VMDescriptor initContainer(VMDescriptor vmDescriptor, final VMConfig vmConfig) throws Exception {
-    final String vmDescriptorPath = VMService.ALL_PATH + "/" + vmConfig.getName();
+    final String vmDescriptorPath = VMService.ALL_PATH + "/" + vmConfig.getVmId();
     final RegistryConfig rConfig = vmConfig.getRegistryConfig();
     final Registry registry = rConfig.newInstance().connect();
     
@@ -77,7 +77,9 @@ public class VM {
     Map<String, String> props = vmConfig.getProperties();
     props.put("vm.registry.allocated.path", vmDescriptorPath);
     String hostname = NetworkUtil.getHostname();
-    AppModule appModule = new AppModule(hostname, vmConfig.getName(), vmConfig.getAppHome(), vmConfig.getAppDataDir(), props) {
+    String localAppHome = vmConfig.getLocalAppHome();
+    String localAppDataDir = localAppHome + "/data";
+    AppModule appModule = new AppModule(hostname, vmConfig.getVmId(), localAppHome, localAppDataDir, props) {
       @Override
       protected void configure(Map<String, String> properties) {
         super.configure(properties);
@@ -225,18 +227,10 @@ public class VM {
     long start = System.currentTimeMillis() ;
     System.out.println("VM: main(..) start");
     VMConfig vmConfig = new VMConfig(args);
-    String vmDir = null ;
-    File hadoopDir = new File("/opt/hadoop");
-    if(hadoopDir.exists()) {
-      vmDir = "/opt/hadoop/vm/" + vmConfig.getName();
-      System.setProperty("vm.app.dir", vmDir);
-      System.setProperty("app.home", vmDir);
-    } else {
-      vmDir = "target/vm/" + vmConfig.getName();
-      System.setProperty("vm.app.dir", vmDir);
-      System.setProperty("app.home", vmDir);
-    }
-    vmConfig.setAppDataDir(vmDir + "/data");
+    String vmDir = vmConfig.getLocalAppHome() ;
+    System.setProperty("vm.app.dir", vmDir);
+    System.setProperty("app.home", vmDir);
+    
     Properties log4jProps = new Properties();
     log4jProps.load(IOUtil.loadRes(vmConfig.getLog4jConfigUrl()));
     LoggerFactory.log4jConfigure(log4jProps);

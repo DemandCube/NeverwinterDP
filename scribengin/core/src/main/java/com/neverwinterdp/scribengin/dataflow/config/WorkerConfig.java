@@ -1,12 +1,16 @@
 package com.neverwinterdp.scribengin.dataflow.config;
 
 public class WorkerConfig {
-  private int  numOfInstances          = 2;
-  private int  memory                  = 128;
-  private int  cpuCores                = 1;
-  private int  numOfExecutor           = 2;
-  private long taskSwitchingPeriod     = 5000;
-  private long maxWaitForRunningStatus = 60000;
+  private int     numOfInstances          = 2;
+  private int     memory                  = 128;
+  private int     cpuCores                = 1;
+  private int     numOfExecutor           = 2;
+  private long    taskSwitchingPeriod     = 5000;
+  private long    maxWaitForRunningStatus = 60000;
+  
+  private String  log4jConfigUrl = "classpath:scribengin/log4j/vm-log4j.properties";
+  private boolean enableGCLog             = false;
+  private String  profilerOpts ;
 
   public int getNumOfInstances() { return numOfInstances; }
   public void setNumOfInstances(int numOfInstances) {
@@ -31,4 +35,15 @@ public class WorkerConfig {
   public void setMaxWaitForRunningStatus(long maxWaitForRunningStatus) {
     this.maxWaitForRunningStatus = maxWaitForRunningStatus;
   }
+  
+  public String getLog4jConfigUrl() { return log4jConfigUrl; }
+  public void setLog4jConfigUrl(String log4jConfigUrl) {
+    this.log4jConfigUrl = log4jConfigUrl;
+  }
+  
+  public boolean isEnableGCLog() { return enableGCLog; }
+  public void setEnableGCLog(boolean enableGCLog) { this.enableGCLog = enableGCLog;}
+  
+  public String getProfilerOpts() { return profilerOpts;}
+  public void setProfilerOpts(String profilerOpts) { this.profilerOpts = profilerOpts; }
 }
