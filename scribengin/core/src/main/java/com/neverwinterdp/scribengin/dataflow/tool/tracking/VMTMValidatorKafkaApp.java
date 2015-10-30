@@ -104,7 +104,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
     }
     
     public void start() {
-      int NUM_OF_THREAD = 2;
+      int NUM_OF_THREAD = 3;
       executorService = Executors.newFixedThreadPool(NUM_OF_THREAD);
       for(int i = 0; i < NUM_OF_THREAD; i++) {
         Runnable runnable = new Runnable() {

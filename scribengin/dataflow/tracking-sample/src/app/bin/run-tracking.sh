@@ -155,7 +155,7 @@ if [ $VALIDATOR_DISABLE == "false" ] ; then
     --dfs-app-home $DFS_APP_HOME \
     --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
     --vm-id vm-tracking-validator-1 --role tracking-validator \
-    --enable-gc-log  \
+    --enable-gc-log \
     --vm-application  com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp \
     --prop:tracking.report-path=$TRACKING_REPORT_PATH \
     --prop:tracking.num-of-reader=$VALIDATOR_NUM_OF_READER \
