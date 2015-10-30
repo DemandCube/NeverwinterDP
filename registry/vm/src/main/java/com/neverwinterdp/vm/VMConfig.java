@@ -287,9 +287,7 @@ public class VMConfig {
       b.append(" -Xloggc:" + logFile + " -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps");
     }
     
-    if(profilerOpts != null) {
-      //b.append(" -Xloggc:" + localAppHome + "/logs/gc.log ");
-    }
+    b.append(" -agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 ");
   }
    
   private void addParameters(StringBuilder b) {
