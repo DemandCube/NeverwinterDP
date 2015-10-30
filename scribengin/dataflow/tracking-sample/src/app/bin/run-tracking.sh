@@ -114,7 +114,9 @@ $SHELL vm upload-app --local $APP_DIR --dfs $DFS_APP_HOME
 $SHELL vm submit \
   --dfs-app-home $DFS_APP_HOME \
   --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP  --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
-  --name vm-tracking-generator-1 --role vm-tracking-generator --vm-application  com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMGeneratorKafkaApp \
+  --vm-id vm-tracking-generator-1 --role vm-tracking-generator \
+  --enable-gc-log \
+  --vm-application  com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMGeneratorKafkaApp \
   --prop:tracking.report-path=$TRACKING_REPORT_PATH \
   --prop:tracking.num-of-writer=$GENERATOR_NUM_OF_WRITER \
   --prop:tracking.num-of-chunk=$GENERATOR_NUM_OF_CHUNK \
@@ -152,7 +154,9 @@ if [ $VALIDATOR_DISABLE == "false" ] ; then
   $SHELL vm submit  \
     --dfs-app-home $DFS_APP_HOME \
     --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
-    --name vm-tracking-validator-1 --role tracking-validator --vm-application  com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp \
+    --vm-id vm-tracking-validator-1 --role tracking-validator \
+    --enable-gc-log \
+    --vm-application  com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp \
     --prop:tracking.report-path=$TRACKING_REPORT_PATH \
     --prop:tracking.num-of-reader=$VALIDATOR_NUM_OF_READER \
     --prop:tracking.expect-num-of-message-per-chunk=$GENERATOR_NUM_OF_MESSAGE_PER_CHUNK \
