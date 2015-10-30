@@ -33,7 +33,7 @@ public class KafkaPartitionReader {
   private KafkaClient kafkaClient ;
   private String topic ;
   private PartitionMetadata partitionMetadata;
-  private int fetchSize = 100000;
+  private int fetchSize = 1024 * 1024;
   private SimpleConsumer consumer;
   private long currentOffset;
   
