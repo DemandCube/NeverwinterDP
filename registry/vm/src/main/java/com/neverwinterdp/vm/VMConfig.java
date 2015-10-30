@@ -259,8 +259,9 @@ public class VMConfig {
     StringBuilder b = new StringBuilder() ;
     b.append("java ").append(" -Xmx" + requestMemory + "m ");
     addJVMOptions(b);
+    b.append(" ").append(VM.class.getName()).append(" ") ;
     addParameters(b);
-    b.append(VM.class.getName()) ;
+   
     System.out.println("Command: " + b.toString());
     return b.toString() ;
   }
