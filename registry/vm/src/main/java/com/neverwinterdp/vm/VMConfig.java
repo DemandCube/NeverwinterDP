@@ -267,8 +267,11 @@ public class VMConfig {
   }
   
   private void addJVMOptions(StringBuilder b) {
+    b.append(" -server -Djava.awt.headless=true ");
+    b.append("-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSScavengeBeforeRemark -XX:+DisableExplicitGC");
+    
     if(enableGCLog) {
-      b.append(" -Xloggc:" + localAppHome + "/logs/gc.log ");
+      b.append(" -Xloggc:" + localAppHome + "/logs/gc.log -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps");
     }
     
     if(profilerOpts != null) {
