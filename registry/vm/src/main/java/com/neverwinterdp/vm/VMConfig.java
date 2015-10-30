@@ -272,7 +272,7 @@ public class VMConfig {
     b.append("-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSScavengeBeforeRemark -XX:+DisableExplicitGC");
     
     if(enableGCLog) {
-      String logFile = ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/gc.log";
+      String logFile = ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/" + vmId + "-gc.log";
       b.append(" -Xloggc:" + logFile + " -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps");
     }
     
