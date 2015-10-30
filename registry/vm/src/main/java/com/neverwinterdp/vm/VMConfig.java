@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.ApplicationConstants;
 
 import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.JCommander;
@@ -271,7 +272,8 @@ public class VMConfig {
     b.append("-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSScavengeBeforeRemark -XX:+DisableExplicitGC");
     
     if(enableGCLog) {
-      b.append(" -Xloggc:" + localAppHome + "/logs/gc.log -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps");
+      String logFile = ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/gc.log";
+      b.append(" -Xloggc:" + logFile + " -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps");
     }
     
     if(profilerOpts != null) {
