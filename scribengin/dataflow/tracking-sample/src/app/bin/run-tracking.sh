@@ -131,12 +131,13 @@ $SHELL vm wait-for-vm-status --vm-id vm-tracking-generator-1 --vm-status TERMINA
 #########################################################################################################################
 # Launch A Dataflow Chain                                                                                               #
 #########################################################################################################################
+#--dataflow-worker-enable-gc $DATAFLOW_WORKER_ENABLE_GC --dataflow-worker-profiler-opts $DATAFLOW_WORKER_PROFILER_OPTS \
 $SHELL dataflow submit \
   --dfs-app-home $DFS_APP_HOME \
   --dataflow-config $DATAFLOW_DESCRIPTOR_FILE \
   --dataflow-id tracking-dataflow --dataflow-max-runtime $DATAFLOW_MAX_RUNTIME  \
   --dataflow-num-of-worker $DATAFLOW_NUM_OF_WORKER --dataflow-num-of-executor-per-worker $DATAFLOW_NUM_OF_EXECUTOR_PER_WORKER \
-  --dataflow-worker-enable-gc $DATAFLOW_WORKER_ENABLE_GC --dataflow-worker-profiler-opts $DATAFLOW_WORKER_PROFILER_OPTS \
+  --dataflow-worker-enable-gc  \
   --wait-for-running-timeout 180000 
 
 if [ "$DATAFLOW_KILL_WORKER_RANDOM" = "true" ] ; then
