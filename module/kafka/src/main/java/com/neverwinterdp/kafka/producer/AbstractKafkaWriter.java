@@ -64,6 +64,5 @@ abstract public class AbstractKafkaWriter implements KafkaWriter {
   }
   
   public void commit() throws Exception {
-    
   }
 }

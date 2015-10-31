@@ -108,12 +108,12 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
   }
   
   public void commit() throws Exception {
-    waittingAckBuffer.waitForEmptyBuffer(90000);
+    waittingAckBuffer.waitForEmptyBuffer(60000);
   }
   
   public void close() throws InterruptedException { 
     if(resendThread != null && resendThread.isAlive()) {
-      resendThread.waitForTermination(90000);
+      resendThread.waitForTermination(60000);
     }
     if(producer == null) return;
     producer.close(); 
