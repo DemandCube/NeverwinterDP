@@ -7,7 +7,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskService;
-import com.neverwinterdp.registry.task.switchable.SwitchableTaskService;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowInitActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowMasterActivityService;

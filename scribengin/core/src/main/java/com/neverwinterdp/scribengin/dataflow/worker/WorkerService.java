@@ -104,7 +104,8 @@ private Logger logger ;
   
   public void waitForTermination() throws RegistryException, InterruptedException {
     System.out.println("DataflowWorkerService: waitForTermination()");
-    taskService.getTaskExecutorService().awaitTermination(1, TimeUnit.DAYS);
+    long maxRunTime = dflRegistry.getConfigRegistry().getDataflowConfig().getMaxRunTime();
+    taskService.getTaskExecutorService().awaitTermination(maxRunTime, TimeUnit.MILLISECONDS);
     if(simulateKill) return;
     
     taskService.onDestroy();
