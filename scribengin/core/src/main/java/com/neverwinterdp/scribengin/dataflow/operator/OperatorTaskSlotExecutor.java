@@ -61,7 +61,7 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
         if(lastNoMessageTime < 0) lastNoMessageTime = currentTime;
         report.setAssignedWithNoMessageProcess(report.getAssignedWithNoMessageProcess() + 1);
         report.setLastAssignedWithNoMessageProcess(report.getLastAssignedWithNoMessageProcess() + 1);
-        if(lastNoMessageTime + 45000 < currentTime) {
+        if(lastNoMessageTime + 30000 < currentTime) {
           getTaskContext().setComplete();
           context.setComplete();
         }
@@ -71,7 +71,7 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
       }
       report.addAccRuntime(currentTime - startTime);
       
-      if(context.isComplete() || report.getProcessCount() > 5000 || lastFlushTime + 10000 < currentTime) {
+      if(context.isComplete() || report.getProcessCount() > 15000 || lastFlushTime + 10000 < currentTime) {
         updateContext();
       }
     } catch(InterruptedException ex) {
