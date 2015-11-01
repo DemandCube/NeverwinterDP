@@ -71,7 +71,7 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
       }
       report.addAccRuntime(currentTime - startTime);
       
-      if(context.isComplete() || report.getProcessCount() > 10000 || lastFlushTime + 10000 < currentTime) {
+      if(context.isComplete() || report.getProcessCount() > 10000 || lastFlushTime + 30000 < currentTime) {
         updateContext();
       }
     } catch(InterruptedException ex) {
