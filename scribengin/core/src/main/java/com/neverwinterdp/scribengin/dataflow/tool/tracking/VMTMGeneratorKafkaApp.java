@@ -55,7 +55,7 @@ public class VMTMGeneratorKafkaApp extends VMApp {
   public class KafkaTrackingMessageWriter extends TrackingMessageWriter {
     private String            topic;
     private AckKafkaWriter    kafkaWriter;
-    
+    private int               counter = 0;
     KafkaTrackingMessageWriter(String topic) {
       this.topic = topic;
     }
@@ -73,6 +73,10 @@ public class VMTMGeneratorKafkaApp extends VMApp {
     public void write(TrackingMessage message) throws Exception {
       String json = JSONSerializer.INSTANCE.toString(message);
       kafkaWriter.send(topic, json, 30 * 1000);
+      counter++ ;
+      if(counter % 10000 == 0) {
+        kafkaWriter.commit();
+      }
     }
   }
 }
