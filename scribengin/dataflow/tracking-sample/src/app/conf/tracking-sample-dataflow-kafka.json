@@ -18,7 +18,7 @@
   },
 
   "streamConfig": {
-    "parallelism": 8,
+    "parallelism": 6,
     "replication": 2,
 
     "streams": {
