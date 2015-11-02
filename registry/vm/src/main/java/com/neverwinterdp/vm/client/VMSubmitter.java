@@ -68,9 +68,7 @@ public class VMSubmitter {
   }
   
   public void waitForTerminated(long timeout) throws Exception {
-    VMStatus[] status = new VMStatus[] {
-      VMStatus.TERMINATED
-    };
+    VMStatus[] status = new VMStatus[] { VMStatus.TERMINATED };
     waitForStatus(timeout, status) ;
   }
   
