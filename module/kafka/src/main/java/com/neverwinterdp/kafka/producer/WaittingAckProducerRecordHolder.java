@@ -53,6 +53,18 @@ public class WaittingAckProducerRecordHolder<K, V> {
     wait(waitTime);
   }
   
+  synchronized void waitForEmptyBuffer(long waitTime) throws Exception {
+    long startTime = System.currentTimeMillis();
+    while(buffer.size() > 0) {
+      long remainTime = waitTime - (System.currentTimeMillis() - startTime);
+      if(remainTime <= 0) break;
+      wait(remainTime);
+    }
+    if(buffer.size() > 0) { 
+      throw new Exception("Not all messages are sent and ack after " + waitTime + "ms");
+    }
+  }
+
   synchronized void notifyForAvailableBuffer() {
     notify();
   }

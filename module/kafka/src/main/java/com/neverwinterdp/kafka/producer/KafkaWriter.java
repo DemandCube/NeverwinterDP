@@ -22,5 +22,7 @@ public interface KafkaWriter {
 
   public void send(String topic, int partition, byte[] key, byte[] data, Callback callback, long timeout) throws Exception ;
   
+  public void commit() throws Exception ;
+  
   public void close() throws Exception ;
 }

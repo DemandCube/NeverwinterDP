@@ -62,4 +62,7 @@ abstract public class AbstractKafkaWriter implements KafkaWriter {
       return UUID.randomUUID().toString();
     }
   }
+  
+  public void commit() throws Exception {
+  }
 }
