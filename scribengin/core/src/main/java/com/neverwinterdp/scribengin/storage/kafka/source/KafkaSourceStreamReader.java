@@ -16,7 +16,8 @@ public class KafkaSourceStreamReader implements SourcePartitionStreamReader {
   
   public KafkaSourceStreamReader(KafkaClient kafkaClient, PartitionConfig pConfig, PartitionMetadata pmd) throws Exception {
     this.partitionConfig = pConfig;
-    this.partitionReader = new KafkaPartitionReader(pConfig.attribute("name"), kafkaClient, pConfig.attribute("topic"), pmd);
+    String readerName = pConfig.attribute("name");
+    this.partitionReader = new KafkaPartitionReader(readerName, kafkaClient, pConfig.attribute("topic"), pmd);
   }
   
   @Override

@@ -74,6 +74,7 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
       for(int i = activeWorkers.size(); i < dflConfig.getWorker().getNumOfInstances(); i++) {
         String workerId = dflConfig.getId() + "-worker-" + idTracker.nextSeqId();
         allocate(dflRegistry, dflConfig, workerId);
+        Thread.sleep(5000);
       }
     }
     
