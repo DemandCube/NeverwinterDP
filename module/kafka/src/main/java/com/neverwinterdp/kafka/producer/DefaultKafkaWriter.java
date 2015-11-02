@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 
@@ -26,9 +27,21 @@ public class DefaultKafkaWriter extends AbstractKafkaWriter {
   public DefaultKafkaWriter(String name, Map<String, String> props, String kafkaBrokerUrls) {
     super(name);
     Properties kafkaProps = new Properties();
-    kafkaProps.put("bootstrap.servers", kafkaBrokerUrls);
-    kafkaProps.put("value.serializer", ByteArraySerializer.class.getName());
-    kafkaProps.put("key.serializer",   ByteArraySerializer.class.getName());
+    kafkaProps.setProperty(ProducerConfig.CLIENT_ID_CONFIG, name);
+    kafkaProps.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBrokerUrls);
+    kafkaProps.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
+    kafkaProps.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,   ByteArraySerializer.class.getName());
+    
+    kafkaProps.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+    kafkaProps.setProperty(ProducerConfig.RETRIES_CONFIG, "3");
+    kafkaProps.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, "16384");
+    kafkaProps.setProperty(ProducerConfig.BLOCK_ON_BUFFER_FULL_CONFIG, "true");
+    
+    kafkaProps.setProperty(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, "100");
+    kafkaProps.setProperty(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, "10");
+    
+    kafkaProps.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
+    
     this.kafkaProperties = kafkaProps;
     if (props != null) {
       kafkaProps.putAll(props);
