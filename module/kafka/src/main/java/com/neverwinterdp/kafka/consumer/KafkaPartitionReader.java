@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.neverwinterdp.kafka.BrokerRegistration;
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.util.JSONSerializer;
 
@@ -73,12 +74,12 @@ public class KafkaPartitionReader {
       Thread.sleep(retryDelay);
       //Refresh the partition metadata
       try {
-      partitionMetadata = kafkaClient.findPartitionMetadata(topic, partitionMetadata.partitionId());
-      Broker broker = partitionMetadata.leader();
-      if(broker != null) {
-        consumer = new SimpleConsumer(broker.host(), broker.port(), 60000, 2 * fetchSize, name);
-        return;
-      }
+        partitionMetadata = kafkaClient.findPartitionMetadata(topic, partitionMetadata.partitionId());
+        Broker broker = partitionMetadata.leader();
+        if(broker != null) {
+          consumer = new SimpleConsumer(broker.host(), broker.port(), 60000, 2 * fetchSize, name);
+          return;
+        }
       } catch(Exception ex) {
         error = ex ;
       }
