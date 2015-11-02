@@ -64,9 +64,9 @@ public class Segment {
   
   public Segment(FileStatus fileStatus)  {
     String fileName = fileStatus.getPath().getName();
-    int lastDotIdx = fileName.lastIndexOf('.');
-    String name = fileName.substring(0, lastDotIdx);
-    String[] part = name.split("-");
+    int lastDotIdx  = fileName.lastIndexOf('.');
+    String name     = fileName.substring(0, lastDotIdx);
+    String[] part   = name.split("-");
     type = Type.valueOf(part[1]); 
     createdTime = part[2];
     uuid = part[3];

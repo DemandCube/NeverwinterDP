@@ -84,7 +84,7 @@ private Logger logger ;
     for(int i = 0; i < dflConfig.getWorker().getNumOfExecutor(); i++) {
       TaskExecutor<OperatorTaskConfig> executor = 
           new TaskExecutor<OperatorTaskConfig>(vmDescriptor.getId() + "-executor-" + i, taskService) ;
-      taskService.addExecutor(executor.getTaskExecutorDescriptor(), 3);
+      taskService.addExecutor(executor.getTaskExecutorDescriptor(), 2);
     }
     Node workerNode = dflRegistry.getWorkerRegistry().getWorkerNode(vmDescriptor.getId());
     notifier = new Notifier(dflRegistry.getRegistry(), workerNode.getPath() + "/notifications", "dataflow-worker-service");
