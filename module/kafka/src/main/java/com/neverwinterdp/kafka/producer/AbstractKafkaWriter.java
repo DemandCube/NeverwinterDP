@@ -2,6 +2,7 @@ package com.neverwinterdp.kafka.producer;
 
 import java.nio.charset.Charset;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.kafka.clients.producer.Callback;
 
@@ -14,8 +15,12 @@ import com.neverwinterdp.util.JSONSerializer;
 abstract public class AbstractKafkaWriter implements KafkaWriter {
   final static public  Charset UTF8 = Charset.forName("UTF-8") ;
   
+  private String writerUUID     = UUID.randomUUID().toString();
+  private AtomicLong  idTracker = new AtomicLong();
+  
   private String name;
-
+  
+  
   public String getName() { return name; }
 
   public void setName(String name) { this.name = name; }
@@ -57,9 +62,9 @@ abstract public class AbstractKafkaWriter implements KafkaWriter {
   
   private String nextKey(int partition) {
     if(partition >= 0) {
-      return "p:" + partition + ":" + UUID.randomUUID().toString();
+      return "p:" + partition + ":" + writerUUID + ":" + idTracker.incrementAndGet();
     } else {
-      return UUID.randomUUID().toString();
+      return writerUUID + ":" + idTracker.incrementAndGet();
     }
   }
   
