@@ -109,20 +109,24 @@ private Logger logger ;
       taskService.getTaskExecutorService().awaitTermination(maxRunTime, TimeUnit.MILLISECONDS);
     } catch(InterruptedException ex) {
       if(simulateKill) {
-        taskService.getTaskExecutorService().awaitTermination(15, TimeUnit.SECONDS);
+        dataflowWorkerEventWatcher.setComplete();
+        throw new RuntimeException("Simulate Kill", ex) ;
       }
-      throw ex ;
+      throw ex;
     }
-    
     taskService.onDestroy();
+    dataflowWorkerEventWatcher.setComplete();
     workerStatus = DataflowWorkerStatus.TERMINATED;
     dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
     dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getId(), metricRegistry);
   }
   
-  public void shutdown() {
-    taskService.getTaskExecutorService().shutdown();
+  public void shutdown() throws InterruptedException, RegistryException {
+    taskService.onDestroy();
     dataflowWorkerEventWatcher.setComplete();
+    workerStatus = DataflowWorkerStatus.TERMINATED_WITH_INTERRUPT;
+    dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
+    dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getId(), metricRegistry);
   }
   
   public void simulateKill() throws Exception {
@@ -131,7 +135,8 @@ private Logger logger ;
     notifier.info("start-simulate-kill", "DataflowTaskExecutorService: start simulateKill()");
     simulateKill = true ;
     if(workerStatus.lessThan(DataflowWorkerStatus.TERMINATED)) {
-      taskService.getTaskExecutorService().simulateKill();
+      System.err.println("WorkerService: taskService.getTaskExecutorService().simulateKill()"); 
+      taskService.simulateKill();
     }
     notifier.info("finish-simulate-kill", "DataflowTaskExecutorService: finish simulateKill()");
     logger.info("Finish kill()");

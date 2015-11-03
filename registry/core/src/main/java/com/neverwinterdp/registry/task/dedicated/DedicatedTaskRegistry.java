@@ -349,7 +349,7 @@ public class DedicatedTaskRegistry<T> {
         if(executor.getStatus().toString().indexOf("TERMINATED") < 0) {
           List<String> taskIds = executorsAllNode.getChild(executorId).getChild("tasks").getChildren();
           for(String taskId : taskIds) {
-            transaction.createChild(taskAvailableNode, taskId, NodeCreateMode.PERSISTENT);
+            transaction.createChild(taskAvailableNode, taskId +  "-", NodeCreateMode.PERSISTENT_SEQUENTIAL);
           }
           executor.setStatus(TaskExecutorDescriptor.TasExecutorStatus.TERMINATED_WITH_ERROR);
         }

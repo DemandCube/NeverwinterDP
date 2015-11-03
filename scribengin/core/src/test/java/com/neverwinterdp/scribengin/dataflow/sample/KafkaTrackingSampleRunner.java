@@ -114,7 +114,7 @@ public class KafkaTrackingSampleRunner  {
 
     shell.execute(
       "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor" +
-      "  --dataflow-id " + dataflowId +
+      "  --dataflow-id " + dataflowId + " --show-history-workers " +
       "  --report-path " + REPORT_PATH + " --max-runtime " + dataflowMaxRuntime +"  --print-period 10000"
     );
     

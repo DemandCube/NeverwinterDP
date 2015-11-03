@@ -17,14 +17,20 @@ public class DedicatedTaskService<T> {
   public DedicatedTaskService(DedicatedTaskRegistry<T> taskRegistry, TaskSlotExecutorFactory<T> taskSlotExecutorFactory) throws RegistryException {
     this.taskRegistry = taskRegistry;
     this.taskSlotExecutorFactory = taskSlotExecutorFactory;
-    taskWatcher = new DedicatedTaskWatcher<T>(taskRegistry) ;
+    taskWatcher = new DedicatedTaskWatcher<T>(taskRegistry);
     taskExecutorService = new TaskExecutorService<T>();
   }
   
   @PreDestroy
-  public void onDestroy() {
+  public void onDestroy() throws InterruptedException {
     taskWatcher.onDestroy();
+    taskExecutorService.shutdown();
   } 
+  
+  public void simulateKill() {
+    taskWatcher.onDestroy();
+    taskExecutorService.simulateKill();
+  }
   
   public DedicatedTaskRegistry<T> getTaskRegistry() { return this.taskRegistry; }
   

@@ -79,8 +79,9 @@ public class MasterService {
     System.out.println("DataflowMasterService: waitForTermination()");
     taskMonitor.waitForAllTaskFinish(maxRunTime);
     activityService.queue(new DataflowStopActivityBuilder().build());
-    
     workerMonitor.waitForAllWorkerTerminated();
+    taskMonitor.waitForAllTaskFinish(30000);
+    
     taskService.onDestroy();
     activityService.onDestroy();
     //finish

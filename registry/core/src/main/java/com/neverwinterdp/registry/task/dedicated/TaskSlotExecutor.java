@@ -26,4 +26,7 @@ abstract public class TaskSlotExecutor<T> {
 
   public void onPostExecuteSlot() throws Exception {
   }
+  
+  public void onShutdown() throws Exception {
+  }
 }

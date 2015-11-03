@@ -42,6 +42,11 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
   public boolean isComplete() { return context.isComplete() ; }
   
   @Override
+  public void onShutdown() throws Exception {
+    saveContext();
+  }
+  
+  @Override
   public void executeSlot() throws Exception {
     startTime = System.currentTimeMillis();
     OperatorTaskReport report = context.getTaskReport();
@@ -75,12 +80,12 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
         updateContext();
       }
     } catch(InterruptedException ex) {
-      //kill simulation
       throw ex ;
     } catch(Throwable t) {
       report.setAssignedHasErrorCount(report.getAssignedHasErrorCount() + 1);
       workerService.getLogger().error("DataflowTask Error", t);
       t.printStackTrace();
+      throw t;
     }
   }
   

@@ -18,7 +18,6 @@ public class DataflowTaskMonitor implements DedicatedTaskMonitor<OperatorTaskCon
 
   @Override
   public void onLostExecutor(DedicatedTaskRegistry<OperatorTaskConfig> taskRegistry, String executorId) {
-    System.out.println("DataflowTaskMonitor: onLostExecutor " + executorId);
     try {
       taskRegistry.historyTaskExecutor(executorId);
     } catch (RegistryException e) {
@@ -52,6 +51,7 @@ public class DataflowTaskMonitor implements DedicatedTaskMonitor<OperatorTaskCon
   }
 
   synchronized public boolean waitForAllTaskFinish(long timeout) throws InterruptedException {
+    if(finished) return finished;
     if(timeout > 0) wait(timeout) ;
     else wait() ;
     return finished;

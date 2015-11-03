@@ -13,6 +13,7 @@ public class TaskExecutor<T> implements Runnable {
   private int                           numOfTaskSlot;
   private List<TaskSlotExecutor<T>>     taskSlotExecutors = new ArrayList<>();
   private TaskSlotExecutor<T>           currentRunningTaskSlotExecutor;
+  private boolean                       shutdown = false;
   
   public TaskExecutor(String id, DedicatedTaskService<T> taskService, int numOfTaskSlot) {
     executor = new TaskExecutorDescriptor(id, "NA");
@@ -30,17 +31,22 @@ public class TaskExecutor<T> implements Runnable {
     if(currentRunningTaskSlotExecutor != null) currentRunningTaskSlotExecutor.interrupt();
   }
   
+  public void shutdown() { shutdown = true; }
+  
   public void run() {
     try {
-      while(true) {
+      while(!shutdown) {
         updateTaskSlotExecutors();
         if(taskSlotExecutors.size() == 0) {
           taskService.idleExecutor(executor);
-          Thread.sleep(5000);
+          Thread.sleep(1000);
         } else {
           taskService.activeExecutor(executor);
           runTaskExecutors();
         }
+      }
+      for(TaskSlotExecutor<T> taskSlotExecutor : taskSlotExecutors) {
+        taskSlotExecutor.onShutdown();
       }
     } catch(InterruptedException e) {
     } catch(Exception e) {

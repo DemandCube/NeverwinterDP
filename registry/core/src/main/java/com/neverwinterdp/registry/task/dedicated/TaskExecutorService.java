@@ -1,16 +1,16 @@
 package com.neverwinterdp.registry.task.dedicated;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class TaskExecutorService<T> {
-  private ExecutorService       execService;
   private List<TaskExecutor<T>> taskExecutors = new ArrayList<TaskExecutor<T>>();
-  private List<Future<?>> taskExecutorsFuture = new ArrayList<>();
+  private List<TaskExecutorThread> taskExecutorsThreads = new ArrayList<>();
+  
   private TaskSlotTimerThread taskSlotTimer ;
   
   public void add(TaskExecutor<T> executor) {
@@ -22,38 +22,55 @@ public class TaskExecutorService<T> {
   }
   
   public void startExecutors(long breakIn) throws InterruptedException {
-    execService = Executors.newFixedThreadPool(taskExecutors.size());
     for(int i = 0; i < taskExecutors.size(); i++) {
       TaskExecutor<T> executor = taskExecutors.get(i) ;
-      Future<?> future = execService.submit(executor);
-      taskExecutorsFuture.add(future);
+      TaskExecutorThread executorThread = new TaskExecutorThread(executor);
+      taskExecutorsThreads.add(executorThread);
+      executorThread.start();
       if(breakIn > 0) Thread.sleep(breakIn);
     }
-    execService.shutdown();
     taskSlotTimer = new TaskSlotTimerThread();
     taskSlotTimer.start();
   }
   
   
   
-  public void shutdown() {
+  public void shutdown() throws InterruptedException {
     taskSlotTimer.interrupt();
-    execService.shutdownNow();
+    if(taskExecutors.size() > 0) {
+      for(TaskExecutor<T> executor : taskExecutors) {
+        executor.shutdown();
+      }
+      awaitTermination(30, TimeUnit.SECONDS);
+    }
   }
   
-  public void awaitTermination(long maxWaitTime, TimeUnit unit) throws InterruptedException {
-    execService.awaitTermination(maxWaitTime, unit);
+  synchronized public void awaitTermination(long maxWaitTime, TimeUnit unit) throws InterruptedException {
+    maxWaitTime = unit.toMillis(maxWaitTime);
+    long startTime = System.currentTimeMillis();
+    while(taskExecutorsThreads.size() > 0) {
+      long remainWaitTime = maxWaitTime - (System.currentTimeMillis() - startTime);
+      if(remainWaitTime <= 0) break;
+      wait(remainWaitTime);
+      Iterator<TaskExecutorThread> i = taskExecutorsThreads.iterator();
+      while(i.hasNext()) {
+        if(!i.next().isAlive()) i.remove();
+      }
+    }
     taskSlotTimer.interrupt();
+  }
+  
+  synchronized void notifyThreadTermination() {
+    notifyAll();
   }
   
   
   public void simulateKill() {
     taskSlotTimer.interrupt();
-    execService.shutdownNow();
-    for(Future<?> future : taskExecutorsFuture) {
-      future.cancel(true);
+    Iterator<TaskExecutorThread> i = taskExecutorsThreads.iterator();
+    while(i.hasNext()) {
+      i.next().interrupt();
     }
-
   }
   
   public class TaskSlotTimerThread extends Thread {
@@ -67,6 +84,22 @@ public class TaskExecutorService<T> {
         }
       } catch (InterruptedException e) {
       }
+    }
+  }
+  
+  public class TaskExecutorThread extends Thread {
+    TaskExecutor<T> executor;
+    
+    TaskExecutorThread(TaskExecutor<T> executor) {
+      this.executor = executor;
+    }
+    
+    public void run() {
+      executor.run();
+      notifyThreadTermination();
+    }
+    
+    public void shutdown() {
     }
   }
 }
