@@ -20,7 +20,7 @@ import com.neverwinterdp.util.log.LoggerFactory;
 
 public class KafkaTrackingSampleRunner  {
   String dataflowId           = "tracking-dataflow";
-  int    numOfMessagePerChunk = 2000;
+  int    numOfMessagePerChunk = 1000;
   long   dataflowMaxRuntime   = 90000;
   
   ScribenginClusterBuilder clusterBuilder ;
@@ -88,7 +88,8 @@ public class KafkaTrackingSampleRunner  {
     String dataflowChainSubmitCommand = 
         "dataflow submit " + 
         "  --dataflow-config src/test/resources/kafka-tracking-dataflow.json" +
-        "  --dataflow-id " + dataflowId + " --dataflow-max-runtime " + dataflowMaxRuntime;
+        "  --dataflow-id " + dataflowId + " --dataflow-num-of-worker 3 " + 
+        " --dataflow-max-runtime " + dataflowMaxRuntime;
     shell.execute(dataflowChainSubmitCommand);
     
     String logValidatorSubmitCommand = 

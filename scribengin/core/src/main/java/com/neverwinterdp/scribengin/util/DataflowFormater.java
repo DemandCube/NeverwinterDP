@@ -1,6 +1,7 @@
 package com.neverwinterdp.scribengin.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskReport;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerRuntimeReport;
 import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.util.text.StringUtil;
@@ -39,7 +41,7 @@ public class DataflowFormater {
   public String getFormattedText() throws RegistryException {
     StringBuilder b = new StringBuilder();
     b.append(getInfo()).append("\n");
-    b.append(getDataflowTaskInfo()).append("\n");
+    b.append(getGroupByOperatorDataflowTaskInfo()).append("\n");
     b.append(getDataflowActiveWorkerInfo()).append("\n");
     b.append(getDataflowHistoryWorkerInfo()).append("\n");
     return b.toString();
@@ -54,8 +56,20 @@ public class DataflowFormater {
     return infoFt.getFormattedText();
   }
   
-  public String getDataflowTaskInfo() throws RegistryException {
-    List<OperatorTaskRuntimeReport> reports =  DataflowRegistry.getDataflowTaskRuntimeReports(registry, dataflowPath);
+  public String getGroupByExecutorDataflowTaskInfo() throws RegistryException {
+    DataflowTaskRegistry dtRegistry = new DataflowTaskRegistry(registry, dataflowPath) ;
+    LinkedHashMap<String, List<OperatorTaskRuntimeReport>> groupByExecutorReports = new LinkedHashMap<>();
+    List<String> executorIds = dtRegistry.getAllExecutorIds();
+    for(String executorId : executorIds) {
+      List<OperatorTaskRuntimeReport> reports =  dtRegistry.getDataflowTaskRuntimeReportsByExecutorId(executorId);
+      groupByExecutorReports.put(executorId, reports);
+    }
+    return getDataflowTaskInfo(groupByExecutorReports) ;
+  }
+  
+  public String getGroupByOperatorDataflowTaskInfo() throws RegistryException {
+    DataflowTaskRegistry dtRegistry = new DataflowTaskRegistry(registry, dataflowPath) ;
+    List<OperatorTaskRuntimeReport> reports =  dtRegistry.getDataflowTaskRuntimeReports();
     LinkedHashMap<String, List<OperatorTaskRuntimeReport>> groupByOperatorReports = new LinkedHashMap<>();
     for(int i = 0; i < reports.size(); i++) {
       OperatorTaskRuntimeReport rtReport = reports.get(i);
@@ -67,9 +81,12 @@ public class DataflowFormater {
       }
       holder.add(rtReport);
     }
-    
+    return getDataflowTaskInfo(groupByOperatorReports);
+  }
+
+  String getDataflowTaskInfo(LinkedHashMap<String, List<OperatorTaskRuntimeReport>> groupByReports) throws RegistryException {
     String[] header = {
-      "Task Id", "Status", "Assigned", "AHE", "AWNM", "LAWNM", "AC", "CC", "CFC", "Last Commit Time", "Start Time", "Finish Time", "Exec Time", "Duration"
+        "Task Id", "Status", "Assigned", "AHE", "AWNM", "LAWNM", "AC", "CC", "CFC", "Last Commit Time", "Start Time", "Finish Time", "Exec Time", "Duration"
     } ;
     TabularFormater taskFt = new TabularFormater(header);
     taskFt.setTitle("Dataflow Task Info");
@@ -79,10 +96,11 @@ public class DataflowFormater {
     taskFt.addFooter("AC    = Accumulate Message Commit Count");
     taskFt.addFooter("CC    = Commit Count");
     taskFt.addFooter("CFC   = Commit Fail Count");
-    for(Map.Entry<String, List<OperatorTaskRuntimeReport>> entry : groupByOperatorReports.entrySet()) {
-      String operator = entry.getKey();
+
+    for(Map.Entry<String, List<OperatorTaskRuntimeReport>> entry : groupByReports.entrySet()) {
+      String groupBy = entry.getKey();
       List<OperatorTaskRuntimeReport> operatorReports = entry.getValue();
-      taskFt.addRow(operator, "", "", "", "", "", "", "", "", "", "", "", "", "");
+      taskFt.addRow(groupBy, "", "", "", "", "", "", "", "", "", "", "", "", "");
       for(int i = 0; i < operatorReports.size(); i++) {
         OperatorTaskRuntimeReport rtReport = operatorReports.get(i);
         OperatorTaskReport report = rtReport.getReport();

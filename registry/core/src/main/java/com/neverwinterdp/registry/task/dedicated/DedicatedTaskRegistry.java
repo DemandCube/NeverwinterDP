@@ -142,6 +142,8 @@ public class DedicatedTaskRegistry<T> {
   
   public Node getExecutorsHeartbeatNode() { return executorsHeartbeatNode; }
   
+  public Node getExecutorsAllNode() { return executorsAllNode; }
+  
   public Notifier getTaskCoordinationNotifier() { return taskCoordinationNotifier; }
   
   public T getTaskDescriptor(String taskId) throws RegistryException {

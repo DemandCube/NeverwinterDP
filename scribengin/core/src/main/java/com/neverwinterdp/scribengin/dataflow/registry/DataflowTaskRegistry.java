@@ -1,6 +1,7 @@
 package com.neverwinterdp.scribengin.dataflow.registry;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.neverwinterdp.registry.Node;
@@ -13,11 +14,14 @@ import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskReport;
+import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskRuntimeReport;
 
 public class DataflowTaskRegistry extends DedicatedTaskRegistry<OperatorTaskConfig> {
+  private String dataflowPath ;
   
-  public DataflowTaskRegistry(Registry registry, String path) throws RegistryException {
-    init(registry, path, OperatorTaskConfig.class) ;
+  public DataflowTaskRegistry(Registry registry, String dataflowPath) throws RegistryException {
+    init(registry, dataflowPath + "/tasks", OperatorTaskConfig.class) ;
+    this.dataflowPath = dataflowPath;
   }
 
   public void offer(OperatorTaskConfig taskConfig) throws RegistryException {
@@ -60,5 +64,31 @@ public class DataflowTaskRegistry extends DedicatedTaskRegistry<OperatorTaskConf
   
   public void finish(DedicatedTaskContext<OperatorTaskConfig> context, TaskStatus taskStatus) throws RegistryException {
     finish(context.getTaskExecutorDescriptor(), context.getTaskId(), taskStatus) ;
+  }
+
+  public List<String> getAllExecutorIds() throws RegistryException {
+    List<String> executorIds = getExecutorsAllNode().getChildren();
+    Collections.sort(executorIds);
+    return executorIds;
+  }
+  
+  public List<OperatorTaskRuntimeReport> getDataflowTaskRuntimeReportsByExecutorId(String executorId) throws RegistryException {
+    List<String> taskIds = getExecutorsAllNode().getChild(executorId).getChild("tasks").getChildren() ;
+    return getDataflowTaskRuntimeReports(taskIds) ;
+  }
+  
+  
+  public List<OperatorTaskRuntimeReport> getDataflowTaskRuntimeReports() throws RegistryException {
+    List<String> taskIds = getTasksListNode().getChildren() ;
+    return getDataflowTaskRuntimeReports(taskIds);
+  }
+
+  List<OperatorTaskRuntimeReport> getDataflowTaskRuntimeReports(List<String> taskIds) throws RegistryException {
+    String taskListPath = getTasksListNode().getPath();
+    List<OperatorTaskRuntimeReport> holder = new ArrayList<>();
+    for(String selTaskId : taskIds) {
+      holder.add(new OperatorTaskRuntimeReport(getRegistry(), taskListPath + "/" + selTaskId));
+    }
+    return holder;
   }
 }

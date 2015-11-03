@@ -268,7 +268,8 @@ public class VMConfig {
   
   public String buildCommand() {
     StringBuilder b = new StringBuilder() ;
-    b.append("java ").append(" -Xms128m -Xmx" + requestMemory + "m ");
+    int jvmHeap = (int)(requestMemory * 0.8);
+    b.append("java ").append(" -Xms128m -Xmx" + jvmHeap + "m ");
     addJVMOptions(b);
     b.append(" ").append(VM.class.getName()).append(" ") ;
     addParameters(b);

@@ -152,7 +152,12 @@ public class DataflowCommand extends Command {
       
       console.println(dflFormater.getInfo());
       
-      if(all || tasks) console.println(dflFormater.getDataflowTaskInfo());
+      if(all || tasks) {
+        console.println(dflFormater.getGroupByOperatorDataflowTaskInfo());
+        
+        console.println(dflFormater.getGroupByExecutorDataflowTaskInfo());
+      }
+      
       
       if(all || activeWorkers) console.println(dflFormater.getDataflowActiveWorkerInfo());
       
