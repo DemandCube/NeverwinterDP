@@ -56,7 +56,7 @@ public class KafkaTrackingSampleWithWorkerKillUnitTest  {
         String killCommand = 
             "dataflow kill-worker-random " +
             "  --dataflow-id " + trackingSampleRunner.dataflowId + 
-            "  --wait-before-simulate-failure 5000 --failure-period 15000 --max-kill 3 --simulate-kill";
+            "  --wait-before-simulate-failure 10000 --failure-period 15000 --max-kill 1 --simulate-kill";
         trackingSampleRunner.shell.execute(killCommand);
       } catch (Exception e) {
         e.printStackTrace();

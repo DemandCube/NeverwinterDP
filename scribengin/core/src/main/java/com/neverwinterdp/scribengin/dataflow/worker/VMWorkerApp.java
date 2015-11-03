@@ -67,16 +67,11 @@ public class VMWorkerApp extends VMApp {
       }
     });
     
-    try {
-      dataflowTaskExecutorService.init();
-      dataflowTaskExecutorService.run();
-      dataflowTaskExecutorService.waitForTermination();
-    } catch(Throwable ex) {
-      ex.printStackTrace();
-      dflRegistry.
-        getWorkerRegistry().
-        setWorkerStatus(getVM().getDescriptor().getId(), DataflowWorkerStatus.TERMINATED_WITH_ERROR);
-      throw ex;
-    }
+    dataflowTaskExecutorService.init();
+    dataflowTaskExecutorService.run();
+    dataflowTaskExecutorService.waitForTermination();
+    dflRegistry.
+      getWorkerRegistry().
+      setWorkerStatus(getVM().getDescriptor().getId(), DataflowWorkerStatus.TERMINATED);
   }
 }

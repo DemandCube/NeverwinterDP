@@ -1,5 +1,7 @@
 package com.neverwinterdp.scribengin.dataflow.master;
 
+import org.slf4j.Logger;
+
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskMonitor;
@@ -8,7 +10,7 @@ import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 
 public class DataflowTaskMonitor implements DedicatedTaskMonitor<OperatorTaskConfig> {
   private boolean finished = false;
-  
+  private Logger logger ;
   
   @Override
   public void onAddExecutor(DedicatedTaskRegistry<OperatorTaskConfig> taskRegistry, String executorId) {
@@ -16,6 +18,12 @@ public class DataflowTaskMonitor implements DedicatedTaskMonitor<OperatorTaskCon
 
   @Override
   public void onLostExecutor(DedicatedTaskRegistry<OperatorTaskConfig> taskRegistry, String executorId) {
+    System.out.println("DataflowTaskMonitor: onLostExecutor " + executorId);
+    try {
+      taskRegistry.historyTaskExecutor(executorId);
+    } catch (RegistryException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override

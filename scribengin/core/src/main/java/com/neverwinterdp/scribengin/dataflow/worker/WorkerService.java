@@ -9,6 +9,7 @@ import com.google.inject.Injector;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.notification.Notifier;
+import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskService;
 import com.neverwinterdp.registry.task.dedicated.TaskExecutor;
@@ -82,9 +83,8 @@ private Logger logger ;
     DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
     taskService = new DedicatedTaskService<OperatorTaskConfig>(dflRegistry.getTaskRegistry(), taskSlotExecutorFactory);
     for(int i = 0; i < dflConfig.getWorker().getNumOfExecutor(); i++) {
-      TaskExecutor<OperatorTaskConfig> executor = 
-          new TaskExecutor<OperatorTaskConfig>(vmDescriptor.getId() + "-executor-" + i, taskService) ;
-      taskService.addExecutor(executor.getTaskExecutorDescriptor(), 2);
+      TaskExecutorDescriptor executor = new TaskExecutorDescriptor(vmDescriptor.getId() + "-executor-" + i, vmDescriptor.getId());
+      taskService.addExecutor(executor, 2);
     }
     Node workerNode = dflRegistry.getWorkerRegistry().getWorkerNode(vmDescriptor.getId());
     notifier = new Notifier(dflRegistry.getRegistry(), workerNode.getPath() + "/notifications", "dataflow-worker-service");
@@ -99,14 +99,20 @@ private Logger logger ;
     System.out.println("DataflowMasterService: run()");
     workerStatus = DataflowWorkerStatus.RUNNING;
     dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
-    taskService.getTaskExecutorService().startExecutors(3000);
+    taskService.getTaskExecutorService().startExecutors(-1);
   }
   
   public void waitForTermination() throws RegistryException, InterruptedException {
     System.out.println("DataflowWorkerService: waitForTermination()");
     long maxRunTime = dflRegistry.getConfigRegistry().getDataflowConfig().getMaxRunTime();
-    taskService.getTaskExecutorService().awaitTermination(maxRunTime, TimeUnit.MILLISECONDS);
-    if(simulateKill) return;
+    try {
+      taskService.getTaskExecutorService().awaitTermination(maxRunTime, TimeUnit.MILLISECONDS);
+    } catch(InterruptedException ex) {
+      if(simulateKill) {
+        taskService.getTaskExecutorService().awaitTermination(15, TimeUnit.SECONDS);
+      }
+      throw ex ;
+    }
     
     taskService.onDestroy();
     workerStatus = DataflowWorkerStatus.TERMINATED;
@@ -120,6 +126,7 @@ private Logger logger ;
   }
   
   public void simulateKill() throws Exception {
+    System.err.println("WorkerService: simulateKill()"); 
     logger.info("Start kill()");
     notifier.info("start-simulate-kill", "DataflowTaskExecutorService: start simulateKill()");
     simulateKill = true ;
