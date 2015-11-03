@@ -15,16 +15,23 @@ public class TaskExecutorService<T> {
     taskExecutors.add(executor);
   }
   
-  public void startExecutors() {
+  public void startExecutors() throws InterruptedException {
+    startExecutors(-1);
+  }
+  
+  public void startExecutors(long breakIn) throws InterruptedException {
     execService = Executors.newFixedThreadPool(taskExecutors.size());
     for(int i = 0; i < taskExecutors.size(); i++) {
       TaskExecutor<T> executor = taskExecutors.get(i) ;
       execService.submit(executor);
+      if(breakIn > 0) Thread.sleep(breakIn);
     }
     execService.shutdown();
     taskSlotTimer = new TaskSlotTimerThread();
     taskSlotTimer.start();
   }
+  
+  
   
   public void shutdown() {
     taskSlotTimer.interrupt();

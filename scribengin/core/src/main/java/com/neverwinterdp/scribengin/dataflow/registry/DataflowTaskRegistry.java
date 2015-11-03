@@ -67,13 +67,25 @@ public class DataflowTaskRegistry extends DedicatedTaskRegistry<OperatorTaskConf
   }
 
   public List<String> getAllExecutorIds() throws RegistryException {
-    List<String> executorIds = getExecutorsAllNode().getChildren();
+    List<String> executorIds = executorsAllNode.getChildren();
+    Collections.sort(executorIds);
+    return executorIds;
+  }
+  
+  public List<String> getActiveExecutorIds() throws RegistryException {
+    List<String> executorIds = executorsActiveNode.getChildren();
+    Collections.sort(executorIds);
+    return executorIds;
+  }
+  
+  public List<String> getIdleExecutorIds() throws RegistryException {
+    List<String> executorIds = executorsIdleNode.getChildren();
     Collections.sort(executorIds);
     return executorIds;
   }
   
   public List<OperatorTaskRuntimeReport> getDataflowTaskRuntimeReportsByExecutorId(String executorId) throws RegistryException {
-    List<String> taskIds = getExecutorsAllNode().getChild(executorId).getChild("tasks").getChildren() ;
+    List<String> taskIds = executorsAllNode.getChild(executorId).getChild("tasks").getChildren() ;
     return getDataflowTaskRuntimeReports(taskIds) ;
   }
   

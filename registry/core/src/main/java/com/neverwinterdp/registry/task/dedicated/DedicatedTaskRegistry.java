@@ -50,23 +50,23 @@ public class DedicatedTaskRegistry<T> {
   private String   path ;
   private Class<T> taskDescriptorType;
   
-  private Node     tasksRootNode ;
-  private Node     tasksListNode ;
-  private Node     executionsNode;
-  private Node     taskAvailableNode;
-  private Node     taskFinishedNode;
+  protected Node     tasksRootNode ;
+  protected Node     tasksListNode ;
+  protected Node     executionsNode;
+  protected Node     taskAvailableNode;
+  protected Node     taskFinishedNode;
   
-  private Node     executorsNode;
-  private Node     executorsAllNode;
-  private Node     executorsActiveNode;
-  private Node     executorsIdleNode;
-  private Node     executorsHistoryNode;
-  private Node     executorsHeartbeatNode;
+  protected Node     executorsNode;
+  protected Node     executorsAllNode;
+  protected Node     executorsActiveNode;
+  protected Node     executorsIdleNode;
+  protected Node     executorsHistoryNode;
+  protected Node     executorsHeartbeatNode;
   
-  private Node     tasksLockNode ; 
+  protected Node     tasksLockNode ; 
   
-  private Notifier taskExecutionNotifier ;
-  private Notifier taskCoordinationNotifier ;
+  protected Notifier taskExecutionNotifier ;
+  protected Notifier taskCoordinationNotifier ;
   
   public DedicatedTaskRegistry() { }
   
@@ -141,8 +141,6 @@ public class DedicatedTaskRegistry<T> {
   public Node getTaskFinishedNode() { return taskFinishedNode; }
   
   public Node getExecutorsHeartbeatNode() { return executorsHeartbeatNode; }
-  
-  public Node getExecutorsAllNode() { return executorsAllNode; }
   
   public Notifier getTaskCoordinationNotifier() { return taskCoordinationNotifier; }
   

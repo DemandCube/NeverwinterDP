@@ -1,7 +1,6 @@
 package com.neverwinterdp.scribengin.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,8 +58,11 @@ public class DataflowFormater {
   public String getGroupByExecutorDataflowTaskInfo() throws RegistryException {
     DataflowTaskRegistry dtRegistry = new DataflowTaskRegistry(registry, dataflowPath) ;
     LinkedHashMap<String, List<OperatorTaskRuntimeReport>> groupByExecutorReports = new LinkedHashMap<>();
-    List<String> executorIds = dtRegistry.getAllExecutorIds();
-    for(String executorId : executorIds) {
+    for(String executorId : dtRegistry.getActiveExecutorIds()) {
+      List<OperatorTaskRuntimeReport> reports =  dtRegistry.getDataflowTaskRuntimeReportsByExecutorId(executorId);
+      groupByExecutorReports.put(executorId, reports);
+    }
+    for(String executorId : dtRegistry.getIdleExecutorIds()) {
       List<OperatorTaskRuntimeReport> reports =  dtRegistry.getDataflowTaskRuntimeReportsByExecutorId(executorId);
       groupByExecutorReports.put(executorId, reports);
     }

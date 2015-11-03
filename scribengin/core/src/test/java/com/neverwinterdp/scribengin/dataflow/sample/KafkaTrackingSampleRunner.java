@@ -88,8 +88,9 @@ public class KafkaTrackingSampleRunner  {
     String dataflowChainSubmitCommand = 
         "dataflow submit " + 
         "  --dataflow-config src/test/resources/kafka-tracking-dataflow.json" +
-        "  --dataflow-id " + dataflowId + " --dataflow-num-of-worker 3 " + 
-        " --dataflow-max-runtime " + dataflowMaxRuntime;
+        "  --dataflow-id " + dataflowId + 
+        "  --dataflow-num-of-worker 2 --dataflow-num-of-executor-per-worker 5" + 
+        "  --dataflow-max-runtime " + dataflowMaxRuntime;
     shell.execute(dataflowChainSubmitCommand);
     
     String logValidatorSubmitCommand = 
