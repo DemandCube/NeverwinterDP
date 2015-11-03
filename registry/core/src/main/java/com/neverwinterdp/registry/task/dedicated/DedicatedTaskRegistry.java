@@ -329,6 +329,11 @@ public class DedicatedTaskRegistry<T> {
     execute(executor, op);
   }
   
+  public void historyTaskExecutor(String executorId) throws RegistryException {
+    TaskExecutorDescriptor executor = executorsAllNode.getChild(executorId).getDataAs(TaskExecutorDescriptor.class);
+    historyTaskExecutor(executor);
+  }
+  
   public void historyTaskExecutor(final TaskExecutorDescriptor executor) throws RegistryException {
     BatchOperations<Boolean> op = new BatchOperations<Boolean>() {
       @Override
@@ -341,7 +346,13 @@ public class DedicatedTaskRegistry<T> {
           transaction.deleteDescendant(executorsActiveNode, executorId);
         } 
         transaction.createDescendant(executorsHistoryNode, executorId, NodeCreateMode.PERSISTENT);
-        executor.setStatus(TaskExecutorDescriptor.TasExecutorStatus.TERMINATED);
+        if(executor.getStatus().toString().indexOf("TERMINATED") < 0) {
+          List<String> taskIds = executorsAllNode.getChild(executorId).getChild("tasks").getChildren();
+          for(String taskId : taskIds) {
+            transaction.createChild(taskAvailableNode, taskId, NodeCreateMode.PERSISTENT);
+          }
+          executor.setStatus(TaskExecutorDescriptor.TasExecutorStatus.TERMINATED_WITH_ERROR);
+        }
         transaction.setData(executorsAllNode.getChild(executorId), executor);
         transaction.commit();
         return true;

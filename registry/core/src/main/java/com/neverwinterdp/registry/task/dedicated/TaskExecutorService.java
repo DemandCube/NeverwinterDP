@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class TaskExecutorService<T> {
   private ExecutorService       execService;
   private List<TaskExecutor<T>> taskExecutors = new ArrayList<TaskExecutor<T>>();
+  private List<Future<?>> taskExecutorsFuture = new ArrayList<>();
   private TaskSlotTimerThread taskSlotTimer ;
   
   public void add(TaskExecutor<T> executor) {
@@ -23,7 +25,8 @@ public class TaskExecutorService<T> {
     execService = Executors.newFixedThreadPool(taskExecutors.size());
     for(int i = 0; i < taskExecutors.size(); i++) {
       TaskExecutor<T> executor = taskExecutors.get(i) ;
-      execService.submit(executor);
+      Future<?> future = execService.submit(executor);
+      taskExecutorsFuture.add(future);
       if(breakIn > 0) Thread.sleep(breakIn);
     }
     execService.shutdown();
@@ -45,7 +48,12 @@ public class TaskExecutorService<T> {
   
   
   public void simulateKill() {
+    taskSlotTimer.interrupt();
     execService.shutdownNow();
+    for(Future<?> future : taskExecutorsFuture) {
+      future.cancel(true);
+    }
+
   }
   
   public class TaskSlotTimerThread extends Thread {

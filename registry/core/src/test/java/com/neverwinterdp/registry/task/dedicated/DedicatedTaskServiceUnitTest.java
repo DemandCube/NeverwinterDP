@@ -23,6 +23,7 @@ import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskDescriptor;
+import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
 
@@ -102,8 +103,8 @@ public class DedicatedTaskServiceUnitTest {
     
     int NUM_OF_EXECUTORS = 5;
     for(int i = 0; i < NUM_OF_EXECUTORS; i++) {
-      TaskExecutor<TaskDescriptor> executor = new TaskExecutor<TaskDescriptor>("executor-" + i, service) ;
-      service.addExecutor(executor.getTaskExecutorDescriptor(), 3);
+      TaskExecutorDescriptor executor = new TaskExecutorDescriptor("executor-" + i, "NA");
+      service.addExecutor(executor, 3);
     }
     service.getTaskExecutorService().startExecutors();
     service.getTaskExecutorService().awaitTermination(5, TimeUnit.SECONDS);

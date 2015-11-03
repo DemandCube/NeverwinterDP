@@ -28,6 +28,8 @@ public class DedicatedTaskService<T> {
   
   public DedicatedTaskRegistry<T> getTaskRegistry() { return this.taskRegistry; }
   
+  public TaskSlotExecutorFactory<T> getTaskSlotExecutorFactory() { return taskSlotExecutorFactory; }
+  
   public void addTaskMonitor(DedicatedTaskMonitor<T> monitor) {
     taskWatcher.addTaskMonitor(monitor);
   }
@@ -54,12 +56,7 @@ public class DedicatedTaskService<T> {
   
   public void addExecutor(TaskExecutorDescriptor executorDescriptor, int taskSlots) throws Exception {
     taskRegistry.addTaskExecutor(executorDescriptor);
-    TaskExecutor<T> executor = new TaskExecutor<T>(executorDescriptor.getId(), this) ;
-    List<DedicatedTaskContext<T>> contexts = taskRegistry.take(executorDescriptor, taskSlots);
-    for(int j = 0; j < contexts.size(); j++) {
-      TaskSlotExecutor<T> taskSlotExecutor = taskSlotExecutorFactory.create(contexts.get(j));
-      executor.add(taskSlotExecutor);
-    }
+    TaskExecutor<T> executor = new TaskExecutor<T>(executorDescriptor.getId(), this, taskSlots) ;
     taskExecutorService.add(executor);
   }
   

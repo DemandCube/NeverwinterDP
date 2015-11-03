@@ -77,6 +77,7 @@ class DedicatedTaskWatcher<T> {
     
     public TaskOperation<T> init(DedicatedTaskRegistry<T> taskRegistry, String executorId, String taskId) {
       this.taskRegistry = taskRegistry;
+      this.executorId = executorId;
       this.taskId = taskId;
       return this;
     }

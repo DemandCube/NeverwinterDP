@@ -10,12 +10,14 @@ import com.neverwinterdp.registry.task.TaskStatus;
 public class TaskExecutor<T> implements Runnable {
   private DedicatedTaskService<T>       taskService;
   private TaskExecutorDescriptor        executor;
+  private int                           numOfTaskSlot;
   private List<TaskSlotExecutor<T>>     taskSlotExecutors = new ArrayList<>();
-  private  TaskSlotExecutor<T>          currentRunningTaskSlotExecutor;
+  private TaskSlotExecutor<T>           currentRunningTaskSlotExecutor;
   
-  public TaskExecutor(String id, DedicatedTaskService<T> taskService) {
+  public TaskExecutor(String id, DedicatedTaskService<T> taskService, int numOfTaskSlot) {
     executor = new TaskExecutorDescriptor(id, "NA");
     this.taskService = taskService;
+    this.numOfTaskSlot = numOfTaskSlot;
   }
   
   public TaskExecutorDescriptor getTaskExecutorDescriptor () { return this.executor; }
@@ -31,6 +33,7 @@ public class TaskExecutor<T> implements Runnable {
   public void run() {
     try {
       while(true) {
+        updateTaskSlotExecutors();
         if(taskSlotExecutors.size() == 0) {
           taskService.idleExecutor(executor);
           Thread.sleep(5000);
@@ -44,6 +47,18 @@ public class TaskExecutor<T> implements Runnable {
       e.printStackTrace();
     }
   }
+  
+  void updateTaskSlotExecutors() throws Exception {
+    if(taskSlotExecutors.size() < numOfTaskSlot) {
+      int requestTaskSlot = numOfTaskSlot - taskSlotExecutors.size();
+      List<DedicatedTaskContext<T>> contexts = taskService.getTaskRegistry().take(executor, requestTaskSlot);
+      for(int j = 0; j < contexts.size(); j++) {
+        TaskSlotExecutor<T> taskSlotExecutor = taskService.getTaskSlotExecutorFactory().create(contexts.get(j));
+        add(taskSlotExecutor);
+      }
+    }
+  }
+  
   
   void runTaskExecutors() throws Exception {
     Iterator<TaskSlotExecutor<T>> executorItr = taskSlotExecutors.iterator();
