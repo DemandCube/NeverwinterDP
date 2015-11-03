@@ -99,7 +99,7 @@ private Logger logger ;
     System.out.println("DataflowMasterService: run()");
     workerStatus = DataflowWorkerStatus.RUNNING;
     dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
-    taskService.getTaskExecutorService().startExecutors(-1);
+    taskService.getTaskExecutorService().startExecutors(3000);
   }
   
   public void waitForTermination() throws RegistryException, InterruptedException {
