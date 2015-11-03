@@ -32,6 +32,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
     Registry registry = getVM().getVMRegistry().getRegistry();
+    registry.setRetryable(true);
     
     String reportPath  = vmConfig.getProperty("tracking.report-path", "/applications/tracking-message");
     int    numOfReader = vmConfig.getPropertyAsInt("tracking.num-of-reader", 3);

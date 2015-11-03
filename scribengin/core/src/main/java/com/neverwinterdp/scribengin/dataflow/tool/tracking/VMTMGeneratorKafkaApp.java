@@ -23,7 +23,7 @@ public class VMTMGeneratorKafkaApp extends VMApp {
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
     Registry registry = getVM().getVMRegistry().getRegistry();
-    
+    registry.setRetryable(true);
     String reportPath = vmConfig.getProperty("tracking.report-path", "/applications/tracking-message");
     int numOfWriter = vmConfig.getPropertyAsInt("tracking.num-of-writer", 3);
     service = new TrackingGeneratorService(registry, reportPath);
