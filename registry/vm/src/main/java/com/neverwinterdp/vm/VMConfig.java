@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.ApplicationConstants;
 
 import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.JCommander;
@@ -41,7 +40,7 @@ public class VMConfig {
   @Parameter(names = "--cpu-cores", description = "The request number of cpu cores")
   private int                 requestCpuCores  = 1;
   @Parameter(names = "--memory", description = "The request amount of memory in MB")
-  private int                 requestMemory    = 256;
+  private int                 requestMemory    = 512;
 
   @Parameter(names = "--dfs-app-home", description = "DFS App Home")
   private String dfsAppHome;
