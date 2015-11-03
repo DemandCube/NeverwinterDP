@@ -269,7 +269,7 @@ public class VMConfig {
   
   public String buildCommand() {
     StringBuilder b = new StringBuilder() ;
-    b.append("java ").append(" -Xmx" + requestMemory + "m ");
+    b.append("java ").append(" -Xms128m -Xmx" + requestMemory + "m ");
     addJVMOptions(b);
     b.append(" ").append(VM.class.getName()).append(" ") ;
     addParameters(b);
@@ -280,7 +280,8 @@ public class VMConfig {
   
   private void addJVMOptions(StringBuilder b) {
     b.append(" -server -Djava.awt.headless=true ");
-    b.append("-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSScavengeBeforeRemark -XX:+DisableExplicitGC");
+    b.append(" -XX:+UseConcMarkSweepGC ");
+    b.append(" -XX:+CMSClassUnloadingEnabled");
     
     if(enableGCLog) {
       String logFile = localLogDir + "/" + vmId + "-gc.log";
