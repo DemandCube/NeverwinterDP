@@ -19,16 +19,16 @@ public class S3SourceGenerator {
 
   private DataflowMessageGenerator recordGenerator = new DataflowMessageGenerator();
 
-  private int numOfBufferPerStream;
-  private int numOfRecordPerBuffer;
+  private int numStreams;
+  private int numRecordsPerStream;
 
   private Stopwatch stopwatch = Stopwatch.createUnstarted();
 
-  public void generateSource(S3Client s3Client, String bucketName, String folderPath, int numBufferPerStream, int numRecordsPerBuffer) throws Exception {
+  public void generateSource(S3Client s3Client, String bucketName, String folderPath, int numStreams, int numRecordsPerStream) throws Exception {
     stopwatch.start();
     System.out.println("generating test Data...");
-    this.numOfBufferPerStream = numBufferPerStream;
-    this.numOfRecordPerBuffer = numRecordsPerBuffer;
+    this.numStreams = numStreams;
+    this.numRecordsPerStream = numRecordsPerStream;
 
     StorageConfig descriptor = new StorageConfig("s3", bucketName);
     descriptor.attribute("s3.bucket.name", bucketName);
@@ -39,16 +39,16 @@ public class S3SourceGenerator {
   }
 
   void generateStream(Sink sink) throws Exception {
-    SinkPartitionStream stream = sink.newStream();
-    SinkPartitionStreamWriter writer = stream.getWriter();
-    for (int i = 0; i < numOfBufferPerStream; i++) {
-      for (int j = 0; j < numOfRecordPerBuffer; j++) {
+    for (int i = 0; i < numStreams; i++) {
+      SinkPartitionStream stream = sink.newStream();
+      SinkPartitionStreamWriter writer = stream.getWriter();
+      for (int j = 0; j < numRecordsPerStream; j++) {
         String partition = Integer.toString(i);
         writer.append(recordGenerator.nextRecord(partition, 2));
       }
       writer.commit();
+      writer.close();
     }
-    writer.close();
   }
   
   static public class DataflowMessageGenerator implements MessageGenerator {

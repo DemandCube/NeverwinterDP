@@ -29,8 +29,8 @@ public class SourceExperimentTest {
 
   private String bucketName;
   private String folderPath;
-  private int numOfBuffersPerStream =5;
-  private int numRecordsPerBuffer = 100;
+  private int numStreams =5;
+  private int numRecordsPerStream = 100;
 
   @BeforeClass
   public static void setupClass() {
@@ -50,7 +50,7 @@ public class SourceExperimentTest {
       s3Client.deleteBucket(bucketName, true);
     }
     s3Client.createBucket(bucketName);
-    new S3SourceGenerator().generateSource(s3Client, bucketName, folderPath, numOfBuffersPerStream, numRecordsPerBuffer);
+    new S3SourceGenerator().generateSource(s3Client, bucketName, folderPath, numStreams, numRecordsPerStream);
   }
 
   @After
@@ -75,7 +75,7 @@ public class SourceExperimentTest {
 
     SourcePartitionStream[] streams = source.getStreams();
 
-    assertEquals(numOfBuffersPerStream, streams.length);
+    assertEquals(numStreams, streams.length);
     for (SourcePartitionStream stream : streams) {
       SourcePartitionStreamReader reader = stream.getReader("test");
       Record dataflowMessage;
@@ -87,7 +87,7 @@ public class SourceExperimentTest {
     }
     messageTracker.optimize();
     messageTracker.dump(System.out);
-    int totalRecords = numOfBuffersPerStream * numRecordsPerBuffer;
+    int totalRecords = numStreams * numRecordsPerStream;
     assertEquals(totalRecords, messageTracker.getLogCount());
     assertTrue(messageTracker.isInSequence());
     S3Util.listStructure(s3Client, bucketName);
