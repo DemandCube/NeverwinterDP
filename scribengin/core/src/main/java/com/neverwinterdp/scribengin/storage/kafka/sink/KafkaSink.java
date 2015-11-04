@@ -3,7 +3,7 @@ package com.neverwinterdp.scribengin.storage.kafka.sink;
 import java.util.LinkedHashMap;
 
 import com.neverwinterdp.kafka.KafkaClient;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.kafka.KafkaStorage;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
@@ -35,42 +35,42 @@ public class KafkaSink implements Sink {
   public StorageConfig getDescriptor() { return storageConfig; }
 
   @Override
-  public SinkPartitionStream getStream(PartitionConfig pConfig) throws Exception {
-    SinkPartitionStream stream = streams.get(pConfig.getPartitionId());
+  public SinkPartitionStream getPartitionStream(PartitionStreamConfig pConfig) throws Exception {
+    SinkPartitionStream stream = streams.get(pConfig.getPartitionStreamId());
     if(stream != null) return stream ;
     KafkaSinkPartitionStream newStream= new KafkaSinkPartitionStream(pConfig) ;
-    streams.put(pConfig.getPartitionId(), newStream) ;
+    streams.put(pConfig.getPartitionStreamId(), newStream) ;
     return newStream;
   }
 
   @Override
-  public SinkPartitionStream getStream(int partitionId) throws Exception {
+  public SinkPartitionStream getParitionStream(int partitionId) throws Exception {
     SinkPartitionStream stream = streams.get(partitionId);
     return stream ;
   }
 
   
   @Override
-  public SinkPartitionStream[] getStreams() {
+  public SinkPartitionStream[] getPartitionStreams() {
     SinkPartitionStream[] array = new SinkPartitionStream[streams.size()];
     return streams.values().toArray(array);
   }
 
   @Override
   public void delete(SinkPartitionStream stream) throws Exception {
-    SinkPartitionStream found = streams.get(stream.getParitionConfig().getPartitionId());
+    SinkPartitionStream found = streams.get(stream.getPartitionStreamId());
     if(found != null) {
       found.delete();
-      streams.remove(stream.getParitionConfig().getPartitionId());
+      streams.remove(stream.getPartitionStreamId());
     } else {
-      throw new Exception("Cannot find the stream " + stream.getParitionConfig().getPartitionId());
+      throw new Exception("Cannot find the stream " + stream.getPartitionStreamId());
     }
   }
 
   @Override
   public SinkPartitionStream newStream() throws Exception {
-    PartitionConfig streamDescriptor = new PartitionConfig(storageConfig);
-    streamDescriptor.setPartitionId(idTracker++);
+    PartitionStreamConfig streamDescriptor = new PartitionStreamConfig(storageConfig);
+    streamDescriptor.setPartitionStreamId(idTracker++);
     return new KafkaSinkPartitionStream(streamDescriptor);
   }
 

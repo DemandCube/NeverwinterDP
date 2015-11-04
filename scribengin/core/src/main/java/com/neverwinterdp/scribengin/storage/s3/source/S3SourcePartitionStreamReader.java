@@ -7,7 +7,7 @@ import java.util.List;
 import com.amazonaws.services.s3.model.S3Object;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.scribengin.storage.s3.S3Folder;
 import com.neverwinterdp.scribengin.storage.s3.S3Storage;
@@ -30,7 +30,7 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
   private int currPosition;
   private CommitPoint lastCommitInfo;
 
-  public S3SourcePartitionStreamReader(String name, S3Client client, StorageConfig sConfig, PartitionConfig pConfig) throws Exception {
+  public S3SourcePartitionStreamReader(String name, S3Client client, StorageConfig sConfig, PartitionStreamConfig pConfig) throws Exception {
     this.name = name;
     this.s3Client = client;
     

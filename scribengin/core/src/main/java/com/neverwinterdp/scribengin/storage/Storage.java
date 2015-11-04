@@ -3,7 +3,7 @@ package com.neverwinterdp.scribengin.storage;
 import java.util.List;
 
 import com.neverwinterdp.scribengin.storage.sink.Sink;
-import com.neverwinterdp.scribengin.storage.source.Source;
+import com.neverwinterdp.scribengin.storage.source.SourcePartition;
 
 abstract public class Storage {
   private StorageConfig storageConfig;
@@ -14,7 +14,7 @@ abstract public class Storage {
   
   public StorageConfig getStorageConfig() { return this.storageConfig; }
   
-  abstract public List<PartitionConfig> getPartitionConfigs() throws Exception ;
+  abstract public List<PartitionStreamConfig> getPartitionConfigs() throws Exception ;
   
   abstract public void refresh() throws Exception ; 
   
@@ -24,5 +24,5 @@ abstract public class Storage {
   abstract public void create(int numOfPartition, int replication) throws Exception;
   
   abstract public Sink getSink() throws Exception ;
-  abstract public Source getSource() throws Exception ;
+  abstract public SourcePartition getSource() throws Exception ;
 }

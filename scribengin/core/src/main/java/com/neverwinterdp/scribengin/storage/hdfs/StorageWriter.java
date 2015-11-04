@@ -12,7 +12,7 @@ public class StorageWriter<T> {
   private Storage<T> storage;
   private FileSystem fs;
   private String     location;
-  private SinkBuffer currentBuffer;
+  private SegmentWriter currentBuffer;
   
   public StorageWriter(Storage<T> storage) {
     this.storage = storage ;
@@ -24,7 +24,7 @@ public class StorageWriter<T> {
   
   public void append(T obj) throws Exception {
     if(currentBuffer == null) {
-      currentBuffer = nextSinkBuffer();
+      currentBuffer = nextSegmentWriter();
     }
     currentBuffer.append(obj);
   }
@@ -56,8 +56,8 @@ public class StorageWriter<T> {
     }
   }
   
-  private SinkBuffer nextSinkBuffer() throws IOException {
-    SinkBuffer buffer = new SinkBuffer() ;
+  private SegmentWriter nextSegmentWriter() throws IOException {
+    SegmentWriter buffer = new SegmentWriter() ;
     return buffer;
   }
   
@@ -67,18 +67,18 @@ public class StorageWriter<T> {
     return b.toString() ;
   }
   
-  class SinkBuffer {
+  class SegmentWriter {
     private Path bufferingPath;
     private Path dataPath;
     private Segment segment;
     private FSDataOutputStream bufferingOs;
     private int  count = 0 ;
     
-    public SinkBuffer() throws IOException {
+    public SegmentWriter() throws IOException {
       segment        = new Segment();
       bufferingPath  = new Path(segment.toBufferingPath(location)) ;
       dataPath       = new Path(segment.toDataPath(location)) ;
-      bufferingOs         = fs.create(bufferingPath) ;
+      bufferingOs    = fs.create(bufferingPath) ;
     }
     
     public void append(T obj) throws IOException {

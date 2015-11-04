@@ -7,7 +7,7 @@ import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 
 public class StreamRegistry {
@@ -29,7 +29,7 @@ public class StreamRegistry {
     transaction.create(streamsNode, null, NodeCreateMode.PERSISTENT);
   }
   
-  public void create(String name, StorageConfig sConfig, List<PartitionConfig> pConfigs) throws RegistryException {
+  public void create(String name, StorageConfig sConfig, List<PartitionStreamConfig> pConfigs) throws RegistryException {
     Transaction transaction = registry.getTransaction();
     String streamPath = streamsNode.getPath() + "/" + name;
     String inputPath  = streamPath + "/input";
@@ -38,8 +38,8 @@ public class StreamRegistry {
     transaction.create(inputPath,  null, NodeCreateMode.PERSISTENT);
     transaction.create(outputPath, null, NodeCreateMode.PERSISTENT);
     for(int i = 0; i < pConfigs.size(); i++) {
-      PartitionConfig pConfig = pConfigs.get(i);
-      int pId = pConfig.getPartitionId();
+      PartitionStreamConfig pConfig = pConfigs.get(i);
+      int pId = pConfig.getPartitionStreamId();
       transaction.create(inputPath + "/partition-" + pId, pConfig, NodeCreateMode.PERSISTENT);
       transaction.create(outputPath + "/partition-" + pId, pConfig, NodeCreateMode.PERSISTENT);
     }
@@ -51,8 +51,8 @@ public class StreamRegistry {
     return stream.getDataAs(StorageConfig.class) ;
   }
   
-  public List<PartitionConfig> getStreamInputPartitions(String name) throws RegistryException {
+  public List<PartitionStreamConfig> getStreamInputPartitions(String name) throws RegistryException {
     Node streamInputNode = streamsNode.getDescendant(name + "/input");
-    return streamInputNode.getChildrenAs(PartitionConfig.class) ;
+    return streamInputNode.getChildrenAs(PartitionStreamConfig.class) ;
   }
 }

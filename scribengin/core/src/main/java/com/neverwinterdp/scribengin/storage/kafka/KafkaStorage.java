@@ -5,13 +5,13 @@ import java.util.List;
 
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.Storage;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
-import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSource;
+import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSourcePartition;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
-import com.neverwinterdp.scribengin.storage.source.Source;
+import com.neverwinterdp.scribengin.storage.source.SourcePartition;
 
 import kafka.javaapi.PartitionMetadata;
 import kafka.javaapi.TopicMetadata;
@@ -22,7 +22,7 @@ public class KafkaStorage extends Storage {
   final static public String ZK_CONNECT = "zk.connect";
   
   private KafkaClient kafkaClient ;
-  private KafkaSource kafkaSource ;
+  private KafkaSourcePartition kafkaSource ;
   
   public KafkaStorage(KafkaClient kafkaClient, StorageConfig storageDescriptor) {
     super(storageDescriptor);
@@ -34,14 +34,14 @@ public class KafkaStorage extends Storage {
     this.kafkaClient = kafkaClient;
   }
   
-  public List<PartitionConfig> getPartitionConfigs() throws Exception {
+  public List<PartitionStreamConfig> getPartitionConfigs() throws Exception {
     StorageConfig sConfig = getStorageConfig();
     TopicMetadata tMetadata = kafkaClient.findTopicMetadata(sConfig.attribute(TOPIC));
-    List<PartitionConfig> pConfigs = new ArrayList<>();
+    List<PartitionStreamConfig> pConfigs = new ArrayList<>();
     List<PartitionMetadata> partitions = tMetadata.partitionsMetadata();
     for(int i = 0; i < partitions.size(); i++) {
       PartitionMetadata pmetadata = partitions.get(i);
-      PartitionConfig pConfig = new PartitionConfig(pmetadata.partitionId());
+      PartitionStreamConfig pConfig = new PartitionStreamConfig(pmetadata.partitionId());
       pConfigs.add(pConfig);
     }
     return pConfigs ;
@@ -78,9 +78,9 @@ public class KafkaStorage extends Storage {
   }
 
   @Override
-  public Source getSource() throws Exception {
+  public SourcePartition getSource() throws Exception {
     if(kafkaSource == null) {
-      kafkaSource = new KafkaSource(kafkaClient, getStorageConfig());
+      kafkaSource = new KafkaSourcePartition(kafkaClient, getStorageConfig());
     }
     return kafkaSource;
   }

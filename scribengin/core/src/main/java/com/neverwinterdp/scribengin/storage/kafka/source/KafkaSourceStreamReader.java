@@ -5,16 +5,16 @@ import kafka.javaapi.PartitionMetadata;
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.scribengin.storage.Record;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 
 public class KafkaSourceStreamReader implements SourcePartitionStreamReader {
-  private PartitionConfig partitionConfig;
+  private PartitionStreamConfig partitionConfig;
   private KafkaPartitionReader partitionReader ;
   private CommitPoint lastCommitInfo ;
   
-  public KafkaSourceStreamReader(KafkaClient kafkaClient, PartitionConfig pConfig, PartitionMetadata pmd) throws Exception {
+  public KafkaSourceStreamReader(KafkaClient kafkaClient, PartitionStreamConfig pConfig, PartitionMetadata pmd) throws Exception {
     this.partitionConfig = pConfig;
     String readerName = pConfig.attribute("name");
     this.partitionReader = new KafkaPartitionReader(readerName, kafkaClient, pConfig.attribute("topic"), pmd);

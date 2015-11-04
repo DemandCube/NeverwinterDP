@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
-import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
+import com.neverwinterdp.scribengin.storage.s3.source.S3SourcePartition;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 import com.neverwinterdp.tool.message.Message;
@@ -68,12 +68,12 @@ public class SourceExperimentTest {
     StorageConfig descriptor = new StorageConfig();
     descriptor.attribute("s3.bucket.name", bucketName);
     descriptor.attribute("s3.storage.path", folderPath);
-    S3Source source = new S3Source(s3Client, descriptor);
+    S3SourcePartition source = new S3SourcePartition(s3Client, descriptor);
 
     MessageTracker messageTracker = new MessageTracker();
     MessageExtractor messageExtractor = MessageExtractor.DEFAULT_MESSAGE_EXTRACTOR;
 
-    SourcePartitionStream[] streams = source.getStreams();
+    SourcePartitionStream[] streams = source.getPartitionStreams();
 
     assertEquals(numOfBuffersPerStream, streams.length);
     for (SourcePartitionStream stream : streams) {

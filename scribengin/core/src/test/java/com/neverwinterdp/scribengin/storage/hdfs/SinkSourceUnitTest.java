@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.hdfs.sink.HDFSSink;
-import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSource;
+import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSourcePartition;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
@@ -43,7 +43,7 @@ public class SinkSourceUnitTest {
   @Test
   public void testSink() throws Exception {
     HDFSSink sink = new HDFSSink(fs, DATA_DIRECTORY);
-    SinkPartitionStream[] streams = sink.getStreams();
+    SinkPartitionStream[] streams = sink.getPartitionStreams();
     Assert.assertEquals(0, streams.length);
     
     int NUM_OF_COMMIT = 5;
@@ -53,7 +53,7 @@ public class SinkSourceUnitTest {
     SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < NUM_OF_COMMIT; i++) {
       for(int j = 0; j < NUM_OF_RECORD_PER_COMMIT; j ++) {
-        String key = "stream=" + stream.getParitionConfig().getPartitionId() +",buffer=" + i + ",record=" + j;
+        String key = "stream=" + stream.getPartitionStreamId() +",buffer=" + i + ",record=" + j;
         writer.append(Record.create(key, key));
       }
       writer.commit();
@@ -133,8 +133,8 @@ public class SinkSourceUnitTest {
   }
   
   private int count(String hdfsDir) throws Exception {
-    HDFSSource source = new HDFSSource(fs, hdfsDir);
-    SourcePartitionStream[] stream = source.getStreams();
+    HDFSSourcePartition source = new HDFSSourcePartition(fs, hdfsDir);
+    SourcePartitionStream[] stream = source.getPartitionStreams();
     int count  = 0; 
     for(int  i = 0; i < stream.length; i++) {
       SourcePartitionStreamReader reader = stream[i].getReader("test") ;

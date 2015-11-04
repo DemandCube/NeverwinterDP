@@ -6,11 +6,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @SuppressWarnings("serial")
 public class StorageConfig extends HashMap<String, String> {
-  final static public String TYPE        = "type";
-  final static public String LOCATION    = "location";
-  final static public String PARTITION   = "partition";
-  final static public String REPLICATION = "replication";
-  
+  final static public String TYPE             = "type";
+  final static public String LOCATION         = "location";
+  final static public String PARTITION_STREAM = "partition-stream";
+  final static public String REPLICATION      = "replication";
+
   public StorageConfig() { }
   
   public StorageConfig(String type) {
@@ -35,9 +35,9 @@ public class StorageConfig extends HashMap<String, String> {
   }
   
   @JsonIgnore
-  public int  getPartition() { return intAttribute(PARTITION, 5); }
-  public void setPartition(int partition) { 
-    attribute(PARTITION, partition);
+  public int  getPartitionStream() { return intAttribute(PARTITION_STREAM, 5); }
+  public void setPartitionStream(int partition) { 
+    attribute(PARTITION_STREAM, partition);
   }
   
   @JsonIgnore

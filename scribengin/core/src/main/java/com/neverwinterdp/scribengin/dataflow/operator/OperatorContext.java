@@ -7,7 +7,7 @@ import java.util.Set;
 
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.WorkerService;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.Storage;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
@@ -15,7 +15,7 @@ import com.neverwinterdp.scribengin.storage.StorageService;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
-import com.neverwinterdp.scribengin.storage.source.Source;
+import com.neverwinterdp.scribengin.storage.source.SourcePartition;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 import com.neverwinterdp.yara.Meter;
@@ -155,13 +155,13 @@ public class OperatorContext {
   }
   
   static public class InputContext {
-    private Source                      source;
+    private SourcePartition             source;
     private SourcePartitionStream       assignedPartition;
     private SourcePartitionStreamReader assignedPartitionReader;
 
     public InputContext(Storage storage, int partitionId) throws Exception {
       this.source = storage.getSource();
-      this.assignedPartition = source.getStream(partitionId);
+      this.assignedPartition = source.getPartitionStream(partitionId);
       this.assignedPartitionReader = assignedPartition.getReader("DataflowTask");
     }
 
@@ -183,13 +183,13 @@ public class OperatorContext {
   }
 
   static public class OutputContext {
-    private Sink sink;
-    private SinkPartitionStream assignedPartition;
+    private Sink                      sink;
+    private SinkPartitionStream       assignedPartition;
     private SinkPartitionStreamWriter assignedPartitionWriter;
 
     public OutputContext(Storage storage, int partitionId) throws Exception {
       sink = storage.getSink();
-      assignedPartition = sink.getStream(partitionId);
+      assignedPartition = sink.getParitionStream(partitionId);
       if(assignedPartition == null) {
         assignedPartition = sink.newStream();
       }
@@ -212,14 +212,11 @@ public class OperatorContext {
       assignedPartitionWriter.close();
     }
     
-    public PartitionConfig getStreamDescriptor() { return this.assignedPartition.getParitionConfig() ;}
-    
     public String toString() {
       StringBuilder b = new StringBuilder();
       b.append("Sink:\n").
         append("  Type = ").append(sink.getDescriptor().getType()).
-        append("  Stream Id = ").append(assignedPartition.getParitionConfig().getPartitionId()).
-        append("  Location = ").append(assignedPartition.getParitionConfig().getLocation());
+        append("  Stream Id = ").append(assignedPartition.getPartitionStreamId());
       return b.toString();
     }
   }

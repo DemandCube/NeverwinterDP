@@ -9,7 +9,7 @@ import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
-import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSource;
+import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSourcePartition;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
@@ -53,11 +53,11 @@ public class SinkSourceUnitTest {
     }
     writer.close();
     
-    KafkaSource source = new KafkaSource(kafkaClient, "hello", TOPIC);
-    SourcePartitionStream[] streams = source.getStreams();
+    KafkaSourcePartition source = new KafkaSourcePartition(kafkaClient, "hello", TOPIC);
+    SourcePartitionStream[] streams = source.getPartitionStreams();
     Assert.assertEquals(5, streams.length);
     for(int i = 0; i < streams.length; i++) {
-      System.out.println("Stream id: " + streams[i].getDescriptor().getPartitionId());
+      System.out.println("Stream id: " + streams[i].getDescriptor().getPartitionStreamId());
       SourcePartitionStreamReader reader = streams[i].getReader("kafka");
       Record dataflowMessage = null;
       while((dataflowMessage = reader.next(1000)) != null) {

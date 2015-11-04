@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 
 import com.neverwinterdp.es.ESObjectClient;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.es.ESStorage;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
@@ -36,43 +36,43 @@ public class ESSink implements Sink {
   public StorageConfig getDescriptor() { return storage.getStorageConfig(); }
 
   @Override
-  public SinkPartitionStream getStream(PartitionConfig pConfig) throws Exception {
+  public SinkPartitionStream getPartitionStream(PartitionStreamConfig pConfig) throws Exception {
     StorageConfig sConfig = storage.getStorageConfig();
-    SinkPartitionStream stream = streams.get(pConfig.getPartitionId());
+    SinkPartitionStream stream = streams.get(pConfig.getPartitionStreamId());
     if(stream != null) return stream ;
     ESSinkStream newStream= new ESSinkStream(sConfig, pConfig) ;
-    streams.put(pConfig.getPartitionId(), newStream) ;
+    streams.put(pConfig.getPartitionStreamId(), newStream) ;
     return newStream;
   }
   
   @Override
-  public SinkPartitionStream getStream(int partitionId) throws Exception {
+  public SinkPartitionStream getParitionStream(int partitionId) throws Exception {
     SinkPartitionStream stream = streams.get(partitionId);
     if(stream != null) return stream ;
     return null;
   }
 
   @Override
-  public SinkPartitionStream[] getStreams() {
+  public SinkPartitionStream[] getPartitionStreams() {
     SinkPartitionStream[] array = new SinkPartitionStream[streams.size()];
     return streams.values().toArray(array);
   }
 
   @Override
   public void delete(SinkPartitionStream stream) throws Exception {
-    SinkPartitionStream found = streams.get(stream.getParitionConfig().getPartitionId());
+    SinkPartitionStream found = streams.get(stream.getPartitionStreamId());
     if(found != null) {
       found.delete();
-      streams.remove(stream.getParitionConfig().getPartitionId());
+      streams.remove(stream.getPartitionStreamId());
     } else {
-      throw new Exception("Cannot find the stream " + stream.getParitionConfig().getPartitionId());
+      throw new Exception("Cannot find the stream " + stream.getPartitionStreamId());
     }
   }
 
   @Override
   public SinkPartitionStream newStream() throws Exception {
-    PartitionConfig pConfig = new PartitionConfig(storage.newStreamDescriptor());
-    pConfig.setPartitionId(idTracker++);
+    PartitionStreamConfig pConfig = new PartitionStreamConfig(storage.newStreamDescriptor());
+    pConfig.setPartitionStreamId(idTracker++);
     return new ESSinkStream(storage.getStorageConfig(), pConfig);
   }
 

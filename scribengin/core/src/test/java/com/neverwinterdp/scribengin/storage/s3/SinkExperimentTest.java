@@ -63,17 +63,17 @@ public class SinkExperimentTest {
     descriptor.attribute("s3.storage.path", folderName);
 
     S3Sink sink = new S3Sink(s3Client, descriptor);
-    SinkPartitionStream[] streams = sink.getStreams();
+    SinkPartitionStream[] streams = sink.getPartitionStreams();
     assertEquals(0, streams.length);
 
     SinkPartitionStream stream = sink.newStream();
-    assertEquals(1, sink.getStreams().length);
+    assertEquals(1, sink.getPartitionStreams().length);
 
     SinkPartitionStreamWriter writer = stream.getWriter();
     int numBuffers = 5;
     for (int i = 0; i < numBuffers; i++) {
       for (int j = 0; j < 100; j++) {
-        String key = "stream=" + stream.getParitionConfig().getPartitionId() + ",buffer=" + i + ",record=" + j;
+        String key = "stream=" + stream.getPartitionStreamId() + ",buffer=" + i + ",record=" + j;
         writer.append(Record.create(key, key));
       }
       writer.commit();

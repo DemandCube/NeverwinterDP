@@ -6,29 +6,36 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @SuppressWarnings("serial")
-public class PartitionConfig extends HashMap<String, String> {
-  final static public String PARTITION_ID = "partitionId";
-  final static public String LOCATION     = "location";
+public class PartitionStreamConfig extends HashMap<String, String> {
+  final static public String PARTITION           = "partition";
+  final static public String PARTITION_STREAM_ID = "partitionStreamId";
+  final static public String LOCATION            = "location";
   
-  public PartitionConfig() {
+  public PartitionStreamConfig() {
   }
   
-  public PartitionConfig(int id) {
-    setPartitionId(id);
+  public PartitionStreamConfig(int id) {
+    setPartitionStreamId(id);
   }
   
-  public PartitionConfig(int id, String location) {
-    setPartitionId(id);
+  public PartitionStreamConfig(int id, String location) {
+    setPartitionStreamId(id);
     setLocation(location);
   }
   
-  public PartitionConfig(Map<String, String> props) {
+  public PartitionStreamConfig(Map<String, String> props) {
     putAll(props);
   }
   
   @JsonIgnore
-  public int  getPartitionId() { return intAttribute(PARTITION_ID, 0); }
-  public void setPartitionId(int id) { attribute(PARTITION_ID, id); }
+  public String getPartition() { return get(PARTITION); }
+  public void   setPartition(String partition) { 
+    put(LOCATION, partition); 
+  }
+  
+  @JsonIgnore
+  public int  getPartitionStreamId() { return intAttribute(PARTITION_STREAM_ID, 0); }
+  public void setPartitionStreamId(int id) { attribute(PARTITION_STREAM_ID, id); }
   
   @JsonIgnore
   public String getLocation() { return get(LOCATION); }
