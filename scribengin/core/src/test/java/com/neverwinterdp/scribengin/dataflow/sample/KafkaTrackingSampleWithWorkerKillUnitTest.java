@@ -12,7 +12,7 @@ public class KafkaTrackingSampleWithWorkerKillUnitTest  {
   public void setup() throws Exception {
     trackingSampleRunner.setup();
     trackingSampleRunner.numOfMessagePerChunk = 10000;
-    trackingSampleRunner.dataflowMaxRuntime = 180000;
+    trackingSampleRunner.dataflowMaxRuntime = 90000;
   }
   
   @After

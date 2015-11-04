@@ -21,7 +21,7 @@ import com.neverwinterdp.util.log.LoggerFactory;
 public class KafkaTrackingSampleRunner  {
   String dataflowId           = "tracking-dataflow";
   int    numOfMessagePerChunk = 1000;
-  long   dataflowMaxRuntime   = 90000;
+  long   dataflowMaxRuntime   = 45000;
   
   ScribenginClusterBuilder clusterBuilder ;
   Node esNode ;

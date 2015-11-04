@@ -73,5 +73,6 @@ public class VMWorkerApp extends VMApp {
     dflRegistry.
       getWorkerRegistry().
       setWorkerStatus(getVM().getDescriptor().getId(), DataflowWorkerStatus.TERMINATED);
+    System.out.println("VMWorkerApp Done !!!!!!!!!");
   }
 }

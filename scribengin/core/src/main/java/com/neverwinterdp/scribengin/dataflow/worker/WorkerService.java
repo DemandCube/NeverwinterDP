@@ -12,7 +12,6 @@ import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskService;
-import com.neverwinterdp.registry.task.dedicated.TaskExecutor;
 import com.neverwinterdp.registry.task.dedicated.TaskSlotExecutor;
 import com.neverwinterdp.registry.task.dedicated.TaskSlotExecutorFactory;
 import com.neverwinterdp.registry.txevent.TXEvent;

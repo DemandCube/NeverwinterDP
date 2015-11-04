@@ -81,9 +81,12 @@ public class MasterService {
     activityService.queue(new DataflowStopActivityBuilder().build());
     workerMonitor.waitForAllWorkerTerminated();
     taskMonitor.waitForAllTaskFinish(30000);
+    System.out.println("DataflowMasterService: waitForTermination(), wait for all task terminate");
     
     taskService.onDestroy();
+    System.out.println("DataflowMasterService: waitForTermination(), taskService.onDestroy();");
     activityService.onDestroy();
+    System.out.println("DataflowMasterService: waitForTermination(), activityService.onDestroy()");
     //finish
     dflRegistry.setStatus(DataflowLifecycleStatus.FINISH);
     System.out.println("DataflowMasterService: waitForTermination(), done!!!");
