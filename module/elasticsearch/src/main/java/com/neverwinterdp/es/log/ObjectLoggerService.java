@@ -37,7 +37,7 @@ public class ObjectLoggerService {
     logger.log(id, object);
   }
   
-  public int flush() {
+  public int flush() throws InterruptedException {
     int count = 0 ;
     for(ObjectLogger<?> logger : loggers.values()) {
       count += logger.flush();
@@ -46,7 +46,7 @@ public class ObjectLoggerService {
   }
   
   public void close() throws IOException {
-    if(this.flushThread != null || flushThread.isAlive()) {
+    if(flushThread != null && flushThread.isAlive()) {
       flushThread.interrupt();
     }
     for(ObjectLogger<?> logger : loggers.values()) {

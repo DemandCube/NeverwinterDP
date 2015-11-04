@@ -52,11 +52,13 @@ public class ObjectLogger<T> {
   }
 
   synchronized public void close() throws IOException { 
-    esObjectClient.close();
+    if(esObjectClient != null) {
+      esObjectClient.close();
+    }
     queue.close(); 
   }
   
-  synchronized public int flush() {
+  synchronized public int flush() throws InterruptedException {
     if(esObjectClient == null) {
       try {
         esObjectClient = new ESObjectClient<T>(new ESClient(connect), indexName, objectType) ;
@@ -97,6 +99,7 @@ public class ObjectLogger<T> {
     } catch(ElasticsearchException ex) {
       ex.printStackTrace();
     } catch (InterruptedException e) {
+      throw e;
     } catch(Exception ex) {
       ex.printStackTrace() ; 
     }

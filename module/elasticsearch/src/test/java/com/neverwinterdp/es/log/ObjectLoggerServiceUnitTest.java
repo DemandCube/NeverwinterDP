@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.neverwinterdp.es.log.sampler.MetricSampler;
 import com.neverwinterdp.os.DetailThreadInfo;
 import com.neverwinterdp.os.FileStoreInfo;
 import com.neverwinterdp.os.GCInfo;
@@ -42,40 +43,10 @@ public class ObjectLoggerServiceUnitTest {
   
   @Test
   public void testService() throws Exception {
-    RuntimeEnv runtimeEnv = new RuntimeEnv("localhost", "localhost", "build/app") ;
-    OSManagement osMan = new OSManagement(runtimeEnv) ;
-
-    ObjectLoggerService service = new  ObjectLoggerService(new String[] {"127.0.0.1:9300"}, "build/working/buffer", 25000);
-    service.add(DetailThreadInfo.class);
-    service.add(FileStoreInfo.class);
-    service.add(GCInfo.class);
-    service.add(MemoryInfo.class);
-    service.add(OSInfo.class);
-    service.add(ThreadCountInfo.class);
-    
-    DetailThreadInfo[] info = osMan.getDetailThreadInfo();
-    for(DetailThreadInfo sel : info) {
-      service.log(sel.uniqueId(), sel);
-    }
-    
-    for(FileStoreInfo sel : osMan.getFileStoreInfo()) {
-      service.log(sel.uniqueId(), sel);
-    }
-    
-    for(GCInfo sel : osMan.getGCInfo()) {
-      service.log(sel.uniqueId(), sel);
-    }
-    
-    for(MemoryInfo sel : osMan.getMemoryInfo()) {
-      service.log(sel.uniqueId(), sel);
-    }
-    
-    OSInfo osInfo = osMan.getOSInfo();
-    service.log(osInfo.uniqueId(), osInfo);
-    
-    ThreadCountInfo threadCountInfo = osMan.getThreadCountInfo();
-    service.log(threadCountInfo.uniqueId(), threadCountInfo);
-    
-    Thread.sleep(15000);
+    String[] args = {
+      "--vm-name",    "vm-1",
+      "--es-connect", "localhost:9300"
+    };
+    MetricSampler.main(args);
   }
 }
