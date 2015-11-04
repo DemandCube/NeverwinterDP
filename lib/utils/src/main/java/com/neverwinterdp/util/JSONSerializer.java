@@ -1,6 +1,12 @@
 package com.neverwinterdp.util;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -50,10 +56,15 @@ public class JSONSerializer {
 
   public <T> byte[] toBytes(T idoc)  {
     try {
-      StringWriter w = new StringWriter() ;
-      mapper.writeValue(w, idoc);
-      w.close() ;
-      return w.getBuffer().toString().getBytes(UTF8) ;
+//      StringWriter w = new StringWriter() ;
+//      mapper.writeValue(w, idoc);
+//      w.close() ;
+//      return w.getBuffer().toString().getBytes(UTF8) ;
+      ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+      OutputStreamWriter writer = new OutputStreamWriter(outStream);
+      mapper.writeValue(writer, idoc);
+      writer.close() ;
+      return outStream.toByteArray() ;
     } catch(IOException e) {
       throw new RuntimeException(e) ;
     }
@@ -61,7 +72,10 @@ public class JSONSerializer {
 
   public <T> T fromBytes(byte[] data, Class<T> type)  {
     try {
-      StringReader reader = new StringReader(new String(data, UTF8)) ;
+      //StringReader reader = new StringReader(new String(data, UTF8)) ;
+      //return mapper.readValue(reader , type);
+      ByteArrayInputStream inStream = new ByteArrayInputStream(data);
+      Reader reader  = new InputStreamReader(inStream);
       return mapper.readValue(reader , type);
     } catch (IOException e) {
       throw new RuntimeException(e) ;
@@ -69,8 +83,10 @@ public class JSONSerializer {
   }
   
   public <T> T fromBytes(byte[] data, TypeReference<T> typeRef) {
-    StringReader reader = new StringReader(new String(data, UTF8)) ;
     try {
+      //StringReader reader = new StringReader(new String(data, UTF8)) ;
+      ByteArrayInputStream inStream = new ByteArrayInputStream(data);
+      Reader reader  = new InputStreamReader(inStream);
       return mapper.readValue(reader , typeRef);
     } catch (IOException e) {
       throw new RuntimeException(e) ;
@@ -80,12 +96,21 @@ public class JSONSerializer {
   public <T> String toString(T idoc) {
     if(idoc == null) return "" ;
     try  {
-      Writer writer = new StringWriter() ;
+      StringWriter writer = new StringWriter() ;
       ObjectWriter owriter  = mapper.writerWithDefaultPrettyPrinter() ;
       owriter.writeValue(writer, idoc);
       return writer.toString() ;
     } catch(IOException ex) {
       throw new RuntimeException(ex) ;
+    }
+  }
+  
+  public <T> T fromString(String data, Class<T> type) {
+    try {
+      StringReader reader = new StringReader(data) ;
+      return mapper.readValue(reader , type);
+    } catch (IOException e) {
+      throw new RuntimeException(e) ;
     }
   }
   
@@ -100,15 +125,6 @@ public class JSONSerializer {
     return writer.toString() ;
   }
 
-  public <T> T fromString(String data, Class<T> type) {
-    try {
-      StringReader reader = new StringReader(data) ;
-      return mapper.readValue(reader , type);
-    } catch (IOException e) {
-      throw new RuntimeException(e) ;
-    }
-  }
-  
   public <T> T fromString(String data, TypeReference<T> typeRef) {
     try {
       StringReader reader = new StringReader(data) ;

@@ -3,8 +3,6 @@ package com.neverwinterdp.registry.task.dedicated;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class TaskExecutorService<T> {
@@ -36,7 +34,10 @@ public class TaskExecutorService<T> {
   
   
   public void shutdown() throws InterruptedException {
-    taskSlotTimer.interrupt();
+    if(taskSlotTimer  != null) {
+      taskSlotTimer.interrupt();
+    }
+    
     if(taskExecutors.size() > 0) {
       for(TaskExecutor<T> executor : taskExecutors) {
         executor.shutdown();

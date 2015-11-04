@@ -50,7 +50,9 @@ abstract public class AbstractKafkaWriter implements KafkaWriter {
 
   @Override
   public <T> void send(String topic, T obj, long timeout) throws Exception {
-    send(topic, -1, nextKey(-1), JSONSerializer.INSTANCE.toString(obj), null, timeout);
+    byte[] keyBytes     = nextKey(-1).getBytes(UTF8);
+    byte[] messageBytes = JSONSerializer.INSTANCE.toBytes(obj);
+    send(topic, -1, keyBytes, messageBytes, null, timeout);
   }
   
   public void send(String topic, int partition, String key, String data, Callback callback, long timeout) throws Exception {
@@ -59,6 +61,7 @@ abstract public class AbstractKafkaWriter implements KafkaWriter {
     send(topic, partition, keyBytes, messageBytes, callback, timeout);
   }
   
+  abstract public void send(String topic, int partition, byte[] key, byte[] message, Callback callback, long timeout) throws Exception;
   
   private String nextKey(int partition) {
     if(partition >= 0) {

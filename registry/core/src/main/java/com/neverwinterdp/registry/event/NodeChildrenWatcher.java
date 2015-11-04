@@ -28,9 +28,9 @@ abstract public class NodeChildrenWatcher extends NodeWatcher {
   
   @Override
   public void onEvent(NodeEvent event) {
+    if(isComplete()) return;
     if(persistent) {
       try {
-        if(isComplete()) return;
         registry.watchChildren(event.getPath(), this);
       } catch(RegistryException ex) {
         if(ex.getErrorCode() != ErrorCode.NoNode) {
