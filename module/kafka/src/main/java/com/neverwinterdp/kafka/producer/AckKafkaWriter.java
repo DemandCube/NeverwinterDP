@@ -41,6 +41,8 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
     kafkaProps.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,   ByteArraySerializer.class.getName());
     
     kafkaProps.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+    kafkaProps.setProperty(ProducerConfig.TIMEOUT_CONFIG, "60000");
+    
     kafkaProps.setProperty(ProducerConfig.RETRIES_CONFIG, "5");
     kafkaProps.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, "16384");
     kafkaProps.setProperty(ProducerConfig.BLOCK_ON_BUFFER_FULL_CONFIG, "true");
@@ -108,7 +110,7 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
   }
   
   public void commit() throws Exception {
-    waittingAckBuffer.waitForEmptyBuffer(60000);
+    waittingAckBuffer.waitForEmptyBuffer(90000);
   }
   
   public void close() throws InterruptedException { 
