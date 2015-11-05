@@ -25,9 +25,11 @@ public class MetricSampler {
     service.add(DetailThreadInfo.class);
     service.add(FileStoreInfo.class);
     service.add(GCInfo.class);
+    
+    service.add(ThreadCountInfo.class);
+    
     service.add(MemoryInfo.class);
     service.add(OSInfo.class);
-    service.add(ThreadCountInfo.class);
     
     DetailThreadInfo[] info = osMan.getDetailThreadInfo();
     for(DetailThreadInfo sel : info) {

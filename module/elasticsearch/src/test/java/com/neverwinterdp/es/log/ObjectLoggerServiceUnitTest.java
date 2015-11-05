@@ -9,14 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.es.log.sampler.MetricSampler;
-import com.neverwinterdp.os.DetailThreadInfo;
-import com.neverwinterdp.os.FileStoreInfo;
-import com.neverwinterdp.os.GCInfo;
-import com.neverwinterdp.os.MemoryInfo;
-import com.neverwinterdp.os.OSInfo;
-import com.neverwinterdp.os.OSManagement;
-import com.neverwinterdp.os.RuntimeEnv;
-import com.neverwinterdp.os.ThreadCountInfo;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 

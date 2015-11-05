@@ -43,7 +43,8 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
   
   @Override
   public void onShutdown() throws Exception {
-    saveContext();
+    context.commit();
+    context.close();
   }
   
   @Override
@@ -77,7 +78,7 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
       report.addAccRuntime(currentTime - startTime);
       
       if(context.isComplete() || report.getProcessCount() > 10000 || lastFlushTime + 15000 < currentTime) {
-        updateContext();
+        context.commit();
       }
     } catch(InterruptedException ex) {
       throw ex ;
@@ -89,33 +90,12 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
     }
   }
   
-  public void suspend() throws Exception {
-    saveContext();
-    DataflowRegistry dflRegistry = workerService.getDataflowRegistry();
-    dflRegistry.getTaskRegistry().suspend(taskContext);
-  }
-  
   public void finish() throws Exception {
     OperatorTaskReport report = context.getTaskReport();
     report.setFinishTime(System.currentTimeMillis());
-    saveContext();
+    context.commit();
+    context.close();
     DataflowRegistry dflRegistry = workerService.getDataflowRegistry();
     dflRegistry.getTaskRegistry().finish(taskContext, TaskStatus.TERMINATED);
-  }
-  
-  void saveContext() {
-    try {
-      OperatorTaskReport report = context.getTaskReport();
-      report.addAccRuntime(System.currentTimeMillis() - startTime);
-      context.commit();
-      context.close();
-    } catch(Exception ex) {
-      workerService.getLogger().error("Cannot save the executor context due to the error: " + ex);
-    }
-  }
-  
-  void updateContext() throws Exception {
-    OperatorTaskReport report = context.getTaskReport();
-    context.commit();
   }
 }
