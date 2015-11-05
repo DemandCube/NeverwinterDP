@@ -25,9 +25,7 @@ public class HDFSSource implements Source {
   }
   
   @Override
-  public StorageConfig getStorageConfig() {
-    return null;
-  }
+  public StorageConfig getStorageConfig() { return storageConfig; }
 
   @Override
   public SourcePartition getLatestSourcePartition() throws Exception {
@@ -46,7 +44,7 @@ public class HDFSSource implements Source {
     }
     
     FileStatus[] status = fs.listStatus(new Path(storageConfig.getLocation())) ;
+    for(FileStatus sel : status) {
+    }
   }
-  
-  
 }
