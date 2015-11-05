@@ -87,7 +87,7 @@ public class RegistryImpl implements Registry {
     try {
       if(zkClient != null) zkClient.close();
       ZkConnectedStateWatcher connectStateWatcher = new ZkConnectedStateWatcher();
-      zkClient = new ZooKeeper(config.getConnect(), 10000, connectStateWatcher);
+      zkClient = new ZooKeeper(config.getConnect(), 30000, connectStateWatcher);
       if(!connectStateWatcher.waitForConnected(10000)) {
         zkClient.close();
         zkClient = null;
