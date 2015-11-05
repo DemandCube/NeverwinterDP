@@ -35,6 +35,8 @@ public class KafkaSinkPartitionStreamWriter implements SinkPartitionStreamWriter
 
   @Override
   public void commit() throws Exception {
+    prepareCommit();
+    completeCommit();
   }
 
   @Override
