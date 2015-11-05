@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class WaittingAckProducerRecordHolder<K, V> {
-  private int maxSize = 10000;
+  private int maxSize = 5000;
   private LinkedHashMap<Long, WaittingAckProducerRecord<K,V>> buffer = new LinkedHashMap<Long, WaittingAckProducerRecord<K, V>>();
 
   public int size() { return buffer.size(); }
