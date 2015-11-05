@@ -40,7 +40,7 @@ public class TopicWriter {
     KafkaSink sink = new KafkaSink(kafkaClient, topicConfig.topic + ".writer", topicConfig.topic);
     executorService = Executors.newFixedThreadPool(topicConfig.topicNumOfPartitions);
     for(int i = 0; i < topicConfig.topicNumOfPartitions; i++) {
-      SinkPartitionStream stream = sink.newStream();
+      SinkPartitionStream stream = sink.getParitionStream(i);
       TopicPartitionWriter partitionWriter = new TopicPartitionWriter(stream);
       executorService.submit(partitionWriter);
     }

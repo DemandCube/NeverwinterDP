@@ -19,8 +19,8 @@ public class RawKafkaSourceStreamReader implements SourcePartitionStreamReader {
   private CommitPoint lastCommitInfo ;
   
   public RawKafkaSourceStreamReader(KafkaClient kafkaClient, PartitionStreamConfig pConfig, PartitionMetadata pmd) throws Exception {
-    this.partitionConfig = pConfig;
-    this.partitionReader = 
+    partitionConfig = pConfig;
+    partitionReader = 
         new KafkaPartitionReader(pConfig.attribute("name"), kafkaClient, pConfig.attribute("topic"), pmd);
   }
   
@@ -52,7 +52,7 @@ public class RawKafkaSourceStreamReader implements SourcePartitionStreamReader {
 
   @Override
   public void rollback() throws Exception {
-    throw new Exception("To implement") ;
+    partitionReader.rollback();
   }
 
   @Override

@@ -7,7 +7,7 @@ import java.util.Map;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.text.StringUtil;
 
-public class OperationConfig {
+public class SegmentOperationConfig {
   private long                startTime;
   private long                maxLockTime;
   private String              name;
@@ -15,9 +15,9 @@ public class OperationConfig {
   private Map<String, String> attributes = new HashMap<>();
   private String              executor ;
   
-  public OperationConfig() {}
+  public SegmentOperationConfig() {}
   
-  public OperationConfig(String name,  long maxLockTime) {
+  public SegmentOperationConfig(String name,  long maxLockTime) {
     this.name = name;
     this.startTime = System.currentTimeMillis();
     this.maxLockTime = maxLockTime;
@@ -26,7 +26,7 @@ public class OperationConfig {
   public String getName() { return name; }
   public void setName(String name) { this.name = name; }
   
-  public OperationConfig withName(String name) {
+  public SegmentOperationConfig withName(String name) {
     this.name = name;
     return this;
   }
@@ -42,7 +42,7 @@ public class OperationConfig {
   public String getDescription() { return description; }
   public void setDescription(String description) { this.description = description; }
   
-  public OperationConfig withDescription(String desc) {
+  public SegmentOperationConfig withDescription(String desc) {
     this.description = desc;
     return this; 
   }
@@ -53,7 +53,7 @@ public class OperationConfig {
     this.executor = executor;
   }
 
-  public OperationConfig withExecutor(Class<?> type) {
+  public SegmentOperationConfig withExecutor(Class<?> type) {
     this.executor = type.getName();
     return this; 
   }
@@ -66,7 +66,7 @@ public class OperationConfig {
     return attributes.get(name);
   }
   
-  public OperationConfig withAttribute(String name, String value) {
+  public SegmentOperationConfig withAttribute(String name, String value) {
     attributes.put(name, value);
     return this;
   }
@@ -77,7 +77,7 @@ public class OperationConfig {
     return JSONSerializer.INSTANCE.fromString(json, type);
   }
   
-  public <T> OperationConfig withAttribute(String name, T value) {
+  public <T> SegmentOperationConfig withAttribute(String name, T value) {
     String json = JSONSerializer.INSTANCE.toString(value);
     attributes.put(name, json);
     return this;
@@ -85,7 +85,7 @@ public class OperationConfig {
   
   public String withSource() { return attributes.get("source") ;}
   
-  public OperationConfig withSource(String value) {
+  public SegmentOperationConfig withSource(String value) {
     attributes.put("source", value);
     return this;
   }
@@ -96,14 +96,14 @@ public class OperationConfig {
     return StringUtil.toStringArray(values);
   }
   
-  public OperationConfig withSources(List<String> sources) {
+  public SegmentOperationConfig withSources(List<String> sources) {
     attributes.put("sources", StringUtil.join(sources, ","));
     return this;
   }
   
   public String getDestination() { return attributes.get("destination") ;}
   
-  public OperationConfig withDestination(String value) {
+  public SegmentOperationConfig withDestination(String value) {
     attributes.put("destination", value);
     return this;
   }

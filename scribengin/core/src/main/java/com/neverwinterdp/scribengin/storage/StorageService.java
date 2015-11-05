@@ -19,17 +19,12 @@ public class StorageService {
   @Inject
   private KafkaClient kafkaClient;
   
-  @Inject
-  private S3Client s3Client;
+  //@Inject
+  //private S3Client s3Client;
   
   private Map<String, KafkaStorage> cacheKafkaStorage = new HashMap<>();
   
   public StorageService() {
-  }
-  
-  public StorageService(FileSystem fs, S3Client s3Client) {
-    this.fs = fs;
-    this.s3Client = s3Client;
   }
   
   public FileSystem getFileSyztem() { return this.fs ; }

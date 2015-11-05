@@ -28,6 +28,7 @@ import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.Storage;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.StorageService;
+import com.neverwinterdp.scribengin.storage.sink.Sink;
 
 public class DataflowInitActivityBuilder extends ActivityBuilder {
   public Activity build() {
@@ -75,7 +76,8 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
           storage.create(storageConfig.getPartitionStream(), storageConfig.getReplication());
           storage.refresh();
         }
-        List<PartitionStreamConfig> pConfigs = storage.getPartitionConfigs();
+        Sink sink = storage.getSink();
+        List<PartitionStreamConfig> pConfigs = sink.getPartitionStreamConfigs();
         streamRegistry.create(name, storageConfig, pConfigs);
       }
     }

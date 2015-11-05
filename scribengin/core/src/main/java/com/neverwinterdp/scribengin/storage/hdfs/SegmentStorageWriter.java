@@ -8,19 +8,19 @@ import org.apache.hadoop.fs.Path;
 
 import com.neverwinterdp.util.JSONSerializer;
 
-public class StorageWriter<T> {
-  private Storage<T> storage;
+public class SegmentStorageWriter<T> {
+  private SegmentStorage<T> storage;
   private FileSystem fs;
   private String     location;
   private SegmentWriter currentBuffer;
   
-  public StorageWriter(Storage<T> storage) {
+  public SegmentStorageWriter(SegmentStorage<T> storage) {
     this.storage = storage ;
     this.fs = storage.getFileSystem();
     this.location = storage.getLocation();
   }
   
-  public Storage<T> getStorage() { return this.storage; }
+  public SegmentStorage<T> getStorage() { return this.storage; }
   
   public void append(T obj) throws Exception {
     if(currentBuffer == null) {

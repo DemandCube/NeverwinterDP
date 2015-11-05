@@ -28,7 +28,7 @@ public class SegmentSet {
     return dataSize;
   }
   
-  public Path[] toHDFSDataPath(Storage<?> storage) {
+  public Path[] toHDFSDataPath(SegmentStorage<?> storage) {
     Path[] path = new Path[segments.size()];
     String location = storage.getLocation();
     for(int i = 0; i < segments.size(); i++) {

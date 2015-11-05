@@ -7,13 +7,13 @@ import org.apache.hadoop.fs.Path;
 
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
-import com.neverwinterdp.scribengin.storage.hdfs.Storage;
+import com.neverwinterdp.scribengin.storage.hdfs.SegmentStorage;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
 public class HDFSSinkPartitionStream implements SinkPartitionStream {
-  private Storage<Record> storage;
+  private SegmentStorage<Record> storage;
   private FileSystem      fs;
   private PartitionStreamConfig descriptor;
   
@@ -21,13 +21,13 @@ public class HDFSSinkPartitionStream implements SinkPartitionStream {
   public HDFSSinkPartitionStream(FileSystem fs, Path path) throws IOException {
     this.fs = fs ;
     descriptor = new PartitionStreamConfig(HDFSUtil.getStreamId(path), path.toString());
-    storage = new Storage<>(fs, descriptor.getLocation(), Record.class);
+    storage = new SegmentStorage<>(fs, descriptor.getLocation(), Record.class);
   }
   
   public HDFSSinkPartitionStream(FileSystem fs, PartitionStreamConfig descriptor) throws IOException {
     this.fs = fs;
     this.descriptor = descriptor;
-    storage = new Storage<>(fs, descriptor.getLocation(), Record.class);
+    storage = new SegmentStorage<>(fs, descriptor.getLocation(), Record.class);
   }
   
   public int getPartitionStreamId() { return descriptor.getPartitionStreamId(); }

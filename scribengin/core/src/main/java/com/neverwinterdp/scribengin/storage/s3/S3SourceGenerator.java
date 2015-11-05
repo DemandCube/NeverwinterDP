@@ -39,7 +39,7 @@ public class S3SourceGenerator {
   }
 
   void generateStream(Sink sink) throws Exception {
-    SinkPartitionStream stream = sink.newStream();
+    SinkPartitionStream stream = sink.getParitionStream(0);
     SinkPartitionStreamWriter writer = stream.getWriter();
     for (int i = 0; i < numOfBufferPerStream; i++) {
       for (int j = 0; j < numOfRecordPerBuffer; j++) {

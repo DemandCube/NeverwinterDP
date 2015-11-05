@@ -9,6 +9,7 @@ import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
+import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSource;
 import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSourcePartition;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
@@ -44,7 +45,7 @@ public class SinkSourceUnitTest {
     KafkaStorage storage = new KafkaStorage(kafkaClient, "hello", TOPIC);
     KafkaSink sink = (KafkaSink) storage.getSink();
     
-    SinkPartitionStream stream = sink.newStream();
+    SinkPartitionStream stream = sink.getParitionStream(0);
     SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < 10; i++) {
       String hello = "Hello " + i ;
@@ -53,8 +54,9 @@ public class SinkSourceUnitTest {
     }
     writer.close();
     
-    KafkaSourcePartition source = new KafkaSourcePartition(kafkaClient, "hello", TOPIC);
-    SourcePartitionStream[] streams = source.getPartitionStreams();
+    KafkaSource source = new KafkaSource(kafkaClient, "hello", TOPIC);
+    KafkaSourcePartition partition = (KafkaSourcePartition) source.getLatestSourcePartition();
+    SourcePartitionStream[] streams = partition.getPartitionStreams();
     Assert.assertEquals(5, streams.length);
     for(int i = 0; i < streams.length; i++) {
       System.out.println("Stream id: " + streams[i].getDescriptor().getPartitionStreamId());

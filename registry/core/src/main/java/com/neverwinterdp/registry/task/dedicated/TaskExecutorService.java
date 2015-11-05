@@ -55,7 +55,9 @@ public class TaskExecutorService<T> {
       wait(remainWaitTime);
       Iterator<TaskExecutorThread> i = taskExecutorsThreads.iterator();
       while(i.hasNext()) {
-        if(!i.next().isAlive()) i.remove();
+        if(!i.next().isAlive()) {
+          i.remove();
+        }
       }
     }
     taskSlotTimer.interrupt();

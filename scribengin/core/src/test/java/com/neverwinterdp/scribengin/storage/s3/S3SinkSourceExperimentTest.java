@@ -59,7 +59,7 @@ public class S3SinkSourceExperimentTest {
     assertNotNull(sink.getSinkFolder());
     int NUM_MESSAGE_PER_STREAM = 1500;
     for(int i = 0; i < 2; i++) {
-      SinkPartitionStream stream = sink.newStream();
+      SinkPartitionStream stream = sink.getParitionStream(0);
       SinkPartitionStreamWriter writer = stream.getWriter();
       for (int j = 0; j < NUM_MESSAGE_PER_STREAM; j++) {
         String key = "stream=" + stream.getPartitionStreamId() + ",buffer=" + j + ",record=" + j;

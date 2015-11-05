@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.scribengin.storage.Record;
+import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSource;
 import com.neverwinterdp.scribengin.storage.kafka.source.KafkaSourcePartition;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
@@ -34,8 +35,9 @@ public class TopicReader {
   }
   
   public void start() throws Exception {
-    KafkaSourcePartition source = new KafkaSourcePartition(kafkaClient, topic + ".reader",  topic) ;
-    SourcePartitionStream[] streams = source.getPartitionStreams() ;
+    KafkaSource source = new KafkaSource(kafkaClient, topic + ".reader",  topic);
+    KafkaSourcePartition partition = (KafkaSourcePartition)source.getLatestSourcePartition() ;
+    SourcePartitionStream[] streams = partition.getPartitionStreams() ;
     executorService = Executors.newFixedThreadPool(streams.length);
     for(int i = 0; i < streams.length; i++) {
       TopicPartitionReader partitionReader = new TopicPartitionReader(streams[i]);

@@ -18,12 +18,6 @@ public class KafkaSourcePartition implements SourcePartition {
   private StorageConfig                   storageConfig;
   private Map<Integer, KafkaSourceStream> sourceStreams = new HashMap<Integer, KafkaSourceStream>();
 
-  public KafkaSourcePartition(KafkaClient kafkaClient, String name, String topic) throws Exception {
-    this.kafkaClient = kafkaClient;
-    StorageConfig descriptor = createStorageConfig(name, topic, kafkaClient.getZkConnects(), null);
-    init(descriptor);
-  }
-  
   public KafkaSourcePartition(KafkaClient kafkaClient, StorageConfig sconfig) throws Exception {
     this.kafkaClient = kafkaClient;
     init(sconfig);
@@ -67,18 +61,5 @@ public class KafkaSourcePartition implements SourcePartition {
   }
   
   public void close() throws Exception {
-  }
-  
-  static public StorageConfig createStorageConfig(String name, String topic, String zkConnect, String reader) {
-    StorageConfig descriptor = new StorageConfig("kafka");
-    descriptor.attribute("name", name);
-    descriptor.attribute("topic", topic);
-    descriptor.attribute("zk.connect", zkConnect);
-    if(reader != null) {
-      descriptor.attribute("reader", reader);
-    } else {
-      descriptor.attribute("reader", "record");
-    }
-    return descriptor;
   }
 }

@@ -7,7 +7,6 @@ import java.util.Set;
 
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.WorkerService;
-import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.Storage;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
@@ -160,7 +159,7 @@ public class OperatorContext {
     private SourcePartitionStreamReader assignedPartitionReader;
 
     public InputContext(Storage storage, int partitionId) throws Exception {
-      this.source = storage.getSource();
+      this.source = storage.getSource().getLatestSourcePartition();
       this.assignedPartition = source.getPartitionStream(partitionId);
       this.assignedPartitionReader = assignedPartition.getReader("DataflowTask");
     }
@@ -191,7 +190,7 @@ public class OperatorContext {
       sink = storage.getSink();
       assignedPartition = sink.getParitionStream(partitionId);
       if(assignedPartition == null) {
-        assignedPartition = sink.newStream();
+        assignedPartition = sink.getParitionStream(partitionId);
       }
       assignedPartitionWriter = assignedPartition.getWriter();
     }

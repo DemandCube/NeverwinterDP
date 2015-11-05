@@ -44,7 +44,7 @@ public class StorageUnitTest {
     Segment.MEDIUM_DATASIZE_THRESHOLD = 8 * Segment.SMALL_DATASIZE_THRESHOLD;
     Segment.LARGE_DATASIZE_THRESHOLD  = 8 * Segment.MEDIUM_DATASIZE_THRESHOLD;
     AtomicInteger idTracker = new AtomicInteger() ;
-    Storage<Record> storage = new Storage<>(fs, STORAGE_DIR, Record.class);
+    SegmentStorage<Record> storage = new SegmentStorage<>(fs, STORAGE_DIR, Record.class);
     ExecutorService writerService = Executors.newFixedThreadPool(3);
     for(int i = 0; i < NUM_OF_WRITER; i++) {
       StorageWriterRunner runner = 
@@ -66,7 +66,7 @@ public class StorageUnitTest {
   }
 
   int countStorage() throws Exception {
-    StorageReader<Record> reader = new StorageReader<>("test", fs, STORAGE_DIR, Record.class);
+    SegmentStorageReader<Record> reader = new SegmentStorageReader<>("test", fs, STORAGE_DIR, Record.class);
     Record record = null ;
     int count = 0 ;
     while((record = reader.next(1000)) != null) {
@@ -78,13 +78,13 @@ public class StorageUnitTest {
   }
   
   static public class StorageWriterRunner implements Runnable {
-    Storage<Record> storage ;
+    SegmentStorage<Record> storage ;
     AtomicInteger idTracker;
     int numOfSegment;
     int recordPerSegment;
     int recordSize;
     
-    public StorageWriterRunner(Storage<Record> storage, AtomicInteger idTracker, int numOfSegment, int recordPerSegment, int recordSize) {
+    public StorageWriterRunner(SegmentStorage<Record> storage, AtomicInteger idTracker, int numOfSegment, int recordPerSegment, int recordSize) {
       this.storage = storage;
       this.idTracker = idTracker;
       this.numOfSegment = numOfSegment;
@@ -96,7 +96,7 @@ public class StorageUnitTest {
     public void run() {
       try {
         Random rand = new Random();
-        StorageWriter<Record> writer = storage.getStorageWriter();
+        SegmentStorageWriter<Record> writer = storage.getStorageWriter();
         byte[] data = new byte[recordSize];
         for(int i = 0; i < numOfSegment; i++) {
           for(int j = 0; j < recordPerSegment; j++) {

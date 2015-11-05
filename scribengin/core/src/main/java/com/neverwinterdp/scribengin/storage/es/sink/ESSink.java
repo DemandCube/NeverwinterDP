@@ -1,10 +1,12 @@
 package com.neverwinterdp.scribengin.storage.es.sink;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import com.neverwinterdp.es.ESObjectClient;
-import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
+import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.es.ESStorage;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
@@ -35,6 +37,16 @@ public class ESSink implements Sink {
   @Override
   public StorageConfig getDescriptor() { return storage.getStorageConfig(); }
 
+  public List<PartitionStreamConfig> getPartitionStreamConfigs() throws Exception {
+    int numOfPartitionStream = storage.getStorageConfig().getPartitionStream();
+    List<PartitionStreamConfig> holder = new ArrayList<>();
+    for(int i = 0; i < numOfPartitionStream; i++) {
+      PartitionStreamConfig config = new PartitionStreamConfig(i, null);
+      holder.add(config);
+    }
+    return holder;
+  }
+  
   @Override
   public SinkPartitionStream getPartitionStream(PartitionStreamConfig pConfig) throws Exception {
     StorageConfig sConfig = storage.getStorageConfig();
@@ -56,24 +68,6 @@ public class ESSink implements Sink {
   public SinkPartitionStream[] getPartitionStreams() {
     SinkPartitionStream[] array = new SinkPartitionStream[streams.size()];
     return streams.values().toArray(array);
-  }
-
-  @Override
-  public void delete(SinkPartitionStream stream) throws Exception {
-    SinkPartitionStream found = streams.get(stream.getPartitionStreamId());
-    if(found != null) {
-      found.delete();
-      streams.remove(stream.getPartitionStreamId());
-    } else {
-      throw new Exception("Cannot find the stream " + stream.getPartitionStreamId());
-    }
-  }
-
-  @Override
-  public SinkPartitionStream newStream() throws Exception {
-    PartitionStreamConfig pConfig = new PartitionStreamConfig(storage.newStreamDescriptor());
-    pConfig.setPartitionStreamId(idTracker++);
-    return new ESSinkStream(storage.getStorageConfig(), pConfig);
   }
 
   @Override

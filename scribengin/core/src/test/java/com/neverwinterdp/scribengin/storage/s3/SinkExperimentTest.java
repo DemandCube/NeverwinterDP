@@ -66,7 +66,7 @@ public class SinkExperimentTest {
     SinkPartitionStream[] streams = sink.getPartitionStreams();
     assertEquals(0, streams.length);
 
-    SinkPartitionStream stream = sink.newStream();
+    SinkPartitionStream stream = sink.getParitionStream(0);
     assertEquals(1, sink.getPartitionStreams().length);
 
     SinkPartitionStreamWriter writer = stream.getWriter();
@@ -99,7 +99,7 @@ public class SinkExperimentTest {
 
     S3Sink sink = new S3Sink(s3Client, descriptor);
 
-    SinkPartitionStream stream0 = sink.newStream();
+    SinkPartitionStream stream0 = sink.getParitionStream(0);
     SinkPartitionStreamWriter writer = stream0.getWriter();
     for (int i = 0; i < 100; i++) {
       writer.append(Record.create("key-" + i, "record " + i));
@@ -149,7 +149,7 @@ public class SinkExperimentTest {
     @Override
     public void run() {
       try {
-        SinkPartitionStream stream = sink.newStream();
+        SinkPartitionStream stream = sink.getParitionStream(0);
         SinkPartitionStreamWriter writer = stream.getWriter();
         Random random = new Random();
         for (int i = 0; i < 5; i++) {

@@ -45,6 +45,7 @@ public class HDFSSource implements Source {
     
     FileStatus[] status = fs.listStatus(new Path(storageConfig.getLocation())) ;
     for(FileStatus sel : status) {
+      
     }
   }
 }

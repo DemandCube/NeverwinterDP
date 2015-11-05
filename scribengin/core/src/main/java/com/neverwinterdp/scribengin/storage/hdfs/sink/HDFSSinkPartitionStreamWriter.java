@@ -5,16 +5,16 @@ import java.io.IOException;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.hdfs.Segment;
-import com.neverwinterdp.scribengin.storage.hdfs.Storage;
-import com.neverwinterdp.scribengin.storage.hdfs.StorageWriter;
+import com.neverwinterdp.scribengin.storage.hdfs.SegmentStorage;
+import com.neverwinterdp.scribengin.storage.hdfs.SegmentStorageWriter;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 
-public class HDFSSinkPartitionStreamWriter extends StorageWriter<Record> implements SinkPartitionStreamWriter {
+public class HDFSSinkPartitionStreamWriter extends SegmentStorageWriter<Record> implements SinkPartitionStreamWriter {
   private PartitionStreamConfig descriptor ;
   private long             smallDataSizeAccumulate  = 0;
   private long             mediumDataSizeAccumulate = 0;
   
-  public HDFSSinkPartitionStreamWriter(Storage<Record> storage, PartitionStreamConfig descriptor) throws IOException {
+  public HDFSSinkPartitionStreamWriter(SegmentStorage<Record> storage, PartitionStreamConfig descriptor) throws IOException {
     super(storage);
     this.descriptor = descriptor ;
     smallDataSizeAccumulate  = storage.getBufferSegments().dataSize();

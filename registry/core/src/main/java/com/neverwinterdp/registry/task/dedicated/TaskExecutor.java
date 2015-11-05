@@ -14,6 +14,7 @@ public class TaskExecutor<T> implements Runnable {
   private List<TaskSlotExecutor<T>>     taskSlotExecutors = new ArrayList<>();
   private TaskSlotExecutor<T>           currentRunningTaskSlotExecutor;
   private boolean                       shutdown = false;
+  private Throwable                     error ;
   
   public TaskExecutor(String id, DedicatedTaskService<T> taskService, int numOfTaskSlot) {
     executor = new TaskExecutorDescriptor(id, "NA");
@@ -33,6 +34,8 @@ public class TaskExecutor<T> implements Runnable {
   
   public void shutdown() { shutdown = true; }
   
+  public Throwable getError() { return error ; }
+  
   public void run() {
     try {
       while(!shutdown) {
@@ -49,8 +52,8 @@ public class TaskExecutor<T> implements Runnable {
         taskSlotExecutor.onShutdown();
       }
     } catch(InterruptedException e) {
-    } catch(Exception e) {
-      e.printStackTrace();
+    } catch(Throwable e) {
+      error = e ;
     }
   }
   

@@ -1,6 +1,8 @@
 package com.neverwinterdp.scribengin.storage.kafka.sink;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
@@ -9,12 +11,12 @@ import com.neverwinterdp.scribengin.storage.kafka.KafkaStorage;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
 
+import kafka.javaapi.PartitionMetadata;
+import kafka.javaapi.TopicMetadata;
+
 public class KafkaSink implements Sink {
   private StorageConfig storageConfig;
   private KafkaClient   kafkaClient;
-  
-  private int idTracker = 0;
-  private LinkedHashMap<Integer, KafkaSinkPartitionStream> streams = new LinkedHashMap<Integer, KafkaSinkPartitionStream>() ;
   
   public KafkaSink(KafkaClient kafkaClient, String name, String topic) throws Exception {
     this.kafkaClient = kafkaClient;
@@ -34,49 +36,43 @@ public class KafkaSink implements Sink {
   @Override
   public StorageConfig getDescriptor() { return storageConfig; }
 
+  public List<PartitionStreamConfig> getPartitionStreamConfigs() throws Exception {
+    TopicMetadata tMetadata = kafkaClient.findTopicMetadata(storageConfig.attribute(KafkaStorage.TOPIC));
+    List<PartitionStreamConfig> pConfigs = new ArrayList<>();
+    List<PartitionMetadata> partitions = tMetadata.partitionsMetadata();
+    for(int i = 0; i < partitions.size(); i++) {
+      PartitionMetadata pmetadata = partitions.get(i);
+      PartitionStreamConfig pConfig = new PartitionStreamConfig(pmetadata.partitionId());
+      pConfigs.add(pConfig);
+    }
+    return pConfigs ;
+  }
+  
   @Override
   public SinkPartitionStream getPartitionStream(PartitionStreamConfig pConfig) throws Exception {
-    SinkPartitionStream stream = streams.get(pConfig.getPartitionStreamId());
-    if(stream != null) return stream ;
-    KafkaSinkPartitionStream newStream= new KafkaSinkPartitionStream(pConfig) ;
-    streams.put(pConfig.getPartitionStreamId(), newStream) ;
+    KafkaSinkPartitionStream newStream= new KafkaSinkPartitionStream(storageConfig, pConfig) ;
     return newStream;
   }
 
   @Override
   public SinkPartitionStream getParitionStream(int partitionId) throws Exception {
-    SinkPartitionStream stream = streams.get(partitionId);
-    return stream ;
+    PartitionStreamConfig pConfig = new PartitionStreamConfig(partitionId);
+    KafkaSinkPartitionStream newStream= new KafkaSinkPartitionStream(storageConfig, pConfig) ;
+    return newStream;
   }
 
   
   @Override
-  public SinkPartitionStream[] getPartitionStreams() {
-    SinkPartitionStream[] array = new SinkPartitionStream[streams.size()];
-    return streams.values().toArray(array);
-  }
-
-  @Override
-  public void delete(SinkPartitionStream stream) throws Exception {
-    SinkPartitionStream found = streams.get(stream.getPartitionStreamId());
-    if(found != null) {
-      found.delete();
-      streams.remove(stream.getPartitionStreamId());
-    } else {
-      throw new Exception("Cannot find the stream " + stream.getPartitionStreamId());
+  public SinkPartitionStream[] getPartitionStreams() throws Exception {
+    List<PartitionStreamConfig> pConfigs = getPartitionStreamConfigs();
+    SinkPartitionStream[] streams = new SinkPartitionStream[pConfigs.size()];
+    for(int i = 0; i < pConfigs.size(); i++) {
+      streams[i] = new KafkaSinkPartitionStream(storageConfig, pConfigs.get(i)) ;
     }
-  }
-
-  @Override
-  public SinkPartitionStream newStream() throws Exception {
-    PartitionStreamConfig streamDescriptor = new PartitionStreamConfig(storageConfig);
-    streamDescriptor.setPartitionStreamId(idTracker++);
-    return new KafkaSinkPartitionStream(streamDescriptor);
+    return streams;
   }
 
   @Override
   public void close() throws Exception {
-    for(KafkaSinkPartitionStream sel : streams.values()) {
-    }
   }
 }
