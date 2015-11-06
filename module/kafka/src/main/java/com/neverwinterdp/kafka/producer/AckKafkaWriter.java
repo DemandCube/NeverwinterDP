@@ -27,6 +27,7 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
   private AtomicLong idTracker = new AtomicLong();
   private WaittingAckProducerRecordHolder<byte[], byte[]> waittingAckBuffer = new WaittingAckProducerRecordHolder<byte[], byte[]>();
   private ResendThread resendThread ;
+  private int maxCommitTimeout = 300000;
   
   public AckKafkaWriter(String name, String kafkaBrokerUrls) {
     this(name, null, kafkaBrokerUrls);
@@ -110,12 +111,12 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
   }
   
   public void commit() throws Exception {
-    waittingAckBuffer.waitForEmptyBuffer(90000);
+    waittingAckBuffer.waitForEmptyBuffer(maxCommitTimeout);
   }
   
   public void close() throws InterruptedException { 
     if(resendThread != null && resendThread.isAlive()) {
-      resendThread.waitForTermination(60000);
+      resendThread.waitForTermination(maxCommitTimeout);
     }
     if(producer == null) return;
     producer.close(); 
