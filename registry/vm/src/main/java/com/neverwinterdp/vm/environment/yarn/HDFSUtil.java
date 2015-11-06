@@ -16,8 +16,6 @@ public class HDFSUtil {
     return Integer.parseInt(name.substring(dashIdx + 1)) ;
   }
   
-  
-  
   static public void concat(FileSystem fs, Path dest, Path[] src) throws IOException {
     if(fs instanceof LocalFileSystem) {
       FSDataOutputStream output = fs.create(dest) ;
