@@ -28,6 +28,9 @@ import com.neverwinterdp.vm.VMDescriptor;
 public class VMTMValidatorHDFSApp extends VMApp {
   private Logger logger;
   
+//  /tracking-sample/hdfs/aggregate
+//  /tracking-sample/hdfs/aggregate
+  
   @Override
   public void run() throws Exception {
     logger =  getVM().getLoggerFactory().getLogger(VMTMValidatorHDFSApp.class) ;
@@ -106,7 +109,6 @@ public class VMTMValidatorHDFSApp extends VMApp {
       Configuration conf = new Configuration();
       VMConfig.overrideHadoopConfiguration(getVM().getDescriptor().getVmConfig().getHadoopProperties(), conf);
       FileSystem fs = FileSystem.get(conf);
-      storageConfig.setPartitionStream(1);
 
       HDFSStorage hdfsStorage = new HDFSStorage(fs, storageConfig);
       HDFSSource hdfsSource = hdfsStorage.getSource();
