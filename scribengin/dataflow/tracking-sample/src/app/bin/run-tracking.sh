@@ -154,7 +154,7 @@ fi
 # Launch Validator                                                                                                      #
 #########################################################################################################################
 if [ $VALIDATOR_DISABLE == "false" ] ; then
-  sleep 30
+  sleep 15
   $SHELL vm submit  \
     --dfs-app-home $DFS_APP_HOME \
     --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \

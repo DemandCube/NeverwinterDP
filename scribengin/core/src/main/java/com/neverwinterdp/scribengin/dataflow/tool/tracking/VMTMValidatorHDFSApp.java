@@ -48,6 +48,12 @@ public class VMTMValidatorHDFSApp extends VMApp {
     String hdfsLocation        = vmConfig.getProperty("hdfs.location", "/tracking-sample/hdfs/aggregate");
     long   partitionRollPeriod = vmConfig.getPropertyAsLong("hdfs.partition-roll-period", (15 * 60 * 1000));
     
+    logger.info("reportPath = "          + reportPath);
+    logger.info("numOfReader = "         + numOfReader);
+    logger.info("maxRuntime = "          + maxRuntime);
+    logger.info("hdfsLocation = "        + hdfsLocation);
+    logger.info("partitionRollPeriod = " + partitionRollPeriod);
+    
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, reportPath);
     validatorService.withExpectNumOfMessagePerChunk(expectNumOfMessagePerChunk);
     validatorService.addReader(
@@ -62,8 +68,9 @@ public class VMTMValidatorHDFSApp extends VMApp {
     private long partitionRollPeriod ;
     private HDFSSourceReader hdfsSourceReader ;
     
-    HDFSTrackingMessageReader(String hdfsLocation, long rollPeriod) {
-      hdfsSourceReader = new HDFSSourceReader(hdfsLocation, rollPeriod) {
+    HDFSTrackingMessageReader(String hdfsLocation, long partitionRollPeriod) {
+      this.partitionRollPeriod = partitionRollPeriod;
+      hdfsSourceReader = new HDFSSourceReader(hdfsLocation, partitionRollPeriod) {
         @Override
         public void onTrackingMessage(TrackingMessage tMesg) throws Exception {
           queue.offer(tMesg);
