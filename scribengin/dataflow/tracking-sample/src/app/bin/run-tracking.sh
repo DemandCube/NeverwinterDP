@@ -79,8 +79,8 @@ DATAFLOW_KILL_WORKER_PERIOD=$(get_opt --dataflow-kill-worker-period '60000' $@)
 DATAFLOW_DESCRIPTOR_FILE=""
 VALIDATOR_SOURCE_OPT=""
 if [ "$DATAFLOW_STORAGE" = "hdfs" ] ; then
-  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/hdfs-tracking-dataflow-chain.json"
-  LOG_VALIDATOR_VALIDATE_OPT="--prop:validate-hdfs=/tracking-sample/hdfs/info,/tracking-sample/hdfs/warn,/tracking-sample/hdfs/error"
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/tracking-sample-dataflow-hdfs.json"
+  LOG_VALIDATOR_VALIDATE_OPT="--prop:hdfs.location=/tracking-sample/hdfs/aggregate"
 elif [ "$DATAFLOW_STORAGE" = "s3" ] ; then
   DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/s3-tracking-dataflow-chain.json"
   LOG_VALIDATOR_VALIDATE_OPT="--prop:validate-s3=test-tracking-sample:info,test-tracking-sample:warn,test-tracking-sample:error" 
