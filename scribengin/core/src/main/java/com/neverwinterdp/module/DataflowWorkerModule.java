@@ -1,13 +1,10 @@
 package com.neverwinterdp.module;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
 import com.google.inject.name.Names;
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;

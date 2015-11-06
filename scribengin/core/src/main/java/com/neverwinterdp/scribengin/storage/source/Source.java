@@ -7,5 +7,5 @@ import com.neverwinterdp.scribengin.storage.StorageConfig;
 public interface Source {
   public StorageConfig getStorageConfig() ;
   public SourcePartition       getLatestSourcePartition() throws Exception ;
-  public List<SourcePartition> getSourcePartitions() throws Exception ;
+  public List<? extends SourcePartition> getSourcePartitions() throws Exception ;
 }

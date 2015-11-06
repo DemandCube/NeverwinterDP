@@ -1,6 +1,7 @@
 package com.neverwinterdp.scribengin.storage.hdfs.source;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hadoop.fs.FileStatus;
@@ -9,7 +10,6 @@ import org.apache.hadoop.fs.Path;
 
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.source.Source;
-import com.neverwinterdp.scribengin.storage.source.SourcePartition;
 
 public class HDFSSource implements Source {
   private FileSystem    fs;
@@ -25,37 +25,30 @@ public class HDFSSource implements Source {
 
   @Override
   public HDFSSourcePartition getLatestSourcePartition() throws Exception {
-    FileStatus[] status = fs.listStatus(new Path(storageConfig.getLocation())) ;
-    FileStatus latest = null;
-    for(FileStatus sel : status) {
-      if(latest == null) {
-        latest = sel;
-      } else {
-        if(latest.getModificationTime() < sel.getModificationTime()) latest = sel;
-      }
-      
-    }
-    return new HDFSSourcePartition(fs, storageConfig, latest.getPath().toString());
+    String[] paths = getPartitionPaths();
+    return new HDFSSourcePartition(fs, storageConfig, paths[paths.length - 1]);
   }
 
   @Override
-  public List<SourcePartition> getSourcePartitions() throws Exception {
-    List<SourcePartition> holder = new ArrayList<>();
-    FileStatus[] status = fs.listStatus(new Path(storageConfig.getLocation())) ;
-    for(FileStatus sel : status) {
-      holder.add(new HDFSSourcePartition(fs, storageConfig, sel.getPath().toString()));
+  public List<HDFSSourcePartition> getSourcePartitions() throws Exception {
+    List<HDFSSourcePartition> holder = new ArrayList<>();
+    String[] paths = getPartitionPaths();
+    for(String path : paths) {
+      holder.add(new HDFSSourcePartition(fs, storageConfig, path));
     }
     return holder;
   }
 
   public void refresh() throws Exception {
-    Path fsLoc = new Path(storageConfig.getLocation());
-    if(!fs.exists(fsLoc)) {
-      throw new Exception("location " + storageConfig.getLocation() + " does not exist!") ;
-    }
-    
+  }
+  
+  String[] getPartitionPaths() throws Exception {
     FileStatus[] status = fs.listStatus(new Path(storageConfig.getLocation())) ;
-    for(FileStatus sel : status) {
+    String[] paths = new String[status.length];
+    for(int i = 0; i < paths.length; i++) {
+      paths[i] = status[i].getPath().toString();
     }
+    Arrays.sort(paths);
+    return paths;
   }
 }

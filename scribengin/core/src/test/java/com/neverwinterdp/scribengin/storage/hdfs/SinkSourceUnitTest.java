@@ -101,6 +101,7 @@ public class SinkSourceUnitTest {
     
     StorageConfig storageConfig = new StorageConfig("HDFS", DATA_DIRECTORY);
     storageConfig.setPartitionStream(1);
+    storageConfig.attribute("partitioner", "15min");
     HDFSStorage hdfsStorage = new HDFSStorage(fs, storageConfig);
     HDFSSink sink = hdfsStorage.getSink();
     

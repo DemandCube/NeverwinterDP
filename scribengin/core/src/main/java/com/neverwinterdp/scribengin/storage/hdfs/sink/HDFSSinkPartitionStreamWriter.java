@@ -96,6 +96,8 @@ public class HDFSSinkPartitionStreamWriter implements SinkPartitionStreamWriter 
     String name = sConfig.attribute("partitioner");
     if("hourly".equals(name)) {
       partitioner = new HDFSStoragePartitioner.Hourly();
+    } else if("15min".equals(name)) {
+      partitioner = new HDFSStoragePartitioner.Every15Min();
     }
     return partitioner;
   }

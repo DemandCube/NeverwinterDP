@@ -77,15 +77,18 @@ DATAFLOW_KILL_WORKER_PERIOD=$(get_opt --dataflow-kill-worker-period '60000' $@)
 
 
 DATAFLOW_DESCRIPTOR_FILE=""
+VALIDATOR_APP=""
 VALIDATOR_SOURCE_OPT=""
 if [ "$DATAFLOW_STORAGE" = "hdfs" ] ; then
   DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/tracking-sample-dataflow-hdfs.json"
-  LOG_VALIDATOR_VALIDATE_OPT="--prop:hdfs.location=/tracking-sample/hdfs/aggregate"
+  VALIDATOR_APP="com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorHDFSApp"
+  VALIDATOR_SOURCE_OPT="--prop:hdfs.location=/tracking-sample/hdfs/aggregate --prop:hdfs.partition-roll-period=1200000"
 elif [ "$DATAFLOW_STORAGE" = "s3" ] ; then
   DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/s3-tracking-dataflow-chain.json"
   LOG_VALIDATOR_VALIDATE_OPT="--prop:validate-s3=test-tracking-sample:info,test-tracking-sample:warn,test-tracking-sample:error" 
 else
   DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/tracking-sample-dataflow-kafka.json"
+  VALIDATOR_APP="com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp"
   VALIDATOR_SOURCE_OPT="--prop:kafka.zk-connects=zookeeper-1:2181  --prop:kafka.topic=tracking.aggregate  --prop:kafka.message-wait-timeout=1200000"
 fi
 
@@ -156,12 +159,11 @@ if [ $VALIDATOR_DISABLE == "false" ] ; then
     --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
     --vm-id vm-tracking-validator-1 --role tracking-validator \
     --enable-gc-log \
-    --vm-application  com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp \
+    --vm-application $VALIDATOR_APP \
     --prop:tracking.report-path=$TRACKING_REPORT_PATH \
     --prop:tracking.num-of-reader=$VALIDATOR_NUM_OF_READER \
     --prop:tracking.expect-num-of-message-per-chunk=$GENERATOR_NUM_OF_MESSAGE_PER_CHUNK \
     --prop:tracking.max-runtime=$(( 180000 + $DATAFLOW_MAX_RUNTIME ))\
-    --prop:kafka.message-wait-timeout=900000 \
     $VALIDATOR_SOURCE_OPT
 
   $SHELL vm wait-for-vm-status --vm-id vm-tracking-validator-1 --vm-status TERMINATED --max-wait-time 5000
