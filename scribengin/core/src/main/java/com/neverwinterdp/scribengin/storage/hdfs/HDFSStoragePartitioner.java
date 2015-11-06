@@ -13,7 +13,7 @@ public interface HDFSStoragePartitioner {
   }
   
   static public class Hourly implements HDFSStoragePartitioner {
-    final static public SimpleDateFormat PARTITION_TIME_FORMATER = new SimpleDateFormat("yyyy-MM-dd@HH:00") ;
+    final static public SimpleDateFormat PARTITION_TIME_FORMATER = new SimpleDateFormat("yyyy-MM-dd-HH00") ;
     
     @Override
     public String getCurrentPartition() { 
@@ -22,7 +22,7 @@ public interface HDFSStoragePartitioner {
   }
   
   static public class Every15Min implements HDFSStoragePartitioner {
-    final static public SimpleDateFormat PARTITION_TIME_FORMATER = new SimpleDateFormat("yyyy-MM-dd@HH:mm") ;
+    final static public SimpleDateFormat PARTITION_TIME_FORMATER = new SimpleDateFormat("yyyy-MM-dd-HHmm") ;
     
     @Override
     public String getCurrentPartition() {

@@ -135,7 +135,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
     }
     
     Date getTimestamp(String partitionLocation) throws ParseException {
-      SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd@HH:mm");
+      SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd-HHmm");
       int index = partitionLocation.indexOf("storage-");
       String timestamp = partitionLocation.substring(index + "storage-".length());
       return timestampFormat.parse(timestamp);
