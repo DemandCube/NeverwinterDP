@@ -16,12 +16,8 @@ public class HDFSSink implements Sink {
   private FileSystem fs;
   private StorageConfig storageConfig;
   
-  public HDFSSink(FileSystem fs, String location) throws FileNotFoundException, IllegalArgumentException, IOException {
-    this(fs, new StorageConfig("HDFS", location));
-  }
-  
   public HDFSSink(FileSystem fs, StorageConfig sConfig) throws FileNotFoundException, IllegalArgumentException, IOException {
-    this.fs = fs;
+    this.fs            = fs;
     this.storageConfig = sConfig;
   }
   
@@ -42,9 +38,8 @@ public class HDFSSink implements Sink {
   }
   
   public SinkPartitionStream  getParitionStream(int partitionId) throws Exception {
-    String location = storageConfig.getLocation() + "/partition-stream-" + partitionId;
-    PartitionStreamConfig pConfig = new PartitionStreamConfig(partitionId, location) ;
-    HDFSSinkPartitionStream stream = new HDFSSinkPartitionStream(fs, pConfig);
+    PartitionStreamConfig pConfig = new PartitionStreamConfig(partitionId, null) ;
+    HDFSSinkPartitionStream stream = new HDFSSinkPartitionStream(fs, storageConfig, pConfig);
     return stream ;
   }
   

@@ -10,9 +10,9 @@ import com.neverwinterdp.util.JSONSerializer;
 
 public class SegmentStorageWriter<T> {
   private SegmentStorage<T> storage;
-  private FileSystem fs;
-  private String     location;
-  private SegmentWriter currentBuffer;
+  private FileSystem        fs;
+  private String            location;
+  private SegmentWriter     currentBuffer;
   
   public SegmentStorageWriter(SegmentStorage<T> storage) {
     this.storage = storage ;

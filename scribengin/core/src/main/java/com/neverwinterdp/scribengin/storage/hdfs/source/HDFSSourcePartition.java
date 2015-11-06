@@ -17,24 +17,20 @@ import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
  * @author Tuan Nguyen
  */
 public class HDFSSourcePartition implements SourcePartition {
-  private FileSystem fs;
-  private String     location ;
-  private StorageConfig descriptor ;
+  private FileSystem    fs;
+  private String        location ;
+  private StorageConfig storageConfig ;
+  
   private Map<Integer,HDFSSourcePartitionStream> streams = new LinkedHashMap<Integer, HDFSSourcePartitionStream>();
   
-  public HDFSSourcePartition(FileSystem fs, String location) throws Exception {
-    this(fs, new StorageConfig("HDFS", location));
-  }
-  
-  public HDFSSourcePartition(FileSystem fs, StorageConfig descriptor) throws Exception {
+  public HDFSSourcePartition(FileSystem fs, StorageConfig descriptor, String partitionLoc) throws Exception {
     this.fs = fs;
-    this.descriptor = descriptor ;
+    this.storageConfig = descriptor ;
     Path fsLoc = new Path(descriptor.getLocation());
     if(!fs.exists(fsLoc)) {
       throw new Exception("location " + descriptor.getLocation() + " does not exist!") ;
     }
-    
-    FileStatus[] status = fs.listStatus(new Path(descriptor.getLocation())) ;
+    FileStatus[] status = fs.listStatus(new Path(partitionLoc)) ;
     for(int i = 0; i < status.length; i++) {
       PartitionStreamConfig pConfig = new PartitionStreamConfig();
       pConfig.setLocation(status[i].getPath().toString());
@@ -44,7 +40,7 @@ public class HDFSSourcePartition implements SourcePartition {
     }
   }
   
-  public StorageConfig getStorageConfig() { return descriptor; }
+  public StorageConfig getStorageConfig() { return storageConfig; }
 
   public SourcePartitionStream   getPartitionStream(int id) { 
     return streams.get(id) ; 

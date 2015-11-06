@@ -9,10 +9,10 @@ import org.apache.hadoop.fs.Path;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class SegmentLock {
-  private FileSystem        fs; 
-  private   Path            lockPath ;
-  private   SegmentOperationConfig operationConfig;
-  transient private boolean owner = false;
+  private FileSystem             fs;
+  private Path                   lockPath;
+  private SegmentOperationConfig operationConfig;
+  transient private boolean      owner = false;
   
   public SegmentLock(FileSystem fs, Path lockPath, SegmentOperationConfig operationConfig) {
     this.fs = fs ;

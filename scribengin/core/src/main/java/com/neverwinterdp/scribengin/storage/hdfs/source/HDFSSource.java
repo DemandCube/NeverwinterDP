@@ -1,5 +1,6 @@
 package com.neverwinterdp.scribengin.storage.hdfs.source;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.fs.FileStatus;
@@ -14,11 +15,6 @@ public class HDFSSource implements Source {
   private FileSystem    fs;
   private StorageConfig storageConfig;
   
-  public HDFSSource(FileSystem fs, String location) throws Exception {
-    this.fs = fs ;
-    this.storageConfig = new StorageConfig("HDFS", location);
-  }
-  
   public HDFSSource(FileSystem fs, StorageConfig storageConfig) throws Exception {
     this.fs = fs ;
     this.storageConfig = storageConfig ;
@@ -28,13 +24,28 @@ public class HDFSSource implements Source {
   public StorageConfig getStorageConfig() { return storageConfig; }
 
   @Override
-  public SourcePartition getLatestSourcePartition() throws Exception {
-    return null;
+  public HDFSSourcePartition getLatestSourcePartition() throws Exception {
+    FileStatus[] status = fs.listStatus(new Path(storageConfig.getLocation())) ;
+    FileStatus latest = null;
+    for(FileStatus sel : status) {
+      if(latest == null) {
+        latest = sel;
+      } else {
+        if(latest.getModificationTime() < sel.getModificationTime()) latest = sel;
+      }
+      
+    }
+    return new HDFSSourcePartition(fs, storageConfig, latest.getPath().toString());
   }
 
   @Override
   public List<SourcePartition> getSourcePartitions() throws Exception {
-    return null;
+    List<SourcePartition> holder = new ArrayList<>();
+    FileStatus[] status = fs.listStatus(new Path(storageConfig.getLocation())) ;
+    for(FileStatus sel : status) {
+      holder.add(new HDFSSourcePartition(fs, storageConfig, sel.getPath().toString()));
+    }
+    return holder;
   }
 
   public void refresh() throws Exception {

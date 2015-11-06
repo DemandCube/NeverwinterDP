@@ -1,16 +1,16 @@
 package com.neverwinterdp.scribengin.storage.hdfs;
 
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 import com.neverwinterdp.scribengin.storage.Storage;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
-import com.neverwinterdp.scribengin.storage.sink.Sink;
-import com.neverwinterdp.scribengin.storage.source.Source;
+import com.neverwinterdp.scribengin.storage.hdfs.sink.HDFSSink;
+import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSource;
 
 public class HDFSStorage extends Storage {
-  private FileSystem    fs ;
-  private StorageConfig storageConfig;
-  
+  private FileSystem             fs;
+
   public HDFSStorage(FileSystem fs, StorageConfig storageDescriptor) {
     super(storageDescriptor);
     this.fs = fs ;
@@ -22,11 +22,14 @@ public class HDFSStorage extends Storage {
 
   @Override
   public boolean exists() throws Exception {
-    return false;
+    String location = getStorageConfig().getLocation();
+    return fs.exists(new Path(location));
   }
 
   @Override
   public void drop() throws Exception {
+    String location = getStorageConfig().getLocation();
+    fs.delete(new Path(location), true);
   }
 
   @Override
@@ -34,12 +37,12 @@ public class HDFSStorage extends Storage {
   }
 
   @Override
-  public Sink getSink() throws Exception {
-    return null;
+  public HDFSSink getSink() throws Exception {
+    return new HDFSSink(fs, getStorageConfig());
   }
 
   @Override
-  public Source getSource() throws Exception {
-    return null;
+  public HDFSSource getSource() throws Exception {
+    return new HDFSSource(fs, getStorageConfig());
   }
 }

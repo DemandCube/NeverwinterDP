@@ -1,7 +1,6 @@
 package com.neverwinterdp.scribengin.storage.es.sink;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.neverwinterdp.es.ESObjectClient;
@@ -13,9 +12,6 @@ import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
 
 public class ESSink implements Sink {
   private ESStorage storage ;
-  
-  private int idTracker = 0;
-  private LinkedHashMap<Integer, ESSinkStream> streams = new LinkedHashMap<Integer, ESSinkStream>() ;
   
   public ESSink(StorageConfig descriptor) throws Exception {
     init(new ESStorage(descriptor)) ;
@@ -50,29 +46,32 @@ public class ESSink implements Sink {
   @Override
   public SinkPartitionStream getPartitionStream(PartitionStreamConfig pConfig) throws Exception {
     StorageConfig sConfig = storage.getStorageConfig();
-    SinkPartitionStream stream = streams.get(pConfig.getPartitionStreamId());
-    if(stream != null) return stream ;
     ESSinkStream newStream= new ESSinkStream(sConfig, pConfig) ;
-    streams.put(pConfig.getPartitionStreamId(), newStream) ;
     return newStream;
   }
   
   @Override
   public SinkPartitionStream getParitionStream(int partitionId) throws Exception {
-    SinkPartitionStream stream = streams.get(partitionId);
-    if(stream != null) return stream ;
-    return null;
+    StorageConfig sConfig = storage.getStorageConfig();
+    PartitionStreamConfig pConfig = new PartitionStreamConfig(partitionId, null);
+    ESSinkStream newStream= new ESSinkStream(sConfig, pConfig) ;
+    return newStream;
+
   }
 
   @Override
-  public SinkPartitionStream[] getPartitionStreams() {
-    SinkPartitionStream[] array = new SinkPartitionStream[streams.size()];
-    return streams.values().toArray(array);
+  public SinkPartitionStream[] getPartitionStreams() throws Exception {
+    StorageConfig sConfig = storage.getStorageConfig();
+    int numOfStream = sConfig.getPartitionStream();
+    SinkPartitionStream[] array = new SinkPartitionStream[numOfStream];
+    for(int i = 0; i < array.length; i++) {
+      array[i] = getParitionStream(i);
+    }
+    return array;
   }
 
   @Override
   public void close() throws Exception {
-    for(ESSinkStream sel : streams.values()) {
-    }
+    
   }
 }
