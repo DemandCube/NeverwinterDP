@@ -44,11 +44,13 @@ public class HDFSSinkPartitionStreamWriter implements SinkPartitionStreamWriter 
 
   @Override
   public void prepareCommit() throws Exception {
+    if(writer == null) return;
     writer.prepareCommit();
   }
   
   @Override
   public void completeCommit() throws Exception {
+    if(writer == null) return;
     writer.completeCommit();
     if(smallDataSizeAccumulate >= Segment.SMALL_DATASIZE_THRESHOLD) {
       writer.getStorage().optimizeBufferSegments();
@@ -65,12 +67,14 @@ public class HDFSSinkPartitionStreamWriter implements SinkPartitionStreamWriter 
 
   @Override
   public void commit() throws Exception {
+    if(writer == null) return;
     prepareCommit();
     completeCommit();
   }
   
   @Override
   public void rollback() throws Exception {
+    if(writer == null) return;
     writer.rollback();
   }
 
