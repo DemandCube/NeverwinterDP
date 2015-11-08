@@ -45,6 +45,7 @@ public class SegmentStorageWriter<T> {
   }
 
   public void rollback() throws Exception {
+    if(currentBuffer == null) return ;
     currentBuffer.rollback();
     currentBuffer = null ;
   }
