@@ -47,8 +47,6 @@ public class SegmentLock {
   synchronized public boolean lock() throws IOException {
     if(owner) return true;
     try {
-//      boolean created = fs.createNewFile(lockPath);
-//      if(!created) return false;
       if(fs.exists(lockPath)) return false ;
       FSDataOutputStream out = fs.create(lockPath, false);
       out.hsync();
@@ -57,7 +55,6 @@ public class SegmentLock {
       out.hflush();
       out.close();
       owner = true;
-      //System.out.println("==> lock, hashcode = " + hashCode());
       return owner;
     } catch(AlreadyBeingCreatedException ex) {
       return false;
