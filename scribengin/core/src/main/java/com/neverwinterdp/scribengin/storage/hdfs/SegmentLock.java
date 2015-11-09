@@ -57,6 +57,7 @@ public class SegmentLock {
       owner = true;
       return owner;
     } catch(AlreadyBeingCreatedException ex) {
+      System.err.println("Lock Error: " + ex.getMessage());
       return false;
     } catch(IOException ex) {
       if(ex.getMessage().startsWith("File already exists")) {
