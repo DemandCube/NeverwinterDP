@@ -137,7 +137,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
           noPartitionFound++;
         }
         if(noPartitionFound > 10) break ;
-        if(!validatePartition) Thread.sleep(60000);
+        if(!validatePartition) Thread.sleep(30000);
       }
     }
     
