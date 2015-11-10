@@ -6,7 +6,6 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.protocol.AlreadyBeingCreatedException;
-
 import com.neverwinterdp.util.JSONSerializer;
 
 public class SegmentLock {
@@ -60,8 +59,11 @@ public class SegmentLock {
       System.err.println("Lock Error: " + ex.getMessage());
       return false;
     } catch(IOException ex) {
+      System.err.println("Lock Error: " + ex.getMessage());
       if(ex.getMessage().startsWith("File already exists")) {
-        System.err.println("Lock Error: " + ex.getMessage());
+        return false;
+      } else if(ex instanceof AlreadyBeingCreatedException) {
+        System.err.println("Lock Error(IOException): " + ex.getMessage());
         return false;
       }
       throw ex;
