@@ -284,11 +284,13 @@ public class VMConfig {
     b.append(" -XX:+CMSClassUnloadingEnabled");
     
     if(enableGCLog) {
-      String logFile = localLogDir + "/" + vmId + "-gc.log";
-      b.append(" -Xloggc:" + logFile + " -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps");
+      String gcLogFile = localLogDir + "/" + vmId + "-gc.log";
+      b.append(" -Xloggc:" + gcLogFile + " -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps");
     }
     
     b.append(" -agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 ");
+    String hiccupLogFile = localLogDir + "/" + vmId + ".hlog";
+    b.append(" -javaagent:jHiccup.jar=\"-d 0 -i 5000 -l " + hiccupLogFile + "\"");
   }
    
   private void addParameters(StringBuilder b) {
