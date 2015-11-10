@@ -55,17 +55,16 @@ public class SegmentLock {
       out.close();
       owner = true;
       return owner;
-    } catch(AlreadyBeingCreatedException ex) {
-      System.err.println("Lock Error: " + ex.getMessage());
-      return false;
     } catch(IOException ex) {
-      System.err.println("Lock Error: " + ex.getMessage());
       if(ex.getMessage().startsWith("File already exists")) {
+        System.err.println("Lock Error(File already exists): " + ex.getMessage());
         return false;
-      } else if(ex instanceof AlreadyBeingCreatedException) {
-        System.err.println("Lock Error(IOException): " + ex.getMessage());
+      } else if(ex.getMessage().indexOf("Failed to CREATE_FILE") >=0 ) {
+        System.err.println("Lock Error(Failed to CREATE_FILE): " + ex.getMessage());
         return false;
       }
+      System.err.println("Lock Error Exception Type: " + ex.getClass().getName());
+      System.err.println("Lock Error(Unknown): " + ex.getMessage());
       throw ex;
     }
   }
