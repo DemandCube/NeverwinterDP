@@ -290,7 +290,6 @@ public class VMConfig {
     
     String hiccupLogFile = localLogDir + "/" + vmId + ".hlog";
     b.append(" -javaagent:/opt/jHiccup/jHiccup.jar=-d,10000,-i,5000,-l," + hiccupLogFile + " ");
-    
     //b.append(" -agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 ");
   }
    
