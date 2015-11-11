@@ -8,13 +8,13 @@ import org.apache.hadoop.fs.Path;
 
 import com.neverwinterdp.util.JSONSerializer;
 
-public class Lock {
-  private FileSystem        fs; 
-  private   Path            lockPath ;
-  private   OperationConfig operationConfig;
-  transient private boolean owner = false;
+public class SegmentLock {
+  private FileSystem             fs;
+  private Path                   lockPath;
+  private SegmentOperationConfig operationConfig;
+  transient private boolean      owner = false;
   
-  public Lock(FileSystem fs, Path lockPath, OperationConfig operationConfig) {
+  public SegmentLock(FileSystem fs, Path lockPath, SegmentOperationConfig operationConfig) {
     this.fs = fs ;
     this.lockPath = lockPath;
     this.operationConfig = operationConfig;
@@ -22,7 +22,7 @@ public class Lock {
 
   public Path getLockPath() {  return lockPath; }
 
-  public OperationConfig getOperationConfig() { return operationConfig; }
+  public SegmentOperationConfig getOperationConfig() { return operationConfig; }
 
   public boolean tryLock(long timeout, long tryPeriod) throws IOException, InterruptedException {
     long stopTime = System.currentTimeMillis() + timeout;
@@ -34,7 +34,7 @@ public class Lock {
     return false; 
   }
   
-  synchronized public void update(OperationConfig config) throws IOException {
+  synchronized public void update(SegmentOperationConfig config) throws IOException {
     checkOwner();
     FSDataOutputStream out = fs.create(lockPath, true);
     byte[] bytes = JSONSerializer.INSTANCE.toBytes(config);
@@ -46,8 +46,6 @@ public class Lock {
   synchronized public boolean lock() throws IOException {
     if(owner) return true;
     try {
-//      boolean created = fs.createNewFile(lockPath);
-//      if(!created) return false;
       if(fs.exists(lockPath)) return false ;
       FSDataOutputStream out = fs.create(lockPath, false);
       out.hsync();
@@ -56,13 +54,17 @@ public class Lock {
       out.hflush();
       out.close();
       owner = true;
-      //System.out.println("==> lock, hashcode = " + hashCode());
       return owner;
     } catch(IOException ex) {
+      System.err.println("Lock Error Exception Type: " + ex.getClass().getName());
       if(ex.getMessage().startsWith("File already exists")) {
-        System.err.println("Lock Error: " + ex.getMessage());
+        System.err.println("Lock Error(File already exists): " + ex.getMessage());
+        return false;
+      } else if(ex.getMessage().indexOf("Failed to CREATE_FILE") >=0 ) {
+        System.err.println("Lock Error(Failed to CREATE_FILE): " + ex.getMessage());
         return false;
       }
+      System.err.println("Lock Error(Unknown): " + ex.getMessage());
       throw ex;
     }
   }

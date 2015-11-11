@@ -15,6 +15,8 @@ public interface Registry {
   
   public String getSessionId()  ;
   
+  public void setRetryable(boolean retryable);
+  
   public Node create(String path, NodeCreateMode mode) throws RegistryException ;
   public void createRef(String path, String toPath, NodeCreateMode mode) throws RegistryException ;
   public Node create(String path, byte[] data, NodeCreateMode mode) throws RegistryException ;

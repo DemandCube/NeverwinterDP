@@ -27,6 +27,7 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
   private AtomicLong idTracker = new AtomicLong();
   private WaittingAckProducerRecordHolder<byte[], byte[]> waittingAckBuffer = new WaittingAckProducerRecordHolder<byte[], byte[]>();
   private ResendThread resendThread ;
+  private int maxCommitTimeout = 300000;
   
   public AckKafkaWriter(String name, String kafkaBrokerUrls) {
     this(name, null, kafkaBrokerUrls);
@@ -41,11 +42,17 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
     kafkaProps.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,   ByteArraySerializer.class.getName());
     
     kafkaProps.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+    kafkaProps.setProperty(ProducerConfig.TIMEOUT_CONFIG, "60000");
+
     kafkaProps.setProperty(ProducerConfig.RETRIES_CONFIG, "3");
     kafkaProps.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, "16384");
     kafkaProps.setProperty(ProducerConfig.BLOCK_ON_BUFFER_FULL_CONFIG, "true");
     
-    kafkaProps.setProperty(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, "100");
+    kafkaProps.setProperty(ProducerConfig.RETRIES_CONFIG, "5");
+    kafkaProps.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, "16384");
+    kafkaProps.setProperty(ProducerConfig.BLOCK_ON_BUFFER_FULL_CONFIG, "true");
+    
+    kafkaProps.setProperty(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, "500");
     kafkaProps.setProperty(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG, "10");
     
     kafkaProps.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
@@ -108,12 +115,12 @@ public class AckKafkaWriter extends AbstractKafkaWriter {
   }
   
   public void commit() throws Exception {
-    waittingAckBuffer.waitForEmptyBuffer(60000);
+    waittingAckBuffer.waitForEmptyBuffer(maxCommitTimeout);
   }
   
   public void close() throws InterruptedException { 
     if(resendThread != null && resendThread.isAlive()) {
-      resendThread.waitForTermination(60000);
+      resendThread.waitForTermination(maxCommitTimeout);
     }
     if(producer == null) return;
     producer.close(); 

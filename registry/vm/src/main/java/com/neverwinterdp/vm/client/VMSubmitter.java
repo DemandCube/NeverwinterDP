@@ -40,7 +40,7 @@ public class VMSubmitter {
     }
     
     VMDescriptor masterVMDescriptor = vmClient.getMasterVMDescriptor();
-    vmConfig.setAppHome(dfsAppHome);
+    vmConfig.setDfsAppHome(dfsAppHome);
     vmConfig.addVMResource("vm.libs", dfsAppHome + "/libs");
     vmConfig.addVMResource("vm.config", dfsAppHome + "/config");
     CommandResult<?> result = vmClient.execute(masterVMDescriptor, new VMServiceCommand.Allocate(vmConfig));
@@ -68,9 +68,7 @@ public class VMSubmitter {
   }
   
   public void waitForTerminated(long timeout) throws Exception {
-    VMStatus[] status = new VMStatus[] {
-      VMStatus.TERMINATED
-    };
+    VMStatus[] status = new VMStatus[] { VMStatus.TERMINATED };
     waitForStatus(timeout, status) ;
   }
   

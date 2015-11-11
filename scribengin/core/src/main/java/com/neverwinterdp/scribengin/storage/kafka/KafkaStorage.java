@@ -1,11 +1,7 @@
 package com.neverwinterdp.scribengin.storage.kafka;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
 import com.neverwinterdp.scribengin.storage.Storage;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.kafka.sink.KafkaSink;
@@ -14,7 +10,6 @@ import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.source.Source;
 
 import kafka.javaapi.PartitionMetadata;
-import kafka.javaapi.TopicMetadata;
 
 public class KafkaStorage extends Storage {
   final static public String NAME       = "name";
@@ -34,19 +29,6 @@ public class KafkaStorage extends Storage {
     this.kafkaClient = kafkaClient;
   }
   
-  public List<PartitionConfig> getPartitionConfigs() throws Exception {
-    StorageConfig sConfig = getStorageConfig();
-    TopicMetadata tMetadata = kafkaClient.findTopicMetadata(sConfig.attribute(TOPIC));
-    List<PartitionConfig> pConfigs = new ArrayList<>();
-    List<PartitionMetadata> partitions = tMetadata.partitionsMetadata();
-    for(int i = 0; i < partitions.size(); i++) {
-      PartitionMetadata pmetadata = partitions.get(i);
-      PartitionConfig pConfig = new PartitionConfig(pmetadata.partitionId());
-      pConfigs.add(pConfig);
-    }
-    return pConfigs ;
-  }
-
   @Override
   public void refresh() throws Exception {
     kafkaSource  = null ;

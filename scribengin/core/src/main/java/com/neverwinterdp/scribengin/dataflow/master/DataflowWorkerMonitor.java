@@ -30,14 +30,14 @@ public class DataflowWorkerMonitor {
     workerHeartbeatListeners.put(vmDescriptor.getRegistryPath(), listener);
   }
   
-  synchronized void removeWorkerListener(String heartbeatPath) throws Exception {
+  synchronized void onWorkerBrokenHeartbeat(String heartbeatPath) throws Exception {
+    System.out.println("DataflowWorkerMonitor: onWorkerBrokenHeartbeat " + heartbeatPath);
     Node heartbeatNode = new Node(dataflowRegistry.getRegistry(), heartbeatPath);
     Node vmNode = heartbeatNode.getParentNode().getParentNode();
     workerHeartbeatListeners.remove(vmNode.getPath());
     dataflowRegistry.getWorkerRegistry().historyWorker(vmNode.getName());
     
-    DataflowWorkerStatus dataflowWorkerStatus = 
-        dataflowRegistry.getWorkerRegistry().getDataflowWorkerStatus(vmNode.getName());
+    DataflowWorkerStatus dataflowWorkerStatus = dataflowRegistry.getWorkerRegistry().getDataflowWorkerStatus(vmNode.getName());
     if(dataflowWorkerStatus.lessThan(DataflowWorkerStatus.TERMINATED)) {
       DataflowWorkerStatus workerStatus = DataflowWorkerStatus.TERMINATED_WITH_ERROR;
       dataflowRegistry.getWorkerRegistry().setWorkerStatus(vmNode.getName(), workerStatus);
@@ -72,7 +72,7 @@ public class DataflowWorkerMonitor {
     public void processNodeEvent(NodeEvent nodeEvent) throws Exception {
       if(nodeEvent.getType() == NodeEvent.Type.DELETE) {
         setComplete();
-        removeWorkerListener(nodeEvent.getPath());
+        onWorkerBrokenHeartbeat(nodeEvent.getPath());
       }
     }
   }

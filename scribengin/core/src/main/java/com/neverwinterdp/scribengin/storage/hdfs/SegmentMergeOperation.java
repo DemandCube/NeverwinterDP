@@ -9,10 +9,10 @@ import org.apache.hadoop.fs.Path;
 
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
-public class MergeOperation<T> implements OperationExecutor<T> {
+public class SegmentMergeOperation<T> implements SegmentOperationExecutor<T> {
   
   @Override
-  public void execute(Storage<T> storage, Lock lock, OperationConfig config) throws Exception {
+  public void execute(SegmentStorage<T> storage, SegmentLock lock, SegmentOperationConfig config) throws Exception {
     if(!init(storage,lock, config)) return;
     
     config.withAttribute("step", "merge");
@@ -24,10 +24,10 @@ public class MergeOperation<T> implements OperationExecutor<T> {
     commit(storage,lock, config);
   }
 
-  public void resume(Storage<T> storage, Lock lock, OperationConfig config) throws Exception {
+  public void resume(SegmentStorage<T> storage, SegmentLock lock, SegmentOperationConfig config) throws Exception {
   }
   
-  boolean init(Storage<T> storage, Lock lock, OperationConfig config) throws Exception {
+  boolean init(SegmentStorage<T> storage, SegmentLock lock, SegmentOperationConfig config) throws Exception {
     storage.refresh();
     Segment.Type segType = config.attribute("segment.type", Segment.Type.class);
 
@@ -54,7 +54,7 @@ public class MergeOperation<T> implements OperationExecutor<T> {
     return true;
   }
   
-  void merge(Storage<T> storage, Lock lock, OperationConfig config) throws Exception {
+  void merge(SegmentStorage<T> storage, SegmentLock lock, SegmentOperationConfig config) throws Exception {
     SegmentSet segSet = config.attribute("sources", SegmentSet.class);
     Segment    destSegment = config.attribute("destination", Segment.class);
     
@@ -67,7 +67,7 @@ public class MergeOperation<T> implements OperationExecutor<T> {
     fs.rename(bufferingPath, completePath);
   }
   
-  void commit(Storage<T> storage, Lock lock, OperationConfig config) throws Exception {
+  void commit(SegmentStorage<T> storage, SegmentLock lock, SegmentOperationConfig config) throws Exception {
     FileSystem fs = storage.getFileSystem();
 //    SegmentSet segSet = config.attribute("sources", SegmentSet.class);
 //    Path[] srcPath  = segSet.toHDFSDataPath(storage);
@@ -84,10 +84,10 @@ public class MergeOperation<T> implements OperationExecutor<T> {
     fs.rename(completePath, dataPath);
   }
   
-  static public OperationConfig createOperationConfig(Storage<?> storage, Segment.Type segType, long maxLockTime) {
-    OperationConfig opConfig = new OperationConfig("merge-buffer", maxLockTime);
+  static public SegmentOperationConfig createOperationConfig(SegmentStorage<?> storage, Segment.Type segType, long maxLockTime) {
+    SegmentOperationConfig opConfig = new SegmentOperationConfig("merge-buffer", maxLockTime);
     opConfig.
-      withExecutor(MergeOperation.class).
+      withExecutor(SegmentMergeOperation.class).
       withAttribute("segment.type", segType);
     return opConfig;
   }

@@ -68,6 +68,8 @@ DATAFLOW_STORAGE=$(get_opt --dataflow-storage 'kafka' $@)
 
 DATAFLOW_NUM_OF_WORKER=$(get_opt --dataflow-num-of-worker '2' $@)
 DATAFLOW_NUM_OF_EXECUTOR_PER_WORKER=$(get_opt --dataflow-num-of-executor-per-worker '2' $@)
+DATAFLOW_WORKER_ENABLE_GC=$(has_opt "--dataflow-worker-enable-gc" $@ )
+DATAFLOW_WORKER_PROFILER_OPTS=$(get_opt --dataflow-worker-profiler-opts '' $@)
 
 DATAFLOW_KILL_WORKER_RANDOM=$(get_opt --dataflow-kill-worker-random 'false' $@)
 DATAFLOW_KILL_WORKER_MAX=$(get_opt --dataflow-kill-worker-max '5' $@)
@@ -75,15 +77,18 @@ DATAFLOW_KILL_WORKER_PERIOD=$(get_opt --dataflow-kill-worker-period '60000' $@)
 
 
 DATAFLOW_DESCRIPTOR_FILE=""
+VALIDATOR_APP=""
 VALIDATOR_SOURCE_OPT=""
 if [ "$DATAFLOW_STORAGE" = "hdfs" ] ; then
-  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/hdfs-tracking-dataflow-chain.json"
-  LOG_VALIDATOR_VALIDATE_OPT="--prop:validate-hdfs=/tracking-sample/hdfs/info,/tracking-sample/hdfs/warn,/tracking-sample/hdfs/error"
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/tracking-sample-dataflow-hdfs.json"
+  VALIDATOR_APP="com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorHDFSApp"
+  VALIDATOR_SOURCE_OPT="--prop:hdfs.location=/tracking-sample/hdfs/aggregate --prop:hdfs.partition-roll-period=1200000"
 elif [ "$DATAFLOW_STORAGE" = "s3" ] ; then
   DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/s3-tracking-dataflow-chain.json"
   LOG_VALIDATOR_VALIDATE_OPT="--prop:validate-s3=test-tracking-sample:info,test-tracking-sample:warn,test-tracking-sample:error" 
 else
   DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/tracking-sample-dataflow-kafka.json"
+  VALIDATOR_APP="com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp"
   VALIDATOR_SOURCE_OPT="--prop:kafka.zk-connects=zookeeper-1:2181  --prop:kafka.topic=tracking.aggregate  --prop:kafka.message-wait-timeout=1200000"
 fi
 
@@ -112,7 +117,9 @@ $SHELL vm upload-app --local $APP_DIR --dfs $DFS_APP_HOME
 $SHELL vm submit \
   --dfs-app-home $DFS_APP_HOME \
   --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP  --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
-  --name vm-tracking-generator-1 --role vm-tracking-generator --vm-application  com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMGeneratorKafkaApp \
+  --vm-id vm-tracking-generator-1 --role vm-tracking-generator \
+  --enable-gc-log \
+  --vm-application  com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMGeneratorKafkaApp \
   --prop:tracking.report-path=$TRACKING_REPORT_PATH \
   --prop:tracking.num-of-writer=$GENERATOR_NUM_OF_WRITER \
   --prop:tracking.num-of-chunk=$GENERATOR_NUM_OF_CHUNK \
@@ -129,11 +136,13 @@ $SHELL vm wait-for-vm-status --vm-id vm-tracking-generator-1 --vm-status TERMINA
 #########################################################################################################################
 # Launch A Dataflow Chain                                                                                               #
 #########################################################################################################################
+#--dataflow-worker-enable-gc $DATAFLOW_WORKER_ENABLE_GC --dataflow-worker-profiler-opts $DATAFLOW_WORKER_PROFILER_OPTS \
 $SHELL dataflow submit \
   --dfs-app-home $DFS_APP_HOME \
   --dataflow-config $DATAFLOW_DESCRIPTOR_FILE \
   --dataflow-id tracking-dataflow --dataflow-max-runtime $DATAFLOW_MAX_RUNTIME  \
   --dataflow-num-of-worker $DATAFLOW_NUM_OF_WORKER --dataflow-num-of-executor-per-worker $DATAFLOW_NUM_OF_EXECUTOR_PER_WORKER \
+  --dataflow-worker-enable-gc  \
   --wait-for-running-timeout 180000 
 
 if [ "$DATAFLOW_KILL_WORKER_RANDOM" = "true" ] ; then
@@ -145,15 +154,17 @@ fi
 # Launch Validator                                                                                                      #
 #########################################################################################################################
 if [ $VALIDATOR_DISABLE == "false" ] ; then
+  sleep 15
   $SHELL vm submit  \
     --dfs-app-home $DFS_APP_HOME \
     --registry-connect zookeeper-1:2181  --registry-db-domain /NeverwinterDP --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl \
-    --name vm-tracking-validator-1 --role tracking-validator --vm-application  com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp \
+    --vm-id vm-tracking-validator-1 --role tracking-validator \
+    --enable-gc-log \
+    --vm-application $VALIDATOR_APP \
     --prop:tracking.report-path=$TRACKING_REPORT_PATH \
     --prop:tracking.num-of-reader=$VALIDATOR_NUM_OF_READER \
     --prop:tracking.expect-num-of-message-per-chunk=$GENERATOR_NUM_OF_MESSAGE_PER_CHUNK \
     --prop:tracking.max-runtime=$(( 180000 + $DATAFLOW_MAX_RUNTIME ))\
-    --prop:kafka.message-wait-timeout=900000 \
     $VALIDATOR_SOURCE_OPT
 
   $SHELL vm wait-for-vm-status --vm-id vm-tracking-validator-1 --vm-status TERMINATED --max-wait-time 5000

@@ -3,17 +3,17 @@ package com.neverwinterdp.scribengin.storage.es.sink;
 import com.neverwinterdp.es.ESObjectClient;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.es.ESStorage;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class ESStreamWriter implements SinkPartitionStreamWriter {
   ESStorage        storage ;
-  PartitionConfig  partitionConfig;
+  PartitionStreamConfig  partitionConfig;
   ESObjectClient<Object> esObjClient;
   
-  public ESStreamWriter(StorageConfig sConfig, PartitionConfig pConfig) throws Exception {
+  public ESStreamWriter(StorageConfig sConfig, PartitionStreamConfig pConfig) throws Exception {
     this.storage = new ESStorage(sConfig);
     this.partitionConfig = pConfig;
     esObjClient = storage.getESObjectClient();

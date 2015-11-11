@@ -2,20 +2,22 @@ package com.neverwinterdp.scribengin.storage.kafka.sink;
 
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.kafka.producer.KafkaWriter;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.Record;
+import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 
 //TODO: Allow the writer write to the assigned partition and configure the send time out
 public class KafkaSinkPartitionStreamWriter implements SinkPartitionStreamWriter {
-  private PartitionConfig descriptor;
+  private StorageConfig         storageConfig;
+  private PartitionStreamConfig partitionStreamConfig;
   private KafkaWriter writer ;
   private String topic;
   
-  public KafkaSinkPartitionStreamWriter(PartitionConfig descriptor) {
-    this.descriptor = descriptor;
-    this.writer = new AckKafkaWriter(descriptor.attribute("name"), descriptor.attribute("broker.list")) ;
-    this.topic = descriptor.attribute("topic");
+  public KafkaSinkPartitionStreamWriter(StorageConfig storageConfig, PartitionStreamConfig partitionStreamConfig) {
+    this.partitionStreamConfig = partitionStreamConfig;
+    this.writer = new AckKafkaWriter(storageConfig.attribute("name"), storageConfig.attribute("broker.list")) ;
+    this.topic = storageConfig.attribute("topic");
   }
   
   @Override
@@ -35,12 +37,13 @@ public class KafkaSinkPartitionStreamWriter implements SinkPartitionStreamWriter
 
   @Override
   public void commit() throws Exception {
-    writer.commit();
+    prepareCommit();
+    completeCommit();
   }
 
   @Override
-  public void prepareCommit() {
-
+  public void prepareCommit() throws Exception {
+    writer.commit();
   }
 
   @Override

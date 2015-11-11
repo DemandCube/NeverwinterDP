@@ -11,7 +11,7 @@
 
   "worker": {
     "numOfInstances": 8,
-    "memory": 128,
+    "memory": 512,
     "cpuCores": 1,
     "numOfExecutor": 2,
     "taskSwitchingPeriod" : 30000

@@ -21,7 +21,7 @@ import com.neverwinterdp.util.log.LoggerFactory;
 public class KafkaTrackingSampleRunner  {
   String dataflowId           = "tracking-dataflow";
   int    numOfMessagePerChunk = 1000;
-  long   dataflowMaxRuntime   = 90000;
+  long   dataflowMaxRuntime   = 45000;
   
   ScribenginClusterBuilder clusterBuilder ;
   Node esNode ;
@@ -73,10 +73,10 @@ public class KafkaTrackingSampleRunner  {
         "  --vm-application " + VMTMGeneratorKafkaApp.class.getName() + 
         
         "  --prop:tracking.report-path=" + REPORT_PATH +
-        "  --prop:tracking.num-of-writer=3" +
+        "  --prop:tracking.num-of-writer=1" +
         "  --prop:tracking.num-of-chunk=10" +
         "  --prop:tracking.num-of-message-per-chunk=" + numOfMessagePerChunk +
-        "  --prop:tracking.break-in-period=10" +
+        "  --prop:tracking.break-in-period=500" +
         "  --prop:tracking.message-size=512" +
          
         "  --prop:kafka.zk-connects=127.0.0.1:2181" +
@@ -88,7 +88,9 @@ public class KafkaTrackingSampleRunner  {
     String dataflowChainSubmitCommand = 
         "dataflow submit " + 
         "  --dataflow-config src/test/resources/kafka-tracking-dataflow.json" +
-        "  --dataflow-id " + dataflowId + " --dataflow-max-runtime " + dataflowMaxRuntime;
+        "  --dataflow-id " + dataflowId + 
+        "  --dataflow-num-of-worker 2 --dataflow-num-of-executor-per-worker 5" + 
+        "  --dataflow-max-runtime " + dataflowMaxRuntime;
     shell.execute(dataflowChainSubmitCommand);
     
     String logValidatorSubmitCommand = 
@@ -112,7 +114,7 @@ public class KafkaTrackingSampleRunner  {
 
     shell.execute(
       "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor" +
-      "  --dataflow-id " + dataflowId +
+      "  --dataflow-id " + dataflowId + " --show-history-workers " +
       "  --report-path " + REPORT_PATH + " --max-runtime " + dataflowMaxRuntime +"  --print-period 10000"
     );
     
@@ -120,5 +122,9 @@ public class KafkaTrackingSampleRunner  {
       "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingJUnitShellPlugin" +
       "  --dataflow-id " + dataflowId + "  --report-path " + REPORT_PATH + " --junit-report-file build/junit-report.xml"
     );
+    
+    shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED") ;
+    
+    shell.execute("registry dump");
   }
 }

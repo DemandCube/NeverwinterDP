@@ -39,7 +39,7 @@ public class YarnVMClient extends VMClient {
   @Override
   public void createVMMaster(String localAppHome, String name) throws Exception {
     VMConfig vmConfig = new VMConfig() ;
-    vmConfig.setName(name);
+    vmConfig.setVmId(name);
     vmConfig.addRoles("vm-master") ;
     vmConfig.setSelfRegistration(true) ;
     vmConfig.setRegistryConfig(getRegistry().getRegistryConfig());
@@ -55,7 +55,7 @@ public class YarnVMClient extends VMClient {
     String remoteAppHome = VMClient.APPLICATIONS + "/vm-master";
     appClient.uploadApp(localAppHome, remoteAppHome);
     
-    vmConfig.setAppHome(remoteAppHome);
+    vmConfig.setDfsAppHome(remoteAppHome);
     vmConfig.addVMResource("dfs-app-lib",  remoteAppHome + "/libs");
     vmConfig.addVMResource("dfs-app-conf", remoteAppHome + "/conf");
     appClient.run(vmConfig, yarnConf);

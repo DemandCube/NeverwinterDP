@@ -8,7 +8,6 @@ public class DataflowConfig {
   private String  name;
   private String  dataflowAppHome;
   private long    maxRunTime  = 90000;
-  private String  log4jConfigUrl = "classpath:scribengin/log4j/vm-log4j.properties";
  
   private MasterConfig master;
   private WorkerConfig worker;
@@ -29,11 +28,6 @@ public class DataflowConfig {
 
   public long getMaxRunTime() { return maxRunTime; }
   public void setMaxRunTime(long maxRunTime) { this.maxRunTime = maxRunTime; }
-  
-  public String getLog4jConfigUrl() { return log4jConfigUrl; }
-  public void setLog4jConfigUrl(String log4jConfigUrl) {
-    this.log4jConfigUrl = log4jConfigUrl;
-  }
   
   public MasterConfig getMaster() { return master; }
   public void setMaster(MasterConfig master) { this.master = master; }

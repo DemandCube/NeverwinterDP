@@ -8,8 +8,8 @@ import org.apache.hadoop.fs.FileSystem;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.scribengin.storage.hdfs.HDFSStorage;
 import com.neverwinterdp.scribengin.storage.kafka.KafkaStorage;
-import com.neverwinterdp.scribengin.storage.s3.S3Client;
 
 @Singleton
 public class StorageService {
@@ -19,17 +19,13 @@ public class StorageService {
   @Inject
   private KafkaClient kafkaClient;
   
-  @Inject
-  private S3Client s3Client;
+  //@Inject
+  //private S3Client s3Client;
   
   private Map<String, KafkaStorage> cacheKafkaStorage = new HashMap<>();
+  private Map<String, HDFSStorage>  cacheHDFSStorage = new HashMap<>();
   
   public StorageService() {
-  }
-  
-  public StorageService(FileSystem fs, S3Client s3Client) {
-    this.fs = fs;
-    this.s3Client = s3Client;
   }
   
   public FileSystem getFileSyztem() { return this.fs ; }
@@ -38,11 +34,20 @@ public class StorageService {
     if("kafka".equalsIgnoreCase(storageConfig.getType())) {
       String zkConnect = storageConfig.attribute(KafkaStorage.ZK_CONNECT);
       String topic     = storageConfig.attribute(KafkaStorage.TOPIC);
-      String key = zkConnect + "/" + topic;
+      String key = "kafka:" + zkConnect + "/" + topic;
       KafkaStorage storage = cacheKafkaStorage.get(key);
       if(storage == null) {
         storage = new KafkaStorage(kafkaClient, storageConfig);
         cacheKafkaStorage.put(key, storage);
+      }
+      return storage;
+    } else if("hdfs".equalsIgnoreCase(storageConfig.getType())) {
+      String location  = storageConfig.getLocation();
+      String key = "hdfs:" + location;
+      HDFSStorage storage = cacheHDFSStorage.get(key);
+      if(storage == null) {
+        storage = new HDFSStorage(fs, storageConfig);
+        cacheHDFSStorage.put(key, storage);
       }
       return storage;
     }

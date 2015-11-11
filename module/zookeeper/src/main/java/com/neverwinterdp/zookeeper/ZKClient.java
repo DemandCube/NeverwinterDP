@@ -30,7 +30,7 @@ public class ZKClient {
       public void process(WatchedEvent event) {
       }
     };
-    zkClient = new ZooKeeper(zkConnects, 15000, watcher);
+    zkClient = new ZooKeeper(zkConnects, 30000, watcher);
     long waitTime = 0 ;
     while(waitTime < timeout) {
       if(zkClient.getState().isConnected()) {

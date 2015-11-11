@@ -3,8 +3,6 @@ package com.neverwinterdp.registry.task.dedicated;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
@@ -76,7 +74,17 @@ public class DedicatedTaskServiceUnitTest {
 
   @Test
   public void testTaskService() throws Exception {
-    DedicatedTaskService<TaskDescriptor> service = new DedicatedTaskService<>(registry, TASK_SERVICE_PATH, TaskDescriptor.class);
+    TaskSlotExecutorFactory<TaskDescriptor> taskSlotExecutorFactory = new TaskSlotExecutorFactory<TaskDescriptor>() {
+      @Override
+      public TaskSlotExecutor<TaskDescriptor> create(DedicatedTaskContext<TaskDescriptor> context) {
+        return new DummyTaskSlotExecutor(context);
+      }
+      
+    };
+    DedicatedTaskRegistry<TaskDescriptor> dedicatedTaskRegistry = 
+        new DedicatedTaskRegistry<>(registry, TASK_SERVICE_PATH, TaskDescriptor.class);
+    dedicatedTaskRegistry.initRegistry();
+    DedicatedTaskService<TaskDescriptor> service = new DedicatedTaskService<>(dedicatedTaskRegistry, taskSlotExecutorFactory);
     int NUM_OF_TASKS = 15;
     DecimalFormat seqIdFormater = new DecimalFormat("000");
     for(int i = 0; i < NUM_OF_TASKS; i++) {
@@ -94,20 +102,14 @@ public class DedicatedTaskServiceUnitTest {
   
     
     int NUM_OF_EXECUTORS = 5;
-    ExecutorService execService = Executors.newFixedThreadPool(NUM_OF_EXECUTORS);
     for(int i = 0; i < NUM_OF_EXECUTORS; i++) {
-      TaskExecutor<TaskDescriptor> executor = new TaskExecutor<TaskDescriptor>("executor-" + i, service) {
-        @Override
-        protected TaskSlotExecutor<TaskDescriptor> createTaskSlotExecutor(TaskExecutorDescriptor executor, DedicatedTaskContext<TaskDescriptor> context) throws Exception {
-          return new DummyTaskSlotExecutor(executor, context);
-        }
-      };
-      service.addExecutor(executor.getTaskExecutorDescriptor());
-      execService.submit(executor);
+      TaskExecutorDescriptor executor = new TaskExecutorDescriptor("executor-" + i, "NA");
+      service.addExecutor(executor, 3);
     }
-    execService.shutdown();
-    execService.awaitTermination(10000, TimeUnit.MILLISECONDS);
+    service.getTaskExecutorService().startExecutors();
+    service.getTaskExecutorService().awaitTermination(5, TimeUnit.SECONDS);
     service.getTaskRegistry().getTasksRootNode().dump(System.out);
+    registry.get("/").dump(System.out);
     service.onDestroy();
   }
 }

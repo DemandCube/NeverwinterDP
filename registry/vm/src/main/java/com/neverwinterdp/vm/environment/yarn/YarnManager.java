@@ -85,10 +85,11 @@ abstract public class YarnManager {
     ctx.setEnvironment(appEnv);
     
     StringBuilder sb = new StringBuilder();
+    String logDir =  appVMConfig.getLocalLogDir() ;
     List<String> commands = Collections.singletonList(
         sb.append(command).
-        append(" 1> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stdout").
-        append(" 2> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stderr").toString()
+        append(" 1> ").append(logDir + "/" + appVMConfig.getVmId() + "-stdout").
+        append(" 2> ").append(logDir + "/" + appVMConfig.getVmId() + "-stderr").toString()
     );
     ctx.setCommands(commands);
     nmClient.startContainer(container, ctx);

@@ -32,8 +32,11 @@ public class AppClient {
 
   public void run(VMConfig vmConfig, Configuration conf) throws Exception {
     try {
+      if(vmConfig.getLocalAppHome() == null) {
+        vmConfig.setLocalAppHome("/opt/hadoop/vm/" + vmConfig.getVmId());
+      }
       vmConfig.overrideHadoopConfiguration(conf);
-      System.out.println("Create YarnClient") ;
+      System.out.println("Create Yarn Client") ;
       YarnClient yarnClient = YarnClient.createYarnClient();
       yarnClient.init(conf);
       yarnClient.start();
@@ -66,12 +69,12 @@ public class AppClient {
 
       System.out.println("Set up resource type requirements for ApplicationMaster") ;
       Resource resource = Records.newRecord(Resource.class);
-      resource.setMemory(256);
-      resource.setVirtualCores(1);
+      resource.setMemory(vmConfig.getRequestMemory());
+      resource.setVirtualCores(vmConfig.getRequestCpuCores());
 
       System.out.println("Finally, set-up ApplicationSubmissionContext for the application");
       ApplicationSubmissionContext appContext = app.getApplicationSubmissionContext();
-      appContext.setApplicationName(vmConfig.getName()); // application name
+      appContext.setApplicationName(vmConfig.getVmId()); // application name
       appContext.setAMContainerSpec(amContainer);
       appContext.setResource(resource);
       appContext.setQueue("default"); // queue 

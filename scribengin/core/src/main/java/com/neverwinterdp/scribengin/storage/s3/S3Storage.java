@@ -1,9 +1,9 @@
 package com.neverwinterdp.scribengin.storage.s3;
 
 import com.neverwinterdp.scribengin.storage.StorageConfig;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.s3.sink.S3Sink;
-import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
+import com.neverwinterdp.scribengin.storage.s3.source.S3SourcePartition;
 
 public class S3Storage {
   private String bucketName ;
@@ -24,20 +24,20 @@ public class S3Storage {
   
   public StorageConfig getStorageDescriptor() { return toStorageDesciptor();  }
   
-  public PartitionConfig createPartitionConfig(String streamKey) {
+  public PartitionStreamConfig createPartitionConfig(String streamKey) {
     int id = Integer.parseInt(streamKey.substring(streamKey.lastIndexOf('-') + 1)) ;
-    PartitionConfig descriptor = new PartitionConfig(id, bucketName) ;
+    PartitionStreamConfig descriptor = new PartitionStreamConfig(id, bucketName) ;
     descriptor.attribute("s3.bucket.name", bucketName);
     descriptor.attribute("s3.storage.path", storageFolder);
     return descriptor;
   }
   
-  public String getPartitionKey(PartitionConfig pConfig) {
-    return this.storageFolder + "/stream-" + pConfig.getPartitionId();
+  public String getPartitionKey(PartitionStreamConfig pConfig) {
+    return this.storageFolder + "/stream-" + pConfig.getPartitionStreamId();
   }
   
-  public PartitionConfig createPartitionConfig(int id) {
-    PartitionConfig descriptor = new PartitionConfig(id, bucketName) ;
+  public PartitionStreamConfig createPartitionConfig(int id) {
+    PartitionStreamConfig descriptor = new PartitionStreamConfig(id, bucketName) ;
     descriptor.attribute("s3.bucket.name", bucketName);
     descriptor.attribute("s3.storage.path", storageFolder);
     descriptor.attribute("s3.storage.stream", "stream-" + id);
@@ -57,12 +57,12 @@ public class S3Storage {
     return new S3Sink(s3Client, getStorageDescriptor()); 
   }
   
-  public S3Source getSource() throws Exception { 
-    return new S3Source(getS3Client(), toStorageDesciptor()); 
+  public S3SourcePartition getSource() throws Exception { 
+    return new S3SourcePartition(getS3Client(), toStorageDesciptor()); 
   }
   
-  public S3Source getSource(S3Client s3Client) throws Exception { 
-    return new S3Source(getS3Client(), toStorageDesciptor()); 
+  public S3SourcePartition getSource(S3Client s3Client) throws Exception { 
+    return new S3SourcePartition(getS3Client(), toStorageDesciptor()); 
   }
   
   StorageConfig toStorageDesciptor() {

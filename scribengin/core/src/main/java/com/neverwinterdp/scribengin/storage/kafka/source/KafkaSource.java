@@ -1,73 +1,39 @@
 package com.neverwinterdp.scribengin.storage.kafka.source;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import kafka.javaapi.PartitionMetadata;
-import kafka.javaapi.TopicMetadata;
-
-import com.neverwinterdp.scribengin.storage.StorageConfig;
-import com.neverwinterdp.scribengin.storage.kafka.KafkaStorage;
 import com.neverwinterdp.kafka.KafkaClient;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.source.Source;
-import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
+import com.neverwinterdp.scribengin.storage.source.SourcePartition;
 
 public class KafkaSource implements Source {
-  private KafkaClient                     kafkaClient;
-  private StorageConfig                   storageConfig;
-  private Map<Integer, KafkaSourceStream> sourceStreams = new HashMap<Integer, KafkaSourceStream>();
-
+  private KafkaClient          kafkaClient;
+  private StorageConfig        storageConfig;
+  private KafkaSourcePartition partition ;
+  
   public KafkaSource(KafkaClient kafkaClient, String name, String topic) throws Exception {
-    this.kafkaClient = kafkaClient;
-    StorageConfig descriptor = createStorageConfig(name, topic, kafkaClient.getZkConnects(), null);
-    init(descriptor);
+    this(kafkaClient, createStorageConfig(name, topic, kafkaClient.getZkConnects(), null));
   }
   
   public KafkaSource(KafkaClient kafkaClient, StorageConfig sconfig) throws Exception {
     this.kafkaClient = kafkaClient;
-    init(sconfig);
-  }
-  
-  void init(StorageConfig sconfig) throws Exception {
     this.storageConfig = sconfig;
-    TopicMetadata topicMetdadata = kafkaClient.findTopicMetadata(sconfig.attribute("topic"));
-    List<PartitionMetadata> partitionMetadatas = topicMetdadata.partitionsMetadata();
-    for(int i = 0; i < partitionMetadatas.size(); i++) {
-      PartitionMetadata partitionMetadata = partitionMetadatas.get(i);
-      KafkaSourceStream sourceStream = new KafkaSourceStream(kafkaClient, sconfig, partitionMetadata);
-      sourceStreams.put(sourceStream.getId(), sourceStream);
-    }
+    this.partition = new KafkaSourcePartition(kafkaClient, storageConfig);
   }
   
   @Override
   public StorageConfig getStorageConfig() { return storageConfig; }
 
-  /**
-   * The stream id is equivalent to the partition id of the kafka
-   */
   @Override
-  public SourcePartitionStream getStream(int id) {  
-    SourcePartitionStream stream = sourceStreams.get(id); 
-    if(stream == null) {
-      throw new RuntimeException("Cannot find the partition " + id + ", available streams = " + sourceStreams.size());
-    }
-    return stream;
-  }
+  public SourcePartition getLatestSourcePartition() throws Exception { return partition; }
 
   @Override
-  public SourcePartitionStream getStream(PartitionConfig descriptor) {
-    return getStream(descriptor.getPartitionId());
-  }
-
-  @Override
-  public SourcePartitionStream[] getStreams() {
-    SourcePartitionStream[] array = new SourcePartitionStream[sourceStreams.size()];
-    return sourceStreams.values().toArray(array);
-  }
-  
-  public void close() throws Exception {
+  public List<SourcePartition> getSourcePartitions() throws Exception {
+    List<SourcePartition> holder = new ArrayList<>();
+    holder.add(partition);
+    return holder;
   }
   
   static public StorageConfig createStorageConfig(String name, String topic, String zkConnect, String reader) {

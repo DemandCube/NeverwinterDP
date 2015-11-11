@@ -9,18 +9,18 @@ import kafka.message.MessageAndOffset;
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.scribengin.storage.Record;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 
 public class RawKafkaSourceStreamReader implements SourcePartitionStreamReader {
-  private PartitionConfig partitionConfig;
+  private PartitionStreamConfig partitionConfig;
   private KafkaPartitionReader partitionReader ;
   private CommitPoint lastCommitInfo ;
   
-  public RawKafkaSourceStreamReader(KafkaClient kafkaClient, PartitionConfig pConfig, PartitionMetadata pmd) throws Exception {
-    this.partitionConfig = pConfig;
-    this.partitionReader = 
+  public RawKafkaSourceStreamReader(KafkaClient kafkaClient, PartitionStreamConfig pConfig, PartitionMetadata pmd) throws Exception {
+    partitionConfig = pConfig;
+    partitionReader = 
         new KafkaPartitionReader(pConfig.attribute("name"), kafkaClient, pConfig.attribute("topic"), pmd);
   }
   
@@ -52,7 +52,7 @@ public class RawKafkaSourceStreamReader implements SourcePartitionStreamReader {
 
   @Override
   public void rollback() throws Exception {
-    throw new Exception("To implement") ;
+    partitionReader.rollback();
   }
 
   @Override

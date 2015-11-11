@@ -71,8 +71,7 @@ public class DataflowRegistry {
     masterRegistry   = new MasterRegistry(registry, dataflowPath);
     workerRegistry   = new WorkerRegistry(registry, dataflowPath);
     
-    String taskPath = dataflowPath + "/tasks";
-    taskRegistry = new DataflowTaskRegistry(registry, taskPath);
+    taskRegistry = new DataflowTaskRegistry(registry, dataflowPath);
     
     String notificationPath = dataflowPath +  "/" + NOTIFICATIONS_PATH;
     dataflowTaskNotifier   = new Notifier(registry, notificationPath, "dataflow-tasks");
@@ -154,24 +153,6 @@ public class DataflowRegistry {
   
   static  public DataflowLifecycleStatus getStatus(Registry registry, String dataflowPath) throws RegistryException {
     return registry.getDataAs(dataflowPath + "/status" , DataflowLifecycleStatus.class) ;
-  }
-  
-  
-  static public List<OperatorTaskRuntimeReport> getDataflowTaskRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
-    String taskListPath = dataflowPath + "/tasks/task-list";
-    
-    List<String> taskIds = null;
-    try {
-      taskIds = registry.getChildren(taskListPath) ;
-      List<OperatorTaskRuntimeReport> holder = new ArrayList<>();
-      for(String selTaskId : taskIds) {
-        holder.add(new OperatorTaskRuntimeReport(registry, taskListPath + "/" + selTaskId));
-      }
-      return holder;
-    } catch(RegistryException ex) {
-      if(ex.getErrorCode() == ErrorCode.NoNode) return new ArrayList<>();
-      throw ex ;
-    }
   }
   
   static public ActivityRegistry getMasterActivityRegistry(Registry registry, String dataflowPath) throws RegistryException {

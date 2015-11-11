@@ -24,10 +24,11 @@ import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.OperatorRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.StreamRegistry;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.Storage;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.StorageService;
+import com.neverwinterdp.scribengin.storage.sink.Sink;
 
 public class DataflowInitActivityBuilder extends ActivityBuilder {
   public Activity build() {
@@ -70,12 +71,13 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
         Storage storage = storageService.getStorage(storageConfig);
         storage.refresh();
         if(!storage.exists()) {
-          storageConfig.setPartition(streamConfig.getParallelism());
+          storageConfig.setPartitionStream(streamConfig.getParallelism());
           storageConfig.setReplication(streamConfig.getReplication());
-          storage.create(storageConfig.getPartition(), storageConfig.getReplication());
+          storage.create(storageConfig.getPartitionStream(), storageConfig.getReplication());
           storage.refresh();
         }
-        List<PartitionConfig> pConfigs = storage.getPartitionConfigs();
+        Sink sink = storage.getSink();
+        List<PartitionStreamConfig> pConfigs = sink.getPartitionStreamConfigs();
         streamRegistry.create(name, storageConfig, pConfigs);
       }
     }
@@ -122,15 +124,15 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
       StreamRegistry streamRegistry = service.getDataflowRegistry().getStreamRegistry();
       DataflowTaskRegistry taskRegistry = service.getDataflowRegistry().getTaskRegistry();
       for(String input : opConfig.getInputs()) {
-        List<PartitionConfig> pConfigs = streamRegistry.getStreamInputPartitions(input);
+        List<PartitionStreamConfig> pConfigs = streamRegistry.getStreamInputPartitions(input);
         for(int i = 0; i < pConfigs.size(); i++) {
-          PartitionConfig pConfig = pConfigs.get(i);
-          String taskId =  opName + ":" + input + "-" + SEQ_ID_FORMATTER.format(pConfig.getPartitionId());
+          PartitionStreamConfig pConfig = pConfigs.get(i);
+          String taskId =  opName + ":" + input + "-" + SEQ_ID_FORMATTER.format(pConfig.getPartitionStreamId());
           OperatorTaskConfig taskConfig = new OperatorTaskConfig();
           taskConfig.setTaskId(taskId);
           taskConfig.setOperatorName(opName);
           taskConfig.setInput(input);
-          taskConfig.setInputPartitionId(pConfig.getPartitionId());
+          taskConfig.setInputPartitionId(pConfig.getPartitionStreamId());
           taskConfig.setOutputs(opConfig.getOutputs());
           taskConfig.setOperator(opConfig.getOperator());
           taskRegistry.offer(taskConfig);

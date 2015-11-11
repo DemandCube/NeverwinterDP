@@ -23,7 +23,7 @@ public class VMRegistryFormatter extends NodeFormatter {
     }
     
     Map<String,String> result = new HashMap<String, String>();
-    result.put("Name", vmDescriptor.getVmConfig().getName());
+    result.put("Name", vmDescriptor.getVmConfig().getVmId());
     result.put("Hostname", vmDescriptor.getHostname());
     result.put("Description", vmDescriptor.getVmConfig().getDescription());
     result.put("Memory", Integer.toString(vmDescriptor.getMemory()));

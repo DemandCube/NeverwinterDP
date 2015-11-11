@@ -36,7 +36,7 @@ public class KafkaClientUnitTest {
     KafkaClient kafkaClient = new KafkaClient("KafkaClient", cluster.getZKConnect());
     KafkaStorage storage = new KafkaStorage(kafkaClient, "writer", "hello");
     KafkaSink sink = (KafkaSink) storage.getSink();
-    SinkPartitionStream stream = sink.newStream();
+    SinkPartitionStream stream = sink.getParitionStream(0);
     SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < 10; i++) {
     }

@@ -1,20 +1,21 @@
 package com.neverwinterdp.scribengin.dataflow.operator;
 
-import com.neverwinterdp.registry.task.switchable.SwitchableTaskContext;
+import com.neverwinterdp.registry.task.TaskStatus;
+import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.WorkerService;
 import com.neverwinterdp.scribengin.storage.Record;
 
 public class OperatorTask {
-  private WorkerService                         workerService;
-  private final SwitchableTaskContext<OperatorTaskConfig> taskContext;
-  private OperatorTaskConfig                    operatorTaskConfig;
-  private Operator                              operator;
-  private OperatorContext                       context;
-  private boolean                               interrupt = false;
-  private long                                  startTime = 0;
-  
-  public OperatorTask(WorkerService service, SwitchableTaskContext<OperatorTaskConfig> taskContext) throws Exception {
+  private WorkerService                            workerService;
+  private DedicatedTaskContext<OperatorTaskConfig> taskContext;
+  private OperatorTaskConfig                       operatorTaskConfig;
+  private Operator                                 operator;
+  private OperatorContext                          context;
+  private boolean                                  interrupt = false;
+  private long                                     startTime = 0;
+
+  public OperatorTask(WorkerService service, DedicatedTaskContext<OperatorTaskConfig> taskContext) throws Exception {
     this.workerService = service;
     this.taskContext     = taskContext;
     this.operatorTaskConfig      = taskContext.getTaskDescriptor(false);
@@ -22,7 +23,7 @@ public class OperatorTask {
     operator = opType.newInstance();
   }
   
-  public SwitchableTaskContext<OperatorTaskConfig> getTaskContext() { return this.taskContext; }
+  public DedicatedTaskContext<OperatorTaskConfig> getTaskContext() { return this.taskContext; }
   
   public OperatorTaskConfig getDescriptor() { return operatorTaskConfig ; }
   
@@ -73,18 +74,16 @@ public class OperatorTask {
   
   public void suspend() throws Exception {
     saveContext();
-    String refWorker = workerService.getVMDescriptor().getId();
     DataflowRegistry dflRegistry = workerService.getDataflowRegistry();
-    dflRegistry.getTaskRegistry().suspend(refWorker, taskContext);
+    dflRegistry.getTaskRegistry().suspend(taskContext);
   }
   
   public void finish() throws Exception {
-    String refWorker = workerService.getVMDescriptor().getId();
     OperatorTaskReport report = context.getTaskReport();
     report.setFinishTime(System.currentTimeMillis());
     saveContext();
     DataflowRegistry dflRegistry = workerService.getDataflowRegistry();
-    dflRegistry.getTaskRegistry().finish(refWorker, taskContext);
+    dflRegistry.getTaskRegistry().finish(taskContext, TaskStatus.TERMINATED);
   }
   
   void saveContext() {

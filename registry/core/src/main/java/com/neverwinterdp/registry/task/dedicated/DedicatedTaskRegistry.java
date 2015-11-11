@@ -34,6 +34,7 @@ public class DedicatedTaskRegistry<T> {
   final static public String EXECUTIONS_TASK_AVAILABLE_PATH       = EXECUTIONS_PATH + "/task-available";
   
   final static public String EXECUTIONS_EXECUTORS_PATH            = EXECUTIONS_PATH + "/executors";
+  final static public String EXECUTIONS_EXECUTORS_HEARTBEAT_PATH  = EXECUTIONS_PATH + "/executors/heartbeat";
   final static public String EXECUTIONS_EXECUTORS_ALL_PATH        = EXECUTIONS_PATH + "/executors/all";
   final static public String EXECUTIONS_EXECUTORS_ACTIVE_PATH     = EXECUTIONS_PATH + "/executors/active";
   final static public String EXECUTIONS_EXECUTORS_IDLE_PATH       = EXECUTIONS_PATH + "/executors/idle";
@@ -49,22 +50,23 @@ public class DedicatedTaskRegistry<T> {
   private String   path ;
   private Class<T> taskDescriptorType;
   
-  private Node     tasksRootNode ;
-  private Node     tasksListNode ;
-  private Node     executionsNode;
-  private Node     taskAvailableNode;
-  private Node     taskFinishedNode;
+  protected Node     tasksRootNode ;
+  protected Node     tasksListNode ;
+  protected Node     executionsNode;
+  protected Node     taskAvailableNode;
+  protected Node     taskFinishedNode;
   
-  private Node     executorsNode;
-  private Node     executorsAllNode;
-  private Node     executorsActiveNode;
-  private Node     executorsIdleNode;
-  private Node     executorsHistoryNode;
+  protected Node     executorsNode;
+  protected Node     executorsAllNode;
+  protected Node     executorsActiveNode;
+  protected Node     executorsIdleNode;
+  protected Node     executorsHistoryNode;
+  protected Node     executorsHeartbeatNode;
   
-  private Node     tasksLockNode ; 
+  protected Node     tasksLockNode ; 
   
-  private Notifier taskExecutionNotifier ;
-  private Notifier taskCoordinationNotifier ;
+  protected Notifier taskExecutionNotifier ;
+  protected Notifier taskCoordinationNotifier ;
   
   public DedicatedTaskRegistry() { }
   
@@ -89,6 +91,7 @@ public class DedicatedTaskRegistry<T> {
     executorsActiveNode = tasksRootNode.getDescendant(EXECUTIONS_EXECUTORS_ACTIVE_PATH);
     executorsIdleNode = tasksRootNode.getDescendant(EXECUTIONS_EXECUTORS_IDLE_PATH);
     executorsHistoryNode = tasksRootNode.getDescendant(EXECUTIONS_EXECUTORS_HISTORY_PATH);
+    executorsHeartbeatNode = tasksRootNode.getDescendant(EXECUTIONS_EXECUTORS_HEARTBEAT_PATH);
     
     tasksLockNode = tasksRootNode.getDescendant(EXECUTIONS_LOCK_PATH);
     
@@ -116,6 +119,7 @@ public class DedicatedTaskRegistry<T> {
     transaction.create(executorsActiveNode,  null, NodeCreateMode.PERSISTENT);
     transaction.create(executorsIdleNode,  null, NodeCreateMode.PERSISTENT);
     transaction.create(executorsHistoryNode,  null, NodeCreateMode.PERSISTENT);
+    transaction.create(executorsHeartbeatNode,  null, NodeCreateMode.PERSISTENT);
     
     transaction.create(tasksLockNode, null, NodeCreateMode.PERSISTENT);
     
@@ -131,7 +135,15 @@ public class DedicatedTaskRegistry<T> {
   public Node getTasksRootNode() { return tasksRootNode; }
   
   public Node getTasksListNode() { return tasksListNode; }
+  
+  public Node getTaskAvailableNode() { return taskAvailableNode; }
 
+  public Node getTaskFinishedNode() { return taskFinishedNode; }
+  
+  public Node getExecutorsHeartbeatNode() { return executorsHeartbeatNode; }
+  
+  public Notifier getTaskCoordinationNotifier() { return taskCoordinationNotifier; }
+  
   public T getTaskDescriptor(String taskId) throws RegistryException {
     return tasksListNode.getChild(taskId).getDataAs(taskDescriptorType) ;
   }
@@ -269,7 +281,7 @@ public class DedicatedTaskRegistry<T> {
         String executorId = executor.getId();
         transaction.createChild(executorsAllNode, executorId, executor, NodeCreateMode.PERSISTENT);
         transaction.createDescendant(executorsAllNode, executorId + "/tasks", NodeCreateMode.PERSISTENT);
-        transaction.createDescendant(executorsAllNode, executorId + "/heartbeat", NodeCreateMode.EPHEMERAL);
+        transaction.createDescendant(executorsHeartbeatNode, executorId, NodeCreateMode.EPHEMERAL);
         transaction.commit();
         return true;
       }
@@ -317,6 +329,11 @@ public class DedicatedTaskRegistry<T> {
     execute(executor, op);
   }
   
+  public void historyTaskExecutor(String executorId) throws RegistryException {
+    TaskExecutorDescriptor executor = executorsAllNode.getChild(executorId).getDataAs(TaskExecutorDescriptor.class);
+    historyTaskExecutor(executor);
+  }
+  
   public void historyTaskExecutor(final TaskExecutorDescriptor executor) throws RegistryException {
     BatchOperations<Boolean> op = new BatchOperations<Boolean>() {
       @Override
@@ -329,7 +346,13 @@ public class DedicatedTaskRegistry<T> {
           transaction.deleteDescendant(executorsActiveNode, executorId);
         } 
         transaction.createDescendant(executorsHistoryNode, executorId, NodeCreateMode.PERSISTENT);
-        executor.setStatus(TaskExecutorDescriptor.TasExecutorStatus.TERMINATED);
+        if(executor.getStatus().toString().indexOf("TERMINATED") < 0) {
+          List<String> taskIds = executorsAllNode.getChild(executorId).getChild("tasks").getChildren();
+          for(String taskId : taskIds) {
+            transaction.createChild(taskAvailableNode, taskId +  "-", NodeCreateMode.PERSISTENT_SEQUENTIAL);
+          }
+          executor.setStatus(TaskExecutorDescriptor.TasExecutorStatus.TERMINATED_WITH_ERROR);
+        }
         transaction.setData(executorsAllNode.getChild(executorId), executor);
         transaction.commit();
         return true;

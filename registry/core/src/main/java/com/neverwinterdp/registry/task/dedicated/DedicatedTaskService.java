@@ -4,38 +4,41 @@ import java.util.List;
 
 import javax.annotation.PreDestroy;
 
-import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.TaskStatus;
 
 public class DedicatedTaskService<T> {
-  private DedicatedTaskRegistry<T> taskRegistry ;
+  private DedicatedTaskRegistry<T>   taskRegistry;
+  private DedicatedTaskWatcher<T>    taskWatcher ;
+  private TaskExecutorService<T>     taskExecutorService;
+  private TaskSlotExecutorFactory<T> taskSlotExecutorFactory;
 
-  public DedicatedTaskService() { }
-  
-  public DedicatedTaskService(DedicatedTaskRegistry<T> taskRegistry) throws RegistryException {
-    init(taskRegistry) ;
-  }
-  
-  public DedicatedTaskService(Registry registry, String path, Class<T> taskDescriptorType) throws RegistryException {
-    init(registry, path, taskDescriptorType) ;
-  }
-  
-  protected void init(Registry registry, String path, Class<T> taskDescriptorType) throws RegistryException {
-    init(new DedicatedTaskRegistry<T>(registry, path, taskDescriptorType));
-  }
-  
-  protected void init(DedicatedTaskRegistry<T> taskReg) throws RegistryException {
-    taskRegistry = taskReg;
-    taskReg.initRegistry();
+  public DedicatedTaskService(DedicatedTaskRegistry<T> taskRegistry, TaskSlotExecutorFactory<T> taskSlotExecutorFactory) throws RegistryException {
+    this.taskRegistry = taskRegistry;
+    this.taskSlotExecutorFactory = taskSlotExecutorFactory;
+    taskWatcher = new DedicatedTaskWatcher<T>(taskRegistry);
+    taskExecutorService = new TaskExecutorService<T>();
   }
   
   @PreDestroy
-  public void onDestroy() {
+  public void onDestroy() throws InterruptedException {
+    taskWatcher.onDestroy();
+    taskExecutorService.shutdown();
   } 
   
+  public void simulateKill() {
+    taskWatcher.onDestroy();
+    taskExecutorService.simulateKill();
+  }
+  
   public DedicatedTaskRegistry<T> getTaskRegistry() { return this.taskRegistry; }
+  
+  public TaskSlotExecutorFactory<T> getTaskSlotExecutorFactory() { return taskSlotExecutorFactory; }
+  
+  public void addTaskMonitor(DedicatedTaskMonitor<T> monitor) {
+    taskWatcher.addTaskMonitor(monitor);
+  }
   
   public void offer(String taskId, T taskDescriptor) throws RegistryException {
     taskRegistry.offer(taskId, taskDescriptor);
@@ -53,8 +56,14 @@ public class DedicatedTaskService<T> {
     taskRegistry.finish(executor, taskId, status);
   }
   
-  public void addExecutor(TaskExecutorDescriptor executor) throws RegistryException {
-    taskRegistry.addTaskExecutor(executor);
+  //================== Executor =======================================================
+  
+  public TaskExecutorService<T> getTaskExecutorService() { return this.taskExecutorService; }
+  
+  public void addExecutor(TaskExecutorDescriptor executorDescriptor, int taskSlots) throws Exception {
+    taskRegistry.addTaskExecutor(executorDescriptor);
+    TaskExecutor<T> executor = new TaskExecutor<T>(executorDescriptor.getId(), this, taskSlots) ;
+    taskExecutorService.add(executor);
   }
   
   public void activeExecutor(TaskExecutorDescriptor executor) throws RegistryException {

@@ -51,6 +51,7 @@ public class RegistryImpl implements Registry {
   
   private ZooKeeper zkClient ;
   
+  private boolean retryable = false ;
   private boolean closed = false;
   private int     reconnectCount = 0;
   
@@ -86,7 +87,7 @@ public class RegistryImpl implements Registry {
     try {
       if(zkClient != null) zkClient.close();
       ZkConnectedStateWatcher connectStateWatcher = new ZkConnectedStateWatcher();
-      zkClient = new ZooKeeper(config.getConnect(), 10000, connectStateWatcher);
+      zkClient = new ZooKeeper(config.getConnect(), 30000, connectStateWatcher);
       if(!connectStateWatcher.waitForConnected(10000)) {
         zkClient.close();
         zkClient = null;
@@ -99,6 +100,10 @@ public class RegistryImpl implements Registry {
     return this;
   }
 
+  public void setRetryable(boolean retryable){
+    this.retryable = retryable ;
+  }
+  
   @Override
   synchronized public void shutdown() throws RegistryException {
     if(closed) return;
@@ -640,6 +645,11 @@ public class RegistryImpl implements Registry {
   }
   
   <T> T execute(Operation<T> op, int retry) throws RegistryException {
+    if(retryable) return executeWithRetry(op, retry);
+    else return executeWithoutRetry(op);
+  }
+  
+  <T> T executeWithoutRetry(Operation<T> op) throws RegistryException {
     if(closed) {
       throw new RegistryException(ErrorCode.Closed, "Registry has been closed");
     }

@@ -2,6 +2,7 @@ package com.neverwinterdp.kafka.producer;
 
 import java.nio.charset.Charset;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.kafka.clients.producer.Callback;
 
@@ -14,8 +15,12 @@ import com.neverwinterdp.util.JSONSerializer;
 abstract public class AbstractKafkaWriter implements KafkaWriter {
   final static public  Charset UTF8 = Charset.forName("UTF-8") ;
   
+  private String writerUUID     = UUID.randomUUID().toString();
+  private AtomicLong  idTracker = new AtomicLong();
+  
   private String name;
-
+  
+  
   public String getName() { return name; }
 
   public void setName(String name) { this.name = name; }
@@ -45,7 +50,9 @@ abstract public class AbstractKafkaWriter implements KafkaWriter {
 
   @Override
   public <T> void send(String topic, T obj, long timeout) throws Exception {
-    send(topic, -1, nextKey(-1), JSONSerializer.INSTANCE.toString(obj), null, timeout);
+    byte[] keyBytes     = nextKey(-1).getBytes(UTF8);
+    byte[] messageBytes = JSONSerializer.INSTANCE.toBytes(obj);
+    send(topic, -1, keyBytes, messageBytes, null, timeout);
   }
   
   public void send(String topic, int partition, String key, String data, Callback callback, long timeout) throws Exception {
@@ -54,12 +61,13 @@ abstract public class AbstractKafkaWriter implements KafkaWriter {
     send(topic, partition, keyBytes, messageBytes, callback, timeout);
   }
   
+  abstract public void send(String topic, int partition, byte[] key, byte[] message, Callback callback, long timeout) throws Exception;
   
   private String nextKey(int partition) {
     if(partition >= 0) {
-      return "p:" + partition + ":" + UUID.randomUUID().toString();
+      return "p:" + partition + ":" + writerUUID + ":" + idTracker.incrementAndGet();
     } else {
-      return UUID.randomUUID().toString();
+      return writerUUID + ":" + idTracker.incrementAndGet();
     }
   }
   

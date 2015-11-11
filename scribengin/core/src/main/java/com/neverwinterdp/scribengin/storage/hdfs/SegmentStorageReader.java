@@ -17,7 +17,7 @@ import com.neverwinterdp.util.JSONSerializer;
 /**
  * @author Tuan Nguyen
  */
-public class StorageReader<T> {
+public class SegmentStorageReader<T> {
   private String            name;
   private FileSystem        fs;
   private String            location;
@@ -31,7 +31,7 @@ public class StorageReader<T> {
   private int currPosition;
   private CommitPoint lastCommitInfo;
 
-  public StorageReader(String name, FileSystem fs, String location, Class<T> type) throws FileNotFoundException, IllegalArgumentException, IOException {
+  public SegmentStorageReader(String name, FileSystem fs, String location, Class<T> type) throws FileNotFoundException, IllegalArgumentException, IOException {
     this.name = name;
     this.fs = fs;
     this.location = location;

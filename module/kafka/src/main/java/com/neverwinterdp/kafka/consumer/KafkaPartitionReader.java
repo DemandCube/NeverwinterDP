@@ -29,11 +29,12 @@ import kafka.message.MessageAndOffset;
 
 
 public class KafkaPartitionReader {
+  final static public int DEFAULT_FETCH_SIZE = 512 * 1024;
   private String   name;
   private KafkaClient kafkaClient ;
   private String topic ;
   private PartitionMetadata partitionMetadata;
-  private int fetchSize = 100000;
+  private int fetchSize = DEFAULT_FETCH_SIZE;
   private SimpleConsumer consumer;
   private long currentOffset;
   
@@ -59,7 +60,7 @@ public class KafkaPartitionReader {
     if(consumer != null) consumer.close();
     Broker broker = partitionMetadata.leader();
     if(broker != null) {
-      consumer = new SimpleConsumer(broker.host(), broker.port(), 100000, 64 * 1024, name);
+      consumer = new SimpleConsumer(broker.host(), broker.port(), 100000, 2 * fetchSize, name);
     } else {
       reconnect(3, 5000);
     }
@@ -72,12 +73,12 @@ public class KafkaPartitionReader {
       Thread.sleep(retryDelay);
       //Refresh the partition metadata
       try {
-      partitionMetadata = kafkaClient.findPartitionMetadata(topic, partitionMetadata.partitionId());
-      Broker broker = partitionMetadata.leader();
-      if(broker != null) {
-        consumer = new SimpleConsumer(broker.host(), broker.port(), 100000, 64 * 1024, name);
-        return;
-      }
+        partitionMetadata = kafkaClient.findPartitionMetadata(topic, partitionMetadata.partitionId());
+        Broker broker = partitionMetadata.leader();
+        if(broker != null) {
+          consumer = new SimpleConsumer(broker.host(), broker.port(), 60000, 2 * fetchSize, name);
+          return;
+        }
       } catch(Exception ex) {
         error = ex ;
       }
@@ -225,7 +226,7 @@ public class KafkaPartitionReader {
           new FetchRequestBuilder().
           clientId(name).
           addFetch(topic, partitionMetadata.partitionId(), currentOffset, fetchSize).
-          minBytes(1).
+          minBytes(1024).
           maxWait(maxWait).
           build();
       

@@ -1,21 +1,27 @@
 package com.neverwinterdp.scribengin.dataflow.registry;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.registry.task.switchable.SwitchableTaskContext;
-import com.neverwinterdp.registry.task.switchable.SwitchableTaskRegistry;
+import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
+import com.neverwinterdp.registry.task.TaskStatus;
+import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
+import com.neverwinterdp.registry.task.dedicated.DedicatedTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskReport;
+import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskRuntimeReport;
 
-public class DataflowTaskRegistry extends SwitchableTaskRegistry<OperatorTaskConfig> {
+public class DataflowTaskRegistry extends DedicatedTaskRegistry<OperatorTaskConfig> {
+  private String dataflowPath ;
   
-  public DataflowTaskRegistry(Registry registry, String path) throws RegistryException {
-    init(registry, path, OperatorTaskConfig.class) ;
+  public DataflowTaskRegistry(Registry registry, String dataflowPath) throws RegistryException {
+    init(registry, dataflowPath + "/tasks", OperatorTaskConfig.class) ;
+    this.dataflowPath = dataflowPath;
   }
 
   public void offer(OperatorTaskConfig taskConfig) throws RegistryException {
@@ -48,15 +54,53 @@ public class DataflowTaskRegistry extends SwitchableTaskRegistry<OperatorTaskCon
     taskNode.createChild("report", report, NodeCreateMode.PERSISTENT);
   }
   
-  public void suspend(String refWorker, SwitchableTaskContext<OperatorTaskConfig> context) throws RegistryException {
-    suspend(refWorker, context, false) ;
+  public void suspend(DedicatedTaskContext<OperatorTaskConfig> context) throws RegistryException {
+    suspend(context.getTaskExecutorDescriptor(), context.getTaskId()) ;
   }
   
-  public void suspend(String refWorker, SwitchableTaskContext<OperatorTaskConfig> context, final boolean disconnectHeartbeat) throws RegistryException {
-    suspend(refWorker, context.getTaskTransactionId(), disconnectHeartbeat);
+  public void suspend(TaskExecutorDescriptor executor, DedicatedTaskContext<OperatorTaskConfig> context) throws RegistryException {
+    suspend(executor, context.getTaskId()) ;
+  }
+  
+  public void finish(DedicatedTaskContext<OperatorTaskConfig> context, TaskStatus taskStatus) throws RegistryException {
+    finish(context.getTaskExecutorDescriptor(), context.getTaskId(), taskStatus) ;
   }
 
-  public void finish(String refWorker, SwitchableTaskContext<OperatorTaskConfig> context) throws RegistryException {
-    finish(refWorker, context.getTaskTransactionId());
+  public List<String> getAllExecutorIds() throws RegistryException {
+    List<String> executorIds = executorsAllNode.getChildren();
+    Collections.sort(executorIds);
+    return executorIds;
+  }
+  
+  public List<String> getActiveExecutorIds() throws RegistryException {
+    List<String> executorIds = executorsActiveNode.getChildren();
+    Collections.sort(executorIds);
+    return executorIds;
+  }
+  
+  public List<String> getIdleExecutorIds() throws RegistryException {
+    List<String> executorIds = executorsIdleNode.getChildren();
+    Collections.sort(executorIds);
+    return executorIds;
+  }
+  
+  public List<OperatorTaskRuntimeReport> getDataflowTaskRuntimeReportsByExecutorId(String executorId) throws RegistryException {
+    List<String> taskIds = executorsAllNode.getChild(executorId).getChild("tasks").getChildren() ;
+    return getDataflowTaskRuntimeReports(taskIds) ;
+  }
+  
+  
+  public List<OperatorTaskRuntimeReport> getDataflowTaskRuntimeReports() throws RegistryException {
+    List<String> taskIds = getTasksListNode().getChildren() ;
+    return getDataflowTaskRuntimeReports(taskIds);
+  }
+
+  List<OperatorTaskRuntimeReport> getDataflowTaskRuntimeReports(List<String> taskIds) throws RegistryException {
+    String taskListPath = getTasksListNode().getPath();
+    List<OperatorTaskRuntimeReport> holder = new ArrayList<>();
+    for(String selTaskId : taskIds) {
+      holder.add(new OperatorTaskRuntimeReport(getRegistry(), taskListPath + "/" + selTaskId));
+    }
+    return holder;
   }
 }

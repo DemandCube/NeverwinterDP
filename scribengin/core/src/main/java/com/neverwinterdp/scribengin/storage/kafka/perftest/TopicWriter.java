@@ -1,5 +1,6 @@
 package com.neverwinterdp.scribengin.storage.kafka.perftest;
 
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +40,7 @@ public class TopicWriter {
     KafkaSink sink = new KafkaSink(kafkaClient, topicConfig.topic + ".writer", topicConfig.topic);
     executorService = Executors.newFixedThreadPool(topicConfig.topicNumOfPartitions);
     for(int i = 0; i < topicConfig.topicNumOfPartitions; i++) {
-      SinkPartitionStream stream = sink.newStream();
+      SinkPartitionStream stream = sink.getParitionStream(i);
       TopicPartitionWriter partitionWriter = new TopicPartitionWriter(stream);
       executorService.submit(partitionWriter);
     }
@@ -59,7 +60,8 @@ public class TopicWriter {
   public class TopicPartitionWriter implements Runnable {
     private SinkPartitionStream       stream;
     private SinkPartitionStreamWriter currentWriter = null;
-    
+    private Random                    random        = new Random();
+
     TopicPartitionWriter(SinkPartitionStream stream) {
       this.stream = stream ;
     }
@@ -83,13 +85,14 @@ public class TopicWriter {
     }
     
     void doRun() throws Exception {
-      byte[] data = new byte[512];
       while(idTracker.get() < topicConfig.topicNumOfMessages) {
         currentWriter = stream.getWriter();
         for(int i = 0; i < topicConfig.writerWritePerWriter; i++) {
           if(idTracker.get() >= topicConfig.topicNumOfMessages) break;
           long id  = idTracker.incrementAndGet();
           String key = "message-" + id;
+          byte[] data = new byte[512];
+          random.nextBytes(data);
           Record record = new Record(key, data);
           currentWriter.append(record);
           reporter.incrWrite(topicConfig.topic, 1);

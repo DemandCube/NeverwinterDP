@@ -1,17 +1,11 @@
 package com.neverwinterdp.scribengin.storage.source;
 
-import com.neverwinterdp.scribengin.storage.StorageConfig;
-import com.neverwinterdp.scribengin.storage.PartitionConfig;
+import java.util.List;
 
-/**
- * @author Tuan Nguyen
- */
+import com.neverwinterdp.scribengin.storage.StorageConfig;
+
 public interface Source {
   public StorageConfig getStorageConfig() ;
-  public SourcePartitionStream   getStream(int id) ;
-  public SourcePartitionStream   getStream(PartitionConfig descriptor) ;
-  
-  public SourcePartitionStream[] getStreams() ;
-  
-  public void close() throws Exception ;
+  public SourcePartition       getLatestSourcePartition() throws Exception ;
+  public List<? extends SourcePartition> getSourcePartitions() throws Exception ;
 }

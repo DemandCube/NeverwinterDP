@@ -19,8 +19,8 @@ APP_OPT="-Dapp.dir=$APP_DIR -Duser.dir=$APP_DIR"
 ARGS="\
   --zk-connect zookeeper-1:2181 \
   \
-  --topics tracking.input,tracking.info,tracking.aggregate \
-  --topic-num-of-message 20000000 \
+  --topics tracking.input,tracking.info,tracking.warn,tracking.error,tracking.aggregate \
+  --topic-num-of-message 30000000 \
   --topic-num-of-partition 8 --topic-num-of-replication 2 \
   \
   --writer-write-per-writer 50000  --writer-write-break-in-period 100 \

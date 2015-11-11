@@ -83,7 +83,7 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
       VMConfig vmConfig = new VMConfig();
       vmConfig.
         setClusterEnvironment(service.getVMConfig().getClusterEnvironment()).
-        setName(workerId).
+        setVmId(workerId).
         addRoles("dataflow-worker").
         setRequestCpuCores(dflConfig.getWorker().getCpuCores()).
         setRequestMemory(dflConfig.getWorker().getMemory()).
@@ -91,11 +91,13 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
         setVmApplication(VMWorkerApp.class.getName()).
         addProperty("dataflow.registry.path", dflRegistry.getDataflowPath()).
         setHadoopProperties(service.getVMConfig().getHadoopProperties()).
-        setLog4jConfigUrl(dflConfig.getLog4jConfigUrl());
+        setLog4jConfigUrl(dflConfig.getWorker().getLog4jConfigUrl()).
+        setEnableGCLog(dflConfig.getWorker().isEnableGCLog()).
+        setProfilerOpts(dflConfig.getWorker().getProfilerOpts());
 
       String dataflowAppHome = dflConfig.getDataflowAppHome();
       if(dataflowAppHome != null) {
-        vmConfig.setAppHome(dataflowAppHome);
+        vmConfig.setDfsAppHome(dataflowAppHome);
         vmConfig.addVMResource("dataflow.libs", dataflowAppHome + "/libs");
       }
 

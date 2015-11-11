@@ -1,17 +1,20 @@
 package com.neverwinterdp.registry.task.dedicated;
 
-import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
-
 abstract public class TaskSlotExecutor<T> {
-  private TaskExecutorDescriptor  executorDescriptor;
   private DedicatedTaskContext<T> taskContext;
+  private boolean                 interrupt = false;
 
-  public TaskSlotExecutor(TaskExecutorDescriptor  executor, DedicatedTaskContext<T> taskContext) {
-    this.executorDescriptor = executor;
+  public TaskSlotExecutor(DedicatedTaskContext<T> taskContext) {
     this.taskContext        = taskContext;
   }
 
   public DedicatedTaskContext<T> getTaskContext() { return taskContext ; }
+  
+  public boolean isInterrupted() { return this.interrupt ; }
+  
+  public void interrupt() { interrupt = true; }
+  
+  public void clearInterrupt() { interrupt = false; }
   
   public void onInit() throws Exception {
   }
@@ -22,5 +25,8 @@ abstract public class TaskSlotExecutor<T> {
   abstract public void executeSlot() throws Exception;
 
   public void onPostExecuteSlot() throws Exception {
+  }
+  
+  public void onShutdown() throws Exception {
   }
 }

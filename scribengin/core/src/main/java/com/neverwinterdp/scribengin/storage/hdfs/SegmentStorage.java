@@ -10,13 +10,13 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-public class Storage<T> {
+public class SegmentStorage<T> {
   private FileSystem    fs;
   private String        location;
   private Class<T>      type;
   private LinkedHashMap<String, Segment> segments;
   
-  public Storage(FileSystem fs, String location, Class<T> type) throws IOException {
+  public SegmentStorage(FileSystem fs, String location, Class<T> type) throws IOException {
     this.fs       = fs;
     this.location = location;
     this.type = type;
@@ -48,7 +48,7 @@ public class Storage<T> {
     }
   }
   
-  public StorageWriter<T> getStorageWriter() { return new StorageWriter<T>(this); }
+  public SegmentStorageWriter<T> getStorageWriter() { return new SegmentStorageWriter<T>(this); }
   
   public SegmentSet getBufferSegments() {
     return getSegmentByType(Segment.Type.buffer);
@@ -75,28 +75,28 @@ public class Storage<T> {
   }
   
   public void optimizeBufferSegments() throws Exception {
-    OperationConfig opConfig = MergeOperation.createOperationConfig(this, Segment.Type.buffer, 30000);
+    SegmentOperationConfig opConfig = SegmentMergeOperation.createOperationConfig(this, Segment.Type.buffer, 30000);
     execute(opConfig, 30000, 1000);
   }
   
   public void optimizeSmallSegments() throws Exception {
-    OperationConfig opConfig = MergeOperation.createOperationConfig(this, Segment.Type.small, 30000);
+    SegmentOperationConfig opConfig = SegmentMergeOperation.createOperationConfig(this, Segment.Type.small, 30000);
     execute(opConfig, 30000, 1000);
   }
   
   public void optimizeMediumSegments() throws Exception {
-    OperationConfig opConfig = MergeOperation.createOperationConfig(this, Segment.Type.medium, 30000);
+    SegmentOperationConfig opConfig = SegmentMergeOperation.createOperationConfig(this, Segment.Type.medium, 30000);
     execute(opConfig, 30000, 1000);
   }
   
   
-  public void execute(OperationConfig config, long maxWaitTime, long tryPeriod) throws Exception {
+  public void execute(SegmentOperationConfig config, long maxWaitTime, long tryPeriod) throws Exception {
     Path lockPath = new Path(location + "/lock");
-    Lock lock = new Lock(fs, lockPath, config) ;
+    SegmentLock lock = new SegmentLock(fs, lockPath, config) ;
     if(lock.tryLock(maxWaitTime, tryPeriod)) {
-      Class<? extends OperationExecutor> opClass = 
-        (Class<? extends OperationExecutor>) Class.forName(config.getExecutor()) ;
-      OperationExecutor op = opClass.newInstance();
+      Class<? extends SegmentOperationExecutor> opClass = 
+        (Class<? extends SegmentOperationExecutor>) Class.forName(config.getExecutor()) ;
+      SegmentOperationExecutor op = opClass.newInstance();
       op.execute(this, lock, config);
       lock.unlock();
     }
