@@ -39,6 +39,7 @@ public class VMConfig {
 
   @Parameter(names = "--cpu-cores", description = "The request number of cpu cores")
   private int                 requestCpuCores  = 1;
+  
   @Parameter(names = "--memory", description = "The request amount of memory in MB")
   private int                 requestMemory    = 512;
 
@@ -59,7 +60,6 @@ public class VMConfig {
   
   @Parameter(names = "--profiler-opts", description = "Options for profiler such yourkit")
   private String profilerOpts ;
-  
   
   @DynamicParameter(names = "--vm-resource:", description = "The resources for the vm")
   private Map<String, String> vmResources      = new LinkedHashMap<String, String>();
@@ -97,7 +97,6 @@ public class VMConfig {
   }
   
   public List<String> getRoles() { return roles; }
-  
   public VMConfig setRoles(List<String> roles) { 
     this.roles = roles; 
     return this;
@@ -191,7 +190,6 @@ public class VMConfig {
   }
   
   public String getProperty(String name) { return properties.get(name); }
-  
   public String getProperty(String name, String defaultValue) { 
     String value = properties.get(name); 
     if(value == null) return defaultValue;
