@@ -1,0 +1,73 @@
+{
+  "id" :   "log-dataflow",
+  "name" : "log-dataflow",
+  "maxRunTime": 90000,
+  
+  "master": {
+    "numOfInstances": 2,
+    "memory": 128,
+    "cpuCores": 1
+  },
+
+  "worker": {
+    "numOfInstances": 2,
+    "memory": 128,
+    "cpuCores": 1,
+    "numOfExecutor": 4,
+    "taskSwitchingPeriod" : 5000
+  },
+
+  "streamConfig": {
+    "parallelism": 5,
+    "replication": 1,
+
+    "streams": {
+
+      "input": {
+         "type" : "kafka", "topic" : "tracking.input", "zk.connect" : "127.0.0.1:2181", "reader" : "raw", "name" : "tracking.input"
+      },
+
+      "info" : {
+        "type" : "kafka", "topic" : "tracking.info", "zk.connect" : "127.0.0.1:2181", "name" : "tracking.info"
+      },
+
+      "warn" : {
+        "type" : "kafka", "topic" : "tracking.warn", "zk.connect" : "127.0.0.1:2181", "name" : "tracking.warn"
+      },
+
+      "error" : {
+        "type" : "kafka", "topic" : "tracking.error", "zk.connect" : "127.0.0.1:2181", "name" : "tracking.error"
+      },
+
+      "aggregate" : {
+        "type" : "s3", "name" : "tracking.aggregate", "location": "tracking-sample-bucket", "folder":"data", "partitioner": "15min"
+      }
+    }
+  },
+
+  "operators": {
+    "splitter": {
+      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.TrackingMessageSplitter",
+      "inputs": ["input"],
+      "outputs": ["info", "warn", "error"]
+    },
+
+    "info": {
+      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.TrackingMessagePerister",
+      "inputs": ["info"],
+      "outputs": ["aggregate"]
+    },
+
+    "warn": {
+      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.TrackingMessagePerister",
+      "inputs": ["warn"],
+      "outputs": ["aggregate"]
+    },
+
+    "error": {
+      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.TrackingMessagePerister",
+      "inputs": ["error"],
+      "outputs": ["aggregate"]
+    }
+  }  
+}

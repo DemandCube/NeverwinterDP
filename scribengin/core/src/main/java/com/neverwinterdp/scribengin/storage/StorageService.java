@@ -10,6 +10,8 @@ import com.google.inject.Singleton;
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.scribengin.storage.hdfs.HDFSStorage;
 import com.neverwinterdp.scribengin.storage.kafka.KafkaStorage;
+import com.neverwinterdp.scribengin.storage.s3.S3Client;
+import com.neverwinterdp.scribengin.storage.s3.S3Storage;
 
 @Singleton
 public class StorageService {
@@ -19,11 +21,12 @@ public class StorageService {
   @Inject
   private KafkaClient kafkaClient;
   
-  //@Inject
-  //private S3Client s3Client;
+  @Inject
+  private S3Client s3Client;
   
   private Map<String, KafkaStorage> cacheKafkaStorage = new HashMap<>();
   private Map<String, HDFSStorage>  cacheHDFSStorage = new HashMap<>();
+  private Map<String, S3Storage>  cacheS3Storage = new HashMap<>();
   
   public StorageService() {
   }
@@ -48,6 +51,16 @@ public class StorageService {
       if(storage == null) {
         storage = new HDFSStorage(fs, storageConfig);
         cacheHDFSStorage.put(key, storage);
+      }
+      return storage;
+    } else if("s3".equalsIgnoreCase(storageConfig.getType())){
+      String bucket = storageConfig.attribute(S3Storage.BUCKET);
+      String folder = storageConfig.attribute(S3Storage.FOLDER);
+      
+      S3Storage storage = cacheS3Storage.get(bucket);
+      if(storage == null) {
+        storage = new S3Storage(bucket, folder);
+        cacheS3Storage.put(bucket, storage);
       }
       return storage;
     }
