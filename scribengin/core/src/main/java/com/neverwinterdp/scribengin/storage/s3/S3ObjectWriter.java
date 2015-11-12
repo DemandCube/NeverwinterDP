@@ -33,9 +33,9 @@ public class S3ObjectWriter {
   }
 
   public void waitAndClose(long timeout) throws Exception, IOException, InterruptedException {
-    byte[] data = bos.toByteArray();
     objOs.close();
-    bos.close(); 
+    byte[] data = bos.toByteArray();
+    bos.close();
     ByteArrayInputStream input = new ByteArrayInputStream(data);
     metadata.setContentLength(data.length);
     PutObjectRequest request = new PutObjectRequest(bucketName, key, input, metadata);

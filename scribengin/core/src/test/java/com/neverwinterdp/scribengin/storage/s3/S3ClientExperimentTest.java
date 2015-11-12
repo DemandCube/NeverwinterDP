@@ -3,6 +3,7 @@ package com.neverwinterdp.scribengin.storage.s3;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,18 +34,24 @@ public class S3ClientExperimentTest {
   }
   
   @Test
-  public void testS3ObjectWriter() throws Exception, IOException, InterruptedException {
+  public void testS3ObjectReaderWriter() throws Exception {
     String KEY = "test-s3-object-writer" ;
     S3ObjectWriter writer = new S3ObjectWriter(s3Client, BUCKET_NAME, KEY, new ObjectMetadata());
     for(int i = 0; i < 10; i++) {
       writer.write(("This is the test " + i + "\n").getBytes());
       Thread.sleep(1000);
     }
-    writer.waitAndClose(10000);;
+    writer.waitAndClose(10000);
     S3Object object = s3Client.getObject(BUCKET_NAME, KEY);
-    String content = IOUtil.getStreamContentAsString(object.getObjectContent(), "UTF-8") ;
-    System.out.println(content);
-    Assert.assertEquals(10, content.split("\n").length);
+    S3ObjectReader reader = new S3ObjectReader(object.getObjectContent());
+    int count = 0 ;
+    while(reader.hasNext()) {
+      String content = new String(reader.next()) ;
+      System.out.println(content);
+      count++ ;
+    }
+    reader.close();
+    Assert.assertEquals(10, count);
   }
   
   @Test

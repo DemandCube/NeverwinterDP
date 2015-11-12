@@ -64,7 +64,7 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
     if(currentSegmenttReader == null) return null ;
     
     if(currentSegmenttReader.hasNext()) {
-      return currentSegmenttReader.next();
+      return currentSegmenttReader.nextAs(Record.class);
     } else {
       currentSegmenttReader.close();
       currentSegmenttReader = null ;
