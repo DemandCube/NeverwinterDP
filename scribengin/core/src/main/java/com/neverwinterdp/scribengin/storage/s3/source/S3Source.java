@@ -1,5 +1,6 @@
 package com.neverwinterdp.scribengin.storage.s3.source;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,8 +31,13 @@ public class S3Source implements Source {
   }
 
   @Override
-  public List<? extends SourcePartition> getSourcePartitions() throws Exception {
-    return null;
+  public List<S3SourcePartition> getSourcePartitions() throws Exception {
+    List<String> partitionKeys = getPartitionNames();
+    List<S3SourcePartition> holder = new ArrayList<>();
+    for(int i = 0; i < partitionKeys.size(); i++) {
+      holder.add(new S3SourcePartition(s3Client, storageConfig, partitionKeys.get(i)));
+    }
+    return holder;
   }
   
   List<String> getPartitionNames() throws Exception {

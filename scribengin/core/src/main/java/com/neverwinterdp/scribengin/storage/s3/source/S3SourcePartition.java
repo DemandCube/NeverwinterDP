@@ -3,6 +3,7 @@ package com.neverwinterdp.scribengin.storage.s3.source;
 import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
+import com.neverwinterdp.scribengin.storage.s3.S3Storage;
 import com.neverwinterdp.scribengin.storage.source.SourcePartition;
 
 /**
@@ -22,6 +23,8 @@ public class S3SourcePartition implements SourcePartition {
   @Override
   public StorageConfig getStorageConfig() { return storageConfig; }
 
+  public String getPartitionName() { return this.partitionName ; }
+ 
   @Override
   public S3SourcePartitionStream getPartitionStream(int partitionStreamId) { 
     PartitionStreamConfig streamConfig = new PartitionStreamConfig(partitionStreamId, null);
@@ -43,6 +46,13 @@ public class S3SourcePartition implements SourcePartition {
     return stream;
   }
 
+  public void delete() throws Exception {
+    String bucketName  = storageConfig.attribute(S3Storage.BUCKET_NAME);
+    String storagePath = storageConfig.attribute(S3Storage.STORAGE_PATH);
+    String partitionPath = storagePath + "/" + partitionName;
+    s3Client.deleteS3Folder(bucketName, partitionPath);
+  }
+  
   public void close() throws Exception {
   }
 }

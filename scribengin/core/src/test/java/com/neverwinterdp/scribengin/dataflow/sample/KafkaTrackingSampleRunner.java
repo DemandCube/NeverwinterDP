@@ -141,7 +141,7 @@ public class KafkaTrackingSampleRunner  {
       );
       
     shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED") ;
-    shell.execute("dataflow info  --dataflow-id " + dataflowId + " --show-history-workers ");
+    shell.execute("dataflow info  --dataflow-id " + dataflowId + " --show-tasks --show-workers --show-history-workers ");
     shell.execute("registry dump");
   }
 }

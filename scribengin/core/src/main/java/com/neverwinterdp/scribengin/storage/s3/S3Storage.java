@@ -17,7 +17,9 @@ public class S3Storage extends Storage {
   
   public S3Storage(S3Client s3Client, StorageConfig sConfig) {
     super(sConfig);
-    this.s3Client = s3Client;
+    this.bucketName    = sConfig.attribute(BUCKET_NAME);
+    this.storageFolder = sConfig.attribute(STORAGE_PATH);
+    this.s3Client      = s3Client;
   }
   
   public String getBucketName() { return this.bucketName ; }

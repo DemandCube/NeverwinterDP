@@ -40,7 +40,7 @@
       },
 
       "aggregate" : {
-        "type" : "s3", "name" : "tracking.aggregate", "location": "tracking-sample-bucket", "folder":"data", "partitioner": "15min"
+        "type" : "s3", "name" : "tracking.aggregate", "s3.bucket.name": "tracking-sample-bucket", "s3.storage.path":"tracking-sample", "partitioner": "15min"
       }
     }
   },

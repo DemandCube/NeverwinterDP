@@ -5,7 +5,6 @@ import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
-import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 
 public class S3SourcePartitionStream implements SourcePartitionStream {
   private S3Client              s3Client ;
@@ -24,7 +23,7 @@ public class S3SourcePartitionStream implements SourcePartitionStream {
   public PartitionStreamConfig getPartitionStreamConfig() { return partitionStreamConfig ; }
   
   @Override
-  public SourcePartitionStreamReader getReader(String name) throws Exception {
+  public S3SourcePartitionStreamReader getReader(String name) throws Exception {
     return new S3SourcePartitionStreamReader(name, s3Client, storageConfig, partitionName, partitionStreamConfig) ;
   }
 }

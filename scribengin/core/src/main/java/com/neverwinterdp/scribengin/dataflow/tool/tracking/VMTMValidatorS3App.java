@@ -8,18 +8,17 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
-import com.neverwinterdp.scribengin.storage.hdfs.HDFSStorage;
-import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSource;
-import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSourcePartition;
-import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSourcePartitionStream;
-import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSourcePartitionStreamReader;
+import com.neverwinterdp.scribengin.storage.s3.S3Client;
+import com.neverwinterdp.scribengin.storage.s3.S3Storage;
+import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
+import com.neverwinterdp.scribengin.storage.s3.source.S3SourcePartition;
+import com.neverwinterdp.scribengin.storage.s3.source.S3SourcePartitionStream;
+import com.neverwinterdp.scribengin.storage.s3.source.S3SourcePartitionStreamReader;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
@@ -27,9 +26,6 @@ import com.neverwinterdp.vm.VMDescriptor;
 
 public class VMTMValidatorS3App extends VMApp {
   private Logger logger;
-  
-//  /tracking-sample/hdfs/aggregate
-//  /tracking-sample/hdfs/aggregate
   
   @Override
   public void run() throws Exception {
@@ -45,32 +41,34 @@ public class VMTMValidatorS3App extends VMApp {
     long   maxRuntime   = vmConfig.getPropertyAsLong("tracking.max-runtime", 120000);
     int    expectNumOfMessagePerChunk = vmConfig.getPropertyAsInt("tracking.expect-num-of-message-per-chunk", 0);
     
-    String hdfsLocation        = vmConfig.getProperty("hdfs.location", "/tracking-sample/hdfs/aggregate");
-    long   partitionRollPeriod = vmConfig.getPropertyAsLong("hdfs.partition-roll-period", (15 * 60 * 1000));
+    String s3BucketName        = vmConfig.getProperty("s3.bucket.name", "tracking-sample-bucket");
+    String s3StoragePath       = vmConfig.getProperty("s3.storage.path", "tracking-sample");
+    long   partitionRollPeriod = vmConfig.getPropertyAsLong("s3.partition-roll-period", (15 * 60 * 1000));
     
     logger.info("reportPath = "          + reportPath);
     logger.info("numOfReader = "         + numOfReader);
     logger.info("maxRuntime = "          + maxRuntime);
-    logger.info("hdfsLocation = "        + hdfsLocation);
+    logger.info("s3.bucket.name  = "      + s3BucketName);
+    logger.info("s3.storage.path = "      + s3StoragePath);
     logger.info("partitionRollPeriod = " + partitionRollPeriod);
     
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, reportPath);
     validatorService.withExpectNumOfMessagePerChunk(expectNumOfMessagePerChunk);
     validatorService.addReader(
-        new HDFSTrackingMessageReader(hdfsLocation, partitionRollPeriod)
+        new S3TrackingMessageReader(s3BucketName, s3StoragePath, partitionRollPeriod)
     );
     validatorService.start();
     validatorService.awaitForTermination(maxRuntime, TimeUnit.MILLISECONDS);
   }
 
-  public class HDFSTrackingMessageReader extends TrackingMessageReader {
+  public class S3TrackingMessageReader extends TrackingMessageReader {
+    private long           partitionRollPeriod ;
+    private S3SourceReader s3SourceReader ;
     private BlockingQueue<TrackingMessage> queue = new LinkedBlockingQueue<>(5000);
-    private long partitionRollPeriod ;
-    private HDFSSourceReader hdfsSourceReader ;
     
-    HDFSTrackingMessageReader(String hdfsLocation, long partitionRollPeriod) {
+    S3TrackingMessageReader(String bucketName, String storagePath, long partitionRollPeriod) {
       this.partitionRollPeriod = partitionRollPeriod;
-      hdfsSourceReader = new HDFSSourceReader(hdfsLocation, partitionRollPeriod) {
+      s3SourceReader = new S3SourceReader(bucketName, storagePath, partitionRollPeriod) {
         @Override
         public void onTrackingMessage(TrackingMessage tMesg) throws Exception {
           queue.offer(tMesg);
@@ -79,11 +77,11 @@ public class VMTMValidatorS3App extends VMApp {
     }
     
     public void onInit(TrackingRegistry registry) throws Exception {
-      hdfsSourceReader.start();
+      s3SourceReader.start();
     }
    
     public void onDestroy(TrackingRegistry registry) throws Exception{
-      hdfsSourceReader.interrupt();
+      s3SourceReader.interrupt();
     }
     
     @Override
@@ -92,12 +90,14 @@ public class VMTMValidatorS3App extends VMApp {
     }
   }
   
-  abstract public class HDFSSourceReader extends Thread {
-    private String hdfsLocation ;
+  abstract public class S3SourceReader extends Thread {
+    private String bucketName;
+    private String storagePath;
     private long   partitionRollPeriod;
     
-    HDFSSourceReader(String hdfsLocation, long partitionRollPeriod) {
-      this.hdfsLocation        = hdfsLocation;
+    S3SourceReader(String bucketName, String storagePath, long partitionRollPeriod) {
+      this.bucketName          = bucketName;
+      this.storagePath         = storagePath;
       this.partitionRollPeriod = partitionRollPeriod;
     }
     
@@ -112,21 +112,21 @@ public class VMTMValidatorS3App extends VMApp {
     }
     
     void doRun() throws Exception {
-      StorageConfig storageConfig = new StorageConfig("HDFS", hdfsLocation);
-      Configuration conf = new Configuration();
-      VMConfig.overrideHadoopConfiguration(getVM().getDescriptor().getVmConfig().getHadoopProperties(), conf);
-      FileSystem fs = FileSystem.get(conf);
+      StorageConfig storageConfig = new StorageConfig("s3", bucketName + ":" + storagePath);
+      storageConfig.attribute(S3Storage.BUCKET_NAME, bucketName);
+      storageConfig.attribute(S3Storage.STORAGE_PATH, storagePath);
+      S3Client s3Client = new S3Client();
 
-      HDFSStorage hdfsStorage = new HDFSStorage(fs, storageConfig);
-      HDFSSource hdfsSource = hdfsStorage.getSource();
+      S3Storage s3Storage = new S3Storage(s3Client, storageConfig);
+      S3Source  s3Source = s3Storage.getSource();
       int noPartitionFound = 0 ;
       while(true) {
-        List<HDFSSourcePartition> partitions = hdfsSource.getSourcePartitions();
+        List<S3SourcePartition> partitions = s3Source.getSourcePartitions();
         boolean validatePartition = false;
         if(partitions.size() > 0) {
           noPartitionFound = 0;
-          HDFSSourcePartition partition = partitions.get(0);
-          Date timestamp   = getTimestamp(partition.getPartitionLocation());
+          S3SourcePartition partition = partitions.get(0);
+          Date timestamp   = getTimestamp(partition.getPartitionName());
           Date currentTime = new Date();
           if(currentTime.getTime() > timestamp.getTime() + partitionRollPeriod) {
             validatePartition(partition);
@@ -141,17 +141,17 @@ public class VMTMValidatorS3App extends VMApp {
       }
     }
     
-    Date getTimestamp(String partitionLocation) throws ParseException {
+    Date getTimestamp(String partitionName) throws ParseException {
       SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd-HHmm");
-      int index = partitionLocation.indexOf("storage-");
-      String timestamp = partitionLocation.substring(index + "storage-".length());
+      int index = partitionName.indexOf("storage-");
+      String timestamp = partitionName.substring(index + "storage-".length());
       return timestampFormat.parse(timestamp);
     }
     
-    void validatePartition(HDFSSourcePartition partition) throws Exception {
-      HDFSSourcePartitionStream[] stream = partition.getPartitionStreams();
+    void validatePartition(S3SourcePartition partition) throws Exception {
+      S3SourcePartitionStream[] stream = partition.getPartitionStreams();
       for(int i = 0; i < stream.length; i++) {
-        HDFSSourcePartitionStreamReader reader = stream[i].getReader("validator") ;
+        S3SourcePartitionStreamReader reader = stream[i].getReader("validator") ;
         Record record = null;
         while((record = reader.next(1000)) != null) {
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(record.getData(), TrackingMessage.class);
