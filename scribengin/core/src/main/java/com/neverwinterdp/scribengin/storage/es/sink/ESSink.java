@@ -31,7 +31,7 @@ public class ESSink implements Sink {
   }
   
   @Override
-  public StorageConfig getDescriptor() { return storage.getStorageConfig(); }
+  public StorageConfig getStorageConfig() { return storage.getStorageConfig(); }
 
   public List<PartitionStreamConfig> getPartitionStreamConfigs() throws Exception {
     int numOfPartitionStream = storage.getStorageConfig().getPartitionStream();

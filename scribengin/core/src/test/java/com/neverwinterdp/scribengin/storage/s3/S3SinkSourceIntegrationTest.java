@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.s3.sink.S3Sink;
+import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
 import com.neverwinterdp.scribengin.storage.s3.source.S3SourcePartition;
 import com.neverwinterdp.scribengin.storage.sink.Sink;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
@@ -26,8 +27,10 @@ public class S3SinkSourceIntegrationTest {
 
   private static S3Client s3Client;
 
-  protected String bucketName;
-  protected String storageFolder;
+  protected String        bucketName;
+  protected String        storageFolder;
+  private   StorageConfig storageConfig;
+  private   S3Storage     storage ;
   
   @BeforeClass
   static public void beforeClass() {
@@ -41,36 +44,33 @@ public class S3SinkSourceIntegrationTest {
   
   @Before
   public void setup() throws Exception {
-    bucketName = "s3-sink-source-test-" + UUID.randomUUID();
+    bucketName    = "s3-sink-source-test-" + UUID.randomUUID();
     storageFolder = "integration-test";
+    
     if (s3Client.hasBucket(bucketName)) {
       s3Client.deleteBucket(bucketName, true);
     }
     
-    System.out.println("Creating bucket: "+bucketName);
+    System.out.println("Creating bucket: " + bucketName);
     s3Client.createBucket(bucketName);
-    System.out.println("Creating folder: "+storageFolder);
+    System.out.println("Creating folder: " + storageFolder);
     s3Client.createS3Folder(bucketName, storageFolder);
-    
+    storageConfig = new StorageConfig("s3");
+    storageConfig.attribute(S3Storage.BUCKET_NAME, bucketName);
+    storageConfig.attribute(S3Storage.STORAGE_PATH, storageFolder);
+    storage = new S3Storage(s3Client, storageConfig);
   }
   
   @After
   public void teardown() throws Exception {
-    System.out.println("Deleting bucket: "+bucketName);
+    System.out.println("Deleting bucket: " + bucketName);
     s3Client.deleteBucket(bucketName, true);
   }
   
   @Test
   public void testS3SourceSink() throws Exception{
-    S3Storage storage = new S3Storage(bucketName, storageFolder);
     S3Sink sink = storage.getSink(s3Client) ;
-    
-    
-    SinkPartitionStream[] streams = sink.getPartitionStreams();
-    //Assert num of streams is set to the default, since we don't set it
-    Assert.assertEquals(new StorageConfig().getPartitionStream(), streams.length);
-    
-    int NUM_OF_COMMIT = 5;
+    int NUM_OF_COMMIT            = 5;
     int NUM_OF_RECORD_PER_COMMIT = 100;
     int NUM_OF_RECORDS = NUM_OF_COMMIT * NUM_OF_RECORD_PER_COMMIT; 
     //Only write to one partition
@@ -92,7 +92,6 @@ public class S3SinkSourceIntegrationTest {
   
   @Test
   public void testRollback() throws Exception {
-    S3Storage storage = new S3Storage(bucketName, storageFolder);
     S3Sink sink = storage.getSink(s3Client) ;
     SinkPartitionStream stream = sink.getParitionStream(0);
     SinkPartitionStreamWriter writer = stream.getWriter();
@@ -112,11 +111,10 @@ public class S3SinkSourceIntegrationTest {
   
   @Test
   public void testMultiThread() throws Exception {
-    int NUM_OF_WRITER = 3;
+    int NUM_OF_WRITER                = 3;
     int NUM_OF_PARTITIONS_PER_WRITER = 10;
-    int NUM_RECORDS_PER_WRITER = 100;
+    int NUM_RECORDS_PER_WRITER       = 100;
     int TOTAL_NUM_OF_MESSAGE = NUM_OF_WRITER * NUM_OF_PARTITIONS_PER_WRITER * NUM_RECORDS_PER_WRITER;
-    S3Storage storage = new S3Storage(bucketName, storageFolder);
     S3Sink sink = storage.getSink(s3Client) ;
     
     SinkStreamWriterTask[] task = new SinkStreamWriterTask[NUM_OF_WRITER]; 
@@ -135,13 +133,14 @@ public class S3SinkSourceIntegrationTest {
   }
   
   private int count(S3Storage storage) throws Exception {
-    S3SourcePartition source = storage.getSource(s3Client);
-    SourcePartitionStream[] sourceStreams = source.getPartitionStreams();
+    S3Source source             = storage.getSource();
+    S3SourcePartition partition = source.getLatestSourcePartition();
+    SourcePartitionStream[] sourceStreams = partition.getPartitionStreams();
 
     int recordCount = 0 ;
     for (int i = 0; i < sourceStreams.length; i++) {
       SourcePartitionStream stream = sourceStreams[i];
-      SourcePartitionStreamReader reader = stream.getReader(stream.getDescriptor().getLocation());
+      SourcePartitionStreamReader reader = stream.getReader(stream.getPartitionStreamConfig().getLocation());
       while (reader.next(1000) != null) {
         recordCount++;
       }

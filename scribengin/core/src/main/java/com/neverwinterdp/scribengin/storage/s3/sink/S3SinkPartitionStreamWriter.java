@@ -4,25 +4,49 @@ import java.io.IOException;
 import java.util.UUID;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.Record;
+import com.neverwinterdp.scribengin.storage.StorageConfig;
+import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.scribengin.storage.s3.S3Folder;
 import com.neverwinterdp.scribengin.storage.s3.S3ObjectWriter;
+import com.neverwinterdp.scribengin.storage.s3.S3Storage;
+import com.neverwinterdp.scribengin.storage.s3.S3StoragePartitioner;
 import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class S3SinkPartitionStreamWriter implements SinkPartitionStreamWriter {
   static private final int TIMEOUT = 5 * 60 * 1000;
   
-  private S3Folder       streamS3Folder;
-  private SegmentWriter  currentWriter ;
+  private S3Client              s3Client;
+  private StorageConfig         storageConfig;
+  private PartitionStreamConfig partitionStreamConfig;
+  private S3StoragePartitioner  partitioner ;
+  
+  private SegmentWriter         currentWriter ;
 
-  public S3SinkPartitionStreamWriter(S3Folder streamS3Folder) throws IOException {
-    this.streamS3Folder = streamS3Folder;
+  public S3SinkPartitionStreamWriter(S3Client s3Client, StorageConfig sConfig, PartitionStreamConfig pConfig) throws IOException {
+    this.s3Client              = s3Client;
+    this.storageConfig         = sConfig;
+    this.partitionStreamConfig = pConfig;
+    this.partitioner           = getPartitioner(sConfig);
   }
   
   @Override
   public void append(Record dataflowMessage) throws Exception {
-    if(currentWriter == null) currentWriter = new SegmentWriter(streamS3Folder);
+    if(currentWriter == null) {
+      String bucketName          = storageConfig.attribute(S3Storage.BUCKET_NAME);
+      String storageFolder       = storageConfig.attribute(S3Storage.STORAGE_PATH);
+      String partition           = partitioner.getCurrentPartition();
+      int    partitionStreamId   = partitionStreamConfig.getPartitionStreamId();
+      
+      String partitionPath = storageFolder + "/" + partition;
+      if(!s3Client.hasKey(bucketName, partitionPath)) {
+        s3Client.createS3Folder(bucketName, partitionPath);
+      }
+      String streamPath = partitionPath + "/partition-stream-" + partitionStreamId;
+      currentWriter = new SegmentWriter(s3Client, bucketName, streamPath);
+    }
     currentWriter.append(dataflowMessage);
   }
 
@@ -61,24 +85,38 @@ public class S3SinkPartitionStreamWriter implements SinkPartitionStreamWriter {
     }
   }
   
+  S3StoragePartitioner getPartitioner(StorageConfig sConfig) {
+    S3StoragePartitioner partitioner = new S3StoragePartitioner.Default();
+    String name = sConfig.attribute("partitioner");
+    if("hourly".equals(name)) {
+      partitioner = new S3StoragePartitioner.Hourly();
+    } else if("15min".equals(name)) {
+      partitioner = new S3StoragePartitioner.Every15Min();
+    }
+    return partitioner;
+  }
+  
   static public class SegmentWriter {
     private String         currentSegmentName;
     private S3ObjectWriter currentWriter ;
-    private S3Folder streamS3Folder ;
+    private S3Folder       streamS3Folder ;
     
-    public SegmentWriter(S3Folder streamS3Folder) throws IOException {
-      this.streamS3Folder = streamS3Folder ;
+    public SegmentWriter(S3Client s3Client, String bucketName, String folder) throws IOException {
+      if(!s3Client.hasKey(bucketName, folder)) {
+        streamS3Folder = s3Client.createS3Folder(bucketName, folder);
+      } else {
+        streamS3Folder = s3Client.getS3Folder(bucketName, folder);
+      }
     }
     
-    
-    public void append(Record dataflowMessage) throws Exception {
+    public void append(Record record) throws Exception {
       if(currentWriter == null) {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.addUserMetadata("transaction", "prepare");
         currentSegmentName = "segment-" + UUID.randomUUID().toString();
-        currentWriter = streamS3Folder.createObjectWriter(currentSegmentName, metadata);
+        currentWriter      = streamS3Folder.createObjectWriter(currentSegmentName, metadata);
       }
-      byte[] bytes = JSONSerializer.INSTANCE.toBytes(dataflowMessage);
+      byte[] bytes = JSONSerializer.INSTANCE.toBytes(record);
       currentWriter.write(bytes);
     }
 

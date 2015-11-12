@@ -34,7 +34,7 @@ public class KafkaSink implements Sink {
   }
   
   @Override
-  public StorageConfig getDescriptor() { return storageConfig; }
+  public StorageConfig getStorageConfig() { return storageConfig; }
 
   public List<PartitionStreamConfig> getPartitionStreamConfigs() throws Exception {
     TopicMetadata tMetadata = kafkaClient.findTopicMetadata(storageConfig.attribute(KafkaStorage.TOPIC));

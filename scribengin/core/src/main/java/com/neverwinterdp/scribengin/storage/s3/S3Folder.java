@@ -66,6 +66,14 @@ public class S3Folder {
     return holder;
   }
   
+  public List<String> getChildrenKeys() {
+    List<String> holder = new ArrayList<String>() ;
+    for(S3ObjectSummary sel : getChildren()) {
+      holder.add(sel.getKey());
+    }
+    return holder;
+  }
+  
   public List<S3ObjectSummary> getChildren() {
     ListObjectsRequest request = 
       new ListObjectsRequest().withBucketName(bucketName).withPrefix(folderPath + "/").withDelimiter("/");

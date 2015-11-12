@@ -24,7 +24,7 @@ public class KafkaSourceStream implements SourcePartitionStream {
   public int getId() { return partitionConfig.getPartitionStreamId(); }
   
   @Override
-  public PartitionStreamConfig getDescriptor() { return partitionConfig; }
+  public PartitionStreamConfig getPartitionStreamConfig() { return partitionConfig; }
 
   @Override
   public SourcePartitionStreamReader getReader(String name) throws Exception {

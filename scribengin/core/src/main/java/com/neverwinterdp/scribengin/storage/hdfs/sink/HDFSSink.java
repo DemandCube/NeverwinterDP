@@ -21,7 +21,7 @@ public class HDFSSink implements Sink {
     this.storageConfig = sConfig;
   }
   
-  public StorageConfig getDescriptor() { return this.storageConfig; }
+  public StorageConfig getStorageConfig() { return this.storageConfig; }
   
   public List<PartitionStreamConfig> getPartitionStreamConfigs() throws Exception {
     int numOfPartitionStream = storageConfig.getPartitionStream();

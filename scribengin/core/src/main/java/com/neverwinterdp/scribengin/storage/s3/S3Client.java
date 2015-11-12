@@ -125,9 +125,6 @@ public class S3Client {
   }
 
   public S3Folder getS3Folder(String bucketName, String folderPath) throws AmazonClientException, AmazonServiceException {
-    if (!hasBucket(bucketName)) {
-      throw new AmazonServiceException("Bucket " + bucketName + " does not exist");
-    }
     if (getObjectMetadata(bucketName, folderPath) == null) {
       throw new AmazonServiceException("Folder " + folderPath + " does not exist");
     }

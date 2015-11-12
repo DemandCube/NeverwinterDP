@@ -59,7 +59,7 @@ public class SinkSourceUnitTest {
     SourcePartitionStream[] streams = partition.getPartitionStreams();
     Assert.assertEquals(5, streams.length);
     for(int i = 0; i < streams.length; i++) {
-      System.out.println("Stream id: " + streams[i].getDescriptor().getPartitionStreamId());
+      System.out.println("Stream id: " + streams[i].getPartitionStreamConfig().getPartitionStreamId());
       SourcePartitionStreamReader reader = streams[i].getReader("kafka");
       Record dataflowMessage = null;
       while((dataflowMessage = reader.next(1000)) != null) {

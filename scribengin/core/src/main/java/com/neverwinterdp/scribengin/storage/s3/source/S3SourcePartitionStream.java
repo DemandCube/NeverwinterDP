@@ -8,20 +8,23 @@ import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
 
 public class S3SourcePartitionStream implements SourcePartitionStream {
-  private S3Client s3Client ;
-  private StorageConfig   storageConfig;
-  private PartitionStreamConfig partitionConfig ;
+  private S3Client              s3Client ;
+  private StorageConfig         storageConfig;
+  private String                partitionName;
+  private PartitionStreamConfig partitionStreamConfig ;
   
-  public S3SourcePartitionStream(S3Client s3Client, StorageConfig sConfig, PartitionStreamConfig pConfig) {
-    this.s3Client= s3Client;
-    this.partitionConfig = pConfig;
-    this.storageConfig = sConfig;
+  public S3SourcePartitionStream(S3Client s3Client, StorageConfig sConfig, 
+                                 String partitionName, PartitionStreamConfig pConfig) {
+    this.s3Client              = s3Client;
+    this.storageConfig         = sConfig;
+    this.partitionName         = partitionName;
+    this.partitionStreamConfig = pConfig;
   }
 
-  public PartitionStreamConfig getDescriptor() { return partitionConfig ; }
+  public PartitionStreamConfig getPartitionStreamConfig() { return partitionStreamConfig ; }
   
   @Override
   public SourcePartitionStreamReader getReader(String name) throws Exception {
-    return new S3SourcePartitionStreamReader(name, s3Client, storageConfig, partitionConfig) ;
+    return new S3SourcePartitionStreamReader(name, s3Client, storageConfig, partitionName, partitionStreamConfig) ;
   }
 }

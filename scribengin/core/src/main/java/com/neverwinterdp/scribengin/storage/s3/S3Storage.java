@@ -4,62 +4,45 @@ import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.Storage;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.s3.sink.S3Sink;
-import com.neverwinterdp.scribengin.storage.s3.source.S3SourcePartition;
-import com.neverwinterdp.scribengin.storage.source.Source;
+import com.neverwinterdp.scribengin.storage.s3.source.S3Source;
 
 public class S3Storage extends Storage {
-  final static public String BUCKET       = "location";
-  final static public String FOLDER       = "folder";
+  final static public String BUCKET_NAME   = "s3.bucket.name";
+  final static public String STORAGE_PATH  = "s3.storage.path";
   
   private String bucketName ;
   private String storageFolder ;
   
   private S3Client s3Client ;
   
-  public S3Storage(S3Client s3Client, StorageConfig storageDescriptor) {
-    super(storageDescriptor);
+  public S3Storage(S3Client s3Client, StorageConfig sConfig) {
+    super(sConfig);
     this.s3Client = s3Client;
   }
-  
-  
-  public S3Storage(String bucketName, String storageFolder) {
-    super(new StorageConfig("s3", bucketName));
-    this.bucketName = bucketName;
-    this.storageFolder = storageFolder;
-    this.s3Client = new S3Client();
-  }
-  
-  public S3Storage(StorageConfig descriptor) {
-    super(new StorageConfig("s3", descriptor.getLocation()));
-    fromStorageDescriptor(descriptor);
-    this.s3Client = new S3Client();
-  }
-  
   
   public String getBucketName() { return this.bucketName ; }
   
   public String getStorageFolder() { return this.storageFolder ; }
   
-  public StorageConfig getStorageDescriptor() { return toStorageDesciptor();  }
-  
   public PartitionStreamConfig createPartitionConfig(String streamKey) {
     int partitionId = Integer.parseInt(streamKey.substring(streamKey.lastIndexOf('-') + 1)) ;
     PartitionStreamConfig descriptor = new PartitionStreamConfig(partitionId, bucketName) ;
-    descriptor.attribute("s3.bucket.name", bucketName);
-    descriptor.attribute("s3.storage.path", storageFolder);
+    descriptor.attribute(BUCKET_NAME,  bucketName);
+    descriptor.attribute(STORAGE_PATH, storageFolder);
     return descriptor;
   }
   
   public String getPartitionKey(PartitionStreamConfig pConfig) {
-    return this.storageFolder + "/stream-" + pConfig.getPartitionStreamId();
+    return storageFolder + "/stream-" + pConfig.getPartitionStreamId();
   }
   
   public PartitionStreamConfig createPartitionConfig(int partitionId) {
-    PartitionStreamConfig descriptor = new PartitionStreamConfig(partitionId, bucketName) ;
-    descriptor.attribute("s3.bucket.name", bucketName);
-    descriptor.attribute("s3.storage.path", storageFolder);
-    descriptor.attribute("s3.storage.stream", "stream-" + partitionId);
-    return descriptor;
+    PartitionStreamConfig streamConfig = new PartitionStreamConfig(partitionId, bucketName) ;
+    streamConfig.attribute("s3.bucket.name", bucketName);
+    streamConfig.attribute("s3.storage.path", storageFolder);
+    
+    streamConfig.attribute("s3.storage.stream", "stream-" + partitionId);
+    return streamConfig;
   }
   
   public S3Client getS3Client() {
@@ -68,34 +51,18 @@ public class S3Storage extends Storage {
   }
   
   public S3Sink getSink() { 
-    return new S3Sink(getStorageDescriptor()); 
+    return new S3Sink(s3Client, getStorageConfig()); 
   }
   
   public S3Sink getSink(S3Client s3Client) { 
-    return new S3Sink(s3Client, getStorageDescriptor()); 
+    return new S3Sink(s3Client, getStorageConfig()); 
   }
   
-  public Source getSource() throws Exception {
-    //TODO: Implement S3 source
-    return null;
+  public S3Source getSource() throws Exception {
+    StorageConfig storageConfig = getStorageConfig();
+    return new S3Source(s3Client, storageConfig);
   }
   
-  public S3SourcePartition getSource(S3Client s3Client) throws Exception { 
-    return new S3SourcePartition(getS3Client(), toStorageDesciptor()); 
-  }
-  
-  StorageConfig toStorageDesciptor() {
-    StorageConfig descriptor = new StorageConfig("S3") ;
-    descriptor.attribute("s3.bucket.name", bucketName);
-    descriptor.attribute("s3.storage.path", storageFolder);
-    return descriptor ;
- }
-  
-  void fromStorageDescriptor(StorageConfig descriptor) {
-    bucketName    = descriptor.attribute("s3.bucket.name");
-    storageFolder = descriptor.attribute("s3.storage.path");
-  }
-
   @Override
   public void refresh() throws Exception {
   }

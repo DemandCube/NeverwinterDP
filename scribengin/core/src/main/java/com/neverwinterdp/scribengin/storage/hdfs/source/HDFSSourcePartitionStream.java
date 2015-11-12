@@ -17,7 +17,7 @@ public class HDFSSourcePartitionStream implements SourcePartitionStream {
     this.descriptor = descriptor;
   }
   
-  public PartitionStreamConfig getDescriptor() { return descriptor ; }
+  public PartitionStreamConfig getPartitionStreamConfig() { return descriptor ; }
   
   @Override
   public  HDFSSourcePartitionStreamReader getReader(String name) throws FileNotFoundException, IllegalArgumentException, IOException {

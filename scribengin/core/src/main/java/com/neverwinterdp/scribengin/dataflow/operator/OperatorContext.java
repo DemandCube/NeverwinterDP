@@ -214,7 +214,7 @@ public class OperatorContext {
     public String toString() {
       StringBuilder b = new StringBuilder();
       b.append("Sink:\n").
-        append("  Type = ").append(sink.getDescriptor().getType()).
+        append("  Type = ").append(sink.getStorageConfig().getType()).
         append("  Stream Id = ").append(assignedPartition.getPartitionStreamId());
       return b.toString();
     }

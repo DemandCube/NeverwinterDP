@@ -7,7 +7,7 @@ import java.util.List;
 import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 
 public interface Sink {
-  public StorageConfig getDescriptor();
+  public StorageConfig getStorageConfig();
   
   public List<PartitionStreamConfig> getPartitionStreamConfigs() throws Exception ;
   

@@ -54,13 +54,13 @@ public class StorageService {
       }
       return storage;
     } else if("s3".equalsIgnoreCase(storageConfig.getType())){
-      String bucket = storageConfig.attribute(S3Storage.BUCKET);
-      String folder = storageConfig.attribute(S3Storage.FOLDER);
-      
-      S3Storage storage = cacheS3Storage.get(bucket);
+      String bucket = storageConfig.attribute(S3Storage.BUCKET_NAME);
+      String storagePath = storageConfig.attribute(S3Storage.STORAGE_PATH);
+      String key = bucket + ":" + storagePath;
+      S3Storage storage = cacheS3Storage.get(key);
       if(storage == null) {
-        storage = new S3Storage(bucket, folder);
-        cacheS3Storage.put(bucket, storage);
+        storage = new S3Storage(s3Client, storageConfig);
+        cacheS3Storage.put(key, storage);
       }
       return storage;
     }
