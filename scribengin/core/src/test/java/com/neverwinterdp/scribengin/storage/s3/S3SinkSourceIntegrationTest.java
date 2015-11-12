@@ -112,8 +112,8 @@ public class S3SinkSourceIntegrationTest {
   
   @Test
   public void testMultiThread() throws Exception {
-    int NUM_OF_WRITER = 5;
-    int NUM_OF_PARTITIONS_PER_WRITER = 50;
+    int NUM_OF_WRITER = 3;
+    int NUM_OF_PARTITIONS_PER_WRITER = 10;
     int NUM_RECORDS_PER_WRITER = 100;
     int TOTAL_NUM_OF_MESSAGE = NUM_OF_WRITER * NUM_OF_PARTITIONS_PER_WRITER * NUM_RECORDS_PER_WRITER;
     S3Storage storage = new S3Storage(bucketName, storageFolder);
@@ -134,7 +134,6 @@ public class S3SinkSourceIntegrationTest {
     Assert.assertEquals(TOTAL_NUM_OF_MESSAGE, count(storage));
   }
   
-  
   private int count(S3Storage storage) throws Exception {
     S3SourcePartition source = storage.getSource(s3Client);
     SourcePartitionStream[] sourceStreams = source.getPartitionStreams();
@@ -143,7 +142,6 @@ public class S3SinkSourceIntegrationTest {
     for (int i = 0; i < sourceStreams.length; i++) {
       SourcePartitionStream stream = sourceStreams[i];
       SourcePartitionStreamReader reader = stream.getReader(stream.getDescriptor().getLocation());
-
       while (reader.next(1000) != null) {
         recordCount++;
       }

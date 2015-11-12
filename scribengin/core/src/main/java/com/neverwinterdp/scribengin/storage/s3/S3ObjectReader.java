@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.storage.s3.source;
+package com.neverwinterdp.scribengin.storage.s3;
 
 import java.io.BufferedInputStream;
 import java.io.Closeable;

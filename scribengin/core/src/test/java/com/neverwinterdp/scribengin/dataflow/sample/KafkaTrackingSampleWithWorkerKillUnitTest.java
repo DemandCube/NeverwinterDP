@@ -34,7 +34,10 @@ public class KafkaTrackingSampleWithWorkerKillUnitTest  {
   public class RunnerThread extends Thread {
     public void run() {
       try {
-        trackingSampleRunner.runDataflow();
+        trackingSampleRunner.submitVMTMGenrator();
+        trackingSampleRunner.submitKafkaTMDataflow();
+        trackingSampleRunner.submitKafkaVMTMValidator();
+        trackingSampleRunner.runMonitor();
       } catch (Exception e) {
         e.printStackTrace();
       } finally {
@@ -56,7 +59,7 @@ public class KafkaTrackingSampleWithWorkerKillUnitTest  {
         String killCommand = 
             "dataflow kill-worker-random " +
             "  --dataflow-id " + trackingSampleRunner.dataflowId + 
-            "  --wait-before-simulate-failure 10000 --failure-period 15000 --max-kill 1 --simulate-kill";
+            "  --wait-before-simulate-failure 15000 --failure-period 15000 --max-kill 1 --simulate-kill";
         trackingSampleRunner.shell.execute(killCommand);
       } catch (Exception e) {
         e.printStackTrace();

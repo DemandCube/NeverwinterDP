@@ -10,6 +10,7 @@ import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
 import com.neverwinterdp.scribengin.storage.s3.S3Folder;
+import com.neverwinterdp.scribengin.storage.s3.S3ObjectReader;
 import com.neverwinterdp.scribengin.storage.s3.S3Storage;
 import com.neverwinterdp.scribengin.storage.s3.S3Util;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;

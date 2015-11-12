@@ -20,7 +20,7 @@ import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 
-public class S3TrackingSampleIntegrationTest {
+public class RichardS3TrackingSampleIntegrationTest {
   
   String dataflowId           = "s3-tracking-dataflow";
   int    numOfMessagePerChunk = 100;
@@ -101,6 +101,7 @@ public class S3TrackingSampleIntegrationTest {
         "  --dataflow-num-of-worker 2 --dataflow-num-of-executor-per-worker 5" + 
         "  --dataflow-max-runtime " + dataflowMaxRuntime;
     shell.execute(dataflowSubmitCommand);
+    
     /*
     String logValidatorSubmitCommand = 
       "vm submit " +
@@ -121,6 +122,7 @@ public class S3TrackingSampleIntegrationTest {
     
     shell.execute(logValidatorSubmitCommand);
     */
+    
     shell.execute(
       "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor" +
       "  --dataflow-id " + dataflowId + " --show-history-workers " +

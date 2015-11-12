@@ -5,11 +5,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class KafkaTrackingSampleUnitTest  {
+public class S3TrackingSamplIntegrationTest  {
   KafkaTrackingSampleRunner trackingSampleRunner = new KafkaTrackingSampleRunner();
   
   @Before
   public void setup() throws Exception {
+    trackingSampleRunner.dataflowMaxRuntime = 60000;
     trackingSampleRunner.setup();
   }
   
@@ -21,8 +22,7 @@ public class KafkaTrackingSampleUnitTest  {
   @Test
   public void testTrackingSample() throws Exception {
     trackingSampleRunner.submitVMTMGenrator();
-    trackingSampleRunner.submitKafkaTMDataflow();
-    trackingSampleRunner.submitKafkaVMTMValidator();
+    trackingSampleRunner.submitS3TMDataflow();
     trackingSampleRunner.runMonitor();
   }
 }

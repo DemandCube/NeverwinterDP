@@ -15,8 +15,6 @@ public class S3Storage extends Storage {
   private String storageFolder ;
   
   private S3Client s3Client ;
-  //private S3Source s3Source ;
-
   
   public S3Storage(S3Client s3Client, StorageConfig storageDescriptor) {
     super(storageDescriptor);
@@ -45,8 +43,8 @@ public class S3Storage extends Storage {
   public StorageConfig getStorageDescriptor() { return toStorageDesciptor();  }
   
   public PartitionStreamConfig createPartitionConfig(String streamKey) {
-    int id = Integer.parseInt(streamKey.substring(streamKey.lastIndexOf('-') + 1)) ;
-    PartitionStreamConfig descriptor = new PartitionStreamConfig(id, bucketName) ;
+    int partitionId = Integer.parseInt(streamKey.substring(streamKey.lastIndexOf('-') + 1)) ;
+    PartitionStreamConfig descriptor = new PartitionStreamConfig(partitionId, bucketName) ;
     descriptor.attribute("s3.bucket.name", bucketName);
     descriptor.attribute("s3.storage.path", storageFolder);
     return descriptor;
@@ -56,11 +54,11 @@ public class S3Storage extends Storage {
     return this.storageFolder + "/stream-" + pConfig.getPartitionStreamId();
   }
   
-  public PartitionStreamConfig createPartitionConfig(int id) {
-    PartitionStreamConfig descriptor = new PartitionStreamConfig(id, bucketName) ;
+  public PartitionStreamConfig createPartitionConfig(int partitionId) {
+    PartitionStreamConfig descriptor = new PartitionStreamConfig(partitionId, bucketName) ;
     descriptor.attribute("s3.bucket.name", bucketName);
     descriptor.attribute("s3.storage.path", storageFolder);
-    descriptor.attribute("s3.storage.stream", "stream-" + id);
+    descriptor.attribute("s3.storage.stream", "stream-" + partitionId);
     return descriptor;
   }
   
@@ -76,10 +74,6 @@ public class S3Storage extends Storage {
   public S3Sink getSink(S3Client s3Client) { 
     return new S3Sink(s3Client, getStorageDescriptor()); 
   }
-  
-  //public S3SourcePartition getSource() throws Exception { 
-  //  return new S3SourcePartition(getS3Client(), toStorageDesciptor()); 
-  //}
   
   public Source getSource() throws Exception {
     //TODO: Implement S3 source
@@ -98,30 +92,29 @@ public class S3Storage extends Storage {
  }
   
   void fromStorageDescriptor(StorageConfig descriptor) {
-    bucketName = descriptor.attribute("s3.bucket.name");
+    bucketName    = descriptor.attribute("s3.bucket.name");
     storageFolder = descriptor.attribute("s3.storage.path");
   }
 
   @Override
   public void refresh() throws Exception {
-    //TODO: Implement s3Source
-    //s3Source = null;
   }
 
   @Override
   public boolean exists() throws Exception {
-    //TODO: check if folder exists too
-    return s3Client.hasBucket(this.bucketName);
+    return s3Client.hasKey(bucketName, storageFolder);
   }
 
   @Override
   public void drop() throws Exception {
-    s3Client.deleteBucket(this.bucketName, true);
+    s3Client.deleteKeyWithPrefix(bucketName, storageFolder);
   }
 
   @Override
   public void create(int numOfPartition, int replication) throws Exception {
-    s3Client.createBucket(this.bucketName);
-    s3Client.createS3Folder(this.bucketName, this.storageFolder);
+    if(!s3Client.hasBucket(bucketName)) {
+      s3Client.createBucket(bucketName);
+    }
+    s3Client.createS3Folder(bucketName, storageFolder);
   }
 }

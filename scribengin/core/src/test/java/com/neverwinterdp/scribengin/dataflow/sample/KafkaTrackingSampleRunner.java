@@ -19,6 +19,7 @@ import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 
 public class KafkaTrackingSampleRunner  {
+  String REPORT_PATH          = "/applications/tracking-sample/reports";
   String dataflowId           = "tracking-dataflow";
   int    numOfMessagePerChunk = 1000;
   long   dataflowMaxRuntime   = 45000;
@@ -61,8 +62,7 @@ public class KafkaTrackingSampleRunner  {
     esNode.close();
   }
   
-  public void runDataflow() throws Exception {
-    String REPORT_PATH = "/applications/tracking-sample/reports";
+  public void submitVMTMGenrator() throws Exception {
     String logGeneratorSubmitCommand = 
         "vm submit " +
         "  --dfs-app-home /applications/tracking-sample" +
@@ -84,7 +84,9 @@ public class KafkaTrackingSampleRunner  {
         "  --prop:kafka.num-of-partition=5" +
         "  --prop:kafka.replication=1" ;
     shell.execute(logGeneratorSubmitCommand);
-    
+  }
+  
+  public void submitKafkaTMDataflow() throws Exception {
     String dataflowChainSubmitCommand = 
         "dataflow submit " + 
         "  --dataflow-config src/test/resources/kafka-tracking-dataflow.json" +
@@ -92,39 +94,54 @@ public class KafkaTrackingSampleRunner  {
         "  --dataflow-num-of-worker 2 --dataflow-num-of-executor-per-worker 5" + 
         "  --dataflow-max-runtime " + dataflowMaxRuntime;
     shell.execute(dataflowChainSubmitCommand);
-    
+  }
+  
+  public void submitS3TMDataflow() throws Exception {
+    String dataflowSubmitCommand = 
+        "dataflow submit " + 
+        "  --dataflow-config src/test/resources/s3-tracking-dataflow.json" +
+        "  --dataflow-id " + dataflowId + 
+        "  --dataflow-num-of-worker 2 --dataflow-num-of-executor-per-worker 5" + 
+        "  --dataflow-max-runtime " + dataflowMaxRuntime;
+    shell.execute(dataflowSubmitCommand);
+  }
+  
+  public void submitKafkaVMTMValidator() throws Exception {
     String logValidatorSubmitCommand = 
-      "vm submit " +
-      "  --dfs-app-home /applications/tracking-sample" +
-      "  --registry-connect 127.0.0.1:2181" +
-      "  --registry-db-domain /NeverwinterDP" +
-      "  --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl" + 
-      "  --name vm-tracking-validator-1 --role tracking-validator" + 
-      "  --vm-application " + VMTMValidatorKafkaApp.class.getName() + 
-      
-      "  --prop:tracking.report-path=" + REPORT_PATH +
-      "  --prop:tracking.num-of-reader=3"  +
-      "  --prop:tracking.expect-num-of-message-per-chunk=" + numOfMessagePerChunk +
-      "  --prop:tracking.max-runtime=120000"  +
-      "  --prop:kafka.zk-connects=127.0.0.1:2181"  +
-      "  --prop:kafka.topic=tracking.aggregate"  +
-      "  --prop:kafka.message-wait-timeout=30000" ;
-    
+        "vm submit " +
+        "  --dfs-app-home /applications/tracking-sample" +
+        "  --registry-connect 127.0.0.1:2181" +
+        "  --registry-db-domain /NeverwinterDP" +
+        "  --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl" + 
+        "  --name vm-tracking-validator-1 --role tracking-validator" + 
+        
+        "  --vm-application " + VMTMValidatorKafkaApp.class.getName() + 
+        
+        "  --prop:tracking.report-path=" + REPORT_PATH +
+        "  --prop:tracking.num-of-reader=3"  +
+        "  --prop:tracking.expect-num-of-message-per-chunk=" + numOfMessagePerChunk +
+        "  --prop:tracking.max-runtime=120000"  +
+        
+        "  --prop:kafka.zk-connects=127.0.0.1:2181"  +
+        "  --prop:kafka.topic=tracking.aggregate"  +
+        "  --prop:kafka.message-wait-timeout=30000" ;
     shell.execute(logValidatorSubmitCommand);
-
+  }
+  
+  public void runMonitor() throws Exception {
     shell.execute(
       "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor" +
       "  --dataflow-id " + dataflowId + " --show-history-workers " +
       "  --report-path " + REPORT_PATH + " --max-runtime " + dataflowMaxRuntime +"  --print-period 10000"
     );
-    
+      
     shell.execute(
-      "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingJUnitShellPlugin" +
-      "  --dataflow-id " + dataflowId + "  --report-path " + REPORT_PATH + " --junit-report-file build/junit-report.xml"
-    );
-    
+        "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingJUnitShellPlugin" +
+        "  --dataflow-id " + dataflowId + "  --report-path " + REPORT_PATH + " --junit-report-file build/junit-report.xml"
+      );
+      
     shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED") ;
-    
+    shell.execute("dataflow info  --dataflow-id " + dataflowId + " --show-history-workers ");
     shell.execute("registry dump");
   }
 }
