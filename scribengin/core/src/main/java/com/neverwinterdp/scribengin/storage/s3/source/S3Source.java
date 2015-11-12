@@ -26,8 +26,8 @@ public class S3Source implements Source {
   @Override
   public S3SourcePartition getLatestSourcePartition() throws Exception {
     List<String> partitionKeys = getPartitionNames();
-    String latestKey = partitionKeys.get(partitionKeys.size() -1);
-    return new S3SourcePartition(s3Client, storageConfig, latestKey);
+    String latestPartitionName = partitionKeys.get(partitionKeys.size() -1);
+    return new S3SourcePartition(s3Client, storageConfig, latestPartitionName);
   }
 
   @Override
@@ -41,11 +41,11 @@ public class S3Source implements Source {
   }
   
   List<String> getPartitionNames() throws Exception {
-    String bucketName         = storageConfig.attribute(S3Storage.BUCKET_NAME);
-    String storageFolderPath  = storageConfig.attribute(S3Storage.STORAGE_PATH);
-    S3Folder storageFolder    = s3Client.getS3Folder(bucketName, storageFolderPath);
-    List<String> childrenKeys = storageFolder.getChildrenNames() ;
-    Collections.sort(childrenKeys);
-    return childrenKeys;
+    String bucketName          = storageConfig.attribute(S3Storage.BUCKET_NAME);
+    String storageFolderPath   = storageConfig.attribute(S3Storage.STORAGE_PATH);
+    S3Folder storageFolder     = s3Client.getS3Folder(bucketName, storageFolderPath);
+    List<String> childrenNames = storageFolder.getChildrenNames() ;
+    Collections.sort(childrenNames);
+    return childrenNames;
   }
 }

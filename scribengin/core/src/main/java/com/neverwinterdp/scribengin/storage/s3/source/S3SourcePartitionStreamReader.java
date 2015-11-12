@@ -2,6 +2,7 @@ package com.neverwinterdp.scribengin.storage.s3.source;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.amazonaws.services.s3.model.S3Object;
@@ -86,7 +87,6 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
   public boolean isEndOfDataStream() { return endOfStream; }
   
   public void rollback() throws Exception {
-    System.err.println("rollback() This method is not implemented");
     currPosition = commitPoint;
   }
 
@@ -101,7 +101,6 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
   }
 
   public void commit() throws Exception {
-    System.err.println("commit() This method is not implemented");
     lastCommitInfo = new CommitPoint(name, commitPoint, currPosition);
     this.commitPoint = currPosition;
   }
@@ -123,8 +122,13 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
       return null;
     }
     String segment = segments.get(currentSegmentPos);
-    S3Object s3Object = streamFolder.getS3Object(segment);
-    S3ObjectReader reader = new S3ObjectReader(s3Object.getObjectContent());
-    return reader;
+    try {
+      S3Object s3Object = streamFolder.getS3Object(segment);
+      S3ObjectReader reader = new S3ObjectReader(s3Object.getObjectContent());
+      return reader;
+    } catch(Throwable t) {
+      System.err.println(new Date() + " - Cannot get reader for segment: " + streamFolder.getFolderPath() + "/" + segment);
+      throw t;
+    }
   }
 }
