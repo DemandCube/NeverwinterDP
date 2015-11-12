@@ -117,6 +117,7 @@ public class VMTMValidatorS3App extends VMApp {
       StorageConfig storageConfig = new StorageConfig("s3", bucketName + ":" + storagePath);
       storageConfig.attribute(S3Storage.BUCKET_NAME, bucketName);
       storageConfig.attribute(S3Storage.STORAGE_PATH, storagePath);
+      storageConfig.setPartitionStream(8);
       S3Client s3Client = new S3Client();
 
       S3Storage s3Storage = new S3Storage(s3Client, storageConfig);
