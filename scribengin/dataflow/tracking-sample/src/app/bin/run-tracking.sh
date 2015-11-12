@@ -86,7 +86,7 @@ if [ "$DATAFLOW_STORAGE" = "hdfs" ] ; then
 elif [ "$DATAFLOW_STORAGE" = "s3" ] ; then
   DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/s3-tracking-dataflow-chain.json"
   VALIDATOR_APP="com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorS3App"
-  LOG_VALIDATOR_VALIDATE_OPT="--prop:validate-s3=test-tracking-sample:info,test-tracking-sample:warn,test-tracking-sample:error" 
+  VALIDATOR_SOURCE_OPT="--prop:s3.bucket.name=tracking-sample-bucket --prop:s3.storage.path=aggregate --prop:s3.partition-roll-period=1200000"
 else
   DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/tracking-sample-dataflow-s3.json"
   VALIDATOR_APP="com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp"

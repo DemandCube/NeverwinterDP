@@ -1,6 +1,5 @@
 package com.neverwinterdp.scribengin.dataflow.sample;
 
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +19,6 @@ public class S3TrackingSamplIntegrationTest  {
     } else {
       s3Client.deleteS3Folder(bucketName, "aggregate");
     }
-    
     trackingSampleRunner.dataflowMaxRuntime = 60000;
     trackingSampleRunner.setup();
   }
