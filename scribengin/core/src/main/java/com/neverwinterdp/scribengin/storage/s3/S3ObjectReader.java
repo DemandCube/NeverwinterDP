@@ -15,10 +15,10 @@ public class S3ObjectReader implements Closeable {
 
   protected static final Pattern PATTERN = Pattern.compile("(?=<)|(?<=})");
   private InputStream inputStream;
-  private Scanner streamReader;
+  private Scanner     streamReader;
 
   public S3ObjectReader(InputStream inputStream) {
-    BufferedInputStream bis = new BufferedInputStream(inputStream);
+    BufferedInputStream bis = new BufferedInputStream(inputStream, 256 * 1024);
     streamReader = new Scanner(bis, StandardCharsets.UTF_8.name());
     streamReader.useDelimiter(PATTERN);
     this.inputStream = inputStream;

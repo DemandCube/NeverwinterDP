@@ -194,6 +194,7 @@ public class VMTMValidatorS3App extends VMApp {
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(record.getData(), TrackingMessage.class);
           tmQueue.offer(tMesg);
         }
+        reader.close();
       }
     }
   }
