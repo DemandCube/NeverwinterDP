@@ -84,13 +84,13 @@ if [ "$DATAFLOW_STORAGE" = "hdfs" ] ; then
   VALIDATOR_APP="com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorHDFSApp"
   VALIDATOR_SOURCE_OPT="--prop:hdfs.location=/tracking-sample/hdfs/aggregate --prop:hdfs.partition-roll-period=1200000"
 elif [ "$DATAFLOW_STORAGE" = "s3" ] ; then
-  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/chain/s3-tracking-dataflow-chain.json"
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/tracking-sample-dataflow-s3.json"
   VALIDATOR_APP="com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorS3App"
   VALIDATOR_SOURCE_OPT="--prop:s3.bucket.name=tracking-sample-bucket --prop:s3.storage.path=aggregate --prop:s3.partition-roll-period=1200000"
 else
-  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/tracking-sample-dataflow-s3.json"
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/tracking-sample-dataflow-kafka.json"
   VALIDATOR_APP="com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp"
-  VALIDATOR_SOURCE_OPT="--prop:s3.bucket.name=tracking-sample-bucket --prop:s3.storage.path=aggregate --prop:s3.partition-roll-period=1200000"
+  VALIDATOR_SOURCE_OPT="--prop:kafka.zk-connects=zookeeper-1:2181  --prop:kafka.topic=tracking.aggregate  --prop:kafka.message-wait-timeout=1200000"
 fi
 
 DATAFLOW_DEFAULT_RUNTIME=$(( 180000 + (($GENERATOR_NUM_OF_CHUNK * $GENERATOR_NUM_OF_MESSAGE_PER_CHUNK) / 3) ))
