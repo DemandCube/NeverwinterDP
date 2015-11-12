@@ -4,37 +4,35 @@ import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
-import java.util.regex.Pattern;
+import java.io.ObjectInputStream;
 
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class S3ObjectReader implements Closeable {
-
-  protected static final Pattern PATTERN = Pattern.compile("(?=<)|(?<=})");
-  private InputStream inputStream;
-  private Scanner     streamReader;
-
-  public S3ObjectReader(InputStream inputStream) {
-    BufferedInputStream bis = new BufferedInputStream(inputStream, 256 * 1024);
-    streamReader = new Scanner(bis, StandardCharsets.UTF_8.name());
-    streamReader.useDelimiter(PATTERN);
-    this.inputStream = inputStream;
+  private ObjectInputStream   objIs;
+  private byte[] current = null ;
+  
+  public S3ObjectReader(InputStream inputStream) throws IOException {
+    objIs = new ObjectInputStream(new BufferedInputStream(inputStream, 256 * 1024));
   }
 
   public Record next() {
-    return JSONSerializer.INSTANCE.fromString(streamReader.next(), Record.class);
+    return JSONSerializer.INSTANCE.fromBytes(current, Record.class);
   }
 
-  public boolean hasNext() {
-    return streamReader.hasNext();
+  public boolean hasNext() throws IOException {
+    if(objIs.available() > 0) {
+      int size = objIs.readInt();
+      current = new byte[size];
+      objIs.read(current);
+      return true;
+    }
+    return false;
   }
 
   @Override
   public void close() throws IOException {
-    streamReader.close();
-    inputStream.close();
+    objIs.close();
   }
 }
