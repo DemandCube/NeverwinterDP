@@ -160,7 +160,7 @@ public class VMTMValidatorS3App extends VMApp {
         service.submit(new S3SourceReader(streamQueue, tmQueue));
       }
       service.shutdown();
-      service.awaitTermination(2 * partitionRollPeriod, TimeUnit.MICROSECONDS);
+      service.awaitTermination(2 * partitionRollPeriod, TimeUnit.MILLISECONDS);
       partition.delete();
     }
   }
