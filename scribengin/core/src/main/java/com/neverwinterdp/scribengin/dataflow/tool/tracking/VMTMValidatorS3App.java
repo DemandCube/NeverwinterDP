@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -68,45 +70,40 @@ public class VMTMValidatorS3App extends VMApp {
 
   public class S3TrackingMessageReader extends TrackingMessageReader {
     private long           partitionRollPeriod ;
-    private S3SourceReader s3SourceReader ;
-    private BlockingQueue<TrackingMessage> queue = new LinkedBlockingQueue<>(5000);
+    private S3SourceConnector s3SourceConnector ;
+    private BlockingQueue<TrackingMessage> tmQueue = new LinkedBlockingQueue<>(5000);
     
     S3TrackingMessageReader(String bucketName, String storagePath, long partitionRollPeriod) {
       this.partitionRollPeriod = partitionRollPeriod;
-      s3SourceReader = new S3SourceReader(bucketName, storagePath, partitionRollPeriod) {
-        @Override
-        public void onTrackingMessage(TrackingMessage tMesg) throws Exception {
-          queue.offer(tMesg);
-        }
-      };
+      s3SourceConnector = new S3SourceConnector(bucketName, storagePath, partitionRollPeriod, tmQueue) ;
     }
     
     public void onInit(TrackingRegistry registry) throws Exception {
-      s3SourceReader.start();
+      s3SourceConnector.start();
     }
    
     public void onDestroy(TrackingRegistry registry) throws Exception{
-      s3SourceReader.interrupt();
+      s3SourceConnector.interrupt();
     }
     
     @Override
     public TrackingMessage next() throws Exception {
-      return queue.poll(partitionRollPeriod + 300000, TimeUnit.MILLISECONDS);
+      return tmQueue.poll(partitionRollPeriod + 300000, TimeUnit.MILLISECONDS);
     }
   }
   
-  abstract public class S3SourceReader extends Thread {
+  public class S3SourceConnector extends Thread {
     private String bucketName;
     private String storagePath;
     private long   partitionRollPeriod;
+    private BlockingQueue<TrackingMessage> tmQueue;
     
-    S3SourceReader(String bucketName, String storagePath, long partitionRollPeriod) {
+    S3SourceConnector(String bucketName, String storagePath, long partitionRollPeriod, BlockingQueue<TrackingMessage> tmQueue) {
       this.bucketName          = bucketName;
       this.storagePath         = storagePath;
       this.partitionRollPeriod = partitionRollPeriod;
+      this.tmQueue             = tmQueue;
     }
-    
-    abstract public void onTrackingMessage(TrackingMessage tMesg) throws Exception ;
     
     public void run() {
       try {
@@ -135,7 +132,6 @@ public class VMTMValidatorS3App extends VMApp {
           Date currentTime = new Date();
           if(currentTime.getTime() > timestamp.getTime() + partitionRollPeriod) {
             validatePartition(partition);
-            partition.delete();
             validatePartition = true;
           }
         } else {
@@ -154,13 +150,47 @@ public class VMTMValidatorS3App extends VMApp {
     }
     
     void validatePartition(S3SourcePartition partition) throws Exception {
+      BlockingQueue<S3SourcePartitionStream> streamQueue = new LinkedBlockingQueue<>();
       S3SourcePartitionStream[] stream = partition.getPartitionStreams();
       for(int i = 0; i < stream.length; i++) {
-        S3SourcePartitionStreamReader reader = stream[i].getReader("validator") ;
+        streamQueue.offer(stream[i]);
+      }
+      ExecutorService service = Executors.newFixedThreadPool(stream.length);
+      for(int i = 0; i < stream.length; i++) {
+        service.submit(new S3SourceReader(streamQueue, tmQueue));
+      }
+      service.shutdown();
+      service.awaitTermination(2 * partitionRollPeriod, TimeUnit.MICROSECONDS);
+      partition.delete();
+    }
+  }
+  
+  class S3SourceReader implements Runnable {
+    private BlockingQueue<S3SourcePartitionStream> streamQueue;
+    private BlockingQueue<TrackingMessage>         tmQueue;
+    
+    S3SourceReader(BlockingQueue<S3SourcePartitionStream> streamQueue, BlockingQueue<TrackingMessage> tmQueue) {
+      this.streamQueue = streamQueue ;
+      this.tmQueue = tmQueue;
+    }
+    
+    @Override
+    public void run() {
+      try {
+        doRun();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+    
+    void doRun() throws Exception {
+      S3SourcePartitionStream stream = null;
+      while((stream = streamQueue.poll(5000, TimeUnit.MILLISECONDS)) != null) {
         Record record = null;
-        while((record = reader.next(1000)) != null) {
+        S3SourcePartitionStreamReader reader = stream.getReader("validator") ;
+        while((record = reader.next(10000)) != null) {
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(record.getData(), TrackingMessage.class);
-          onTrackingMessage(tMesg);
+          tmQueue.offer(tMesg);
         }
       }
     }
