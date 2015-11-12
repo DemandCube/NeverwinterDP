@@ -23,6 +23,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
+import com.beust.jcommander.Parameter;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -148,5 +149,21 @@ public class S3Client {
     for (S3ObjectSummary sel : s3Client.listObjects(bucketName, prefix).getObjectSummaries()) {
       s3Client.deleteObject(bucketName, sel.getKey());
     }
+  }
+  
+  static public class Args {
+    @Parameter(names = "--bucket-name", description = "bucket name")
+    public String bucketName ;
+    
+    @Parameter(names = "--folder", description = "folder path")
+    public String folder ;
+    
+    @Parameter(names = "--command", description = "command")
+    public String command ;
+  }
+  
+  static public void main(String[] args) throws Exception {
+    S3Client s3Client = new S3Client();
+    
   }
 }

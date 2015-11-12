@@ -124,21 +124,23 @@ public class VMTMValidatorS3App extends VMApp {
       int noPartitionFound = 0 ;
       while(true) {
         List<S3SourcePartition> partitions = s3Source.getSourcePartitions();
-        boolean validatePartition = false;
         if(partitions.size() > 0) {
           noPartitionFound = 0;
-          S3SourcePartition partition = partitions.get(0);
-          Date timestamp   = getTimestamp(partition.getPartitionName());
-          Date currentTime = new Date();
-          if(currentTime.getTime() > timestamp.getTime() + partitionRollPeriod) {
-            validatePartition(partition);
-            validatePartition = true;
+          for(int i = 0; i < partitions.size(); i++) {
+            S3SourcePartition partition = partitions.get(i);
+            Date timestamp   = getTimestamp(partition.getPartitionName());
+            Date currentTime = new Date();
+            if(currentTime.getTime() > timestamp.getTime() + partitionRollPeriod) {
+              validatePartition(partition);
+            } else {
+              break ;
+            }
           }
         } else {
           noPartitionFound++;
         }
         if(noPartitionFound > 50) break ;
-        if(!validatePartition) Thread.sleep(15000);
+        Thread.sleep(15000);
       }
     }
     
