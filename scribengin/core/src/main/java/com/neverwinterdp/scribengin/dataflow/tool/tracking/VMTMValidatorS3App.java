@@ -158,9 +158,9 @@ public class VMTMValidatorS3App extends VMApp {
       for(int i = 0; i < stream.length; i++) {
         streamQueue.offer(stream[i]);
       }
-      ExecutorService service = Executors.newFixedThreadPool(stream.length);
+      ExecutorService service = Executors.newFixedThreadPool(3);
       for(int i = 0; i < stream.length; i++) {
-        service.submit(new S3SourceReader(streamQueue, tmQueue));
+        service.submit(new S3PartitionStreamReader(streamQueue, tmQueue));
       }
       service.shutdown();
       service.awaitTermination(2 * partitionRollPeriod, TimeUnit.MILLISECONDS);
@@ -168,11 +168,11 @@ public class VMTMValidatorS3App extends VMApp {
     }
   }
   
-  class S3SourceReader implements Runnable {
+  class S3PartitionStreamReader implements Runnable {
     private BlockingQueue<S3SourcePartitionStream> streamQueue;
     private BlockingQueue<TrackingMessage>         tmQueue;
     
-    S3SourceReader(BlockingQueue<S3SourcePartitionStream> streamQueue, BlockingQueue<TrackingMessage> tmQueue) {
+    S3PartitionStreamReader(BlockingQueue<S3SourcePartitionStream> streamQueue, BlockingQueue<TrackingMessage> tmQueue) {
       this.streamQueue = streamQueue ;
       this.tmQueue = tmQueue;
     }

@@ -34,6 +34,7 @@ public class S3ObjectReader implements Closeable {
 
   @Override
   public void close() throws IOException {
+    streamReader.close();
     inputStream.close();
   }
 }

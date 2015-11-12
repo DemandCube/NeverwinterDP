@@ -122,13 +122,8 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
       return null;
     }
     String segment = segments.get(currentSegmentPos);
-    try {
-      S3Object s3Object = streamFolder.getS3Object(segment);
-      S3ObjectReader reader = new S3ObjectReader(s3Object.getObjectContent());
-      return reader;
-    } catch(Throwable t) {
-      System.err.println(new Date() + " - Cannot get reader for segment: " + streamFolder.getFolderPath() + "/" + segment);
-      throw t;
-    }
+    S3Object s3Object = streamFolder.getS3Object(segment);
+    S3ObjectReader reader = new S3ObjectReader(s3Object.getObjectContent());
+    return reader;
   }
 }
