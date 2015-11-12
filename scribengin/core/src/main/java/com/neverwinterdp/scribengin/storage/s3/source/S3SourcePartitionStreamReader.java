@@ -2,7 +2,6 @@ package com.neverwinterdp.scribengin.storage.s3.source;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.amazonaws.services.s3.model.S3Object;
@@ -15,6 +14,7 @@ import com.neverwinterdp.scribengin.storage.s3.S3ObjectReader;
 import com.neverwinterdp.scribengin.storage.s3.S3Storage;
 import com.neverwinterdp.scribengin.storage.source.CommitPoint;
 import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
+import com.neverwinterdp.util.JSONSerializer;
 
 public class S3SourcePartitionStreamReader implements SourcePartitionStreamReader {
   private String                name;
@@ -64,7 +64,8 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
     if(currentSegmenttReader == null) return null ;
     
     if(currentSegmenttReader.hasNext()) {
-      return currentSegmenttReader.nextAs(Record.class);
+      byte[] data = currentSegmenttReader.next();
+      return JSONSerializer.INSTANCE.fromBytes(data, Record.class);
     } else {
       currentSegmenttReader.close();
       currentSegmenttReader = null ;

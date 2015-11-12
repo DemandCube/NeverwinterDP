@@ -38,7 +38,7 @@ public class S3ClientExperimentTest {
     String KEY = "test-s3-object-writer" ;
     S3ObjectWriter writer = new S3ObjectWriter(s3Client, BUCKET_NAME, KEY, new ObjectMetadata());
     for(int i = 0; i < 10; i++) {
-      writer.write(("This is the test " + i + "\n").getBytes());
+      writer.write(("This is the test " + i).getBytes());
       Thread.sleep(1000);
     }
     writer.waitAndClose(10000);

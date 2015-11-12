@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 
-import com.neverwinterdp.util.JSONSerializer;
-
 public class S3ObjectReader implements Closeable {
   private ObjectInputStream   objIs;
   private byte[] current = null ;
@@ -19,15 +17,14 @@ public class S3ObjectReader implements Closeable {
   public byte[] next() { return current; }
   
   
-  public <T> T nextAs(Class<T> type) {
-    return JSONSerializer.INSTANCE.fromBytes(current, type);
-  }
-
   public boolean hasNext() throws IOException {
     if(objIs.available() > 0) {
       int size = objIs.readInt();
       current = new byte[size];
-      objIs.read(current);
+      int read = 0 ;
+      while(read < current.length) {
+        read += objIs.read(current, read, current.length);
+      }
       return true;
     }
     return false;
