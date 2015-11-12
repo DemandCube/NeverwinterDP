@@ -8,7 +8,7 @@ import org.junit.Test;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
 
 public class S3TrackingSamplIntegrationTest  {
-  String bucketName = "tracking-sample-bucket";
+  String bucketName = "tracking-sample-integration-test-bucket";
   S3Client s3Client;
   KafkaTrackingSampleRunner trackingSampleRunner = new KafkaTrackingSampleRunner();
   
@@ -18,7 +18,7 @@ public class S3TrackingSamplIntegrationTest  {
     if (!s3Client.hasBucket(bucketName)) {
       s3Client.createBucket(bucketName);
     } else {
-      s3Client.deleteS3Folder(bucketName, "tracking-sample");
+      s3Client.deleteS3Folder(bucketName, "aggregate");
     }
     
     trackingSampleRunner.dataflowMaxRuntime = 60000;
@@ -28,13 +28,14 @@ public class S3TrackingSamplIntegrationTest  {
   @After
   public void teardown() throws Exception {
     trackingSampleRunner.teardown();
-    s3Client.deleteS3Folder(bucketName, "tracking-sample");
+    s3Client.deleteS3Folder(bucketName, "aggregate");
   }
   
   @Test
   public void testTrackingSample() throws Exception {
     trackingSampleRunner.submitVMTMGenrator();
     trackingSampleRunner.submitS3TMDataflow();
+    trackingSampleRunner.submitS3VMTMValidator();
     trackingSampleRunner.runMonitor();
   }
 }

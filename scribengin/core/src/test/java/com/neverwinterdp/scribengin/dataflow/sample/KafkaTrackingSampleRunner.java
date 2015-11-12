@@ -11,6 +11,7 @@ import org.elasticsearch.node.NodeBuilder;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMGeneratorKafkaApp;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp;
+import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorS3App;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
 import com.neverwinterdp.scribengin.tool.ScribenginClusterBuilder;
@@ -107,6 +108,23 @@ public class KafkaTrackingSampleRunner  {
   }
   
   public void submitKafkaVMTMValidator() throws Exception {
+    String storageProps = 
+      "  --prop:kafka.zk-connects=127.0.0.1:2181"  +
+      "  --prop:kafka.topic=tracking.aggregate"  +
+      "  --prop:kafka.message-wait-timeout=30000" ;
+    submitVMTMValidator(VMTMValidatorKafkaApp.class, storageProps);
+  }
+  
+  public void submitS3VMTMValidator() throws Exception {
+    String storageProps = 
+      "  --prop:s3.bucket.name=tracking-sample-bucket"  +
+      "  --prop:s3.storage.path=aggregate" +
+      "  --prop:s3.partition-roll-period=0";
+      
+    submitVMTMValidator(VMTMValidatorS3App.class, storageProps);
+  }
+  
+  void submitVMTMValidator(Class<?> vmAppType, String storageProps) throws Exception {
     String logValidatorSubmitCommand = 
         "vm submit " +
         "  --dfs-app-home /applications/tracking-sample" +
@@ -115,16 +133,14 @@ public class KafkaTrackingSampleRunner  {
         "  --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl" + 
         "  --name vm-tracking-validator-1 --role tracking-validator" + 
         
-        "  --vm-application " + VMTMValidatorKafkaApp.class.getName() + 
+        "  --vm-application " + vmAppType.getName() + 
         
         "  --prop:tracking.report-path=" + REPORT_PATH +
         "  --prop:tracking.num-of-reader=3"  +
         "  --prop:tracking.expect-num-of-message-per-chunk=" + numOfMessagePerChunk +
-        "  --prop:tracking.max-runtime=120000"  +
-        
-        "  --prop:kafka.zk-connects=127.0.0.1:2181"  +
-        "  --prop:kafka.topic=tracking.aggregate"  +
-        "  --prop:kafka.message-wait-timeout=30000" ;
+        "  --prop:tracking.max-runtime=" + dataflowMaxRuntime +
+        storageProps ;
+    
     shell.execute(logValidatorSubmitCommand);
   }
   
@@ -136,9 +152,9 @@ public class KafkaTrackingSampleRunner  {
     );
       
     shell.execute(
-        "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingJUnitShellPlugin" +
-        "  --dataflow-id " + dataflowId + "  --report-path " + REPORT_PATH + " --junit-report-file build/junit-report.xml"
-      );
+      "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingJUnitShellPlugin" +
+      "  --dataflow-id " + dataflowId + "  --report-path " + REPORT_PATH + " --junit-report-file build/junit-report.xml"
+    );
       
     shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED") ;
     shell.execute("dataflow info  --dataflow-id " + dataflowId + " --show-tasks --show-workers --show-history-workers ");

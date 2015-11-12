@@ -1,6 +1,6 @@
 {
-  "id" :   "log-dataflow",
-  "name" : "log-dataflow",
+  "id" :   "tracking-dataflow",
+  "name" : "tracking-dataflow",
   "maxRunTime": 90000,
   
   "master": {
@@ -10,37 +10,38 @@
   },
 
   "worker": {
-    "numOfInstances": 2,
-    "memory": 128,
+    "numOfInstances": 8,
+    "memory": 512,
     "cpuCores": 1,
-    "numOfExecutor": 4,
-    "taskSwitchingPeriod" : 5000
+    "numOfExecutor": 2,
+    "taskSwitchingPeriod" : 30000
   },
 
   "streamConfig": {
-    "parallelism": 5,
-    "replication": 1,
+    "parallelism": 8,
+    "replication": 2,
 
     "streams": {
 
       "input": {
-         "type" : "kafka", "topic" : "tracking.input", "zk.connect" : "127.0.0.1:2181", "reader" : "raw", "name" : "tracking.input"
+         "type" : "kafka", "topic" : "tracking.input", "zk.connect" : "zookeeper-1:2181", "reader" : "raw", "name" : "tracking.input"
       },
 
       "info" : {
-        "type" : "kafka", "topic" : "tracking.info", "zk.connect" : "127.0.0.1:2181", "name" : "tracking.info"
+        "type" : "kafka", "topic" : "tracking.info", "zk.connect" : "zookeeper-1:2181", "name" : "tracking.info"
       },
 
       "warn" : {
-        "type" : "kafka", "topic" : "tracking.warn", "zk.connect" : "127.0.0.1:2181", "name" : "tracking.warn"
+        "type" : "kafka", "topic" : "tracking.warn", "zk.connect" : "zookeeper-1:2181", "name" : "tracking.warn"
       },
 
       "error" : {
-        "type" : "kafka", "topic" : "tracking.error", "zk.connect" : "127.0.0.1:2181", "name" : "tracking.error"
+        "type" : "kafka", "topic" : "tracking.error", "zk.connect" : "zookeeper-1:2181", "name" : "tracking.error"
       },
 
       "aggregate" : {
-        "type" : "s3", "name" : "tracking.aggregate", "s3.bucket.name": "tracking-sample-integration-test-bucket", "s3.storage.path":"aggregate", "partitioner": "15min"
+        "type" : "s3", "name" : "tracking.aggregate", "location": "tracking-sample-bucket:aggregate", "partitioner": "15min",
+        "s3.bucket.name": "tracking-sample-bucket", "s3.storage.path": "aggregate"
       }
     }
   },

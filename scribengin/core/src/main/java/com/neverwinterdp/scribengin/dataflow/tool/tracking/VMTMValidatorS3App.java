@@ -29,8 +29,10 @@ public class VMTMValidatorS3App extends VMApp {
   
   @Override
   public void run() throws Exception {
+    try {
     logger =  getVM().getLoggerFactory().getLogger(VMTMValidatorS3App.class) ;
     logger.info("Start run()");
+    System.err.println("VMTMValidatorS3App: start run");
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
     Registry registry = getVM().getVMRegistry().getRegistry();
@@ -59,6 +61,9 @@ public class VMTMValidatorS3App extends VMApp {
     );
     validatorService.start();
     validatorService.awaitForTermination(maxRuntime, TimeUnit.MILLISECONDS);
+    } catch(Throwable t) {
+      t.printStackTrace();
+    }
   }
 
   public class S3TrackingMessageReader extends TrackingMessageReader {
