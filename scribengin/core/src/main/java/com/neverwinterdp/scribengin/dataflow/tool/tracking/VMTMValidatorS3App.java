@@ -158,7 +158,7 @@ public class VMTMValidatorS3App extends VMApp {
       for(int i = 0; i < stream.length; i++) {
         streamQueue.offer(stream[i]);
       }
-      ExecutorService service = Executors.newFixedThreadPool(3);
+      ExecutorService service = Executors.newFixedThreadPool(stream.length);
       for(int i = 0; i < stream.length; i++) {
         service.submit(new S3PartitionStreamReader(streamQueue, tmQueue));
       }
