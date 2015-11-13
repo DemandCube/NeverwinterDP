@@ -3,7 +3,6 @@ package com.neverwinterdp.scribengin.storage.s3;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,7 +13,10 @@ import org.junit.Test;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
-import com.neverwinterdp.util.io.IOUtil;
+import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.yara.MetricPrinter;
+import com.neverwinterdp.yara.MetricRegistry;
+import com.neverwinterdp.yara.Timer;
 
 public class S3ClientExperimentTest {
   static public String BUCKET_NAME = "s3-client-integration-test-" + UUID.randomUUID();
@@ -36,22 +38,53 @@ public class S3ClientExperimentTest {
   @Test
   public void testS3ObjectReaderWriter() throws Exception {
     String KEY = "test-s3-object-writer" ;
+    int    NUM_OF_RECORDS = 1000;
+    MetricRegistry mRegistry = new MetricRegistry();
+    long startTime = System.currentTimeMillis();
+    Timer.Context writerCreateCtx = mRegistry.timer("writer.create").time();
     S3ObjectWriter writer = new S3ObjectWriter(s3Client, BUCKET_NAME, KEY, new ObjectMetadata());
+    writerCreateCtx.stop();
+    
+    Timer writerWrite = mRegistry.timer("writer.write");
+    for(int i = 0; i < NUM_OF_RECORDS; i++) {
+      DataObj data = new DataObj("key-" + i, 512);
+      Timer.Context writerWriteCtx = writerWrite.time(); 
+      writer.write(JSONSerializer.INSTANCE.toBytes(data));
+      writerWriteCtx.stop();
+    }
+    startTime = System.currentTimeMillis();
+    Timer.Context writerCloseCtx = mRegistry.timer("writer.close").time();
+    writer.waitAndClose(30 * NUM_OF_RECORDS);
+    writerCloseCtx.stop();
+    System.out.println("Write in: " + (System.currentTimeMillis() - startTime));
+    
     for(int i = 0; i < 10; i++) {
-      writer.write(("This is the test " + i).getBytes());
-      Thread.sleep(1000);
+      Timer.Context readerGetCtx = mRegistry.timer("reader.get").time();
+      S3Object object = s3Client.getObject(BUCKET_NAME, KEY);
+      readerGetCtx.stop();
+      
+      Timer.Context readerCreateCtx = mRegistry.timer("reader.create").time();
+      S3ObjectReader reader = new S3ObjectReader(object);
+      readerCreateCtx.stop();
+
+      Timer readerRead = mRegistry.timer("reader.read");
+      int count = 0 ;
+      while(reader.hasNext()) {
+        Timer.Context readerReadCtx = readerRead.time();
+        byte[] data = reader.next();
+        DataObj dataObj = JSONSerializer.INSTANCE.fromBytes(data, DataObj.class);
+        readerReadCtx.stop();
+        if(NUM_OF_RECORDS < 30) {
+          System.out.println(dataObj.getKey());
+        }
+        count++ ;
+      }
+      reader.close();
+      Assert.assertEquals(NUM_OF_RECORDS, count);
     }
-    writer.waitAndClose(10000);
-    S3Object object = s3Client.getObject(BUCKET_NAME, KEY);
-    S3ObjectReader reader = new S3ObjectReader(object.getObjectContent());
-    int count = 0 ;
-    while(reader.hasNext()) {
-      String content = new String(reader.next()) ;
-      System.out.println(content);
-      count++ ;
-    }
-    reader.close();
-    Assert.assertEquals(10, count);
+    System.out.println("Read in: " + (System.currentTimeMillis() - startTime));
+    MetricPrinter mPrinter = new MetricPrinter() ;
+    mPrinter.print(mRegistry);
   }
   
   @Test
@@ -79,5 +112,23 @@ public class S3ClientExperimentTest {
     List<S3Folder> folders = s3Client.getRootFolders(BUCKET_NAME);
     System.out.println("folders " + folders);
     assertEquals(counter, folders.size());
+  }
+  
+  static public class DataObj {
+    private String key ;
+    private byte[] data ;
+
+    public DataObj() {}
+    
+    public DataObj(String key, int size) {
+      this.key = key;
+      data = new byte[size];
+    }
+    
+    public String getKey() { return key; }
+    public void setKey(String key) { this.key = key; }
+    
+    public byte[] getData() { return data; }
+    public void setData(byte[] data) { this.data = data; }
   }
 }

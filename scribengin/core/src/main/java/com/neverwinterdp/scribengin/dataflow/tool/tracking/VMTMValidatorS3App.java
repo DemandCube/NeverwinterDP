@@ -188,11 +188,12 @@ public class VMTMValidatorS3App extends VMApp {
     
     void doRun() throws Exception {
       S3SourcePartitionStream stream = null;
-      while((stream = streamQueue.poll(5000, TimeUnit.MILLISECONDS)) != null) {
+      while((stream = streamQueue.poll(10, TimeUnit.MILLISECONDS)) != null) {
         Record record = null;
         S3SourcePartitionStreamReader reader = stream.getReader("validator") ;
-        while((record = reader.next(10000)) != null) {
-          TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(record.getData(), TrackingMessage.class);
+        while((record = reader.next(1000)) != null) {
+          byte[] data = record.getData();
+          TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(data, TrackingMessage.class);
           tmQueue.offer(tMesg);
         }
         reader.close();

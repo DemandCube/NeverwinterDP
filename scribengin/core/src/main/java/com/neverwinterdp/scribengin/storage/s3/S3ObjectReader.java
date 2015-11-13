@@ -6,12 +6,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 
+import com.amazonaws.services.s3.model.S3Object;
+
 public class S3ObjectReader implements Closeable {
-  private ObjectInputStream   objIs;
-  private byte[] current = null ;
+  private ObjectInputStream objIs;
+  private byte[]            current = null ;
   
-  public S3ObjectReader(InputStream inputStream) throws IOException {
-    objIs = new ObjectInputStream(new BufferedInputStream(inputStream, 256 * 1024));
+  public S3ObjectReader(S3Object s3Object) throws IOException {
+    InputStream is = s3Object.getObjectContent();
+    objIs = new ObjectInputStream(new BufferedInputStream(is, 1024 * 1024));
   }
 
   public byte[] next() { return current; }
