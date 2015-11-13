@@ -16,6 +16,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteBucketRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -145,10 +146,49 @@ public class S3Client {
     return folders;
   }
 
-  void deleteKeyWithPrefix(String bucketName, String prefix) {
-    for (S3ObjectSummary sel : s3Client.listObjects(bucketName, prefix).getObjectSummaries()) {
-      s3Client.deleteObject(bucketName, sel.getKey());
+  public List<String> listKeyWithPrefix(String bucketName, String keyPrefix) {
+    List<String> keyHolder = new ArrayList<>();
+    ListObjectsRequest request = new ListObjectsRequest();
+    request.
+      withBucketName(bucketName).
+      withPrefix(keyPrefix);
+    String marker = "first";
+    while(marker != null) {
+      ObjectListing oListing = s3Client.listObjects(request);
+      for (S3ObjectSummary sel : oListing.getObjectSummaries()) {
+        keyHolder.add(sel.getKey());
+      }
+      marker = oListing.getNextMarker();
+      request.setMarker(marker);
     }
+    return keyHolder;
+  }
+  
+  public List<String> listKeyChildren(String bucketName, String key, String delimiter) {
+    List<String> keyHolder = new ArrayList<>();
+    ListObjectsRequest request = new ListObjectsRequest();
+    request.
+      withBucketName(bucketName).
+      withPrefix(key + delimiter).withDelimiter(delimiter);
+    String marker = "first";
+    while(marker != null) {
+      ObjectListing oListing = s3Client.listObjects(request);
+      for (S3ObjectSummary sel : oListing.getObjectSummaries()) {
+        keyHolder.add(sel.getKey());
+      }
+      marker = oListing.getNextMarker();
+      request.setMarker(marker);
+    }
+    return keyHolder;
+  }
+  
+  public void deleteKeyWithPrefix(String bucketName, String prefix) {
+    DeleteObjectsRequest delReq = new DeleteObjectsRequest(bucketName);
+    List<String> keyHolder = listKeyWithPrefix(bucketName, prefix);
+    String[] keys = new String[keyHolder.size()];
+    keys = keyHolder.toArray(keys);
+    delReq.withKeys(keys);
+    s3Client.deleteObjects(delReq);
   }
   
   static public class Args {

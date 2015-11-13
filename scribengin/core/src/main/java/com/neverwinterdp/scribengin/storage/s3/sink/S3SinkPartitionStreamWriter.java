@@ -141,7 +141,7 @@ public class S3SinkPartitionStreamWriter implements SinkPartitionStreamWriter {
     public void rollback() throws Exception {
       if(currentWriter == null) return;
       currentWriter.forceClose() ;
-      streamS3Folder.deleteObject(currentSegmentName);
+      streamS3Folder.deleteChild(currentSegmentName);
       currentWriter = null ;
     }
     

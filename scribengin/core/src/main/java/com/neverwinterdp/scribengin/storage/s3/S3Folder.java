@@ -9,12 +9,9 @@ import java.util.List;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ListObjectsRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 public class S3Folder {
   private S3Client       s3Client ;
@@ -59,32 +56,21 @@ public class S3Folder {
   
   public List<String> getChildrenNames() {
     List<String> holder = new ArrayList<String>() ;
-    for(S3ObjectSummary sel : getChildren()) {
-      String name = sel.getKey().substring(folderPath.length() + 1);
+    for(String child : getChildren()) {
+      String name = child.substring(folderPath.length() + 1);
       holder.add(name);
     }
     return holder;
   }
   
-  public List<String> getChildrenKeys() {
-    List<String> holder = new ArrayList<String>() ;
-    for(S3ObjectSummary sel : getChildren()) {
-      holder.add(sel.getKey());
-    }
-    return holder;
+  public List<String> getChildrenKeys() { return getChildren(); }
+  
+  public List<String> getChildren() {
+    return s3Client.listKeyChildren(bucketName, folderPath, "/") ;
   }
   
-  public List<S3ObjectSummary> getChildren() {
-    ListObjectsRequest request = 
-      new ListObjectsRequest().withBucketName(bucketName).withPrefix(folderPath + "/").withDelimiter("/");
-    ObjectListing objectListing = s3Client.getAmazonS3Client().listObjects(request);
-    return objectListing.getObjectSummaries() ;
-  }
-  
-  public List<S3ObjectSummary> getDescendants() {
-    ListObjectsRequest request = new ListObjectsRequest().withBucketName(bucketName).withPrefix(folderPath + "/");
-    ObjectListing objectListing = s3Client.getAmazonS3Client().listObjects(request);
-    return objectListing.getObjectSummaries();
+  public List<String> getDescendants() {
+    return s3Client.listKeyWithPrefix(bucketName, folderPath + "/");
   }
   
   public S3Folder getS3Folder(String name) {
@@ -99,7 +85,7 @@ public class S3Folder {
     s3Client.createObject(bucketName, toKey(name), is, metadata);
   } 
   
-  public void deleteObject(String name) throws IOException {
+  public void deleteChild(String name) throws IOException {
     s3Client.deleteS3Folder(bucketName, toKey(name));
   }
   
@@ -108,8 +94,6 @@ public class S3Folder {
   }
   
   public S3ObjectWriter createObjectWriter(String name, ObjectMetadata metadata) throws IOException {
-    //TODO (tuan) confirm if this should be here.
-    createFolder(toKey(name));
     S3ObjectWriter writer = new S3ObjectWriter(s3Client, bucketName, toKey(name), metadata);
     return writer;
   }
@@ -118,7 +102,6 @@ public class S3Folder {
     S3Object object = s3Client.getAmazonS3Client().getObject(new GetObjectRequest(bucketName, toKey(name)));
     return object;
   }
-  
   
   public String toKey(String name) { return folderPath + "/" + name; }
   
