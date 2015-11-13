@@ -102,12 +102,16 @@ public class S3ClientExperimentTest {
   
   @Test
   public void testDeleteWithPrefix() throws IOException, InterruptedException {
-    int NUM_OF_FILES = 100;
+    int NUM_OF_FILES = 10;
     String FOLDER = "folder" ;
+    long start = System.currentTimeMillis();
     for(int i = 0; i < NUM_OF_FILES; i++) {
       ObjectMetadata metadata = new ObjectMetadata() ;
       metadata.setContentType("text/plain");
       s3Client.createObject(BUCKET_NAME, FOLDER + "/" + i, new byte[128], metadata);
+      if(i % 100 == 0) {
+        System.out.println("create " + (i + 1) + " in " + (System.currentTimeMillis() - start) + "ms");
+      }
     }
     List<String> children = s3Client.listKeyChildren(BUCKET_NAME, FOLDER, "/");
     Assert.assertEquals(NUM_OF_FILES, children.size());

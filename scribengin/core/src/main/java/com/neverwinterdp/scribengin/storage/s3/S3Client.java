@@ -17,6 +17,7 @@ import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteBucketRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsResult;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -173,8 +174,10 @@ public class S3Client {
     String marker = "first";
     while(marker != null) {
       ObjectListing oListing = s3Client.listObjects(request);
+      int count  = 0;
       for (S3ObjectSummary sel : oListing.getObjectSummaries()) {
         keyHolder.add(sel.getKey());
+        count++ ;
       }
       marker = oListing.getNextMarker();
       request.setMarker(marker);
@@ -182,14 +185,27 @@ public class S3Client {
     return keyHolder;
   }
   
-  public void deleteKeyWithPrefix(String bucketName, String prefix) {
-    List<String> keyHolder = listKeyWithPrefix(bucketName, prefix);
-    if(keyHolder.size() == 0) return;
-    String[] keys = new String[keyHolder.size()];
-    keys = keyHolder.toArray(keys);
-    DeleteObjectsRequest delReq = new DeleteObjectsRequest(bucketName);
-    delReq.withKeys(keys);
-    s3Client.deleteObjects(delReq);
+  public void deleteKeyWithPrefix(String bucketName, String keyPrefix) {
+    ListObjectsRequest request = new ListObjectsRequest();
+    request.
+      withBucketName(bucketName).
+      withPrefix(keyPrefix);
+    String marker = "first";
+    while(marker != null) {
+      ObjectListing oListing = s3Client.listObjects(request);
+      List<S3ObjectSummary> oSummaryList = oListing.getObjectSummaries();
+      String[] keys = new String[oSummaryList.size()];
+      for(int i = 0; i < keys.length; i++) {
+        keys[i] = oSummaryList.get(i).getKey();
+      }
+      if(keys.length > 0) {
+        DeleteObjectsRequest delReq = new DeleteObjectsRequest(bucketName);
+        delReq.withKeys(keys);
+        DeleteObjectsResult result = s3Client.deleteObjects(delReq);
+      }
+      marker = oListing.getNextMarker();
+      request.setMarker(marker);
+    }
   }
   
   static public class Args {
