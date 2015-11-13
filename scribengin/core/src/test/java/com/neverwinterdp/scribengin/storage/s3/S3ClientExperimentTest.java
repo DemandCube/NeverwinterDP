@@ -101,6 +101,21 @@ public class S3ClientExperimentTest {
   }
   
   @Test
+  public void testDeleteWithPrefix() throws IOException, InterruptedException {
+    int NUM_OF_FILES = 100;
+    String FOLDER = "folder" ;
+    for(int i = 0; i < NUM_OF_FILES; i++) {
+      ObjectMetadata metadata = new ObjectMetadata() ;
+      metadata.setContentType("text/plain");
+      s3Client.createObject(BUCKET_NAME, FOLDER + "/" + i, new byte[128], metadata);
+    }
+    List<String> children = s3Client.listKeyChildren(BUCKET_NAME, FOLDER, "/");
+    Assert.assertEquals(NUM_OF_FILES, children.size());
+    s3Client.deleteKeyWithPrefix(BUCKET_NAME, FOLDER);
+    Assert.assertEquals(0, s3Client.listKeyWithPrefix(BUCKET_NAME, FOLDER).size());
+  }
+  
+  @Test
   public void testGetRootFolders() {
     String folderPath= "unit-test";
 

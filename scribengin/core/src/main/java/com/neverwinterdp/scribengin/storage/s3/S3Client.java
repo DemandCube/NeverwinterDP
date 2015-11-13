@@ -183,10 +183,11 @@ public class S3Client {
   }
   
   public void deleteKeyWithPrefix(String bucketName, String prefix) {
-    DeleteObjectsRequest delReq = new DeleteObjectsRequest(bucketName);
     List<String> keyHolder = listKeyWithPrefix(bucketName, prefix);
+    if(keyHolder.size() == 0) return;
     String[] keys = new String[keyHolder.size()];
     keys = keyHolder.toArray(keys);
+    DeleteObjectsRequest delReq = new DeleteObjectsRequest(bucketName);
     delReq.withKeys(keys);
     s3Client.deleteObjects(delReq);
   }
