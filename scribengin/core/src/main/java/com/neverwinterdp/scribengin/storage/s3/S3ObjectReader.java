@@ -21,7 +21,7 @@ public class S3ObjectReader implements Closeable {
   
   
   public boolean hasNext() throws IOException {
-    if(objIs.available() > 0) {
+    if(objIs.available() > -1) {
       int size = objIs.readInt();
       current = new byte[size];
       objIs.readFully(current);
