@@ -63,7 +63,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
   }
 
   public class HDFSTrackingMessageReader extends TrackingMessageReader {
-    private BlockingQueue<TrackingMessage> tmQueue = new LinkedBlockingQueue<>(5000);
+    private BlockingQueue<TrackingMessage> tmQueue = new LinkedBlockingQueue<>(10000);
     private long partitionRollPeriod ;
     private HDFSSourceReader hdfsSourceReader ;
     

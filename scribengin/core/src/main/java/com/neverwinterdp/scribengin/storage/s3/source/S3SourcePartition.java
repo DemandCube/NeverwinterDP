@@ -1,8 +1,13 @@
 package com.neverwinterdp.scribengin.storage.s3.source;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
 import com.neverwinterdp.scribengin.storage.s3.S3Client;
+import com.neverwinterdp.scribengin.storage.s3.S3Folder;
 import com.neverwinterdp.scribengin.storage.s3.S3Storage;
 import com.neverwinterdp.scribengin.storage.source.SourcePartition;
 
@@ -38,11 +43,19 @@ public class S3SourcePartition implements SourcePartition {
 
   @Override
   public S3SourcePartitionStream[] getPartitionStreams() {
-    int numOfStream  = storageConfig.getPartitionStream() ;
-    S3SourcePartitionStream[] stream = new S3SourcePartitionStream[numOfStream];
-    for(int i = 0; i < numOfStream; i++) {
-      stream[i] = getPartitionStream(i);
+    String bucketName    = storageConfig.attribute(S3Storage.BUCKET_NAME);
+    String storagePath   = storageConfig.attribute(S3Storage.STORAGE_PATH);
+    String partitionPath = storagePath + "/" + partitionName;
+    S3Folder pFolder = s3Client.getS3Folder(bucketName, partitionPath);
+    List<String> streamNames = pFolder.getChildrenNames();
+    S3SourcePartitionStream[] stream = new S3SourcePartitionStream[streamNames.size()];
+    for(int i = 0; i < streamNames.size(); i++) {
+      String streamName = streamNames.get(i);
+      int dashIdx = streamName.lastIndexOf('-');
+      int id = Integer.parseInt(streamName.substring(dashIdx + 1)) ;
+      stream[i] = getPartitionStream(id);
     }
+    Arrays.sort(stream, S3SourcePartitionStream.COMPARATOR);
     return stream;
   }
 

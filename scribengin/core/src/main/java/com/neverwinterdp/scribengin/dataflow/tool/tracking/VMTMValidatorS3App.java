@@ -52,8 +52,8 @@ public class VMTMValidatorS3App extends VMApp {
     logger.info("reportPath = "          + reportPath);
     logger.info("numOfReader = "         + numOfReader);
     logger.info("maxRuntime = "          + maxRuntime);
-    logger.info("s3.bucket.name  = "      + s3BucketName);
-    logger.info("s3.storage.path = "      + s3StoragePath);
+    logger.info("s3.bucket.name  = "     + s3BucketName);
+    logger.info("s3.storage.path = "     + s3StoragePath);
     logger.info("partitionRollPeriod = " + partitionRollPeriod);
     
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, reportPath);
@@ -69,9 +69,9 @@ public class VMTMValidatorS3App extends VMApp {
   }
 
   public class S3TrackingMessageReader extends TrackingMessageReader {
-    private long           partitionRollPeriod ;
-    private S3SourceConnector s3SourceConnector ;
-    private BlockingQueue<TrackingMessage> tmQueue = new LinkedBlockingQueue<>(5000);
+    private long                           partitionRollPeriod ;
+    private S3SourceConnector              s3SourceConnector ;
+    private BlockingQueue<TrackingMessage> tmQueue = new LinkedBlockingQueue<>(10000);
     
     S3TrackingMessageReader(String bucketName, String storagePath, long partitionRollPeriod) {
       this.partitionRollPeriod = partitionRollPeriod;
@@ -117,7 +117,6 @@ public class VMTMValidatorS3App extends VMApp {
       StorageConfig storageConfig = new StorageConfig("s3", bucketName + ":" + storagePath);
       storageConfig.attribute(S3Storage.BUCKET_NAME, bucketName);
       storageConfig.attribute(S3Storage.STORAGE_PATH, storagePath);
-      storageConfig.setPartitionStream(8);
       S3Client s3Client = new S3Client();
 
       S3Storage s3Storage = new S3Storage(s3Client, storageConfig);

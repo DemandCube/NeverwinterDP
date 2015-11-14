@@ -75,12 +75,12 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
 
   public Record[] next(int size, long maxWait) throws Exception {
     List<Record> holder = new ArrayList<Record>();
-    Record[] array = new Record[holder.size()];
     for (int i = 0; i < size; i++) {
-      Record dataflowMessage = next(maxWait);
-      if (dataflowMessage != null) holder.add(dataflowMessage);
+      Record record = next(maxWait);
+      if (record != null) holder.add(record);
       else break;
     }
+    Record[] array = new Record[holder.size()];
     holder.toArray(array);
     return array;
   }

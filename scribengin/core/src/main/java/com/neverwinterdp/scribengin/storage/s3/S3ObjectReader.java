@@ -24,10 +24,7 @@ public class S3ObjectReader implements Closeable {
     if(objIs.available() > 0) {
       int size = objIs.readInt();
       current = new byte[size];
-      int read = 0 ;
-      while(read < current.length) {
-        read += objIs.read(current, read, current.length - read);
-      }
+      objIs.readFully(current);
       return true;
     }
     return false;

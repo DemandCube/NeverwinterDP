@@ -174,10 +174,8 @@ public class S3Client {
     String marker = "first";
     while(marker != null) {
       ObjectListing oListing = s3Client.listObjects(request);
-      int count  = 0;
       for (S3ObjectSummary sel : oListing.getObjectSummaries()) {
         keyHolder.add(sel.getKey());
-        count++ ;
       }
       marker = oListing.getNextMarker();
       request.setMarker(marker);
