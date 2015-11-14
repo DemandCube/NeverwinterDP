@@ -69,9 +69,9 @@ public class SegmentStorageReader<T> {
     List<T> holder = new ArrayList<>();
     Record[] array = new Record[holder.size()];
     for (int i = 0; i < size; i++) {
-      T dataflowMessage = next(maxWait);
-      if (dataflowMessage != null)
-        holder.add(dataflowMessage);
+      T record = next(maxWait);
+      if (record != null)
+        holder.add(record);
       else
         break;
     }
