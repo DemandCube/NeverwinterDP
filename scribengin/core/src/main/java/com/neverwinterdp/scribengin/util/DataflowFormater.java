@@ -103,6 +103,7 @@ public class DataflowFormater {
       String groupBy = entry.getKey();
       List<OperatorTaskRuntimeReport> operatorReports = entry.getValue();
       taskFt.addRow(groupBy, "", "", "", "", "", "", "", "", "", "", "", "", "");
+      int accCommitProcessCount = 0;
       for(int i = 0; i < operatorReports.size(); i++) {
         OperatorTaskRuntimeReport rtReport = operatorReports.get(i);
         OperatorTaskReport report = rtReport.getReport();
@@ -122,7 +123,9 @@ public class DataflowFormater {
             report.getAccRuntime() + "ms",
             report.durationTime() + "ms"
         );
+        accCommitProcessCount += report.getAccCommitProcessCount();
       }
+      taskFt.addRow("  All", "", "", "", "", "", accCommitProcessCount, "", "", "", "", "", "", "");
     }
     return taskFt.getFormattedText();
   }
