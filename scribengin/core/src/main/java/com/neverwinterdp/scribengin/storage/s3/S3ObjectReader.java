@@ -21,9 +21,8 @@ public class S3ObjectReader implements Closeable {
   
   
   public boolean hasNext() throws IOException {
-    if(objIs.available() > -1) {
-      int size = objIs.readInt();
-      current = new byte[size];
+    if(objIs.available() > 0) {
+      current = new byte[objIs.readInt()];
       objIs.readFully(current);
       return true;
     }
@@ -33,5 +32,12 @@ public class S3ObjectReader implements Closeable {
   @Override
   public void close() throws IOException {
     objIs.close();
+  }
+  
+  static int getInt(byte[] b, int off) {
+    return ((b[off + 3] & 0xFF)      ) +
+           ((b[off + 2] & 0xFF) <<  8) +
+           ((b[off + 1] & 0xFF) << 16) +
+           ((b[off    ]       ) << 24);
   }
 }

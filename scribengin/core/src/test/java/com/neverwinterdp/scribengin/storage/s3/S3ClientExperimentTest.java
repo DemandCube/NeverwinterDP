@@ -39,6 +39,7 @@ public class S3ClientExperimentTest {
   public void testS3ObjectReaderWriter() throws Exception {
     String KEY = "test-s3-object-writer" ;
     int    NUM_OF_RECORDS = 1000;
+    
     MetricRegistry mRegistry = new MetricRegistry();
     long startTime = System.currentTimeMillis();
     Timer.Context writerCreateCtx = mRegistry.timer("writer.create").time();
