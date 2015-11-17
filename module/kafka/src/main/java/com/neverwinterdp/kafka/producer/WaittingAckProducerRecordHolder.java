@@ -56,7 +56,7 @@ public class WaittingAckProducerRecordHolder<K, V> {
       throw new Exception("Not all messages are sent and ack after " + waitTime + "ms");
     }
   }
-  
+
   synchronized void notifyForAvailableBuffer() {
     notifyAll();
   }
