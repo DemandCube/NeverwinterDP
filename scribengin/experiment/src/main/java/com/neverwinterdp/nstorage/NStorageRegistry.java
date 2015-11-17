@@ -1,4 +1,4 @@
-package com.neverwinterdp.hqueue;
+package com.neverwinterdp.nstorage;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,43 +12,43 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.lock.Lock;
 
-public class HQueueRegistry<T> {
+public class NStorageRegistry<T> {
   final static public String PARTITIONS   = "partitions";
   final static public String LOCKS        = "locks";
   final static public String CURSORS_READ = "cursors/read";
   
-  private Registry registry ;
-  private Node queueNode ;
-  private Node partitionsNode ;
-  private Node locksNode ;
-  private Node cursorsReadNode ;
-  private HQueue<T> hqueue ;
+  private Registry          registry;
+  private Node              nstorageNode;
+  private Node              partitionsNode;
+  private Node              locksNode;
+  private Node              cursorsReadNode;
+  private NStorageConfig<T> nstorageConfig;
 
-  public HQueueRegistry(Registry registry, String path) throws RegistryException {
+  public NStorageRegistry(Registry registry, String path) throws RegistryException {
     this.registry = registry;
-    queueNode = registry.get(path);
-    partitionsNode = queueNode.getChild(PARTITIONS);
-    locksNode = queueNode.getChild(LOCKS);
-    cursorsReadNode = queueNode.getDescendant(CURSORS_READ);
-    hqueue = (HQueue<T>) queueNode.getDataAs(HQueue.class);
+    nstorageNode = registry.get(path);
+    partitionsNode = nstorageNode.getChild(PARTITIONS);
+    locksNode = nstorageNode.getChild(LOCKS);
+    cursorsReadNode = nstorageNode.getDescendant(CURSORS_READ);
+    nstorageConfig = (NStorageConfig<T>) nstorageNode.getDataAs(NStorageConfig.class);
   }
   
-  public HQueueRegistry(Registry registry, HQueue<T> hqueue) throws RegistryException {
+  public NStorageRegistry(Registry registry, NStorageConfig<T> hqueue) throws RegistryException {
     this.registry = registry;
     if(registry.exists(hqueue.getRegistryPath())) {
       throw new RegistryException(ErrorCode.NodeExists, "The path " + hqueue.getRegistryPath() + " is already existed");
     }
-    queueNode = registry.createIfNotExist(hqueue.getRegistryPath()) ;
-    queueNode.setData(hqueue);
+    nstorageNode = registry.createIfNotExist(hqueue.getRegistryPath()) ;
+    nstorageNode.setData(hqueue);
     
-    partitionsNode = queueNode.createChild(PARTITIONS, NodeCreateMode.PERSISTENT);
-    locksNode = queueNode.createChild(LOCKS, NodeCreateMode.PERSISTENT);
-    cursorsReadNode = queueNode.createDescendantIfNotExists(CURSORS_READ);
-    this.hqueue = hqueue ;
+    partitionsNode = nstorageNode.createChild(PARTITIONS, NodeCreateMode.PERSISTENT);
+    locksNode = nstorageNode.createChild(LOCKS, NodeCreateMode.PERSISTENT);
+    cursorsReadNode = nstorageNode.createDescendantIfNotExists(CURSORS_READ);
+    this.nstorageConfig = hqueue ;
     resizePartitions();
   }
   
-  public HQueue<T> getHQueue() { return hqueue; }
+  public NStorageConfig<T> getNStorageConfig() { return nstorageConfig; }
   
   public void resizePartitions() throws RegistryException {
     BatchOperations<Boolean> newPartitionOp = new BatchOperations<Boolean>() {
@@ -57,12 +57,12 @@ public class HQueueRegistry<T> {
         try {
           Transaction transaction = registry.getTransaction();
           List<String> pNames = partitionsNode.getChildren();
-          for(int i = pNames.size(); i < hqueue.getNumOfPartition(); i++) {
-            HQueuePartition partition = new HQueuePartition();
+          for(int i = pNames.size(); i < nstorageConfig.getNumOfPartition(); i++) {
+            NStoragePartition partition = new NStoragePartition();
             partition.setPartitionId(i);
             String pName = "partition-" + partition.getPartitionId();
             partition.setRegistryLocation(partitionsNode.getPath() + "/" + pName);
-            partition.setFsLocation(hqueue.getFsLocation() + "/partitions/" + pName);
+            partition.setFsLocation(nstorageConfig.getFsLocation() + "/partitions/" + pName);
             transaction.createChild(partitionsNode, pName, partition, NodeCreateMode.PERSISTENT);
           }
           transaction.commit();
@@ -76,16 +76,16 @@ public class HQueueRegistry<T> {
     lock.execute(newPartitionOp, 3, 3000);
   }
   
-  public HQueuePartition getPartition(int partitionId) throws RegistryException {
-    return partitionsNode.getChild("partition-" + partitionId).getDataAs(HQueuePartition.class) ;
+  public NStoragePartition getPartition(int partitionId) throws RegistryException {
+    return partitionsNode.getChild("partition-" + partitionId).getDataAs(NStoragePartition.class) ;
   }
   
-  public List<HQueuePartition> getPartitions() throws RegistryException {
-    return partitionsNode.getChildrenAs(HQueuePartition.class) ;
+  public List<NStoragePartition> getPartitions() throws RegistryException {
+    return partitionsNode.getChildrenAs(NStoragePartition.class) ;
   }
   
-  public HQueuePartitionSegment newHQueuePartitionSegment(HQueuePartition partition) throws RegistryException {
-    final HQueuePartitionSegment segment = new HQueuePartitionSegment();
+  public NStoragePartitionSegment newNStoragePartitionSegment(NStoragePartition partition) throws RegistryException {
+    final NStoragePartitionSegment segment = new NStoragePartitionSegment();
     BatchOperations<Boolean> newPartitionOp = new BatchOperations<Boolean>() {
       @Override
       public Boolean execute(Registry registry) throws RegistryException {
@@ -103,28 +103,27 @@ public class HQueueRegistry<T> {
     return segment;
   }
   
-  public List<HQueuePartitionSegment> getHQueuePartitionSegments(HQueuePartition partition) throws RegistryException {
+  public List<NStoragePartitionSegment> getNStoragePartitionSegments(NStoragePartition partition) throws RegistryException {
     Node partitionNode = partitionsNode.getChild("partition-" + partition.getPartitionId()) ;
     Node segmentsNode = partitionNode.getChild("segments");
-    List<HQueuePartitionSegment> segments = segmentsNode.getChildrenAs(HQueuePartitionSegment.class);
-    Collections.sort(segments, HQueuePartitionSegment.ID_COMPARATOR);
+    List<NStoragePartitionSegment> segments = segmentsNode.getChildrenAs(NStoragePartitionSegment.class);
+    Collections.sort(segments, NStoragePartitionSegment.ID_COMPARATOR);
     return segments;
   }
   
-  public HQueueCursorRead getHQueueCursorRead(String name, boolean create) throws RegistryException {
+  public NStorageCursorRead getCursorRead(String name, boolean create) throws RegistryException {
     if(cursorsReadNode.hasChild(name)) {
-      return cursorsReadNode.getChild(name).getDataAs(HQueueCursorRead.class);
+      return cursorsReadNode.getChild(name).getDataAs(NStorageCursorRead.class);
     }
-    HQueueCursorRead cursor = new HQueueCursorRead(name);
+    NStorageCursorRead cursor = new NStorageCursorRead(name);
     cursorsReadNode.createChild(name, cursor, NodeCreateMode.PERSISTENT);
     return cursor ;
   }
   
-  public HQueueCursorReadPartition getHQueueCursorRead(HQueueCursorRead cursor, HQueuePartition partition) throws RegistryException {
+  public NStoragePartitionCursorRead getPartitionCursorRead(NStorageCursorRead cursor, NStoragePartition partition) throws RegistryException {
     Node cursorNode = cursorsReadNode.getChild(cursor.getName());
     cursorNode.getChild("partitions").getChild("partition-" + partition.getPartitionId());
-    HQueueCursorReadPartition partitionCursor = 
-      cursorNode.getDataAs(HQueueCursorReadPartition.class);
+    NStoragePartitionCursorRead partitionCursor = cursorNode.getDataAs(NStoragePartitionCursorRead.class);
     return partitionCursor ;
   }
 }

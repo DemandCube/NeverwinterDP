@@ -1,12 +1,12 @@
-package com.neverwinterdp.hqueue;
+package com.neverwinterdp.nstorage;
 
-public class HQueueCursorRead {
+public class NStorageCursorRead {
   private String name ;
   
-  public HQueueCursorRead() {
+  public NStorageCursorRead() {
   }
   
-  public HQueueCursorRead(String name) {
+  public NStorageCursorRead(String name) {
     this.name = name ;
   }
 

@@ -1,15 +1,15 @@
-package com.neverwinterdp.hqueue;
+package com.neverwinterdp.nstorage;
 
-public class HQueueCursorReadPartition {
+public class NStoragePartitionCursorRead {
   private String name ;
   private int    partitionId ;
   private int    currentSegment;
   private int    currentPosition;
   
-  public HQueueCursorReadPartition() {
+  public NStoragePartitionCursorRead() {
   }
   
-  public HQueueCursorReadPartition(String name) {
+  public NStoragePartitionCursorRead(String name) {
     this.name = name;
   }
 

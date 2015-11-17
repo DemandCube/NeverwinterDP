@@ -9,6 +9,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.neverwinterdp.nstorage.NStorageConfig;
+import com.neverwinterdp.nstorage.NStorageContext;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.tool.message.Message;
@@ -36,13 +38,13 @@ public class HQueueUnitTest {
   
   @Test
   public void testHQueue() throws Exception {
-    HQueue<Message> hqueue = 
-      new HQueue<Message>("test", "/hqueue/test", "build/hqueue/test", Message.class);
+    NStorageConfig<Message> hqueue = 
+      new NStorageConfig<Message>("test", "/hqueue/test", "build/hqueue/test", Message.class);
     hqueue.setNumOfPartition(5);
     Registry registry = newRegistry() ;
     
-    HQueueContext<Message> hqueueContext = new HQueueContext<>(registry, hqueue);
-    Assert.assertEquals(5, hqueueContext.getHQueuePartitions().size());
+    NStorageContext<Message> hqueueContext = new NStorageContext<>(registry, hqueue);
+    Assert.assertEquals(5, hqueueContext.getPartitions().size());
     
     registry.get("/").dump(System.out);
   }

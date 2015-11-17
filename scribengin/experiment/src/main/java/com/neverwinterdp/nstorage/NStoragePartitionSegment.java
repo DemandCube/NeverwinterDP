@@ -1,11 +1,11 @@
-package com.neverwinterdp.hqueue;
+package com.neverwinterdp.nstorage;
 
 import java.util.Comparator;
 
-public class HQueuePartitionSegment {
-  static public Comparator<HQueuePartitionSegment> ID_COMPARATOR = new Comparator<HQueuePartitionSegment>() {
+public class NStoragePartitionSegment {
+  static public Comparator<NStoragePartitionSegment> ID_COMPARATOR = new Comparator<NStoragePartitionSegment>() {
     @Override
-    public int compare(HQueuePartitionSegment s1, HQueuePartitionSegment s2) {
+    public int compare(NStoragePartitionSegment s1, NStoragePartitionSegment s2) {
       return s1.getId() - s2.getId();
     }
   };

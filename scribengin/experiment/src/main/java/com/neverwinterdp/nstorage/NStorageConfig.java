@@ -1,6 +1,6 @@
-package com.neverwinterdp.hqueue;
+package com.neverwinterdp.nstorage;
 
-public class HQueue <T> {
+public class NStorageConfig <T> {
   private String name;
   private String fsLocation;
   private String registryPath;
@@ -8,10 +8,10 @@ public class HQueue <T> {
   private int    maxPartitionSegmentSize = 1 * 1024 * 1024;
   private String type ;
   
-  public HQueue() {
+  public NStorageConfig() {
   }
   
-  public HQueue(String name, String registryPath, String fsLocation, Class<T> type) {
+  public NStorageConfig(String name, String registryPath, String fsLocation, Class<T> type) {
     this.name = name ;
     this.registryPath = registryPath;
     this.fsLocation = fsLocation;
