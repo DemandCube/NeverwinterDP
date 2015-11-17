@@ -11,6 +11,7 @@ include 'registry/core'
 include 'registry/vm'
 include 'registry/vm-sample'
 
+include 'scribengin/storage'
 include 'scribengin/core'
 include 'scribengin/experiment'
 include 'scribengin/dataflow/tracking-sample'
