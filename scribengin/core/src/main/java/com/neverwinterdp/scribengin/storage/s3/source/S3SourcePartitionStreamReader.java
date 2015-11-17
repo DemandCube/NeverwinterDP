@@ -93,12 +93,10 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
 
   @Override
   public void prepareCommit() {
-    
   }
 
   @Override
   public void completeCommit() {
-   
   }
 
   public void commit() throws Exception {
@@ -117,8 +115,9 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
   }
 
   private S3ObjectReader nextSegmentReader() throws IOException {
+    if(endOfStream) return null; 
     currentSegmentPos++;
-    if (currentSegmentPos >= segments.size()) {
+    if(currentSegmentPos >= segments.size()) {
       endOfStream = true;
       return null;
     }

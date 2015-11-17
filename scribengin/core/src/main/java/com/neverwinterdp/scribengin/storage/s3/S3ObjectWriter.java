@@ -22,7 +22,7 @@ public class S3ObjectWriter {
     this.bucketName = bucketName;
     this.key        = key;
     this.metadata   = metadata;
-    this.bos        = new ByteArrayOutputStream() ;
+    this.bos        = new ByteArrayOutputStream(4 * 1024 * 1024) ;
     this.objOs      = new ObjectOutputStream(bos);
   }
 

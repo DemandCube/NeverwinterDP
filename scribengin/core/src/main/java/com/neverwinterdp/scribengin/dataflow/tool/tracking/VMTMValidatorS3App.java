@@ -180,22 +180,20 @@ public class VMTMValidatorS3App extends VMApp {
     public void run() {
       try {
         doRun();
-      } catch (Exception e) {
-        e.printStackTrace();
+      } catch(Throwable e) {
+        logger.error("Error:", e);
       }
     }
     
     void doRun() throws Exception {
       S3SourcePartitionStream stream = null;
-      while((stream = streamQueue.poll(10, TimeUnit.MILLISECONDS)) != null) {
+      while((stream = streamQueue.poll(100, TimeUnit.MILLISECONDS)) != null) {
         Record record = null;
         S3SourcePartitionStreamReader reader = stream.getReader("validator") ;
         while((record = reader.next(1000)) != null) {
           byte[] data = record.getData();
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(data, TrackingMessage.class);
-          if(!tmQueue.offer(tMesg, 5000, TimeUnit.MILLISECONDS)) {
-            throw new Exception("Cannot queue the messages after 5s, increase the buffer");
-          }
+          tmQueue.put(tMesg);
         }
         reader.close();
       }
