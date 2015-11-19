@@ -48,7 +48,7 @@ public class S3ObjectWriter {
     PutObjectResult result = s3Client.getAmazonS3Client().putObject(request);
     //uploadListener.waitForUploadComplete(timeout);
     if(uploadListener.getComleteProgressEvent() == null) {
-      throw new InterruptedException("Cannot get the complete event after " + timeout + "ms, the last event " + uploadListener.getLastProgressEventType());
+      throw new IOException("Cannot get the complete event after " + timeout + "ms, the last event " + uploadListener.getLastProgressEventType());
     }
   }
   
