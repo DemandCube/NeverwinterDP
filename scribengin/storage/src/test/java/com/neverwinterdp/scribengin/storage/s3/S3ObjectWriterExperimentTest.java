@@ -39,6 +39,6 @@ public class S3ObjectWriterExperimentTest {
         System.out.println("write " + i + ", bytes " + totalBytes); 
       }
     }
-    writer.waitAndClose(120000);
+    writer.waitAndClose(30000);
   }
 }

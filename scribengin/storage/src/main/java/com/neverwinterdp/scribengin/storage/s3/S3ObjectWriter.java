@@ -5,6 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
+import com.amazonaws.event.ProgressEvent;
+import com.amazonaws.event.ProgressEventType;
+import com.amazonaws.event.ProgressListener;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
@@ -39,11 +42,42 @@ public class S3ObjectWriter {
     ByteArrayInputStream input = new ByteArrayInputStream(data);
     metadata.setContentLength(data.length);
     PutObjectRequest request = new PutObjectRequest(bucketName, key, input, metadata);
+    UploadProgressListener uploadListener = new UploadProgressListener();
+    request.setGeneralProgressListener(uploadListener);
     request.getRequestClientOptions().setReadLimit(256 * 1024);
     PutObjectResult result = s3Client.getAmazonS3Client().putObject(request);
+    //uploadListener.waitForUploadComplete(timeout);
+    if(uploadListener.getComleteProgressEvent() == null) {
+      throw new InterruptedException("Cannot get the complete event after " + timeout + "ms, the last event " + uploadListener.getLastProgressEventType());
+    }
   }
   
   public void forceClose() throws IOException, InterruptedException {
     objOs.close();
+  }
+  
+  static public class UploadProgressListener implements ProgressListener {
+    private ProgressEventType lastProgressEventType ;
+    private ProgressEventType completeEvent ;
+    @Override
+    public void progressChanged(ProgressEvent progressEvent) {
+      lastProgressEventType = progressEvent.getEventType() ;
+      if(lastProgressEventType == ProgressEventType.TRANSFER_COMPLETED_EVENT) {
+        completeEvent = lastProgressEventType;
+        notifyComplete();
+      }
+    }
+    
+    public ProgressEventType getLastProgressEventType() { return lastProgressEventType; }
+    
+    public ProgressEventType getComleteProgressEvent() { return  completeEvent; }
+    
+    synchronized void notifyComplete() {
+       notifyAll();
+    }
+    
+    synchronized void waitForUploadComplete(long timeout) throws InterruptedException {
+      wait(timeout);;
+   }
   }
 }
