@@ -4,9 +4,9 @@ public class NStoragePartitionSegmentWriter<T> {
   private NStorageContext<T>       context;
   private NStoragePartition        partition;
   private NStoragePartitionSegment segment;
-  private long                   maxPartitionSegmentSize;
-  private long                   currentPartitionSegmentSize;
-  
+  private long                     maxPartitionSegmentSize;
+  private long                     currentPartitionSegmentSize;
+
   public NStoragePartitionSegmentWriter(NStorageContext<T> context, NStoragePartition  partition, NStoragePartitionSegment segment) {
     this.context   = context;
     this.partition = partition ;

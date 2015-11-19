@@ -162,7 +162,7 @@ public class VMTMValidatorS3App extends VMApp {
         service.submit(new S3PartitionStreamReader(streamQueue, tmQueue));
       }
       service.shutdown();
-      service.awaitTermination(2 * partitionRollPeriod, TimeUnit.MILLISECONDS);
+      service.awaitTermination(1, TimeUnit.DAYS);
       partition.delete();
     }
   }
