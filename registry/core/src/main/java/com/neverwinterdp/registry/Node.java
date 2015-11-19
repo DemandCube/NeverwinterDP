@@ -205,6 +205,7 @@ public class Node {
   private void dump(Appendable out, String parent, String node, Registry registry, String indentation) throws IOException, RegistryException {
     //During the recursive traverse, a node can be added or removed by the other process
     //So we can ignore all the No node exists exception
+    int MAX_DATA_LENGTH = 120;
     String path = parent + "/" + node;
     if("/".equals(parent)) path = "/" + node;
     byte[] data = {};
@@ -217,8 +218,8 @@ public class Node {
       stringData = " - " + new String(data);
       stringData = stringData.replace("\r\n", " ");
       stringData = stringData.replace("\n", " ");
-      if(stringData.length() > 80) {
-        stringData = stringData.substring(0, 80) + "...";
+      if(stringData.length() > MAX_DATA_LENGTH) {
+        stringData = stringData.substring(0, MAX_DATA_LENGTH) + "...";
       }
     }
     out.append(indentation + node + stringData).append('\n');
