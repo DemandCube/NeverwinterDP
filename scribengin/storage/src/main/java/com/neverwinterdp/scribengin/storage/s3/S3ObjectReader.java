@@ -9,10 +9,12 @@ import java.io.ObjectInputStream;
 import com.amazonaws.services.s3.model.S3Object;
 
 public class S3ObjectReader implements Closeable {
+  private S3Object          s3Object;
   private ObjectInputStream objIs;
   private byte[]            current = null ;
   
   public S3ObjectReader(S3Object s3Object) throws IOException {
+    this.s3Object  = s3Object;
     InputStream is = s3Object.getObjectContent();
     objIs = new ObjectInputStream(new BufferedInputStream(is, 1024 * 1024));
   }
@@ -31,6 +33,7 @@ public class S3ObjectReader implements Closeable {
 
   @Override
   public void close() throws IOException {
+    s3Object.close();
     objIs.close();
   }
 }
