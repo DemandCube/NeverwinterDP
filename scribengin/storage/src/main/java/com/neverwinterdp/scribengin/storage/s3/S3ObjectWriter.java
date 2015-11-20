@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.amazonaws.event.ProgressEvent;
 import com.amazonaws.event.ProgressEventType;
@@ -39,6 +41,7 @@ public class S3ObjectWriter {
   public void waitAndClose(long timeout) throws Exception, IOException, InterruptedException {
     objOs.close();
     byte[] data = bos.toByteArray();
+    if(data.length == 0) return;
     ByteArrayInputStream input = new ByteArrayInputStream(data);
     metadata.setContentLength(data.length);
     PutObjectRequest request = new PutObjectRequest(bucketName, key, input, metadata);
@@ -46,9 +49,12 @@ public class S3ObjectWriter {
     request.setGeneralProgressListener(uploadListener);
     request.getRequestClientOptions().setReadLimit(256 * 1024);
     PutObjectResult result = s3Client.getAmazonS3Client().putObject(request);
-    //uploadListener.waitForUploadComplete(timeout);
+    uploadListener.waitForUploadComplete(timeout);
     if(uploadListener.getComleteProgressEvent() == null) {
-      throw new IOException("Cannot get the complete event after " + timeout + "ms, the last event " + uploadListener.getLastProgressEventType());
+      String mesg = 
+          "Cannot get the complete event after " + timeout + "ms\n" + 
+          uploadListener.getProgressEventInfo();
+      throw new IOException(mesg);
     }
   }
   
@@ -57,20 +63,23 @@ public class S3ObjectWriter {
   }
   
   static public class UploadProgressListener implements ProgressListener {
-    private ProgressEventType lastProgressEventType ;
-    private ProgressEventType completeEvent ;
+    private StringBuilder progressEvents = new StringBuilder();
+    private ProgressEvent completeEvent ;
+    
     @Override
-    public void progressChanged(ProgressEvent progressEvent) {
-      lastProgressEventType = progressEvent.getEventType() ;
-      if(lastProgressEventType == ProgressEventType.TRANSFER_COMPLETED_EVENT) {
-        completeEvent = lastProgressEventType;
+    synchronized public void progressChanged(ProgressEvent progressEvent) {
+      progressEvents.append(progressEvent).append("\n");
+      if(progressEvent.getEventType() == ProgressEventType.TRANSFER_COMPLETED_EVENT) {
+        completeEvent = progressEvent;
         notifyComplete();
       }
     }
     
-    public ProgressEventType getLastProgressEventType() { return lastProgressEventType; }
+    public ProgressEvent getComleteProgressEvent() { return  completeEvent; }
     
-    public ProgressEventType getComleteProgressEvent() { return  completeEvent; }
+    public String getProgressEventInfo() {
+      return progressEvents.toString();
+    }
     
     synchronized void notifyComplete() {
        notifyAll();
