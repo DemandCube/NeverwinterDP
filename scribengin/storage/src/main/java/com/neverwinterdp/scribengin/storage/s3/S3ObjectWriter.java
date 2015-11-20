@@ -4,8 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.amazonaws.event.ProgressEvent;
 import com.amazonaws.event.ProgressEventType;
@@ -56,6 +54,7 @@ public class S3ObjectWriter {
           uploadListener.getProgressEventInfo();
       throw new IOException(mesg);
     }
+    System.err.println(uploadListener.getProgressEventInfo());
   }
   
   public void forceClose() throws IOException, InterruptedException {
@@ -63,12 +62,19 @@ public class S3ObjectWriter {
   }
   
   static public class UploadProgressListener implements ProgressListener {
+    private int requestByteTransferEvent = 0;
+    private ProgressEvent lastRequestByteTransferEvent  ;
     private StringBuilder progressEvents = new StringBuilder();
     private ProgressEvent completeEvent ;
     
     @Override
     synchronized public void progressChanged(ProgressEvent progressEvent) {
-      progressEvents.append(progressEvent).append("\n");
+      if(progressEvent.getEventType() == ProgressEventType.REQUEST_BYTE_TRANSFER_EVENT) {
+        requestByteTransferEvent++;
+        lastRequestByteTransferEvent = progressEvent;
+      } else {
+        progressEvents.append(progressEvent).append("\n");
+      }
       if(progressEvent.getEventType() == ProgressEventType.TRANSFER_COMPLETED_EVENT) {
         completeEvent = progressEvent;
         notifyComplete();
@@ -78,7 +84,11 @@ public class S3ObjectWriter {
     public ProgressEvent getComleteProgressEvent() { return  completeEvent; }
     
     public String getProgressEventInfo() {
-      return progressEvents.toString();
+      String info = 
+          "lastRequestByteTransferEvent = " + lastRequestByteTransferEvent + "\n" +
+          "REQUEST_BYTE_TRANSFER_EVENT = " + requestByteTransferEvent + "\n" +
+          progressEvents.toString();
+      return info;
     }
     
     synchronized void notifyComplete() {
