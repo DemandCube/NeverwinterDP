@@ -44,7 +44,8 @@ public class S3Client {
   public S3Client(Region region) {
     ClientConfiguration conf = new ClientConfiguration() ;
     conf.setMaxConnections(100);
-    conf.setMaxErrorRetry(10);
+    conf.setMaxErrorRetry(5);
+    conf.setConnectionTimeout(90000);
     s3Client = new AmazonS3Client(conf);
     s3Client.setRegion(region);
     manager = new TransferManager(s3Client);
