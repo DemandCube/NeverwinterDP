@@ -16,7 +16,7 @@ import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class S3SinkPartitionStreamWriter implements SinkPartitionStreamWriter {
-  static private final int TIMEOUT = 3 * 60 * 1000;
+  static private final int TIMEOUT = 90 * 1000;
   
   private S3Client              s3Client;
   private StorageConfig         storageConfig;

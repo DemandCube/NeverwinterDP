@@ -31,7 +31,7 @@ public class S3ObjectWriterExperimentTest {
     String KEY = "test-s3-object-writer" ;
     S3ObjectWriter writer = new S3ObjectWriter(s3Client, BUCKET_NAME, KEY, new ObjectMetadata());
     int totalBytes = 0 ;
-    for(int i = 0; i < 10000; i++) {
+    for(int i = 0; i < 1000; i++) {
       byte[] data = new byte[512] ;
       writer.write(data);
       totalBytes += data.length;
@@ -39,6 +39,6 @@ public class S3ObjectWriterExperimentTest {
         System.out.println("write " + i + ", bytes " + totalBytes); 
       }
     }
-    writer.waitAndClose(120000);
+    writer.waitAndClose(30000);
   }
 }

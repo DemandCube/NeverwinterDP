@@ -1,0 +1,39 @@
+Storage
+  partition-0
+    action-queue
+    readers
+      reader-1
+        name:            reader-1
+        segment:         segment-0000003
+        segmentData:     segment-data-1
+        lastCommitIndex: 1000
+        startTime:       0
+        endTime:         100
+    writers
+      writer-1
+        name: writer-1
+      writer-2
+        name: writer-2
+    data
+      segment-00000001
+        status: optimized
+        lock
+        data
+          segment-data-1.dat
+      segment-00000002
+        status: optimized
+        lock
+        data
+          segment-data-1.dat
+          segment-data-2.dat
+          segment-data-3.dat
+            creator:               name
+            from:                  -1
+            to:                    -1
+            lastCommitRecordIndex: 1000
+            lastCommitPos:         1000000
+            startTime:             0
+            endTime:               100
+            location:              segment-data-1.dat
+            status:                writing
+

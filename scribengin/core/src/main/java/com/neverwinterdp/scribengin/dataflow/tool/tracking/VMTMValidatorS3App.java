@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 
@@ -27,7 +28,8 @@ import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
 
 public class VMTMValidatorS3App extends VMApp {
-  private Logger logger;
+  private Logger     logger;
+  private AtomicLong readCounter = new AtomicLong();
   
   @Override
   public void run() throws Exception {
@@ -161,8 +163,11 @@ public class VMTMValidatorS3App extends VMApp {
       for(int i = 0; i < stream.length; i++) {
         service.submit(new S3PartitionStreamReader(streamQueue, tmQueue));
       }
+      long start = System.currentTimeMillis();
       service.shutdown();
-      service.awaitTermination(2 * partitionRollPeriod, TimeUnit.MILLISECONDS);
+      service.awaitTermination(1, TimeUnit.DAYS);
+      long duration = System.currentTimeMillis() - start;
+      logger.info("Validate the partition " + partition.getPartitionName() + " in " + duration + "ms, read = " + readCounter.get());
       partition.delete();
     }
   }
@@ -194,6 +199,7 @@ public class VMTMValidatorS3App extends VMApp {
           byte[] data = record.getData();
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(data, TrackingMessage.class);
           tmQueue.put(tMesg);
+          readCounter.incrementAndGet();
         }
         reader.close();
       }

@@ -5,6 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
+import com.amazonaws.event.ProgressEvent;
+import com.amazonaws.event.ProgressEventType;
+import com.amazonaws.event.ProgressListener;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
@@ -36,14 +39,65 @@ public class S3ObjectWriter {
   public void waitAndClose(long timeout) throws Exception, IOException, InterruptedException {
     objOs.close();
     byte[] data = bos.toByteArray();
+    if(data.length == 0) return;
+    
     ByteArrayInputStream input = new ByteArrayInputStream(data);
     metadata.setContentLength(data.length);
     PutObjectRequest request = new PutObjectRequest(bucketName, key, input, metadata);
     request.getRequestClientOptions().setReadLimit(256 * 1024);
+    UploadProgressListener uploadListener = new UploadProgressListener();
+    request.setGeneralProgressListener(uploadListener);
     PutObjectResult result = s3Client.getAmazonS3Client().putObject(request);
+    uploadListener.waitForUploadComplete(timeout);
+    if(uploadListener.getComleteProgressEvent() == null) {
+      String mesg = 
+          "Cannot get the complete event after " + timeout + "ms\n" + 
+          uploadListener.getProgressEventInfo();
+      throw new IOException(mesg);
+    }
   }
   
   public void forceClose() throws IOException, InterruptedException {
     objOs.close();
+  }
+  
+  static public class UploadProgressListener implements ProgressListener {
+    private int requestByteTransferEvent = 0;
+    private ProgressEvent lastRequestByteTransferEvent  ;
+    private StringBuilder progressEvents = new StringBuilder();
+    private ProgressEvent completeEvent ;
+    
+    @Override
+    synchronized public void progressChanged(ProgressEvent progressEvent) {
+      if(progressEvent.getEventType() == ProgressEventType.REQUEST_BYTE_TRANSFER_EVENT) {
+        requestByteTransferEvent++;
+        lastRequestByteTransferEvent = progressEvent;
+      } else {
+        progressEvents.append(progressEvent).append("\n");
+      }
+      if(progressEvent.getEventType() == ProgressEventType.TRANSFER_COMPLETED_EVENT) {
+        completeEvent = progressEvent;
+        notifyComplete();
+      }
+    }
+    
+    public ProgressEvent getComleteProgressEvent() { return  completeEvent; }
+    
+    public String getProgressEventInfo() {
+      String info = 
+          "lastRequestByteTransferEvent = " + lastRequestByteTransferEvent + "\n" +
+          "REQUEST_BYTE_TRANSFER_EVENT = " + requestByteTransferEvent + "\n" +
+          progressEvents.toString();
+      return info;
+    }
+    
+    synchronized void notifyComplete() {
+       notifyAll();
+    }
+    
+    synchronized void waitForUploadComplete(long timeout) throws InterruptedException {
+      if(completeEvent != null) return;
+      wait(timeout);
+   }
   }
 }

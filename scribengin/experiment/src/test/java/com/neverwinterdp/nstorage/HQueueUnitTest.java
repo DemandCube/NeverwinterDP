@@ -1,4 +1,4 @@
-package com.neverwinterdp.hqueue;
+package com.neverwinterdp.nstorage;
 
 
 import org.apache.hadoop.conf.Configuration;
