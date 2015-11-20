@@ -48,7 +48,7 @@ public class S3ObjectWriter {
     UploadProgressListener uploadListener = new UploadProgressListener();
     request.setGeneralProgressListener(uploadListener);
     PutObjectResult result = s3Client.getAmazonS3Client().putObject(request);
-    
+    uploadListener.waitForUploadComplete(timeout);
     if(uploadListener.getComleteProgressEvent() == null) {
       String mesg = 
           "Cannot get the complete event after " + timeout + "ms\n" + 
