@@ -48,15 +48,16 @@ public class S3ObjectWriter {
         tryWaitAndClose(data, timeout);
         return;
       } catch (AmazonServiceException ase) {
-        System.out.println("Error Message:    " + ase.getMessage());
-        System.out.println("HTTP Status Code: " + ase.getStatusCode());
-        System.out.println("AWS Error Code:   " + ase.getErrorCode());
-        System.out.println("Error Type:       " + ase.getErrorType());
-        System.out.println("Request ID:       " + ase.getRequestId());
+        System.err.println("waitAndClose: try = "  + i);
+        System.err.println("Error Message:    " + ase.getMessage());
+        System.err.println("HTTP Status Code: " + ase.getStatusCode());
+        System.err.println("AWS Error Code:   " + ase.getErrorCode());
+        System.err.println("Error Type:       " + ase.getErrorType());
+        System.err.println("Request ID:       " + ase.getRequestId());
         error = ase;
         continue ;
-      } catch (AmazonClientException ace) {
-        error = ace ;
+      } catch(Throwable t) {
+        error = t ;
         break;
       }
     }
