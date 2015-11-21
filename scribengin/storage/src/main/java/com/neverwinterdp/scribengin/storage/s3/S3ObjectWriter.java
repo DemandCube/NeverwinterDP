@@ -42,37 +42,46 @@ public class S3ObjectWriter {
     objOs.close();
     byte[] data = bos.toByteArray();
     if(data.length == 0) return;
-    
+    Throwable error = null;
+    for(int i = 0; i < 3; i++) {
+      try {
+        tryWaitAndClose(data, timeout);
+        return;
+      } catch (AmazonServiceException ase) {
+        System.out.println("Error Message:    " + ase.getMessage());
+        System.out.println("HTTP Status Code: " + ase.getStatusCode());
+        System.out.println("AWS Error Code:   " + ase.getErrorCode());
+        System.out.println("Error Type:       " + ase.getErrorType());
+        System.out.println("Request ID:       " + ase.getRequestId());
+        error = ase;
+        continue ;
+      } catch (AmazonClientException ace) {
+        error = ace ;
+        break;
+      }
+    }
+    throw new IOException(error);
+  }
+  
+  public void forceClose() throws IOException, InterruptedException {
+    objOs.close();
+  }
+  
+  private void tryWaitAndClose(byte[] data, long timeout) throws AmazonServiceException, AmazonClientException, InterruptedException {
     ByteArrayInputStream input = new ByteArrayInputStream(data);
     metadata.setContentLength(data.length);
     PutObjectRequest request = new PutObjectRequest(bucketName, key, input, metadata);
     request.getRequestClientOptions().setReadLimit(256 * 1024);
     UploadProgressListener uploadListener = new UploadProgressListener();
     request.setGeneralProgressListener(uploadListener);
-    try {
-      PutObjectResult result = s3Client.getAmazonS3Client().putObject(request);
-      uploadListener.waitForUploadComplete(timeout);
-      if(uploadListener.getComleteProgressEvent() == null) {
-        String mesg = 
-            "Cannot get the complete event after " + timeout + "ms\n" + 
-            uploadListener.getProgressEventInfo();
-        throw new IOException(mesg);
-      }
-    } catch (AmazonServiceException ase) {
-      System.out.println("Error Message:    " + ase.getMessage());
-      System.out.println("HTTP Status Code: " + ase.getStatusCode());
-      System.out.println("AWS Error Code:   " + ase.getErrorCode());
-      System.out.println("Error Type:       " + ase.getErrorType());
-      System.out.println("Request ID:       " + ase.getRequestId());
-      throw new IOException(ase);
-    } catch (AmazonClientException ace) {
-      System.out.println("Error Message: " + ace.getMessage());
-      throw new IOException(ace);
-    } 
-  }
-  
-  public void forceClose() throws IOException, InterruptedException {
-    objOs.close();
+    PutObjectResult result = s3Client.getAmazonS3Client().putObject(request);
+    uploadListener.waitForUploadComplete(timeout);
+    if(uploadListener.getComleteProgressEvent() == null) {
+      String mesg = 
+          "Cannot get the complete event after " + timeout + "ms\n" + 
+          uploadListener.getProgressEventInfo();
+      throw new AmazonServiceException(mesg);
+    }
   }
   
   static public class UploadProgressListener implements ProgressListener {
