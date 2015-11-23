@@ -12,9 +12,9 @@ abstract public class SegmentStorageWriter {
     this.segStorageReg = segStorageReg;
   }
   
-  abstract protected SegmentWriter nextSegmentWriter(SegmentDescriptor segment) ;
+  abstract protected SegmentWriter nextSegmentWriter(SegmentDescriptor segment) throws RegistryException, IOException;
   
-  private SegmentWriter nextSegmentWriter() throws RegistryException {
+  private SegmentWriter nextSegmentWriter() throws RegistryException, IOException  {
     SegmentDescriptor segment = segStorageReg.newSegment();
     return nextSegmentWriter(segment) ;
   }
