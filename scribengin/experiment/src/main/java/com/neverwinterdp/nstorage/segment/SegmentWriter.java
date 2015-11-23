@@ -5,9 +5,9 @@ import java.io.IOException;
 import com.neverwinterdp.registry.RegistryException;
 
 abstract public class SegmentWriter {
-  private String                 name;
-  private SegmentStorageRegistry registry;
-  private SegmentDescriptor      segment;
+  protected String                 name;
+  protected SegmentStorageRegistry registry;
+  protected SegmentDescriptor      segment;
   
   public SegmentWriter(String name, SegmentStorageRegistry registry, SegmentDescriptor segment) {
     this.name     = name;
@@ -15,7 +15,30 @@ abstract public class SegmentWriter {
     this.segment  = segment;
   }
 
-  abstract public boolean isFull() throws IOException, RegistryException;
+  public boolean isFull() throws IOException, RegistryException {
+    return isBufferFull();
+  }
   
-  abstract public void write(byte[] data) throws IOException, RegistryException ;
+  public void write(byte[] data) throws IOException, RegistryException {
+  }
+  
+  public void prepareCommit() throws IOException, RegistryException {
+    bufferPrepareCommit();
+  }
+  
+  public void completeCommit() throws IOException, RegistryException {
+    bufferCompleteCommit();
+  }
+  
+  public void rollback() throws IOException, RegistryException {
+    bufferRollback();
+  }
+  
+  abstract protected boolean isBufferFull() throws IOException, RegistryException;
+  
+  abstract protected void bufferWrite(byte[] data) throws IOException, RegistryException ;
+  
+  abstract protected void bufferPrepareCommit() throws IOException ;
+  abstract protected void bufferCompleteCommit() throws IOException ;
+  abstract protected void bufferRollback() throws IOException ;
 }

@@ -112,7 +112,6 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
     if(currentSegmenttReader != null) {
       currentSegmenttReader.close();
     }
-    System.err.println(partitionName + ": closed");
   }
 
   private S3ObjectReader nextSegmentReader() throws IOException {
@@ -124,8 +123,12 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
     }
     String segment = segments.get(currentSegmentPos);
     S3Object s3Object = streamFolder.getS3Object(segment);
-    S3ObjectReader reader = new S3ObjectReader(s3Object);
-    System.err.println(partitionName + ": segment = " + segment + ", segment-index = " + currentSegmentPos + ", segment total = " + segments.size());
-    return reader;
+    String transaction = s3Object.getObjectMetadata().getUserMetadata().get("transaction");
+    if("complete".equals(transaction)) {
+      S3ObjectReader reader = new S3ObjectReader(s3Object);
+      return reader;
+    }
+    s3Object.close();
+    return nextSegmentReader();
   }
 }

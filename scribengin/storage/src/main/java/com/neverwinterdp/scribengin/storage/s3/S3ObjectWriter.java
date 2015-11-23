@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.event.ProgressEvent;
 import com.amazonaws.event.ProgressEventType;
 import com.amazonaws.event.ProgressListener;
@@ -40,7 +42,33 @@ public class S3ObjectWriter {
     objOs.close();
     byte[] data = bos.toByteArray();
     if(data.length == 0) return;
-    
+    Throwable error = null;
+    for(int i = 0; i < 3; i++) {
+      try {
+        tryWaitAndClose(data, timeout);
+        return;
+      } catch (AmazonServiceException ase) {
+        System.err.println("waitAndClose: try = "  + i);
+        System.err.println("Error Message:    " + ase.getMessage());
+        System.err.println("HTTP Status Code: " + ase.getStatusCode());
+        System.err.println("AWS Error Code:   " + ase.getErrorCode());
+        System.err.println("Error Type:       " + ase.getErrorType());
+        System.err.println("Request ID:       " + ase.getRequestId());
+        error = ase;
+        continue ;
+      } catch(Throwable t) {
+        error = t ;
+        break;
+      }
+    }
+    throw new IOException(error);
+  }
+  
+  public void forceClose() throws IOException, InterruptedException {
+    objOs.close();
+  }
+  
+  private void tryWaitAndClose(byte[] data, long timeout) throws AmazonServiceException, AmazonClientException, InterruptedException {
     ByteArrayInputStream input = new ByteArrayInputStream(data);
     metadata.setContentLength(data.length);
     PutObjectRequest request = new PutObjectRequest(bucketName, key, input, metadata);
@@ -53,12 +81,8 @@ public class S3ObjectWriter {
       String mesg = 
           "Cannot get the complete event after " + timeout + "ms\n" + 
           uploadListener.getProgressEventInfo();
-      throw new IOException(mesg);
+      throw new AmazonServiceException(mesg);
     }
-  }
-  
-  public void forceClose() throws IOException, InterruptedException {
-    objOs.close();
   }
   
   static public class UploadProgressListener implements ProgressListener {

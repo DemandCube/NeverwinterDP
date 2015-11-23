@@ -77,7 +77,7 @@ public class SyncYarnManager extends YarnManager {
     vmReq.setCallback(cb);
     Container container = null ;
     for(int i = 0; i < 10; i++) {
-      container = allocateAndRun(vmReq, 2500);
+      container = allocateAndRun(vmReq, 6000);
       if(container != null) break;
     }
     if(container == null) {
@@ -91,17 +91,19 @@ public class SyncYarnManager extends YarnManager {
     vmReq.reset();
     ContainerRequest containerReq = vmReq.getContainerRequest();
     heartbeatThread.add(containerReq);
-    long stopTime = System.currentTimeMillis() + timeout;
+    long startTime = System.currentTimeMillis();
     int retry = 0;
     Container allocatedContainer = null ;
-    while (allocatedContainer == null && System.currentTimeMillis() < stopTime) {
+    while (allocatedContainer == null) {
       retry++ ;
       AllocateResponse response = heartbeatThread.nextResponse();
       List<Container> containers = response.getAllocatedContainers();
-      logger.info("  " + retry + "  Allocate containers = " + containers.size() + ", retry = " + retry + ", duration = " + (retry * 500));
       for (Container container : containers) {
         if(allocatedContainer == null) allocatedContainer = container;
       }
+      long duration = System.currentTimeMillis() - startTime;
+      logger.info("  " + retry + "  Allocate containers = " + containers.size() + ", retry = " + retry + ", duration = " + duration);
+      if(duration > timeout) break;
     }
     if(allocatedContainer != null) {
       vmReq.getCallback().onAllocate(this, vmReq, allocatedContainer);
@@ -130,8 +132,10 @@ public class SyncYarnManager extends YarnManager {
       while(true) {
         try {
           AllocateResponse response = amrmClient.allocate(0);
-          responseQueue.put(response);
-          Thread.sleep(500);
+          if(response.getAllocatedContainers().size() > 0) {
+            responseQueue.put(response);
+          }
+          Thread.sleep(1000);
         } catch(InterruptedException ex) {
           return;
         } catch(Exception ex) {

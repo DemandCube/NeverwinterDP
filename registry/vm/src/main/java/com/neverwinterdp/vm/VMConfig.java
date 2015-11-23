@@ -56,7 +56,7 @@ public class VMConfig {
   private String   log4jConfigUrl = "classpath:vm-log4j.properties";
   
   @Parameter(names = "--enable-gc-log", description = "Enable GC Log")
-  private boolean  enableGCLog = true;
+  private boolean  enableGCLog = false;
   
   @Parameter(names = "--profiler-opts", description = "Options for profiler such yourkit")
   private String profilerOpts ;

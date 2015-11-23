@@ -24,14 +24,12 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.amazonaws.services.s3.transfer.TransferManager;
 import com.beust.jcommander.Parameter;
 import com.google.inject.Singleton;
 
 @Singleton
 public class S3Client {
   private AmazonS3Client s3Client;
-  private TransferManager manager ;
   
   public S3Client(String regionName) {
     this(Region.getRegion(Regions.fromName(regionName)));
@@ -43,12 +41,13 @@ public class S3Client {
 
   public S3Client(Region region) {
     ClientConfiguration conf = new ClientConfiguration() ;
-    conf.setMaxConnections(100);
-    conf.setMaxErrorRetry(5);
-    conf.setConnectionTimeout(90000);
+    conf.
+      withMaxConnections(100).
+      withConnectionTimeout(180000).
+      withMaxErrorRetry(5).
+      withGzip(true);
     s3Client = new AmazonS3Client(conf);
     s3Client.setRegion(region);
-    manager = new TransferManager(s3Client);
   }
   
   @PreDestroy
