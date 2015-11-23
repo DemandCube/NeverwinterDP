@@ -12,12 +12,13 @@ import com.neverwinterdp.registry.RegistryException;
 
 public class HDFSSegmentStorage extends SegmentStorage {
   private FileSystem fs;
-  private String     storagePath;
+  private String     storageLocation;
   
-  public HDFSSegmentStorage(FileSystem fs, String storagePath, Registry registry, String regPath) throws RegistryException, IOException {
-    this.fs          = fs;
-    this.storagePath = storagePath;
-    Path hdfsStoragePath = new Path(storagePath);
+  public HDFSSegmentStorage(FileSystem fs, String storageLoc, Registry registry, String regPath) throws RegistryException, IOException {
+    this.fs              = fs;
+    this.storageLocation = storageLoc;
+    
+    Path hdfsStoragePath = new Path(storageLoc);
     if(!fs.exists(hdfsStoragePath)) {
       fs.mkdirs(hdfsStoragePath);
     }
@@ -27,5 +28,10 @@ public class HDFSSegmentStorage extends SegmentStorage {
       segStorageReg.initRegistry();
     }
     init(segStorageReg);
+  }
+  
+  @Override
+  public HDFSStorageWriter getWriter(String name) {
+    return new HDFSStorageWriter(name, fs, storageLocation, registry); 
   }
 }

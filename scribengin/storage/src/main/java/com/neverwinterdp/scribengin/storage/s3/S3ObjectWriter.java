@@ -74,10 +74,14 @@ public class S3ObjectWriter {
     metadata.setContentLength(data.length);
     PutObjectRequest request = new PutObjectRequest(bucketName, key, input, metadata);
     //request.getRequestClientOptions().setReadLimit(256 * 1024);
+    long start = System.currentTimeMillis();
+    System.err.println("before upload.............");
     UploadProgressListener uploadListener = new UploadProgressListener();
     request.setGeneralProgressListener(uploadListener);
     PutObjectResult result = s3Client.getAmazonS3Client().putObject(request);
+    System.err.println("after upload sent: " + (System.currentTimeMillis() - start) + "ms");
     uploadListener.waitForUploadComplete(timeout);
+    System.err.println("after upload complete: " + (System.currentTimeMillis() - start) + "ms");
     if(uploadListener.getComleteProgressEvent() == null) {
       String mesg = 
           "Cannot get the complete event after " + timeout + "ms\n" + 
