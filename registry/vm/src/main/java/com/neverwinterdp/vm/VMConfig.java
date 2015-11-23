@@ -58,9 +58,6 @@ public class VMConfig {
   @Parameter(names = "--enable-gc-log", description = "Enable GC Log")
   private boolean  enableGCLog = false;
   
-  @Parameter(names = "--profiler-opts", description = "Options for profiler such yourkit")
-  private String profilerOpts ;
-  
   @DynamicParameter(names = "--vm-resource:", description = "The resources for the vm")
   private Map<String, String> vmResources      = new LinkedHashMap<String, String>();
 
@@ -144,12 +141,6 @@ public class VMConfig {
   public boolean isEnableGCLog() { return enableGCLog; }
   public VMConfig setEnableGCLog(boolean enableGCLog) { 
     this.enableGCLog = enableGCLog; 
-    return this;
-  }
-
-  public String getProfilerOpts() { return profilerOpts; }
-  public VMConfig setProfilerOpts(String profilerOpts) { 
-    this.profilerOpts = profilerOpts; 
     return this;
   }
 
@@ -283,11 +274,11 @@ public class VMConfig {
     
     if(enableGCLog) {
       String gcLogFile = localLogDir + "/" + vmId + "-gc.log";
-      b.append(" -Xloggc:" + gcLogFile + " -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps");
+      //b.append(" -Xloggc:" + gcLogFile + " -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps");
     }
     
     String hiccupLogFile = localLogDir + "/" + vmId + ".hlog";
-    b.append(" -javaagent:/opt/jHiccup/jHiccup.jar=-d,10000,-i,5000,-l," + hiccupLogFile + " ");
+    //b.append(" -javaagent:/opt/jHiccup/jHiccup.jar=-d,10000,-i,5000,-l," + hiccupLogFile + " ");
     //b.append(" -agentpath:/opt/yourkit/bin/linux-x86-64/libyjpagent.so=disablestacktelemetry,disableexceptiontelemetry,delay=10000 ");
   }
    

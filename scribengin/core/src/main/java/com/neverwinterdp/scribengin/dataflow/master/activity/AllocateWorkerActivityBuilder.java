@@ -92,8 +92,7 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
         addProperty("dataflow.registry.path", dflRegistry.getDataflowPath()).
         setHadoopProperties(service.getVMConfig().getHadoopProperties()).
         setLog4jConfigUrl(dflConfig.getWorker().getLog4jConfigUrl()).
-        setEnableGCLog(dflConfig.getWorker().isEnableGCLog()).
-        setProfilerOpts(dflConfig.getWorker().getProfilerOpts());
+        setEnableGCLog(dflConfig.getWorker().isEnableGCLog());
 
       String dataflowAppHome = dflConfig.getDataflowAppHome();
       if(dataflowAppHome != null) {

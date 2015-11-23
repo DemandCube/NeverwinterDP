@@ -28,6 +28,4 @@ public class HDFSSegmentStorage extends SegmentStorage {
     }
     init(segStorageReg);
   }
-  
-  
 }

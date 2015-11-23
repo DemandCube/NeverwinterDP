@@ -61,6 +61,7 @@ public class S3ObjectWriter {
         break;
       }
     }
+    error.printStackTrace(System.err);
     throw new IOException(error);
   }
   
@@ -72,7 +73,7 @@ public class S3ObjectWriter {
     ByteArrayInputStream input = new ByteArrayInputStream(data);
     metadata.setContentLength(data.length);
     PutObjectRequest request = new PutObjectRequest(bucketName, key, input, metadata);
-    request.getRequestClientOptions().setReadLimit(256 * 1024);
+    //request.getRequestClientOptions().setReadLimit(256 * 1024);
     UploadProgressListener uploadListener = new UploadProgressListener();
     request.setGeneralProgressListener(uploadListener);
     PutObjectResult result = s3Client.getAmazonS3Client().putObject(request);
@@ -81,6 +82,7 @@ public class S3ObjectWriter {
       String mesg = 
           "Cannot get the complete event after " + timeout + "ms\n" + 
           uploadListener.getProgressEventInfo();
+      System.err.println(mesg);
       throw new AmazonServiceException(mesg);
     }
   }
@@ -99,6 +101,7 @@ public class S3ObjectWriter {
       } else {
         progressEvents.append(progressEvent).append("\n");
       }
+      
       if(progressEvent.getEventType() == ProgressEventType.TRANSFER_COMPLETED_EVENT) {
         completeEvent = progressEvent;
         notifyComplete();

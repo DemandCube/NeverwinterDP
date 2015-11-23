@@ -71,9 +71,6 @@ public class DataflowCommand extends Command {
     @Parameter(names = "--dataflow-worker-enable-gc",  description = "enable worker gc")
     private boolean workerEnableGC = false;
     
-    @Parameter(names = "--dataflow-worker-profiler-opts",  description = "Add worker profiler opts")
-    private String dataflowWorkerProfileOpts ;
-    
     @Parameter(names = "--wait-for-running-timeout", description = "The dataflow path to deploy")
     private long waitForRunningTimeout = 120000;
     
@@ -97,9 +94,6 @@ public class DataflowCommand extends Command {
         dflConfig.getWorker().setNumOfExecutor(numOfExecutorPerWorker);
       }
       if(workerEnableGC) dflConfig.getWorker().setEnableGCLog(workerEnableGC);
-      if(dataflowWorkerProfileOpts != null) {
-        dflConfig.getWorker().setProfilerOpts(dataflowWorkerProfileOpts);
-      }
         
       scala.Console.println(JSONSerializer.INSTANCE.toString(dflConfig));
       DataflowSubmitter submitter = new DataflowSubmitter(client, dflConfig);
