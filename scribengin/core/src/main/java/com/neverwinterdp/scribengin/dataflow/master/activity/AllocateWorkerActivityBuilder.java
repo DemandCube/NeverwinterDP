@@ -70,8 +70,10 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
       SequenceIdTracker idTracker = 
         new SequenceIdTracker(dflRegistry.getRegistry(), DataflowRegistry.DATAFLOW_WORKER_ID_TRACKER);
       List<String> activeWorkers = dflRegistry.getWorkerRegistry().getActiveWorkerIds();
-      
-      for(int i = activeWorkers.size(); i < dflConfig.getWorker().getNumOfInstances(); i++) {
+      //TODO: fix this hack
+      int numOfInstanceToAllocate = 1;
+      if(activeWorkers.size() == 0) numOfInstanceToAllocate = activeWorkers.size();
+      for(int i = activeWorkers.size(); i < numOfInstanceToAllocate; i++) {
         String workerId = dflConfig.getId() + "-worker-" + idTracker.nextSeqId();
         allocate(dflRegistry, dflConfig, workerId);
       }
