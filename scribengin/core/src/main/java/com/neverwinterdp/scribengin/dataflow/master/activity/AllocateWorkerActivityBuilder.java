@@ -73,7 +73,7 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
       //TODO: fix this hack
       int numOfInstanceToAllocate = activeWorkers.size();
       if(numOfInstanceToAllocate > 0) numOfInstanceToAllocate = 1;
-      for(int i = activeWorkers.size(); i < numOfInstanceToAllocate; i++) {
+      for(int i = 0; i < numOfInstanceToAllocate; i++) {
         String workerId = dflConfig.getId() + "-worker-" + idTracker.nextSeqId();
         allocate(dflRegistry, dflConfig, workerId);
       }
