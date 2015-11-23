@@ -77,7 +77,7 @@ public class SyncYarnManager extends YarnManager {
     vmReq.setCallback(cb);
     Container container = null ;
     for(int i = 0; i < 10; i++) {
-      container = allocateAndRun(vmReq, 2500);
+      container = allocateAndRun(vmReq, 6000);
       if(container != null) break;
     }
     if(container == null) {
@@ -130,8 +130,10 @@ public class SyncYarnManager extends YarnManager {
       while(true) {
         try {
           AllocateResponse response = amrmClient.allocate(0);
-          responseQueue.put(response);
-          Thread.sleep(500);
+          if(response.getAllocatedContainers().size() > 0) {
+            responseQueue.put(response);
+          }
+          Thread.sleep(1000);
         } catch(InterruptedException ex) {
           return;
         } catch(Exception ex) {
