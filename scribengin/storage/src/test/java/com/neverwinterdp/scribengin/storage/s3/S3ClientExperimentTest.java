@@ -38,7 +38,7 @@ public class S3ClientExperimentTest {
   @Test
   public void testS3ObjectReaderWriter() throws Exception {
     String KEY = "test-s3-object-writer" ;
-    int    NUM_OF_RECORDS = 1000;
+    int    NUM_OF_RECORDS = 100000;
     
     MetricRegistry mRegistry = new MetricRegistry();
     long startTime = System.currentTimeMillis();
@@ -53,12 +53,17 @@ public class S3ClientExperimentTest {
       writer.write(JSONSerializer.INSTANCE.toBytes(data));
       writerWriteCtx.stop();
     }
-    startTime = System.currentTimeMillis();
-    Timer.Context writerCloseCtx = mRegistry.timer("writer.close").time();
-    writer.waitAndClose(30 * NUM_OF_RECORDS);
-    writerCloseCtx.stop();
-    System.out.println("Write in: " + (System.currentTimeMillis() - startTime));
     
+    try {
+      startTime = System.currentTimeMillis();
+      Timer.Context writerCloseCtx = mRegistry.timer("writer.close").time();
+      writer.waitAndClose(5000);
+      writerCloseCtx.stop();
+    } catch(Throwable t) {
+      t.printStackTrace();
+    }
+    System.err.println("Write in: " + (System.currentTimeMillis() - startTime));
+    MetricPrinter mPrinter = new MetricPrinter() ;
     for(int i = 0; i < 10; i++) {
       Timer.Context readerGetCtx = mRegistry.timer("reader.get").time();
       S3Object object = s3Client.getObject(BUCKET_NAME, KEY);
@@ -81,11 +86,10 @@ public class S3ClientExperimentTest {
         count++ ;
       }
       reader.close();
+      mPrinter.print(mRegistry);
       Assert.assertEquals(NUM_OF_RECORDS, count);
     }
     System.out.println("Read in: " + (System.currentTimeMillis() - startTime));
-    MetricPrinter mPrinter = new MetricPrinter() ;
-    mPrinter.print(mRegistry);
   }
   
   @Test

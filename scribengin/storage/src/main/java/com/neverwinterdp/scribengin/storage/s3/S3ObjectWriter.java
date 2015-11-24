@@ -39,7 +39,8 @@ public class S3ObjectWriter {
   }
 
   public void waitAndClose(long timeout) throws Exception, IOException, InterruptedException {
-    objOs.close();
+    objOs.flush();
+    bos.flush();
     byte[] data = bos.toByteArray();
     if(data.length == 0) return;
     Throwable error = null;
@@ -75,13 +76,10 @@ public class S3ObjectWriter {
     PutObjectRequest request = new PutObjectRequest(bucketName, key, input, metadata);
     //request.getRequestClientOptions().setReadLimit(256 * 1024);
     long start = System.currentTimeMillis();
-    System.err.println("before upload.............");
     UploadProgressListener uploadListener = new UploadProgressListener();
     request.setGeneralProgressListener(uploadListener);
     PutObjectResult result = s3Client.getAmazonS3Client().putObject(request);
-    System.err.println("after upload sent: " + (System.currentTimeMillis() - start) + "ms");
     uploadListener.waitForUploadComplete(timeout);
-    System.err.println("after upload complete: " + (System.currentTimeMillis() - start) + "ms");
     if(uploadListener.getComleteProgressEvent() == null) {
       String mesg = 
           "Cannot get the complete event after " + timeout + "ms\n" + 
@@ -109,6 +107,8 @@ public class S3ObjectWriter {
       if(progressEvent.getEventType() == ProgressEventType.TRANSFER_COMPLETED_EVENT) {
         completeEvent = progressEvent;
         notifyComplete();
+      } else if(progressEvent.getEventType() == ProgressEventType.TRANSFER_FAILED_EVENT) {
+        System.err.println("Exception: Got Failed Event....");
       }
     }
     

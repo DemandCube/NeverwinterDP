@@ -11,8 +11,8 @@ import com.amazonaws.services.s3.model.S3Object;
 public class S3ObjectReader implements Closeable {
   private S3Object          s3Object;
   private ObjectInputStream objIs;
-  private byte[]            current = null ;
-  
+  private byte[]            current        = null;
+
   public S3ObjectReader(S3Object s3Object) throws IOException {
     this.s3Object  = s3Object;
     InputStream is = s3Object.getObjectContent();
@@ -24,7 +24,8 @@ public class S3ObjectReader implements Closeable {
   
   public boolean hasNext() throws IOException {
     if(objIs.available() > 0) {
-      current = new byte[objIs.readInt()];
+      int size = objIs.readInt();
+      current = new byte[size];
       objIs.readFully(current);
       return true;
     }
