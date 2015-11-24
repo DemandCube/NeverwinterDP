@@ -85,7 +85,10 @@ public class S3ClientExperimentTest {
         }
         count++ ;
       }
+      Thread.sleep(1000);
+      reader.dump();
       reader.close();
+      object.close();
       mPrinter.print(mRegistry);
       Assert.assertEquals(NUM_OF_RECORDS, count);
     }
