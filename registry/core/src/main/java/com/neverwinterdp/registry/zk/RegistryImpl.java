@@ -88,10 +88,10 @@ public class RegistryImpl implements Registry {
       if(zkClient != null) zkClient.close();
       ZkConnectedStateWatcher connectStateWatcher = new ZkConnectedStateWatcher();
       zkClient = new ZooKeeper(config.getConnect(), 30000, connectStateWatcher);
-      if(!connectStateWatcher.waitForConnected(10000)) {
+      if(!connectStateWatcher.waitForConnected(timeout)) {
         zkClient.close();
         zkClient = null;
-        throw new RegistryException(ErrorCode.Connection, "Cannot connect due to the interrupt") ;
+        throw new RegistryException(ErrorCode.Connection, "Cannot connect after " + timeout + "ms") ;
       }
     } catch(IOException | InterruptedException ex) {
       throw new RegistryException(ErrorCode.Connection, ex) ;
@@ -123,7 +123,7 @@ public class RegistryImpl implements Registry {
     shutdown();
   }
 
-  ZooKeeper getZKClient() throws RegistryException {
+  synchronized ZooKeeper getZKClient() throws RegistryException {
     if(closed) {
       throw new RegistryException(ErrorCode.Closed, "Registry has been closed");
     }
@@ -701,7 +701,7 @@ public class RegistryImpl implements Registry {
           String message = kEx.getMessage() + "\n" + "  path = " + nodeExistsEx.getPath();
           throw new RegistryException(ErrorCode.NodeExists, message, kEx) ;
         } else if(kEx.code() ==  KeeperException.Code.CONNECTIONLOSS) {
-          reconnect(10000);
+          reconnect(15000);
           error = new RegistryException(ErrorCode.ConnectionLoss, kEx.getMessage(), kEx) ;
         }
       } catch(RegistryException ex) {

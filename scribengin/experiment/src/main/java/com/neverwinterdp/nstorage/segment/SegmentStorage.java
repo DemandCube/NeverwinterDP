@@ -8,4 +8,6 @@ abstract public class SegmentStorage {
   }
   
   public SegmentStorageRegistry getSegmentStorageRegistry() { return this.registry ; }
+  
+  abstract public SegmentStorageWriter getWriter(String name) ;
 }

@@ -43,7 +43,7 @@ public class S3Client {
     ClientConfiguration conf = new ClientConfiguration() ;
     conf.
       withMaxConnections(100).
-      withConnectionTimeout(180000).
+      withConnectionTimeout(90000).
       withMaxErrorRetry(5).
       withGzip(true);
     s3Client = new AmazonS3Client(conf);

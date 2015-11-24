@@ -70,8 +70,11 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
       SequenceIdTracker idTracker = 
         new SequenceIdTracker(dflRegistry.getRegistry(), DataflowRegistry.DATAFLOW_WORKER_ID_TRACKER);
       List<String> activeWorkers = dflRegistry.getWorkerRegistry().getActiveWorkerIds();
-      
-      for(int i = activeWorkers.size(); i < dflConfig.getWorker().getNumOfInstances(); i++) {
+      //TODO: fix this hack
+      int numOfInstanceToAllocate = 1;
+      if(activeWorkers.size() == 0) numOfInstanceToAllocate = dflConfig.getWorker().getNumOfInstances();
+
+      for(int i = 0; i < numOfInstanceToAllocate; i++) {
         String workerId = dflConfig.getId() + "-worker-" + idTracker.nextSeqId();
         allocate(dflRegistry, dflConfig, workerId);
       }
@@ -92,8 +95,7 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
         addProperty("dataflow.registry.path", dflRegistry.getDataflowPath()).
         setHadoopProperties(service.getVMConfig().getHadoopProperties()).
         setLog4jConfigUrl(dflConfig.getWorker().getLog4jConfigUrl()).
-        setEnableGCLog(dflConfig.getWorker().isEnableGCLog()).
-        setProfilerOpts(dflConfig.getWorker().getProfilerOpts());
+        setEnableGCLog(dflConfig.getWorker().isEnableGCLog());
 
       String dataflowAppHome = dflConfig.getDataflowAppHome();
       if(dataflowAppHome != null) {

@@ -69,7 +69,6 @@ DATAFLOW_STORAGE=$(get_opt --dataflow-storage 'kafka' $@)
 DATAFLOW_NUM_OF_WORKER=$(get_opt --dataflow-num-of-worker '2' $@)
 DATAFLOW_NUM_OF_EXECUTOR_PER_WORKER=$(get_opt --dataflow-num-of-executor-per-worker '2' $@)
 DATAFLOW_WORKER_ENABLE_GC=$(has_opt "--dataflow-worker-enable-gc" $@ )
-DATAFLOW_WORKER_PROFILER_OPTS=$(get_opt --dataflow-worker-profiler-opts '' $@)
 
 DATAFLOW_KILL_WORKER_RANDOM=$(get_opt --dataflow-kill-worker-random 'false' $@)
 DATAFLOW_KILL_WORKER_MAX=$(get_opt --dataflow-kill-worker-max '5' $@)
@@ -137,7 +136,6 @@ $SHELL vm wait-for-vm-status --vm-id vm-tracking-generator-1 --vm-status TERMINA
 #########################################################################################################################
 # Launch A Dataflow Chain                                                                                               #
 #########################################################################################################################
-#--dataflow-worker-enable-gc $DATAFLOW_WORKER_ENABLE_GC --dataflow-worker-profiler-opts $DATAFLOW_WORKER_PROFILER_OPTS \
 $SHELL dataflow submit \
   --dfs-app-home $DFS_APP_HOME \
   --dataflow-config $DATAFLOW_DESCRIPTOR_FILE \

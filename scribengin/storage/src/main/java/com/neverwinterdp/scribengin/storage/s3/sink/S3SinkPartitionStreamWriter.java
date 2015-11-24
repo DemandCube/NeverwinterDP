@@ -2,6 +2,7 @@ package com.neverwinterdp.scribengin.storage.s3.sink;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
@@ -16,7 +17,9 @@ import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class S3SinkPartitionStreamWriter implements SinkPartitionStreamWriter {
-  static private final int TIMEOUT = 90 * 1000;
+  static final private String WORKER_ID = UUID.randomUUID().toString();
+  static final private AtomicInteger SEGMENT_ID_TRACKER = new AtomicInteger();
+  static final private int    TIMEOUT = 90 * 1000;
   
   private S3Client              s3Client;
   private StorageConfig         storageConfig;
@@ -113,7 +116,7 @@ public class S3SinkPartitionStreamWriter implements SinkPartitionStreamWriter {
       if(currentWriter == null) {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.addUserMetadata("transaction", "prepare");
-        currentSegmentName = "segment-" + UUID.randomUUID().toString();
+        currentSegmentName = "segment-" + WORKER_ID + "-" + SEGMENT_ID_TRACKER.incrementAndGet();
         currentWriter      = streamS3Folder.createObjectWriter(currentSegmentName, metadata);
       }
       byte[] bytes = JSONSerializer.INSTANCE.toBytes(record);

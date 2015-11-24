@@ -41,7 +41,11 @@ public class ESClient {
   
   public ESClient(String clusterName, String[] address) {
     this.address = address;
-    Settings settings = ImmutableSettings.settingsBuilder().put("cluster.name", clusterName).build();
+    Settings settings = 
+      ImmutableSettings.settingsBuilder().
+      put("cluster.name", clusterName).
+      put("transport.ping_schedule", "20s").
+      build();
     client = new TransportClient(settings);
     for (String selAddr : address) {
       int port = 9300;
