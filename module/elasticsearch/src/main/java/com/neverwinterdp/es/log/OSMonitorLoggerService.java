@@ -25,7 +25,7 @@ public class OSMonitorLoggerService extends ObjectLoggerService {
     String[] esConnect = { "elasticsearch-1:9300" };
     init(esConnect, bufferBaseDir, 25000);
    
-    add(DetailThreadInfo.class);
+    //add(DetailThreadInfo.class);
     add(FileStoreInfo.class);
     add(GCInfo.class);
     add(MemoryInfo.class);
