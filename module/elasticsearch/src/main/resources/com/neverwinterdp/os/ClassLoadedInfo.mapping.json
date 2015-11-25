@@ -1,0 +1,12 @@
+{
+  "ClassLoadedInfo": {
+    "properties" : {
+      "timestamp" : { 
+        "type" : "date", "format" : "dd/MM/yyyy HH:mm:ss" 
+      },
+      "host" : {
+        "type" : "string", "index":"not_analyzed"
+      } 
+    }
+  }
+}

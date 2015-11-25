@@ -1,61 +1,69 @@
 package com.neverwinterdp.es.log.sampler;
 
-import com.neverwinterdp.os.DetailThreadInfo;
-import com.neverwinterdp.os.FileStoreInfo;
+import java.nio.file.FileSystem;
+import java.util.Random;
+
+import com.beust.jcommander.JCommander;
+import com.neverwinterdp.es.log.ObjectLoggerService;
+import com.neverwinterdp.os.ClassLoadedInfo;
 import com.neverwinterdp.os.GCInfo;
 import com.neverwinterdp.os.MemoryInfo;
 import com.neverwinterdp.os.OSInfo;
 import com.neverwinterdp.os.OSManagement;
 import com.neverwinterdp.os.RuntimeEnv;
 import com.neverwinterdp.os.ThreadCountInfo;
-import com.beust.jcommander.JCommander;
-import com.neverwinterdp.es.log.ObjectLoggerService;
 
 public class MetricSampler {
   static public void main(String[] args) throws Exception {
     MetricSamplerConfig config = new MetricSamplerConfig();
     new JCommander(config, args);
-    
-    
-    RuntimeEnv runtimeEnv = new RuntimeEnv(config.vmName, config.vmName, "build/app") ;
-    OSManagement osMan = new OSManagement(runtimeEnv) ;
+    RuntimeEnv runtimeEnv = new RuntimeEnv(config.vmName, config.vmName, config.appDir);
+    OSManagement osMan = new OSManagement(runtimeEnv);
 
-    String bufferDir = runtimeEnv.getAppDir() + "/working/buffer";
-    ObjectLoggerService service = new  ObjectLoggerService(new String[] {config.esConnect}, bufferDir, 25000);
-    service.add(DetailThreadInfo.class);
-    service.add(FileStoreInfo.class);
+    String bufferDir = runtimeEnv.getAppDir() + config.bufferDir;
+        //+ System.getProperty("file.separator") + config.vmName;
+    ObjectLoggerService service = new ObjectLoggerService(new String[] { config.esConnect },
+        bufferDir, 25000);
     service.add(GCInfo.class);
-    
-    service.add(ThreadCountInfo.class);
-    
     service.add(MemoryInfo.class);
     service.add(OSInfo.class);
-    
-    DetailThreadInfo[] info = osMan.getDetailThreadInfo();
-    for(DetailThreadInfo sel : info) {
-      service.log(sel.uniqueId(), sel);
+    service.add(ThreadCountInfo.class);
+    service.add(ClassLoadedInfo.class);
+
+    Random r = new Random();
+    while (true) {
+      
+      int fromBytes = 512;
+      int toBytes = 1024;
+      byte data[] = new byte[r.nextInt(toBytes-fromBytes) + fromBytes];
+
+      GCInfo[] gcinfos = osMan.getGCInfo();
+      MemoryInfo[] memoryInfos = osMan.getMemoryInfo();
+      ThreadCountInfo threadCountInfos = osMan.getThreadCountInfo();
+      ClassLoadedInfo classLoadedInfo = osMan.getLoadedClassInfo();
+      OSInfo osInfo = osMan.getOSInfo();
+      
+      service.log(threadCountInfos.uniqueId(), threadCountInfos);
+      service.log(classLoadedInfo.uniqueId(), classLoadedInfo);
+      service.log(osInfo.uniqueId(), osInfo);
+
+      for (GCInfo sel : gcinfos) {
+        if (sel != null) {
+          service.log(sel.uniqueId(), sel);
+        }
+      }
+
+      for (MemoryInfo sel : memoryInfos) {
+        service.log(sel.uniqueId(), sel);
+      }
+
+      System.out.println(OSInfo.getFormattedText(osInfo));
+      System.out.println(MemoryInfo.getFormattedText(memoryInfos));
+      System.out.println(GCInfo.getFormattedText(gcinfos));
+      System.out.println(ThreadCountInfo.getFormattedText(threadCountInfos));
+      System.out.println(ClassLoadedInfo.getFormattedText(classLoadedInfo));
+      Thread.sleep(5000);
+
     }
-    
-    for(FileStoreInfo sel : osMan.getFileStoreInfo()) {
-      service.log(sel.uniqueId(), sel);
-    }
-    
-    for(GCInfo sel : osMan.getGCInfo()) {
-      service.log(sel.uniqueId(), sel);
-    }
-    
-    for(MemoryInfo sel : osMan.getMemoryInfo()) {
-      service.log(sel.uniqueId(), sel);
-    }
-    
-    OSInfo osInfo = osMan.getOSInfo();
-    service.log(osInfo.uniqueId(), osInfo);
-    
-    ThreadCountInfo threadCountInfo = osMan.getThreadCountInfo();
-    service.log(threadCountInfo.uniqueId(), threadCountInfo);
-    System.out.println("Send sample metric done!!!!!!!!!!!!");
-    Thread.sleep(10000);
-    service.close();
-    System.out.println("Push some data done");
   }
 }
