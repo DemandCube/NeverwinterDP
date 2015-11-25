@@ -45,10 +45,10 @@ public class OSMonitorLoggerService extends ObjectLoggerService {
     public void run() {
       try {
         while(true) {
-          DetailThreadInfo[] info = osManagement.getDetailThreadInfo();
-          for(DetailThreadInfo sel : info) {
-            log(sel.uniqueId(), sel);
-          }
+//          DetailThreadInfo[] info = osManagement.getDetailThreadInfo();
+//          for(DetailThreadInfo sel : info) {
+//            log(sel.uniqueId(), sel);
+//          }
 
           for(FileStoreInfo sel : osManagement.getFileStoreInfo()) {
             log(sel.uniqueId(), sel);
