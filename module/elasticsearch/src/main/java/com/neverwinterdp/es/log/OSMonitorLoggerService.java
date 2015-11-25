@@ -5,7 +5,6 @@ import java.io.IOException;
 import javax.annotation.PreDestroy;
 
 import com.google.inject.Inject;
-import com.neverwinterdp.os.DetailThreadInfo;
 import com.neverwinterdp.os.FileStoreInfo;
 import com.neverwinterdp.os.GCInfo;
 import com.neverwinterdp.os.MemoryInfo;
@@ -67,9 +66,11 @@ public class OSMonitorLoggerService extends ObjectLoggerService {
 
           ThreadCountInfo threadCountInfo = osManagement.getThreadCountInfo();
           log(threadCountInfo.uniqueId(), threadCountInfo);
-          Thread.sleep(30000);
+          Thread.sleep(10000);
         }
-      } catch (InterruptedException e) {
+      } catch(InterruptedException e) {
+      } catch(Throwable t) {
+        t.printStackTrace();
       }
     }
   }

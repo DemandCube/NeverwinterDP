@@ -47,7 +47,6 @@ public class ElasticSearchAppender extends AppenderSkeleton {
       e.printStackTrace();
     }
     forwardThread = new DeamonThread(); 
-    forwardThread.setDaemon(true);
     forwardThread.start() ;
     System.out.println("ElasticSearchAppender: Finish Activate Elasticsearch log4j appender");
   }
@@ -74,7 +73,7 @@ public class ElasticSearchAppender extends AppenderSkeleton {
     Log4jRecord record = new Log4jRecord(event) ;
     try {
       queue.writeObject(record) ;
-    } catch (Exception e) {
+    } catch(Throwable e) {
       queueError = true ;
       e.printStackTrace();
     }
@@ -125,7 +124,7 @@ public class ElasticSearchAppender extends AppenderSkeleton {
           elasticsearchError = true ;
         } catch (InterruptedException e) {
           return ;
-        } catch(Exception ex) {
+        } catch(Throwable ex) {
           ex.printStackTrace() ; 
           return ;
         }
