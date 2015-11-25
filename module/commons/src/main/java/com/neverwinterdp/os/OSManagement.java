@@ -23,6 +23,7 @@ import com.sun.management.OperatingSystemMXBean;
 @Singleton
 public class OSManagement {
   private String vmName = "localhost";
+  private Map<String, GCInfo> previousGCInfos = new HashMap<String, GCInfo>() ;
   
   public OSManagement() { }
   
@@ -62,20 +63,18 @@ public class OSManagement {
   }
   public String getMemoryInfoFormattedText() { return MemoryInfo.getFormattedText(getMemoryInfo()); }
   
-  private Map<String, Long> oldGCInfoCollectionCount = new HashMap<String, Long>() ;
-  private List<GarbageCollectorMXBean> gcbeans = ManagementFactory.getGarbageCollectorMXBeans() ;
+  
   public GCInfo[] getGCInfo() {
+    List<GarbageCollectorMXBean> gcbeans = ManagementFactory.getGarbageCollectorMXBeans();
     GCInfo[] gcInfo = new GCInfo[gcbeans.size()];
     for(int i = 0; i < gcbeans.size(); i++) {
       GarbageCollectorMXBean gcbean = gcbeans.get(i) ;
       gcInfo[i] = new GCInfo(gcbean);
-      if(oldGCInfoCollectionCount.get(gcbean.getName()) == null){
-        gcInfo[i].setCollectionCount(gcbean.getCollectionCount());
-      }else{
-        gcInfo[i].setCollectionCount(gcbean.getCollectionCount() - oldGCInfoCollectionCount.get(gcbean.getName()));
+      GCInfo prevGCInfo = previousGCInfos.get(gcInfo[i].getName());
+      if(prevGCInfo != null) {
+        gcInfo[i].setDiffCollectionCount(gcInfo[i].getCollectionCount() - prevGCInfo.getCollectionCount());
       }
-      gcInfo[i].setHost(vmName);
-      oldGCInfoCollectionCount.put(gcbean.getName(), gcbean.getCollectionCount());
+      previousGCInfos.put(gcInfo[i].getName(), gcInfo[i]);
     }
     return gcInfo;
   }

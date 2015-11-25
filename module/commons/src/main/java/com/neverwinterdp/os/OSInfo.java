@@ -25,14 +25,14 @@ public class OSInfo implements Serializable {
   private long   freeSwapSpaceSize;
   
   public OSInfo(com.sun.management.OperatingSystemMXBean osMBean) {
-    timestamp          = new Date();
-    name               = osMBean.getName();
-    arch               = osMBean.getArch();
-    availableProcessor = osMBean.getAvailableProcessors() ;
-    processCpuTime     = osMBean.getProcessCpuTime();
-    processCpuLoad     = osMBean.getProcessCpuLoad();
-    systemCpuLoad      = osMBean.getSystemCpuLoad();
-    systemCpuLoadAverage = osMBean.getSystemLoadAverage();
+    timestamp              = new Date();
+    name                   = osMBean.getName();
+    arch                   = osMBean.getArch();
+    availableProcessor     = osMBean.getAvailableProcessors() ;
+    processCpuTime         = osMBean.getProcessCpuTime();
+    processCpuLoad         = osMBean.getProcessCpuLoad();
+    systemCpuLoad          = osMBean.getSystemCpuLoad();
+    systemCpuLoadAverage   = osMBean.getSystemLoadAverage();
     freePhysicalMemorySize = osMBean.getFreePhysicalMemorySize() ;
     freeSwapSpaceSize      = osMBean.getFreeSwapSpaceSize() ;
   }

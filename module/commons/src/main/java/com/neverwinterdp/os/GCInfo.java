@@ -15,7 +15,8 @@ public class GCInfo implements Serializable {
   private Date   timestamp;
   private String host;
   private String name;
-  private long collectionCount;
+  private long   collectionCount;
+  private long   diffCollectionCount;
 
   public GCInfo() { }
   
@@ -40,7 +41,9 @@ public class GCInfo implements Serializable {
   public long getCollectionCount() { return collectionCount; }
   public void setCollectionCount(long collectionCount) { this.collectionCount = collectionCount; }
 
-  
+  public long getDiffCollectionCount() { return diffCollectionCount; }
+  public void setDiffCollectionCount(long diffCollectionCount) { this.diffCollectionCount = diffCollectionCount; }
+
   static public String getFormattedText(GCInfo ... gcInfo) {
     String[] header = {"Timestamp", "Name","Host", "Collection Count"} ;
     TabularFormater formatter = new TabularFormater(header) ;

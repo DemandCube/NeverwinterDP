@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 
 import com.neverwinterdp.module.AppContainer;
 import com.neverwinterdp.module.DataflowWorkerModule;
+import com.neverwinterdp.module.ESOSMonitorLoggerModule;
 import com.neverwinterdp.module.ServiceModuleContainer;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.vm.VMApp;
@@ -28,7 +29,7 @@ public class VMWorkerApp extends VMApp {
     
     AppContainer appContainer = getVM().getAppContainer();
     Map<String, String> esLoggerModuleProps = new HashMap<String, String>();
-    //appContainer.install(esLoggerModuleProps, ESOSMonitorLoggerModule.NAME);
+    appContainer.install(esLoggerModuleProps, ESOSMonitorLoggerModule.NAME);
     
     Map<String, String> workerModuleProps = new HashMap<String, String>();
     workerModuleProps.putAll(vmConfig.getHadoopProperties());

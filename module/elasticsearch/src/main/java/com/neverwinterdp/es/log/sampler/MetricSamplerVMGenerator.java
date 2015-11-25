@@ -22,7 +22,6 @@ public class MetricSamplerVMGenerator implements Runnable {
   }
 
   public void startNewJavaProcess() throws IOException, InterruptedException {
-
     ProcessBuilder processBuilder = createProcess();
     System.out.println("Starting new vm  " + optionsAsString + "; args= "
         + Arrays.toString(arguments));

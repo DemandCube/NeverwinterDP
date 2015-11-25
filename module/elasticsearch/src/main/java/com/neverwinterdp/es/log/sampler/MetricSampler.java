@@ -1,6 +1,5 @@
 package com.neverwinterdp.es.log.sampler;
 
-import java.nio.file.FileSystem;
 import java.util.Random;
 
 import com.beust.jcommander.JCommander;
@@ -21,9 +20,7 @@ public class MetricSampler {
     OSManagement osMan = new OSManagement(runtimeEnv);
 
     String bufferDir = runtimeEnv.getAppDir() + config.bufferDir;
-        //+ System.getProperty("file.separator") + config.vmName;
-    ObjectLoggerService service = new ObjectLoggerService(new String[] { config.esConnect },
-        bufferDir, 25000);
+    ObjectLoggerService service = new ObjectLoggerService(new String[] { config.esConnect }, bufferDir, 25000);
     service.add(GCInfo.class);
     service.add(MemoryInfo.class);
     service.add(OSInfo.class);
@@ -32,7 +29,6 @@ public class MetricSampler {
 
     Random r = new Random();
     while (true) {
-      
       int fromBytes = 512;
       int toBytes = 1024;
       byte data[] = new byte[r.nextInt(toBytes-fromBytes) + fromBytes];
