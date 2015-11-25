@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.sun.management.OperatingSystemMXBean;
 
@@ -31,6 +32,7 @@ public class OSManagement {
     this.vmName = runtimeEnv.getVMName() ;
   }
   
+  @Inject
   public void onInject(RuntimeEnv runtimeEnv ) {
     vmName = runtimeEnv.getVMName();
   }

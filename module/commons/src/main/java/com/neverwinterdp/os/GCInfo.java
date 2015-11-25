@@ -6,7 +6,6 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neverwinterdp.util.text.DateUtil;
-import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
 @SuppressWarnings("serial")
