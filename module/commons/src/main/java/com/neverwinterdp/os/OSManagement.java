@@ -75,6 +75,8 @@ public class OSManagement {
       GCInfo prevGCInfo = previousGCInfos.get(gcInfo[i].getName());
       if(prevGCInfo != null) {
         gcInfo[i].setDiffCollectionCount(gcInfo[i].getCollectionCount() - prevGCInfo.getCollectionCount());
+      }else{
+        gcInfo[i].setDiffCollectionCount(gcInfo[i].getCollectionCount());
       }
       previousGCInfos.put(gcInfo[i].getName(), gcInfo[i]);
     }

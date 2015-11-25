@@ -22,6 +22,7 @@ public class GCInfo implements Serializable {
   public GCInfo(GarbageCollectorMXBean gcbean) {
     timestamp = new Date(System.currentTimeMillis()) ;
     name = gcbean.getName();
+    collectionCount = gcbean.getCollectionCount();
   }
   
   public String uniqueId() { 
@@ -44,14 +45,15 @@ public class GCInfo implements Serializable {
   public void setDiffCollectionCount(long diffCollectionCount) { this.diffCollectionCount = diffCollectionCount; }
 
   static public String getFormattedText(GCInfo ... gcInfo) {
-    String[] header = {"Timestamp", "Name","Host", "Collection Count"} ;
+    String[] header = {"Timestamp", "Name","Host", "Collection Count", "Diff Collection Count"} ;
     TabularFormater formatter = new TabularFormater(header) ;
     for(GCInfo sel : gcInfo) {
       formatter.addRow(
           DateUtil.asCompactDateTime(sel.getTimestamp()),
           sel.getName(), 
           sel.getHost(),
-          sel.getCollectionCount());
+          sel.getCollectionCount(),
+          sel.getDiffCollectionCount());
     }
     return formatter.getFormattedText() ;
   }
