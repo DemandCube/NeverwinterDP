@@ -45,7 +45,7 @@ public class S3Client {
       withMaxConnections(100).
       withConnectionTimeout(60 * 1000).
       withSocketTimeout(30 * 1000).
-      withMaxErrorRetry(3).      
+      withMaxErrorRetry(3).
       withGzip(true);
     s3Client = new AmazonS3Client(conf);
     s3Client.setRegion(region);

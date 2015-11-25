@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 
+import com.amazonaws.services.s3.model.MultiObjectDeleteException;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.scribengin.storage.Record;
 import com.neverwinterdp.scribengin.storage.StorageConfig;
@@ -168,7 +169,16 @@ public class VMTMValidatorS3App extends VMApp {
       service.awaitTermination(1, TimeUnit.DAYS);
       long duration = System.currentTimeMillis() - start;
       logger.info("Validate the partition " + partition.getPartitionName() + " in " + duration + "ms, read = " + readCounter.get());
-      partition.delete();
+      
+      for(int i = 0; i < 3; i++) {
+        try {
+          partition.delete();
+          break;
+        } catch(MultiObjectDeleteException ex) {
+          logger.error("Fail to delete for the " + (i + 1) + " try", ex);
+        }
+        Thread.sleep(3000);
+      }
     }
   }
   

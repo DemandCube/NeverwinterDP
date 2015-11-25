@@ -21,6 +21,7 @@ public class S3ObjectWriter {
   private ObjectMetadata metadata ;
   private ByteArrayOutputStream bos ;
   private ObjectOutputStream    objOs;
+  private int numOfRecords = 0;
   
   public S3ObjectWriter(S3Client s3Client, String bucketName, String key, ObjectMetadata metadata) throws IOException {
     this.s3Client   = s3Client;
@@ -36,6 +37,7 @@ public class S3ObjectWriter {
   public void write(byte[] data) throws IOException {
     objOs.writeInt(data.length);
     objOs.write(data);
+    numOfRecords++;
   }
 
   public void waitAndClose(long timeout) throws Exception, IOException, InterruptedException {
@@ -73,6 +75,7 @@ public class S3ObjectWriter {
   private void tryWaitAndClose(byte[] data, long timeout) throws AmazonServiceException, AmazonClientException, InterruptedException {
     ByteArrayInputStream input = new ByteArrayInputStream(data);
     metadata.setContentLength(data.length);
+    metadata.addUserMetadata("num-of-records", Integer.toString(numOfRecords));
     PutObjectRequest request = new PutObjectRequest(bucketName, key, input, metadata);
     //request.getRequestClientOptions().setReadLimit(256 * 1024);
     long start = System.currentTimeMillis();

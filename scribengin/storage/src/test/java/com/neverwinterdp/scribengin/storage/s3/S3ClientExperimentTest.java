@@ -38,7 +38,7 @@ public class S3ClientExperimentTest {
   @Test
   public void testS3ObjectReaderWriter() throws Exception {
     String KEY = "test-s3-object-writer" ;
-    int    NUM_OF_RECORDS = 100000;
+    int    NUM_OF_RECORDS = 100;
     
     MetricRegistry mRegistry = new MetricRegistry();
     long startTime = System.currentTimeMillis();
@@ -64,7 +64,7 @@ public class S3ClientExperimentTest {
     }
     System.err.println("Write in: " + (System.currentTimeMillis() - startTime));
     MetricPrinter mPrinter = new MetricPrinter() ;
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < 1; i++) {
       Timer.Context readerGetCtx = mRegistry.timer("reader.get").time();
       S3Object object = s3Client.getObject(BUCKET_NAME, KEY);
       readerGetCtx.stop();
@@ -85,7 +85,10 @@ public class S3ClientExperimentTest {
         }
         count++ ;
       }
+      Thread.sleep(1000);
+      reader.dump();
       reader.close();
+      object.close();
       mPrinter.print(mRegistry);
       Assert.assertEquals(NUM_OF_RECORDS, count);
     }
