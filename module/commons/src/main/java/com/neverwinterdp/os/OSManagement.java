@@ -78,6 +78,7 @@ public class OSManagement {
       }else{
         gcInfo[i].setDiffCollectionCount(gcInfo[i].getCollectionCount());
       }
+      gcInfo[i].setHost(vmName);
       previousGCInfos.put(gcInfo[i].getName(), gcInfo[i]);
     }
     return gcInfo;
