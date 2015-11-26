@@ -54,7 +54,7 @@ public class DFSFileSystemExperimentTest {
     while(!truncate && retry < 10) {
       truncate = fs.truncate(testPath, data.length);
       System.err.println("truncate = " + truncate);
-      Thread.sleep(3000);
+      Thread.sleep(1000);
       retry++;
     }
     FSDataInputStream is = fs.open(testPath);
