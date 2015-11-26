@@ -77,6 +77,7 @@ public class DFSFileSystemExperimentTest {
     }
     
     Path concatPath = new Path(TEST_DIR + "/concat.txt");
+    fs.createNewFile(concatPath);
     fs.concat(concatPath, path);
   }
 }
