@@ -61,18 +61,17 @@ public class DFSFileSystemExperimentTest {
   public void testConcat() throws Exception {
     Path[] path = new Path[10];
     for(int i = 0; i < path.length; i++) {
-      path[i] = new Path("./build/hdfs/file-" + i + ".txt");
+      path[i] = new Path(TEST_DIR + "/file-" + i + ".txt");
       String TEXT = "file content " + i ;
       FSDataOutputStream os = fs.create(path[i]) ;
       os.write(TEXT.getBytes());
       os.close();
     }
     
-    Path concatPath = new Path("./build/hdfs/concat.txt");
+    Path concatPath = new Path(TEST_DIR + "/concat.txt");
     try {
       fs.concat(concatPath, path);
     } catch(UnsupportedOperationException ex) {
-      //TODO
       System.err.println("TODO: test concat method with real HDFS");
     }
     
