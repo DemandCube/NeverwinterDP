@@ -49,10 +49,14 @@ public class DFSFileSystemExperimentTest {
     os.close();
     
     System.err.println("write: " + (data.length * 2));
-    
-    boolean truncate = fs.truncate(testPath, data.length);
-    System.err.println("truncate = " + truncate);
-    
+    boolean truncate = false;
+    int retry = 0;
+    while(!truncate && retry < 10) {
+      truncate = fs.truncate(testPath, data.length);
+      System.err.println("truncate = " + truncate);
+      Thread.sleep(3000);
+      retry++;
+    }
     FSDataInputStream is = fs.open(testPath);
     System.out.println("expect lenth = "+ data.length + ", file length = " + is.available());
     String text = IOUtil.getStreamContentAsString(is, "UTF-8");
