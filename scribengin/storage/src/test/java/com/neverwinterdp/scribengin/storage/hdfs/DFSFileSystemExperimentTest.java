@@ -48,7 +48,7 @@ public class DFSFileSystemExperimentTest {
     os.close();
     System.err.println("pass 1");
     
-    fs.truncate(testPath, data.length);
+    fs.truncate(testPath, data.length - 1);
     System.err.println("pass 2");
     
     FSDataInputStream is = fs.open(testPath);
