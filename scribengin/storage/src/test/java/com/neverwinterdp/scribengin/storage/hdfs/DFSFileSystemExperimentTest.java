@@ -52,9 +52,9 @@ public class DFSFileSystemExperimentTest {
     System.err.println("truncate = " + truncate);
     
     FSDataInputStream is = fs.open(testPath);
+    System.out.println("expect lenth = "+ data.length + ", file length = " + is.available());
     String text = IOUtil.getStreamContentAsString(is, "UTF-8");
     System.err.println("text = " + text);
-    System.out.println("expect lenth = "+ data.length + ", file length = " + is.available());
     Assert.assertEquals(TEXT, text);
     System.err.println("pass 3");
   }
