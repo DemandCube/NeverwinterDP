@@ -1,8 +1,6 @@
 package com.neverwinterdp.scribengin.storage.hdfs;
 
 
-import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -13,19 +11,25 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
-public class HDFSFileSystemUnitTest {
-  static String TEST_DIR = "./build/hdfs" ;
+public class DFSFileSystemExperimentTest {
+  static String TEST_DIR = "/tmp/dfs-test" ;
   private FileSystem fs ;
   
   @Before
   public void setup() throws Exception {
-    FileUtil.removeIfExist(TEST_DIR, false);
-    fs = FileSystem.getLocal(new Configuration()) ;
-    //org.apache.hadoop.fs.FileUtil.copyMerge(fs, srcDir, dstFS, dstFile, deleteSource, conf, addString)
+    System.setProperty("HADOOP_USER_NAME", "neverwinterdp");
+    
+    Configuration conf = new Configuration();
+    conf.set("HADOOP_USER_NAME", "neverwinterdp");
+    conf.set("fs.default.name", "hdfs://159.203.71.183:9000");
+    fs = FileSystem.get(conf) ;
+    if(fs.exists(new Path(TEST_DIR))) {
+      fs.delete(new Path(TEST_DIR), true);
+    }
+    fs.mkdirs(new Path(TEST_DIR));
   }
   
   @After
@@ -34,43 +38,23 @@ public class HDFSFileSystemUnitTest {
   }
   
   @Test
-  public void testOverwrite() throws Exception {
-    Path path = new Path(TEST_DIR + "/test");
-    FSDataOutputStream out1 = fs.create(path, false);
-    try {
-      FSDataOutputStream out2 = fs.create(path, false);
-      Assert.fail();
-    } catch(IOException ex) {
-    } 
-  }
-  
-  @Test
-  public void testCreateReadWrite() throws Exception {
+  public void testWritePos() throws Exception {
     String TEXT = "hello" ;
-    Path testPath = new Path("./build/hdfs/test.txt"); 
+    byte[] data = TEXT.getBytes();
+    Path testPath = new Path(TEST_DIR + "/test.txt"); 
     FSDataOutputStream os = fs.create(testPath) ;
-    os.write(TEXT.getBytes());
+    os.write(data);
+    os.write(data);
     os.close();
+    System.err.println("pass 1");
+    
+    fs.truncate(testPath, data.length);
+    System.err.println("pass 2");
     
     FSDataInputStream is = fs.open(testPath);
     String text = IOUtil.getStreamContentAsString(is, "UTF-8");
     Assert.assertEquals(TEXT, text);
-  }
-  
-  @Test
-  public void testWritePos() throws Exception {
-    String TEXT = "hello" ;
-    byte[] data = TEXT.getBytes();
-    Path testPath = new Path("./build/hdfs/test.txt"); 
-    FSDataOutputStream os = fs.create(testPath) ;
-    os.write(data);
-    os.write(data);
-    os.close();
-
-    fs.truncate(testPath, data.length);
-    FSDataInputStream is = fs.open(testPath);
-    String text = IOUtil.getStreamContentAsString(is, "UTF-8");
-    Assert.assertEquals(TEXT, text);
+    System.err.println("pass 3");
   }
   
   @Test
