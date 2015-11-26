@@ -24,7 +24,7 @@ public class DFSFileSystemExperimentTest {
     
     Configuration conf = new Configuration();
     conf.set("HADOOP_USER_NAME", "neverwinterdp");
-    conf.set("fs.default.name", "hdfs://hadoop-master:9000");
+    conf.set("fs.defaultFS", "hdfs://hadoop-master:9000");
     fs = FileSystem.get(conf) ;
     if(fs.exists(new Path(TEST_DIR))) {
       fs.delete(new Path(TEST_DIR), true);
