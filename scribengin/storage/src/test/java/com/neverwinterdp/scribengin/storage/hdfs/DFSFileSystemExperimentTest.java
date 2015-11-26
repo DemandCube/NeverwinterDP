@@ -71,12 +71,6 @@ public class DFSFileSystemExperimentTest {
     }
     
     Path concatPath = new Path(TEST_DIR + "/concat.txt");
-    try {
-      fs.concat(concatPath, path);
-    } catch(UnsupportedOperationException ex) {
-      System.err.println("TODO: test concat method with real HDFS");
-    }
-    
-    HDFSUtil.concat(fs, concatPath, path);
+    fs.concat(concatPath, path);
   }
 }
