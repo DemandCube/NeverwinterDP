@@ -45,7 +45,9 @@ public class DFSFileSystemExperimentTest {
     FSDataOutputStream os = fs.create(testPath) ;
     os.write(data);
     os.write(data);
+    os.hflush();
     os.close();
+    
     System.err.println("write: " + (data.length * 2));
     
     boolean truncate = fs.truncate(testPath, data.length);
