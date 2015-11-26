@@ -58,22 +58,6 @@ public class HDFSFileSystemUnitTest {
   }
   
   @Test
-  public void testWritePos() throws Exception {
-    String TEXT = "hello" ;
-    byte[] data = TEXT.getBytes();
-    Path testPath = new Path("./build/hdfs/test.txt"); 
-    FSDataOutputStream os = fs.create(testPath) ;
-    os.write(data);
-    os.write(data);
-    os.close();
-
-    fs.truncate(testPath, data.length);
-    FSDataInputStream is = fs.open(testPath);
-    String text = IOUtil.getStreamContentAsString(is, "UTF-8");
-    Assert.assertEquals(TEXT, text);
-  }
-  
-  @Test
   public void testConcat() throws Exception {
     Path[] path = new Path[10];
     for(int i = 0; i < path.length; i++) {
