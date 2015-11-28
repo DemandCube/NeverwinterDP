@@ -4,14 +4,16 @@ Storage
     readers
       all
         reader-1-001: { name: reader-1, segment: segment-0000003 }
+          segment-001: { segment: segment-0000001 }
+          segment-002: { segment: segment-0000002 }
       history
       active
         reader-1-001
       heartbeat
         reader-1-001
     writers
-      writer-1 {name: writer-1}
-      writer-2 {name: writer-2}
+      writer-1 {name: writer-1, segment: segment-0000002}
+      writer-2 {name: writer-2, segment: segment-0000003}
     data
       current
         segment-00000001
