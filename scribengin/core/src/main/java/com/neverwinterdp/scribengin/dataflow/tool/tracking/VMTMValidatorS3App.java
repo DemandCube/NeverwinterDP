@@ -208,7 +208,9 @@ public class VMTMValidatorS3App extends VMApp {
         while((record = reader.next(1000)) != null) {
           byte[] data = record.getData();
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(data, TrackingMessage.class);
-          tmQueue.put(tMesg);
+          if(!tmQueue.offer(tMesg, 90000, TimeUnit.MILLISECONDS)) {
+            throw new Exception("Cannot queue the messages after 5s, increase the buffer");
+          }
           readCounter.incrementAndGet();
         }
         reader.close();

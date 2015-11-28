@@ -68,7 +68,7 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
       DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
       SequenceIdTracker idTracker = 
-        new SequenceIdTracker(dflRegistry.getRegistry(), DataflowRegistry.DATAFLOW_WORKER_ID_TRACKER);
+        new SequenceIdTracker(dflRegistry.getRegistry(), DataflowRegistry.DATAFLOW_WORKER_ID_TRACKER, true);
       List<String> activeWorkers = dflRegistry.getWorkerRegistry().getActiveWorkerIds();
       //TODO: fix this hack
       int numOfInstanceToAllocate = 1;
