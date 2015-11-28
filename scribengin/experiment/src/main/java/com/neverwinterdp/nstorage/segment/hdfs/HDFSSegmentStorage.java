@@ -6,9 +6,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.neverwinterdp.nstorage.segment.SegmentDescriptor;
-import com.neverwinterdp.nstorage.segment.SegmentStorage;
 import com.neverwinterdp.nstorage.segment.SegmentRegistry;
 import com.neverwinterdp.nstorage.segment.SegmentRegistryPrinter;
+import com.neverwinterdp.nstorage.segment.SegmentStorage;
 import com.neverwinterdp.nstorage.segment.WriterDescriptor;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
@@ -37,20 +37,24 @@ public class HDFSSegmentStorage extends SegmentStorage {
   
   @Override
   protected HDFSSegmentWriter nextSegmentWriter(WriterDescriptor writer, SegmentDescriptor segment) throws RegistryException, IOException {
-    return new HDFSSegmentWriter(segStorageReg, writer, segment, fs, storageLocation);
+    return new HDFSSegmentWriter(segRegistry, writer, segment, fs, storageLocation);
+  }
+
+  @Override
+  public HDFSSegmentConsistencyVerifier getSegmentConsistencyVerifier() {
+    return new HDFSSegmentConsistencyVerifier(segRegistry, fs, storageLocation);
   }
   
   public void close() throws RegistryException, IOException {
     if(writer != null) {
-      segStorageReg.closeWriter(writer);
+      segRegistry.closeWriter(writer);
       writer = null;
     }
   }
   
   public void dump() throws RegistryException, IOException {
-    SegmentRegistryPrinter rPrinter = new SegmentRegistryPrinter(System.out, segStorageReg);
+    SegmentRegistryPrinter rPrinter = new SegmentRegistryPrinter(System.out, segRegistry);
     rPrinter.print();
     HDFSUtil.dump(fs, storageLocation);
   }
-
 }

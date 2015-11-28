@@ -6,35 +6,36 @@ import com.neverwinterdp.registry.RegistryException;
 
 abstract public class SegmentStorage {
   protected String clientId;
-  protected SegmentRegistry segStorageReg;
+  protected SegmentRegistry segRegistry;
   
   protected ReaderDescriptor reader;
   protected WriterDescriptor writer;
   
   protected void init(String clientId, SegmentRegistry segStorageReg) {
     this.clientId      = clientId;
-    this.segStorageReg = segStorageReg;
+    this.segRegistry = segStorageReg;
   }
   
-  public SegmentRegistry getSegmentStorageRegistry() { return segStorageReg ; }
+  public SegmentRegistry getSegmentRegistry() { return segRegistry ; }
   
   public SegmentReader getReader() throws RegistryException, IOException  {
     if(reader == null) {
-      reader = segStorageReg.createReader(clientId);
+      reader = segRegistry.createReader(clientId);
     }
     return null;
   }
   
   public SegmentWriter newSegmentWriter() throws RegistryException, IOException  {
     if(writer == null) {
-      writer = segStorageReg.createWriter(clientId);
+      writer = segRegistry.createWriter(clientId);
     }
     
-    SegmentDescriptor segment = segStorageReg.newSegment(writer);
+    SegmentDescriptor segment = segRegistry.newSegment(writer);
     SegmentWriter segWriter = nextSegmentWriter(writer, segment) ;
     return segWriter;
   }
   
   abstract protected SegmentWriter nextSegmentWriter(WriterDescriptor writer, SegmentDescriptor segment) throws RegistryException, IOException;
   
+  abstract public SegmentConsistencyVerifier getSegmentConsistencyVerifier() ;
 }

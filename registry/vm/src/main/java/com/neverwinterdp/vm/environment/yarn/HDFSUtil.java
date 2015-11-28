@@ -9,6 +9,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.neverwinterdp.util.io.IOUtil;
+
 public class HDFSUtil {
   static public int getStreamId(Path path) {
     String name = path.getName();
@@ -38,6 +40,18 @@ public class HDFSUtil {
     } else {
       fs.createNewFile(dest);
       fs.concat(dest, src);
+    }
+  }
+  
+  static public void truncate(FileSystem fs, Path path, long newLength) throws IOException {
+    if(fs instanceof LocalFileSystem) {
+      FSDataInputStream is = fs.open(path);
+      byte[] data = IOUtil.getStreamContentAsBytes(is);
+      FSDataOutputStream os = fs.create(path, true);
+      os.write(data, 0, (int)newLength);
+      os.close();
+    } else {
+      fs.truncate(path, newLength);
     }
   }
   

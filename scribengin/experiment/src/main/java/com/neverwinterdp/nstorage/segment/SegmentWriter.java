@@ -52,7 +52,7 @@ abstract public class SegmentWriter {
   }
   
   
-  abstract protected int  bufferGetNumberOfWrittenRecords() ;
+  abstract protected long  bufferGetNumberOfWrittenRecords() ;
   abstract protected long bufferGetCurrentPosistion() ;
   
   abstract protected boolean isBufferFull() throws IOException, RegistryException;
