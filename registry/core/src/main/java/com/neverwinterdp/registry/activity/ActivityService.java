@@ -43,7 +43,7 @@ public class ActivityService extends ActivityRegistry {
     this.registry  = container.getInstance(Registry.class);
     super.init(registry, activityPath, true);
     queue = new DistributedQueue(registry, activityPath + "/queue");
-    activityIdTracker = new SequenceIdTracker(registry, activityPath + "/activity-id-tracker");
+    activityIdTracker = new SequenceIdTracker(registry, activityPath + "/activity-id-tracker", true);
 
     for(Activity selActive : getActiveActivities()) {
       resume(selActive);

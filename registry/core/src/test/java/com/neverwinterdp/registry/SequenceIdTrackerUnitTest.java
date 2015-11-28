@@ -34,9 +34,9 @@ public class SequenceIdTrackerUnitTest {
   @Test
   public void testSequenceIdTracker() throws Exception {
     String SEQ_ID_TRACKER_PATH = "/id-tracker";
-    SequenceIdTracker tracker1 = new  SequenceIdTracker(newRegistry().connect(), SEQ_ID_TRACKER_PATH);
+    SequenceIdTracker tracker1 = new  SequenceIdTracker(newRegistry().connect(), SEQ_ID_TRACKER_PATH, true);
     System.out.println("tracker1: " + tracker1.nextSeqId());
-    SequenceIdTracker tracker2 = new  SequenceIdTracker(newRegistry().connect(), SEQ_ID_TRACKER_PATH);
+    SequenceIdTracker tracker2 = new  SequenceIdTracker(newRegistry().connect(), SEQ_ID_TRACKER_PATH, true);
     System.out.println("tracker2: " + tracker2.nextSeqId());
   }
   

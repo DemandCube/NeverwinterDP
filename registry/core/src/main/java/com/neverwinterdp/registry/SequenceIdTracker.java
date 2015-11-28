@@ -11,10 +11,18 @@ public class SequenceIdTracker {
   private Registry registry ;
   private String   path;
   
-  public SequenceIdTracker(Registry registry, String path) throws RegistryException {
+  public SequenceIdTracker(Registry registry, String path, boolean init) throws RegistryException {
     this.registry = registry;
     this.path = path ;
+    if(init) initRegistry();
+  }
+  
+  public void initRegistry() throws RegistryException {
     registry.createIfNotExist(path);
+  }
+  
+  public void initRegistry(Transaction transaction) throws RegistryException {
+    transaction.create(path, null, NodeCreateMode.PERSISTENT);
   }
   
   public int nextInt() throws RegistryException {
