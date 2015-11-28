@@ -6,31 +6,36 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.neverwinterdp.nstorage.segment.DataSegmentDescriptor;
 import com.neverwinterdp.nstorage.segment.SegmentDescriptor;
-import com.neverwinterdp.nstorage.segment.SegmentStorageRegistry;
+import com.neverwinterdp.nstorage.segment.SegmentRegistry;
 import com.neverwinterdp.nstorage.segment.SegmentWriter;
+import com.neverwinterdp.nstorage.segment.WriterDescriptor;
 import com.neverwinterdp.registry.RegistryException;
 
 public class HDFSSegmentWriter extends SegmentWriter {
   private FileSystem            fs;
   private String                storageLocation;
-  private DataSegmentDescriptor dataSegmentDescriptor;
-  private String                relativePath;
   private String                fullPath ;
   private FSDataOutputStream    bufferingOs;
+  private int                   bufferNumberOfWrittenRecords;
+  private long                  bufferCurrentPosition;
   
-  public HDFSSegmentWriter(String name, SegmentStorageRegistry registry, SegmentDescriptor segment, 
+  public HDFSSegmentWriter(SegmentRegistry registry, WriterDescriptor writer, SegmentDescriptor segment, 
                            FileSystem fs, String storageLoc) throws RegistryException, IOException {
-    super(name, registry, segment);
+    super(registry, writer, segment);
     this.fs = fs;
-    dataSegmentDescriptor = registry.newDataSegment(name, segment);
-    relativePath = segment.getName() + "/" + dataSegmentDescriptor.getName() + ".dat";
-    fullPath = storageLocation + "/" + relativePath;
-    dataSegmentDescriptor.setLocation(relativePath);
+    this.storageLocation = storageLoc;
+    this.fullPath = storageLocation + "/" + segment.getName() + ".dat";
     bufferingOs  = fs.create(new Path(fullPath)) ;
   }
 
+  @Override
+  protected int  bufferGetNumberOfWrittenRecords() { return this.bufferNumberOfWrittenRecords; }
+  
+  @Override
+  protected long bufferGetCurrentPosistion() { return this.bufferCurrentPosition ; }
+  
+  
   @Override
   protected boolean isBufferFull() throws IOException, RegistryException {
     return false;
@@ -40,6 +45,8 @@ public class HDFSSegmentWriter extends SegmentWriter {
   protected void bufferWrite(byte[] data) throws IOException, RegistryException {
     bufferingOs.writeInt(data.length);
     bufferingOs.write(data);
+    bufferNumberOfWrittenRecords++ ;
+    bufferCurrentPosition += 4 + data.length;
   }
 
   @Override
@@ -53,5 +60,15 @@ public class HDFSSegmentWriter extends SegmentWriter {
 
   @Override
   protected void bufferRollback() throws IOException {
+    if(bufferingOs != null) {
+      bufferingOs.close();
+      fs.delete(new Path(fullPath), true);
+    }
+    bufferingOs  = fs.create(new Path(fullPath)) ;
+  }
+
+  @Override
+  protected void bufferClose() throws IOException {
+    bufferingOs.close();
   }
 }

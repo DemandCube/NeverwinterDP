@@ -40,10 +40,11 @@ public class SegmentStorageRegistryUnitTest {
   @Test
   public void testSegment() throws Exception {
     int NUM_OF_SEGMENTS = 3;
-    SegmentStorageRegistry segStorageReg = new SegmentStorageRegistry(registry, "/seg-storage");
+    SegmentRegistry segStorageReg = new SegmentRegistry(registry, "/seg-storage");
     segStorageReg.initRegistry();
+    WriterDescriptor writer = segStorageReg.createWriter("test");
     for(int i = 0; i < NUM_OF_SEGMENTS; i++) {
-      SegmentDescriptor segment = segStorageReg.newSegment();
+      SegmentDescriptor segment = segStorageReg.newSegment(writer);
     }
     
     List<String> segments = segStorageReg.getSegments();
@@ -51,31 +52,8 @@ public class SegmentStorageRegistryUnitTest {
     
     SegmentDescriptor segment0 = segStorageReg.getSegmentById(0);
     Assert.assertNotNull(segment0);
-    
-    registry.get("/seg-storage").dump(System.out);
-  }
   
-  @Test
-  public void testDataSegment() throws Exception {
-    int NUM_DATA_OF_SEGMENTS = 3;
-    SegmentStorageRegistry segStorageReg = new SegmentStorageRegistry(registry, "/seg-storage");
-    segStorageReg.initRegistry();
-    SegmentDescriptor segment0 = segStorageReg.newSegment();
-    for(int i = 0; i < NUM_DATA_OF_SEGMENTS; i++) {
-      DataSegmentDescriptor dataSeg = segStorageReg.newDataSegment("test", segment0);
-    }
-    
-    DataSegmentDescriptor dataSeg0 = segStorageReg.getDataSegmentById(segment0, 0);
-    Assert.assertNotNull(dataSeg0);
-    
-    dataSeg0.setLastCommitRecordIndex(1);
-    dataSeg0.setLastCommitPos(1);
-    segStorageReg.commit(segment0, dataSeg0);
-    dataSeg0 = segStorageReg.getDataSegmentById(segment0, 0);
-    Assert.assertEquals(1, dataSeg0.getLastCommitRecordIndex());
-    
-    List<String> dataSegments = segStorageReg.getDataSegments(segment0);
-    Assert.assertEquals(NUM_DATA_OF_SEGMENTS, dataSegments.size());
-    registry.get("/seg-storage").dump(System.out);
+    SegmentRegistryPrinter rPrinter = new SegmentRegistryPrinter(System.out, segStorageReg);
+    rPrinter.print();
   }
 }

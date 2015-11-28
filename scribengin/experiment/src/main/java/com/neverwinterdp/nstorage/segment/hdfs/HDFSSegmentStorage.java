@@ -5,16 +5,26 @@ import java.io.IOException;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.neverwinterdp.nstorage.segment.SegmentDescriptor;
 import com.neverwinterdp.nstorage.segment.SegmentStorage;
-import com.neverwinterdp.nstorage.segment.SegmentStorageRegistry;
+import com.neverwinterdp.nstorage.segment.SegmentRegistry;
+import com.neverwinterdp.nstorage.segment.SegmentRegistryPrinter;
+import com.neverwinterdp.nstorage.segment.WriterDescriptor;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
 public class HDFSSegmentStorage extends SegmentStorage {
   private FileSystem fs;
   private String     storageLocation;
-  
-  public HDFSSegmentStorage(FileSystem fs, String storageLoc, Registry registry, String regPath) throws RegistryException, IOException {
+
+  public HDFSSegmentStorage(String clientId, FileSystem fs, String storageLoc, Registry registry, String regPath) throws RegistryException, IOException {
+    SegmentRegistry segStorageReg = new SegmentRegistry(registry, regPath);
+    if(!registry.exists(regPath)) {
+      segStorageReg.initRegistry();
+    }
+    init(clientId, segStorageReg);
+    
     this.fs              = fs;
     this.storageLocation = storageLoc;
     
@@ -22,16 +32,25 @@ public class HDFSSegmentStorage extends SegmentStorage {
     if(!fs.exists(hdfsStoragePath)) {
       fs.mkdirs(hdfsStoragePath);
     }
-    
-    SegmentStorageRegistry segStorageReg = new SegmentStorageRegistry(registry, regPath);
-    if(!registry.exists(regPath)) {
-      segStorageReg.initRegistry();
-    }
-    init(segStorageReg);
   }
+
   
   @Override
-  public HDFSStorageWriter getWriter(String name) {
-    return new HDFSStorageWriter(name, fs, storageLocation, registry); 
+  protected HDFSSegmentWriter nextSegmentWriter(WriterDescriptor writer, SegmentDescriptor segment) throws RegistryException, IOException {
+    return new HDFSSegmentWriter(segStorageReg, writer, segment, fs, storageLocation);
   }
+  
+  public void close() throws RegistryException, IOException {
+    if(writer != null) {
+      segStorageReg.closeWriter(writer);
+      writer = null;
+    }
+  }
+  
+  public void dump() throws RegistryException, IOException {
+    SegmentRegistryPrinter rPrinter = new SegmentRegistryPrinter(System.out, segStorageReg);
+    rPrinter.print();
+    HDFSUtil.dump(fs, storageLocation);
+  }
+
 }

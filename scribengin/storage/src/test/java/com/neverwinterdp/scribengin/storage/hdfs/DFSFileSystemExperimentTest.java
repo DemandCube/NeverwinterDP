@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.util.io.IOUtil;
-import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
 public class DFSFileSystemExperimentTest {
   static String TEST_DIR = "/tmp/dfs-test" ;
@@ -38,7 +37,7 @@ public class DFSFileSystemExperimentTest {
   }
   
   @Test
-  public void testWritePos() throws Exception {
+  public void testTruncate() throws Exception {
     String TEXT = "hello" ;
     byte[] data = TEXT.getBytes();
     Path testPath = new Path(TEST_DIR + "/test.txt"); 
@@ -51,7 +50,7 @@ public class DFSFileSystemExperimentTest {
     System.err.println("write: " + (data.length * 2));
     boolean truncate = false;
     int retry = 0;
-    while(!truncate && retry < 10) {
+    while(!truncate && retry < 3) {
       truncate = fs.truncate(testPath, data.length);
       System.err.println("truncate = " + truncate);
       Thread.sleep(1000);

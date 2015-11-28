@@ -36,8 +36,23 @@ public class HDFSSegmentStorageUnitTest {
   
   @Test
   public void testStorage() throws Exception {
-    HDFSSegmentStorage storage = 
-      new HDFSSegmentStorage(fs, WORKING_DIR + "/hdfs", registry, "/seg-storage");
+    HDFSSegmentStorage storage =  
+      new HDFSSegmentStorage("tester", fs, WORKING_DIR + "/seg-storage", registry, "/seg-storage");
+    HDFSSegmentWriter writer = (HDFSSegmentWriter)storage.newSegmentWriter();
+    for(int i = 0; i < 10; i++) {
+      writer.write("test".getBytes());
+    }
+    writer.prepareCommit();
+    writer.completeCommit();
     
+    writer.close();
+    
+    System.out.println("##Before close storage");
+    storage.dump();
+    System.out.println("\n\n");
+    
+    System.out.println("##After close storage");
+    storage.close();
+    storage.dump();
   }
 }
