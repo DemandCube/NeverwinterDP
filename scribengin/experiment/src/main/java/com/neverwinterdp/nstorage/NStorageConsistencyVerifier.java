@@ -23,7 +23,7 @@ abstract public class NStorageConsistencyVerifier {
     segementConsistencies = new ArrayList<>();
     segmentDescriptors    = new ArrayList<>();
     for(int i = 0; i < segments.size(); i++) {
-      SegmentDescriptor segment = segRegistry.getSegmentByName(segments.get(i));
+      SegmentDescriptor segment = segRegistry.getSegmentBySegmentId(segments.get(i));
       SegmentConsistency sc = verify(segment);
       segmentDescriptors.add(segment);
       segementConsistencies.add(sc);
@@ -31,7 +31,7 @@ abstract public class NStorageConsistencyVerifier {
   }
   
   SegmentConsistency verify(SegmentDescriptor segment) throws RegistryException, IOException {
-    SegmentConsistency sc = new SegmentConsistency(segment.getName());
+    SegmentConsistency sc = new SegmentConsistency(segment.getSegmentId());
     if(segment.getStatus() == SegmentDescriptor.Status.COMPLETE) {
       sc.setStatus(Consistency.GOOD);
       if(segment.getFinishedTime() >= segment.getCreatedTime()) sc.setTime(Consistency.GOOD);
@@ -86,7 +86,7 @@ abstract public class NStorageConsistencyVerifier {
     for(int i = 0; i < segementConsistencies.size(); i++) {
       SegmentDescriptor segment = segmentDescriptors.get(i);
       ft.addRow(
-        segment.getName(),
+        segment.getSegmentId(),
         segment.getCreator(), 
         DateUtil.asCompactDateTime(segment.getCreatedTime()),
         DateUtil.asCompactDateTime(segment.getFinishedTime()),

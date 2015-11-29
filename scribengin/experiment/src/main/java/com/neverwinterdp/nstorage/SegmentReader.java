@@ -16,7 +16,7 @@ abstract public class SegmentReader {
   }
   
   public boolean hasNext() throws IOException, RegistryException {
-    return false;
+    return getCurrentReadPosition() < segment.getDataSegmentLastCommitPos();
   }
   
   public byte[] nextRecord() throws IOException, RegistryException {
@@ -30,4 +30,9 @@ abstract public class SegmentReader {
   
   public void completeCommit() throws IOException {
   }
+  
+  public void rollback() throws IOException {
+  }
+  
+  abstract protected long getCurrentReadPosition() ;
 }

@@ -7,25 +7,20 @@ import com.neverwinterdp.util.text.DateUtil;
 public class NStorageReaderDescriptor {
   static DecimalFormat ID_FORMAT = new DecimalFormat("000000");
   
-  private String       id;
-  private String       reader;
+  private String       readerId;
   private long         startedTime;
   private long         finishedTime;
   
   
   public NStorageReaderDescriptor() { }
   
-  public NStorageReaderDescriptor(int id, String reader) {
-    this.id          = reader + "-" + ID_FORMAT.format(id) ;
-    this.reader      = reader;
+  public NStorageReaderDescriptor(String readerId) {
+    this.readerId    = readerId  ;
     this.startedTime = System.currentTimeMillis();
   }
   
-  public String getId() { return id; }
-  public void setId(String id) { this.id = id; }
-  
-  public String getReader() { return reader; }
-  public void setReader(String reader) { this.reader = reader; }
+  public String getReaderId() { return readerId; }
+  public void setReaderId(String id) { this.readerId = id; }
   
   public long getStartedTime() { return startedTime; }
   public void setStartedTime(long startedTime) { this.startedTime = startedTime; }
@@ -35,8 +30,7 @@ public class NStorageReaderDescriptor {
   
   public String toString() {
     StringBuilder b = new StringBuilder();
-    b.append(id).append(": {");
-    b.append("reader=").append(reader).append(", ");
+    b.append(readerId).append(": {");
     b.append("startedTime=").append(DateUtil.asCompactDateTime(startedTime)).append(", ");
     b.append("finishedTime=").append(DateUtil.asCompactDateTime(finishedTime));
     b.append("}");

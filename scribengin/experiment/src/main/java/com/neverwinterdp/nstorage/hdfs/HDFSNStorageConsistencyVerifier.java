@@ -22,7 +22,7 @@ public class HDFSNStorageConsistencyVerifier extends NStorageConsistencyVerifier
   
   @Override
   protected long getDataSegmentLength(SegmentDescriptor segment) throws IOException {
-    String segFullPath = storageLocation + "/" + segment.getName() + ".dat";
+    String segFullPath = storageLocation + "/" + segment.getSegmentId() + ".dat";
     FileStatus fstatus = fs.getFileStatus(new Path(segFullPath));
     return fstatus.getLen();
   }

@@ -25,7 +25,7 @@ public class HDFSSegmentWriter extends SegmentWriter {
     super(registry, writer, segment);
     this.fs = fs;
     this.storageLocation = storageLoc;
-    this.segFullPath = storageLocation + "/" + segment.getName() + ".dat";
+    this.segFullPath = storageLocation + "/" + segment.getSegmentId() + ".dat";
     bufferingOs  = fs.create(new Path(segFullPath)) ;
   }
 

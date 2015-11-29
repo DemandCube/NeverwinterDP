@@ -25,7 +25,7 @@ public class NStorageRegistryPrinter {
     println("  ", "segments");
     List<String> segments = segStorageReg.getSegments() ;
     for(int i = 0; i < segments.size(); i++) {
-      SegmentDescriptor segment = segStorageReg.getSegmentByName(segments.get(i));
+      SegmentDescriptor segment = segStorageReg.getSegmentBySegmentId(segments.get(i));
       println("    "  , segment.toString()) ;
     }
   }
@@ -37,6 +37,11 @@ public class NStorageRegistryPrinter {
     for(int i = 0; i < allReaders.size(); i++) {
       NStorageReaderDescriptor reader = segStorageReg.getReader(allReaders.get(i));
       println("      "  , reader.toString()) ;
+      List<String> segmentIds = segStorageReg.getSegmentReadDescriptors(reader);
+      for(int j = 0; j < segmentIds.size(); j++) {
+        SegmentReadDescriptor segmentReadDescriptor = segStorageReg.getSegmentReadDescriptor(reader, segmentIds.get(j));
+        println("        ", segmentReadDescriptor.toString()) ;
+      }
     }
     println("    ", "active");
     List<String> activeReaders = segStorageReg.getActiveReaders() ;

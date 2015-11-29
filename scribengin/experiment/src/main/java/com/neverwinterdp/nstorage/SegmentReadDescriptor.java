@@ -9,6 +9,12 @@ public class SegmentReadDescriptor {
   private long         currentReadDataPosition;
   private List<String> logs;
   
+  public SegmentReadDescriptor() { }
+  
+  public SegmentReadDescriptor(String segmentId) {
+    this.segmentId = segmentId;
+  }
+  
   public String getSegmentId() { return segmentId; }
   public void setSegmentId(String segmentId) { this.segmentId = segmentId; }
   

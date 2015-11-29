@@ -58,4 +58,20 @@ public class NStorageRegistryUnitTest {
     NStorageRegistryPrinter rPrinter = new NStorageRegistryPrinter(System.out, segStorageReg);
     rPrinter.print();
   }
+  
+  @Test
+  public void testReader() throws Exception {
+    NStorageRegistry storageRegistry = new NStorageRegistry(registry, "/seg-storage");
+    storageRegistry.initRegistry();
+    NStorageWriterDescriptor writer = storageRegistry.createWriter("writer-1");
+    SegmentDescriptor segment0 = storageRegistry.newSegment(writer);
+    SegmentDescriptor segment1 = storageRegistry.newSegment(writer);
+
+    NStorageReaderDescriptor reader = storageRegistry.getOrCreateReader("reader-1");
+    SegmentReadDescriptor segment0ReadDescriptor = storageRegistry.getOrCreateSegmentReadDescriptor(reader, segment0);
+    SegmentReadDescriptor segment1ReadDescriptor = storageRegistry.getOrCreateSegmentReadDescriptor(reader, segment1);
+    
+    NStorageRegistryPrinter rPrinter = new NStorageRegistryPrinter(System.out, storageRegistry);
+    rPrinter.print();
+  }
 }

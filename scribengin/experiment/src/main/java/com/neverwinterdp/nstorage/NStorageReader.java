@@ -8,9 +8,10 @@ abstract public class NStorageReader {
   protected NStorageRegistry registry;
   protected NStorageReaderDescriptor readerDescriptor;
   
+  
   public NStorageReader(String clientId, NStorageRegistry registry) throws RegistryException {
     this.registry = registry;
-    readerDescriptor = registry.createReader(clientId);
+    readerDescriptor = registry.getOrCreateReader(clientId);
   }
   
   public boolean hasNext() throws IOException, RegistryException {

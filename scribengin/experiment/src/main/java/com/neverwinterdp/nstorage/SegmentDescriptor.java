@@ -10,7 +10,7 @@ public class SegmentDescriptor {
   static public enum Status { WRITING, COMPLETE }
   
   private int    id ;
-  private String name;
+  private String segmentId;
   private String creator;
   private long   createdTime;
   private long   finishedTime = -1l;
@@ -27,15 +27,15 @@ public class SegmentDescriptor {
   
   public SegmentDescriptor(int id) {
     this.id          = id ;
-    this.name        = toSegmentName(id);
+    this.segmentId   = toSegmentId(id);
     this.createdTime = System.currentTimeMillis();
   }
   
   public int getId() { return id; }
   public void setId(int id) { this.id = id; }
 
-  public String getName() { return name; }
-  public void   setName(String name) { this.name = name; }
+  public String getSegmentId() { return segmentId; }
+  public void   setSegmentId(String name) { this.segmentId = name; }
 
   public String getCreator() { return creator; }
   public void setCreator(String creator) { this.creator = creator; }
@@ -72,7 +72,7 @@ public class SegmentDescriptor {
 
   public String toString() {
     StringBuilder b = new StringBuilder();
-    b.append(name).append(": {");
+    b.append(segmentId).append(": {");
     b.append("id=").append(id).append(", ");
     b.append("creator=").append(creator).append(", ");
     b.append("createdTime=").append(DateUtil.asCompactDateTime(createdTime)).append(", ");
@@ -87,7 +87,7 @@ public class SegmentDescriptor {
     return b.toString();
   }
   
-  static public String toSegmentName(int id) {
+  static public String toSegmentId(int id) {
     return "segment-" + ID_FORMAT.format(id);
   }
 }

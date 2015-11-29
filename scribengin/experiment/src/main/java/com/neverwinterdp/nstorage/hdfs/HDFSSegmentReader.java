@@ -16,6 +16,7 @@ public class HDFSSegmentReader extends SegmentReader {
   private String            storageLocation;
   private String            fullPath;
   private FSDataInputStream dataIs;
+  private long              currentReadPos;
   
   public HDFSSegmentReader(NStorageRegistry registry, NStorageReaderDescriptor readerDescriptor, SegmentDescriptor segment, 
                            FileSystem fs, String storageLoc) throws IllegalArgumentException, IOException {
@@ -23,7 +24,7 @@ public class HDFSSegmentReader extends SegmentReader {
     
     this.fs = fs;
     this.storageLocation = storageLoc;
-    fullPath = storageLocation + "/" + segment.getName() + ".dat";
+    fullPath = storageLocation + "/" + segment.getSegmentId() + ".dat";
     dataIs  = fs.open(new Path(fullPath)) ;
   }
 
@@ -32,6 +33,15 @@ public class HDFSSegmentReader extends SegmentReader {
     int size    = dataIs.readInt();
     byte[] data = new byte[size];
     dataIs.readFully(data);
+    currentReadPos += 4 + data.length;
     return data;
   }
+
+  protected void rollback(long pos) throws IOException {
+    dataIs.seek(pos);
+    currentReadPos = pos;
+  }
+  
+  @Override
+  protected long getCurrentReadPosition() { return currentReadPos; }
 }

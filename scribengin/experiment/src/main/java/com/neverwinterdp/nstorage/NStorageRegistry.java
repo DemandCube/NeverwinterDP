@@ -35,7 +35,6 @@ public class NStorageRegistry {
   private Node              readersActiveNode;
   private Node              readersHeartbeatNode;
   private Node              readersHistoryNode;
-  private SequenceIdTracker readerIdTracker;
 
   private Node              writersNode;
   private Node              writersAllNode;
@@ -60,7 +59,6 @@ public class NStorageRegistry {
     readersActiveNode    = registryNode.getDescendant(READERS_ACTIVE);
     readersHeartbeatNode = registryNode.getDescendant(READERS_HEARTBEAT);
     readersHistoryNode   = registryNode.getDescendant(READERS_HISTORY);
-    readerIdTracker      = new SequenceIdTracker(registry, readersNode.getPath() + "/id-tracker", false);
     
     writersNode          = registryNode.getChild(WRITERS);
     writersAllNode       = registryNode.getDescendant(WRITERS_ALL);
@@ -88,7 +86,6 @@ public class NStorageRegistry {
     trans.create(readersActiveNode,    null, NodeCreateMode.PERSISTENT);
     trans.create(readersHeartbeatNode, null, NodeCreateMode.PERSISTENT);
     trans.create(readersHistoryNode,   null, NodeCreateMode.PERSISTENT);
-    readerIdTracker.initRegistry(trans);
     
     trans.create(writersNode,          null, NodeCreateMode.PERSISTENT);
     trans.create(writersAllNode,       null, NodeCreateMode.PERSISTENT);
@@ -108,10 +105,10 @@ public class NStorageRegistry {
   }
   
   public SegmentDescriptor getSegmentById(int id) throws RegistryException {
-    return segmentsNode.getChild(SegmentDescriptor.toSegmentName(id)).getDataAs(SegmentDescriptor.class);
+    return segmentsNode.getChild(SegmentDescriptor.toSegmentId(id)).getDataAs(SegmentDescriptor.class);
   }
   
-  public SegmentDescriptor getSegmentByName(String name) throws RegistryException {
+  public SegmentDescriptor getSegmentBySegmentId(String name) throws RegistryException {
     return segmentsNode.getChild(name).getDataAs(SegmentDescriptor.class);
   }
   
@@ -123,11 +120,11 @@ public class NStorageRegistry {
         SegmentDescriptor segment = new SegmentDescriptor(segments.size());
         segment.setCreator(writer.getWriter());
         Transaction transaction = registry.getTransaction();
-        transaction.createChild(segmentsNode, segment.getName(), segment, NodeCreateMode.PERSISTENT);
-        transaction.createDescendant(segmentsNode, segment.getName() + "/lock", NodeCreateMode.PERSISTENT) ;
-        transaction.createDescendant(segmentsNode, segment.getName() + "/data", NodeCreateMode.PERSISTENT) ;
+        transaction.createChild(segmentsNode, segment.getSegmentId(), segment, NodeCreateMode.PERSISTENT);
+        transaction.createDescendant(segmentsNode, segment.getSegmentId() + "/lock", NodeCreateMode.PERSISTENT) ;
+        transaction.createDescendant(segmentsNode, segment.getSegmentId() + "/data", NodeCreateMode.PERSISTENT) ;
         
-        writer.logStartSegment(segment.getName());
+        writer.logStartSegment(segment.getSegmentId());
         transaction.setData(writersAllNode.getPath() + "/" + writer.getId(), writer);
         transaction.commit();
         return segment;
@@ -150,7 +147,7 @@ public class NStorageRegistry {
       @Override
       public SegmentDescriptor execute(Registry registry) throws RegistryException {
         Transaction transaction = registry.getTransaction();
-        Node segNode = segmentsNode.getChild(segment.getName());
+        Node segNode = segmentsNode.getChild(segment.getSegmentId());
         transaction.setData(segNode.getPath(), segment);
         if(finished) {
           writer.logFinishSegment();
@@ -160,7 +157,7 @@ public class NStorageRegistry {
         return segment;
       }
     };
-    Lock lock = lockNode.getLock("write", "Lock to update the segment " + segment.getName()) ;
+    Lock lock = lockNode.getLock("write", "Lock to update the segment " + segment.getSegmentId()) ;
     lock.execute(op, 3, 3000);
   }
   
@@ -180,14 +177,36 @@ public class NStorageRegistry {
     return readersAllNode.getChild(name).getDataAs(NStorageReaderDescriptor.class);
   }
   
-  public NStorageReaderDescriptor createReader(String name) throws RegistryException {
-    NStorageReaderDescriptor reader = new NStorageReaderDescriptor(readerIdTracker.nextInt(), name) ;
+  public NStorageReaderDescriptor getOrCreateReader(String readerId) throws RegistryException {
+    NStorageReaderDescriptor reader = new NStorageReaderDescriptor(readerId) ;
     Transaction transaction = registry.getTransaction();
-    transaction.createChild(readersAllNode, reader.getId(), reader, NodeCreateMode.PERSISTENT);
-    transaction.createChild(readersActiveNode, reader.getId(), NodeCreateMode.PERSISTENT);
-    transaction.createChild(readersHeartbeatNode, reader.getId(), NodeCreateMode.EPHEMERAL);
+    transaction.createChild(readersAllNode, reader.getReaderId(), reader, NodeCreateMode.PERSISTENT);
+    transaction.createChild(readersActiveNode, reader.getReaderId(), NodeCreateMode.PERSISTENT);
+    transaction.createChild(readersHeartbeatNode, reader.getReaderId(), NodeCreateMode.EPHEMERAL);
     transaction.commit();
     return reader;
+  }
+  
+  public SegmentReadDescriptor getOrCreateSegmentReadDescriptor(NStorageReaderDescriptor reader, SegmentDescriptor segment) throws RegistryException {
+    Node readerNode = readersAllNode.getChild(reader.getReaderId());
+    Node readerSegmentNode = readerNode.getChild(segment.getSegmentId());
+    if(readerSegmentNode.exists()) {
+      return readerSegmentNode.getDataAs(SegmentReadDescriptor.class);
+    }
+    SegmentReadDescriptor segReadDescriptor = new SegmentReadDescriptor(segment.getSegmentId());
+    readerSegmentNode.create(segReadDescriptor, NodeCreateMode.PERSISTENT);
+    return segReadDescriptor;
+  }
+  
+  public List<String> getSegmentReadDescriptors(NStorageReaderDescriptor reader) throws RegistryException {
+    Node readerNode = readersAllNode.getChild(reader.getReaderId());
+    return readerNode.getChildren();
+  }
+  
+  public SegmentReadDescriptor getSegmentReadDescriptor(NStorageReaderDescriptor reader, String segmentId) throws RegistryException {
+    Node readerNode = readersAllNode.getChild(reader.getReaderId());
+    Node segmentReadNode = readerNode.getChild(segmentId);
+    return segmentReadNode.getDataAs(SegmentReadDescriptor.class);
   }
   
   public List<String> getAllWriters() throws RegistryException {
