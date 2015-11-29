@@ -112,6 +112,15 @@ public class NStorageRegistry {
     return segmentsNode.getChild(name).getDataAs(SegmentDescriptor.class);
   }
   
+  public SegmentDescriptor getNextSegmentDescriptor(SegmentDescriptor segment) throws RegistryException {
+    Node nextSegmentNode = segmentsNode.getChild(SegmentDescriptor.toSegmentId(segment.getId() + 1));
+    if(nextSegmentNode.exists()) {
+      SegmentDescriptor nextSegment = nextSegmentNode.getDataAs(SegmentDescriptor.class);
+      return nextSegment;
+    }
+    return null;
+  }
+  
   public SegmentDescriptor newSegment(final NStorageWriterDescriptor writer) throws RegistryException {
     BatchOperations<SegmentDescriptor> op = new BatchOperations<SegmentDescriptor>() {
       @Override
@@ -187,7 +196,7 @@ public class NStorageRegistry {
     return reader;
   }
   
-  public SegmentReadDescriptor getOrCreateSegmentReadDescriptor(NStorageReaderDescriptor reader, SegmentDescriptor segment) throws RegistryException {
+  public SegmentReadDescriptor createSegmentReadDescriptor(NStorageReaderDescriptor reader, SegmentDescriptor segment) throws RegistryException {
     Node readerNode = readersAllNode.getChild(reader.getReaderId());
     Node readerSegmentNode = readerNode.getChild(segment.getSegmentId());
     if(readerSegmentNode.exists()) {
@@ -196,6 +205,15 @@ public class NStorageRegistry {
     SegmentReadDescriptor segReadDescriptor = new SegmentReadDescriptor(segment.getSegmentId());
     readerSegmentNode.create(segReadDescriptor, NodeCreateMode.PERSISTENT);
     return segReadDescriptor;
+  }
+  
+  public SegmentReadDescriptor createNextSegmentReadDescriptor(NStorageReaderDescriptor reader, SegmentDescriptor segment) throws RegistryException {
+    Node nextSegmentNode = segmentsNode.getChild(SegmentDescriptor.toSegmentId(segment.getId() + 1));
+    if(nextSegmentNode.exists()) {
+      SegmentDescriptor nextSegment = nextSegmentNode.getDataAs(SegmentDescriptor.class);
+      return createSegmentReadDescriptor(reader, nextSegment);
+    }
+    return null;
   }
   
   public List<String> getSegmentReadDescriptors(NStorageReaderDescriptor reader) throws RegistryException {

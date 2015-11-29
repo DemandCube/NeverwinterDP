@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SegmentReadDescriptor {
-  private String       segmentId;
-  private long         currentReadRecordIndex;
-  private long         currentReadDataPosition;
+  
+  private String segmentId;
+  private long   currentReadRecordIndex;
+  private long   currentReadDataPosition;
+
   private List<String> logs;
   
   public SegmentReadDescriptor() { }

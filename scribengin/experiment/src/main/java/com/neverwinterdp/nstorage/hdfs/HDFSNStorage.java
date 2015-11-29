@@ -7,12 +7,9 @@ import org.apache.hadoop.fs.Path;
 
 import com.neverwinterdp.nstorage.NStorage;
 import com.neverwinterdp.nstorage.NStorageReader;
-import com.neverwinterdp.nstorage.NStorageReaderDescriptor;
 import com.neverwinterdp.nstorage.NStorageRegistry;
 import com.neverwinterdp.nstorage.NStorageRegistryPrinter;
 import com.neverwinterdp.nstorage.NStorageWriter;
-import com.neverwinterdp.nstorage.SegmentDescriptor;
-import com.neverwinterdp.nstorage.SegmentReader;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
@@ -42,7 +39,7 @@ public class HDFSNStorage extends NStorage {
   }
 
   @Override
-  protected NStorageReader createReader(String clientId, NStorageRegistry registry) throws RegistryException {
+  protected NStorageReader createReader(String clientId, NStorageRegistry registry) throws RegistryException, IOException {
     return new HDFSNStorageReader(clientId, registry, fs, storageLocation);
   }
   

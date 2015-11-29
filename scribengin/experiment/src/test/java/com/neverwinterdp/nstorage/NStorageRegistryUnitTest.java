@@ -68,8 +68,8 @@ public class NStorageRegistryUnitTest {
     SegmentDescriptor segment1 = storageRegistry.newSegment(writer);
 
     NStorageReaderDescriptor reader = storageRegistry.getOrCreateReader("reader-1");
-    SegmentReadDescriptor segment0ReadDescriptor = storageRegistry.getOrCreateSegmentReadDescriptor(reader, segment0);
-    SegmentReadDescriptor segment1ReadDescriptor = storageRegistry.getOrCreateSegmentReadDescriptor(reader, segment1);
+    SegmentReadDescriptor segment0ReadDescriptor = storageRegistry.createSegmentReadDescriptor(reader, segment0);
+    SegmentReadDescriptor segment1ReadDescriptor = storageRegistry.createSegmentReadDescriptor(reader, segment1);
     
     NStorageRegistryPrinter rPrinter = new NStorageRegistryPrinter(System.out, storageRegistry);
     rPrinter.print();

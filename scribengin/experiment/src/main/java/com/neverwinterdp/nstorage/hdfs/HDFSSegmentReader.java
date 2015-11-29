@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.Path;
 import com.neverwinterdp.nstorage.NStorageReaderDescriptor;
 import com.neverwinterdp.nstorage.NStorageRegistry;
 import com.neverwinterdp.nstorage.SegmentDescriptor;
+import com.neverwinterdp.nstorage.SegmentReadDescriptor;
 import com.neverwinterdp.nstorage.SegmentReader;
 
 public class HDFSSegmentReader extends SegmentReader {
@@ -18,9 +19,10 @@ public class HDFSSegmentReader extends SegmentReader {
   private FSDataInputStream dataIs;
   private long              currentReadPos;
   
-  public HDFSSegmentReader(NStorageRegistry registry, NStorageReaderDescriptor readerDescriptor, SegmentDescriptor segment, 
+  public HDFSSegmentReader(NStorageRegistry registry, NStorageReaderDescriptor readerDescriptor, 
+                           SegmentDescriptor segment, SegmentReadDescriptor segmentReadDescriptor, 
                            FileSystem fs, String storageLoc) throws IllegalArgumentException, IOException {
-    super(registry, readerDescriptor, segment);
+    super(registry, readerDescriptor, segment, segmentReadDescriptor);
     
     this.fs = fs;
     this.storageLocation = storageLoc;
