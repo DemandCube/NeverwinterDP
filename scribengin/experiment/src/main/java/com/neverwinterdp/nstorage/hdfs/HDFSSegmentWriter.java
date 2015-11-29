@@ -37,7 +37,7 @@ public class HDFSSegmentWriter extends SegmentWriter {
   
   
   @Override
-  protected boolean isBufferFull() throws IOException, RegistryException {
+  protected boolean bufferIsFull() throws IOException, RegistryException {
     return false;
   }
 

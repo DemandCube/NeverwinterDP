@@ -2,18 +2,12 @@ package com.neverwinterdp.nstorage;
 
 import java.util.List;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.neverwinterdp.nstorage.SegmentDescriptor;
-import com.neverwinterdp.nstorage.NStorageRegistry;
-import com.neverwinterdp.nstorage.NStorageRegistryPrinter;
-import com.neverwinterdp.nstorage.NStorageWriterDescriptor;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.util.io.FileUtil;
@@ -25,7 +19,6 @@ public class NStorageRegistryUnitTest {
   
   private EmbededZKServerSet zkCluster;
   private Registry           registry;
-  private FileSystem         fs ;
   
   @BeforeClass
   static public void beforeClass() throws Exception {
@@ -38,7 +31,6 @@ public class NStorageRegistryUnitTest {
     zkCluster = new EmbededZKServerSet(WORKING_DIR + "/zookeeper", 2181, 1);
     zkCluster.start();
     registry = RegistryConfig.getDefault().newInstance().connect();
-    fs = FileSystem.getLocal(new Configuration());
   }
   
   @After

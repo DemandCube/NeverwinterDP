@@ -5,10 +5,12 @@ import java.io.IOException;
 import com.neverwinterdp.registry.RegistryException;
 
 abstract public class NStorageReader {
-  private NStorageRegistry registry;
+  protected NStorageRegistry registry;
+  protected NStorageReaderDescriptor readerDescriptor;
   
-  public NStorageReader(String clientId, NStorageRegistry registry) {
+  public NStorageReader(String clientId, NStorageRegistry registry) throws RegistryException {
     this.registry = registry;
+    readerDescriptor = registry.createReader(clientId);
   }
   
   public boolean hasNext() throws IOException, RegistryException {
@@ -24,4 +26,6 @@ abstract public class NStorageReader {
   
   public void completeCommit() throws IOException {
   }
+  
+  abstract protected SegmentReader createSegmentReader(SegmentDescriptor segment) throws RegistryException, IOException ;
 }

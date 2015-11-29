@@ -5,12 +5,14 @@ import java.io.IOException;
 import com.neverwinterdp.registry.RegistryException;
 
 abstract public class SegmentReader {
-  private NStorageRegistry  registry;
-  private SegmentDescriptor segment;
+  private NStorageRegistry         registry;
+  private NStorageReaderDescriptor readerDescriptor;
+  private SegmentDescriptor        segment;
   
-  public SegmentReader(NStorageRegistry registry, SegmentDescriptor segment) {
-    this.registry = registry;
-    this.segment  = segment;
+  public SegmentReader(NStorageRegistry registry,NStorageReaderDescriptor readerDescriptor, SegmentDescriptor segment) {
+    this.registry         = registry;
+    this.readerDescriptor = readerDescriptor;
+    this.segment          = segment;
   }
   
   public boolean hasNext() throws IOException, RegistryException {

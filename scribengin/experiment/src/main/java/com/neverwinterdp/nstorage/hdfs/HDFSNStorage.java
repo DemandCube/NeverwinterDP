@@ -5,13 +5,14 @@ import java.io.IOException;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.neverwinterdp.nstorage.NStorage;
+import com.neverwinterdp.nstorage.NStorageReader;
 import com.neverwinterdp.nstorage.NStorageReaderDescriptor;
-import com.neverwinterdp.nstorage.SegmentDescriptor;
-import com.neverwinterdp.nstorage.SegmentReader;
 import com.neverwinterdp.nstorage.NStorageRegistry;
 import com.neverwinterdp.nstorage.NStorageRegistryPrinter;
-import com.neverwinterdp.nstorage.NStorage;
-import com.neverwinterdp.nstorage.NStorageWriterDescriptor;
+import com.neverwinterdp.nstorage.NStorageWriter;
+import com.neverwinterdp.nstorage.SegmentDescriptor;
+import com.neverwinterdp.nstorage.SegmentReader;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
@@ -35,17 +36,16 @@ public class HDFSNStorage extends NStorage {
       fs.mkdirs(hdfsStoragePath);
     }
   }
+  
+  protected NStorageWriter createWriter(String clientId, NStorageRegistry registry) throws RegistryException{
+    return new HDFSNStorageWriter(clientId, registry, fs, storageLocation);
+  }
 
   @Override
-  protected SegmentReader createSegmentReader(NStorageReaderDescriptor reader, SegmentDescriptor segment) throws RegistryException, IOException {
-    return null;
+  protected NStorageReader createReader(String clientId, NStorageRegistry registry) throws RegistryException {
+    return new HDFSNStorageReader(clientId, registry, fs, storageLocation);
   }
   
-  @Override
-  protected HDFSSegmentWriter createSegmentWriter(NStorageWriterDescriptor writer, SegmentDescriptor segment) throws RegistryException, IOException {
-    return new HDFSSegmentWriter(registry, writer, segment, fs, storageLocation);
-  }
-
   @Override
   public HDFSNStorageConsistencyVerifier getSegmentConsistencyVerifier() {
     return new HDFSNStorageConsistencyVerifier(registry, fs, storageLocation);

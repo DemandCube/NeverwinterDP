@@ -1,12 +1,13 @@
 package com.neverwinterdp.nstorage;
 
-import java.io.IOException;
-
 import com.neverwinterdp.registry.RegistryException;
 
 abstract public class NStorage {
   protected String           clientId;
   protected NStorageRegistry registry;
+  
+  protected NStorageWriter   storageWriter;
+  protected NStorageReader   storageReader;
   
   protected NStorageReaderDescriptor reader;
   protected NStorageWriterDescriptor writer;
@@ -18,26 +19,23 @@ abstract public class NStorage {
   
   public NStorageRegistry getRegistry() { return registry ; }
   
-  public SegmentReader getReader(SegmentDescriptor segment) throws RegistryException, IOException  {
-    if(reader == null) {
-      reader = registry.createReader(clientId);
+  public NStorageWriter getWriter() throws RegistryException {
+    if(storageWriter == null) {
+      storageWriter = createWriter(clientId, registry);
     }
-    return null;
+    return storageWriter;
   }
   
-  public SegmentWriter newSegmentWriter() throws RegistryException, IOException  {
-    if(writer == null) {
-      writer = registry.createWriter(clientId);
+  abstract protected NStorageWriter createWriter(String clientId, NStorageRegistry registry) throws RegistryException;
+
+  public NStorageReader getReader() throws RegistryException {
+    if(storageReader == null) {
+      storageReader = createReader(clientId, registry);
     }
-    
-    SegmentDescriptor segment = registry.newSegment(writer);
-    SegmentWriter segWriter = createSegmentWriter(writer, segment) ;
-    return segWriter;
+    return storageReader;
   }
   
-  abstract protected SegmentReader createSegmentReader(NStorageReaderDescriptor reader, SegmentDescriptor segment) throws RegistryException, IOException;
-  
-  abstract protected SegmentWriter createSegmentWriter(NStorageWriterDescriptor writer, SegmentDescriptor segment) throws RegistryException, IOException;
-  
+  abstract protected NStorageReader createReader(String clientId, NStorageRegistry registry) throws RegistryException;
+
   abstract public NStorageConsistencyVerifier getSegmentConsistencyVerifier() ;
 }

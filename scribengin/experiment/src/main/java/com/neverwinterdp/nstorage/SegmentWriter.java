@@ -8,6 +8,7 @@ abstract public class SegmentWriter {
   protected NStorageRegistry         registry;
   protected NStorageWriterDescriptor writer;
   protected SegmentDescriptor        segment;
+  private   boolean                  closed = false;
   
   public SegmentWriter(NStorageRegistry registry, NStorageWriterDescriptor writer, SegmentDescriptor segment) {
     this.registry = registry;
@@ -16,7 +17,7 @@ abstract public class SegmentWriter {
   }
 
   public boolean isFull() throws IOException, RegistryException {
-    return isBufferFull();
+    return bufferIsFull();
   }
   
   public void write(byte[] data) throws IOException, RegistryException {
@@ -32,11 +33,14 @@ abstract public class SegmentWriter {
     bufferRollback();
   }
   
+  public boolean isClosed() { return closed ; }
+  
   public void close() throws IOException, RegistryException {
     bufferClose();
     segment.setFinishedTime(System.currentTimeMillis());
     segment.setStatus(SegmentDescriptor.Status.COMPLETE);
     registry.finish(writer, segment);
+    closed = true;
   }
   
   public void prepareCommit() throws IOException, RegistryException {
@@ -55,7 +59,7 @@ abstract public class SegmentWriter {
   abstract protected long  bufferGetNumberOfWrittenRecords() ;
   abstract protected long bufferGetCurrentPosistion() ;
   
-  abstract protected boolean isBufferFull() throws IOException, RegistryException;
+  abstract protected boolean bufferIsFull() throws IOException, RegistryException;
   
   abstract protected void bufferWrite(byte[] data) throws IOException, RegistryException ;
   

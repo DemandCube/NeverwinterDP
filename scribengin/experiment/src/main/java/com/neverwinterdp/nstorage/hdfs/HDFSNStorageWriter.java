@@ -1,0 +1,27 @@
+package com.neverwinterdp.nstorage.hdfs;
+
+import java.io.IOException;
+
+import org.apache.hadoop.fs.FileSystem;
+
+import com.neverwinterdp.nstorage.NStorageRegistry;
+import com.neverwinterdp.nstorage.NStorageWriter;
+import com.neverwinterdp.nstorage.NStorageWriterDescriptor;
+import com.neverwinterdp.nstorage.SegmentDescriptor;
+import com.neverwinterdp.registry.RegistryException;
+
+public class HDFSNStorageWriter extends NStorageWriter {
+  private FileSystem fs;
+  private String     storageLocation;
+  
+  public HDFSNStorageWriter(String clientId, NStorageRegistry registry, FileSystem fs, String storageLoc) throws RegistryException {
+    super(clientId, registry);
+    this.fs              = fs;
+    this.storageLocation = storageLoc;
+  }
+
+  @Override
+  protected HDFSSegmentWriter createSegmentWriter(NStorageWriterDescriptor writer, SegmentDescriptor segment) throws RegistryException, IOException {
+    return new HDFSSegmentWriter(registry, writer, segment, fs, storageLocation);
+  }
+}

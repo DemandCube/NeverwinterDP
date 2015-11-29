@@ -13,10 +13,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.neverwinterdp.nstorage.SegmentConsistency;
 import com.neverwinterdp.nstorage.NStorageConsistencyVerifier;
-import com.neverwinterdp.nstorage.hdfs.HDFSNStorage;
-import com.neverwinterdp.nstorage.hdfs.HDFSSegmentWriter;
+import com.neverwinterdp.nstorage.SegmentConsistency;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.RegistryException;
@@ -120,15 +118,15 @@ public class HDFSNStorageUnitTest {
     String name ;
     int    numOfRecordPerCommit = 10;
     int    numOfCommit          = 10;
-    HDFSNStorage storage;
-    HDFSSegmentWriter writer;
+    HDFSNStorage       storage;
+    HDFSNStorageWriter writer;
     
     StorageWriter(String name, int numOfCommit, int numOfRecordPerCommit) throws RegistryException, IOException {
       this.name                 = name;
       this.numOfCommit          = numOfCommit;
       this.numOfRecordPerCommit = numOfRecordPerCommit;
       storage = new HDFSNStorage(name, fs, WORKING_DIR + "/seg-storage", registry, "/seg-storage");
-      writer = (HDFSSegmentWriter) storage.newSegmentWriter();
+      writer = (HDFSNStorageWriter) storage.getWriter();
     }
     
     @Override
