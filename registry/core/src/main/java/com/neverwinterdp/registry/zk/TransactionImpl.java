@@ -15,6 +15,7 @@ import com.neverwinterdp.util.JSONSerializer;
 public class TransactionImpl implements Transaction {
   private RegistryImpl registry;
   private org.apache.zookeeper.Transaction zkTransaction ;
+  private int opCount ;
   
   public TransactionImpl(RegistryImpl registry, org.apache.zookeeper.Transaction zkTransaction) {
     this.zkTransaction = zkTransaction;
@@ -24,6 +25,7 @@ public class TransactionImpl implements Transaction {
   @Override
   public Transaction create(String path, byte[] data, NodeCreateMode mode) {
     zkTransaction.create(registry.realPath(path), data, RegistryImpl.DEFAULT_ACL, RegistryImpl.toCreateMode(mode));
+    opCount++;
     return this;
   }
 
@@ -36,6 +38,7 @@ public class TransactionImpl implements Transaction {
       data = new byte[0] ;
     }
     zkTransaction.create(registry.realPath(path), data, RegistryImpl.DEFAULT_ACL, RegistryImpl.toCreateMode(mode));
+    opCount++;
     return this;
   }
   
@@ -76,6 +79,7 @@ public class TransactionImpl implements Transaction {
   @Override
   public Transaction delete(String path) {
     zkTransaction.delete(registry.realPath(path), -1);
+    opCount++;
     return this;
   }
 
@@ -85,6 +89,7 @@ public class TransactionImpl implements Transaction {
     for (int i = tree.size() - 1; i >= 0 ; --i) {
       //Delete the leaves first and eventually get rid of the root
       zkTransaction.delete(tree.get(i), -1);
+      opCount++;
     }
     return this;
   }
@@ -100,24 +105,28 @@ public class TransactionImpl implements Transaction {
       String selToPath = selPath.replace(path, toPath);
       byte[] data = registry.getData(selPath) ;
       create(selToPath, data, NodeCreateMode.PERSISTENT) ;
+      opCount++;
     }
   }
   
   @Override
   public Transaction check(String path) {
     zkTransaction.check(registry.realPath(path), -1);
+    opCount++;
     return this;
   }
 
   @Override
   public Transaction setData(String path, byte[] data) {
     zkTransaction.setData(registry.realPath(path), data, -1);
+    opCount++;
     return this;
   }
   
   @Override
   public <T> Transaction setData(final String path, T obj) {
     zkTransaction.setData(registry.realPath(path), JSONSerializer.INSTANCE.toBytes(obj), -1);
+    opCount++;
     return this ;
   }
   
@@ -145,6 +154,7 @@ public class TransactionImpl implements Transaction {
   
   @Override
   public void commit() throws RegistryException {
+    if(opCount == 0) return ;
     try {
       List<OpResult> results = zkTransaction.commit();
     } catch (InterruptedException  | KeeperException e) {
