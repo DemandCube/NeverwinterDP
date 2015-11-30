@@ -6,8 +6,8 @@ import java.util.List;
 public class SegmentReadDescriptor {
   
   private String segmentId;
-  private long   currentReadRecordIndex;
-  private long   currentReadDataPosition;
+  private long   commitReadRecordIndex;
+  private long   commitReadDataPosition;
 
   private List<String> logs;
   
@@ -20,14 +20,14 @@ public class SegmentReadDescriptor {
   public String getSegmentId() { return segmentId; }
   public void setSegmentId(String segmentId) { this.segmentId = segmentId; }
   
-  public long getCurrentReadRecordIndex() { return currentReadRecordIndex; }
-  public void setCurrentReadRecordIndex(long currentReadRecordIndex) {
-    this.currentReadRecordIndex = currentReadRecordIndex;
+  public long getCommitReadRecordIndex() { return commitReadRecordIndex; }
+  public void setCommitReadRecordIndex(long idx) {
+    this.commitReadRecordIndex = idx;
   }
   
-  public long getCurrentReadDataPosition() { return currentReadDataPosition; }
-  public void setCurrentReadDataPosition(long currentReadDataPosition) {
-    this.currentReadDataPosition = currentReadDataPosition;
+  public long getCommitReadDataPosition() { return commitReadDataPosition; }
+  public void setCommitReadDataPosition(long position) {
+    this.commitReadDataPosition = position;
   }
   
   public List<String> getLogs() { return logs; }
@@ -40,8 +40,8 @@ public class SegmentReadDescriptor {
   public String toString() {
     StringBuilder b = new StringBuilder();
     b.append(segmentId).append(": {");
-    b.append("currentReadRecordIndex=").append(currentReadRecordIndex).append(", ");
-    b.append("currentReadDataPosition=").append(currentReadDataPosition);
+    b.append("currentReadRecordIndex=").append(commitReadRecordIndex).append(", ");
+    b.append("currentReadDataPosition=").append(commitReadDataPosition);
     b.append("}");
     return b.toString();
   }

@@ -15,9 +15,9 @@ import com.neverwinterdp.nstorage.SegmentReader;
 public class HDFSSegmentReader extends SegmentReader {
   private FileSystem        fs;
   private String            storageLocation;
-  private String            fullPath;
+  private String            segmentFullPath;
   private FSDataInputStream dataIs;
-  private long              currentReadPos;
+  private long              currentReadPos = 0;
   
   public HDFSSegmentReader(NStorageRegistry registry, NStorageReaderDescriptor readerDescriptor, 
                            SegmentDescriptor segment, SegmentReadDescriptor segmentReadDescriptor, 
@@ -26,8 +26,13 @@ public class HDFSSegmentReader extends SegmentReader {
     
     this.fs = fs;
     this.storageLocation = storageLoc;
-    fullPath = storageLocation + "/" + segment.getSegmentId() + ".dat";
-    dataIs  = fs.open(new Path(fullPath)) ;
+    
+    segmentFullPath = storageLocation + "/" + segment.getSegmentId() + ".dat";
+    dataIs  = fs.open(new Path(segmentFullPath)) ;
+    if(segmentReadDescriptor.getCommitReadDataPosition() > 0) {
+      currentReadPos = segmentReadDescriptor.getCommitReadDataPosition();
+      dataIs.seek(currentReadPos);
+    }
   }
 
   @Override

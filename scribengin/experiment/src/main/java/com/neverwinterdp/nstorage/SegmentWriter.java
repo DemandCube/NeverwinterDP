@@ -9,6 +9,10 @@ abstract public class SegmentWriter {
   protected NStorageWriterDescriptor writer;
   protected SegmentDescriptor        segment;
   private   boolean                  closed = false;
+  private   long                     numberOfWrittenRecords;
+  private   long                     maxSegmentSize;
+  private   long                     maxBufferSize ;
+  private   long                     numberOfUncommitRecords;
   
   public SegmentWriter(NStorageRegistry registry, NStorageWriterDescriptor writer, SegmentDescriptor segment) {
     this.registry = registry;
@@ -16,12 +20,21 @@ abstract public class SegmentWriter {
     this.segment  = segment;
   }
 
+  public void setMaxSegmentSize(long size) { this.maxSegmentSize = size; }
+  
+  public void setMaxBufferSize(long size) { this.maxBufferSize = size; }
+  
   public boolean isFull() throws IOException, RegistryException {
-    return bufferIsFull();
+    return bufferGetSegmentSize() > maxSegmentSize;
   }
   
   public void write(byte[] data) throws IOException, RegistryException {
+    if(bufferGetUncommitSize() > maxBufferSize) {
+      throw new IOException("Cannot buffer more than " + maxBufferSize + " bytes. Call commit");
+    }
     bufferWrite(data);
+    numberOfWrittenRecords++;
+    numberOfUncommitRecords++;
   }
   
   public void commit() throws IOException, RegistryException {
@@ -31,6 +44,22 @@ abstract public class SegmentWriter {
 
   public void rollback() throws IOException, RegistryException {
     bufferRollback();
+    numberOfWrittenRecords = numberOfWrittenRecords - numberOfUncommitRecords ;
+    numberOfUncommitRecords = 0;
+  }
+  
+  
+  public void prepareCommit() throws IOException, RegistryException {
+    bufferPrepareCommit();
+  }
+  
+  public void completeCommit() throws IOException, RegistryException {
+    bufferCompleteCommit();
+    segment.setDataSegmentNumOfRecords(bufferGetNumberOfWrittenRecords());
+    segment.setDataSegmentLastCommitPos(bufferGetSegmentSize());
+    segment.setDataSegmentCommitCount(segment.getDataSegmentCommitCount() + 1);
+    registry.commit(writer, segment);
+    numberOfUncommitRecords = 0;
   }
   
   public boolean isClosed() { return closed ; }
@@ -43,23 +72,12 @@ abstract public class SegmentWriter {
     closed = true;
   }
   
-  public void prepareCommit() throws IOException, RegistryException {
-    bufferPrepareCommit();
-  }
+  protected long bufferGetNumberOfWrittenRecords() { return numberOfWrittenRecords; }
+
+  protected long bufferGetNumberOfUncommitRecords() { return 0; }
   
-  public void completeCommit() throws IOException, RegistryException {
-    bufferCompleteCommit();
-    segment.setDataSegmentNumOfRecords(bufferGetNumberOfWrittenRecords());
-    segment.setDataSegmentLastCommitPos(bufferGetCurrentPosistion());
-    segment.setDataSegmentCommitCount(segment.getDataSegmentCommitCount() + 1);
-    registry.commit(writer, segment);
-  }
-  
-  
-  abstract protected long  bufferGetNumberOfWrittenRecords() ;
-  abstract protected long bufferGetCurrentPosistion() ;
-  
-  abstract protected boolean bufferIsFull() throws IOException, RegistryException;
+  abstract protected long bufferGetSegmentSize() ;
+  abstract protected long bufferGetUncommitSize() ;
   
   abstract protected void bufferWrite(byte[] data) throws IOException, RegistryException ;
   

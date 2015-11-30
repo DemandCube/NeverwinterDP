@@ -18,15 +18,15 @@ public class HDFSNStorage extends NStorage {
   private FileSystem fs;
   private String     storageLocation;
 
-  public HDFSNStorage(String clientId, FileSystem fs, String storageLoc, Registry registry, String regPath) throws RegistryException, IOException {
+  public HDFSNStorage(FileSystem fs, String storageLoc, Registry registry, String regPath) throws RegistryException, IOException {
+    this.fs              = fs;
+    this.storageLocation = storageLoc;
+    
     NStorageRegistry segStorageReg = new NStorageRegistry(registry, regPath);
     if(!registry.exists(regPath)) {
       segStorageReg.initRegistry();
     }
-    init(clientId, segStorageReg);
-    
-    this.fs              = fs;
-    this.storageLocation = storageLoc;
+    init(segStorageReg);
     
     Path hdfsStoragePath = new Path(storageLoc);
     if(!fs.exists(hdfsStoragePath)) {
@@ -46,13 +46,6 @@ public class HDFSNStorage extends NStorage {
   @Override
   public HDFSNStorageConsistencyVerifier getSegmentConsistencyVerifier() {
     return new HDFSNStorageConsistencyVerifier(registry, fs, storageLocation);
-  }
-  
-  public void close() throws RegistryException, IOException {
-    if(writer != null) {
-      registry.closeWriter(writer);
-      writer = null;
-    }
   }
   
   public void dump() throws RegistryException, IOException {

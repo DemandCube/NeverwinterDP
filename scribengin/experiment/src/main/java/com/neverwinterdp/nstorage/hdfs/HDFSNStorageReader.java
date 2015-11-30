@@ -16,9 +16,9 @@ public class HDFSNStorageReader extends NStorageReader {
   
   public HDFSNStorageReader(String clientId, NStorageRegistry registry, 
                             FileSystem fs, String storageLoc) throws RegistryException, IOException {
-    super(clientId, registry);
     this.fs              = fs;
     this.storageLocation = storageLoc;
+    init(clientId, registry);
   }
 
   @Override

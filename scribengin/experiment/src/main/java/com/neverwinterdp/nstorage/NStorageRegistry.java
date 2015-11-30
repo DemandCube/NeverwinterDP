@@ -1,5 +1,6 @@
 package com.neverwinterdp.nstorage;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.neverwinterdp.registry.BatchOperations;
@@ -98,10 +99,14 @@ public class NStorageRegistry {
     trans.create(lockNode,           null, NodeCreateMode.PERSISTENT);
   }
   
+  public Registry getRegistry() { return registry ; }
+  
   public String getRegistryPath() { return registryPath ; }
   
   public List<String> getSegments() throws RegistryException {
-    return segmentsNode.getChildren() ;
+    List<String> segments = segmentsNode.getChildren() ;
+    Collections.sort(segments);
+    return segments;
   }
   
   public SegmentDescriptor getSegmentById(int id) throws RegistryException {
@@ -198,12 +203,13 @@ public class NStorageRegistry {
   
   public SegmentReadDescriptor createSegmentReadDescriptor(NStorageReaderDescriptor reader, SegmentDescriptor segment) throws RegistryException {
     Node readerNode = readersAllNode.getChild(reader.getReaderId());
-    Node readerSegmentNode = readerNode.getChild(segment.getSegmentId());
-    if(readerSegmentNode.exists()) {
-      return readerSegmentNode.getDataAs(SegmentReadDescriptor.class);
-    }
+    Node readSegmentNode = readerNode.getChild(segment.getSegmentId());
+    Transaction trans = registry.getTransaction();
     SegmentReadDescriptor segReadDescriptor = new SegmentReadDescriptor(segment.getSegmentId());
-    readerSegmentNode.create(segReadDescriptor, NodeCreateMode.PERSISTENT);
+    reader.setLastReadSegmentId(segment.getSegmentId());
+    trans.create(readSegmentNode, segReadDescriptor, NodeCreateMode.PERSISTENT);
+    trans.setData(readerNode, reader);
+    trans.commit();
     return segReadDescriptor;
   }
   
@@ -216,9 +222,25 @@ public class NStorageRegistry {
     return null;
   }
   
+  public void commit(Transaction trans, NStorageReaderDescriptor reader, SegmentDescriptor segment, SegmentReadDescriptor segRead, boolean complete) throws RegistryException {
+    Node readerNode      = readersAllNode.getChild(reader.getReaderId());
+    Node readSegmentNode = readerNode.getChild(segment.getSegmentId());
+    if(segment.getStatus() == SegmentDescriptor.Status.COMPLETE) {
+      if(segment.getDataSegmentLastCommitPos() == segRead.getCommitReadDataPosition()) {
+        trans.delete(readSegmentNode.getPath());
+      } else {
+        trans.setData(readSegmentNode, segRead);
+      }
+    } else {
+      trans.setData(readSegmentNode, segRead);
+    }
+  }
+  
   public List<String> getSegmentReadDescriptors(NStorageReaderDescriptor reader) throws RegistryException {
     Node readerNode = readersAllNode.getChild(reader.getReaderId());
-    return readerNode.getChildren();
+    List<String> readSegments = readerNode.getChildren();
+    Collections.sort(readSegments);
+    return readSegments;
   }
   
   public SegmentReadDescriptor getSegmentReadDescriptor(NStorageReaderDescriptor reader, String segmentId) throws RegistryException {
@@ -253,7 +275,7 @@ public class NStorageRegistry {
     return writer;
   }
   
-  public void closeWriter(String id) throws RegistryException {
+  public void removeWriter(String id) throws RegistryException {
     closeWriter(getWriter(id));
   }
   

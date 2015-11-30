@@ -5,36 +5,22 @@ import java.io.IOException;
 import com.neverwinterdp.registry.RegistryException;
 
 abstract public class NStorage {
-  protected String           clientId;
   protected NStorageRegistry registry;
   
-  protected NStorageWriter   storageWriter;
-  protected NStorageReader   storageReader;
-  
-  protected NStorageReaderDescriptor reader;
-  protected NStorageWriterDescriptor writer;
-  
-  protected void init(String clientId, NStorageRegistry registry) {
-    this.clientId = clientId;
+  protected void init(NStorageRegistry registry) {
     this.registry = registry;
   }
   
   public NStorageRegistry getRegistry() { return registry ; }
   
-  public NStorageWriter getWriter() throws RegistryException, IOException {
-    if(storageWriter == null) {
-      storageWriter = createWriter(clientId, registry);
-    }
-    return storageWriter;
+  public NStorageWriter getWriter(String writerId) throws RegistryException, IOException {
+    return createWriter(writerId, registry);
   }
   
   abstract protected NStorageWriter createWriter(String clientId, NStorageRegistry registry) throws RegistryException, IOException;
 
-  public NStorageReader getReader() throws RegistryException, IOException {
-    if(storageReader == null) {
-      storageReader = createReader(clientId, registry);
-    }
-    return storageReader;
+  public NStorageReader getReader(String readerId) throws RegistryException, IOException {
+    return createReader(readerId, registry);
   }
   
   abstract protected NStorageReader createReader(String clientId, NStorageRegistry registry) throws RegistryException, IOException;

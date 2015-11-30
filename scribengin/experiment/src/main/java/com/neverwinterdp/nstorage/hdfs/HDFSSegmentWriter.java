@@ -17,8 +17,8 @@ public class HDFSSegmentWriter extends SegmentWriter {
   private String                storageLocation;
   private String                segFullPath ;
   private FSDataOutputStream    bufferingOs;
-  private long                  bufferNumberOfWrittenRecords;
-  private long                  bufferCurrentPosition;
+  private long                  currentSegmentSize;
+  private long                  uncommitBufferSize;
   
   public HDFSSegmentWriter(NStorageRegistry registry, NStorageWriterDescriptor writer, SegmentDescriptor segment, 
                            FileSystem fs, String storageLoc) throws RegistryException, IOException {
@@ -30,23 +30,17 @@ public class HDFSSegmentWriter extends SegmentWriter {
   }
 
   @Override
-  protected long  bufferGetNumberOfWrittenRecords() { return this.bufferNumberOfWrittenRecords; }
-  
-  @Override
-  protected long bufferGetCurrentPosistion() { return this.bufferCurrentPosition ; }
-  
-  
-  @Override
-  protected boolean bufferIsFull() throws IOException, RegistryException {
-    return false;
-  }
+  protected long bufferGetSegmentSize() { return currentSegmentSize ; }
 
+  @Override
+  protected long bufferGetUncommitSize() { return uncommitBufferSize; }
+  
   @Override
   protected void bufferWrite(byte[] data) throws IOException, RegistryException {
     bufferingOs.writeInt(data.length);
     bufferingOs.write(data);
-    bufferNumberOfWrittenRecords++ ;
-    bufferCurrentPosition += 4 + data.length;
+    currentSegmentSize += 4 + data.length;
+    uncommitBufferSize += 4 + data.length;
   }
 
   @Override
@@ -56,6 +50,7 @@ public class HDFSSegmentWriter extends SegmentWriter {
 
   @Override
   protected void bufferCompleteCommit() throws IOException {
+    uncommitBufferSize = 0;
   }
 
   @Override
@@ -66,8 +61,8 @@ public class HDFSSegmentWriter extends SegmentWriter {
       Path hdfsSegFullPath = new Path(segFullPath);
       fs.truncate(hdfsSegFullPath, segment.getDataSegmentLastCommitPos());
       bufferingOs = fs.append(hdfsSegFullPath);
-      bufferNumberOfWrittenRecords = segment.getDataSegmentNumOfRecords();
-      bufferCurrentPosition = segment.getDataSegmentLastCommitPos();
+      currentSegmentSize = segment.getDataSegmentLastCommitPos();
+      uncommitBufferSize = 0;
     }
   }
 

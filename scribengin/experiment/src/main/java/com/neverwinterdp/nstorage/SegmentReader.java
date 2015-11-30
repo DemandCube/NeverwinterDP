@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.neverwinterdp.nstorage.SegmentDescriptor.Status;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.Transaction;
 
 abstract public class SegmentReader {
   static public enum DataAvailability { YES, WAITING, EOS }
@@ -13,6 +14,7 @@ abstract public class SegmentReader {
   private SegmentDescriptor        segment;
   private SegmentReadDescriptor    segmentReadDescriptor;
   private DataAvailability         lastCheckDataAvailability;
+  private boolean                  complete = false;
   
   public SegmentReader(NStorageRegistry registry,NStorageReaderDescriptor readerDescriptor, SegmentDescriptor segment, SegmentReadDescriptor segmentReadDescriptor) {
     this.registry              = registry;
@@ -26,6 +28,8 @@ abstract public class SegmentReader {
   public SegmentReadDescriptor getSegmentReadDescriptor() { return segmentReadDescriptor; }
   
   public NStorageReaderDescriptor getReaderDescriptor() { return readerDescriptor; }
+  
+  public boolean isComplete() { return this.complete ; }
   
   public DataAvailability getDataAvailability() throws IOException, RegistryException {
     if(lastCheckDataAvailability != null && lastCheckDataAvailability == DataAvailability.WAITING) {
@@ -62,13 +66,20 @@ abstract public class SegmentReader {
   
   abstract protected byte[] dataNextRecord() throws IOException;
   
-  public void prepareCommit() throws IOException {
+  public void prepareCommit(Transaction trans) throws IOException, RegistryException {
+    segmentReadDescriptor.setCommitReadDataPosition(getCurrentReadPosition());
+    if(segment.getStatus() == SegmentDescriptor.Status.COMPLETE) {
+      if(segment.getDataSegmentLastCommitPos() == segmentReadDescriptor.getCommitReadDataPosition()) {
+        complete = true;
+      }
+    }
+    registry.commit(trans, readerDescriptor, segment, segmentReadDescriptor, complete);
   }
   
-  public void completeCommit() throws IOException {
+  public void completeCommit(Transaction trans) throws IOException {
   }
   
-  public void rollback() throws IOException {
+  public void rollback(Transaction trans) throws IOException {
   }
   
   abstract protected long getCurrentReadPosition() ;

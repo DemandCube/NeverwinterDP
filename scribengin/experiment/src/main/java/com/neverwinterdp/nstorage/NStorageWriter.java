@@ -8,20 +8,30 @@ abstract public class NStorageWriter {
   protected NStorageRegistry         registry;
   protected NStorageWriterDescriptor writerDescriptor;
   private   SegmentWriter            currentSegWriter;
+  private   long                     maxSegmentSize = 64 * 1024 * 1024;
+  private   long                     maxBufferSize  =  4 * 1024 * 1024;
   
   public NStorageWriter(String clientId, NStorageRegistry registry) throws RegistryException {
     this.registry         = registry;
     this.writerDescriptor = registry.createWriter(clientId);
   }
   
+  public String getWriterId() { return writerDescriptor.getId(); }
+  
+  public NStorageWriter setMaxSegmentSize(long size) {
+    this.maxSegmentSize = size;
+    return this;
+  }
+  
+  public NStorageWriter setMaxBufferSize(long size) {
+    this.maxBufferSize = size;
+    return this;
+  }
+  
   public void write(byte[] data) throws IOException, RegistryException {
     if(currentSegWriter == null || currentSegWriter.isClosed()) {
       currentSegWriter = newSegmentWriter();
-    } else if(currentSegWriter.isFull()) {
-      currentSegWriter.commit();
-      currentSegWriter.close();
-      currentSegWriter = newSegmentWriter();
-    }
+    } 
     currentSegWriter.write(data);
   }
 
@@ -33,6 +43,10 @@ abstract public class NStorageWriter {
   public void completeCommit() throws IOException, RegistryException {
     checkValidCurrentSegmentWriter();
     currentSegWriter.completeCommit();
+    if(currentSegWriter.isFull()) {
+      currentSegWriter.close();
+      currentSegWriter = null;
+    }
   }
 
   public void commit() throws IOException, RegistryException {
@@ -46,13 +60,26 @@ abstract public class NStorageWriter {
   }
   
   public void close() throws IOException, RegistryException {
-    checkValidCurrentSegmentWriter();
-    currentSegWriter.close();
+    if(currentSegWriter != null) {
+      currentSegWriter.close();
+      currentSegWriter = null;
+    }
+  }
+  
+  public void remove() throws IOException, RegistryException {
+    registry.removeWriter(writerDescriptor.getId());
+  }
+  
+  public void closeAndRemove() throws IOException, RegistryException {
+    close();
+    remove();
   }
   
   public SegmentWriter newSegmentWriter() throws RegistryException, IOException  {
     SegmentDescriptor segment = registry.newSegment(writerDescriptor);
     SegmentWriter     segWriter = createSegmentWriter(writerDescriptor, segment) ;
+    segWriter.setMaxSegmentSize(maxSegmentSize);
+    segWriter.setMaxBufferSize(maxBufferSize);
     return segWriter;
   }
   

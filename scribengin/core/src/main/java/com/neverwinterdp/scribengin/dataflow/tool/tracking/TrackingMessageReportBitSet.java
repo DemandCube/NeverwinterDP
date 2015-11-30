@@ -4,17 +4,17 @@ import java.util.BitSet;
 
 public class TrackingMessageReportBitSet {
   private TrackingMessageReport report;
- 
-  private BitSet bitSet ;
-  private int duplicatedCount = 0;
-  private int numOfBits ;
-  private int trackProgress = -1;
-  private int logCount ;
-  
+
+  private BitSet bitSet;
+  private int    duplicatedCount = 0;
+  private int    numOfBits;
+  private int    trackProgress   = -1;
+  private int    logCount;
+
   private long minDeliveryTime;
   private long maxDeliveryTime;
-  private long sumDeliveryTime ;
-  
+  private long sumDeliveryTime;
+
   public TrackingMessageReportBitSet(String vmId, String chunkId, int expectNumOfMessage) {
     report = new TrackingMessageReport(vmId, chunkId, expectNumOfMessage);
     
