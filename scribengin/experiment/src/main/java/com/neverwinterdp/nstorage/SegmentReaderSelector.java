@@ -13,7 +13,6 @@ import com.neverwinterdp.registry.Transaction;
 public class SegmentReaderSelector {
   private List<SegmentReader>       allSegmentReaders;
   private LinkedList<SegmentReader> activeSegmentReaders;
-  private SegmentReader             currentSegmentReader;
   
   public SegmentReaderSelector() {
     allSegmentReaders    = new ArrayList<>();
@@ -38,31 +37,31 @@ public class SegmentReaderSelector {
       }
     }
     allSegmentReaders.add(segmentReader);
-    DataAvailability dataAvailability = segmentReader.getDataAvailability();
+    DataAvailability dataAvailability = segmentReader.updateAndGetDataAvailability();
     if(dataAvailability != DataAvailability.EOS) {
       activeSegmentReaders.add(segmentReader);
     }
   }
   
   public SegmentReader select() throws IOException, RegistryException {
-    if(currentSegmentReader != null) {
-      DataAvailability dataAvailability = currentSegmentReader.getDataAvailability(); 
-      if(dataAvailability == DataAvailability.YES) {
-        return currentSegmentReader;
-      } else if(dataAvailability == DataAvailability.EOS) {
-        currentSegmentReader = null;
-      } else {
-        activeSegmentReaders.add(currentSegmentReader);
-        currentSegmentReader = null;
-      }
-    }
+    if(activeSegmentReaders.size() == 0) return null;
     Iterator<SegmentReader> i = activeSegmentReaders.iterator();
     while(i.hasNext()) {
       SegmentReader segReader = i.next();
-      DataAvailability dataAvailability = segReader.getDataAvailability(); 
+      DataAvailability dataAvailability = segReader.updateAndGetDataAvailability(); 
       if(dataAvailability == DataAvailability.YES) {
+        return segReader;
+      } else if(dataAvailability == DataAvailability.EOS) {
         i.remove();
-        currentSegmentReader = segReader;
+      }
+    }
+    
+    i = activeSegmentReaders.iterator();
+    while(i.hasNext()) {
+      SegmentReader segReader = i.next();
+      segReader.updateSegmentDescriptor();
+      DataAvailability dataAvailability = segReader.updateAndGetDataAvailability(); 
+      if(dataAvailability == DataAvailability.YES) {
         return segReader;
       } else if(dataAvailability == DataAvailability.EOS) {
         i.remove();
@@ -83,10 +82,21 @@ public class SegmentReaderSelector {
     Iterator<SegmentReader> i = allSegmentReaders.iterator();
     while(i.hasNext()) {
       SegmentReader reader = i.next();
+      reader.completeCommit(transaction);
       if(reader.isComplete()) i.remove();
     }
   }
   
   public void rollback(Transaction transaction) throws IOException, RegistryException {
+    activeSegmentReaders.clear();
+    Iterator<SegmentReader> i = allSegmentReaders.iterator();
+    while(i.hasNext()) {
+      SegmentReader reader = i.next();
+      reader.rollback(transaction);
+      DataAvailability availability  = reader.updateAndGetDataAvailability() ;
+      if(availability == DataAvailability.YES || availability == DataAvailability.YES) {
+        activeSegmentReaders.add(reader);
+      }
+    }
   }
 }

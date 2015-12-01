@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.neverwinterdp.registry.BatchOperations;
+import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
@@ -117,15 +118,17 @@ public class NStorageRegistry {
     return segmentsNode.getChild(name).getDataAs(SegmentDescriptor.class);
   }
   
-  public SegmentDescriptor getNextSegmentDescriptor(SegmentDescriptor segment) throws RegistryException {
-    Node nextSegmentNode = segmentsNode.getChild(SegmentDescriptor.toSegmentId(segment.getId() + 1));
-    if(nextSegmentNode.exists()) {
+  public SegmentDescriptor getNextSegmentDescriptor(int segmentId) throws RegistryException {
+    Node nextSegmentNode = segmentsNode.getChild(SegmentDescriptor.toSegmentId(segmentId + 1));
+    try {
       SegmentDescriptor nextSegment = nextSegmentNode.getDataAs(SegmentDescriptor.class);
       return nextSegment;
+    } catch(RegistryException ex) {
+      if(ex.getErrorCode() == ErrorCode.NoNode) return null;
+      throw ex;
     }
-    return null;
   }
-  
+
   public SegmentDescriptor newSegment(final NStorageWriterDescriptor writer) throws RegistryException {
     BatchOperations<SegmentDescriptor> op = new BatchOperations<SegmentDescriptor>() {
       @Override

@@ -44,7 +44,7 @@ public class HDFSSegmentReader extends SegmentReader {
     return data;
   }
 
-  protected void rollback(long pos) throws IOException {
+  protected void rollback(long readRecordIndex, long pos) throws IOException {
     dataIs.seek(pos);
     currentReadPos = pos;
   }

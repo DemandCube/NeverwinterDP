@@ -16,7 +16,8 @@ import com.neverwinterdp.nstorage.NStorageConsistencyVerifier;
 import com.neverwinterdp.nstorage.NStorageReader;
 import com.neverwinterdp.nstorage.NStorageWriter;
 import com.neverwinterdp.nstorage.SegmentConsistency;
-import com.neverwinterdp.nstorage.test.RandomCommitRollbackTRGenerator;
+import com.neverwinterdp.nstorage.test.TrackingRecordGenerator;
+import com.neverwinterdp.nstorage.test.TrackingRecordValidator;
 import com.neverwinterdp.nstorage.test.TrackingRecord;
 import com.neverwinterdp.nstorage.test.TrackingRecordService;
 import com.neverwinterdp.registry.Registry;
@@ -56,8 +57,12 @@ public class HDFSNStorageUnitTest {
   
   @Test
   public void testCommit() throws Exception {
+    int NUM_OF_COMMIT = 1;
+    int NUM_OF_RECORD_PER_COMMIT = 1000;
+    int NUM_OF_RECORDS = NUM_OF_COMMIT * NUM_OF_RECORD_PER_COMMIT;
     HDFSNStorage storage = new HDFSNStorage(fs, WORKING_DIR + "/seg-storage", registry, "/seg-storage");
-    RandomCommitRollbackTRGenerator storageWriter = new RandomCommitRollbackTRGenerator(storage.getWriter("test"), 1, 1000);
+    TrackingRecordGenerator storageWriter = 
+      new TrackingRecordGenerator(storage.getWriter("test"), NUM_OF_COMMIT, NUM_OF_RECORD_PER_COMMIT);
     storageWriter.writeWithCommit();
     storageWriter.writerCloseAndRemove();
     
@@ -69,19 +74,21 @@ public class HDFSNStorageUnitTest {
     Assert.assertEquals(SegmentConsistency.Consistency.GOOD, scVerifier.getMinCommitConsistency());
     
     NStorageReader reader = storage.getReader("reader");
-    byte[] record = null ;
-    TrackingRecordService trackingService = new TrackingRecordService(1000);
-    while((record = reader.nextRecord(1000)) != null) {
-      TrackingRecord trackingRecord = JSONSerializer.INSTANCE.fromBytes(record, TrackingRecord.class);
-      trackingService.log(trackingRecord);
-    }
-    trackingService.report();
+    TrackingRecordValidator validator = new TrackingRecordValidator(reader, NUM_OF_RECORDS, 500);
+    validator.run();
+    validator.report();
+    //storage.dump();
   }
   
   @Test
   public void testRollback() throws Exception {
+    int NUM_OF_COMMIT = 1;
+    int NUM_OF_RECORD_PER_COMMIT = 1000;
+    int NUM_OF_RECORDS = NUM_OF_COMMIT * NUM_OF_RECORD_PER_COMMIT;
+    
     HDFSNStorage storage = new HDFSNStorage(fs, WORKING_DIR + "/seg-storage", registry, "/seg-storage");
-    RandomCommitRollbackTRGenerator storageWriter = new RandomCommitRollbackTRGenerator(storage.getWriter("test"), 1, 100);
+    TrackingRecordGenerator storageWriter = 
+      new TrackingRecordGenerator(storage.getWriter("test"), NUM_OF_COMMIT, NUM_OF_RECORD_PER_COMMIT);
     storageWriter.writeWithCommit();
     NStorageConsistencyVerifier scVerifier = storage.getSegmentConsistencyVerifier();
     scVerifier.verify();
@@ -100,60 +107,67 @@ public class HDFSNStorageUnitTest {
     Assert.assertEquals(SegmentConsistency.Consistency.GOOD, scVerifier.getMinCommitConsistency());
     
     NStorageReader reader = storage.getReader("reader");
-    byte[] record = null ;
-    int count = 0;
-    while((record = reader.nextRecord(1000)) != null) {
-      System.out.println("record: " + new String(record));
-      count++;
-    }
-    System.out.println("read: " + count);
+    TrackingRecordValidator validator = new TrackingRecordValidator(reader, NUM_OF_RECORDS, 100);
+    validator.run();
+    validator.report();
+    storage.dump();
   }
   
   @Test
-  public void testMultipleWriter() throws Exception {
-    int NUM_OF_WRITERS = 3;
-    int NUM_OF_COMMIT = 25;
+  public void testConcurrentMultipleReadWrite() throws Exception {
+    int NUM_OF_WRITERS = 5;
+    int NUM_OF_COMMIT  = 1000;
     int NUM_RECORD_PER_COMMIT = 1000;
+    int NUM_OF_RECORDS_PER_WRITER = NUM_OF_COMMIT * NUM_RECORD_PER_COMMIT;
+    
+    int NUM_OF_READERS = 5;
     
     HDFSNStorage storage = new HDFSNStorage(fs, WORKING_DIR + "/seg-storage", registry, "/seg-storage");
+    
+    long start = System.currentTimeMillis();
     ExecutorService writerService = Executors.newFixedThreadPool(NUM_OF_WRITERS);
-    for(int k = 0; k < NUM_OF_WRITERS; k++) {
-      NStorageWriter writer = storage.getWriter("writer" + (k + 1));
-      RandomCommitRollbackTRGenerator dataGenerator = 
-          new RandomCommitRollbackTRGenerator(writer, NUM_OF_COMMIT, NUM_RECORD_PER_COMMIT).set1MBMaxSegmentSize();
+    for(int i = 0; i < NUM_OF_WRITERS; i++) {
+      NStorageWriter writer = storage.getWriter("writer" + (i + 1));
+      TrackingRecordGenerator dataGenerator = 
+          new TrackingRecordGenerator(writer, NUM_OF_COMMIT, NUM_RECORD_PER_COMMIT);
+      dataGenerator.set25MBMaxSegmentSize();
+      dataGenerator.setRandomRollbackRatio(0.25);
       writerService.submit(dataGenerator);
     }
     writerService.shutdown();
-    writerService.awaitTermination(10, TimeUnit.SECONDS);
+    Thread.sleep(500);
     
-    System.out.println("##Before close storage");
-    storage.dump();
-    System.out.println("\n\n");
-
+    ExecutorService readerService = Executors.newFixedThreadPool(NUM_OF_READERS);
+    TrackingRecordValidator[] validator = new TrackingRecordValidator[NUM_OF_READERS];
+    for(int i = 0; i < NUM_OF_READERS; i++) {
+      NStorageReader reader = storage.getReader("reader-" + (i + 1));
+      validator[i] = new TrackingRecordValidator(reader, NUM_OF_RECORDS_PER_WRITER, 500);
+      validator[i].setRandomRollbackRatio(0.25);
+      readerService.submit(validator[i]);
+    }
+    readerService.shutdown();
+    
+    System.err.println("before writerService.awaitTermination:" + (System.currentTimeMillis() - start) + "ms");
+    writerService.awaitTermination(90, TimeUnit.SECONDS);
+    System.err.println("after writerService.awaitTermination:"  + (System.currentTimeMillis() - start) + "ms");
     NStorageConsistencyVerifier scVerifier = storage.getSegmentConsistencyVerifier();
     scVerifier.verify();
+    for(int i = 0; i < NUM_OF_READERS; i++) {
+      validator[i].report();
+    }
+    
+    System.err.println("before readerService.awaitTermination: " + (System.currentTimeMillis() - start) + "ms");
+    readerService.awaitTermination(90, TimeUnit.SECONDS);
+    System.err.println("after readerService.awaitTermination:"  + (System.currentTimeMillis() - start) + "ms");
+    
+    for(int i = 0; i < NUM_OF_READERS; i++) {
+      validator[i].report();
+    }
+    
     System.out.println(scVerifier.getSegmentDescriptorTextReport());
     System.out.println(scVerifier.getSegmentConsistencyTextReport());
     Assert.assertEquals(SegmentConsistency.Consistency.GOOD, scVerifier.getMinCommitConsistency());
     
-    NStorageReader reader = storage.getReader("reader");
-    TrackingRecordService trackingService = new TrackingRecordService(NUM_OF_COMMIT * NUM_RECORD_PER_COMMIT);
-    byte[] record = null ;
-    int    readCount = 0;
-    while((record = reader.nextRecord(1000)) != null) {
-      TrackingRecord trackingRecord = JSONSerializer.INSTANCE.fromBytes(record, TrackingRecord.class);
-      trackingService.log(trackingRecord);
-      readCount++ ;
-      if(readCount % 500 == 0) {
-        reader.prepareCommit();
-        reader.completeCommit();
-      }
-    }
-    reader.prepareCommit();
-    reader.completeCommit();
-    trackingService.report();
-    
-    System.out.println("##After close storage");
     storage.dump();
   }
 }

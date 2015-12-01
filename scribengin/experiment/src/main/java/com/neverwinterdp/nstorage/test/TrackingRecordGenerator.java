@@ -8,40 +8,63 @@ import com.neverwinterdp.nstorage.NStorageWriter;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.util.JSONSerializer;
 
-public class RandomCommitRollbackTRGenerator implements Runnable {
+public class TrackingRecordGenerator implements Runnable {
   private int            numOfRecordPerCommit = 10;
   private int            numOfCommit          = 10;
   private AtomicInteger  idTracker            = new AtomicInteger();
   private NStorageWriter writer;
   private String         chunkId              = "chunk-0";
-
-  public RandomCommitRollbackTRGenerator(NStorageWriter writer, int numOfCommit, int numOfRecordPerCommit) {
+  private double         randomRollbackRatio  = 0.25;
+  
+  public TrackingRecordGenerator(NStorageWriter writer, int numOfCommit, int numOfRecordPerCommit) {
     this.numOfCommit          = numOfCommit;
     this.numOfRecordPerCommit = numOfRecordPerCommit;
     this.writer = writer;
   }
   
-  public RandomCommitRollbackTRGenerator set1MBMaxSegmentSize() {
+  public TrackingRecordGenerator set1MBMaxSegmentSize() {
     writer.
       setMaxSegmentSize(1024 * 1024).
       setMaxBufferSize(512 * 1024);
     return this;
   }
   
+  public TrackingRecordGenerator set25MBMaxSegmentSize() {
+    writer.
+      setMaxSegmentSize(25 * 1024 * 1024).
+      setMaxBufferSize(  5 * 1024 * 1024);
+    return this;
+  }
+  
+  public TrackingRecordGenerator setRandomRollbackRatio(double ratio) {
+    randomRollbackRatio = ratio;
+    return this;
+  }
+  
   @Override
   public void run() {
     try {
-      doRun();
+      if(randomRollbackRatio > 0) runWithRandomRollback();
+      else                        runWithoutRandomRollback();
     } catch (RegistryException | IOException e) {
       e.printStackTrace();
     }
   }
   
-  void doRun() throws RegistryException, IOException {
+  void runWithoutRandomRollback() throws RegistryException, IOException {
+    int commitCount = 0;
+    while(commitCount < numOfCommit) {
+      writeWithCommit();
+      commitCount++ ;
+    }
+    writer.closeAndRemove();
+  }
+  
+  void runWithRandomRollback() throws RegistryException, IOException {
     int commitCount = 0;
     Random rand = new Random();
     while(commitCount < numOfCommit) {
-      if(rand.nextInt(3) == 1) {
+      if(rand.nextDouble() < randomRollbackRatio) {
         writeWithRollback();
       } else {
         writeWithCommit();

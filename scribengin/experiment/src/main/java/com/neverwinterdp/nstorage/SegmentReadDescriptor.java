@@ -40,8 +40,8 @@ public class SegmentReadDescriptor {
   public String toString() {
     StringBuilder b = new StringBuilder();
     b.append(segmentId).append(": {");
-    b.append("currentReadRecordIndex=").append(commitReadRecordIndex).append(", ");
-    b.append("currentReadDataPosition=").append(commitReadDataPosition);
+    b.append("commitReadRecordIndex=").append(commitReadRecordIndex).append(", ");
+    b.append("commitReadDataPosition=").append(commitReadDataPosition);
     b.append("}");
     return b.toString();
   }
