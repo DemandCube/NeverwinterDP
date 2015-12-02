@@ -7,16 +7,16 @@ import java.util.Set;
 
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.WorkerService;
-import com.neverwinterdp.scribengin.storage.Record;
-import com.neverwinterdp.scribengin.storage.Storage;
-import com.neverwinterdp.scribengin.storage.StorageConfig;
-import com.neverwinterdp.scribengin.storage.StorageService;
-import com.neverwinterdp.scribengin.storage.sink.Sink;
-import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStream;
-import com.neverwinterdp.scribengin.storage.sink.SinkPartitionStreamWriter;
-import com.neverwinterdp.scribengin.storage.source.SourcePartition;
-import com.neverwinterdp.scribengin.storage.source.SourcePartitionStream;
-import com.neverwinterdp.scribengin.storage.source.SourcePartitionStreamReader;
+import com.neverwinterdp.storage.Record;
+import com.neverwinterdp.storage.Storage;
+import com.neverwinterdp.storage.StorageConfig;
+import com.neverwinterdp.storage.StorageService;
+import com.neverwinterdp.storage.sink.Sink;
+import com.neverwinterdp.storage.sink.SinkPartitionStream;
+import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
+import com.neverwinterdp.storage.source.SourcePartition;
+import com.neverwinterdp.storage.source.SourcePartitionStream;
+import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
 import com.neverwinterdp.yara.Meter;
 
 public class OperatorContext {

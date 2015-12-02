@@ -15,13 +15,13 @@ import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 
 import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.scribengin.storage.Record;
-import com.neverwinterdp.scribengin.storage.StorageConfig;
-import com.neverwinterdp.scribengin.storage.hdfs.HDFSStorage;
-import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSource;
-import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSourcePartition;
-import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSourcePartitionStream;
-import com.neverwinterdp.scribengin.storage.hdfs.source.HDFSSourcePartitionStreamReader;
+import com.neverwinterdp.storage.Record;
+import com.neverwinterdp.storage.StorageConfig;
+import com.neverwinterdp.storage.simplehdfs.SimpleHDFSStorage;
+import com.neverwinterdp.storage.simplehdfs.source.HDFSSource;
+import com.neverwinterdp.storage.simplehdfs.source.HDFSSourcePartition;
+import com.neverwinterdp.storage.simplehdfs.source.HDFSSourcePartitionStream;
+import com.neverwinterdp.storage.simplehdfs.source.HDFSSourcePartitionStreamReader;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
@@ -111,7 +111,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
       VMConfig.overrideHadoopConfiguration(getVM().getDescriptor().getVmConfig().getHadoopProperties(), conf);
       FileSystem fs = FileSystem.get(conf);
 
-      HDFSStorage hdfsStorage = new HDFSStorage(fs, storageConfig);
+      SimpleHDFSStorage hdfsStorage = new SimpleHDFSStorage(fs, storageConfig);
       HDFSSource hdfsSource = hdfsStorage.getSource();
       int noPartitionFound = 0 ;
       while(true) {

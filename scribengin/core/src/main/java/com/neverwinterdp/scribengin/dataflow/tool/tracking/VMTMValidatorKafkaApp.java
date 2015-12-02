@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.scribengin.storage.Record;
+import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;

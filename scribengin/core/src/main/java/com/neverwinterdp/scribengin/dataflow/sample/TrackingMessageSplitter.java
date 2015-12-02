@@ -3,7 +3,7 @@ package com.neverwinterdp.scribengin.dataflow.sample;
 import com.neverwinterdp.scribengin.dataflow.operator.Operator;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorContext;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMessage;
-import com.neverwinterdp.scribengin.storage.Record;
+import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class TrackingMessageSplitter extends Operator {

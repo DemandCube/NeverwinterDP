@@ -14,7 +14,7 @@ import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowRunActivity
 import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowStopActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
-import com.neverwinterdp.scribengin.storage.StorageService;
+import com.neverwinterdp.storage.StorageService;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;

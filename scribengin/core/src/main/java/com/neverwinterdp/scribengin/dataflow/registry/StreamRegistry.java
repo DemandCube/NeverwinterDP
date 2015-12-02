@@ -7,8 +7,8 @@ import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
-import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
-import com.neverwinterdp.scribengin.storage.StorageConfig;
+import com.neverwinterdp.storage.PartitionStreamConfig;
+import com.neverwinterdp.storage.StorageConfig;
 
 public class StreamRegistry {
   private Registry registry ;

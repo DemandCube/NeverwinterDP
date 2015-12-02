@@ -2,7 +2,7 @@ package com.neverwinterdp.scribengin.dataflow.config;
 
 import java.util.Map;
 
-import com.neverwinterdp.scribengin.storage.StorageConfig;
+import com.neverwinterdp.storage.StorageConfig;
 
 public class StreamConfig {
   private int                        parallelism;

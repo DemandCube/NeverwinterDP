@@ -4,7 +4,7 @@ import com.neverwinterdp.registry.task.TaskStatus;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.WorkerService;
-import com.neverwinterdp.scribengin.storage.Record;
+import com.neverwinterdp.storage.Record;
 
 public class OperatorTask {
   private WorkerService                            workerService;

@@ -24,11 +24,11 @@ import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.OperatorRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.StreamRegistry;
-import com.neverwinterdp.scribengin.storage.PartitionStreamConfig;
-import com.neverwinterdp.scribengin.storage.Storage;
-import com.neverwinterdp.scribengin.storage.StorageConfig;
-import com.neverwinterdp.scribengin.storage.StorageService;
-import com.neverwinterdp.scribengin.storage.sink.Sink;
+import com.neverwinterdp.storage.PartitionStreamConfig;
+import com.neverwinterdp.storage.Storage;
+import com.neverwinterdp.storage.StorageConfig;
+import com.neverwinterdp.storage.StorageService;
+import com.neverwinterdp.storage.sink.Sink;
 
 public class DataflowInitActivityBuilder extends ActivityBuilder {
   public Activity build() {

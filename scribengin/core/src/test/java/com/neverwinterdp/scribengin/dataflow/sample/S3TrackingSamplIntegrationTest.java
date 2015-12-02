@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.storage.s3.S3Client;
+import com.neverwinterdp.storage.s3.S3Client;
 
 public class S3TrackingSamplIntegrationTest  {
   String bucketName = "tracking-sample-integration-test-bucket";

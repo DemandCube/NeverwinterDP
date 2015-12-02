@@ -23,7 +23,7 @@ import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskSlotExecutor;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
-import com.neverwinterdp.scribengin.storage.StorageService;
+import com.neverwinterdp.storage.StorageService;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.yara.MetricRegistry;

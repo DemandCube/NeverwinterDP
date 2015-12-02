@@ -7,7 +7,7 @@ import org.apache.hadoop.fs.FileSystem;
 
 import com.google.inject.name.Names;
 import com.neverwinterdp.kafka.KafkaClient;
-import com.neverwinterdp.scribengin.storage.s3.S3Client;
+import com.neverwinterdp.storage.s3.S3Client;
 import com.neverwinterdp.vm.VMConfig;
 
 

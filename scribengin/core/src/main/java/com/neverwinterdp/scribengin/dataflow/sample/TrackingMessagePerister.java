@@ -5,7 +5,7 @@ import java.util.Set;
 import com.neverwinterdp.scribengin.dataflow.operator.Operator;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorContext;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMessage;
-import com.neverwinterdp.scribengin.storage.Record;
+import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class TrackingMessagePerister extends Operator {
