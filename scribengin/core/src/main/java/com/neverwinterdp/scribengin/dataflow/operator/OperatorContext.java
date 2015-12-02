@@ -118,21 +118,15 @@ public class OperatorContext {
       prepareCommit();
       completeCommit();
       taskReport.updateCommit();
+      workerService.getDataflowRegistry().getTaskRegistry().save(taskConfig, taskReport);
     } catch (Exception ex) {
       taskReport.setCommitFailCount(taskReport.getCommitFailCount() + 1);
-      workerService.getLogger().warn("DataflowTask Commit Fail, Rollback");
-      try {
-        rollback();
-      } catch(Exception rollbackEx) {
-        workerService.getLogger().error("DataflowTask Rollback Fail", rollbackEx);
-      }
+      workerService.getLogger().warn("DataflowTask Commit Fail");
       throw ex;
-    } finally {
-      workerService.getDataflowRegistry().getTaskRegistry().save(this.taskConfig, taskReport);
-    }
+    } 
   }
 
-  private void rollback() throws Exception {
+  public void rollback() throws Exception {
     //TODO: implement the proper transaction
     Iterator<OutputContext> i = outputContexts.values().iterator();
     while (i.hasNext()) {

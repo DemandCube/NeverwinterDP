@@ -82,11 +82,10 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
       }
     } catch(InterruptedException ex) {
       throw ex ;
-    } catch(Throwable t) {
+    } catch(Exception t) {
+      context.rollback();
       report.setAssignedHasErrorCount(report.getAssignedHasErrorCount() + 1);
       workerService.getLogger().error("DataflowTask Error", t);
-      t.printStackTrace();
-      throw t;
     }
   }
   
