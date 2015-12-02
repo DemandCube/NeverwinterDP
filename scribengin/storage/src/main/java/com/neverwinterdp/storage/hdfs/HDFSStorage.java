@@ -2,6 +2,7 @@ package com.neverwinterdp.storage.hdfs;
 
 import org.apache.hadoop.fs.FileSystem;
 
+import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.sink.Sink;
@@ -9,8 +10,7 @@ import com.neverwinterdp.storage.source.Source;
 
 public class HDFSStorage extends Storage {
   private FileSystem             fs;
-
-  public HDFSStorage(FileSystem fs, StorageConfig storageDescriptor) {
+  public HDFSStorage(Registry registry, FileSystem fs, StorageConfig storageDescriptor) {
     super(storageDescriptor);
     this.fs = fs ;
   }
