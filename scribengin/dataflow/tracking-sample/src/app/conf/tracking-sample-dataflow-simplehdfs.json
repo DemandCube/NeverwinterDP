@@ -40,7 +40,7 @@
       },
 
       "aggregate" : {
-        "type" : "hdfs", "name" : "tracking.aggregate", "registry.path": "/storage/hdfs/tracking-aggregate", "location": "/storage/hdfs/tracking-aggregate"
+        "type" : "simplehdfs", "name" : "tracking.aggregate", "location": "/tracking-sample/hdfs/aggregate", "partitioner": "15min"
       }
     }
   },

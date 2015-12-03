@@ -8,7 +8,6 @@ import org.apache.hadoop.fs.FileSystem;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.hdfs.HDFSStorageRegistry;
 import com.neverwinterdp.storage.source.Source;
-import com.neverwinterdp.storage.source.SourcePartition;
 
 public class HDFSSource implements Source {
   private HDFSStorageRegistry storageRegistry ;
@@ -25,13 +24,13 @@ public class HDFSSource implements Source {
   public StorageConfig getStorageConfig() { return storageRegistry.getStorageConfig(); }
 
   @Override
-  public SourcePartition getLatestSourcePartition() throws Exception {
+  public HDFSSourcePartition getLatestSourcePartition() throws Exception {
     return partition;
   }
 
   @Override
-  public List<? extends SourcePartition> getSourcePartitions() throws Exception {
-    List<SourcePartition> holder = new ArrayList<>();
+  public List<HDFSSourcePartition> getSourcePartitions() throws Exception {
+    List<HDFSSourcePartition> holder = new ArrayList<>();
     holder.add(partition);
     return holder;
   }

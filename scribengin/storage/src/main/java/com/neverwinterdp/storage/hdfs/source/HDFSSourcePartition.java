@@ -46,7 +46,7 @@ public class HDFSSourcePartition implements SourcePartition {
   }
 
   @Override
-  public SourcePartitionStream[] getPartitionStreams() throws Exception {
+  public HDFSSourcePartitionStream[] getPartitionStreams() throws Exception {
     StorageConfig sConfig = getStorageConfig();
     int numOfPartitionStream = sConfig.getPartitionStream();
     HDFSSourcePartitionStream[] stream = new HDFSSourcePartitionStream[numOfPartitionStream];

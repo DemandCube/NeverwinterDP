@@ -79,7 +79,7 @@ public class HDFSStorageUnitTest {
       Record record = null;
       int count = 0;
       while((record = reader.next(3000)) != null) {
-        count++ ;
+        count++;
       }
       System.out.println(reader.getName() + ": " + count);
     }

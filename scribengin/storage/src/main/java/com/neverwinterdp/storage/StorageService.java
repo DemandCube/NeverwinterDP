@@ -8,6 +8,8 @@ import org.apache.hadoop.fs.FileSystem;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.registry.Registry;
+import com.neverwinterdp.storage.hdfs.HDFSStorage;
 import com.neverwinterdp.storage.kafka.KafkaStorage;
 import com.neverwinterdp.storage.s3.S3Client;
 import com.neverwinterdp.storage.s3.S3Storage;
@@ -15,6 +17,9 @@ import com.neverwinterdp.storage.simplehdfs.SimpleHDFSStorage;
 
 @Singleton
 public class StorageService {
+  @Inject
+  private Registry registry;
+  
   @Inject
   private FileSystem fs;
   
@@ -24,9 +29,10 @@ public class StorageService {
   @Inject
   private S3Client s3Client;
   
-  private Map<String, KafkaStorage> cacheKafkaStorage = new HashMap<>();
-  private Map<String, SimpleHDFSStorage>  cacheSimpleHDFSStorage = new HashMap<>();
-  private Map<String, S3Storage>  cacheS3Storage = new HashMap<>();
+  private Map<String, KafkaStorage>      cacheKafkaStorage      = new HashMap<>();
+  private Map<String, HDFSStorage>       cacheHDFSStorage       = new HashMap<>();
+  private Map<String, SimpleHDFSStorage> cacheSimpleHDFSStorage = new HashMap<>();
+  private Map<String, S3Storage>         cacheS3Storage         = new HashMap<>();
   
   public StorageService() {
   }
@@ -42,6 +48,15 @@ public class StorageService {
       if(storage == null) {
         storage = new KafkaStorage(kafkaClient, storageConfig);
         cacheKafkaStorage.put(key, storage);
+      }
+      return storage;
+    } else if("hdfs".equalsIgnoreCase(storageConfig.getType())) {
+      String location  = storageConfig.getLocation();
+      String key = "hdfs:" + location;
+      HDFSStorage storage = cacheHDFSStorage.get(key);
+      if(storage == null) {
+        storage = new HDFSStorage(registry, fs, storageConfig);
+        cacheHDFSStorage.put(key, storage);
       }
       return storage;
     } else if("simplehdfs".equalsIgnoreCase(storageConfig.getType())) {

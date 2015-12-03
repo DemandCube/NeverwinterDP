@@ -3,6 +3,7 @@ package com.neverwinterdp.scribengin.dataflow.tool.tracking;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,22 +17,22 @@ import org.slf4j.Logger;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.StorageConfig;
-import com.neverwinterdp.storage.hdfs.HDFSStorage;
-import com.neverwinterdp.storage.hdfs.source.HDFSSource;
-import com.neverwinterdp.storage.hdfs.source.HDFSSourcePartition;
-import com.neverwinterdp.storage.hdfs.source.HDFSSourcePartitionStream;
-import com.neverwinterdp.storage.hdfs.source.HDFSSourcePartitionStreamReader;
+import com.neverwinterdp.storage.simplehdfs.SimpleHDFSStorage;
+import com.neverwinterdp.storage.simplehdfs.source.HDFSSource;
+import com.neverwinterdp.storage.simplehdfs.source.HDFSSourcePartition;
+import com.neverwinterdp.storage.simplehdfs.source.HDFSSourcePartitionStream;
+import com.neverwinterdp.storage.simplehdfs.source.HDFSSourcePartitionStreamReader;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
 
-public class VMTMValidatorHDFSApp extends VMApp {
+public class VMTMValidatorSimpleHDFSApp extends VMApp {
   private Logger logger;
   
   @Override
   public void run() throws Exception {
-    logger =  getVM().getLoggerFactory().getLogger(VMTMValidatorHDFSApp.class) ;
+    logger =  getVM().getLoggerFactory().getLogger(VMTMValidatorSimpleHDFSApp.class) ;
     logger.info("Start run()");
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
@@ -43,19 +44,19 @@ public class VMTMValidatorHDFSApp extends VMApp {
     long   maxRuntime   = vmConfig.getPropertyAsLong("tracking.max-runtime", 120000);
     int    expectNumOfMessagePerChunk = vmConfig.getPropertyAsInt("tracking.expect-num-of-message-per-chunk", 0);
     
-    String storageRegPath      = vmConfig.getProperty("storage.registry.path", "/storage/hdfs/tracking-aggregate");
+    String hdfsLocation        = vmConfig.getProperty("hdfs.location", "/tracking-sample/hdfs/aggregate");
     long   partitionRollPeriod = vmConfig.getPropertyAsLong("hdfs.partition-roll-period", (15 * 60 * 1000));
     
-    logger.info("reportPath = "            + reportPath);
-    logger.info("numOfReader = "           + numOfReader);
-    logger.info("maxRuntime = "            + maxRuntime);
-    logger.info("storage registry path = " + storageRegPath);
-    logger.info("partitionRollPeriod = "   + partitionRollPeriod);
+    logger.info("reportPath = "          + reportPath);
+    logger.info("numOfReader = "         + numOfReader);
+    logger.info("maxRuntime = "          + maxRuntime);
+    logger.info("hdfsLocation = "        + hdfsLocation);
+    logger.info("partitionRollPeriod = " + partitionRollPeriod);
     
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, reportPath);
     validatorService.withExpectNumOfMessagePerChunk(expectNumOfMessagePerChunk);
     validatorService.addReader(
-        new HDFSTrackingMessageReader(registry, storageRegPath, partitionRollPeriod)
+        new HDFSTrackingMessageReader(hdfsLocation, partitionRollPeriod)
     );
     validatorService.start();
     validatorService.awaitForTermination(maxRuntime, TimeUnit.MILLISECONDS);
@@ -66,9 +67,9 @@ public class VMTMValidatorHDFSApp extends VMApp {
     private long partitionRollPeriod ;
     private HDFSSourceReader hdfsSourceReader ;
     
-    HDFSTrackingMessageReader(Registry registry, String storageRegPath, long partitionRollPeriod) {
+    HDFSTrackingMessageReader(String hdfsLocation, long partitionRollPeriod) {
       this.partitionRollPeriod = partitionRollPeriod;
-      hdfsSourceReader = new HDFSSourceReader(registry, storageRegPath, partitionRollPeriod, tmQueue) ;
+      hdfsSourceReader = new HDFSSourceReader(hdfsLocation, partitionRollPeriod, tmQueue) ;
     }
     
     public void onInit(TrackingRegistry registry) throws Exception {
@@ -86,14 +87,12 @@ public class VMTMValidatorHDFSApp extends VMApp {
   }
   
   public class HDFSSourceReader extends Thread {
-    private long                           partitionRollPeriod;
-    private Registry                       registry;
-    private StorageConfig                  storageConfig;
+    private String hdfsLocation ;
+    private long   partitionRollPeriod;
     private BlockingQueue<TrackingMessage> tmQueue;
-
-    HDFSSourceReader(Registry registry, String registryPath, long partitionRollPeriod, BlockingQueue<TrackingMessage> tmQueue) {
-      storageConfig = new StorageConfig("hdfs", registryPath);
-      storageConfig.attribute(HDFSStorage.REGISTRY_PATH, registryPath);
+    
+    HDFSSourceReader(String hdfsLocation, long partitionRollPeriod, BlockingQueue<TrackingMessage> tmQueue) {
+      this.hdfsLocation        = hdfsLocation;
       this.partitionRollPeriod = partitionRollPeriod;
       this.tmQueue = tmQueue;
     }
@@ -107,22 +106,32 @@ public class VMTMValidatorHDFSApp extends VMApp {
     }
     
     void doRun() throws Exception {
+      StorageConfig storageConfig = new StorageConfig("HDFS", hdfsLocation);
       Configuration conf = new Configuration();
       VMConfig.overrideHadoopConfiguration(getVM().getDescriptor().getVmConfig().getHadoopProperties(), conf);
       FileSystem fs = FileSystem.get(conf);
-      HDFSStorage storage = new HDFSStorage(registry,fs, storageConfig);
-      
-      HDFSSource hdfsSource = storage.getSource();
+
+      SimpleHDFSStorage hdfsStorage = new SimpleHDFSStorage(fs, storageConfig);
+      HDFSSource hdfsSource = hdfsStorage.getSource();
       int noPartitionFound = 0 ;
       while(true) {
-        HDFSSourcePartition partition = hdfsSource.getLatestSourcePartition();
-        Date timestamp   = getTimestamp(partition.getPartitionLocation());
-        Date currentTime = new Date();
-        if(currentTime.getTime() > timestamp.getTime() + partitionRollPeriod) {
-          validatePartition(partition);
+        List<HDFSSourcePartition> partitions = hdfsSource.getSourcePartitions();
+        if(partitions.size() > 0) {
+          noPartitionFound = 0;
+          for(int i = 0; i < partitions.size(); i++) {
+            HDFSSourcePartition partition = partitions.get(i);
+            Date timestamp   = getTimestamp(partition.getPartitionLocation());
+            Date currentTime = new Date();
+            if(currentTime.getTime() > timestamp.getTime() + partitionRollPeriod) {
+              validatePartition(partition);
+            } else {
+              break ;
+            }
+          }
         } else {
-          break ;
+          noPartitionFound++;
         }
+        if(noPartitionFound > 50) break ;
         Thread.sleep(15000);
       }
     }
@@ -140,12 +149,13 @@ public class VMTMValidatorHDFSApp extends VMApp {
       for(int i = 0; i < stream.length; i++) {
         streamQueue.offer(stream[i]);
       }
-      ExecutorService service = Executors.newFixedThreadPool(stream.length);
+      ExecutorService service = Executors.newFixedThreadPool(3);
       for(int i = 0; i < stream.length; i++) {
         service.submit(new HDFSPartitionStreamReader(streamQueue, tmQueue));
       }
       service.shutdown();
       service.awaitTermination(2 * partitionRollPeriod, TimeUnit.MILLISECONDS);
+      partition.delete();
     }
   }
   

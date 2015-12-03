@@ -78,10 +78,14 @@ DATAFLOW_KILL_WORKER_PERIOD=$(get_opt --dataflow-kill-worker-period '60000' $@)
 DATAFLOW_DESCRIPTOR_FILE=""
 VALIDATOR_APP=""
 VALIDATOR_SOURCE_OPT=""
-if [ "$DATAFLOW_STORAGE" = "hdfs" ] ; then
+if [ "$DATAFLOW_STORAGE" = "simplehdfs" ] ; then
+  DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/tracking-sample-dataflow-simplehdfs.json"
+  VALIDATOR_APP="com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorSimpleHDFSApp"
+  VALIDATOR_SOURCE_OPT="--prop:hdfs.location=/tracking-sample/hdfs/aggregate --prop:hdfs.partition-roll-period=1200000"
+elif [ "$DATAFLOW_STORAGE" = "hdfs" ] ; then
   DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/tracking-sample-dataflow-hdfs.json"
   VALIDATOR_APP="com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorHDFSApp"
-  VALIDATOR_SOURCE_OPT="--prop:hdfs.location=/tracking-sample/hdfs/aggregate --prop:hdfs.partition-roll-period=1200000"
+  VALIDATOR_SOURCE_OPT="--prop:storage.registry.path=/storage/hdfs/tracking-aggregate --prop:hdfs.partition-roll-period=1200000"
 elif [ "$DATAFLOW_STORAGE" = "s3" ] ; then
   DATAFLOW_DESCRIPTOR_FILE="$APP_DIR/conf/tracking-sample-dataflow-s3.json"
   VALIDATOR_APP="com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorS3App"
