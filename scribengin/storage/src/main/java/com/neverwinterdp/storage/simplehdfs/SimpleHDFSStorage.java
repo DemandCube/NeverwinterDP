@@ -33,7 +33,7 @@ public class SimpleHDFSStorage extends Storage {
   }
 
   @Override
-  public void create(int numOfPartition, int replication) throws Exception {
+  public void create() throws Exception {
   }
 
   @Override

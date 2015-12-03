@@ -2,6 +2,8 @@ package com.neverwinterdp.storage.kafka.source;
 
 import kafka.javaapi.PartitionMetadata;
 
+import java.io.IOException;
+
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.storage.PartitionStreamConfig;

@@ -48,9 +48,9 @@ public class KafkaStorage extends Storage {
   }
 
   @Override
-  public void create(int numOfPartition, int replication) throws Exception {
-    StorageConfig descriptor = getStorageConfig();
-    kafkaClient.getKafkaTool().createTopic(descriptor.attribute(TOPIC), replication, numOfPartition);
+  public void create() throws Exception {
+    StorageConfig config = getStorageConfig();
+    kafkaClient.getKafkaTool().createTopic(config.attribute(TOPIC), config.getReplication(), config.getPartitionStream());
     kafkaSource = null;
   }
 

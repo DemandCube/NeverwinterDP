@@ -17,7 +17,7 @@ abstract public class Storage {
   abstract public boolean exists() throws Exception ;
   
   abstract public void drop() throws Exception ;
-  abstract public void create(int numOfPartition, int replication) throws Exception;
+  abstract public void create() throws Exception;
   
   abstract public Sink getSink() throws Exception ;
   abstract public Source getSource() throws Exception ;

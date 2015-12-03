@@ -47,7 +47,7 @@ public class SegmentStorageReader<T> {
 
   public String getName() { return name; }
 
-  public T next(long maxWait) throws Exception {
+  public T next(long maxWait) throws IOException {
     if(currentDataPathInputStream == null) {
       currentDataPathInputStream = nextDataPathInputStream();
       if (currentDataPathInputStream == null) return null;
@@ -65,7 +65,7 @@ public class SegmentStorageReader<T> {
     return JSONSerializer.INSTANCE.fromBytes(data, type);
   }
 
-  public Record[] next(int size, long maxWait) throws Exception {
+  public Record[] next(int size, long maxWait) throws IOException {
     List<T> holder = new ArrayList<>();
     Record[] array = new Record[holder.size()];
     for (int i = 0; i < size; i++) {
@@ -93,7 +93,7 @@ public class SegmentStorageReader<T> {
     // TODO Auto-generated method stub
   }
 
-  public void commit() throws Exception {
+  public void commit() throws IOException {
     System.err.println("This method is not implemented");
     lastCommitInfo = new CommitPoint(name, commitPoint, currPosition);
     this.commitPoint = currPosition;
@@ -103,7 +103,7 @@ public class SegmentStorageReader<T> {
     return this.lastCommitInfo;
   }
 
-  public void close() throws Exception {
+  public void close() throws IOException {
     if(currentDataPathInputStream != null) {
       currentDataPathInputStream.close();
     }

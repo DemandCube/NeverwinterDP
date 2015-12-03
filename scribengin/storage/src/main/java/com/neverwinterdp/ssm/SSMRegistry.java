@@ -15,7 +15,6 @@ import com.neverwinterdp.registry.lock.Lock;
 
 public class SSMRegistry {
   final static public String READERS           = "readers";
-  final static public String READERS_ALL       = READERS + "/all";
   final static public String READERS_ACTIVE    = READERS + "/active";
   final static public String READERS_HISTORY   = READERS + "/history";
   final static public String READERS_HEARTBEAT = READERS + "/heartbeat";
@@ -33,7 +32,6 @@ public class SSMRegistry {
   private Node segmentsNode;
 
   private Node              readersNode;
-  private Node              readersAllNode;
   private Node              readersActiveNode;
   private Node              readersHeartbeatNode;
   private Node              readersHistoryNode;
@@ -57,7 +55,6 @@ public class SSMRegistry {
     segmentsNode       = registryNode.getChild("segments");
     
     readersNode          = registryNode.getChild(READERS);
-    readersAllNode       = registryNode.getDescendant(READERS_ALL);
     readersActiveNode    = registryNode.getDescendant(READERS_ACTIVE);
     readersHeartbeatNode = registryNode.getDescendant(READERS_HEARTBEAT);
     readersHistoryNode   = registryNode.getDescendant(READERS_HISTORY);
@@ -84,8 +81,7 @@ public class SSMRegistry {
     trans.create(segmentsNode,       null, NodeCreateMode.PERSISTENT);
     
     trans.create(readersNode,          null, NodeCreateMode.PERSISTENT);
-    trans.create(readersAllNode,       null, NodeCreateMode.PERSISTENT);
-    trans.create(readersActiveNode,    null, NodeCreateMode.PERSISTENT);
+    trans.create(readersActiveNode,       null, NodeCreateMode.PERSISTENT);
     trans.create(readersHeartbeatNode, null, NodeCreateMode.PERSISTENT);
     trans.create(readersHistoryNode,   null, NodeCreateMode.PERSISTENT);
     
@@ -178,34 +174,30 @@ public class SSMRegistry {
     lock.execute(op, 3, 3000);
   }
   
-  public List<String> getAllReaders() throws RegistryException {
-    return readersAllNode.getChildren() ;
-  }
-  
   public List<String> getActiveReaders() throws RegistryException {
     return readersActiveNode.getChildren() ;
   }
+  
   
   public List<String> getHistoryReaders() throws RegistryException {
     return readersHistoryNode.getChildren() ;
   }
   
   public SSMReaderDescriptor getReader(String name) throws RegistryException {
-    return readersAllNode.getChild(name).getDataAs(SSMReaderDescriptor.class);
+    return readersActiveNode.getChild(name).getDataAs(SSMReaderDescriptor.class);
   }
   
   public SSMReaderDescriptor getOrCreateReader(String readerId) throws RegistryException {
     SSMReaderDescriptor reader = new SSMReaderDescriptor(readerId) ;
     Transaction transaction = registry.getTransaction();
-    transaction.createChild(readersAllNode, reader.getReaderId(), reader, NodeCreateMode.PERSISTENT);
-    transaction.createChild(readersActiveNode, reader.getReaderId(), NodeCreateMode.PERSISTENT);
+    transaction.createChild(readersActiveNode, reader.getReaderId(), reader, NodeCreateMode.PERSISTENT);
     transaction.createChild(readersHeartbeatNode, reader.getReaderId(), NodeCreateMode.EPHEMERAL);
     transaction.commit();
     return reader;
   }
   
   public SegmentReadDescriptor createSegmentReadDescriptor(SSMReaderDescriptor reader, SegmentDescriptor segment) throws RegistryException {
-    Node readerNode = readersAllNode.getChild(reader.getReaderId());
+    Node readerNode = readersActiveNode.getChild(reader.getReaderId());
     Node readSegmentNode = readerNode.getChild(segment.getSegmentId());
     Transaction trans = registry.getTransaction();
     SegmentReadDescriptor segReadDescriptor = new SegmentReadDescriptor(segment.getSegmentId());
@@ -226,7 +218,7 @@ public class SSMRegistry {
   }
   
   public void commit(Transaction trans, SSMReaderDescriptor reader, SegmentDescriptor segment, SegmentReadDescriptor segRead, boolean complete) throws RegistryException {
-    Node readerNode      = readersAllNode.getChild(reader.getReaderId());
+    Node readerNode      = readersActiveNode.getChild(reader.getReaderId());
     Node readSegmentNode = readerNode.getChild(segment.getSegmentId());
     if(segment.getStatus() == SegmentDescriptor.Status.COMPLETE) {
       if(segment.getDataSegmentLastCommitPos() == segRead.getCommitReadDataPosition()) {
@@ -240,14 +232,14 @@ public class SSMRegistry {
   }
   
   public List<String> getSegmentReadDescriptors(SSMReaderDescriptor reader) throws RegistryException {
-    Node readerNode = readersAllNode.getChild(reader.getReaderId());
+    Node readerNode = readersActiveNode.getChild(reader.getReaderId());
     List<String> readSegments = readerNode.getChildren();
     Collections.sort(readSegments);
     return readSegments;
   }
   
   public SegmentReadDescriptor getSegmentReadDescriptor(SSMReaderDescriptor reader, String segmentId) throws RegistryException {
-    Node readerNode = readersAllNode.getChild(reader.getReaderId());
+    Node readerNode = readersActiveNode.getChild(reader.getReaderId());
     Node segmentReadNode = readerNode.getChild(segmentId);
     return segmentReadNode.getDataAs(SegmentReadDescriptor.class);
   }

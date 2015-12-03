@@ -80,7 +80,7 @@ public class S3Storage extends Storage {
   }
 
   @Override
-  public void create(int numOfPartition, int replication) throws Exception {
+  public void create() throws Exception {
     if(!s3Client.hasBucket(bucketName)) {
       s3Client.createBucket(bucketName);
     }

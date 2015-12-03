@@ -7,7 +7,7 @@ import com.neverwinterdp.storage.Record;
  */
 public interface SourcePartitionStreamReader {
   public String getName() ;
-  public Record next(long maxWait) throws Exception;
+  public Record next(long maxWait) throws Exception ;
   public Record[] next(int size, long maxWait) throws Exception ;
   public boolean isEndOfDataStream() throws Exception ;
   public void rollback() throws Exception;

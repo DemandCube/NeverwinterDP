@@ -9,13 +9,14 @@ import org.junit.Test;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
+import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.zookeeper.tool.server.EmbededZKServerSet;
 
 public class HDFSStorageUnitTest {
   final static public String WORKING_DIR  = "build/working";
-  final static public String STORAGE_NAME = "storage";
+  final static public String HDFS_DIR     = WORKING_DIR + "/hdfs";
   
   private EmbededZKServerSet zkCluster;
   private Registry           registry;
@@ -43,6 +44,12 @@ public class HDFSStorageUnitTest {
   
   @Test
   public void testHDFSStorage() throws Exception {
-    
+    StorageConfig storageConfig = new StorageConfig("hdfs", HDFS_DIR);
+    storageConfig.attribute(HDFSStorage.REGISTRY_PATH, "/storage/hdfs/test");
+    storageConfig.setReplication(2);
+    storageConfig.setPartitionStream(5);
+    HDFSStorage storage = new HDFSStorage(registry,fs, storageConfig);
+    storage.create();
+    registry.get("/").dump(System.out);
   }
 }

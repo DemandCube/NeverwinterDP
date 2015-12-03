@@ -2,17 +2,24 @@ package com.neverwinterdp.storage.hdfs;
 
 import org.apache.hadoop.fs.FileSystem;
 
+import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.Registry;
+import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.sink.Sink;
 import com.neverwinterdp.storage.source.Source;
 
 public class HDFSStorage extends Storage {
-  private FileSystem             fs;
-  public HDFSStorage(Registry registry, FileSystem fs, StorageConfig storageDescriptor) {
-    super(storageDescriptor);
+  final static public String REGISTRY_PATH = "registry.path";
+
+  private HDFSStorageRegistry storageRegistry;
+  private FileSystem          fs;
+
+  public HDFSStorage(Registry registry, FileSystem fs, StorageConfig storageConfig) throws RegistryException {
+    super(storageConfig);
     this.fs = fs ;
+    this.storageRegistry = new HDFSStorageRegistry(registry, storageConfig);
   }
 
   @Override
@@ -21,15 +28,20 @@ public class HDFSStorage extends Storage {
 
   @Override
   public boolean exists() throws Exception {
-    return false;
+    return storageRegistry.exists();
   }
 
   @Override
-  public void drop() throws Exception {
+  public void drop() throws RegistryException {
+    storageRegistry.drop();
   }
 
   @Override
-  public void create(int numOfPartition, int replication) throws Exception {
+  public void create() throws Exception {
+    if(storageRegistry.exists()) {
+      throw new RegistryException(ErrorCode.NodeExists, "The storage is already initialized");
+    }
+    storageRegistry.create();
   }
 
   @Override

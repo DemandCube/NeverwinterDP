@@ -32,7 +32,7 @@ public class SSMRegistryPrinter {
   
   public void printReaders() throws IOException, RegistryException {
     println("  ", "readers");
-    List<String> allReaders = segStorageReg.getAllReaders() ;
+    List<String> allReaders = segStorageReg.getActiveReaders() ;
     println("    ", "all");
     for(int i = 0; i < allReaders.size(); i++) {
       SSMReaderDescriptor reader = segStorageReg.getReader(allReaders.get(i));
