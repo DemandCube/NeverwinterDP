@@ -1,5 +1,6 @@
 package com.neverwinterdp.scribengin.dataflow.operator;
 
+import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskStatus;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.registry.task.dedicated.TaskSlotExecutor;
@@ -82,11 +83,18 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
       }
     } catch(InterruptedException ex) {
       throw ex ;
-    } catch(Exception t) {
-      context.rollback();
-      report.setAssignedHasErrorCount(report.getAssignedHasErrorCount() + 1);
-      workerService.getLogger().error("DataflowTask Error", t);
+    } catch(RegistryException error) {
+      throw error;
+    } catch(Exception error) {
+      rollback(error);
     }
+  }
+  
+  void rollback(Exception error) throws Exception {
+    context.rollback();
+    OperatorTaskReport report = context.getTaskReport();
+    report.setAssignedHasErrorCount(report.getAssignedHasErrorCount() + 1);
+    workerService.getLogger().error("DataflowTask Error", error);
   }
   
   public void finish() throws Exception {

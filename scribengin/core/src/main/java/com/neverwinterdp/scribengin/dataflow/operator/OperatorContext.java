@@ -125,7 +125,7 @@ public class OperatorContext {
       throw ex;
     } 
   }
-
+  
   public void rollback() throws Exception {
     //TODO: implement the proper transaction
     Iterator<OutputContext> i = outputContexts.values().iterator();

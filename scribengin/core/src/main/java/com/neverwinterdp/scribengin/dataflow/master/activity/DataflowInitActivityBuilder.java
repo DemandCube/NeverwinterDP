@@ -73,7 +73,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
         if(!storage.exists()) {
           storageConfig.setPartitionStream(streamConfig.getParallelism());
           storageConfig.setReplication(streamConfig.getReplication());
-          storage.create(storageConfig.getPartitionStream(), storageConfig.getReplication());
+          storage.create();
           storage.refresh();
         }
         Sink sink = storage.getSink();
