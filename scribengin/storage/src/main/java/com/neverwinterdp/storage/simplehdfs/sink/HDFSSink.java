@@ -34,10 +34,10 @@ public class HDFSSink implements Sink {
   }
   
   public SinkPartitionStream  getPartitionStream(PartitionStreamConfig config) throws Exception {
-    return getParitionStream(config.getPartitionStreamId());
+    return getPartitionStream(config.getPartitionStreamId());
   }
   
-  public SinkPartitionStream  getParitionStream(int partitionId) throws Exception {
+  public SinkPartitionStream  getPartitionStream(int partitionId) throws Exception {
     PartitionStreamConfig pConfig = new PartitionStreamConfig(partitionId, null) ;
     HDFSSinkPartitionStream stream = new HDFSSinkPartitionStream(fs, storageConfig, pConfig);
     return stream ;
@@ -47,7 +47,7 @@ public class HDFSSink implements Sink {
     int numOfPartitionStream = storageConfig.getPartitionStream();
     SinkPartitionStream[] stream = new SinkPartitionStream[numOfPartitionStream];
     for(int i = 0; i < numOfPartitionStream; i++) {
-      stream[i] = getParitionStream(i);
+      stream[i] = getPartitionStream(i);
     }
     return stream;
   }

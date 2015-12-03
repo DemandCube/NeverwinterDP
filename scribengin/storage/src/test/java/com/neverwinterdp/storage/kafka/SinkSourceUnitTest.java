@@ -46,7 +46,7 @@ public class SinkSourceUnitTest {
     KafkaStorage storage = new KafkaStorage(kafkaClient, "hello", TOPIC);
     KafkaSink sink = (KafkaSink) storage.getSink();
     
-    SinkPartitionStream stream = sink.getParitionStream(0);
+    SinkPartitionStream stream = sink.getPartitionStream(0);
     SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < 10; i++) {
       String hello = "Hello " + i ;

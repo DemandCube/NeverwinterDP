@@ -8,8 +8,8 @@ import com.neverwinterdp.storage.StorageConfig;
  */
 public interface SourcePartition {
   public StorageConfig getStorageConfig() ;
-  public SourcePartitionStream   getPartitionStream(int id) throws Exception ;
-  public SourcePartitionStream   getPartitionStream(PartitionStreamConfig descriptor) throws Exception ;
+  public SourcePartitionStream getPartitionStream(int id) throws Exception ;
+  public SourcePartitionStream getPartitionStream(PartitionStreamConfig descriptor) throws Exception ;
   
   public SourcePartitionStream[] getPartitionStreams() throws Exception ;
   

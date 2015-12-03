@@ -12,7 +12,7 @@ public interface Sink {
   
   public SinkPartitionStream  getPartitionStream(PartitionStreamConfig descriptor) throws Exception ;
   
-  public SinkPartitionStream  getParitionStream(int partitionId) throws Exception ;
+  public SinkPartitionStream  getPartitionStream(int partitionId) throws Exception ;
   
   public SinkPartitionStream[] getPartitionStreams() throws Exception ;
 

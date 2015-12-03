@@ -20,7 +20,6 @@ public class SSMRegistry {
   final static public String READERS_HEARTBEAT = READERS + "/heartbeat";
   
   final static public String WRITERS           = "writers";
-  final static public String WRITERS_ALL       = WRITERS + "/all";
   final static public String WRITERS_ACTIVE    = WRITERS + "/active";
   final static public String WRITERS_HEARTBEAT = WRITERS + "/heartbeat";
   final static public String WRITERS_HISTORY   = WRITERS + "/history";
@@ -37,7 +36,6 @@ public class SSMRegistry {
   private Node              readersHistoryNode;
 
   private Node              writersNode;
-  private Node              writersAllNode;
   private Node              writersActiveNode;
   private Node              writersHeartbeatNode;
   private Node              writersHistoryNode;
@@ -60,7 +58,6 @@ public class SSMRegistry {
     readersHistoryNode   = registryNode.getDescendant(READERS_HISTORY);
     
     writersNode          = registryNode.getChild(WRITERS);
-    writersAllNode       = registryNode.getDescendant(WRITERS_ALL);
     writersActiveNode    = registryNode.getDescendant(WRITERS_ACTIVE);
     writersHeartbeatNode = registryNode.getDescendant(WRITERS_HEARTBEAT);
     writersHistoryNode   = registryNode.getDescendant(WRITERS_HISTORY);
@@ -86,14 +83,17 @@ public class SSMRegistry {
     trans.create(readersHistoryNode,   null, NodeCreateMode.PERSISTENT);
     
     trans.create(writersNode,          null, NodeCreateMode.PERSISTENT);
-    trans.create(writersAllNode,       null, NodeCreateMode.PERSISTENT);
-    trans.create(writersActiveNode,    null, NodeCreateMode.PERSISTENT);
+    trans.create(writersActiveNode,       null, NodeCreateMode.PERSISTENT);
     trans.create(writersHeartbeatNode, null, NodeCreateMode.PERSISTENT);
     trans.create(writersHistoryNode,   null, NodeCreateMode.PERSISTENT);
     writerIdTracker.initRegistry(trans);
     
     trans.create(actionQueueNode,    null, NodeCreateMode.PERSISTENT);
     trans.create(lockNode,           null, NodeCreateMode.PERSISTENT);
+  }
+  
+  public boolean exists() throws RegistryException { 
+    return registryNode.exists(); 
   }
   
   public Registry getRegistry() { return registry ; }
@@ -138,7 +138,7 @@ public class SSMRegistry {
         transaction.createDescendant(segmentsNode, segment.getSegmentId() + "/data", NodeCreateMode.PERSISTENT) ;
         
         writer.logStartSegment(segment.getSegmentId());
-        transaction.setData(writersAllNode.getPath() + "/" + writer.getId(), writer);
+        transaction.setData(writersActiveNode.getPath() + "/" + writer.getId(), writer);
         transaction.commit();
         return segment;
       }
@@ -164,7 +164,7 @@ public class SSMRegistry {
         transaction.setData(segNode.getPath(), segment);
         if(finished) {
           writer.logFinishSegment();
-          transaction.setData(writersAllNode.getPath() + "/" + writer.getId(), writer);
+          transaction.setData(writersActiveNode.getPath() + "/" + writer.getId(), writer);
         }
         transaction.commit();
         return segment;
@@ -244,10 +244,6 @@ public class SSMRegistry {
     return segmentReadNode.getDataAs(SegmentReadDescriptor.class);
   }
   
-  public List<String> getAllWriters() throws RegistryException {
-    return writersAllNode.getChildren() ;
-  }
-  
   public List<String> getActiveWriters() throws RegistryException {
     return writersActiveNode.getChildren() ;
   }
@@ -257,14 +253,13 @@ public class SSMRegistry {
   }
   
   public SSMWriterDescriptor getWriter(String id) throws RegistryException {
-    return writersAllNode.getChild(id).getDataAs(SSMWriterDescriptor.class);
+    return writersActiveNode.getChild(id).getDataAs(SSMWriterDescriptor.class);
   }
   
   public SSMWriterDescriptor createWriter(String name) throws RegistryException {
     SSMWriterDescriptor writer = new SSMWriterDescriptor(writerIdTracker.nextInt(), name) ;
     Transaction transaction = registry.getTransaction();
-    transaction.createChild(writersAllNode, writer.getId(), writer, NodeCreateMode.PERSISTENT);
-    transaction.createChild(writersActiveNode, writer.getId(), NodeCreateMode.PERSISTENT);
+    transaction.createChild(writersActiveNode, writer.getId(), writer, NodeCreateMode.PERSISTENT);
     transaction.createChild(writersHeartbeatNode, writer.getId(), NodeCreateMode.EPHEMERAL);
     transaction.commit();
     return writer;
@@ -277,7 +272,6 @@ public class SSMRegistry {
   public void closeWriter(SSMWriterDescriptor writer) throws RegistryException {
     Transaction transaction = registry.getTransaction();
     writer.setFinishedTime(System.currentTimeMillis());
-    transaction.deleteChild(writersActiveNode,    writer.getId());
     transaction.deleteChild(writersHeartbeatNode, writer.getId());
     transaction.createChild(writersHistoryNode,   writer.getId(), NodeCreateMode.PERSISTENT);
     transaction.commit();

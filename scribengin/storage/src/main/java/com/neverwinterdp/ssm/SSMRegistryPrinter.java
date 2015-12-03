@@ -62,7 +62,7 @@ public class SSMRegistryPrinter {
   
   public void printWriters() throws IOException, RegistryException {
     println("  ", "writers");
-    List<String> allWriters = segStorageReg.getAllWriters() ;
+    List<String> allWriters = segStorageReg.getActiveWriters() ;
     println("    ", "all");
     for(int i = 0; i < allWriters.size(); i++) {
       SSMWriterDescriptor writer = segStorageReg.getWriter(allWriters.get(i));

@@ -18,7 +18,7 @@ public class KafkaSourceStream implements SourcePartitionStream {
     this.kafkaClient = kafkaClient;
     partitionConfig = new PartitionStreamConfig(storageConfig);
     partitionConfig.setPartitionStreamId(pmd.partitionId());
-    this.partitionMetadata = pmd;
+    partitionMetadata = pmd;
   }
   
   public int getId() { return partitionConfig.getPartitionStreamId(); }

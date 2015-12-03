@@ -1,6 +1,5 @@
 package com.neverwinterdp.storage.hdfs;
 
-import java.io.IOException;
 import java.util.List;
 
 import com.neverwinterdp.registry.ErrorCode;

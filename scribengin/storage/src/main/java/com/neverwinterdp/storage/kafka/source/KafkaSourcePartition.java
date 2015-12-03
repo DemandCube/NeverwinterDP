@@ -37,9 +37,7 @@ public class KafkaSourcePartition implements SourcePartition {
   @Override
   public StorageConfig getStorageConfig() { return storageConfig; }
 
-  /**
-   * The stream id is equivalent to the partition id of the kafka
-   */
+  /** The stream id is equivalent to the partition id of the kafka */
   @Override
   public SourcePartitionStream getPartitionStream(int id) {  
     SourcePartitionStream stream = sourceStreams.get(id); 

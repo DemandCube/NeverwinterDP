@@ -32,7 +32,7 @@ public class S3Sink implements Sink {
   }
 
   @Override
-  synchronized public SinkPartitionStream getParitionStream(int partitionId) throws Exception {
+  synchronized public SinkPartitionStream getPartitionStream(int partitionId) throws Exception {
     PartitionStreamConfig streamConfig = new PartitionStreamConfig(partitionId, null) ;
     S3SinkPartitionStream stream = new S3SinkPartitionStream(s3Client, storageConfig, streamConfig);
     return stream;
@@ -49,7 +49,7 @@ public class S3Sink implements Sink {
     int numOfPartitionStream = storageConfig.getPartitionStream();
     SinkPartitionStream[] array = new SinkPartitionStream[numOfPartitionStream];
     for(int i = 0; i < numOfPartitionStream; i++) {
-      array[i] = getParitionStream(i);
+      array[i] = getPartitionStream(i);
     }
     return array;
   }

@@ -34,6 +34,17 @@ public class HdfsSSM extends SSM {
     }
   }
   
+  public HdfsSSM(FileSystem fs, String storageLoc, SSMRegistry ssmRegistry) throws RegistryException, IOException {
+    this.fs              = fs;
+    this.storageLocation = storageLoc;
+    Path hdfsStoragePath = new Path(storageLoc);
+    if(!fs.exists(hdfsStoragePath)) {
+      fs.mkdirs(hdfsStoragePath);
+    }
+    if(!ssmRegistry.exists()) ssmRegistry.initRegistry();
+    init(ssmRegistry);
+  }
+  
   protected SSMWriter createWriter(String clientId, SSMRegistry registry) throws RegistryException{
     return new HdfsSSMWriter(clientId, registry, fs, storageLocation);
   }

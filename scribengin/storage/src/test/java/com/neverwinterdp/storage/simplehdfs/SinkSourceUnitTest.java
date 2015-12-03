@@ -56,7 +56,7 @@ public class SinkSourceUnitTest {
     int NUM_OF_COMMIT = 5;
     int NUM_OF_RECORD_PER_COMMIT = 1000;
     int NUM_OF_RECORDS = NUM_OF_COMMIT * NUM_OF_RECORD_PER_COMMIT; 
-    SinkPartitionStream stream = sink.getParitionStream(0);
+    SinkPartitionStream stream = sink.getPartitionStream(0);
     SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < NUM_OF_COMMIT; i++) {
       for(int j = 0; j < NUM_OF_RECORD_PER_COMMIT; j ++) {
@@ -85,7 +85,7 @@ public class SinkSourceUnitTest {
     SimpleHDFSStorage hdfsStorage = new SimpleHDFSStorage(fs, storageConfig);
     HDFSSink sink = hdfsStorage.getSink();
     
-    SinkPartitionStream stream0 = sink.getParitionStream(0);
+    SinkPartitionStream stream0 = sink.getPartitionStream(0);
     SinkPartitionStreamWriter writer = stream0.getWriter();
     for(int i = 0; i < 10; i ++) {
       writer.append(Record.create("key-" + i, "record " + i));
@@ -134,7 +134,7 @@ public class SinkSourceUnitTest {
     @Override
     public void run() {
       try {
-        SinkPartitionStream stream = sink.getParitionStream(0);
+        SinkPartitionStream stream = sink.getPartitionStream(0);
         SinkPartitionStreamWriter writer = stream.getWriter();
         byte[] data = new byte[512];
         for(int i = 0; i < numOfSegment; i++) {

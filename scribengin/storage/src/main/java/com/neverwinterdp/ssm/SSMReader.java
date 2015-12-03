@@ -90,7 +90,10 @@ abstract public class SSMReader {
     segmentReaderSelector.rollback(transaction);
     transaction.commit();
   }
-
+  
+  public void close() throws IOException, RegistryException {
+    segmentReaderSelector.close();
+  }
   
   abstract protected SegmentReader createSegmentReader(SegmentDescriptor segment, SegmentReadDescriptor segReadDescriptor) throws RegistryException, IOException ;
 }

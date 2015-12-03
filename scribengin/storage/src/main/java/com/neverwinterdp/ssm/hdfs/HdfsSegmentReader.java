@@ -51,4 +51,8 @@ public class HdfsSegmentReader extends SegmentReader {
   
   @Override
   protected long getCurrentReadPosition() { return currentReadPos; }
+  
+  protected void doClose() throws IOException {
+    dataIs.close();
+  }
 }

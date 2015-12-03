@@ -81,9 +81,15 @@ abstract public class SegmentReader {
     rollback(readRecordIndex, segmentReadDescriptor.getCommitReadDataPosition());
   }
   
+  public void close() throws RegistryException, IOException {
+    doClose();
+  }
+  
   abstract protected void rollback(long readRecordIndex, long pos) throws IOException;
   
   abstract protected long getCurrentReadPosition() ;
+  
+  abstract protected void doClose() throws IOException;
   
   public String toString() { 
     StringBuilder b = new StringBuilder();

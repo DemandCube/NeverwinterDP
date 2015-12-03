@@ -51,7 +51,7 @@ public class ESSink implements Sink {
   }
   
   @Override
-  public SinkPartitionStream getParitionStream(int partitionId) throws Exception {
+  public SinkPartitionStream getPartitionStream(int partitionId) throws Exception {
     StorageConfig sConfig = storage.getStorageConfig();
     PartitionStreamConfig pConfig = new PartitionStreamConfig(partitionId, null);
     ESSinkStream newStream= new ESSinkStream(sConfig, pConfig) ;
@@ -65,7 +65,7 @@ public class ESSink implements Sink {
     int numOfStream = sConfig.getPartitionStream();
     SinkPartitionStream[] array = new SinkPartitionStream[numOfStream];
     for(int i = 0; i < array.length; i++) {
-      array[i] = getParitionStream(i);
+      array[i] = getPartitionStream(i);
     }
     return array;
   }

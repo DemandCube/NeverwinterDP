@@ -77,7 +77,7 @@ public class S3SinkSourceIntegrationTest {
     int NUM_OF_RECORD_PER_COMMIT = 100;
     int NUM_OF_RECORDS = NUM_OF_COMMIT * NUM_OF_RECORD_PER_COMMIT; 
     //Only write to one partition
-    SinkPartitionStream stream = sink.getParitionStream(0);
+    SinkPartitionStream stream = sink.getPartitionStream(0);
     SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < NUM_OF_COMMIT; i++) {
       for(int j = 0; j < NUM_OF_RECORD_PER_COMMIT; j ++) {
@@ -96,7 +96,7 @@ public class S3SinkSourceIntegrationTest {
   @Test
   public void testRollback() throws Exception {
     S3Sink sink = storage.getSink(s3Client) ;
-    SinkPartitionStream stream = sink.getParitionStream(0);
+    SinkPartitionStream stream = sink.getPartitionStream(0);
     SinkPartitionStreamWriter writer = stream.getWriter();
     int NUM_OF_RECORDS = 10;
     for(int i = 0; i < NUM_OF_RECORDS; i ++) {
@@ -167,7 +167,7 @@ public class S3SinkSourceIntegrationTest {
     @Override
     public void run() {
       try {
-        SinkPartitionStream stream = sink.getParitionStream(0);
+        SinkPartitionStream stream = sink.getPartitionStream(0);
         SinkPartitionStreamWriter writer = stream.getWriter();
         byte[] data = new byte[512];
         for(int i = 0; i < numOfPartitions; i++) {

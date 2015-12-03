@@ -39,7 +39,7 @@ public class ESSinkUnitTest {
   @Test
   public void testSource() throws Exception {
     ESSink sink = new ESSink(new String[] {"127.0.0.1:9300"}, "log4j", Log4jRecord.class) ;
-    SinkPartitionStream stream = sink.getParitionStream(0);
+    SinkPartitionStream stream = sink.getPartitionStream(0);
     SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < 10; i++) {
       Log4jRecord log4jRec = new Log4jRecord() ;

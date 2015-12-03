@@ -99,4 +99,14 @@ public class SegmentReaderSelector {
       }
     }
   }
+  
+  public void close() throws IOException, RegistryException {
+    Iterator<SegmentReader> i = allSegmentReaders.iterator();
+    while(i.hasNext()) {
+      SegmentReader reader = i.next();
+      reader.close();
+    }
+    activeSegmentReaders.clear();
+    allSegmentReaders.clear();
+  }
 }

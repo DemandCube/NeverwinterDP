@@ -55,7 +55,7 @@ public class KafkaSink implements Sink {
   }
 
   @Override
-  public SinkPartitionStream getParitionStream(int partitionId) throws Exception {
+  public SinkPartitionStream getPartitionStream(int partitionId) throws Exception {
     PartitionStreamConfig pConfig = new PartitionStreamConfig(partitionId);
     KafkaSinkPartitionStream newStream= new KafkaSinkPartitionStream(storageConfig, pConfig) ;
     return newStream;

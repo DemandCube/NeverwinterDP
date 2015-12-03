@@ -182,9 +182,9 @@ public class OperatorContext {
 
     public OutputContext(Storage storage, int partitionId) throws Exception {
       sink = storage.getSink();
-      assignedPartition = sink.getParitionStream(partitionId);
+      assignedPartition = sink.getPartitionStream(partitionId);
       if(assignedPartition == null) {
-        assignedPartition = sink.getParitionStream(partitionId);
+        assignedPartition = sink.getPartitionStream(partitionId);
       }
       assignedPartitionWriter = assignedPartition.getWriter();
     }
