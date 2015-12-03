@@ -2,11 +2,11 @@ package com.neverwinterdp.storage.hdfs.sink;
 
 import java.io.IOException;
 
+import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.ssm.hdfs.HdfsSSM;
 import com.neverwinterdp.storage.PartitionStreamConfig;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.sink.SinkPartitionStream;
-import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
 
 public class HDFSSinkPartitionStream implements SinkPartitionStream {
   private HdfsSSM                partitionStorage;
@@ -24,8 +24,8 @@ public class HDFSSinkPartitionStream implements SinkPartitionStream {
   public PartitionStreamConfig getParitionConfig() { return this.partitionConfig ; }
   
   @Override
-  synchronized public SinkPartitionStreamWriter getWriter() throws IOException {
-    return new HDFSSinkPartitionStreamWriter(partitionStorage, storageConfig, partitionConfig);
+  public HDFSSinkPartitionStreamWriter getWriter() throws IOException, RegistryException {
+    return new HDFSSinkPartitionStreamWriter("sink-writer", partitionStorage, storageConfig, partitionConfig);
   }
   
   synchronized public void delete() throws Exception {

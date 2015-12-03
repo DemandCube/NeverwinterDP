@@ -2,6 +2,8 @@ package com.neverwinterdp.storage.hdfs.source;
 
 import org.apache.hadoop.fs.FileSystem;
 
+import com.neverwinterdp.ssm.SSMRegistry;
+import com.neverwinterdp.ssm.hdfs.HdfsSSM;
 import com.neverwinterdp.storage.PartitionStreamConfig;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.hdfs.HDFSStorageRegistry;
@@ -15,8 +17,9 @@ public class HDFSSourcePartition implements SourcePartition {
   private HDFSStorageRegistry storageRegistry ;
   private FileSystem          fs;
   
-  public HDFSSourcePartition(HDFSStorageRegistry storageRegistry) {
+  public HDFSSourcePartition(HDFSStorageRegistry storageRegistry, FileSystem fs) {
     this.storageRegistry = storageRegistry;
+    this.fs = fs;
   }
   
   public String getPartitionLocation() { 
@@ -28,18 +31,29 @@ public class HDFSSourcePartition implements SourcePartition {
   }
 
   @Override
-  public SourcePartitionStream getPartitionStream(int id) throws Exception {
-    return null;
+  public HDFSSourcePartitionStream getPartitionStream(int partitionId) throws Exception {
+    PartitionStreamConfig config = new PartitionStreamConfig(partitionId, null);
+    return getPartitionStream(config) ;
   }
 
   @Override
-  public SourcePartitionStream getPartitionStream(PartitionStreamConfig descriptor) throws Exception {
-    return null;
+  public HDFSSourcePartitionStream getPartitionStream(PartitionStreamConfig pConfig) throws Exception {
+    StorageConfig sConfig = getStorageConfig();
+    String pLocation = sConfig.getLocation() + "/partition-" + pConfig.getPartitionStreamId();
+    SSMRegistry pRegistry = storageRegistry.getPartitionRegistry(pConfig.getPartitionStreamId());
+    HdfsSSM pStorage = new HdfsSSM(fs, pLocation, pRegistry);
+    return new HDFSSourcePartitionStream(pStorage, sConfig, pConfig);
   }
 
   @Override
   public SourcePartitionStream[] getPartitionStreams() throws Exception {
-    return null;
+    StorageConfig sConfig = getStorageConfig();
+    int numOfPartitionStream = sConfig.getPartitionStream();
+    HDFSSourcePartitionStream[] stream = new HDFSSourcePartitionStream[numOfPartitionStream];
+    for(int i = 0; i < numOfPartitionStream; i++) {
+      stream[i] = getPartitionStream(i);
+    }
+    return stream;
   }
 
   @Override

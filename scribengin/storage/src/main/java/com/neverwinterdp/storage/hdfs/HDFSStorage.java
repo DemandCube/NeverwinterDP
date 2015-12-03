@@ -8,6 +8,7 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.hdfs.sink.HDFSSink;
+import com.neverwinterdp.storage.hdfs.source.HDFSSource;
 import com.neverwinterdp.storage.sink.Sink;
 import com.neverwinterdp.storage.source.Source;
 
@@ -46,12 +47,12 @@ public class HDFSStorage extends Storage {
   }
 
   @Override
-  public Sink getSink() throws Exception {
-    return new HDFSSink(storageRegistry);
+  public HDFSSink getSink() throws Exception {
+    return new HDFSSink(storageRegistry, fs);
   }
 
   @Override
-  public Source getSource() throws Exception {
-    return null;
+  public HDFSSource getSource() throws Exception {
+    return new HDFSSource(storageRegistry, fs);
   }
 }

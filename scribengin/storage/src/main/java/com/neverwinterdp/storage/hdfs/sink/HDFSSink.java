@@ -11,14 +11,14 @@ import com.neverwinterdp.storage.PartitionStreamConfig;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.hdfs.HDFSStorageRegistry;
 import com.neverwinterdp.storage.sink.Sink;
-import com.neverwinterdp.storage.sink.SinkPartitionStream;
 
 public class HDFSSink implements Sink {
   private HDFSStorageRegistry storageRegistry ;
   private FileSystem          fs;
   
-  public HDFSSink(HDFSStorageRegistry storageRegistry) {
+  public HDFSSink(HDFSStorageRegistry storageRegistry, FileSystem fs) {
     this.storageRegistry = storageRegistry;
+    this.fs = fs;
   }
   
   @Override
@@ -52,10 +52,10 @@ public class HDFSSink implements Sink {
   }
 
   @Override
-  public SinkPartitionStream[] getPartitionStreams() throws Exception {
+  public HDFSSinkPartitionStream[] getPartitionStreams() throws Exception {
     StorageConfig sConfig = getStorageConfig();
     int numOfPartitionStream = sConfig.getPartitionStream();
-    SinkPartitionStream[] stream = new SinkPartitionStream[numOfPartitionStream];
+    HDFSSinkPartitionStream[] stream = new HDFSSinkPartitionStream[numOfPartitionStream];
     for(int i = 0; i < numOfPartitionStream; i++) {
       stream[i] = getPartitionStream(i);
     }
