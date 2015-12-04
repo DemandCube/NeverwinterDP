@@ -273,7 +273,8 @@ public class SSMRegistry {
     Transaction transaction = registry.getTransaction();
     writer.setFinishedTime(System.currentTimeMillis());
     transaction.deleteChild(writersHeartbeatNode, writer.getId());
-    transaction.createChild(writersHistoryNode,   writer.getId(), NodeCreateMode.PERSISTENT);
+    transaction.deleteChild(writersActiveNode, writer.getId());
+    transaction.createChild(writersHistoryNode,   writer.getId() + "-", NodeCreateMode.PERSISTENT_SEQUENTIAL);
     transaction.commit();
   }
 }

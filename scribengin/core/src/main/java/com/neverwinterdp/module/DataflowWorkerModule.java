@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 
 import com.google.inject.name.Names;
 import com.neverwinterdp.kafka.KafkaClient;
@@ -24,6 +25,9 @@ public class DataflowWorkerModule extends ServiceModule {
       VMConfig.overrideHadoopConfiguration(props, conf);
       
       FileSystem fs = FileSystem.get(conf);
+      if(fs instanceof LocalFileSystem) {
+        fs = ((LocalFileSystem)fs).getRaw();
+      }
       bindInstance(FileSystem.class, fs);
       
       String kafkaZkConnects = props.get("kafka.zk.connects");

@@ -58,8 +58,14 @@ abstract public class SSMReader {
     
     if(segmentReaderSelector.countActiveSegmentReader() == 0) {
       String lastReadSegment = readerDescriptor.getLastReadSegmentId();
-      int lastReadSegmentId = Integer.parseInt(lastReadSegment.substring(lastReadSegment.lastIndexOf('-') + 1));
-      SegmentDescriptor nextSegment = registry.getNextSegmentDescriptor(lastReadSegmentId);
+      SegmentDescriptor nextSegment = null;
+      if(lastReadSegment != null) {
+        int lastReadSegmentId = Integer.parseInt(lastReadSegment.substring(lastReadSegment.lastIndexOf('-') + 1));
+        nextSegment = registry.getNextSegmentDescriptor(lastReadSegmentId);
+      } else {
+        List<String> segments = registry.getSegments() ; 
+        if(segments.size() > 0) nextSegment = registry.getSegmentBySegmentId(segments.get(0));
+      }
       if(nextSegment != null) {
         SegmentReadDescriptor nextSegmentRead = registry.createSegmentReadDescriptor(readerDescriptor, nextSegment);
         segmentReaderSelector.add(createSegmentReader(nextSegment, nextSegmentRead));

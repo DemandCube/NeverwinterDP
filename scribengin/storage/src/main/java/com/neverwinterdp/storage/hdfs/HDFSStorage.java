@@ -9,8 +9,6 @@ import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.hdfs.sink.HDFSSink;
 import com.neverwinterdp.storage.hdfs.source.HDFSSource;
-import com.neverwinterdp.storage.sink.Sink;
-import com.neverwinterdp.storage.source.Source;
 
 public class HDFSStorage extends Storage {
   final static public String REGISTRY_PATH = "registry.path";
@@ -21,7 +19,7 @@ public class HDFSStorage extends Storage {
   public HDFSStorage(Registry registry, FileSystem fs, StorageConfig storageConfig) throws RegistryException {
     super(storageConfig);
     this.fs = fs ;
-    this.storageRegistry = new HDFSStorageRegistry(registry, storageConfig);
+    storageRegistry = new HDFSStorageRegistry(registry, storageConfig);
   }
 
   @Override

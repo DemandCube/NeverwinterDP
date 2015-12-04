@@ -92,6 +92,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
     private BlockingQueue<TrackingMessage> tmQueue;
 
     HDFSSourceReader(Registry registry, String registryPath, long partitionRollPeriod, BlockingQueue<TrackingMessage> tmQueue) {
+      this.registry = registry;
       storageConfig = new StorageConfig("hdfs", registryPath);
       storageConfig.attribute(HDFSStorage.REGISTRY_PATH, registryPath);
       this.partitionRollPeriod = partitionRollPeriod;
@@ -111,51 +112,30 @@ public class VMTMValidatorHDFSApp extends VMApp {
       VMConfig.overrideHadoopConfiguration(getVM().getDescriptor().getVmConfig().getHadoopProperties(), conf);
       FileSystem fs = FileSystem.get(conf);
       HDFSStorage storage = new HDFSStorage(registry,fs, storageConfig);
-      
+
       HDFSSource hdfsSource = storage.getSource();
-      int noPartitionFound = 0 ;
-      while(true) {
-        HDFSSourcePartition partition = hdfsSource.getLatestSourcePartition();
-        Date timestamp   = getTimestamp(partition.getPartitionLocation());
-        Date currentTime = new Date();
-        if(currentTime.getTime() > timestamp.getTime() + partitionRollPeriod) {
-          validatePartition(partition);
-        } else {
-          break ;
-        }
-        Thread.sleep(15000);
-      }
-    }
-    
-    Date getTimestamp(String partitionLocation) throws ParseException {
-      SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd-HHmm");
-      int index = partitionLocation.indexOf("storage-");
-      String timestamp = partitionLocation.substring(index + "storage-".length());
-      return timestampFormat.parse(timestamp);
-    }
-    
-    void validatePartition(HDFSSourcePartition partition) throws Exception {
-      BlockingQueue<HDFSSourcePartitionStream> streamQueue = new LinkedBlockingQueue<>();
+      HDFSSourcePartition partition = hdfsSource.getLatestSourcePartition();
+
+      BlockingQueue<HDFSSourcePartitionStreamReader> streamReaderQueue = new LinkedBlockingQueue<>();
       HDFSSourcePartitionStream[] stream = partition.getPartitionStreams();
+      ExecutorService validatorService = Executors.newFixedThreadPool(1);
       for(int i = 0; i < stream.length; i++) {
-        streamQueue.offer(stream[i]);
+        HDFSSourcePartitionStreamReader reader = stream[i].getReader("validator");
+        streamReaderQueue.put(reader);
+        validatorService.submit(new HDFSPartitionStreamReader(streamReaderQueue, tmQueue));
       }
-      ExecutorService service = Executors.newFixedThreadPool(stream.length);
-      for(int i = 0; i < stream.length; i++) {
-        service.submit(new HDFSPartitionStreamReader(streamQueue, tmQueue));
-      }
-      service.shutdown();
-      service.awaitTermination(2 * partitionRollPeriod, TimeUnit.MILLISECONDS);
+      validatorService.shutdown();
+      validatorService.awaitTermination(2 * partitionRollPeriod, TimeUnit.MILLISECONDS);
     }
   }
   
   class HDFSPartitionStreamReader implements Runnable {
-    private BlockingQueue<HDFSSourcePartitionStream> streamQueue;
-    private BlockingQueue<TrackingMessage>           tmQueue;
+    private BlockingQueue<HDFSSourcePartitionStreamReader> streamReaderQueue;
+    private BlockingQueue<TrackingMessage>                 tmQueue;
     
-    HDFSPartitionStreamReader(BlockingQueue<HDFSSourcePartitionStream> streamQueue, BlockingQueue<TrackingMessage> tmQueue) {
-      this.streamQueue = streamQueue ;
-      this.tmQueue = tmQueue;
+    HDFSPartitionStreamReader(BlockingQueue<HDFSSourcePartitionStreamReader> queue, BlockingQueue<TrackingMessage> tmQueue) {
+      this.streamReaderQueue = queue ;
+      this.tmQueue    = tmQueue;
     }
     
     @Override
@@ -168,18 +148,21 @@ public class VMTMValidatorHDFSApp extends VMApp {
     }
     
     void doRun() throws Exception {
-      HDFSSourcePartitionStream stream = null;
-      while((stream = streamQueue.poll(10, TimeUnit.MILLISECONDS)) != null) {
+      HDFSSourcePartitionStreamReader streamReader = null;
+      while((streamReader = streamReaderQueue.poll(10, TimeUnit.MILLISECONDS)) != null) {
         Record record = null;
-        HDFSSourcePartitionStreamReader reader = stream.getReader("validator") ;
-        while((record = reader.next(1000)) != null) {
+        int readCount  = 0;
+        while((record = streamReader.next(1000)) != null) {
           byte[] data = record.getData();
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(data, TrackingMessage.class);
           if(!tmQueue.offer(tMesg, 90000, TimeUnit.MILLISECONDS)) {
             throw new Exception("Cannot queue the messages after 5s, increase the buffer");
           }
+          readCount++;
         }
-        reader.close();
+        System.err.println("Validator " + streamReader + ", read count = " + readCount);
+        streamReader.commit();
+        streamReaderQueue.put(streamReader);
       }
     }
   }

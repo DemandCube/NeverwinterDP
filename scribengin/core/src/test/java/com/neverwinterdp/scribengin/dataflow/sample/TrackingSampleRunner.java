@@ -10,6 +10,7 @@ import org.elasticsearch.node.NodeBuilder;
 
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMGeneratorKafkaApp;
+import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorHDFSApp;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorS3App;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
@@ -19,7 +20,7 @@ import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 
-public class KafkaTrackingSampleRunner  {
+public class TrackingSampleRunner  {
   String REPORT_PATH          = "/applications/tracking-sample/reports";
   String dataflowId           = "tracking-dataflow";
   int    numOfMessagePerChunk = 1000;
@@ -30,7 +31,7 @@ public class KafkaTrackingSampleRunner  {
   ScribenginShell shell;
   
   public void setup() throws Exception {
-    FileUtil.removeIfExist("build/hdfs", false);
+    FileUtil.removeIfExist("build/working", false);
     FileUtil.removeIfExist("build/data", false);
     FileUtil.removeIfExist("build/logs", false);
     FileUtil.removeIfExist("build/elasticsearch", false);
@@ -96,6 +97,32 @@ public class KafkaTrackingSampleRunner  {
         "  --dataflow-max-runtime " + dataflowMaxRuntime;
     shell.execute(dataflowChainSubmitCommand);
   }
+
+  public void submitKafkaVMTMValidator() throws Exception {
+    String storageProps = 
+      "  --prop:kafka.zk-connects=127.0.0.1:2181"  +
+      "  --prop:kafka.topic=tracking.aggregate"  +
+      "  --prop:kafka.message-wait-timeout=30000" ;
+    submitVMTMValidator(VMTMValidatorKafkaApp.class, storageProps);
+  }
+  
+  public void submitHDFSTMDataflow() throws Exception {
+    String dataflowSubmitCommand = 
+        "dataflow submit " + 
+        "  --dataflow-config src/test/resources/hdfs-tracking-dataflow.json" +
+        "  --dataflow-id " + dataflowId + 
+        "  --dataflow-num-of-worker 2 --dataflow-num-of-executor-per-worker 5" + 
+        "  --dataflow-max-runtime " + dataflowMaxRuntime;
+    shell.execute(dataflowSubmitCommand);
+  }
+  
+  public void submitHDFSVMTMValidator() throws Exception {
+    String storageProps = 
+      "  --prop:storage.registry.path=/storage/hdfs/tracking-aggregate" + 
+      "  --prop:hdfs.partition-roll-period=1200000"  ;
+      
+    submitVMTMValidator(VMTMValidatorHDFSApp.class, storageProps);
+  }
   
   public void submitS3TMDataflow() throws Exception {
     String dataflowSubmitCommand = 
@@ -105,14 +132,6 @@ public class KafkaTrackingSampleRunner  {
         "  --dataflow-num-of-worker 2 --dataflow-num-of-executor-per-worker 5" + 
         "  --dataflow-max-runtime " + dataflowMaxRuntime;
     shell.execute(dataflowSubmitCommand);
-  }
-  
-  public void submitKafkaVMTMValidator() throws Exception {
-    String storageProps = 
-      "  --prop:kafka.zk-connects=127.0.0.1:2181"  +
-      "  --prop:kafka.topic=tracking.aggregate"  +
-      "  --prop:kafka.message-wait-timeout=30000" ;
-    submitVMTMValidator(VMTMValidatorKafkaApp.class, storageProps);
   }
   
   public void submitS3VMTMValidator() throws Exception {

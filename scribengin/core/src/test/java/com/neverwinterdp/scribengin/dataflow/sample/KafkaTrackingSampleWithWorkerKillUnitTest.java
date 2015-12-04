@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class KafkaTrackingSampleWithWorkerKillUnitTest  {
-  KafkaTrackingSampleRunner trackingSampleRunner = new KafkaTrackingSampleRunner();
+  TrackingSampleRunner trackingSampleRunner = new TrackingSampleRunner();
   
   @Before
   public void setup() throws Exception {
