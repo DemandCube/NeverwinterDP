@@ -8,8 +8,8 @@ abstract public class SSMWriter {
   protected SSMRegistry         registry;
   protected SSMWriterDescriptor writerDescriptor;
   private   SegmentWriter            currentSegWriter;
-  private   long                     maxSegmentSize = 64 * 1024 * 1024;
-  private   long                     maxBufferSize  =  4 * 1024 * 1024;
+  private   long                     maxSegmentSize = 128 * 1024 * 1024;
+  private   long                     maxBufferSize  = 16  * 1024 * 1024;
   
   public SSMWriter(String clientId, SSMRegistry registry) throws RegistryException {
     this.registry         = registry;
