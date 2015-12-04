@@ -151,6 +151,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
     
     void doRun() throws Exception {
       HDFSSourcePartitionStreamReader streamReader = null;
+      int readCount = 0;;
       while((streamReader = streamReaderQueue.poll(10, TimeUnit.MILLISECONDS)) != null) {
         Record record = null;
         while((record = streamReader.next(1000)) != null) {
@@ -159,10 +160,13 @@ public class VMTMValidatorHDFSApp extends VMApp {
           if(!tmQueue.offer(tMesg, 90000, TimeUnit.MILLISECONDS)) {
             throw new Exception("Cannot queue the messages after 5s, increase the buffer");
           }
+          readCount++ ;
         }
         streamReader.commit();
         streamReaderQueue.put(streamReader);
-        partition.deleteReadDataByActiveReader();
+        if(readCount % 5000000 == 0) {
+          partition.deleteReadDataByActiveReader();
+        }
       }
     }
   }
