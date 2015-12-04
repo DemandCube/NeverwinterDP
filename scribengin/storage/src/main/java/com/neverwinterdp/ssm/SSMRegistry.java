@@ -180,6 +180,7 @@ public class SSMRegistry {
     BatchOperations<List<String>> op = new BatchOperations<List<String>>() {
       @Override
       public List<String> execute(Registry registry) throws RegistryException {
+        System.err.println("cleanReadSegmentByActiveReader(): " + registryPath);
         List<String> deleteSegments = new ArrayList<>();
         List<String> readers = readersActiveNode.getChildren() ;
         String minReadSegmentId = null;
@@ -188,10 +189,14 @@ public class SSMRegistry {
           System.err.println("  reader: " + readers);
           List<String> readSegments = readersActiveNode.getChild(reader).getChildren();
           System.err.println("    read segments: " + readSegments);
-          if(readSegments.size() == 0) continue;
-          
-          Collections.sort(readSegments);
-          String readerMinReadSegment = readSegments.get(0);
+          String readerMinReadSegment = null;
+          if(readSegments.size() == 0)  {
+            SSMReaderDescriptor readerDescriptor = readersActiveNode.getChild(reader).getDataAs(SSMReaderDescriptor.class);
+            readerMinReadSegment = readerDescriptor.getLastReadSegmentId();
+          } else {
+            Collections.sort(readSegments);
+            readerMinReadSegment = readSegments.get(0);
+          }
           if(minReadSegmentId == null) minReadSegmentId = readerMinReadSegment;
           else if(minReadSegmentId.compareTo(readerMinReadSegment) > 0) minReadSegmentId = readerMinReadSegment;
         }
