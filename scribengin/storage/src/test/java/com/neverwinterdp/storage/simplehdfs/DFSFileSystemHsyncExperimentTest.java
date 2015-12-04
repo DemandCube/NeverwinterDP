@@ -45,6 +45,10 @@ public class DFSFileSystemHsyncExperimentTest {
       }
       os.hsync();
       for(int j = 0; j < 128; j++) {
+        if(is.available() < data.length) {
+          is.close();
+          is = fs.open(path);
+        }
         is.readFully(data);
       }
     }
