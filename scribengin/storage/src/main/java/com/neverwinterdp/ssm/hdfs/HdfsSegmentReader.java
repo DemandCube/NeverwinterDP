@@ -1,5 +1,6 @@
 package com.neverwinterdp.ssm.hdfs;
 
+import java.io.EOFException;
 import java.io.IOException;
 
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -37,23 +38,36 @@ public class HdfsSegmentReader extends SegmentReader {
 
   @Override
   protected byte[] dataNextRecord() throws IOException {
-    int size = 0 ;
     try {
-      size    = dataIs.readInt();
-      byte[] data = new byte[size];
-      dataIs.readFully(data);
-      currentReadPos += 4 + data.length;
-      return data;
+      return dataNextRecordWithRetry();
     } catch(IOException ex) {
       System.err.println(
           "dataNextRecord() error, currentReadPos = " + currentReadPos +
-          "currentReadPos + size = " + (currentReadPos + size) +
           ", commit pos = " + segment.getDataSegmentLastCommitPos());
       ex.printStackTrace();
       throw ex;
     }
   }
 
+  byte[] dataNextRecordWithRetry() throws IOException {
+    try {
+      int size    = dataIs.readInt();
+      byte[] data = new byte[size];
+      dataIs.readFully(data);
+      currentReadPos += 4 + data.length;
+      return data;
+    } catch(EOFException ex) {
+      dataIs.close();
+      dataIs  = fs.open(new Path(segmentFullPath)) ;
+      dataIs.seek(currentReadPos);
+    }
+    int size    = dataIs.readInt();
+    byte[] data = new byte[size];
+    dataIs.readFully(data);
+    currentReadPos += 4 + data.length;
+    return data;
+  }
+  
   protected void rollback(long readRecordIndex, long pos) throws IOException {
     dataIs.seek(pos);
     currentReadPos = pos;
