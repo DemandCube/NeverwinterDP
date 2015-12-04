@@ -39,6 +39,7 @@ public class DFSFileSystemHsyncExperimentTest {
     FSDataOutputStream os = fs.create(path);
     FSDataInputStream  is = fs.open(path);
     byte[] data = new byte[1024];
+    long readPos = 0;
     for(int i = 0 ; i < 1024; i++) {
       for(int j = 0; j < 128; j++) {
         os.write(data);
@@ -48,8 +49,11 @@ public class DFSFileSystemHsyncExperimentTest {
         if(is.available() < data.length) {
           is.close();
           is = fs.open(path);
+          is.seek(readPos);
+          System.err.println("reopen at readPos = " + readPos);
         }
         is.readFully(data);
+        readPos += data.length;
       }
     }
   }
