@@ -45,7 +45,7 @@ public class HdfsSegmentWriter extends SegmentWriter {
 
   @Override
   protected void bufferPrepareCommit() throws IOException {
-    bufferingOs.hflush();
+    bufferingOs.hsync();
   }
 
   @Override
