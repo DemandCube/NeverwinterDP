@@ -83,13 +83,22 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
         context.commit();
         commit = true;
       }
-      System.err.println("OperatorTaskSlotExecutor: commit = " + commit + ", report.getProcessCount() = " + report.getProcessCount());
+      System.err.println(
+          "OperatorTaskSlotExecutor: commit = " + commit + 
+          ", report.getProcessCount() = " + report.getProcessCount()
+       );
     } catch(InterruptedException ex) {
+      ex.printStackTrace();
       throw ex ;
     } catch(RegistryException error) {
+      error.printStackTrace();
       throw error;
     } catch(Exception error) {
+      error.printStackTrace();
       rollback(error);
+    } catch(Throwable t) {
+      t.printStackTrace();
+      throw t;
     }
   }
   
