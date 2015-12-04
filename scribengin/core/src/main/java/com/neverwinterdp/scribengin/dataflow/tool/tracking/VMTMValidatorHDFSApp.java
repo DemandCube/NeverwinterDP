@@ -160,7 +160,6 @@ public class VMTMValidatorHDFSApp extends VMApp {
           }
           readCount++;
         }
-        System.err.println("Validator " + streamReader + ", read count = " + readCount);
         streamReader.commit();
         streamReaderQueue.put(streamReader);
       }

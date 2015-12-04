@@ -37,11 +37,17 @@ public class HdfsSegmentReader extends SegmentReader {
 
   @Override
   protected byte[] dataNextRecord() throws IOException {
-    int size    = dataIs.readInt();
-    byte[] data = new byte[size];
-    dataIs.readFully(data);
-    currentReadPos += 4 + data.length;
-    return data;
+    try {
+      int size    = dataIs.readInt();
+      byte[] data = new byte[size];
+      dataIs.readFully(data);
+      currentReadPos += 4 + data.length;
+      return data;
+    } catch(IOException ex) {
+      System.err.println("dataNextRecord() error, currentReadPos = " + currentReadPos + ", commit pos = " + segment.getDataSegmentLastCommitPos());
+      ex.printStackTrace();
+      throw ex;
+    }
   }
 
   protected void rollback(long readRecordIndex, long pos) throws IOException {

@@ -9,12 +9,12 @@ import com.neverwinterdp.ssm.SegmentDescriptor.Status;
 abstract public class SegmentReader {
   static public enum DataAvailability { YES, WAITING, EOS }
   
-  private SSMRegistry         registry;
-  private SSMReaderDescriptor readerDescriptor;
-  private SegmentDescriptor        segment;
-  private SegmentReadDescriptor    segmentReadDescriptor;
-  private boolean                  complete = false;
-  private long                     readRecordIndex;
+  protected SSMRegistry         registry;
+  protected SSMReaderDescriptor readerDescriptor;
+  protected SegmentDescriptor        segment;
+  protected SegmentReadDescriptor    segmentReadDescriptor;
+  protected boolean                  complete = false;
+  protected long                     readRecordIndex;
   
   public SegmentReader(SSMRegistry registry,SSMReaderDescriptor readerDescriptor, SegmentDescriptor segment, SegmentReadDescriptor segmentReadDescriptor) {
     this.registry              = registry;
