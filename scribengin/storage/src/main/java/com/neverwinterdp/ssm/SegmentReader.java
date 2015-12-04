@@ -65,15 +65,15 @@ abstract public class SegmentReader {
   public void prepareCommit(Transaction trans) throws IOException, RegistryException {
     segmentReadDescriptor.setCommitReadDataPosition(readRecordIndex);
     segmentReadDescriptor.setCommitReadDataPosition(getCurrentReadPosition());
-    registry.commit(trans, readerDescriptor, segment, segmentReadDescriptor, complete);
-  }
-  
-  public void completeCommit(Transaction trans) throws IOException {
     if(segment.getStatus() == SegmentDescriptor.Status.COMPLETE) {
       if(segment.getDataSegmentLastCommitPos() == segmentReadDescriptor.getCommitReadDataPosition()) {
         complete = true;
       }
     }
+    registry.commit(trans, readerDescriptor, segment, segmentReadDescriptor, complete);
+  }
+  
+  public void completeCommit(Transaction trans) throws IOException {
   }
   
   public void rollback(Transaction trans) throws IOException {

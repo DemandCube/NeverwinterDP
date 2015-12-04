@@ -262,9 +262,11 @@ public class SSMRegistry {
   public void commit(Transaction trans, SSMReaderDescriptor reader, SegmentDescriptor segment, SegmentReadDescriptor segRead, boolean complete) throws RegistryException {
     Node readerNode      = readersActiveNode.getChild(reader.getReaderId());
     Node readSegmentNode = readerNode.getChild(segment.getSegmentId());
+    System.err.println("commit: complete = " + complete);
     if(complete || segment.getStatus() == SegmentDescriptor.Status.COMPLETE) {
       if(complete || segment.getDataSegmentLastCommitPos() == segRead.getCommitReadDataPosition()) {
         trans.delete(readSegmentNode.getPath());
+        System.err.println("  delete  true");
       } else {
         trans.setData(readSegmentNode, segRead);
       }
