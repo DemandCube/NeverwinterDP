@@ -122,20 +122,23 @@ public class VMTMValidatorHDFSApp extends VMApp {
         HDFSSourcePartitionStreamReader reader = stream[i].getReader("validator");
         streamReaderQueue.put(reader);
       }
+      
       ExecutorService validatorService = Executors.newFixedThreadPool(1);
-      validatorService.submit(new HDFSPartitionStreamReader(partition, streamReaderQueue, tmQueue));
+      for(int i = 0; i < 3; i++) {
+        validatorService.submit(new HDFSPartitionStreamReader(streamReaderQueue, tmQueue));
+      }
       validatorService.shutdown();
-      validatorService.awaitTermination(2 * partitionRollPeriod, TimeUnit.MILLISECONDS);
+      while(!validatorService.awaitTermination(5, TimeUnit.MINUTES)) {
+        partition.deleteReadDataByActiveReader();
+      }
     }
   }
   
   class HDFSPartitionStreamReader implements Runnable {
-    private HDFSSourcePartition partition;
     private BlockingQueue<HDFSSourcePartitionStreamReader> streamReaderQueue;
     private BlockingQueue<TrackingMessage>                 tmQueue;
     
-    HDFSPartitionStreamReader(HDFSSourcePartition partition, BlockingQueue<HDFSSourcePartitionStreamReader> queue, BlockingQueue<TrackingMessage> tmQueue) {
-      this.partition = partition ;
+    HDFSPartitionStreamReader(BlockingQueue<HDFSSourcePartitionStreamReader> queue, BlockingQueue<TrackingMessage> tmQueue) {
       this.streamReaderQueue = queue ;
       this.tmQueue    = tmQueue;
     }
@@ -151,7 +154,6 @@ public class VMTMValidatorHDFSApp extends VMApp {
     
     void doRun() throws Exception {
       HDFSSourcePartitionStreamReader streamReader = null;
-      int readCount = 0;;
       while((streamReader = streamReaderQueue.poll(10, TimeUnit.MILLISECONDS)) != null) {
         Record record = null;
         while((record = streamReader.next(1000)) != null) {
@@ -160,13 +162,9 @@ public class VMTMValidatorHDFSApp extends VMApp {
           if(!tmQueue.offer(tMesg, 90000, TimeUnit.MILLISECONDS)) {
             throw new Exception("Cannot queue the messages after 5s, increase the buffer");
           }
-          readCount++ ;
         }
         streamReader.commit();
         streamReaderQueue.put(streamReader);
-        if(readCount % 5000000 == 0) {
-          partition.deleteReadDataByActiveReader();
-        }
       }
     }
   }
