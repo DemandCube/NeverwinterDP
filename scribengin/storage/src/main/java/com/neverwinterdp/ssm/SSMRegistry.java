@@ -180,8 +180,10 @@ public class SSMRegistry {
     BatchOperations<List<String>> op = new BatchOperations<List<String>>() {
       @Override
       public List<String> execute(Registry registry) throws RegistryException {
+        System.err.println("deleteReadSegmentByActiveReader() for " + registryPath);
         List<String> deleteSegments = new ArrayList<>();
         List<String> readers = readersActiveNode.getChildren() ;
+        System.err.println("  readers: " + readers);
         String minReadSegmentId = null;
         for(int i = 0; i < readers.size(); i++) {
           String reader = readers.get(i);
@@ -193,7 +195,9 @@ public class SSMRegistry {
           if(minReadSegmentId == null) minReadSegmentId = readerMinReadSegment;
           else if(minReadSegmentId.compareTo(readerMinReadSegment) > 0) minReadSegmentId = readerMinReadSegment;
         }
+        System.err.println("  minReadSegmentId: " + minReadSegmentId);
         if(minReadSegmentId == null) return deleteSegments;
+        
         List<String> segments = segmentsNode.getChildren();
         Transaction transaction = registry.getTransaction();
         for(int i = 0; i < segments.size(); i++) {
@@ -204,6 +208,7 @@ public class SSMRegistry {
           }
         }
         transaction.commit();
+        System.err.println("  delete: " + deleteSegments);
         return deleteSegments;
       }
     };
