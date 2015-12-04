@@ -75,6 +75,8 @@ public class HdfsSSMUnitTest {
     TrackingRecordValidator validator = new TrackingRecordValidator(reader, NUM_OF_RECORDS, 500);
     validator.run();
     validator.report();
+    //reader.closeAndRemove();
+    storage.cleanReadSegmentByActiveReader();
     //storage.dump();
   }
   

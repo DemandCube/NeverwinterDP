@@ -26,10 +26,10 @@ abstract public class SSM {
   
   abstract protected SSMReader createReader(String clientId, SSMRegistry registry) throws RegistryException, IOException;
 
-  public void deleteReadSegmentByActiveReader() throws RegistryException, IOException {
-    List<String> deleteSegments = registry.deleteReadSegmentByActiveReader();
-    for(int i = 0; i < deleteSegments.size(); i++) {
-      String segmentId = deleteSegments.get(i);
+  public void cleanReadSegmentByActiveReader() throws RegistryException, IOException {
+    List<String> cleanSegments = registry.cleanReadSegmentByActiveReader();
+    for(int i = 0; i < cleanSegments.size(); i++) {
+      String segmentId = cleanSegments.get(i);
       doDeleteSegment(segmentId);
     }
   }

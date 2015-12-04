@@ -136,8 +136,8 @@ public class SSMRegistry {
         segment.setCreator(writer.getWriter());
         Transaction transaction = registry.getTransaction();
         transaction.createChild(segmentsNode, segment.getSegmentId(), segment, NodeCreateMode.PERSISTENT);
-        transaction.createDescendant(segmentsNode, segment.getSegmentId() + "/lock", NodeCreateMode.PERSISTENT) ;
-        transaction.createDescendant(segmentsNode, segment.getSegmentId() + "/data", NodeCreateMode.PERSISTENT) ;
+//        transaction.createDescendant(segmentsNode, segment.getSegmentId() + "/lock", NodeCreateMode.PERSISTENT) ;
+//        transaction.createDescendant(segmentsNode, segment.getSegmentId() + "/data", NodeCreateMode.PERSISTENT) ;
         
         writer.logStartSegment(segment.getSegmentId());
         transaction.setData(writersActiveNode.getPath() + "/" + writer.getId(), writer);
@@ -176,18 +176,18 @@ public class SSMRegistry {
     lock.execute(op, 3, 3000);
   }
   
-  public List<String> deleteReadSegmentByActiveReader() throws RegistryException {
+  public List<String> cleanReadSegmentByActiveReader() throws RegistryException {
     BatchOperations<List<String>> op = new BatchOperations<List<String>>() {
       @Override
       public List<String> execute(Registry registry) throws RegistryException {
-        System.err.println("deleteReadSegmentByActiveReader() for " + registryPath);
         List<String> deleteSegments = new ArrayList<>();
         List<String> readers = readersActiveNode.getChildren() ;
-        System.err.println("  readers: " + readers);
         String minReadSegmentId = null;
         for(int i = 0; i < readers.size(); i++) {
           String reader = readers.get(i);
+          System.err.println("  reader: " + readers);
           List<String> readSegments = readersActiveNode.getChild(reader).getChildren();
+          System.err.println("    read segments: " + readSegments);
           if(readSegments.size() == 0) continue;
           
           Collections.sort(readSegments);
@@ -262,11 +262,9 @@ public class SSMRegistry {
   public void commit(Transaction trans, SSMReaderDescriptor reader, SegmentDescriptor segment, SegmentReadDescriptor segRead, boolean complete) throws RegistryException {
     Node readerNode      = readersActiveNode.getChild(reader.getReaderId());
     Node readSegmentNode = readerNode.getChild(segment.getSegmentId());
-    System.err.println("commit: complete = " + complete);
     if(complete || segment.getStatus() == SegmentDescriptor.Status.COMPLETE) {
       if(complete || segment.getDataSegmentLastCommitPos() == segRead.getCommitReadDataPosition()) {
         trans.delete(readSegmentNode.getPath());
-        System.err.println("  delete  true");
       } else {
         trans.setData(readSegmentNode, segRead);
       }
