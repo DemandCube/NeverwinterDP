@@ -1,5 +1,7 @@
 package com.neverwinterdp.ssm;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -174,6 +176,41 @@ public class SSMRegistry {
     lock.execute(op, 3, 3000);
   }
   
+  public List<String> deleteReadSegmentByActiveReader() throws RegistryException {
+    BatchOperations<List<String>> op = new BatchOperations<List<String>>() {
+      @Override
+      public List<String> execute(Registry registry) throws RegistryException {
+        List<String> deleteSegments = new ArrayList<>();
+        List<String> readers = readersActiveNode.getChildren() ;
+        String minReadSegmentId = null;
+        for(int i = 0; i < readers.size(); i++) {
+          String reader = readers.get(i);
+          List<String> readSegments = readersActiveNode.getChild(reader).getChildren();
+          if(readSegments.size() == 0) continue;
+          
+          Collections.sort(readSegments);
+          String readerMinReadSegment = readSegments.get(0);
+          if(minReadSegmentId == null) minReadSegmentId = readerMinReadSegment;
+          else if(minReadSegmentId.compareTo(readerMinReadSegment) > 0) minReadSegmentId = readerMinReadSegment;
+        }
+        if(minReadSegmentId == null) return deleteSegments;
+        List<String> segments = segmentsNode.getChildren();
+        Transaction transaction = registry.getTransaction();
+        for(int i = 0; i < segments.size(); i++) {
+          String segmentId = segments.get(i);
+          if(segmentId.compareTo(minReadSegmentId) < 0) {
+            transaction.deleteChild(segmentsNode, segmentId);
+            deleteSegments.add(segmentId);
+          }
+        }
+        transaction.commit();
+        return deleteSegments;
+      }
+    };
+    Lock lock = lockNode.getLock("write", "Lock to remove the segments that are already read by the active reader") ;
+    return lock.execute(op, 3, 3000);
+  }
+  
   public List<String> getActiveReaders() throws RegistryException {
     return readersActiveNode.getChildren() ;
   }
@@ -220,8 +257,8 @@ public class SSMRegistry {
   public void commit(Transaction trans, SSMReaderDescriptor reader, SegmentDescriptor segment, SegmentReadDescriptor segRead, boolean complete) throws RegistryException {
     Node readerNode      = readersActiveNode.getChild(reader.getReaderId());
     Node readSegmentNode = readerNode.getChild(segment.getSegmentId());
-    if(segment.getStatus() == SegmentDescriptor.Status.COMPLETE) {
-      if(segment.getDataSegmentLastCommitPos() == segRead.getCommitReadDataPosition()) {
+    if(complete || segment.getStatus() == SegmentDescriptor.Status.COMPLETE) {
+      if(complete || segment.getDataSegmentLastCommitPos() == segRead.getCommitReadDataPosition()) {
         trans.delete(readSegmentNode.getPath());
       } else {
         trans.setData(readSegmentNode, segRead);
@@ -242,6 +279,19 @@ public class SSMRegistry {
     Node readerNode = readersActiveNode.getChild(reader.getReaderId());
     Node segmentReadNode = readerNode.getChild(segmentId);
     return segmentReadNode.getDataAs(SegmentReadDescriptor.class);
+  }
+  
+  public void removeReader(String id) throws RegistryException {
+    removeReader(getReader(id));
+  }
+  
+  public void removeReader(SSMReaderDescriptor reader) throws RegistryException {
+    Transaction transaction = registry.getTransaction();
+    reader.setFinishedTime(System.currentTimeMillis());
+    transaction.deleteChild(readersHeartbeatNode, reader.getReaderId());
+    transaction.rdelete(readersActiveNode.getPath() + "/" + reader.getReaderId());
+    transaction.createChild(readersHistoryNode, reader.getReaderId() + "-", reader, NodeCreateMode.PERSISTENT_SEQUENTIAL);
+    transaction.commit();
   }
   
   public List<String> getActiveWriters() throws RegistryException {
@@ -266,15 +316,15 @@ public class SSMRegistry {
   }
   
   public void removeWriter(String id) throws RegistryException {
-    closeWriter(getWriter(id));
+    removeWriter(getWriter(id));
   }
   
-  public void closeWriter(SSMWriterDescriptor writer) throws RegistryException {
+  public void removeWriter(SSMWriterDescriptor writer) throws RegistryException {
     Transaction transaction = registry.getTransaction();
     writer.setFinishedTime(System.currentTimeMillis());
     transaction.deleteChild(writersHeartbeatNode, writer.getId());
     transaction.deleteChild(writersActiveNode, writer.getId());
-    transaction.createChild(writersHistoryNode,   writer.getId() + "-", NodeCreateMode.PERSISTENT_SEQUENTIAL);
+    transaction.createChild(writersHistoryNode,   writer.getId() + "-", writer, NodeCreateMode.PERSISTENT_SEQUENTIAL);
     transaction.commit();
   }
 }

@@ -1,7 +1,10 @@
 package com.neverwinterdp.storage.hdfs.source;
 
+import java.io.IOException;
+
 import org.apache.hadoop.fs.FileSystem;
 
+import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.ssm.SSMRegistry;
 import com.neverwinterdp.ssm.hdfs.HdfsSSM;
 import com.neverwinterdp.storage.PartitionStreamConfig;
@@ -56,6 +59,13 @@ public class HDFSSourcePartition implements SourcePartition {
     return stream;
   }
 
+  public void deleteReadDataByActiveReader() throws Exception {
+    HDFSSourcePartitionStream[] streams = getPartitionStreams() ;
+    for(HDFSSourcePartitionStream sel : streams) {
+      sel.deleteReadDataByActiveReader();
+    }
+  }
+  
   @Override
   public void close() throws Exception {
   }

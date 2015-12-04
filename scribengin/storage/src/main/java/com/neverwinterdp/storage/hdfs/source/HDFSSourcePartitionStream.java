@@ -26,4 +26,7 @@ public class HDFSSourcePartitionStream implements SourcePartitionStream {
     return new HDFSSourcePartitionStreamReader(name, partitionStorage, storageConfig, partitionConfig) ;
   }
 
+  public void deleteReadDataByActiveReader() throws RegistryException, IOException {
+    partitionStorage.deleteReadSegmentByActiveReader();
+  }
 }

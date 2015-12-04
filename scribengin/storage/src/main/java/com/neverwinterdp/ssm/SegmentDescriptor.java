@@ -90,4 +90,8 @@ public class SegmentDescriptor {
   static public String toSegmentId(int id) {
     return "segment-" + ID_FORMAT.format(id);
   }
+  
+  static public int extractId(String segmentId) {
+    return Integer.parseInt(segmentId.substring("segment-".length() + 1));
+  }
 }

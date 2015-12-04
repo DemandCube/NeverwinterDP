@@ -118,22 +118,24 @@ public class VMTMValidatorHDFSApp extends VMApp {
 
       BlockingQueue<HDFSSourcePartitionStreamReader> streamReaderQueue = new LinkedBlockingQueue<>();
       HDFSSourcePartitionStream[] stream = partition.getPartitionStreams();
-      ExecutorService validatorService = Executors.newFixedThreadPool(1);
       for(int i = 0; i < stream.length; i++) {
         HDFSSourcePartitionStreamReader reader = stream[i].getReader("validator");
         streamReaderQueue.put(reader);
-        validatorService.submit(new HDFSPartitionStreamReader(streamReaderQueue, tmQueue));
       }
+      ExecutorService validatorService = Executors.newFixedThreadPool(1);
+      validatorService.submit(new HDFSPartitionStreamReader(partition, streamReaderQueue, tmQueue));
       validatorService.shutdown();
       validatorService.awaitTermination(2 * partitionRollPeriod, TimeUnit.MILLISECONDS);
     }
   }
   
   class HDFSPartitionStreamReader implements Runnable {
+    private HDFSSourcePartition partition;
     private BlockingQueue<HDFSSourcePartitionStreamReader> streamReaderQueue;
     private BlockingQueue<TrackingMessage>                 tmQueue;
     
-    HDFSPartitionStreamReader(BlockingQueue<HDFSSourcePartitionStreamReader> queue, BlockingQueue<TrackingMessage> tmQueue) {
+    HDFSPartitionStreamReader(HDFSSourcePartition partition, BlockingQueue<HDFSSourcePartitionStreamReader> queue, BlockingQueue<TrackingMessage> tmQueue) {
+      this.partition = partition ;
       this.streamReaderQueue = queue ;
       this.tmQueue    = tmQueue;
     }
@@ -151,17 +153,16 @@ public class VMTMValidatorHDFSApp extends VMApp {
       HDFSSourcePartitionStreamReader streamReader = null;
       while((streamReader = streamReaderQueue.poll(10, TimeUnit.MILLISECONDS)) != null) {
         Record record = null;
-        int readCount  = 0;
         while((record = streamReader.next(1000)) != null) {
           byte[] data = record.getData();
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(data, TrackingMessage.class);
           if(!tmQueue.offer(tMesg, 90000, TimeUnit.MILLISECONDS)) {
             throw new Exception("Cannot queue the messages after 5s, increase the buffer");
           }
-          readCount++;
         }
         streamReader.commit();
         streamReaderQueue.put(streamReader);
+        partition.deleteReadDataByActiveReader();
       }
     }
   }

@@ -1,6 +1,7 @@
 package com.neverwinterdp.ssm;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.neverwinterdp.registry.RegistryException;
 
@@ -25,5 +26,16 @@ abstract public class SSM {
   
   abstract protected SSMReader createReader(String clientId, SSMRegistry registry) throws RegistryException, IOException;
 
+  public void deleteReadSegmentByActiveReader() throws RegistryException, IOException {
+    List<String> deleteSegments = registry.deleteReadSegmentByActiveReader();
+    for(int i = 0; i < deleteSegments.size(); i++) {
+      String segmentId = deleteSegments.get(i);
+      doDeleteSegment(segmentId);
+    }
+  }
+  
+  abstract protected void doDeleteSegment(String segmentId) throws IOException;
+  
   abstract public SSMConsistencyVerifier getSegmentConsistencyVerifier() ;
+  
 }

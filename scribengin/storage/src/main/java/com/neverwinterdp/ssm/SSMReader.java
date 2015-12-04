@@ -101,5 +101,10 @@ abstract public class SSMReader {
     segmentReaderSelector.close();
   }
   
+  public void closeAndRemove() throws IOException, RegistryException {
+    segmentReaderSelector.close();
+    registry.removeReader(readerDescriptor);
+  }
+  
   abstract protected SegmentReader createSegmentReader(SegmentDescriptor segment, SegmentReadDescriptor segReadDescriptor) throws RegistryException, IOException ;
 }

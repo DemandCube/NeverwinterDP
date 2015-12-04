@@ -53,6 +53,12 @@ public class HdfsSSM extends SSM {
   protected SSMReader createReader(String clientId, SSMRegistry registry) throws RegistryException, IOException {
     return new HdfsSSMReader(clientId, registry, fs, storageLocation);
   }
+
+  @Override
+  protected void doDeleteSegment(String segmentId) throws IOException {
+    String segmentFullPath = storageLocation + "/" + segmentId + ".dat";
+    fs.delete(new Path(segmentFullPath), true);
+  }
   
   @Override
   public HdfsSSMConsistencyVerifier getSegmentConsistencyVerifier() {

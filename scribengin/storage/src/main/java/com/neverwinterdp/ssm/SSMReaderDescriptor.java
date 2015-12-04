@@ -1,17 +1,14 @@
 package com.neverwinterdp.ssm;
 
-import java.text.DecimalFormat;
+import java.util.TreeSet;
 
 import com.neverwinterdp.util.text.DateUtil;
 
 public class SSMReaderDescriptor {
-  static DecimalFormat ID_FORMAT = new DecimalFormat("000000");
-  
-  private String       readerId;
-  private String       lastReadSegmentId;
-  private long         startedTime;
-  private long         finishedTime;
-  
+  private String          readerId;
+  private String          lastReadSegmentId;
+  private long            startedTime;
+  private long            finishedTime;
   
   public SSMReaderDescriptor() { }
   
