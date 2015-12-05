@@ -116,7 +116,7 @@ public class HdfsSSMUnitTest {
   @Test
   public void testConcurrentMultipleReadWrite() throws Exception {
     int NUM_OF_WRITERS = 5;
-    int NUM_OF_COMMIT  = 1000;
+    int NUM_OF_COMMIT  = 100;
     int NUM_RECORD_PER_COMMIT = 1000;
     int NUM_OF_RECORDS_PER_WRITER = NUM_OF_COMMIT * NUM_RECORD_PER_COMMIT;
     
@@ -130,7 +130,7 @@ public class HdfsSSMUnitTest {
       SSMWriter writer = storage.getWriter("writer" + (i + 1));
       TrackingRecordGenerator dataGenerator = 
           new TrackingRecordGenerator(writer, NUM_OF_COMMIT, NUM_RECORD_PER_COMMIT);
-      dataGenerator.set25MBMaxSegmentSize();
+      dataGenerator.set1MBMaxSegmentSize();
       dataGenerator.setRandomRollbackRatio(0.25);
       writerService.submit(dataGenerator);
     }
@@ -148,7 +148,10 @@ public class HdfsSSMUnitTest {
     readerService.shutdown();
     
     System.err.println("before writerService.awaitTermination:" + (System.currentTimeMillis() - start) + "ms");
-    writerService.awaitTermination(90, TimeUnit.SECONDS);
+
+    while(!writerService.awaitTermination(3, TimeUnit.SECONDS)) {
+      storage.cleanReadSegmentByActiveReader();
+    }
     System.err.println("after writerService.awaitTermination:"  + (System.currentTimeMillis() - start) + "ms");
     SSMConsistencyVerifier scVerifier = storage.getSegmentConsistencyVerifier();
     scVerifier.verify();
@@ -157,7 +160,9 @@ public class HdfsSSMUnitTest {
     }
     
     System.err.println("before readerService.awaitTermination: " + (System.currentTimeMillis() - start) + "ms");
-    readerService.awaitTermination(90, TimeUnit.SECONDS);
+    while(!readerService.awaitTermination(3, TimeUnit.SECONDS)) {
+      storage.cleanReadSegmentByActiveReader();
+    }
     System.err.println("after readerService.awaitTermination:"  + (System.currentTimeMillis() - start) + "ms");
     
     for(int i = 0; i < NUM_OF_READERS; i++) {

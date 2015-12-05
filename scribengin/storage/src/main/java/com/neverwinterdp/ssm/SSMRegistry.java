@@ -1,6 +1,5 @@
 package com.neverwinterdp.ssm;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +42,8 @@ public class SSMRegistry {
   private Node              writersHistoryNode;
   private SequenceIdTracker writerIdTracker;
   
+  private SequenceIdTracker segmentIdTracker;
+  
   private Node actionQueueNode;
 
   private Node      lockNode;
@@ -67,6 +68,7 @@ public class SSMRegistry {
     
     actionQueueNode    = registryNode.getChild("action-queue");
     lockNode           = registryNode.getChild("lock");
+    segmentIdTracker   = new SequenceIdTracker(registry, registryPath + "/segment-id-tracker", false);
   }
   
   public void initRegistry() throws RegistryException {
@@ -92,6 +94,7 @@ public class SSMRegistry {
     
     trans.create(actionQueueNode,    null, NodeCreateMode.PERSISTENT);
     trans.create(lockNode,           null, NodeCreateMode.PERSISTENT);
+    segmentIdTracker.initRegistry(trans);
   }
   
   public boolean exists() throws RegistryException { 
@@ -131,13 +134,11 @@ public class SSMRegistry {
     BatchOperations<SegmentDescriptor> op = new BatchOperations<SegmentDescriptor>() {
       @Override
       public SegmentDescriptor execute(Registry registry) throws RegistryException {
-        List<String> segments = segmentsNode.getChildren();
-        SegmentDescriptor segment = new SegmentDescriptor(segments.size());
+        SegmentDescriptor segment = new SegmentDescriptor(segmentIdTracker.nextInt());
+        
         segment.setCreator(writer.getWriter());
         Transaction transaction = registry.getTransaction();
         transaction.createChild(segmentsNode, segment.getSegmentId(), segment, NodeCreateMode.PERSISTENT);
-//        transaction.createDescendant(segmentsNode, segment.getSegmentId() + "/lock", NodeCreateMode.PERSISTENT) ;
-//        transaction.createDescendant(segmentsNode, segment.getSegmentId() + "/data", NodeCreateMode.PERSISTENT) ;
         
         writer.logStartSegment(segment.getSegmentId());
         transaction.setData(writersActiveNode.getPath() + "/" + writer.getId(), writer);
@@ -180,15 +181,15 @@ public class SSMRegistry {
     BatchOperations<List<String>> op = new BatchOperations<List<String>>() {
       @Override
       public List<String> execute(Registry registry) throws RegistryException {
-        System.err.println("cleanReadSegmentByActiveReader(): " + registryPath);
+        //System.err.println("cleanReadSegmentByActiveReader(): " + registryPath);
         List<String> deleteSegments = new ArrayList<>();
         List<String> readers = readersActiveNode.getChildren() ;
         String minReadSegmentId = null;
         for(int i = 0; i < readers.size(); i++) {
           String reader = readers.get(i);
-          System.err.println("  reader: " + readers);
+          //System.err.println("  reader: " + reader);
           List<String> readSegments = readersActiveNode.getChild(reader).getChildren();
-          System.err.println("    read segments: " + readSegments);
+          //System.err.println("    read segments: " + readSegments);
           String readerMinReadSegment = null;
           if(readSegments.size() == 0)  {
             SSMReaderDescriptor readerDescriptor = readersActiveNode.getChild(reader).getDataAs(SSMReaderDescriptor.class);
@@ -197,10 +198,12 @@ public class SSMRegistry {
             Collections.sort(readSegments);
             readerMinReadSegment = readSegments.get(0);
           }
+          //System.err.println("    readerMinReadSegment: " + readerMinReadSegment);
+          
           if(minReadSegmentId == null) minReadSegmentId = readerMinReadSegment;
           else if(minReadSegmentId.compareTo(readerMinReadSegment) > 0) minReadSegmentId = readerMinReadSegment;
         }
-        System.err.println("  minReadSegmentId: " + minReadSegmentId);
+        //System.err.println("  minReadSegmentId: " + minReadSegmentId);
         if(minReadSegmentId == null) return deleteSegments;
         
         List<String> segments = segmentsNode.getChildren();

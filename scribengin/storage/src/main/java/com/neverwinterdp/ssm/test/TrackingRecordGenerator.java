@@ -29,6 +29,13 @@ public class TrackingRecordGenerator implements Runnable {
     return this;
   }
   
+  public TrackingRecordGenerator set5MBMaxSegmentSize() {
+    writer.
+      setMaxSegmentSize(5 * 1024 * 1024).
+      setMaxBufferSize( 1 * 1024 * 1024);
+    return this;
+  }
+  
   public TrackingRecordGenerator set25MBMaxSegmentSize() {
     writer.
       setMaxSegmentSize(25 * 1024 * 1024).
