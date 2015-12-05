@@ -1,8 +1,5 @@
 package com.neverwinterdp.scribengin.dataflow.tool.tracking;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -55,7 +52,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, reportPath);
     validatorService.withExpectNumOfMessagePerChunk(expectNumOfMessagePerChunk);
     validatorService.addReader(
-        new HDFSTrackingMessageReader(registry, storageRegPath, partitionRollPeriod)
+        new HDFSTrackingMessageReader(registry, storageRegPath)
     );
     validatorService.start();
     validatorService.awaitForTermination(maxRuntime, TimeUnit.MILLISECONDS);
@@ -63,12 +60,10 @@ public class VMTMValidatorHDFSApp extends VMApp {
 
   public class HDFSTrackingMessageReader extends TrackingMessageReader {
     private BlockingQueue<TrackingMessage> tmQueue = new LinkedBlockingQueue<>(10000);
-    private long partitionRollPeriod ;
     private HDFSSourceReader hdfsSourceReader ;
     
-    HDFSTrackingMessageReader(Registry registry, String storageRegPath, long partitionRollPeriod) {
-      this.partitionRollPeriod = partitionRollPeriod;
-      hdfsSourceReader = new HDFSSourceReader(registry, storageRegPath, partitionRollPeriod, tmQueue) ;
+    HDFSTrackingMessageReader(Registry registry, String storageRegPath) {
+      hdfsSourceReader = new HDFSSourceReader(registry, storageRegPath, tmQueue) ;
     }
     
     public void onInit(TrackingRegistry registry) throws Exception {
@@ -81,21 +76,19 @@ public class VMTMValidatorHDFSApp extends VMApp {
     
     @Override
     public TrackingMessage next() throws Exception {
-      return tmQueue.poll(partitionRollPeriod + 300000, TimeUnit.MILLISECONDS);
+      return tmQueue.poll(5, TimeUnit.MINUTES);
     }
   }
   
   public class HDFSSourceReader extends Thread {
-    private long                           partitionRollPeriod;
     private Registry                       registry;
     private StorageConfig                  storageConfig;
     private BlockingQueue<TrackingMessage> tmQueue;
 
-    HDFSSourceReader(Registry registry, String registryPath, long partitionRollPeriod, BlockingQueue<TrackingMessage> tmQueue) {
+    HDFSSourceReader(Registry registry, String registryPath, BlockingQueue<TrackingMessage> tmQueue) {
       this.registry = registry;
       storageConfig = new StorageConfig("hdfs", registryPath);
       storageConfig.attribute(HDFSStorage.REGISTRY_PATH, registryPath);
-      this.partitionRollPeriod = partitionRollPeriod;
       this.tmQueue = tmQueue;
     }
     
