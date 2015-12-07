@@ -31,7 +31,7 @@ public class AppModule extends ServiceModule {
     MetricRegistry metricRegistry = new MetricRegistry(vmName) ;
     bind(MetricRegistry.class).toInstance(metricRegistry);
     
-    LoggerFactory loggerFactory = new LoggerFactory("[" + vmName + "][NeverwinterDP]") ;
+    LoggerFactory loggerFactory = new LoggerFactory("[host=" + vmName + "].[module=NeverwinterDP]") ;
     bind(LoggerFactory.class).toInstance(loggerFactory);
   }
 }

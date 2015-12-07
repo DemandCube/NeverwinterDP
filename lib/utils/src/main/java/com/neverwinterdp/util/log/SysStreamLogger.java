@@ -16,7 +16,7 @@ public class SysStreamLogger {
   protected static final String   LINE_SEPERATOR = System.getProperty("line.separator");
 
   static public void bindSystemStreams() {
-    // Enable autoflush
+    //Enable autoflush
     System.setOut(new PrintStream(new LoggingOutputStream(sysOutLogger, false), true));
     System.setErr(new PrintStream(new LoggingOutputStream(sysErrLogger, true), true));
   }

@@ -17,13 +17,35 @@ import com.neverwinterdp.util.text.StringUtil;
 public class ElasticSearchAppender extends AppenderSkeleton {
   private String[] connect ;
   private String   indexName ;
-  
   private String   queueBufferDir;
   private int      queueMaxSizePerSegment = 100000;
+  private String   appHost = null;
+  private String   appName  = null; 
+  
   private MultiSegmentQueue<Log4jRecord> queue ; 
   private boolean  queueError = false ;
   
   private DeamonThread forwardThread ;
+
+  public void setConnects(String connects) {
+    this.connect = StringUtil.toStringArray(connects) ;
+  }
+  
+  public void setIndexName(String indexName) {
+    this.indexName = indexName ;
+  }
+ 
+  public void setQueueBufferDir(String queueBufferDir) { 
+    this.queueBufferDir = queueBufferDir; 
+  }
+
+  public void setQueueMaxSizePerSegment(int queueMaxSizePerSegment) {
+    this.queueMaxSizePerSegment = queueMaxSizePerSegment;
+  }
+  
+  public void setAppHost(String appHost) { this.appHost = appHost; }
+
+  public void setAppName(String appName) { this.appName = appName; }
 
   public void init(String[] connect, String indexName, String queueBufferDir) {
     this.connect = connect;
@@ -39,38 +61,25 @@ public class ElasticSearchAppender extends AppenderSkeleton {
   }
   
   public void activateOptions() {
-    System.out.println("ElasticSearchAppender: Start Activate Elasticsearch log4j appender");
     try {
       queue = new MultiSegmentQueue<Log4jRecord>(queueBufferDir, queueMaxSizePerSegment) ;
     } catch (Exception e) {
       queueError = true ;
       e.printStackTrace();
     }
+    if(appHost == null) appHost = System.getProperty("log4j.app.host");
+    if(appName == null) appName = System.getProperty("log4j.app.name");
     forwardThread = new DeamonThread(); 
     forwardThread.start() ;
-    System.out.println("ElasticSearchAppender: Finish Activate Elasticsearch log4j appender");
-  }
-
-  public void setConnects(String connects) {
-    this.connect = StringUtil.toStringArray(connects) ;
   }
   
-  
-  public void setIndexName(String indexName) {
-    this.indexName = indexName ;
-  }
- 
-  public void setQueueBufferDir(String queueBufferDir) { this.queueBufferDir = queueBufferDir; }
-
-  public void setQueueMaxSizePerSegment(int queueMaxSizePerSegment) {
-    this.queueMaxSizePerSegment = queueMaxSizePerSegment;
-  }
-
   public boolean requiresLayout() { return false; }
 
   protected void append(LoggingEvent event) {
     if(queueError) return ;
     Log4jRecord record = new Log4jRecord(event) ;
+    record.setHost(appHost);
+    record.setAppName(appName);
     try {
       queue.writeObject(record) ;
     } catch(Throwable e) {

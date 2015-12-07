@@ -232,6 +232,10 @@ public class VM {
     
     Properties log4jProps = new Properties();
     log4jProps.load(IOUtil.loadRes(vmConfig.getLog4jConfigUrl()));
+    System.setProperty("log4j.app.host", vmConfig.getVmId());
+    String app = vmConfig.getVmApplication();
+    app = app.substring(app.lastIndexOf('.') + 1);
+    System.setProperty("log4j.app.name", app);
     LoggerFactory.log4jConfigure(log4jProps);
     
     VM vm = new VM(vmConfig);
