@@ -5,6 +5,7 @@ public class WorkerConfig {
   private int     memory                  = 128;
   private int     cpuCores                = 1;
   private int     numOfExecutor           = 2;
+  
   private long    taskSwitchingPeriod     = 5000;
   private long    maxWaitForRunningStatus = 60000;
   
