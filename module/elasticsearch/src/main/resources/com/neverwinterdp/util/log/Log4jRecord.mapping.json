@@ -5,9 +5,10 @@
         "type" : "date", "format" : "dd/MM/yyyy HH:mm:ss" 
       },
 
-      "loggerName" : { "host" : "string", "index":"not_analyzed" },
-      "loggerName" : { "appName" : "string", "index":"not_analyzed" },
-      "loggerName" : { "type" : "string", "index":"not_analyzed" }  
+      "level" : { "type" : "string", "index":"not_analyzed" },
+      "host" : { "type" : "string", "index":"not_analyzed" },
+      "appName" : { "type" : "string", "index":"not_analyzed" },
+      "loggerName" : { "type" : "string", "index": "not_analyzed" }  
     }
   }
 }
