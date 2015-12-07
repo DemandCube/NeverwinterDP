@@ -23,11 +23,11 @@ public class ObjectLogger<T> {
   private boolean  queueError = false ;
   private ESObjectClient<T> esObjectClient ;
   
-  public ObjectLogger(String[] connect, Class<T> objectType, String queueBufferDir, int queueMaxSizePerSegment) throws Exception {
-    this.connect = connect;
-    this.indexName = "log-" + objectType.getSimpleName().replaceAll("(.)([A-Z])", "$1-$2").toLowerCase();
+  public ObjectLogger(String[] connect, Class<T> objectType, String indexName, String queueBufferDir, int queueMaxSizePerSegment) throws Exception {
+    this.connect    = connect;
+    this.indexName  =  indexName;
     this.objectType = objectType;
-    this.queue = new MultiSegmentQueue<LogWithId<T>>(queueBufferDir, queueMaxSizePerSegment) ;
+    this.queue      = new MultiSegmentQueue<LogWithId<T>>(queueBufferDir, queueMaxSizePerSegment) ;
   }
   
   public ObjectLogger<T> setConnects(String connects) { 

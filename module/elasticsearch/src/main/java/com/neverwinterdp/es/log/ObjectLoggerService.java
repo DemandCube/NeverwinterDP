@@ -26,9 +26,9 @@ public class ObjectLoggerService {
     flushThread.start();
   }
   
-  public <T> void add(Class<T> type) throws Exception {
-    String bufferDir = bufferBaseDir + "/" + type.getSimpleName().replaceAll("(.)([A-Z])", "$1-$2").toLowerCase();
-    ObjectLogger<T> logger = new ObjectLogger<T>(connect, type, bufferDir, queueMaxSizePerSegment) ;
+  public <T> void add(Class<T> type, String indexName) throws Exception {
+    String bufferDir = bufferBaseDir + "/" + indexName;
+    ObjectLogger<T> logger = new ObjectLogger<T>(connect, type, indexName, bufferDir, queueMaxSizePerSegment) ;
     loggers.put(type.getName(), logger);
   }
   

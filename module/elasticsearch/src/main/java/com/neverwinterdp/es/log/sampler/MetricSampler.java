@@ -5,6 +5,7 @@ import java.util.Random;
 import com.beust.jcommander.JCommander;
 import com.neverwinterdp.es.log.ObjectLoggerService;
 import com.neverwinterdp.os.ClassLoadedInfo;
+import com.neverwinterdp.os.FileStoreInfo;
 import com.neverwinterdp.os.GCInfo;
 import com.neverwinterdp.os.MemoryInfo;
 import com.neverwinterdp.os.OSInfo;
@@ -21,12 +22,12 @@ public class MetricSampler {
 
     String bufferDir = runtimeEnv.getAppDir() + config.bufferDir;
     ObjectLoggerService service = new ObjectLoggerService(new String[] { config.esConnect }, bufferDir, 25000);
-    service.add(GCInfo.class);
-    service.add(MemoryInfo.class);
-    service.add(OSInfo.class);
-    service.add(ThreadCountInfo.class);
-    service.add(ClassLoadedInfo.class);
-
+    service.add(FileStoreInfo.class,   "monitor.storage");
+    service.add(GCInfo.class,          "monitor.gc");
+    service.add(MemoryInfo.class,      "monitor.memory");
+    service.add(OSInfo.class,          "monitor.os");
+    service.add(ThreadCountInfo.class, "monitor.thread");
+    service.add(ClassLoadedInfo.class, "monitor.classloader");
     Random r = new Random();
     while (true) {
       int fromBytes = 512;
