@@ -29,6 +29,9 @@ public class DataflowSubmitter {
       addRoles("dataflow-master").
       setRegistryConfig(vmClient.getRegistry().getRegistryConfig()).
       setVmApplication(VMMasterApp.class.getName()).
+      setRequestCpuCores(dflConfig.getMaster().getCpuCores()).
+      setRequestMemory(dflConfig.getMaster().getMemory()).
+      setLog4jConfigUrl(dflConfig.getMaster().getLog4jConfigUrl()).
       addProperty("dataflow.registry.path", dataflowPath);
     vmClient.configureEnvironment(vmConfig);
     VMDescriptor vmDescriptor = vmClient.allocate(vmConfig);

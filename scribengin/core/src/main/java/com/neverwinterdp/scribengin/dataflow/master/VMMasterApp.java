@@ -61,6 +61,7 @@ public class VMMasterApp extends VMApp {
             return;
           }
         }
+        
         VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
         AppContainer appContainer = getVM().getAppContainer();
         Map<String, String> esLoggerModuleProps = new HashMap<String, String>();
