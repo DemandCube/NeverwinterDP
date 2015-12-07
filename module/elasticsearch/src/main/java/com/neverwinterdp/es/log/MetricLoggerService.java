@@ -27,9 +27,9 @@ public class MetricLoggerService  extends ObjectLoggerService {
     String[] esConnect = { "elasticsearch-1:9300" };
     init(esConnect, bufferBaseDir, 25000);
    
-    add(CounterSnapshot.class, "metric.counter");
-    add(TimerSnapshot.class,   "metric.timer");
-    add(MetterSnapshot.class,  "metric.metter");
+    add(CounterSnapshot.class, "metric-counter");
+    add(TimerSnapshot.class,   "metric-timer");
+    add(MetterSnapshot.class,  "metric-metter");
     
     metricCollectorThread = new MetricInfoCollectorThread();
     metricCollectorThread.start();

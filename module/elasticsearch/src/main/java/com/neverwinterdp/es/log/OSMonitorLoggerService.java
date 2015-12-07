@@ -26,12 +26,12 @@ public class OSMonitorLoggerService extends ObjectLoggerService {
     init(esConnect, bufferBaseDir, 25000);
    
     //add(DetailThreadInfo.class);
-    add(FileStoreInfo.class,   "monitor.storage");
-    add(GCInfo.class,          "monitor.gc");
-    add(MemoryInfo.class,      "monitor.memory");
-    add(OSInfo.class,          "monitor.os");
-    add(ThreadCountInfo.class, "monitor.thread");
-    add(ClassLoadedInfo.class, "monitor.classloader");
+    add(FileStoreInfo.class,   "monitor-storage");
+    add(GCInfo.class,          "monitor-gc");
+    add(MemoryInfo.class,      "monitor-memory");
+    add(OSInfo.class,          "monitor-os");
+    add(ThreadCountInfo.class, "monitor-thread");
+    add(ClassLoadedInfo.class, "monitor-classloader");
     
     metricCollectorThread = new MetricInfoCollectorThread();
     metricCollectorThread.start();
