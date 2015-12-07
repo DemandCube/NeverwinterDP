@@ -22,12 +22,12 @@ public class MetricSampler {
 
     String bufferDir = runtimeEnv.getAppDir() + config.bufferDir;
     ObjectLoggerService service = new ObjectLoggerService(new String[] { config.esConnect }, bufferDir, 25000);
-    service.add(FileStoreInfo.class,   "monitor-storage");
-    service.add(GCInfo.class,          "monitor-gc");
-    service.add(MemoryInfo.class,      "monitor-memory");
-    service.add(OSInfo.class,          "monitor-os");
-    service.add(ThreadCountInfo.class, "monitor-thread");
-    service.add(ClassLoadedInfo.class, "monitor-classloader");
+    service.add(FileStoreInfo.class,   "neverwinterdp-monitor-storage");
+    service.add(GCInfo.class,          "neverwinterdp-monitor-gc");
+    service.add(MemoryInfo.class,      "neverwinterdp-monitor-memory");
+    service.add(OSInfo.class,          "neverwinterdp-monitor-os");
+    service.add(ThreadCountInfo.class, "neverwinterdp-monitor-thread");
+    service.add(ClassLoadedInfo.class, "neverwinterdp-monitor-classloader");
     Random r = new Random();
     while (true) {
       int fromBytes = 512;
