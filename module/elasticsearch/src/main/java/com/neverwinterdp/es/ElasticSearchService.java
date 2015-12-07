@@ -8,30 +8,25 @@ import java.util.Map;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.neverwinterdp.util.JSONSerializer;
-import com.neverwinterdp.util.log.LoggerFactory;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
 @Singleton
 public class ElasticSearchService {
-  private Logger logger ;
+  private Logger logger = LoggerFactory.getLogger(ElasticSearchService.class);
   
   @Inject @Named("esProperties")
   private Map<String, String> esProperties ;
   
   private Node server ;
   
-  @Inject
-  public void init(LoggerFactory factory) {
-    logger = factory.getLogger(getClass()) ;
-  }
-
   public Logger getLogger() { return this.logger; }
   
   public void start() throws Exception {
