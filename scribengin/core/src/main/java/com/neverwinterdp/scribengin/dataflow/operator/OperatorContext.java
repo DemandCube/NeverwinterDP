@@ -36,14 +36,6 @@ public class OperatorContext {
     this.taskConfig  = taskConfig;
     this.taskReport = report;
     
-    dataflowReadMeter   = 
-        workerService.getMetricRegistry().getMeter("dataflow.source.throughput.byte", "byte") ;
-    dataflowRecordMeter = 
-        workerService.getMetricRegistry().getMeter("dataflow.source.throughput.record", "record") ;
-    initContext();
-  }
-  
-  void initContext() throws Exception {
     DataflowRegistry dflRegistry = workerService.getDataflowRegistry();
     StorageService storageService = workerService.getStorageService();
     StorageConfig inputConfig = dflRegistry.getStreamRegistry().getStream(taskConfig.getInput()) ;
@@ -56,6 +48,11 @@ public class OperatorContext {
       OutputContext outputContext = new OutputContext(outputStorage, partitionId);
       outputContexts.put(output, outputContext);
     }
+
+    dataflowReadMeter   = 
+        workerService.getMetricRegistry().getMeter("dataflow.source." + taskConfig.getInput() + ".throughput.byte", "byte") ;
+    dataflowRecordMeter = 
+        workerService.getMetricRegistry().getMeter("dataflow.source." + taskConfig.getInput() + ".throughput.record", "record") ;
   }
   
   public OperatorTaskConfig getTaskConfig() { return this.taskConfig; }
