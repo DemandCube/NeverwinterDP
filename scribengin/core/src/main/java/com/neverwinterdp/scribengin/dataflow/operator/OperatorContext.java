@@ -90,7 +90,6 @@ public class OperatorContext {
     recordMetter.mark(1);
   }
   
-  
   private void prepareCommit() throws Exception {
     Iterator<OutputContext> i = outputContexts.values().iterator();
     while (i.hasNext()) {

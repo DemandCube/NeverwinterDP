@@ -67,7 +67,7 @@ public class TimerSnapshot implements Serializable {
   }
 
   public String uniqueId() { 
-    return "host=" + serverName + ",timestamp=" + DateUtil.asCompactDateTimeId(timestamp); 
+    return "host=" + serverName + ", name=" + name + ",timestamp=" + DateUtil.asCompactDateTimeId(timestamp); 
   }
   
   public Date getTimestamp() { return timestamp; }
