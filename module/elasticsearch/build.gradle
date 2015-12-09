@@ -23,6 +23,7 @@ dependencies {
   compile project(':lib/yara')
   compile project(':lib/buffer')
   compile project(':module/commons')
+  compile project(':module/jhiccup')
   compile project(':registry/core')
   compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
 
@@ -32,6 +33,7 @@ dependencies {
   esDeployJars project(':lib/buffer')
   esDeployJars project(':module/elasticsearch')
   esDeployJars project(':module/commons')
+  esDeployJars project(':module/jhiccup')
   esDeployJars group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
   
   esDeployJars group: 'com.beust', name: 'jcommander', version: '1.35'
