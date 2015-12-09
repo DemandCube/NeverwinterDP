@@ -116,7 +116,7 @@ public class HdfsSSMUnitTest {
   @Test
   public void testConcurrentMultipleReadWrite() throws Exception {
     int NUM_OF_WRITERS = 5;
-    int NUM_OF_COMMIT  = 100;
+    int NUM_OF_COMMIT  = 1000;
     int NUM_RECORD_PER_COMMIT = 1000;
     int NUM_OF_RECORDS_PER_WRITER = NUM_OF_COMMIT * NUM_RECORD_PER_COMMIT;
     

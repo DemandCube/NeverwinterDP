@@ -7,9 +7,10 @@ import com.neverwinterdp.registry.RegistryException;
 abstract public class SSMWriter {
   protected SSMRegistry         registry;
   protected SSMWriterDescriptor writerDescriptor;
-  private   SegmentWriter            currentSegWriter;
-  private   long                     maxSegmentSize = 128 * 1024 * 1024;
-  private   long                     maxBufferSize  =  32  * 1024 * 1024;
+  private   SegmentWriter       currentSegWriter;
+  private   long                maxSegmentSize = 128 * 1024 * 1024;
+  private   long                maxBufferSize  =  32  * 1024 * 1024;
+  private   boolean             closed = false;
   
   public SSMWriter(String clientId, SSMRegistry registry) throws RegistryException {
     this.registry         = registry;
@@ -37,11 +38,13 @@ abstract public class SSMWriter {
 
   public void prepareCommit() throws IOException, RegistryException {
     checkValidCurrentSegmentWriter();
+    if(currentSegWriter == null) return;
     currentSegWriter.prepareCommit();
   }
   
   public void completeCommit() throws IOException, RegistryException {
     checkValidCurrentSegmentWriter();
+    if(currentSegWriter == null) return;
     currentSegWriter.completeCommit();
     if(currentSegWriter.isFull()) {
       currentSegWriter.close();
@@ -56,6 +59,7 @@ abstract public class SSMWriter {
 
   public void rollback() throws IOException, RegistryException {
     checkValidCurrentSegmentWriter();
+    if(currentSegWriter == null) return;
     currentSegWriter.rollback();
   }
   
@@ -64,6 +68,7 @@ abstract public class SSMWriter {
       currentSegWriter.close();
       currentSegWriter = null;
     }
+    closed = true;
   }
   
   public void remove() throws IOException, RegistryException {
@@ -86,7 +91,7 @@ abstract public class SSMWriter {
   abstract protected SegmentWriter createSegmentWriter(SSMWriterDescriptor writer, SegmentDescriptor segment) throws RegistryException, IOException;
 
   void checkValidCurrentSegmentWriter() throws IOException {
-    if(currentSegWriter == null || currentSegWriter.isClosed()) {
+    if(closed) {
       throw new IOException("The writer has been closed");
     }
   }
