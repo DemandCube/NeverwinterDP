@@ -3,7 +3,6 @@ include 'lib/yara'
 include 'lib/buffer'
 
 include 'module/commons'
-include 'module/jhiccup'
 include 'module/elasticsearch'
 include 'module/zookeeper'
 include 'module/kafka'

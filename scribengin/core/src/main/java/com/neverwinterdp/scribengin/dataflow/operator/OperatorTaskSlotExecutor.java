@@ -86,8 +86,9 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
     } catch(RegistryException error) {
       throw error;
     } catch(Exception error) {
-      System.err.println("Catch Exception with rollback");
+      System.err.println("Catched a task exception");
       error.printStackTrace();
+      System.err.println("Rollback");
       rollback(error);
     } catch(Throwable t) {
       System.err.println("Catch Throwable");
