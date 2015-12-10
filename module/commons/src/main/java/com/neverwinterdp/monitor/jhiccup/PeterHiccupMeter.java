@@ -1,36 +1,28 @@
-package com.neverwinterdp.jhiccup;
+package com.neverwinterdp.monitor.jhiccup;
 
-import java.io.FileNotFoundException;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.SingleWriterRecorder;
 
-import com.neverwinterdp.os.IntervalHiccupInfo;
 import com.neverwinterdp.os.RuntimeEnv;
 
-public class HiccupMeter extends Thread {
-
-  public double resolutionMs = 1.0;
-  public long startDelayMs = 30000;
+public class PeterHiccupMeter extends Thread {
+  private String vmName          = "localhost";
+  
+  public double  resolutionMs    = 1.0;
+  public long    startDelayMs    = 30000;
   public boolean allocateObjects = false;
-  public String errorMessage = "";
+  public String  errorMessage    = "";
 
-  public Double outputValueUnitRatio = 1000000.0; // default to msec units for
-                                                  // output.
-  private String vmName = "localhost";
-
-  public HiccupMeter(RuntimeEnv runtimeEnv) throws FileNotFoundException {
-    this.setName("HiccupMeter");
-    this.vmName = runtimeEnv.getVMName();
-    this.setDaemon(true);
-    this.start();
-  }
-
-  public HiccupMeter(final String[] args) throws FileNotFoundException {
-    this.setName("HiccupMeter");
-    this.setDaemon(true);
+  public Double outputValueUnitRatio = 1000000.0; // default to msec units for output.
+  
+  public PeterHiccupMeter(RuntimeEnv runtimeEnv) {
+    setName("HiccupMeter");
+    vmName = runtimeEnv.getVMName();
+    setDaemon(true);
+    start();
   }
 
   public class HiccupRecorder extends Thread {
@@ -93,7 +85,6 @@ public class HiccupMeter extends Thread {
 
   @Override
   public void run() {
-
     final long uptimeAtInitialStartTime = ManagementFactory.getRuntimeMXBean().getUptime();
     long now = System.currentTimeMillis();
     long jvmStartTime = now - uptimeAtInitialStartTime;
@@ -101,7 +92,7 @@ public class HiccupMeter extends Thread {
     // Normal operating mode.
     // Launch a hiccup recorder, a process termination monitor, and an optional
     // control process:
-    hiccupRecorder = this.createHiccupRecorder(recorder);
+    hiccupRecorder = createHiccupRecorder(recorder);
 
     try {
       if (startDelayMs > 0) {
@@ -121,10 +112,10 @@ public class HiccupMeter extends Thread {
     }
   }
 
-  IntervalHiccupInfo hiccuoInfo;
+  JHiccupInfo hiccuoInfo;
 
-  public IntervalHiccupInfo getHiccupInfo() {
-    hiccuoInfo = new IntervalHiccupInfo();
+  public JHiccupInfo getHiccupInfo() {
+    hiccuoInfo = new JHiccupInfo();
     hiccuoInfo.setHost(vmName);
     // Get the latest interval histogram and give the recorder a fresh
     // Histogram for the next interval
@@ -139,9 +130,9 @@ public class HiccupMeter extends Thread {
 
       hiccuoInfo.setMaxValue(intervalHistogram.getMaxValue() / outputValueUnitRatio);
       hiccuoInfo.setTotalMaxValue(accumulatedHistogram.getMaxValue() / outputValueUnitRatio);
-      hiccuoInfo.setPer_99(accumulatedHistogram.getValueAtPercentile(99.0) / outputValueUnitRatio);
-      hiccuoInfo.setPer_9990(accumulatedHistogram.getValueAtPercentile(99.90) / outputValueUnitRatio);
-      hiccuoInfo.setPer_9999(accumulatedHistogram.getValueAtPercentile(99.99) / outputValueUnitRatio);
+      hiccuoInfo.setP99(accumulatedHistogram.getValueAtPercentile(99.0) / outputValueUnitRatio);
+      hiccuoInfo.setP9990(accumulatedHistogram.getValueAtPercentile(99.90) / outputValueUnitRatio);
+      hiccuoInfo.setP9999(accumulatedHistogram.getValueAtPercentile(99.99) / outputValueUnitRatio);
 
     }
 

@@ -13,18 +13,18 @@ public class ClassLoadedInfo implements Serializable {
   @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp;
   private String host;
-  private int loadedClassCount;
-  private long totalLoadedClassCount;
-  private long unloadedClassCount;
+  private int    loadedClassCount;
+  private long   totalLoadedClassCount;
+  private long   unloadedClassCount;
 
  
   public ClassLoadedInfo() { }
   
   public ClassLoadedInfo(ClassLoadingMXBean clbean) {
-    timestamp = new Date(System.currentTimeMillis()) ;
+    timestamp             = new Date(System.currentTimeMillis()) ;
     totalLoadedClassCount = clbean.getTotalLoadedClassCount();
-    loadedClassCount = clbean.getLoadedClassCount();
-    unloadedClassCount = clbean.getUnloadedClassCount();
+    loadedClassCount      = clbean.getLoadedClassCount();
+    unloadedClassCount    = clbean.getUnloadedClassCount();
   }
   
   public String uniqueId() { 
@@ -37,26 +37,17 @@ public class ClassLoadedInfo implements Serializable {
   public String getHost() { return host; }
   public void setHost(String host) { this.host = host; }
 
-  public int getLoadedClassCount() {
-    return loadedClassCount;
-  }
-
+  public int getLoadedClassCount() { return loadedClassCount; }
   public void setLoadedClassCount(int loadedClassCount) {
     this.loadedClassCount = loadedClassCount;
   }
 
-  public long getTotalLoadedClassCount() {
-    return totalLoadedClassCount;
-  }
-
+  public long getTotalLoadedClassCount() { return totalLoadedClassCount; }
   public void setTotalLoadedClassCount(long totalLoadedClassCount) {
     this.totalLoadedClassCount = totalLoadedClassCount;
   }
 
-  public long getUnloadedClassCount() {
-    return unloadedClassCount;
-  }
-
+  public long getUnloadedClassCount() { return unloadedClassCount; }
   public void setUnloadedClassCount(long unloadedClassCount) {
     this.unloadedClassCount = unloadedClassCount;
   }
