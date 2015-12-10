@@ -74,7 +74,11 @@ public class OSMonitorLoggerService extends ObjectLoggerService {
 
           ThreadCountInfo threadCountInfo = osManagement.getThreadCountInfo();
           log(threadCountInfo.uniqueId(), threadCountInfo);
-          Thread.sleep(10000);
+          
+          JHiccupInfo jhiccupInfo = jhiccupMetter.getHiccupInfo();
+          log(jhiccupInfo.uniqueId(), jhiccupInfo);
+          
+          Thread.sleep(15000);
         }
       } catch(InterruptedException e) {
       } catch(Throwable t) {
