@@ -35,9 +35,9 @@ public class MemoryInfo implements Serializable {
   public MemoryInfo(String name, MemoryUsage mUsage) {
     timestamp = new Date(System.currentTimeMillis());
     this.name = name;
-    init = mUsage.getInit() ;
-    max = mUsage.getMax() ;
-    used = mUsage.getUsed() ;
+    init      = mUsage.getInit() ;
+    max       = mUsage.getMax() ;
+    used      = mUsage.getUsed() ;
     committed = mUsage.getCommitted();
   }
 
