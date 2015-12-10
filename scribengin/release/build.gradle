@@ -64,6 +64,8 @@ dependencies {
   scribenginDeployJars group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.4.3'
   scribenginDeployJars group: 'com.hubspot.jackson', name: 'jackson-datatype-protobuf', version: '0.6.0'
 
+  scribenginDeployJars group: 'org.hdrhistogram', name: 'HdrHistogram', version: '2.1.7'
+
   scribenginDeployJars group: 'aopalliance', name: 'aopalliance', version: '1.0'
   scribenginDeployJars group: 'commons-cli', name: 'commons-cli', version: '1.2'
   scribenginDeployJars group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
