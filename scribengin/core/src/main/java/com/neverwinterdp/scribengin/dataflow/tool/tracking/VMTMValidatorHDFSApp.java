@@ -149,7 +149,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
       HDFSSourcePartitionStreamReader streamReader = null;
       while((streamReader = streamReaderQueue.poll(10, TimeUnit.MILLISECONDS)) != null) {
         Record record = null;
-        while((record = streamReader.next(1000)) != null) {
+        while((record = nextWithRetry(streamReader, 1000, 3)) != null) {
           byte[] data = record.getData();
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(data, TrackingMessage.class);
           if(!tmQueue.offer(tMesg, 90000, TimeUnit.MILLISECONDS)) {
@@ -159,6 +159,20 @@ public class VMTMValidatorHDFSApp extends VMApp {
         streamReader.commit();
         streamReaderQueue.put(streamReader);
       }
+    }
+    
+    Record nextWithRetry(HDFSSourcePartitionStreamReader streamReader, long maxWait, int numOfRetry) throws Exception {
+      Exception error = null;
+      for(int i = 0; i < numOfRetry; i++) {
+        try {
+          return streamReader.next(maxWait);
+        } catch(Exception ex) {
+          error = ex;
+          logger.warn("Error when try to read from the HDFSSourcePartitionStreamReader. Rollback and retry. try = " + i, ex);
+          streamReader.rollback();
+        }
+      }
+      throw error;
     }
   }
 }
