@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class JHiccupMeterUnitTest {
   @Test
-  public void testJHiccupMetter() throws Exception {
+  public void testJHiccupMeter() throws Exception {
     JHiccupMeter hiccupMeter =  new JHiccupMeter("localhost", 50L/*resolutionMs*/);
     Random rand = new Random();
     for(int i = 0; i < 5; i++) {
