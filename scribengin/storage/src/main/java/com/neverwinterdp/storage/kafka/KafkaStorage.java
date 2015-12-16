@@ -1,15 +1,12 @@
 package com.neverwinterdp.storage.kafka;
 
 import com.neverwinterdp.kafka.KafkaClient;
-import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.kafka.sink.KafkaSink;
 import com.neverwinterdp.storage.kafka.source.KafkaSource;
 import com.neverwinterdp.storage.sink.Sink;
 import com.neverwinterdp.storage.source.Source;
-
-import kafka.javaapi.PartitionMetadata;
 
 public class KafkaStorage extends Storage {
   final static public String NAME       = "name";
@@ -75,11 +72,10 @@ public class KafkaStorage extends Storage {
     return descriptor;
   }
   
-  
-  static public KafkaPartitionReader getKafkaPartitionReader(KafkaClient kafkaClient, StorageConfig sconfig, PartitionMetadata metadata) throws Exception {
-    String name = sconfig.attribute(NAME);
-    String topic = sconfig.attribute(TOPIC);
-    KafkaPartitionReader partitionReader = new KafkaPartitionReader(name, kafkaClient, topic, metadata);
-    return partitionReader;
-  }
+//  static public KafkaPartitionReader getKafkaPartitionReader(KafkaClient kafkaClient, StorageConfig sconfig, PartitionMetadata metadata) throws Exception {
+//    String name = sconfig.attribute(NAME);
+//    String topic = sconfig.attribute(TOPIC);
+//    KafkaPartitionReader partitionReader = new KafkaPartitionReader(name, kafkaClient, topic, metadata);
+//    return partitionReader;
+//  }
 }

@@ -1,7 +1,7 @@
-package com.neverwinterdp.scribengin.dataflow.config;
+package com.neverwinterdp.scribengin.dataflow.api;
 
-public class MasterConfig {
-  private int     numOfInstances        = 2;
+public class MasterDescriptor {
+  private int     numOfInstances        = 1;
   private int     memory                = 128;
   private int     cpuCores              = 1;
   

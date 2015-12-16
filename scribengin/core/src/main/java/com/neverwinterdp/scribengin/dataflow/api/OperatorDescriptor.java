@@ -1,8 +1,8 @@
-package com.neverwinterdp.scribengin.dataflow.config;
+package com.neverwinterdp.scribengin.dataflow.api;
 
 import java.util.Set;
 
-public class OperatorConfig {
+public class OperatorDescriptor {
   private String      operator;
   
   private Set<String> inputs;

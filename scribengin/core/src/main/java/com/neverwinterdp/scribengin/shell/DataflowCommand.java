@@ -8,7 +8,7 @@ import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
-import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
+import com.neverwinterdp.scribengin.dataflow.api.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.util.DataflowFormater;
 import com.neverwinterdp.util.JSONSerializer;
@@ -80,8 +80,8 @@ public class DataflowCommand extends Command {
       ScribenginShell scribenginShell = (ScribenginShell) shell;
       ScribenginClient client = scribenginShell.getScribenginClient();
       String dataflowJson = IOUtil.getFileContentAsString(dataflowConfig) ;
-      DataflowConfig dflConfig = 
-        JSONSerializer.INSTANCE.fromString(dataflowJson, DataflowConfig.class);
+      DataflowDescriptor dflConfig = 
+        JSONSerializer.INSTANCE.fromString(dataflowJson, DataflowDescriptor.class);
       if(dataflowId != null) dflConfig.setId(dataflowId);
       if(dataflowMaxRunTime > 0) dflConfig.setMaxRunTime(dataflowMaxRunTime);
       if(dataflowTaskSwitchingPeriod > 0) {

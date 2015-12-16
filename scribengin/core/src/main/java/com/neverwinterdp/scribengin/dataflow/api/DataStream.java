@@ -1,15 +1,22 @@
 package com.neverwinterdp.scribengin.dataflow.api;
 
-public class DataStream<T> {
+import com.neverwinterdp.storage.StorageConfig;
+
+abstract public class DataStream<T> {
   private String name;
+  private DataStreamType   type = DataStreamType.Wire;
   
-  public DataStream(String name) {
+  public DataStream(String name, DataStreamType type) {
     this.name = name;
+    this.type = type ;
   }
   
   public String getName() { return this.name; }
   
-  public <OUT> Operator<T, OUT> connect(Operator<T, OUT> operator) {
-    return operator;
+  public <OUT> DataStream<T> connect(Operator<T, OUT> operator) {
+    operator.in(this);
+    return this;
   }
+  
+  abstract public StorageConfig getStorageConfig() ;
 }

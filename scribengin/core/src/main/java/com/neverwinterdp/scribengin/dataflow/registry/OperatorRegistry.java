@@ -5,7 +5,7 @@ import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
-import com.neverwinterdp.scribengin.dataflow.config.OperatorConfig;
+import com.neverwinterdp.scribengin.dataflow.api.OperatorDescriptor;
 
 public class OperatorRegistry {
   private Registry registry;
@@ -25,7 +25,7 @@ public class OperatorRegistry {
     transaction.create(operatorsNode, null, NodeCreateMode.PERSISTENT);
   }
   
-  public void create(String name, OperatorConfig config) throws RegistryException {
+  public void create(String name, OperatorDescriptor config) throws RegistryException {
     Transaction transaction = registry.getTransaction();
     String operatorPath = operatorsNode.getPath() + "/" + name;
     String inputsPath  = operatorPath + "/inputs";

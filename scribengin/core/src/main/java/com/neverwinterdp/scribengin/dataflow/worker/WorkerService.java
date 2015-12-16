@@ -19,7 +19,7 @@ import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.registry.txevent.TXEventNotification;
 import com.neverwinterdp.registry.txevent.TXEventWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowEvent;
-import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
+import com.neverwinterdp.scribengin.dataflow.api.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskSlotExecutor;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
@@ -79,7 +79,7 @@ private Logger logger ;
       }
     };
     
-    DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
+    DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
     taskService = new DedicatedTaskService<OperatorTaskConfig>(dflRegistry.getTaskRegistry(), taskSlotExecutorFactory);
     for(int i = 0; i < dflConfig.getWorker().getNumOfExecutor(); i++) {
       TaskExecutorDescriptor executor = new TaskExecutorDescriptor(vmDescriptor.getId() + "-executor-" + i, vmDescriptor.getId());

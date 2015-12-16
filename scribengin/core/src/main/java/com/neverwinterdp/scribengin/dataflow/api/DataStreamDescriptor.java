@@ -1,10 +1,11 @@
-package com.neverwinterdp.scribengin.dataflow.config;
+package com.neverwinterdp.scribengin.dataflow.api;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.neverwinterdp.storage.StorageConfig;
 
-public class StreamConfig {
+public class DataStreamDescriptor {
   private int                        parallelism;
   private int                        replication = 2;
   private Map<String, StorageConfig> streams;
@@ -17,4 +18,9 @@ public class StreamConfig {
   
   public Map<String, StorageConfig> getStreams() { return streams; }
   public void setStreams(Map<String, StorageConfig> streams) { this.streams = streams; }
+  
+  public void add(String name, StorageConfig sconfig) {
+    if(streams == null) streams = new HashMap<>();
+    streams.put(name, sconfig);
+  }
 }

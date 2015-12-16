@@ -1,20 +1,23 @@
 package com.neverwinterdp.scribengin.dataflow.api;
 
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
-public class Operator<IN, OUT> {
-  private String                       name;
-  private Map<String, DataStream<IN>>  inStreams;
-  private Map<String, DataStream<OUT>> outStreams;
-  private OperatorFunction<IN, OUT>    operatorFunction;
-  private OutputSelector<OUT>          outputSelector;
+public class Operator<I, O> {
+  private String                 name;
+  private Dataflow<?, ?>         dataflow;
+  private Set<String>            inputs  = new HashSet<String>();
+  private Set<String>            outputs = new HashSet<String>();
+  private OperatorFunction<I, O> operatorFunction;
+  private OutputSelector<O>      outputSelector;
 
-  public Operator(String name) {
-    this.name = name;
+  Operator(Dataflow<?, ?> dataflow, String name) {
+    this.dataflow = dataflow;
+    this.name     = name;
   }
   
-  public Operator(String name, OperatorFunction<IN, OUT> func, OutputSelector<OUT> selector) {
-    this(name);
+  Operator(Dataflow<?, ?> dataflow, String name, OperatorFunction<I, O> func, OutputSelector<O> selector) {
+    this(dataflow, name);
     operatorFunction = func;
     outputSelector   = selector;
   }
@@ -22,20 +25,47 @@ public class Operator<IN, OUT> {
   public String getName() { return name; }
   public void setName(String name) { this.name = name; }
   
-  public DataStream<IN> inConnect(DataStream<IN> in) {
-    return in;
+  public Operator<I, O> connect(DataStream<O> out) {
+    out(out);
+    return this;
   }
   
-  public DataStream<OUT> outConnect(DataStream<OUT> out) {
-    return out;
+  public <T> Operator<I, O> connect(Operator<O, T> nextOp) {
+    DataStream<O> ds  = dataflow.getOrCreateWireDataStream(name + "-to-" + nextOp.getName());
+    out(ds);
+    nextOp.in(ds);
+    return this;
   }
   
-  public <T> Operator<OUT, T> outConnect(Operator<OUT, T> next) {
-    return next;
+  public <T> Operator<I, O> with(OutputSelector<O> selector) {
+    outputSelector = selector;
+    return this;
   }
   
-  public <T> Operator<OUT, T> outConnect(String name, OperatorFunction<OUT, T> func, OutputSelector<T> selector) {
-    Operator<OUT, T> operator = new Operator<OUT, T>(name);
-    return operator;
+  Operator<I, O> in(DataStream<I> in) {
+    dataflow.checkValidDataStream(in);
+    if(inputs.contains(in.getName())) {
+      throw new RuntimeException("The operator " + name + " is already connected to the input stream " + in.getName());
+    }
+    inputs.add(in.getName());
+    return this;
   }
+
+  Operator<I, O> out(DataStream<O> out) {
+    dataflow.checkValidDataStream(out);
+    if(outputs.contains(out.getName())) {
+      throw new RuntimeException("The operator " + name + " is already connected to the output stream " + out.getName());
+    }
+    outputs.add(out.getName());
+    return this;
+  }
+
+  public OperatorDescriptor getOperatorDescriptor() {
+    OperatorDescriptor descriptor = new OperatorDescriptor();
+    descriptor.setOperator(name);
+    descriptor.setInputs(inputs);
+    descriptor.setOutputs(outputs);
+    return descriptor ;
+  }
+  
 }

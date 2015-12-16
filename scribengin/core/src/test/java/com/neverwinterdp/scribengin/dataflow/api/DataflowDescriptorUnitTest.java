@@ -1,17 +1,17 @@
-package com.neverwinterdp.scribengin.dataflow.config;
+package com.neverwinterdp.scribengin.dataflow.api;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
+import com.neverwinterdp.scribengin.dataflow.api.DataflowDescriptor;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.IOUtil;
 
-public class DataflowConfigUnitTest {
+public class DataflowDescriptorUnitTest {
   @Test
   public void testConfig() throws Exception {
     String json = IOUtil.getFileContentAsString("src/test/resources/kafka-tracking-dataflow.json");
-    DataflowConfig config = JSONSerializer.INSTANCE.fromString(json, DataflowConfig.class);
+    DataflowDescriptor config = JSONSerializer.INSTANCE.fromString(json, DataflowDescriptor.class);
     Assert.assertNotNull(config);
   }
 }

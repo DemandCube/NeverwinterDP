@@ -2,32 +2,45 @@ package com.neverwinterdp.scribengin.dataflow.api;
 
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
+import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class APIUnitTest {
   
   @Test
   public void testApi() throws Exception {
+    Dataflow<Message, Message> dfl = new Dataflow<Message, Message>("dataflow");
+    dfl.useWireDataStreamFactory(new KafkaWireDataStreamFactory("127.0.0.1:2181"));
+    KafkaDataStream<Message> inputDs     = 
+        dfl.createInput(new KafkaStorageConfig("input", "127.0.0.1:2181", "input"));
+    KafkaDataStream<Message> aggregateDs = 
+        dfl.createOutput(new KafkaStorageConfig("aggregate", "127.0.0.1:2181", "aggregate"));
+   
+    Operator<Message, Message> splitterOp = dfl.createOperator("splitter");
+    Operator<Message, Message> infoOp  = dfl.createOperator("info");
+    Operator<Message, Message> warnOp  = dfl.createOperator("warn");
+    Operator<Message, Message> errorOp = dfl.createOperator("error");
+
+    inputDs.connect(splitterOp);
+    splitterOp.
+      connect(infoOp).
+      connect(warnOp).
+      connect(errorOp).
+      with(new OutputSelector<Message>() {
+        @Override
+        public String select(Message out, String[] names) {
+          return null;
+        }
+      });
     
-    Dataflow<Message, Message> testDfl = new Dataflow<Message, Message>("dataflow");
-    
-    DataStream<Message> inputDs     = testDfl.addInput(new DataStream<Message>("input"));
-    DataStream<Message> aggregateDs = testDfl.addOutput(new DataStream<Message>("aggregate"));
-    
-    Operator<Message, Message> splitterOp = inputDs.connect(new Operator<Message, Message>("splitter"));
-    
-    Operator<Message, Message> infoOp = splitterOp.outConnect(new Operator<Message, Message>("info"));
-    infoOp.outConnect(aggregateDs);
-    
-    Operator<Message, Message> warnOp = splitterOp.outConnect(new Operator<Message, Message>("warn"));
-    warnOp.outConnect(aggregateDs);
-    
-    Operator<Message, Message> errorOp = splitterOp.outConnect(new Operator<Message, Message>("error"));
-    errorOp.outConnect(aggregateDs);
+    infoOp.connect(aggregateDs);
+    warnOp.connect(aggregateDs);
+    errorOp.connect(aggregateDs);
     
     DataflowExecutionEnvironment env = new DataflowExecutionEnvironment();
-    DataflowConfig testDflConfig = env.build(testDfl);
+    DataflowDescriptor testDflConfig = dfl.buildDataflowDescriptor();
     System.out.println(JSONSerializer.INSTANCE.toString(testDflConfig));
+
+    env.submit(dfl);
   }
 }

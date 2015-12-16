@@ -5,13 +5,13 @@ import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
-import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
+import com.neverwinterdp.scribengin.dataflow.api.DataflowDescriptor;
 
 public class ConfigRegistry {
   private Registry       registry;
   private String         dataflowPath;
   private Node           configNode;
-  private DataflowConfig config;
+  private DataflowDescriptor config;
 
   public ConfigRegistry(Registry registry, String dataflowPath) throws RegistryException {
     this.registry         = registry;
@@ -25,13 +25,13 @@ public class ConfigRegistry {
   void initRegistry(Transaction transaction) throws RegistryException {
   }
   
-  public DataflowConfig getDataflowConfig() throws RegistryException {
+  public DataflowDescriptor getDataflowConfig() throws RegistryException {
     return getDataflowConfig(false);
   }
   
-  public DataflowConfig getDataflowConfig(boolean refresh) throws RegistryException {
+  public DataflowDescriptor getDataflowConfig(boolean refresh) throws RegistryException {
     if(config == null || refresh) {
-      config = configNode.getDataAs(DataflowConfig.class);
+      config = configNode.getDataAs(DataflowDescriptor.class);
     }
     return config;
   }

@@ -15,7 +15,7 @@ import com.neverwinterdp.registry.activity.ActivityExecutionContext;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.activity.ActivityStepBuilder;
 import com.neverwinterdp.registry.activity.ActivityStepExecutor;
-import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
+import com.neverwinterdp.scribengin.dataflow.api.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.master.MasterService;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
@@ -66,7 +66,7 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext context, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
+      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
       SequenceIdTracker idTracker = 
         new SequenceIdTracker(dflRegistry.getRegistry(), DataflowRegistry.DATAFLOW_WORKER_ID_TRACKER, true);
       List<String> activeWorkers = dflRegistry.getWorkerRegistry().getActiveWorkerIds();
@@ -80,7 +80,7 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
       }
     }
     
-    private void allocate(DataflowRegistry dflRegistry, DataflowConfig dflConfig, String workerId) throws Exception {
+    private void allocate(DataflowRegistry dflRegistry, DataflowDescriptor dflConfig, String workerId) throws Exception {
       Registry registry = dflRegistry.getRegistry();
       RegistryConfig registryConfig = registry.getRegistryConfig();
       VMConfig vmConfig = new VMConfig();
@@ -117,7 +117,7 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
+      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
       long maxWait = dflConfig.getWorker().getMaxWaitForRunningStatus();
       dflRegistry.
         getWorkerRegistry().

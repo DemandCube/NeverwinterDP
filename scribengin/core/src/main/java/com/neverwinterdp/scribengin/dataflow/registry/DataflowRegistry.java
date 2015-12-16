@@ -15,7 +15,7 @@ import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
-import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
+import com.neverwinterdp.scribengin.dataflow.api.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerRuntimeReport;
 
@@ -83,7 +83,7 @@ public class DataflowRegistry {
     init();
   }
   
-  public String create(Registry registry, DataflowConfig config) throws RegistryException {
+  public String create(Registry registry, DataflowDescriptor config) throws RegistryException {
     this.registry = registry;
     dataflowPath = DATAFLOW_ALL_PATH + "/" + config.getId();
     init();

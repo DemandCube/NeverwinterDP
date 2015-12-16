@@ -1,16 +1,19 @@
 package com.neverwinterdp.scribengin.dataflow.api;
 
-import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
-
 public class DataflowExecutionEnvironment {
   
   public void submit(Dataflow<?, ?> dataflow) throws Exception {
   }
   
-  public DataflowConfig build(Dataflow<?, ?> dataflow) {
-    DataflowConfig config = new DataflowConfig();
+  public DataflowDescriptor build(Dataflow<?, ?> dataflow) {
+    DataflowDescriptor config = new DataflowDescriptor();
     config.setId(dataflow.getDataflowId());
+    DataStream<?>[] dataStreams = dataflow.getDataStreams();
+    for(int i = 0; i < dataStreams.length; i++) {
+      DataStream<?> sel = dataStreams[i];
+      config.getStreamConfig().add(sel.getName(), sel.getStorageConfig());
+    }
+    config.getStreamConfig();
     return config ;
   }
-  
 }

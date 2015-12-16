@@ -15,9 +15,9 @@ import com.neverwinterdp.registry.activity.ActivityExecutionContext;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.activity.ActivityStepBuilder;
 import com.neverwinterdp.registry.activity.ActivityStepExecutor;
-import com.neverwinterdp.scribengin.dataflow.config.DataflowConfig;
-import com.neverwinterdp.scribengin.dataflow.config.OperatorConfig;
-import com.neverwinterdp.scribengin.dataflow.config.StreamConfig;
+import com.neverwinterdp.scribengin.dataflow.api.DataStreamDescriptor;
+import com.neverwinterdp.scribengin.dataflow.api.DataflowDescriptor;
+import com.neverwinterdp.scribengin.dataflow.api.OperatorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.master.MasterService;
 import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
@@ -62,8 +62,8 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
       StreamRegistry streamRegistry = dflRegistry.getStreamRegistry();
       StorageService storageService = service.getStorageService();
-      DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
-      StreamConfig streamConfig  = dflConfig.getStreamConfig();
+      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
+      DataStreamDescriptor streamConfig  = dflConfig.getStreamConfig();
       Map<String, StorageConfig> storageConfigs = streamConfig.getStreams();
       for(Map.Entry<String, StorageConfig> entry : storageConfigs.entrySet()) {
         String name = entry.getKey();
@@ -92,11 +92,11 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
       OperatorRegistry operatorRegistry = dflRegistry.getOperatorRegistry();
-      DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
-      Map<String, OperatorConfig> operators = dflConfig.getOperators();
-      for(Map.Entry<String, OperatorConfig> entry : operators.entrySet()) {
+      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
+      Map<String, OperatorDescriptor> operators = dflConfig.getOperators();
+      for(Map.Entry<String, OperatorDescriptor> entry : operators.entrySet()) {
         String name = entry.getKey();
-        OperatorConfig config = entry.getValue();
+        OperatorDescriptor config = entry.getValue();
         operatorRegistry.create(name, config);
       }
     }
@@ -110,16 +110,16 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      DataflowConfig dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
-      Map<String, OperatorConfig> operators = dflConfig.getOperators();
-      for(Map.Entry<String, OperatorConfig> entry : operators.entrySet()) {
+      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
+      Map<String, OperatorDescriptor> operators = dflConfig.getOperators();
+      for(Map.Entry<String, OperatorDescriptor> entry : operators.entrySet()) {
         String opName = entry.getKey();
-        OperatorConfig opConfig = entry.getValue();
+        OperatorDescriptor opConfig = entry.getValue();
         createTasks(opName, opConfig);
       }
     }
     
-    void createTasks(String opName, OperatorConfig opConfig) throws RegistryException {
+    void createTasks(String opName, OperatorDescriptor opConfig) throws RegistryException {
       DecimalFormat SEQ_ID_FORMATTER = new DecimalFormat("0000");
       StreamRegistry streamRegistry = service.getDataflowRegistry().getStreamRegistry();
       DataflowTaskRegistry taskRegistry = service.getDataflowRegistry().getTaskRegistry();

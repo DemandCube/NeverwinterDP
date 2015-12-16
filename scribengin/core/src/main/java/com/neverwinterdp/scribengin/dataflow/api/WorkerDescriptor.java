@@ -1,6 +1,6 @@
-package com.neverwinterdp.scribengin.dataflow.config;
+package com.neverwinterdp.scribengin.dataflow.api;
 
-public class WorkerConfig {
+public class WorkerDescriptor {
   private int     numOfInstances          = 2;
   private int     memory                  = 128;
   private int     cpuCores                = 1;
