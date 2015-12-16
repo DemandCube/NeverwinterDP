@@ -1,44 +1,45 @@
-package com.neverwinterdp.scribengin.dataflow.operator;
+package com.neverwinterdp.scribengin.dataflow.runtime;
 
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskStatus;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.registry.task.dedicated.TaskSlotExecutor;
+import com.neverwinterdp.scribengin.dataflow.api.DataStreamOperator;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.WorkerService;
 import com.neverwinterdp.storage.Record;
 
-public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfig>{
+public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStreamOperatorDescriptor>{
   private WorkerService                            workerService;
-  private DedicatedTaskContext<OperatorTaskConfig> taskContext;
-  private OperatorTaskConfig                       operatorTaskConfig;
-  private Operator                                 operator;
-  private OperatorContext                          context;
+  private DedicatedTaskContext<DataStreamOperatorDescriptor> taskContext;
+  private DataStreamOperatorDescriptor                       operatorTaskConfig;
+  private DataStreamOperator                                 operator;
+  private DataStreamOperatorRuntimeContext                          context;
   
   private long                                     startTime = 0;
   private long                                     lastFlushTime = System.currentTimeMillis();
-  private long                                     lastNoMessageTime ;
+  private long                                     lastNoMessageTime = lastFlushTime;
   
-  public OperatorTaskSlotExecutor(WorkerService service, DedicatedTaskContext<OperatorTaskConfig> taskContext) throws Exception {
+  public DataStreamOperatorTaskSlotExecutor(WorkerService service, DedicatedTaskContext<DataStreamOperatorDescriptor> taskContext) throws Exception {
     super(taskContext);
     this.workerService = service;
     this.taskContext     = taskContext;
     this.operatorTaskConfig      = taskContext.getTaskDescriptor(false);
-    Class<Operator> opType = (Class<Operator>) Class.forName(operatorTaskConfig.getOperator());
+    Class<DataStreamOperator> opType = (Class<DataStreamOperator>) Class.forName(operatorTaskConfig.getOperator());
     operator = opType.newInstance();
     
     startTime = System.currentTimeMillis();
     DataflowRegistry dRegistry = workerService.getDataflowRegistry();
-    OperatorTaskReport report = dRegistry.getTaskRegistry().getTaskReport(operatorTaskConfig);
+    DataStreamOperatorReport report = dRegistry.getTaskRegistry().getTaskReport(operatorTaskConfig);
     report.incrAssignedCount();
     dRegistry.getTaskRegistry().save(operatorTaskConfig, report);
-    context = new OperatorContext(workerService, operatorTaskConfig, report);
+    context = new DataStreamOperatorRuntimeContext(workerService, operatorTaskConfig, report);
     dRegistry.getTaskRegistry().save(operatorTaskConfig, report);
   }
   
-  public DedicatedTaskContext<OperatorTaskConfig> getTaskContext() { return this.taskContext; }
+  public DedicatedTaskContext<DataStreamOperatorDescriptor> getTaskContext() { return this.taskContext; }
   
-  public OperatorTaskConfig getDescriptor() { return operatorTaskConfig ; }
+  public DataStreamOperatorDescriptor getDescriptor() { return operatorTaskConfig ; }
   
   public boolean isComplete() { return context.isComplete() ; }
   
@@ -51,7 +52,7 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
   @Override
   public void executeSlot() throws Exception {
     startTime = System.currentTimeMillis();
-    OperatorTaskReport report = context.getTaskReport();
+    DataStreamOperatorReport report = context.getReport();
     int recCount = 0;
     try {
       while(!isInterrupted()) {
@@ -99,13 +100,13 @@ public class OperatorTaskSlotExecutor extends TaskSlotExecutor<OperatorTaskConfi
   
   void rollback(Exception error) throws Exception {
     context.rollback();
-    OperatorTaskReport report = context.getTaskReport();
+    DataStreamOperatorReport report = context.getReport();
     report.setAssignedHasErrorCount(report.getAssignedHasErrorCount() + 1);
     workerService.getLogger().error("DataflowTask Error", error);
   }
   
   public void finish() throws Exception {
-    OperatorTaskReport report = context.getTaskReport();
+    DataStreamOperatorReport report = context.getReport();
     report.setFinishTime(System.currentTimeMillis());
     context.commit();
     context.close();

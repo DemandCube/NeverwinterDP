@@ -16,7 +16,7 @@ import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.api.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskRuntimeReport;
+import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReportWithStatus;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerRuntimeReport;
 
 @Singleton

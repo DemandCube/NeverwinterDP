@@ -6,18 +6,18 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskMonitor;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskRegistry;
-import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
+import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
 
-public class DataflowTaskMonitor implements DedicatedTaskMonitor<OperatorTaskConfig> {
+public class DataflowTaskMonitor implements DedicatedTaskMonitor<DataStreamOperatorDescriptor> {
   private boolean finished = false;
   private Logger logger ;
   
   @Override
-  public void onAddExecutor(DedicatedTaskRegistry<OperatorTaskConfig> taskRegistry, String executorId) {
+  public void onAddExecutor(DedicatedTaskRegistry<DataStreamOperatorDescriptor> taskRegistry, String executorId) {
   }
 
   @Override
-  public void onLostExecutor(DedicatedTaskRegistry<OperatorTaskConfig> taskRegistry, String executorId) {
+  public void onLostExecutor(DedicatedTaskRegistry<DataStreamOperatorDescriptor> taskRegistry, String executorId) {
     try {
       taskRegistry.historyTaskExecutor(executorId);
     } catch (RegistryException e) {
@@ -26,11 +26,11 @@ public class DataflowTaskMonitor implements DedicatedTaskMonitor<OperatorTaskCon
   }
 
   @Override
-  public void onAvailable(DedicatedTaskRegistry<OperatorTaskConfig> taskRegistry, String taskId) {
+  public void onAvailable(DedicatedTaskRegistry<DataStreamOperatorDescriptor> taskRegistry, String taskId) {
   }
 
   @Override
-  public void onFinish(DedicatedTaskRegistry<OperatorTaskConfig> taskRegistry, String taskId) {
+  public void onFinish(DedicatedTaskRegistry<DataStreamOperatorDescriptor> taskRegistry, String taskId) {
     try {
       int allTask = taskRegistry.getTasksListNode().getChildren().size();
       int finishTask = taskRegistry.getTaskFinishedNode().getChildren().size();

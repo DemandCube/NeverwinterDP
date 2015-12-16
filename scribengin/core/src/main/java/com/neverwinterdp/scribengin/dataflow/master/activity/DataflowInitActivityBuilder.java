@@ -15,15 +15,15 @@ import com.neverwinterdp.registry.activity.ActivityExecutionContext;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.activity.ActivityStepBuilder;
 import com.neverwinterdp.registry.activity.ActivityStepExecutor;
-import com.neverwinterdp.scribengin.dataflow.api.DataStreamDescriptor;
+import com.neverwinterdp.scribengin.dataflow.api.DataSetDescriptor;
 import com.neverwinterdp.scribengin.dataflow.api.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.api.OperatorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.master.MasterService;
-import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.OperatorRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.StreamRegistry;
+import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
 import com.neverwinterdp.storage.PartitionStreamConfig;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
@@ -63,7 +63,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
       StreamRegistry streamRegistry = dflRegistry.getStreamRegistry();
       StorageService storageService = service.getStorageService();
       DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
-      DataStreamDescriptor streamConfig  = dflConfig.getStreamConfig();
+      DataSetDescriptor streamConfig  = dflConfig.getStreamConfig();
       Map<String, StorageConfig> storageConfigs = streamConfig.getStreams();
       for(Map.Entry<String, StorageConfig> entry : storageConfigs.entrySet()) {
         String name = entry.getKey();
@@ -128,7 +128,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
         for(int i = 0; i < pConfigs.size(); i++) {
           PartitionStreamConfig pConfig = pConfigs.get(i);
           String taskId =  opName + ":" + input + "-" + SEQ_ID_FORMATTER.format(pConfig.getPartitionStreamId());
-          OperatorTaskConfig taskConfig = new OperatorTaskConfig();
+          DataStreamOperatorDescriptor taskConfig = new DataStreamOperatorDescriptor();
           taskConfig.setTaskId(taskId);
           taskConfig.setOperatorName(opName);
           taskConfig.setInput(input);

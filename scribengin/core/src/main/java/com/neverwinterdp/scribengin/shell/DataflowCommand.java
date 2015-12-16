@@ -80,6 +80,7 @@ public class DataflowCommand extends Command {
       ScribenginShell scribenginShell = (ScribenginShell) shell;
       ScribenginClient client = scribenginShell.getScribenginClient();
       String dataflowJson = IOUtil.getFileContentAsString(dataflowConfig) ;
+      
       DataflowDescriptor dflConfig = 
         JSONSerializer.INSTANCE.fromString(dataflowJson, DataflowDescriptor.class);
       if(dataflowId != null) dflConfig.setId(dataflowId);
@@ -95,8 +96,9 @@ public class DataflowCommand extends Command {
       }
       if(workerEnableGC) dflConfig.getWorker().setEnableGCLog(workerEnableGC);
         
-      scala.Console.println(JSONSerializer.INSTANCE.toString(dflConfig));
+      shell.console().println(JSONSerializer.INSTANCE.toString(dflConfig));
       DataflowSubmitter submitter = new DataflowSubmitter(client, dflConfig);
+      
       submitter.submit();
       submitter.waitForRunning(waitForRunningTimeout);
       shell.console().println("Finished waiting for the dataflow running status");

@@ -1,11 +1,11 @@
-package com.neverwinterdp.scribengin.dataflow.operator;
+package com.neverwinterdp.scribengin.dataflow.runtime;
 
 import java.util.Comparator;
 
-public class OperatorTaskReport {
-  final static public Comparator<OperatorTaskReport> COMPARATOR = new Comparator<OperatorTaskReport>() {
+public class DataStreamOperatorReport {
+  final static public Comparator<DataStreamOperatorReport> COMPARATOR = new Comparator<DataStreamOperatorReport>() {
     @Override
-    public int compare(OperatorTaskReport o1, OperatorTaskReport o2) {
+    public int compare(DataStreamOperatorReport o1, DataStreamOperatorReport o2) {
       return o1.getTaskId().compareTo(o2.getTaskId());
     }
   };
@@ -29,9 +29,9 @@ public class OperatorTaskReport {
   private long   accCommitProcessCount;
   private long   accRuntime ;
   
-  public OperatorTaskReport() {} 
+  public DataStreamOperatorReport() {} 
   
-  public OperatorTaskReport(String taskId, String operatorName) {
+  public DataStreamOperatorReport(String taskId, String operatorName) {
     this.taskId = taskId ;
     this.operatorName = operatorName;
     this.startTime = System.currentTimeMillis();

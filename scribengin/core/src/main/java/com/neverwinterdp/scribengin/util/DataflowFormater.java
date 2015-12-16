@@ -14,10 +14,10 @@ import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
-import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskReport;
-import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowTaskRegistry;
+import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReport;
+import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReportWithStatus;
 import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerRuntimeReport;
 import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.util.text.StringUtil;
@@ -57,13 +57,13 @@ public class DataflowFormater {
   
   public String getGroupByExecutorDataflowTaskInfo() throws RegistryException {
     DataflowTaskRegistry dtRegistry = new DataflowTaskRegistry(registry, dataflowPath) ;
-    LinkedHashMap<String, List<OperatorTaskRuntimeReport>> groupByExecutorReports = new LinkedHashMap<>();
+    LinkedHashMap<String, List<DataStreamOperatorReportWithStatus>> groupByExecutorReports = new LinkedHashMap<>();
     for(String executorId : dtRegistry.getActiveExecutorIds()) {
-      List<OperatorTaskRuntimeReport> reports =  dtRegistry.getDataflowTaskRuntimeReportsByExecutorId(executorId);
+      List<DataStreamOperatorReportWithStatus> reports =  dtRegistry.getDataflowTaskRuntimeReportsByExecutorId(executorId);
       groupByExecutorReports.put(executorId, reports);
     }
     for(String executorId : dtRegistry.getIdleExecutorIds()) {
-      List<OperatorTaskRuntimeReport> reports =  dtRegistry.getDataflowTaskRuntimeReportsByExecutorId(executorId);
+      List<DataStreamOperatorReportWithStatus> reports =  dtRegistry.getDataflowTaskRuntimeReportsByExecutorId(executorId);
       groupByExecutorReports.put(executorId, reports);
     }
     return getDataflowTaskInfo(groupByExecutorReports) ;
@@ -71,12 +71,12 @@ public class DataflowFormater {
   
   public String getGroupByOperatorDataflowTaskInfo() throws RegistryException {
     DataflowTaskRegistry dtRegistry = new DataflowTaskRegistry(registry, dataflowPath) ;
-    List<OperatorTaskRuntimeReport> reports =  dtRegistry.getDataflowTaskRuntimeReports();
-    LinkedHashMap<String, List<OperatorTaskRuntimeReport>> groupByOperatorReports = new LinkedHashMap<>();
+    List<DataStreamOperatorReportWithStatus> reports =  dtRegistry.getDataflowTaskRuntimeReports();
+    LinkedHashMap<String, List<DataStreamOperatorReportWithStatus>> groupByOperatorReports = new LinkedHashMap<>();
     for(int i = 0; i < reports.size(); i++) {
-      OperatorTaskRuntimeReport rtReport = reports.get(i);
+      DataStreamOperatorReportWithStatus rtReport = reports.get(i);
       String operator = rtReport.getReport().getOperatorName();
-      List<OperatorTaskRuntimeReport> holder = groupByOperatorReports.get(operator);
+      List<DataStreamOperatorReportWithStatus> holder = groupByOperatorReports.get(operator);
       if(holder == null) {
         holder = new ArrayList<>();
         groupByOperatorReports.put(operator, holder);
@@ -86,7 +86,7 @@ public class DataflowFormater {
     return getDataflowTaskInfo(groupByOperatorReports);
   }
 
-  String getDataflowTaskInfo(LinkedHashMap<String, List<OperatorTaskRuntimeReport>> groupByReports) throws RegistryException {
+  String getDataflowTaskInfo(LinkedHashMap<String, List<DataStreamOperatorReportWithStatus>> groupByReports) throws RegistryException {
     String[] header = {
         "Task Id", "Status", "Assigned", "AHE", "AWNM", "LAWNM", "AC", "CC", "CFC", "Last Commit Time", "Start Time", "Finish Time", "Exec Time", "Duration"
     } ;
@@ -99,14 +99,14 @@ public class DataflowFormater {
     taskFt.addFooter("CC    = Commit Count");
     taskFt.addFooter("CFC   = Commit Fail Count");
 
-    for(Map.Entry<String, List<OperatorTaskRuntimeReport>> entry : groupByReports.entrySet()) {
+    for(Map.Entry<String, List<DataStreamOperatorReportWithStatus>> entry : groupByReports.entrySet()) {
       String groupBy = entry.getKey();
-      List<OperatorTaskRuntimeReport> operatorReports = entry.getValue();
+      List<DataStreamOperatorReportWithStatus> operatorReports = entry.getValue();
       taskFt.addRow(groupBy, "", "", "", "", "", "", "", "", "", "", "", "", "");
       int accCommitProcessCount = 0;
       for(int i = 0; i < operatorReports.size(); i++) {
-        OperatorTaskRuntimeReport rtReport = operatorReports.get(i);
-        OperatorTaskReport report = rtReport.getReport();
+        DataStreamOperatorReportWithStatus rtReport = operatorReports.get(i);
+        DataStreamOperatorReport report = rtReport.getReport();
         taskFt.addRow(
             "  " + report.getTaskId(), 
             rtReport.getStatus(), 

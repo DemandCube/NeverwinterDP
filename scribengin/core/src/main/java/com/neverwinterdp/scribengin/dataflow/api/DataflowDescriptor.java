@@ -12,7 +12,7 @@ public class DataflowDescriptor {
   private MasterDescriptor master;
   private WorkerDescriptor worker;
   
-  private DataStreamDescriptor streamConfig = new DataStreamDescriptor();
+  private DataSetDescriptor streamConfig = new DataSetDescriptor();
   private Map<String, OperatorDescriptor> operators = new HashMap<>();
   
   public DataflowDescriptor() {}
@@ -44,13 +44,17 @@ public class DataflowDescriptor {
   public WorkerDescriptor getWorker() { return worker; }
   public void setWorker(WorkerDescriptor worker) { this.worker = worker; }
 
-  public DataStreamDescriptor getStreamConfig() { return streamConfig;}
-  public void setStreamConfig(DataStreamDescriptor streams) { this.streamConfig = streams;}
+  public DataSetDescriptor getStreamConfig() { return streamConfig;}
+  public void setStreamConfig(DataSetDescriptor streams) { this.streamConfig = streams;}
  
   public Map<String, OperatorDescriptor> getOperators() { return operators; }
   public void setOperators(Map<String, OperatorDescriptor> operators) { this.operators = operators; }
   
   public void addOperator(OperatorDescriptor descriptor) {
-    operators.put(descriptor.getOperator(), descriptor);
+    operators.put(descriptor.getName(), descriptor);
+  }
+  
+  public void clearOperators() {
+    operators.clear();;
   }
 }

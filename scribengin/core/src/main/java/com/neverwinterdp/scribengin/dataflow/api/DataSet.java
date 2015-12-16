@@ -2,18 +2,18 @@ package com.neverwinterdp.scribengin.dataflow.api;
 
 import com.neverwinterdp.storage.StorageConfig;
 
-abstract public class DataStream<T> {
+abstract public class DataSet<T> {
   private String name;
-  private DataStreamType   type = DataStreamType.Wire;
+  private DataSetType   type = DataSetType.Wire;
   
-  public DataStream(String name, DataStreamType type) {
+  public DataSet(String name, DataSetType type) {
     this.name = name;
     this.type = type ;
   }
   
   public String getName() { return this.name; }
   
-  public <OUT> DataStream<T> connect(Operator<T, OUT> operator) {
+  public <OUT> DataSet<T> connect(Operator<T, OUT> operator) {
     operator.in(this);
     return this;
   }

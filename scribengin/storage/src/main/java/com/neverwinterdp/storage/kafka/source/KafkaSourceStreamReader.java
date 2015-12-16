@@ -1,15 +1,13 @@
 package com.neverwinterdp.storage.kafka.source;
 
-import kafka.javaapi.PartitionMetadata;
-
-import java.io.IOException;
-
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.storage.PartitionStreamConfig;
 import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.source.CommitPoint;
 import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
+
+import kafka.javaapi.PartitionMetadata;
 
 public class KafkaSourceStreamReader implements SourcePartitionStreamReader {
   private PartitionStreamConfig partitionConfig;

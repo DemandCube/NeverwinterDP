@@ -16,6 +16,7 @@ public class KafkaStorageConfig extends StorageConfig {
   }
   
   public KafkaStorageConfig(String name, String zkConnect, String topic) { 
+    setType("kafka");
     setName(name);
     setZKConnect(zkConnect);
     setTopic(topic);

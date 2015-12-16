@@ -1,12 +1,12 @@
-package com.neverwinterdp.scribengin.dataflow.operator;
+package com.neverwinterdp.scribengin.dataflow.runtime;
 
 import java.util.Comparator;
 import java.util.Set;
 
-public class OperatorTaskConfig {
-  final static public Comparator<OperatorTaskConfig> COMPARATOR = new Comparator<OperatorTaskConfig>() {
+public class DataStreamOperatorDescriptor {
+  final static public Comparator<DataStreamOperatorDescriptor> COMPARATOR = new Comparator<DataStreamOperatorDescriptor>() {
     @Override
-    public int compare(OperatorTaskConfig o1, OperatorTaskConfig o2) {
+    public int compare(DataStreamOperatorDescriptor o1, DataStreamOperatorDescriptor o2) {
       return o1.getTaskId().compareTo(o2.getTaskId());
     }
   };
@@ -18,7 +18,7 @@ public class OperatorTaskConfig {
   private Set<String> outputs;
   private String      operator;
 
-  public OperatorTaskConfig() {
+  public DataStreamOperatorDescriptor() {
   }
 
   public String getTaskId() { return taskId; }

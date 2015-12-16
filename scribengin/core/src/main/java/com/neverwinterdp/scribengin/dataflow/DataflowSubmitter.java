@@ -13,9 +13,14 @@ public class DataflowSubmitter {
   private ScribenginClient scribenginClient;
   private DataflowDescriptor   dflConfig;
   
+  
   public DataflowSubmitter(ScribenginClient scribenginClient, DataflowDescriptor dflConfig) {
     this.scribenginClient = scribenginClient;
     this.dflConfig = dflConfig;
+  }
+  
+  public DataflowSubmitter(Registry registry, DataflowDescriptor dflConfig) {
+    this(new ScribenginClient(registry), dflConfig);
   }
   
   public void submit() throws Exception {

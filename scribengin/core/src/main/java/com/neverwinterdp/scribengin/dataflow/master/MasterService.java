@@ -12,8 +12,8 @@ import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowInitActivit
 import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowMasterActivityService;
 import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowRunActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowStopActivityBuilder;
-import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
 import com.neverwinterdp.storage.StorageService;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMConfig;
@@ -35,7 +35,7 @@ public class MasterService {
   private DataflowWorkerMonitor workerMonitor;
   
   private DataflowTaskMonitor  taskMonitor;
-  private DedicatedTaskService<OperatorTaskConfig> taskService ;
+  private DedicatedTaskService<DataStreamOperatorDescriptor> taskService ;
   
   public VMConfig getVMConfig() { return vmConfig; }
   

@@ -1,5 +1,5 @@
 package com.neverwinterdp.scribengin.dataflow.api;
 
-public enum DataStreamType { 
+public enum DataSetType { 
   Input, Output, Wire
 }

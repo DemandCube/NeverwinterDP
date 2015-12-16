@@ -12,57 +12,57 @@ import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.TaskStatus;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskRegistry;
-import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
-import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskReport;
-import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskRuntimeReport;
+import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
+import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReport;
+import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReportWithStatus;
 
-public class DataflowTaskRegistry extends DedicatedTaskRegistry<OperatorTaskConfig> {
+public class DataflowTaskRegistry extends DedicatedTaskRegistry<DataStreamOperatorDescriptor> {
   private String dataflowPath ;
   
   public DataflowTaskRegistry(Registry registry, String dataflowPath) throws RegistryException {
-    init(registry, dataflowPath + "/tasks", OperatorTaskConfig.class) ;
+    init(registry, dataflowPath + "/tasks", DataStreamOperatorDescriptor.class) ;
     this.dataflowPath = dataflowPath;
   }
 
-  public void offer(OperatorTaskConfig taskConfig) throws RegistryException {
+  public void offer(DataStreamOperatorDescriptor taskConfig) throws RegistryException {
     super.offer(taskConfig.getTaskId(), taskConfig);
-    create(taskConfig, new OperatorTaskReport(taskConfig.getTaskId(), taskConfig.getOperatorName()));
+    create(taskConfig, new DataStreamOperatorReport(taskConfig.getTaskId(), taskConfig.getOperatorName()));
   }
   
-  public OperatorTaskReport getTaskReport(OperatorTaskConfig descriptor) throws RegistryException {
+  public DataStreamOperatorReport getTaskReport(DataStreamOperatorDescriptor descriptor) throws RegistryException {
     Node taskNode = getTasksListNode().getChild(descriptor.getTaskId());
-    return getRegistry().getDataAs(taskNode.getPath() + "/report", OperatorTaskReport.class) ;
+    return getRegistry().getDataAs(taskNode.getPath() + "/report", DataStreamOperatorReport.class) ;
   }
   
-  public List<OperatorTaskReport> getTaskReports(List<OperatorTaskConfig> tConfigs) throws RegistryException {
+  public List<DataStreamOperatorReport> getTaskReports(List<DataStreamOperatorDescriptor> tConfigs) throws RegistryException {
     List<String> reportPaths = new ArrayList<String>();
     for(int i = 0; i < tConfigs.size(); i++) {
-      OperatorTaskConfig descriptor = tConfigs.get(i);
+      DataStreamOperatorDescriptor descriptor = tConfigs.get(i);
       Node taskNode = getTasksListNode().getChild(descriptor.getTaskId());
       reportPaths.add(taskNode.getPath() + "/report") ;
     }
-    return getRegistry().getDataAs(reportPaths, OperatorTaskReport.class) ;
+    return getRegistry().getDataAs(reportPaths, DataStreamOperatorReport.class) ;
   }
   
-  public void save(OperatorTaskConfig tConfig, OperatorTaskReport report) throws RegistryException {
+  public void save(DataStreamOperatorDescriptor tConfig, DataStreamOperatorReport report) throws RegistryException {
     Node  reportNode = getTasksListNode().getChild(tConfig.getTaskId()).getChild("report");
     reportNode.setData(report);
   }
   
-  public void create(OperatorTaskConfig taskConfig, OperatorTaskReport report) throws RegistryException {
+  public void create(DataStreamOperatorDescriptor taskConfig, DataStreamOperatorReport report) throws RegistryException {
     Node taskNode = getTasksListNode().getChild(taskConfig.getTaskId());
     taskNode.createChild("report", report, NodeCreateMode.PERSISTENT);
   }
   
-  public void suspend(DedicatedTaskContext<OperatorTaskConfig> context) throws RegistryException {
+  public void suspend(DedicatedTaskContext<DataStreamOperatorDescriptor> context) throws RegistryException {
     suspend(context.getTaskExecutorDescriptor(), context.getTaskId()) ;
   }
   
-  public void suspend(TaskExecutorDescriptor executor, DedicatedTaskContext<OperatorTaskConfig> context) throws RegistryException {
+  public void suspend(TaskExecutorDescriptor executor, DedicatedTaskContext<DataStreamOperatorDescriptor> context) throws RegistryException {
     suspend(executor, context.getTaskId()) ;
   }
   
-  public void finish(DedicatedTaskContext<OperatorTaskConfig> context, TaskStatus taskStatus) throws RegistryException {
+  public void finish(DedicatedTaskContext<DataStreamOperatorDescriptor> context, TaskStatus taskStatus) throws RegistryException {
     finish(context.getTaskExecutorDescriptor(), context.getTaskId(), taskStatus) ;
   }
 
@@ -84,22 +84,22 @@ public class DataflowTaskRegistry extends DedicatedTaskRegistry<OperatorTaskConf
     return executorIds;
   }
   
-  public List<OperatorTaskRuntimeReport> getDataflowTaskRuntimeReportsByExecutorId(String executorId) throws RegistryException {
+  public List<DataStreamOperatorReportWithStatus> getDataflowTaskRuntimeReportsByExecutorId(String executorId) throws RegistryException {
     List<String> taskIds = executorsAllNode.getChild(executorId).getChild("tasks").getChildren() ;
     return getDataflowTaskRuntimeReports(taskIds) ;
   }
   
   
-  public List<OperatorTaskRuntimeReport> getDataflowTaskRuntimeReports() throws RegistryException {
+  public List<DataStreamOperatorReportWithStatus> getDataflowTaskRuntimeReports() throws RegistryException {
     List<String> taskIds = getTasksListNode().getChildren() ;
     return getDataflowTaskRuntimeReports(taskIds);
   }
 
-  List<OperatorTaskRuntimeReport> getDataflowTaskRuntimeReports(List<String> taskIds) throws RegistryException {
+  List<DataStreamOperatorReportWithStatus> getDataflowTaskRuntimeReports(List<String> taskIds) throws RegistryException {
     String taskListPath = getTasksListNode().getPath();
-    List<OperatorTaskRuntimeReport> holder = new ArrayList<>();
+    List<DataStreamOperatorReportWithStatus> holder = new ArrayList<>();
     for(String selTaskId : taskIds) {
-      holder.add(new OperatorTaskRuntimeReport(getRegistry(), taskListPath + "/" + selTaskId));
+      holder.add(new DataStreamOperatorReportWithStatus(getRegistry(), taskListPath + "/" + selTaskId));
     }
     return holder;
   }

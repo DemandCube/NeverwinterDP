@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.neverwinterdp.storage.StorageConfig;
 
-public class DataStreamDescriptor {
+public class DataSetDescriptor {
   private int                        parallelism;
   private int                        replication = 2;
   private Map<String, StorageConfig> streams;
@@ -22,5 +22,9 @@ public class DataStreamDescriptor {
   public void add(String name, StorageConfig sconfig) {
     if(streams == null) streams = new HashMap<>();
     streams.put(name, sconfig);
+  }
+  
+  public void clear() { 
+    if(streams != null) streams.clear();
   }
 }

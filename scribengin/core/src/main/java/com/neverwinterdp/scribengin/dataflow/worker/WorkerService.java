@@ -20,9 +20,9 @@ import com.neverwinterdp.registry.txevent.TXEventNotification;
 import com.neverwinterdp.registry.txevent.TXEventWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.api.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskConfig;
-import com.neverwinterdp.scribengin.dataflow.operator.OperatorTaskSlotExecutor;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
+import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorTaskSlotExecutor;
 import com.neverwinterdp.storage.StorageService;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMDescriptor;
@@ -43,7 +43,7 @@ private Logger logger ;
   @Inject
   private MetricRegistry   metricRegistry ;
   
-  private DedicatedTaskService<OperatorTaskConfig> taskService;
+  private DedicatedTaskService<DataStreamOperatorDescriptor> taskService;
   
   private DataflowWorkerEventWatcher   dataflowWorkerEventWatcher ;
 
@@ -72,15 +72,15 @@ private Logger logger ;
     workerStatus = DataflowWorkerStatus.INIT;
     dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
     
-    TaskSlotExecutorFactory<OperatorTaskConfig> taskSlotExecutorFactory = new TaskSlotExecutorFactory<OperatorTaskConfig>() {
+    TaskSlotExecutorFactory<DataStreamOperatorDescriptor> taskSlotExecutorFactory = new TaskSlotExecutorFactory<DataStreamOperatorDescriptor>() {
       @Override
-      public TaskSlotExecutor<OperatorTaskConfig> create(DedicatedTaskContext<OperatorTaskConfig> context) throws Exception {
-        return new  OperatorTaskSlotExecutor(WorkerService.this, context);
+      public TaskSlotExecutor<DataStreamOperatorDescriptor> create(DedicatedTaskContext<DataStreamOperatorDescriptor> context) throws Exception {
+        return new  DataStreamOperatorTaskSlotExecutor(WorkerService.this, context);
       }
     };
     
     DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
-    taskService = new DedicatedTaskService<OperatorTaskConfig>(dflRegistry.getTaskRegistry(), taskSlotExecutorFactory);
+    taskService = new DedicatedTaskService<DataStreamOperatorDescriptor>(dflRegistry.getTaskRegistry(), taskSlotExecutorFactory);
     for(int i = 0; i < dflConfig.getWorker().getNumOfExecutor(); i++) {
       TaskExecutorDescriptor executor = new TaskExecutorDescriptor(vmDescriptor.getId() + "-executor-" + i, vmDescriptor.getId());
       taskService.addExecutor(executor, 2);

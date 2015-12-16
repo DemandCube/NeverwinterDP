@@ -1,10 +1,11 @@
-package com.neverwinterdp.scribengin.dataflow.operator;
+package com.neverwinterdp.scribengin.dataflow.runtime;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.neverwinterdp.scribengin.dataflow.api.DataStreamOperatorContext;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.WorkerService;
 import com.neverwinterdp.storage.Record;
@@ -19,10 +20,10 @@ import com.neverwinterdp.storage.source.SourcePartitionStream;
 import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
 import com.neverwinterdp.yara.Meter;
 
-public class OperatorContext {
-  private WorkerService      workerService;
-  private OperatorTaskConfig taskConfig;
-  private OperatorTaskReport taskReport;
+public class DataStreamOperatorRuntimeContext implements DataStreamOperatorContext {
+  private WorkerService                workerService;
+  private DataStreamOperatorDescriptor descriptor;
+  private DataStreamOperatorReport     report;
 
   private InputContext               inputContext;
   private Map<String, OutputContext> outputContexts = new HashMap<>();
@@ -31,10 +32,10 @@ public class OperatorContext {
   private Meter   dataflowReadMeter;
   private Meter   dataflowRecordMeter;
 
-  public OperatorContext(WorkerService workerService, OperatorTaskConfig taskConfig, OperatorTaskReport report) throws Exception {
+  public DataStreamOperatorRuntimeContext(WorkerService workerService, DataStreamOperatorDescriptor taskConfig, DataStreamOperatorReport report) throws Exception {
     this.workerService = workerService;
-    this.taskConfig  = taskConfig;
-    this.taskReport = report;
+    this.descriptor  = taskConfig;
+    this.report = report;
     
     DataflowRegistry dflRegistry = workerService.getDataflowRegistry();
     StorageService storageService = workerService.getStorageService();
@@ -55,17 +56,15 @@ public class OperatorContext {
         workerService.getMetricRegistry().getMeter("dataflow.source." + taskConfig.getInput() + ".throughput.record", "record") ;
   }
   
-  public OperatorTaskConfig getTaskConfig() { return this.taskConfig; }
+  public DataStreamOperatorDescriptor getDescriptor() { return this.descriptor; }
   
-  public OperatorTaskReport getTaskReport() { return this.taskReport; }
-  
-  public WorkerService getWorkerService() { return this.workerService; }
+  public DataStreamOperatorReport getReport() { return this.report; }
   
   public boolean isComplete() { return this.complete ; }
   
   public void setComplete() { this.complete = true; }
   
-  public Set<String> getAvailableOutputs() { return taskConfig.getOutputs(); }
+  public Set<String> getAvailableOutputs() { return descriptor.getOutputs(); }
   
   public Record nextRecord(long maxWaitForDataRead) throws Exception {
     Record dataflowMessage = inputContext.assignedPartitionReader.next(maxWaitForDataRead);
@@ -113,10 +112,10 @@ public class OperatorContext {
     try {
       prepareCommit();
       completeCommit();
-      taskReport.updateCommit();
-      workerService.getDataflowRegistry().getTaskRegistry().save(taskConfig, taskReport);
+      report.updateCommit();
+      workerService.getDataflowRegistry().getTaskRegistry().save(descriptor, report);
     } catch (Exception ex) {
-      taskReport.setCommitFailCount(taskReport.getCommitFailCount() + 1);
+      report.setCommitFailCount(report.getCommitFailCount() + 1);
       workerService.getLogger().warn("DataflowTask Commit Fail");
       throw ex;
     } 

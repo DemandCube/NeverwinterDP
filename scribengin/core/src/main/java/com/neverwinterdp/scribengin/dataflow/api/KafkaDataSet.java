@@ -2,15 +2,15 @@ package com.neverwinterdp.scribengin.dataflow.api;
 
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 
-public class KafkaDataStream<T> extends DataStream<T> {
+public class KafkaDataSet<T> extends DataSet<T> {
   private KafkaStorageConfig kafkaStorageConfig;
   
-  public KafkaDataStream(DataStreamType type, KafkaStorageConfig kafkaStorageConfig) {
+  public KafkaDataSet(DataSetType type, KafkaStorageConfig kafkaStorageConfig) {
     super(kafkaStorageConfig.getName(), type);
     this.kafkaStorageConfig = kafkaStorageConfig;
   }
   
-  public KafkaDataStream(String name, DataStreamType type, String zkConnects, String topic) {
+  public KafkaDataSet(String name, DataSetType type, String zkConnects, String topic) {
     super(name, type);
     kafkaStorageConfig = new KafkaStorageConfig();
     kafkaStorageConfig.setName(name);
@@ -18,6 +18,11 @@ public class KafkaDataStream<T> extends DataStream<T> {
     kafkaStorageConfig.setTopic(topic);
   }
 
+  public KafkaDataSet<T> useRawReader() {
+    this.kafkaStorageConfig.attribute("reader", "raw");
+    return this;
+  }
+  
   @Override
   public KafkaStorageConfig getStorageConfig() { return kafkaStorageConfig; }
 }

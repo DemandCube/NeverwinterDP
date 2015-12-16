@@ -14,6 +14,7 @@ import org.apache.zookeeper.server.quorum.QuorumPeerMain;
 
 import com.neverwinterdp.tool.server.Server;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.util.io.FileUtil;
 /**
  * @author Tuan Nguyen
  * @email tuan08@gmail.com
@@ -53,6 +54,10 @@ public class EmbededZKServer implements Server {
   
   public void setMaxClientCnxns(int num) {
     zkProperties.put("maxClientCnxns", Integer.toString(num));
+  }
+  
+  public void clean() throws Exception {
+    FileUtil.removeIfExist(zkProperties.getProperty("dataDir"), false);
   }
   
   public void start() throws Exception {
