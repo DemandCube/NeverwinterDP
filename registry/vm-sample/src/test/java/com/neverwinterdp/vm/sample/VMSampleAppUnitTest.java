@@ -8,14 +8,14 @@ import org.junit.Test;
 import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.client.shell.Shell;
-import com.neverwinterdp.vm.tool.VMZKClusterBuilder;
+import com.neverwinterdp.vm.tool.LocalVMCluster;
 
 public class VMSampleAppUnitTest  {
-  VMZKClusterBuilder  vmCluster ;
+  LocalVMCluster  vmCluster ;
   
   @Before
   public void setup() throws Exception {
-    vmCluster = new VMZKClusterBuilder() ;
+    vmCluster = new LocalVMCluster("build/vm-cluster") ;
     vmCluster.clean();
     vmCluster.start();
   }

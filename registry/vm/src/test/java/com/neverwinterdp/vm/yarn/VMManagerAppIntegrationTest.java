@@ -1,6 +1,5 @@
 package com.neverwinterdp.vm.yarn;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
 import org.junit.After;
@@ -25,45 +24,46 @@ import com.neverwinterdp.vm.environment.yarn.AppClient;
 import com.neverwinterdp.vm.environment.yarn.MiniClusterUtil;
 import com.neverwinterdp.vm.service.VMServiceApp;
 import com.neverwinterdp.vm.service.VMServiceCommand;
-import com.neverwinterdp.vm.tool.VMZKClusterBuilder;
+import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
 
-public class VMManagerAppUnitTest {
+public class VMManagerAppIntegrationTest {
   
   static {
     System.setProperty("java.net.preferIPv4Stack", "true") ;
     System.setProperty("log4j.configuration", "file:src/test/resources/test-log4j.properties") ;
   }
  
-  VMZKClusterBuilder vmCluster ;
+  private EmbededZKServer zookeeperServer ;
   MiniYARNCluster miniYarnCluster ;
+  YarnVMClient vmClient;
 
   @Before
   public void setup() throws Exception {
     YarnConfiguration yarnConf = new YarnConfiguration() ;
     yarnConf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization");
     miniYarnCluster = MiniClusterUtil.createMiniYARNCluster(yarnConf, 1);
-    Configuration conf = miniYarnCluster.getConfig() ;
     
     HadoopProperties yarnProps = new HadoopProperties();
     yarnProps.put("yarn.resourcemanager.scheduler.address", "0.0.0.0:8030");
+    
+    zookeeperServer = new EmbededZKServer("build/zookeeper-1", 2181);
+    zookeeperServer.clean();
+    zookeeperServer.start();
+    
     Registry registry = new RegistryImpl(RegistryConfig.getDefault());
-    YarnVMClient vmClient = new YarnVMClient(registry, yarnProps,miniYarnCluster.getConfig());
-    vmCluster = new VMZKClusterBuilder(vmClient) ;
-    vmCluster.clean(); 
-    vmCluster.startZookeeper();
-    vmCluster.getVMClient().getRegistry().connect();
+    registry.connect();
+    vmClient = new YarnVMClient(registry, yarnProps,miniYarnCluster.getConfig());
   }
 
   @After
   public void teardown() throws Exception {
-    vmCluster.shutdown();
+    zookeeperServer.shutdown();
     miniYarnCluster.stop();
     miniYarnCluster.close();
   }
 
   @Test
   public void testAppClient() throws Exception {
-    VMClient vmClient = vmCluster.getVMClient();
     Shell shell = new Shell(vmClient) ;
     
     String[] args = createVMConfigArgs("vm-master-1");

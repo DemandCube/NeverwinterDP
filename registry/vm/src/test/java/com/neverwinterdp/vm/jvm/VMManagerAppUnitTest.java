@@ -21,20 +21,21 @@ import com.neverwinterdp.vm.command.VMCommand;
 import com.neverwinterdp.vm.event.VMWaitingEventListener;
 import com.neverwinterdp.vm.service.VMService;
 import com.neverwinterdp.vm.service.VMServiceCommand;
-import com.neverwinterdp.vm.tool.VMZKClusterBuilder;
+import com.neverwinterdp.vm.tool.LocalVMCluster;
 
 public class VMManagerAppUnitTest  {
   static {
     System.setProperty("log4j.configuration", "file:src/test/resources/test-log4j.properties") ;
   }
   
-  VMZKClusterBuilder  vmCluster ;
+  LocalVMCluster      vmCluster;
+  //VMZKClusterBuilder  vmCluster ;
   Shell      shell;
   VMClient   vmClient;
   
   @Before
   public void setup() throws Exception {
-    vmCluster = new VMZKClusterBuilder() ;
+    vmCluster = new LocalVMCluster("build/vm-cluster") ;
     vmCluster.clean();
     vmCluster.startZookeeper();
     Thread.sleep(5000);
@@ -48,13 +49,13 @@ public class VMManagerAppUnitTest  {
   @Test
   public void testMaster() throws Exception {
     try {
-      WaitingNodeEventListener master1waitingListener = vmCluster.createVMMaster(null, "vm-master-1");
+      WaitingNodeEventListener master1waitingListener = vmCluster.getVMClusterBuilder().createVMMaster(null, "vm-master-1");
       master1waitingListener.waitForEvents(5000);
       TabularFormater info = master1waitingListener.getTabularFormaterEventLogInfo();
       info.setTitle("Waiting for vm-master events to make sure it is launched properly");
       System.out.println(info.getFormatText()); 
       
-      vmCluster.createVMMaster(null, "vm-master-2");
+      vmCluster.getVMClusterBuilder().createVMMaster(null, "vm-master-2");
       Thread.sleep(2000);
       
       vmClient = vmCluster.getVMClient();
