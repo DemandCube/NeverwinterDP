@@ -40,27 +40,25 @@ public class VMTMValidatorS3App extends VMApp {
     System.err.println("VMTMValidatorS3App: start run");
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
+    TrackingConfig trackingConfig = vmConfig.getVMAppConfigAs(TrackingConfig.class);
     Registry registry = getVM().getVMRegistry().getRegistry();
     registry.setRetryable(true);
     
-    String reportPath   = vmConfig.getProperty("tracking.report-path", "/applications/tracking-message");
     int    numOfReader  = vmConfig.getPropertyAsInt("tracking.num-of-reader", 3);
     long   maxRuntime   = vmConfig.getPropertyAsLong("tracking.max-runtime", 120000);
-    int    expectNumOfMessagePerChunk = vmConfig.getPropertyAsInt("tracking.expect-num-of-message-per-chunk", 0);
     
     String s3BucketName        = vmConfig.getProperty("s3.bucket.name", "tracking-sample-bucket");
     String s3StoragePath       = vmConfig.getProperty("s3.storage.path", "tracking-sample");
     long   partitionRollPeriod = vmConfig.getPropertyAsLong("s3.partition-roll-period", (15 * 60 * 1000));
     
-    logger.info("reportPath = "          + reportPath);
+    logger.info("reportPath = "          + trackingConfig.getReportPath());
     logger.info("numOfReader = "         + numOfReader);
     logger.info("maxRuntime = "          + maxRuntime);
     logger.info("s3.bucket.name  = "     + s3BucketName);
     logger.info("s3.storage.path = "     + s3StoragePath);
     logger.info("partitionRollPeriod = " + partitionRollPeriod);
     
-    TrackingValidatorService validatorService = new TrackingValidatorService(registry, reportPath);
-    validatorService.withExpectNumOfMessagePerChunk(expectNumOfMessagePerChunk);
+    TrackingValidatorService validatorService = new TrackingValidatorService(registry, trackingConfig);
     validatorService.addReader(
         new S3TrackingMessageReader(s3BucketName, s3StoragePath, partitionRollPeriod)
     );

@@ -1,19 +1,16 @@
 package com.neverwinterdp.scribengin.dataflow;
 
 
-import java.util.Properties;
-
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
-import com.neverwinterdp.scribengin.ScribenginClient;
-import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessagePerister;
-import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessageSplitter;
+import com.neverwinterdp.scribengin.dataflow.tracking.TrackingConfig;
+import com.neverwinterdp.scribengin.dataflow.tracking.TrackingDataflowBuilder;
+import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessage;
 import com.neverwinterdp.scribengin.dataflow.tracking.VMTMGeneratorKafkaApp;
 import com.neverwinterdp.scribengin.dataflow.tracking.VMTMValidatorKafkaApp;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
-import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
-import com.neverwinterdp.util.io.IOUtil;
-import com.neverwinterdp.util.log.LoggerFactory;
+import com.neverwinterdp.vm.VMConfig;
+import com.neverwinterdp.vm.client.VMSubmitter;
 
 public class TrackingSampleApiRunner  {
   String REPORT_PATH          = "/applications/tracking-sample/reports";
@@ -28,80 +25,51 @@ public class TrackingSampleApiRunner  {
     String BASE_DIR = "build/working";
     System.setProperty("app.home", BASE_DIR + "/scribengin");
     System.setProperty("vm.app.dir", BASE_DIR + "/scribengin");
-    Properties log4jProps = new Properties() ;
-    log4jProps.load(IOUtil.loadRes("classpath:scribengin/log4j/vm-log4j.properties"));
-    log4jProps.setProperty("log4j.rootLogger", "INFO, file");
-    LoggerFactory.log4jConfigure(log4jProps);
     
     localScribenginCluster = new LocalScribenginCluster(BASE_DIR) ;
     localScribenginCluster.clean(); 
+    localScribenginCluster.useLog4jConfig("classpath:scribengin/log4j/vm-log4j.properties");  
     localScribenginCluster.start();
     
-    ScribenginClient scribenginClient = localScribenginCluster.getScribenginClient() ;
-    shell = new ScribenginShell(scribenginClient);
+    shell = localScribenginCluster.getShell();
   }
   
   public void teardown() throws Exception {
     localScribenginCluster.shutdown();
   }
   
+  TrackingConfig createTrackingConfig() {
+    TrackingConfig vmTrackingConfig = new TrackingConfig();
+    vmTrackingConfig.setReportPath(REPORT_PATH);
+    vmTrackingConfig.setMessageSize(512);
+    vmTrackingConfig.setNumOfChunk(10);
+    vmTrackingConfig.setNumOfMessagePerChunk(numOfMessagePerChunk);
+    vmTrackingConfig.setGeneratorBreakInPeriod(500);
+    vmTrackingConfig.setKafkaZKConnects("127.0.0.1:2181");
+    vmTrackingConfig.setKafkaInputTopic("tracking.input");
+    vmTrackingConfig.setKafkaValidateTopic("tracking.aggregate");
+    vmTrackingConfig.setKafkaNumOfReplication(1);
+    vmTrackingConfig.setKafkaNumOfPartition(5);
+    return vmTrackingConfig;
+  }
+  
   public void submitVMTMGenrator() throws Exception {
-    String logGeneratorSubmitCommand = 
-        "vm submit " +
-        "  --dfs-app-home /applications/tracking-sample" +
-        "  --registry-connect 127.0.0.1:2181" +
-        "  --registry-db-domain /NeverwinterDP" +
-        "  --registry-implementation com.neverwinterdp.registry.zk.RegistryImpl" + 
-        "  --name vm-tracking-generator-1 --role vm-tm-generator" + 
-        "  --vm-application " + VMTMGeneratorKafkaApp.class.getName() + 
-        
-        "  --prop:tracking.report-path=" + REPORT_PATH +
-        "  --prop:tracking.num-of-writer=1" +
-        "  --prop:tracking.num-of-chunk=10" +
-        "  --prop:tracking.num-of-message-per-chunk=" + numOfMessagePerChunk +
-        "  --prop:tracking.break-in-period=500" +
-        "  --prop:tracking.message-size=512" +
-         
-        "  --prop:kafka.zk-connects=127.0.0.1:2181" +
-        "  --prop:kafka.topic=tracking.input" +
-        "  --prop:kafka.num-of-partition=5" +
-        "  --prop:kafka.replication=1" ;
-    shell.execute(logGeneratorSubmitCommand);
+    VMConfig vmConfig = new VMConfig();
+    vmConfig.
+      setVmId("vm-tracking-generator-1").
+      addRoles("vm-tm-generator").
+      withVmApplication(VMTMGeneratorKafkaApp.class).
+      setRegistryConfig(shell.getVMClient().getRegistry().getRegistryConfig()).
+      setVMAppConfig(createTrackingConfig());
+
+    VMSubmitter vmSubmitter = new VMSubmitter(shell.getVMClient(), "/applications/tracking-sample", vmConfig);
+    vmSubmitter.submit();
+    vmSubmitter.waitForRunning(30000);
   }
   
   public void runTMDataflow() throws Exception {
-    Dataflow<Message, Message> dfl = new Dataflow<Message, Message>(dataflowId);
-    dfl.
-      useWireDataSetFactory(new KafkaWireDataSetFactory("127.0.0.1:2181")).
-      setDefaultParallelism(5).
-      setDefaultReplication(1).
-      setMaxRuntime(dataflowMaxRuntime);
-    dfl.getWorkerDescriptor().setNumOfInstances(2);
-    dfl.getWorkerDescriptor().setNumOfExecutor(5);
-    
-    KafkaDataSet<Message> inputDs = 
-        dfl.createInput(new KafkaStorageConfig("input", "127.0.0.1:2181", "tracking.input"));
-    KafkaDataSet<Message> aggregateDs = 
-        dfl.createOutput(new KafkaStorageConfig("aggregate", "127.0.0.1:2181", "tracking.aggregate"));
-   
-    Operator<Message, Message> splitterOp = dfl.createOperator("splitter", TrackingMessageSplitter.class);
-    Operator<Message, Message> infoOp     = dfl.createOperator("info", TrackingMessagePerister.class);
-    Operator<Message, Message> warnOp     = dfl.createOperator("warn", TrackingMessagePerister.class);
-    Operator<Message, Message> errorOp    = dfl.createOperator("error", TrackingMessagePerister.class);
-
-    inputDs.
-      useRawReader().
-      connect(splitterOp);
-    
-    splitterOp.
-      connect(infoOp).
-      connect(warnOp).
-      connect(errorOp);
-    
-    infoOp.connect(aggregateDs);
-    warnOp.connect(aggregateDs);
-    errorOp.connect(aggregateDs);
-    
+    TrackingDataflowBuilder dflBuilder = new TrackingDataflowBuilder(dataflowId);
+    Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
     
@@ -111,11 +79,17 @@ public class TrackingSampleApiRunner  {
   }
 
   public void submitKafkaVMTMValidator() throws Exception {
-    String storageProps = 
-      "  --prop:kafka.zk-connects=127.0.0.1:2181"  +
-      "  --prop:kafka.topic=tracking.aggregate"  +
-      "  --prop:kafka.message-wait-timeout=30000" ;
-    submitVMTMValidator(VMTMValidatorKafkaApp.class, storageProps);
+    VMConfig vmConfig = new VMConfig();
+    vmConfig.
+      setVmId("vm-tracking-validator-1").
+      addRoles("vm-tracking-validator").
+      withVmApplication(VMTMValidatorKafkaApp.class).
+      setRegistryConfig(shell.getVMClient().getRegistry().getRegistryConfig()).
+      setVMAppConfig(createTrackingConfig());
+
+    VMSubmitter vmSubmitter = new VMSubmitter(shell.getVMClient(), "/applications/tracking-sample", vmConfig);
+    vmSubmitter.submit();
+    vmSubmitter.waitForRunning(30000);
   }
   
   void submitVMTMValidator(Class<?> vmAppType, String storageProps) throws Exception {
@@ -134,7 +108,6 @@ public class TrackingSampleApiRunner  {
         "  --prop:tracking.expect-num-of-message-per-chunk=" + numOfMessagePerChunk +
         "  --prop:tracking.max-runtime=" + dataflowMaxRuntime +
         storageProps ;
-    
     shell.execute(logValidatorSubmitCommand);
   }
   

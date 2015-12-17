@@ -2,11 +2,16 @@ package com.neverwinterdp.scribengin;
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
+import java.util.Properties;
+
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
+import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.util.io.FileUtil;
+import com.neverwinterdp.util.io.IOUtil;
+import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.client.LocalVMClient;
 import com.neverwinterdp.vm.tool.VMClusterBuilder;
 
@@ -15,6 +20,7 @@ public class LocalScribenginCluster {
   private KafkaCluster kafkaCluster;
   private Node esNode ;
   private ScribenginClusterBuilder scribenginClusterBuilder;
+  private ScribenginShell shell;
   
   public LocalScribenginCluster(String baseDir) throws Exception {
     this.baseDir = baseDir;
@@ -28,8 +34,17 @@ public class LocalScribenginCluster {
     return scribenginClusterBuilder.getScribenginClient();
   }
   
+  public ScribenginShell getShell() { return shell; }
+  
   public void clean() throws Exception {
     FileUtil.removeIfExist(baseDir, false);
+  }
+  
+  public void useLog4jConfig(String resPath) throws Exception {
+    Properties log4jProps = new Properties() ;
+    log4jProps.load(IOUtil.loadRes(resPath));
+    log4jProps.setProperty("log4j.rootLogger", "INFO, file");
+    LoggerFactory.log4jConfigure(log4jProps);
   }
   
   public void start() throws Exception {
@@ -47,6 +62,8 @@ public class LocalScribenginCluster {
     VMClusterBuilder.h1("Start vm-master");
     scribenginClusterBuilder = new ScribenginClusterBuilder(new VMClusterBuilder(null, new LocalVMClient()));
     scribenginClusterBuilder.start();
+    
+    shell = new ScribenginShell(getScribenginClient());
   }
   
   public void shutdown() throws Exception {

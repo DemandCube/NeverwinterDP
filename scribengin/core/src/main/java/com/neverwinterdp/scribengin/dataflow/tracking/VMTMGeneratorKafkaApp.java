@@ -22,31 +22,23 @@ public class VMTMGeneratorKafkaApp extends VMApp {
     logger = getVM().getLoggerFactory().getLogger(VMTMGeneratorKafkaApp.class);
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
+    TrackingConfig trackingConfig = vmConfig.getVMAppConfigAs(TrackingConfig.class);
+   
     Registry registry = getVM().getVMRegistry().getRegistry();
     registry.setRetryable(true);
-    String reportPath = vmConfig.getProperty("tracking.report-path", "/applications/tracking-message");
-    int numOfWriter = vmConfig.getPropertyAsInt("tracking.num-of-writer", 3);
-    service = new TrackingGeneratorService(registry, reportPath);
-    service.withNumOfChunk(vmConfig.getPropertyAsInt("tracking.num-of-chunk", 3));
-    service.withChunkSize(vmConfig.getPropertyAsInt("tracking.num-of-message-per-chunk", 1000));
-    service.withBreakInPeriod(vmConfig.getPropertyAsLong("tracking.break-in-period", -1));
-    service.withMessageSize(vmConfig.getPropertyAsInt("tracking.message-size", 512));
+    service = new TrackingGeneratorService(registry, trackingConfig);
     service.withLogger(logger);
     
-    String kafkaZkConnects     = vmConfig.getProperty("kafka.zk-connects", "zookeeper-1:2181");
-    String kafkaTopic          = vmConfig.getProperty("kafka.topic", "tracking.input");
-    int    kafkaNumOfPartition = vmConfig.getPropertyAsInt("kafka.num-of-partition", 5);
-    int    kafkaReplication    = vmConfig.getPropertyAsInt("kafka.replication", 1);
+    kafkaClient = new KafkaClient("KafkaClient", trackingConfig.getKafkaZKConnects());
     
-   
-    kafkaClient = new KafkaClient("KafkaClient", kafkaZkConnects);
-    
-    for(int i = 0; i < numOfWriter; i++) {
-      service.addWriter(new KafkaTrackingMessageWriter(kafkaTopic));
+    for(int i = 0; i < trackingConfig.getGeneratorNumOfWriter(); i++) {
+      service.addWriter(new KafkaTrackingMessageWriter(trackingConfig.getKafkaInputTopic()));
     }
     
-    if(!kafkaClient.getKafkaTool().topicExits(kafkaTopic)) {
-      kafkaClient.getKafkaTool().createTopic(kafkaTopic, kafkaReplication, kafkaNumOfPartition);
+    if(!kafkaClient.getKafkaTool().topicExits(trackingConfig.getKafkaInputTopic())) {
+      kafkaClient.
+        getKafkaTool().
+        createTopic(trackingConfig.getKafkaInputTopic(), trackingConfig.getKafkaNumOfReplication(), trackingConfig.getKafkaNumOfPartition());
     }
     service.start();
     service.awaitForTermination(7, TimeUnit.DAYS);

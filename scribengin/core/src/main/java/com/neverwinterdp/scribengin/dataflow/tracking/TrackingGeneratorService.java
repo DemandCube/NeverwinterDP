@@ -15,15 +15,21 @@ import com.neverwinterdp.registry.RegistryException;
 public class TrackingGeneratorService {
   private Logger logger ;
 
-  private ChunkGenerator chunkGenerator = new ChunkGenerator();
+  private ChunkGenerator chunkGenerator ;
+  
   private long   breakInPeriod  =   1;
   
   private TrackingRegistry trackingRegistry;
   private List<TrackingMessageWriter> writers = new ArrayList<>();
   private ExecutorService executorService;
   
-  public TrackingGeneratorService(Registry registry, String reportPath) throws RegistryException {
-    trackingRegistry = new TrackingRegistry(registry, reportPath, true);
+  public TrackingGeneratorService(Registry registry, TrackingConfig trackingConfig) throws RegistryException {
+    trackingRegistry = new TrackingRegistry(registry, trackingConfig.getReportPath(), true);
+    chunkGenerator = new ChunkGenerator();
+    chunkGenerator.numOfChunk = trackingConfig.getNumOfChunk();
+    chunkGenerator.numOfMessage = trackingConfig.getNumOfMessagePerChunk();
+    chunkGenerator.messageSize = trackingConfig.getMessageSize();
+    breakInPeriod = trackingConfig.getGeneratorBreakInPeriod();
   }
   
   public TrackingRegistry getTrackingRegistry() { return trackingRegistry; }
@@ -35,26 +41,6 @@ public class TrackingGeneratorService {
   
   public TrackingGeneratorService withVMId(String vmId) {
     chunkGenerator.vmId = vmId;
-    return this;
-  }
-  
-  public TrackingGeneratorService withNumOfChunk(int num) {
-    chunkGenerator.numOfChunk = num;
-    return this;
-  }
-  
-  public TrackingGeneratorService withChunkSize(int size) {
-    chunkGenerator.numOfMessage = size;
-    return this;
-  }
-  
-  public TrackingGeneratorService withMessageSize(int size) {
-    chunkGenerator.messageSize = size;
-    return this;
-  }
-  
-  public TrackingGeneratorService withBreakInPeriod(long period) {
-    this.breakInPeriod = period;
     return this;
   }
   

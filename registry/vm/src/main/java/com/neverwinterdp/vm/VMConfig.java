@@ -169,6 +169,11 @@ public class VMConfig {
     return this;
   }
   
+  public <T extends VMApp> VMConfig withVmApplication(Class<T> type) { 
+    this.vmApplication = type.getName();
+    return this;
+  }
+  
   public Map<String, String> getProperties() { return properties;}
   public VMConfig setProperties(Map<String, String> appProperties) { 
     this.properties = appProperties;
@@ -185,6 +190,16 @@ public class VMConfig {
     String value = properties.get(name); 
     if(value == null) return defaultValue;
     return value ;
+  }
+  
+  public void setVMAppConfig(VMAppConfig config) {
+    properties.putAll(config);
+  }
+  
+  public <T extends VMAppConfig> T getVMAppConfigAs(Class<T> type) throws InstantiationException, IllegalAccessException {
+    T config = type.newInstance();
+    config.putAll(properties);
+    return config;
   }
   
   public int getPropertyAsInt(String name, int defaultVal) { 

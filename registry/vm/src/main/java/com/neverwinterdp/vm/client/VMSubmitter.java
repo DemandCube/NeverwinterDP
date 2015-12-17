@@ -30,7 +30,7 @@ public class VMSubmitter {
   }
   
   
-  public VMDescriptor submit() throws Exception {
+  public VMSubmitter submit() throws Exception {
     if(uploadAppHome != null) {
       if(dfsAppHome == null) {
         String name = uploadAppHome.substring(uploadAppHome.lastIndexOf('/') + 1);
@@ -43,13 +43,14 @@ public class VMSubmitter {
     vmConfig.setDfsAppHome(dfsAppHome);
     vmConfig.addVMResource("vm.libs", dfsAppHome + "/libs");
     vmConfig.addVMResource("vm.config", dfsAppHome + "/config");
+    vmConfig.setRegistryConfig(vmClient.getRegistry().getRegistryConfig());
     CommandResult<?> result = vmClient.execute(masterVMDescriptor, new VMServiceCommand.Allocate(vmConfig));
     if(result.getErrorStacktrace() != null) {
       System.err.println(result.getErrorStacktrace());
       throw new Exception() ;
     }
     vmDescriptor = result.getResultAs(VMDescriptor.class);
-    return vmDescriptor ;
+    return this ;
   }
   
   public void waitForStatus(long timeout, VMStatus[] status) throws Exception {
@@ -60,11 +61,12 @@ public class VMSubmitter {
     eventListener.waitForEvents(timeout);
   }
   
-  public void waitForRunning(long timeout) throws Exception {
+  public VMSubmitter waitForRunning(long timeout) throws Exception {
     VMStatus[] status = new VMStatus[] {
       VMStatus.RUNNING, VMStatus.TERMINATED
     };
     waitForStatus(timeout, status) ;
+    return this;
   }
   
   public void waitForTerminated(long timeout) throws Exception {

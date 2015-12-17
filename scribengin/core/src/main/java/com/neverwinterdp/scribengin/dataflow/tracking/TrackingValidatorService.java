@@ -19,19 +19,15 @@ public class TrackingValidatorService {
   private RollableTrackingMessageReportBitSetMap bitSetReports ;
   private UpdateReportThread updateReportThread;
   
-  public TrackingValidatorService(Registry registry, String reportPath) throws RegistryException {
-    trackingRegistry = new TrackingRegistry(registry, reportPath, true);
+  public TrackingValidatorService(Registry registry, TrackingConfig trackingConfig) throws RegistryException {
+    trackingRegistry = new TrackingRegistry(registry, trackingConfig.getReportPath(), true);
+    expectNumOfMessagePerChunk = trackingConfig.getNumOfMessagePerChunk();
   }
   
   public TrackingRegistry getTrackingRegistry() { return trackingRegistry; }
   
   public TrackingValidatorService addReader(TrackingMessageReader reader) {
     readers.add(reader);
-    return this;
-  }
-  
-  public TrackingValidatorService withExpectNumOfMessagePerChunk(int num) {
-    expectNumOfMessagePerChunk = num;
     return this;
   }
   

@@ -24,21 +24,15 @@ public class TrackingSampleRunner  {
   
   public void setup() throws Exception {
     String BASE_DIR = "build/working";
-    FileUtil.removeIfExist(BASE_DIR, false);
-    
     System.setProperty("app.home", BASE_DIR + "/scribengin");
     System.setProperty("vm.app.dir", BASE_DIR + "/scribengin");
-    Properties log4jProps = new Properties() ;
-    log4jProps.load(IOUtil.loadRes("classpath:scribengin/log4j/vm-log4j.properties"));
-    log4jProps.setProperty("log4j.rootLogger", "INFO, file");
-    LoggerFactory.log4jConfigure(log4jProps);
     
     localScribenginCluster = new LocalScribenginCluster("build/working") ;
     localScribenginCluster.clean(); 
+    localScribenginCluster.useLog4jConfig("classpath:scribengin/log4j/vm-log4j.properties");
     localScribenginCluster.start();
     
-    ScribenginClient scribenginClient = localScribenginCluster.getScribenginClient() ;
-    shell = new ScribenginShell(scribenginClient);
+    shell = localScribenginCluster.getShell();
   }
   
   public void teardown() throws Exception {
@@ -63,7 +57,7 @@ public class TrackingSampleRunner  {
         "  --prop:tracking.message-size=512" +
          
         "  --prop:kafka.zk-connects=127.0.0.1:2181" +
-        "  --prop:kafka.topic=tracking.input" +
+        "  --prop:kafka.input-topic=tracking.input" +
         "  --prop:kafka.num-of-partition=5" +
         "  --prop:kafka.replication=1" ;
     shell.execute(logGeneratorSubmitCommand);
@@ -82,7 +76,7 @@ public class TrackingSampleRunner  {
   public void submitKafkaVMTMValidator() throws Exception {
     String storageProps = 
       "  --prop:kafka.zk-connects=127.0.0.1:2181"  +
-      "  --prop:kafka.topic=tracking.aggregate"  +
+      "  --prop:kafka.validate-topic=tracking.aggregate"  +
       "  --prop:kafka.message-wait-timeout=30000" ;
     submitVMTMValidator(VMTMValidatorKafkaApp.class, storageProps);
   }

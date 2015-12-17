@@ -36,28 +36,24 @@ public class VMTMValidatorSimpleHDFSApp extends VMApp {
     logger.info("Start run()");
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
+    TrackingConfig trackingConfig = vmConfig.getVMAppConfigAs(TrackingConfig.class);
     Registry registry = getVM().getVMRegistry().getRegistry();
     registry.setRetryable(true);
     
-    String reportPath   = vmConfig.getProperty("tracking.report-path", "/applications/tracking-message");
     int    numOfReader  = vmConfig.getPropertyAsInt("tracking.num-of-reader", 3);
     long   maxRuntime   = vmConfig.getPropertyAsLong("tracking.max-runtime", 120000);
-    int    expectNumOfMessagePerChunk = vmConfig.getPropertyAsInt("tracking.expect-num-of-message-per-chunk", 0);
     
     String hdfsLocation        = vmConfig.getProperty("hdfs.location", "/tracking-sample/hdfs/aggregate");
     long   partitionRollPeriod = vmConfig.getPropertyAsLong("hdfs.partition-roll-period", (15 * 60 * 1000));
     
-    logger.info("reportPath = "          + reportPath);
+    logger.info("reportPath = "          + trackingConfig.getReportPath());
     logger.info("numOfReader = "         + numOfReader);
     logger.info("maxRuntime = "          + maxRuntime);
     logger.info("hdfsLocation = "        + hdfsLocation);
     logger.info("partitionRollPeriod = " + partitionRollPeriod);
     
-    TrackingValidatorService validatorService = new TrackingValidatorService(registry, reportPath);
-    validatorService.withExpectNumOfMessagePerChunk(expectNumOfMessagePerChunk);
-    validatorService.addReader(
-        new HDFSTrackingMessageReader(hdfsLocation, partitionRollPeriod)
-    );
+    TrackingValidatorService validatorService = new TrackingValidatorService(registry, trackingConfig);
+    validatorService.addReader(new HDFSTrackingMessageReader(hdfsLocation, partitionRollPeriod));
     validatorService.start();
     validatorService.awaitForTermination(maxRuntime, TimeUnit.MILLISECONDS);
   }

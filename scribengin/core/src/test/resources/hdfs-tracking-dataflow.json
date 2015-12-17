@@ -27,16 +27,16 @@
          "type" : "kafka", "topic" : "tracking.input", "zk.connect" : "127.0.0.1:2181", "reader" : "raw", "name" : "tracking.input"
       },
 
-      "info" : {
-        "type" : "kafka", "topic" : "tracking.info", "zk.connect" : "127.0.0.1:2181", "name" : "tracking.info"
+      "splitter-to-info" : {
+        "type" : "kafka", "topic" : "tracking.info", "zk.connect" : "127.0.0.1:2181", "name" : "splitter-to-info"
       },
 
-      "warn" : {
-        "type" : "kafka", "topic" : "tracking.warn", "zk.connect" : "127.0.0.1:2181", "name" : "tracking.warn"
+      "splitter-to-warn" : {
+        "type" : "kafka", "topic" : "tracking.warn", "zk.connect" : "127.0.0.1:2181", "name" : "splitter-to-warn"
       },
 
-      "error" : {
-        "type" : "kafka", "topic" : "tracking.error", "zk.connect" : "127.0.0.1:2181", "name" : "tracking.error"
+      "splitter-to-error" : {
+        "type" : "kafka", "topic" : "tracking.error", "zk.connect" : "127.0.0.1:2181", "name" : "splitter-to-error"
       },
 
       "aggregate" : {
@@ -49,24 +49,24 @@
     "splitter": {
       "operator" : "com.neverwinterdp.scribengin.dataflow.sample.TrackingMessageSplitter",
       "inputs": ["input"],
-      "outputs": ["info", "warn", "error"]
+      "outputs": ["splitter-to-info", "splitter-to-warn", "splitter-to-error"]
     },
 
     "info": {
       "operator" : "com.neverwinterdp.scribengin.dataflow.sample.TrackingMessagePerister",
-      "inputs": ["info"],
+      "inputs": ["splitter-to-info"],
       "outputs": ["aggregate"]
     },
 
     "warn": {
       "operator" : "com.neverwinterdp.scribengin.dataflow.sample.TrackingMessagePerister",
-      "inputs": ["warn"],
+      "inputs": ["splitter-to-warn"],
       "outputs": ["aggregate"]
     },
 
     "error": {
       "operator" : "com.neverwinterdp.scribengin.dataflow.sample.TrackingMessagePerister",
-      "inputs": ["error"],
+      "inputs": ["splitter-to-error"],
       "outputs": ["aggregate"]
     }
   }  
