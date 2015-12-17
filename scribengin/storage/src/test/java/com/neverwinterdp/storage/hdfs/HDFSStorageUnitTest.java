@@ -52,8 +52,7 @@ public class HDFSStorageUnitTest {
   
   @Test
   public void testHDFSStorage() throws Exception {
-    StorageConfig storageConfig = new StorageConfig("hdfs", HDFS_DIR);
-    storageConfig.attribute(HDFSStorage.REGISTRY_PATH, "/storage/hdfs/test");
+    HDFSStorageConfig storageConfig = new HDFSStorageConfig("test", "/storage/hdfs/test", HDFS_DIR);
     storageConfig.setReplication(2);
     storageConfig.setPartitionStream(5);
     HDFSStorage storage = new HDFSStorage(registry,fs, storageConfig);

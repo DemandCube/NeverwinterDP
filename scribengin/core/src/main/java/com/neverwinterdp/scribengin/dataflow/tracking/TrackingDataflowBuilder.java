@@ -1,17 +1,22 @@
 package com.neverwinterdp.scribengin.dataflow.tracking;
 
+import com.neverwinterdp.scribengin.dataflow.DataSet;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
 import com.neverwinterdp.scribengin.dataflow.KafkaDataSet;
 import com.neverwinterdp.scribengin.dataflow.KafkaWireDataSetFactory;
 import com.neverwinterdp.scribengin.dataflow.Operator;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
+import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.vm.VMConfig;
 
 public class TrackingDataflowBuilder {
-  private String dataflowId           = "tracking";
-  private TrackingConfig trackingConfig;
+  static public enum OutputType { kafka, hdfs, s3 }
   
+  private String         dataflowId = "tracking";
+  private OutputType     outputType = OutputType.kafka;
+  private TrackingConfig trackingConfig;
+ 
   public TrackingDataflowBuilder(String dataflowId) {
     this.dataflowId = dataflowId;
   
@@ -30,9 +35,15 @@ public class TrackingDataflowBuilder {
     trackingConfig.setKafkaValidateTopic("tracking.aggregate");
     trackingConfig.setKafkaNumOfReplication(1);
     trackingConfig.setKafkaNumOfPartition(5);
+    
+    trackingConfig.setHDFSAggregateRegistryPath("/storage/hdfs/tracking-aggregate");
+    trackingConfig.setHDFSAggregateLocation("build/working/storage/hdfs/tracking-aggregate");
   }
   
-  
+  public TrackingDataflowBuilder setHDFSAggregateOutput() {
+    this.outputType = OutputType.hdfs;
+    return this;
+  }
   
   public Dataflow<TrackingMessage, TrackingMessage> buildDataflow() {
     Dataflow<TrackingMessage, TrackingMessage> dfl = new Dataflow<>(dataflowId);
@@ -46,9 +57,15 @@ public class TrackingDataflowBuilder {
     
     KafkaDataSet<TrackingMessage> inputDs = 
         dfl.createInput(new KafkaStorageConfig("input", "127.0.0.1:2181", "tracking.input"));
-    KafkaDataSet<TrackingMessage> aggregateDs = 
-        dfl.createOutput(new KafkaStorageConfig("aggregate", "127.0.0.1:2181", "tracking.aggregate"));
-   
+    
+    DataSet<TrackingMessage> aggregateDs = null;
+    if(outputType == OutputType.hdfs) {
+      aggregateDs = 
+        dfl.createOutput(new HDFSStorageConfig("aggregate", trackingConfig.getHDFSAggregateRegistryPath(), trackingConfig.getHDFSAggregateLocation()));
+    } else {
+      aggregateDs = 
+        dfl.createOutput(new KafkaStorageConfig("aggregate", trackingConfig.getKafkaZKConnects(), trackingConfig.getKafkaValidateTopic()));
+    }
     Operator<TrackingMessage, TrackingMessage> splitterOp = dfl.createOperator("splitter", TrackingMessageSplitter.class);
     Operator<TrackingMessage, TrackingMessage> infoOp     = dfl.createOperator("info", TrackingMessagePerister.class);
     Operator<TrackingMessage, TrackingMessage> warnOp     = dfl.createOperator("warn", TrackingMessagePerister.class);
@@ -79,7 +96,7 @@ public class TrackingDataflowBuilder {
     return vmConfig;
   }
   
-  public VMConfig buildKafkaVMTMValidatorKafka() throws Exception {
+  public VMConfig buildKafkaVMTMValidator() throws Exception {
     VMConfig vmConfig = new VMConfig();
     vmConfig.
       setVmId("vm-"  + dataflowId + "-validator").
@@ -89,6 +106,15 @@ public class TrackingDataflowBuilder {
     return vmConfig;
   }
   
+  public VMConfig buildHDFSVMTMValidator() throws Exception {
+    VMConfig vmConfig = new VMConfig();
+    vmConfig.
+      setVmId("vm-"  + dataflowId + "-validator").
+      addRoles("vm-" + dataflowId + "-validator").
+      withVmApplication(VMTMValidatorHDFSApp.class).
+      setVMAppConfig(trackingConfig);
+    return vmConfig;
+  }
   
   public void runMonitor(ScribenginShell shell) throws Exception {
     shell.execute(

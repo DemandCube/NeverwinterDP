@@ -47,25 +47,25 @@
 
   "operators": {
     "splitter": {
-      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.TrackingMessageSplitter",
+      "operator" : "com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessageSplitter",
       "inputs": ["input"],
       "outputs": ["splitter-to-info", "splitter-to-warn", "splitter-to-error"]
     },
 
     "info": {
-      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.TrackingMessagePerister",
+      "operator" : "com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessagePerister",
       "inputs": ["splitter-to-info"],
       "outputs": ["aggregate"]
     },
 
     "warn": {
-      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.TrackingMessagePerister",
+      "operator" : "com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessagePerister",
       "inputs": ["splitter-to-warn"],
       "outputs": ["aggregate"]
     },
 
     "error": {
-      "operator" : "com.neverwinterdp.scribengin.dataflow.sample.TrackingMessagePerister",
+      "operator" : "com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessagePerister",
       "inputs": ["splitter-to-error"],
       "outputs": ["aggregate"]
     }

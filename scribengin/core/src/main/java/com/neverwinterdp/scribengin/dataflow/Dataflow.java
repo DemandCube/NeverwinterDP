@@ -3,6 +3,7 @@ package com.neverwinterdp.scribengin.dataflow;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 
 public class Dataflow<IN, OUT> {
@@ -47,9 +48,15 @@ public class Dataflow<IN, OUT> {
     dataSets.put(ds.getName(), ds);
     return ds;
   }
-  
+
   public KafkaDataSet<OUT> createOutput(KafkaStorageConfig config) {
     KafkaDataSet<OUT> ds = new KafkaDataSet<OUT>(DataSetType.Output, config);
+    dataSets.put(ds.getName(), ds);
+    return ds;
+  }
+  
+  public HDFSDataSet<OUT> createOutput(HDFSStorageConfig config) {
+    HDFSDataSet<OUT> ds = new HDFSDataSet<OUT>(DataSetType.Output, config);
     dataSets.put(ds.getName(), ds);
     return ds;
   }

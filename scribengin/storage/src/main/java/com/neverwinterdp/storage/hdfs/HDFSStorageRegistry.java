@@ -12,27 +12,30 @@ import com.neverwinterdp.ssm.SSMRegistry;
 import com.neverwinterdp.storage.StorageConfig;
 
 public class HDFSStorageRegistry {
-  private Registry      registry;
-  private StorageConfig storageConfig;
-  private String        registryPath;
-  
-  private Node          rootNode;
-  private Node          partitionsNode;
-  
+  private Registry          registry;
+  private HDFSStorageConfig storageConfig;
+  private String            registryPath;
+
+  private Node rootNode;
+  private Node partitionsNode;
+
   public HDFSStorageRegistry(Registry registry, StorageConfig sconfig) throws RegistryException {
-    this.registry     = registry;
-    this.registryPath = sconfig.attribute(HDFSStorage.REGISTRY_PATH);;
+    this(registry, new HDFSStorageConfig(sconfig));
+  }
+
+  public HDFSStorageRegistry(Registry registry, HDFSStorageConfig sconfig) throws RegistryException {
+    this.registry      = registry;
+    this.storageConfig = sconfig;
+    this.registryPath  = sconfig.getRegistryPath();;
     
     rootNode       = registry.get(registryPath);
     partitionsNode = rootNode.getChild("partitions");
     
     if(exists()) {
-      this.storageConfig = rootNode.getDataAs(StorageConfig.class) ;
-    } else {
-      this.storageConfig = sconfig;
+      this.storageConfig = rootNode.getDataAs(HDFSStorageConfig.class) ;
     }
   }
-
+  
   public Registry getRegistry() { return registry ; }
   
   public String getRegistryPath() { return registryPath; }

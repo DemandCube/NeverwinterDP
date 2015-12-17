@@ -22,6 +22,9 @@ public class TrackingConfig extends VMAppConfig {
   final static public String KAFKA_NUM_OF_REPLICATION   = "kafka.replication";
   final static public String KAFKA_MESSAGE_WAIT_TIMEOUT = "kafka.message-wait-timeout";
   
+  final static public String HDFS_AGGREGATE_REGISTTRY_PATH = "hdfs.aggregate.registry-path";
+  final static public String HDFS_AGGREGATE_LOCATION       = "hdfs.aggregate.location";
+  
   public TrackingConfig() {
     setReportPath("/applications/tracking-message");
     setGeneratorNumOfWriter(1);
@@ -69,4 +72,10 @@ public class TrackingConfig extends VMAppConfig {
   
   public long getKafkaMessageWaitTimeout() { return longAttribute(KAFKA_MESSAGE_WAIT_TIMEOUT, 30000); }
   public void setKafkaMessageWaitTimeout(long timeout) { attribute(KAFKA_MESSAGE_WAIT_TIMEOUT, timeout); }
+
+  public String getHDFSAggregateRegistryPath() { return attribute(HDFS_AGGREGATE_REGISTTRY_PATH); }
+  public void setHDFSAggregateRegistryPath(String path) { attribute(HDFS_AGGREGATE_REGISTTRY_PATH, path); }
+  
+  public String getHDFSAggregateLocation() { return attribute(HDFS_AGGREGATE_LOCATION); }
+  public void   setHDFSAggregateLocation(String location) { attribute(HDFS_AGGREGATE_LOCATION, location); }
 }

@@ -12,8 +12,8 @@ import org.slf4j.Logger;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.storage.Record;
-import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.hdfs.HDFSStorage;
+import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.hdfs.source.HDFSSource;
 import com.neverwinterdp.storage.hdfs.source.HDFSSourcePartition;
 import com.neverwinterdp.storage.hdfs.source.HDFSSourcePartitionStream;
@@ -36,22 +36,14 @@ public class VMTMValidatorHDFSApp extends VMApp {
     Registry registry = getVM().getVMRegistry().getRegistry();
     registry.setRetryable(true);
     
-    int    numOfReader  = vmConfig.getPropertyAsInt("tracking.num-of-reader", 3);
-    long   maxRuntime   = vmConfig.getPropertyAsLong("tracking.max-runtime", 120000);
-    
-    String storageRegPath      = vmConfig.getProperty("storage.registry.path", "/storage/hdfs/tracking-aggregate");
-    long   partitionRollPeriod = vmConfig.getPropertyAsLong("hdfs.partition-roll-period", (15 * 60 * 1000));
-    
     logger.info("reportPath = "            + trackingConfig.getReportPath());
-    logger.info("numOfReader = "           + numOfReader);
-    logger.info("maxRuntime = "            + maxRuntime);
-    logger.info("storage registry path = " + storageRegPath);
-    logger.info("partitionRollPeriod = "   + partitionRollPeriod);
+    logger.info("maxRuntime = "            + trackingConfig.getValidatorMaxRuntime());
+    logger.info("storage registry path = " + trackingConfig.getHDFSAggregateRegistryPath());
     
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, trackingConfig);
-    validatorService.addReader(new HDFSTrackingMessageReader(registry, storageRegPath));
+    validatorService.addReader(new HDFSTrackingMessageReader(registry, trackingConfig.getHDFSAggregateRegistryPath()));
     validatorService.start();
-    validatorService.awaitForTermination(maxRuntime, TimeUnit.MILLISECONDS);
+    validatorService.awaitForTermination(trackingConfig.getValidatorMaxRuntime(), TimeUnit.MILLISECONDS);
   }
 
   public class HDFSTrackingMessageReader extends TrackingMessageReader {
@@ -78,13 +70,12 @@ public class VMTMValidatorHDFSApp extends VMApp {
   
   public class HDFSSourceReader extends Thread {
     private Registry                       registry;
-    private StorageConfig                  storageConfig;
+    private HDFSStorageConfig              storageConfig;
     private BlockingQueue<TrackingMessage> tmQueue;
 
     HDFSSourceReader(Registry registry, String registryPath, BlockingQueue<TrackingMessage> tmQueue) {
       this.registry = registry;
-      storageConfig = new StorageConfig("hdfs", registryPath);
-      storageConfig.attribute(HDFSStorage.REGISTRY_PATH, registryPath);
+      storageConfig = new HDFSStorageConfig("hdfs", registryPath, "");
       this.tmQueue = tmQueue;
     }
     

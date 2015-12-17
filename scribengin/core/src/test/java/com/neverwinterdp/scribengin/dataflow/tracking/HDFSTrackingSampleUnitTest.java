@@ -9,7 +9,7 @@ public class HDFSTrackingSampleUnitTest  {
   
   @Before
   public void setup() throws Exception {
-    trackingSampleRunner.dataflowMaxRuntime = 60000;
+    trackingSampleRunner.dataflowMaxRuntime = 90000;
     trackingSampleRunner.setup();
   }
   
