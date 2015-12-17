@@ -1,6 +1,5 @@
-package com.neverwinterdp.scribengin.tool;
+package com.neverwinterdp.scribengin;
 
-import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.vm.tool.VMClusterBuilder;
 
 public class ScribenginClusterBuilder {

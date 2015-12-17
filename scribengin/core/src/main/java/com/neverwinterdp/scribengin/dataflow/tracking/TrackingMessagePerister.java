@@ -1,10 +1,9 @@
-package com.neverwinterdp.scribengin.dataflow.sample;
+package com.neverwinterdp.scribengin.dataflow.tracking;
 
 import java.util.Set;
 
-import com.neverwinterdp.scribengin.dataflow.api.DataStreamOperator;
-import com.neverwinterdp.scribengin.dataflow.api.DataStreamOperatorContext;
-import com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMessage;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperator;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
 import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.util.JSONSerializer;
 

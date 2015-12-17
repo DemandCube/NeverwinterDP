@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.tool.tracking;
+package com.neverwinterdp.scribengin.dataflow.tracking;
 
 abstract public class TrackingMessageReader {
   public void onInit(TrackingRegistry registry) throws Exception {

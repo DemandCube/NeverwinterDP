@@ -1,14 +1,14 @@
-package com.neverwinterdp.scribengin.dataflow.sample;
+package com.neverwinterdp.scribengin.dataflow.tracking;
 
 import java.util.Properties;
 
+import com.neverwinterdp.scribengin.LocalScribenginCluster;
 import com.neverwinterdp.scribengin.ScribenginClient;
-import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMGeneratorKafkaApp;
-import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorHDFSApp;
-import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp;
-import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorS3App;
+import com.neverwinterdp.scribengin.dataflow.tracking.VMTMGeneratorKafkaApp;
+import com.neverwinterdp.scribengin.dataflow.tracking.VMTMValidatorHDFSApp;
+import com.neverwinterdp.scribengin.dataflow.tracking.VMTMValidatorKafkaApp;
+import com.neverwinterdp.scribengin.dataflow.tracking.VMTMValidatorS3App;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
-import com.neverwinterdp.scribengin.tool.LocalScribenginCluster;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
@@ -23,14 +23,11 @@ public class TrackingSampleRunner  {
   ScribenginShell shell;
   
   public void setup() throws Exception {
-    FileUtil.removeIfExist("build/working", false);
-    FileUtil.removeIfExist("build/data", false);
-    FileUtil.removeIfExist("build/logs", false);
-    FileUtil.removeIfExist("build/elasticsearch", false);
-    FileUtil.removeIfExist("build/cluster", false);
-    FileUtil.removeIfExist("build/scribengin", false);
+    String BASE_DIR = "build/working";
+    FileUtil.removeIfExist(BASE_DIR, false);
     
-    System.setProperty("vm.app.dir", "build/scribengin");
+    System.setProperty("app.home", BASE_DIR + "/scribengin");
+    System.setProperty("vm.app.dir", BASE_DIR + "/scribengin");
     Properties log4jProps = new Properties() ;
     log4jProps.load(IOUtil.loadRes("classpath:scribengin/log4j/vm-log4j.properties"));
     log4jProps.setProperty("log4j.rootLogger", "INFO, file");
@@ -149,13 +146,13 @@ public class TrackingSampleRunner  {
   
   public void runMonitor() throws Exception {
     shell.execute(
-      "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor" +
+      "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
       "  --dataflow-id " + dataflowId + " --show-history-workers " +
       "  --report-path " + REPORT_PATH + " --max-runtime " + dataflowMaxRuntime +"  --print-period 10000"
     );
       
     shell.execute(
-      "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingJUnitShellPlugin" +
+      "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingJUnitShellPlugin" +
       "  --dataflow-id " + dataflowId + "  --report-path " + REPORT_PATH + " --junit-report-file build/junit-report.xml"
     );
       

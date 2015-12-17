@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.util;
+package com.neverwinterdp.scribengin.shell;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

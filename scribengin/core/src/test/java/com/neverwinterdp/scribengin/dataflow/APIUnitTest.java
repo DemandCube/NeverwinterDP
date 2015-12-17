@@ -1,9 +1,14 @@
-package com.neverwinterdp.scribengin.dataflow.api;
+package com.neverwinterdp.scribengin.dataflow;
 
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.dataflow.sample.TrackingMessagePerister;
-import com.neverwinterdp.scribengin.dataflow.sample.TrackingMessageSplitter;
+import com.neverwinterdp.scribengin.dataflow.Dataflow;
+import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
+import com.neverwinterdp.scribengin.dataflow.KafkaDataSet;
+import com.neverwinterdp.scribengin.dataflow.KafkaWireDataSetFactory;
+import com.neverwinterdp.scribengin.dataflow.Operator;
+import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessagePerister;
+import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessageSplitter;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
 
@@ -13,15 +18,15 @@ public class APIUnitTest {
   public void testApi() throws Exception {
     Dataflow<Message, Message> dfl = new Dataflow<Message, Message>("dataflow");
     dfl.useWireDataSetFactory(new KafkaWireDataSetFactory("127.0.0.1:2181"));
-    KafkaDataSet<Message> inputDs     = 
+    KafkaDataSet<Message> inputDs = 
         dfl.createInput(new KafkaStorageConfig("input", "127.0.0.1:2181", "input"));
     KafkaDataSet<Message> aggregateDs = 
         dfl.createOutput(new KafkaStorageConfig("aggregate", "127.0.0.1:2181", "aggregate"));
    
     Operator<Message, Message> splitterOp = dfl.createOperator("splitter", TrackingMessageSplitter.class);
-    Operator<Message, Message> infoOp     = dfl.createOperator("info", TrackingMessagePerister.class);
-    Operator<Message, Message> warnOp     = dfl.createOperator("warn", TrackingMessagePerister.class);
-    Operator<Message, Message> errorOp    = dfl.createOperator("error", TrackingMessagePerister.class);
+    Operator<Message, Message> infoOp     = dfl.createOperator("info",     TrackingMessagePerister.class);
+    Operator<Message, Message> warnOp     = dfl.createOperator("warn",     TrackingMessagePerister.class);
+    Operator<Message, Message> errorOp    = dfl.createOperator("error",    TrackingMessagePerister.class);
 
     inputDs.connect(splitterOp);
     splitterOp.

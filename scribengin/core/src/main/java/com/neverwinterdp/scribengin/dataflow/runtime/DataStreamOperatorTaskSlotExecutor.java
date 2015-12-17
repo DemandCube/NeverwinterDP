@@ -4,7 +4,7 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskStatus;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.registry.task.dedicated.TaskSlotExecutor;
-import com.neverwinterdp.scribengin.dataflow.api.DataStreamOperator;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperator;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.WorkerService;
 import com.neverwinterdp.storage.Record;

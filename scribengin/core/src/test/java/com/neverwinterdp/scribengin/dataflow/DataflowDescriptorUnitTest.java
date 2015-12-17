@@ -1,9 +1,9 @@
-package com.neverwinterdp.scribengin.dataflow.api;
+package com.neverwinterdp.scribengin.dataflow;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.neverwinterdp.scribengin.dataflow.api.DataflowDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.IOUtil;
 

@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.api;
+package com.neverwinterdp.scribengin.dataflow;
 
 public class KafkaWireDataSetFactory implements WireDataSetFactory {
   private String zkConnects ;

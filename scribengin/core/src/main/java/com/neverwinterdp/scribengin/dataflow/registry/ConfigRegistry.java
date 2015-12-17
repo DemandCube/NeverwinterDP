@@ -5,7 +5,7 @@ import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
-import com.neverwinterdp.scribengin.dataflow.api.DataflowDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 
 public class ConfigRegistry {
   private Registry       registry;

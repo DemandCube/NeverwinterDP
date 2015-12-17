@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.api;
+package com.neverwinterdp.scribengin.dataflow;
 
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 

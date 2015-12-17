@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.api;
+package com.neverwinterdp.scribengin.dataflow;
 
 import java.util.Set;
 

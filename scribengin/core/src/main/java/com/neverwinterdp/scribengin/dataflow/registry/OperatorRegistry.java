@@ -5,7 +5,7 @@ import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
-import com.neverwinterdp.scribengin.dataflow.api.OperatorDescriptor;
+import com.neverwinterdp.scribengin.dataflow.OperatorDescriptor;
 
 public class OperatorRegistry {
   private Registry registry;

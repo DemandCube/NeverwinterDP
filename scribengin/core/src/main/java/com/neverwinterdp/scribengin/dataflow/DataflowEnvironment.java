@@ -1,24 +1,23 @@
-package com.neverwinterdp.scribengin.dataflow.api;
+package com.neverwinterdp.scribengin.dataflow;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
-import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
+import com.neverwinterdp.scribengin.ScribenginClient;
 
 public class DataflowEnvironment {
   private Registry registry;
-  
-  protected DataflowEnvironment() { }
-  
-  public DataflowEnvironment(Registry registry) { 
-    init(registry);
-  }
+  private ScribenginClient scribenginClient;
   
   public DataflowEnvironment(RegistryConfig config) throws Exception { 
-    init(config.newInstance());
+    this(config.newInstance());
   }
   
-  protected void init(Registry registry) {
-    this.registry = registry;
+  public DataflowEnvironment(Registry registry) { 
+    this.scribenginClient = new ScribenginClient(registry);
+  }
+  
+  public DataflowEnvironment(ScribenginClient scribenginClient) { 
+    this.scribenginClient = new ScribenginClient(registry);
   }
   
   public void submit(Dataflow<?, ?> dataflow, long maxWaitForRunning) throws Exception {

@@ -1,19 +1,17 @@
-package com.neverwinterdp.scribengin.dataflow.api;
+package com.neverwinterdp.scribengin.dataflow;
 
 
 import java.util.Properties;
 
+import com.neverwinterdp.scribengin.LocalScribenginCluster;
 import com.neverwinterdp.scribengin.ScribenginClient;
-import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
-import com.neverwinterdp.scribengin.dataflow.sample.TrackingMessagePerister;
-import com.neverwinterdp.scribengin.dataflow.sample.TrackingMessageSplitter;
-import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMGeneratorKafkaApp;
-import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp;
+import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessagePerister;
+import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessageSplitter;
+import com.neverwinterdp.scribengin.dataflow.tracking.VMTMGeneratorKafkaApp;
+import com.neverwinterdp.scribengin.dataflow.tracking.VMTMValidatorKafkaApp;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
-import com.neverwinterdp.scribengin.tool.LocalScribenginCluster;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
-import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 
@@ -27,19 +25,15 @@ public class TrackingSampleApiRunner  {
   ScribenginShell shell;
   
   public void setup() throws Exception {
-    FileUtil.removeIfExist("build/working", false);
-    FileUtil.removeIfExist("build/data", false);
-    FileUtil.removeIfExist("build/logs", false);
-    FileUtil.removeIfExist("build/cluster", false);
-    FileUtil.removeIfExist("build/scribengin", false);
-    
-    System.setProperty("vm.app.dir", "build/scribengin");
+    String BASE_DIR = "build/working";
+    System.setProperty("app.home", BASE_DIR + "/scribengin");
+    System.setProperty("vm.app.dir", BASE_DIR + "/scribengin");
     Properties log4jProps = new Properties() ;
     log4jProps.load(IOUtil.loadRes("classpath:scribengin/log4j/vm-log4j.properties"));
     log4jProps.setProperty("log4j.rootLogger", "INFO, file");
     LoggerFactory.log4jConfigure(log4jProps);
     
-    localScribenginCluster = new LocalScribenginCluster("build/working") ;
+    localScribenginCluster = new LocalScribenginCluster(BASE_DIR) ;
     localScribenginCluster.clean(); 
     localScribenginCluster.start();
     
@@ -98,6 +92,7 @@ public class TrackingSampleApiRunner  {
     inputDs.
       useRawReader().
       connect(splitterOp);
+    
     splitterOp.
       connect(infoOp).
       connect(warnOp).
@@ -110,9 +105,9 @@ public class TrackingSampleApiRunner  {
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
     
-    DataflowSubmitter submitter = new DataflowSubmitter(shell.getScribenginClient(), dflDescriptor);
-    submitter.submit();
-    submitter.waitForRunning(60000);
+    new DataflowSubmitter(shell.getScribenginClient(), dfl).
+      submit().
+      waitForRunning(60000);
   }
 
   public void submitKafkaVMTMValidator() throws Exception {
@@ -145,13 +140,13 @@ public class TrackingSampleApiRunner  {
   
   public void runMonitor() throws Exception {
     shell.execute(
-      "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor" +
+      "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
       "  --dataflow-id " + dataflowId + " --show-history-workers " +
       "  --report-path " + REPORT_PATH + " --max-runtime " + dataflowMaxRuntime +"  --print-period 10000"
     );
       
     shell.execute(
-      "plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingJUnitShellPlugin" +
+      "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingJUnitShellPlugin" +
       "  --dataflow-id " + dataflowId + "  --report-path " + REPORT_PATH + " --junit-report-file build/junit-report.xml"
     );
       

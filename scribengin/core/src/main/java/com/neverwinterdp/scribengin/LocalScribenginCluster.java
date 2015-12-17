@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.tool;
+package com.neverwinterdp.scribengin;
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
@@ -6,7 +6,6 @@ import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
-import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.vm.client.LocalVMClient;
 import com.neverwinterdp.vm.tool.VMClusterBuilder;
@@ -53,6 +52,7 @@ public class LocalScribenginCluster {
   public void shutdown() throws Exception {
     scribenginClusterBuilder.shutdown();
     kafkaCluster.shutdown();
+    esNode.stop();
     esNode.close();
   }
 }
