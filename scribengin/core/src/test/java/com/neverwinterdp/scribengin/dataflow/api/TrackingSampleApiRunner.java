@@ -1,12 +1,7 @@
 package com.neverwinterdp.scribengin.dataflow.api;
 
 
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
-
 import java.util.Properties;
-
-import org.elasticsearch.node.Node;
-import org.elasticsearch.node.NodeBuilder;
 
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
@@ -15,8 +10,7 @@ import com.neverwinterdp.scribengin.dataflow.sample.TrackingMessageSplitter;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMGeneratorKafkaApp;
 import com.neverwinterdp.scribengin.dataflow.tool.tracking.VMTMValidatorKafkaApp;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
-import com.neverwinterdp.scribengin.tool.EmbededVMClusterBuilder;
-import com.neverwinterdp.scribengin.tool.ScribenginClusterBuilder;
+import com.neverwinterdp.scribengin.tool.LocalScribenginCluster;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.FileUtil;
@@ -29,15 +23,13 @@ public class TrackingSampleApiRunner  {
   int    numOfMessagePerChunk = 1000;
   long   dataflowMaxRuntime   = 45000;
   
-  ScribenginClusterBuilder clusterBuilder ;
-  Node esNode ;
+  LocalScribenginCluster localScribenginCluster ;
   ScribenginShell shell;
   
   public void setup() throws Exception {
     FileUtil.removeIfExist("build/working", false);
     FileUtil.removeIfExist("build/data", false);
     FileUtil.removeIfExist("build/logs", false);
-    FileUtil.removeIfExist("build/elasticsearch", false);
     FileUtil.removeIfExist("build/cluster", false);
     FileUtil.removeIfExist("build/scribengin", false);
     
@@ -47,24 +39,16 @@ public class TrackingSampleApiRunner  {
     log4jProps.setProperty("log4j.rootLogger", "INFO, file");
     LoggerFactory.log4jConfigure(log4jProps);
     
-    NodeBuilder nb = nodeBuilder();
-    nb.getSettings().put("cluster.name",       "neverwinterdp");
-    nb.getSettings().put("path.data",          "build/elasticsearch/data");
-    nb.getSettings().put("node.name",          "elasticsearch-1");
-    nb.getSettings().put("transport.tcp.port", "9300");
-    esNode = nb.node();
+    localScribenginCluster = new LocalScribenginCluster("build/working") ;
+    localScribenginCluster.clean(); 
+    localScribenginCluster.start();
     
-    clusterBuilder = new ScribenginClusterBuilder(new EmbededVMClusterBuilder()) ;
-    clusterBuilder.clean(); 
-    clusterBuilder.startVMMasters();
-    
-    ScribenginClient scribenginClient = clusterBuilder.getScribenginClient() ;
+    ScribenginClient scribenginClient = localScribenginCluster.getScribenginClient() ;
     shell = new ScribenginShell(scribenginClient);
   }
   
   public void teardown() throws Exception {
-    clusterBuilder.shutdown();
-    esNode.close();
+    localScribenginCluster.shutdown();
   }
   
   public void submitVMTMGenrator() throws Exception {
