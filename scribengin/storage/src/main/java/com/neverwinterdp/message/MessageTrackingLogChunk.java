@@ -5,12 +5,13 @@ import java.text.DecimalFormat;
 import java.util.BitSet;
 import java.util.zip.DataFormatException;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neverwinterdp.util.io.IOUtil;
 
 public class MessageTrackingLogChunk {
   static DecimalFormat ID_FORMAT = new DecimalFormat("00000000");
   
-  private String name;
+  private String  name;
   private int     chunkId;
   private int     chunkSize;
   private int     trackingProgress;
@@ -20,7 +21,8 @@ public class MessageTrackingLogChunk {
   private int     trackingCount;
   private boolean complete = false;
 
-  transient private BitSet bitSet;
+  transient private boolean persisted = false;
+  transient private BitSet  bitSet;
 
   public MessageTrackingLogChunk() {}
   
@@ -79,6 +81,10 @@ public class MessageTrackingLogChunk {
     bitSet = BitSet.valueOf(bitData);
   }
   
+  @JsonIgnore
+  public boolean isPersisted() { return this.persisted; }
+  public void    setPersisted(boolean b) { persisted = b; }
+  
   synchronized public int log(MessageTracking mTracking, MessageTrackingLog log) {
     if(mTracking.getChunkId() != chunkId) {
       throw new RuntimeException("The chunk id is not matched, chunkId = " + chunkId + ", message chunk id = " + mTracking.getChunkId());
@@ -88,11 +94,10 @@ public class MessageTrackingLogChunk {
       throw new RuntimeException("The tracking id is greater than the chunk size" + chunkSize);
     }
     
-    
     if(idx > trackingProgress) trackingProgress = idx;
-    if(bitSet.get(idx)) trackingDuplicatedCount++ ;
+    if(bitSet.get(idx)) trackingDuplicatedCount++;
     bitSet.set(idx, true);
-    trackingCount++ ;
+    trackingCount++;
     return trackingCount;
   }
   
@@ -106,7 +111,12 @@ public class MessageTrackingLogChunk {
       }
     }
     if(noLostTo < 0) trackingNoLostTo = trackingProgress;
+    else trackingNoLostTo = noLostTo ;
+    
     trackingLostCount = lostCount;
+    if(trackingNoLostTo + 1 == chunkSize) {
+      complete = true;
+    }
   }
   
   public String toChunkIdName() { return toChunkIdName(chunkId); }

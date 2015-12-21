@@ -28,12 +28,12 @@ public class MessageTrackingLogReporter {
   public void merge(MessageTrackingLogChunk chunk) {
     for(int i = 0; i < aggregateChunkReports.size(); i++) {
       AggregateChunkReport sel = aggregateChunkReports.get(i) ;
-      if(sel.getFromChunkId() > chunk.getChunkId()) {
+      if(chunk.getChunkId() < sel.getFromChunkId()) {
         AggregateChunkReport newChunkReport = new AggregateChunkReport();
         newChunkReport.merge(chunk);
         aggregateChunkReports.add(i, newChunkReport);
         return;
-      } else if(sel.getToChunkId() == chunk.getChunkId()) {
+      } else if(chunk.getChunkId() == sel.getToChunkId() + 1) {
         sel.merge(chunk);
         return;
       }
@@ -51,7 +51,7 @@ public class MessageTrackingLogReporter {
       if(previous == null) {
         previous = current;
         holder.add(current);
-      } else if(previous.getToChunkId() == current.getFromChunkId()) {
+      } else if(previous.getToChunkId() + 1 == current.getFromChunkId()) {
         previous.merge(current);
       } else {
         previous = current;
@@ -99,7 +99,7 @@ public class MessageTrackingLogReporter {
 
     public void merge(MessageTrackingLogChunk chunk) {
       if(fromChunkId < 0) fromChunkId = chunk.getChunkId();
-      toChunkId = chunk.getChunkId() + 1;
+      toChunkId = chunk.getChunkId();
       trackingLostCount += chunk.getTrackingLostCount();
       trackingDuplicatedCount += chunk.getTrackingDuplicatedCount();
     }
