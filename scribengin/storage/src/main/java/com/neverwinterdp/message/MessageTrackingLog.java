@@ -1,28 +1,24 @@
 package com.neverwinterdp.message;
 
 public class MessageTrackingLog {
+  private long   timestamp;
   private String   name;
-  private long     timestamp;
-  private short    activityCode;
-  private String[] tags;
-  
+  private String[] tag;
+
   public MessageTrackingLog() { }
   
-  public MessageTrackingLog(String name, long timestamp, short activityCode) {
-    this.name         = name;
-    this.timestamp    = timestamp;
-    this.activityCode = activityCode;
+  public MessageTrackingLog(String name, String[] tag) {
+    this.timestamp = System.currentTimeMillis();
+    this.name      = name;
+    this.tag       = tag;
   }
-  
-  public String getName() { return name; }
-  public void setName(String name) { this.name = name; }
   
   public long getTimestamp() { return timestamp; }
   public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
   
-  public short getActivityCode() { return activityCode; }
-  public void setActivityCode(short activityCode) { this.activityCode = activityCode; }
+  public String getName() { return name; }
+  public void setName(String name) { this.name = name; }
 
-  public String[] getTags() { return tags; }
-  public void setTags(String[] tags) { this.tags = tags; }
+  public String[] getTag() { return tag; }
+  public void setTag(String[] tag) { this.tag = tag; }
 }

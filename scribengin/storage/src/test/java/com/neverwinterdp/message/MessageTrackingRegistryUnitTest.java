@@ -60,7 +60,7 @@ final static public String WORKING_DIR = "build/working";
     while(!executorService.isTerminated()) {
       executorService.awaitTermination(3, TimeUnit.SECONDS);
       for(String selLogName : logName) {
-        MessageTrackingLogReporter reporter = mRegistry.mergeMessageTrackingLogChunk(selLogName);
+        MessageTrackingReporter reporter = mRegistry.mergeMessageTrackingLogChunk(selLogName);
         registry.get("/").dump(System.out);
         System.out.println(reporter.toFormattedText());
       }
@@ -121,7 +121,7 @@ final static public String WORKING_DIR = "build/working";
     private MessageTrackingRegistry               mRegistry;
     private String                                logName;
     private int                                   chunkSize;
-    private Map<Integer, MessageTrackingLogChunk> chunks = new HashMap<>();
+    private Map<Integer, MessageTrackingChunkStat> chunks = new HashMap<>();
     
     public TrackingMessageLogProducer(MessageTrackingRegistry mRegistry, String name, int chunkSize) {
       this.mRegistry    = mRegistry;
@@ -130,21 +130,21 @@ final static public String WORKING_DIR = "build/working";
     }
     
     public void produce(MessageTracking mTracking) {
-      MessageTrackingLogChunk chunk = chunks.get(mTracking.getChunkId());
+      mTracking.add(new MessageTrackingLog(logName, null));
+      MessageTrackingChunkStat chunk = chunks.get(mTracking.getChunkId());
       if(chunk == null) {
-        chunk = new MessageTrackingLogChunk(logName, mTracking.getChunkId(), chunkSize);
+        chunk = new MessageTrackingChunkStat(logName, mTracking.getChunkId(), chunkSize);
         chunks.put(chunk.getChunkId(), chunk);
       }
-      MessageTrackingLog log = new MessageTrackingLog(logName, System.currentTimeMillis(), (short)0);
-      chunk.log(mTracking, log);
+      chunk.log(mTracking);
     }
     
     public void flush() throws Exception {
-      Iterator<MessageTrackingLogChunk> i = chunks.values().iterator();
+      Iterator<MessageTrackingChunkStat> i = chunks.values().iterator();
       while(i.hasNext()) {
-        MessageTrackingLogChunk chunk = i.next();
+        MessageTrackingChunkStat chunk = i.next();
         chunk.update();
-        mRegistry.saveMessageTrackingLogChunk(chunk);
+        mRegistry.saveMessageTrackingChunkStat(chunk);
         if(chunk.isComplete()) i.remove();
         Thread.sleep(250);
       }

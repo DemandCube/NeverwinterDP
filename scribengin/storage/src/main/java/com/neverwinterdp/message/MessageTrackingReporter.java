@@ -1,32 +1,72 @@
 package com.neverwinterdp.message;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.neverwinterdp.util.text.TabularFormater;
 
 public class MessageTrackingReporter {
-  private Map<String, MessageTrackingLogReporter> messageTrackingLogReporters ;
+  private String                                  name;
+  private List<AggregateMessageTrackingChunkStat> aggregateChunkReports;
   
-  public MessageTrackingReporter() {
+  public MessageTrackingReporter() { }
+  
+  public MessageTrackingReporter(String name) {
+    this.name                  = name ;
+    this.aggregateChunkReports = new ArrayList<>();
   }
   
-  public MessageTrackingReporter(boolean init) {
-    messageTrackingLogReporters = new HashMap<>();
+  public String getName() { return name; }
+  public void setName(String name) { this.name = name; }
+
+  public List<AggregateMessageTrackingChunkStat> getAggregateChunkReports() { return aggregateChunkReports; }
+  public void setAggregateChunkReports(List<AggregateMessageTrackingChunkStat> aggregateChunkReports) {
+    this.aggregateChunkReports = aggregateChunkReports;
   }
 
-  public Map<String, MessageTrackingLogReporter> getMessageTrackingLogReporters() {
-    return messageTrackingLogReporters;
-  }
-
-  public void setMessageTrackingLogReporters(Map<String, MessageTrackingLogReporter> messageTrackingLogReporters) {
-    this.messageTrackingLogReporters = messageTrackingLogReporters;
-  }
-  
-  public MessageTrackingLogReporter getMessageTrackingLogReporter(String name, boolean create) {
-    MessageTrackingLogReporter reporter = messageTrackingLogReporters.get(name);
-    if(reporter == null && create) {
-      reporter = new MessageTrackingLogReporter(name);
-      messageTrackingLogReporters.put(name, reporter);
+  public void merge(MessageTrackingChunkStat chunk) {
+    for(int i = 0; i < aggregateChunkReports.size(); i++) {
+      AggregateMessageTrackingChunkStat sel = aggregateChunkReports.get(i) ;
+      if(chunk.getChunkId() < sel.getFromChunkId()) {
+        AggregateMessageTrackingChunkStat newChunkReport = new AggregateMessageTrackingChunkStat();
+        newChunkReport.merge(chunk);
+        aggregateChunkReports.add(i, newChunkReport);
+        return;
+      } else if(chunk.getChunkId() == sel.getToChunkId() + 1) {
+        sel.merge(chunk);
+        return;
+      }
     }
-    return reporter;
+    AggregateMessageTrackingChunkStat newChunkReport = new AggregateMessageTrackingChunkStat();
+    newChunkReport.merge(chunk);
+    aggregateChunkReports.add(newChunkReport);
+  }
+  
+  public void optimize() {
+    List<AggregateMessageTrackingChunkStat> holder = new ArrayList<>();
+    AggregateMessageTrackingChunkStat previous = null;
+    for(int i = 0; i < aggregateChunkReports.size(); i++) {
+      AggregateMessageTrackingChunkStat current = aggregateChunkReports.get(i) ;
+      if(previous == null) {
+        previous = current;
+        holder.add(current);
+      } else if(previous.getToChunkId() + 1 == current.getFromChunkId()) {
+        previous.merge(current);
+      } else {
+        previous = current;
+        holder.add(current);
+      }
+    }
+    aggregateChunkReports = holder;
+  }
+  
+  public String toFormattedText() {
+    TabularFormater ft = new TabularFormater("From", "To", "Lost", "Duplicated");
+    ft.setTitle(name + " report");
+    for(int i = 0; i < aggregateChunkReports.size(); i++) {
+      AggregateMessageTrackingChunkStat sel = aggregateChunkReports.get(i) ;
+      ft.addRow(sel.getFromChunkId(), sel.getToChunkId(), sel.getTrackingLostCount(), sel.getTrackingDuplicatedCount());
+    }
+    return ft.getFormattedText();
   }
 }

@@ -51,7 +51,7 @@ public class MessageTrackingRegistry {
     return messageChunkIdTracker.nextInt(); 
   }
   
-  public void saveMessageTrackingLogChunk(MessageTrackingLogChunk chunk) throws RegistryException {
+  public void saveMessageTrackingChunkStat(MessageTrackingChunkStat chunk) throws RegistryException {
     final Node reportNode = trackingLogNode.getChild(chunk.getName());
     if(!reportNode.exists()) {
       BatchOperations<Boolean> op = new BatchOperations<Boolean>() {
@@ -72,11 +72,11 @@ public class MessageTrackingRegistry {
       lock.execute(op, 3, 3000);
     }
     
-    if(chunk.isComplete()) saveCompleleteMessageTrackingLogChunk(reportNode, chunk) ;
-    else saveProgressMessageTrackingLogChunk(reportNode, chunk) ;
+    if(chunk.isComplete()) saveComplete(reportNode, chunk) ;
+    else saveProgress(reportNode, chunk) ;
   }
   
-  void saveCompleleteMessageTrackingLogChunk(final Node reportNode, final MessageTrackingLogChunk chunk) throws RegistryException {
+  void saveComplete(final Node reportNode, final MessageTrackingChunkStat chunk) throws RegistryException {
     BatchOperations<Boolean> saveCompleteOp = new BatchOperations<Boolean>() {
       @Override
       public Boolean execute(Registry registry) throws RegistryException {
@@ -95,7 +95,7 @@ public class MessageTrackingRegistry {
     registry.executeBatch(saveCompleteOp, 3, 3000);
   }
   
-  void saveProgressMessageTrackingLogChunk(final Node reportNode, final MessageTrackingLogChunk chunk) throws RegistryException {
+  void saveProgress(final Node reportNode, final MessageTrackingChunkStat chunk) throws RegistryException {
     BatchOperations<Boolean> saveCompleteOp = new BatchOperations<Boolean>() {
       @Override
       public Boolean execute(Registry registry) throws RegistryException {
@@ -116,25 +116,25 @@ public class MessageTrackingRegistry {
     registry.executeBatch(saveCompleteOp, 3, 3000);
   }
   
-  public MessageTrackingLogReporter mergeMessageTrackingLogChunk(String name) throws RegistryException {
+  public MessageTrackingReporter mergeMessageTrackingLogChunk(String name) throws RegistryException {
     final Node reportNode = trackingLogNode.getChild(name);
-    MessageTrackingLogReporter reporter = null;
+    MessageTrackingReporter reporter = null;
     if(reportNode.exists()) {
-      reporter = reportNode.getDataAs(MessageTrackingLogReporter.class);
+      reporter = reportNode.getDataAs(MessageTrackingReporter.class);
     }
-    if(reporter == null) reporter = new  MessageTrackingLogReporter(name);
+    if(reporter == null) reporter = new  MessageTrackingReporter(name);
     
     final Node finishedNode = reportNode.getChild(FINISHED);
     final List<String> finishedChunks = finishedNode.getChildren();
     Collections.sort(finishedChunks);
     for(int i= 0; i < finishedChunks.size(); i++) {
-      MessageTrackingLogChunk chunk = 
-        finishedNode.getChild(finishedChunks.get(i)).getDataAs( MessageTrackingLogChunk.class);
+      Node chunkNode = finishedNode.getChild(finishedChunks.get(i));
+      MessageTrackingChunkStat chunk = chunkNode.getDataAs( MessageTrackingChunkStat.class);
       reporter.merge(chunk);
     }
     reporter.optimize();
     
-    final MessageTrackingLogReporter reporterToSave = reporter;
+    final MessageTrackingReporter reporterToSave = reporter;
     BatchOperations<Boolean> saveCompleteOp = new BatchOperations<Boolean>() {
       @Override
       public Boolean execute(Registry registry) throws RegistryException {

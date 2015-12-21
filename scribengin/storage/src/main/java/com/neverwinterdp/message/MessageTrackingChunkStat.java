@@ -3,33 +3,39 @@ package com.neverwinterdp.message;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.BitSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.DataFormatException;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neverwinterdp.util.io.IOUtil;
 
-public class MessageTrackingLogChunk {
+public class MessageTrackingChunkStat {
   static DecimalFormat ID_FORMAT = new DecimalFormat("00000000");
   
-  private String  name;
-  private int     chunkId;
-  private int     chunkSize;
-  private int     trackingProgress;
-  private int     trackingNoLostTo;
-  private int     trackingLostCount;
-  private int     trackingDuplicatedCount;
-  private int     trackingCount;
+  private String                                   name;
+  private int                                      chunkId;
+  private int                                      chunkSize;
+  private int                                      trackingProgress;
+  private int                                      trackingNoLostTo;
+  private int                                      trackingLostCount;
+  private int                                      trackingDuplicatedCount;
+  private int                                      trackingCount;
+  private Map<String, MessageTrackingLogChunkStat> logStats;
+  
   private boolean complete = false;
 
   transient private boolean persisted = false;
   transient private BitSet  bitSet;
 
-  public MessageTrackingLogChunk() {}
+  public MessageTrackingChunkStat() {}
   
-  public MessageTrackingLogChunk(String name, int chunkId, int chunkSize) {
+  public MessageTrackingChunkStat(String name, int chunkId, int chunkSize) {
     this.name      = name ;
     this.chunkId   =  chunkId;
     this.chunkSize = chunkSize;
+    this.logStats  = new HashMap<>();
     this.bitSet    = new BitSet(chunkSize);
   }
 
@@ -67,11 +73,14 @@ public class MessageTrackingLogChunk {
     this.trackingCount = trackingCount;
   }
 
+  public Map<String, MessageTrackingLogChunkStat> getLogStats() { return logStats; }
+  public void setLogStats(Map<String, MessageTrackingLogChunkStat> logStats) { this.logStats = logStats; }
+
   public boolean isComplete() { return complete;}
   public void setComplete(boolean complete) {
     this.complete = complete;
   }
-
+  
   public byte[] getBitSetData() throws IOException {
     return IOUtil.compress(bitSet.toByteArray()) ;
   }
@@ -85,7 +94,7 @@ public class MessageTrackingLogChunk {
   public boolean isPersisted() { return this.persisted; }
   public void    setPersisted(boolean b) { persisted = b; }
   
-  synchronized public int log(MessageTracking mTracking, MessageTrackingLog log) {
+  synchronized public int log(MessageTracking mTracking) {
     if(mTracking.getChunkId() != chunkId) {
       throw new RuntimeException("The chunk id is not matched, chunkId = " + chunkId + ", message chunk id = " + mTracking.getChunkId());
     }
@@ -98,6 +107,19 @@ public class MessageTrackingLogChunk {
     if(bitSet.get(idx)) trackingDuplicatedCount++;
     bitSet.set(idx, true);
     trackingCount++;
+    
+    List<MessageTrackingLog> logs = mTracking.getLogs();
+    if(logs != null) {
+      for(int i = 0; i < logs.size(); i++) {
+        MessageTrackingLog log = logs.get(i);
+        MessageTrackingLogChunkStat logStat = logStats.get(log.getName());
+        if(logStat == null) {
+          logStat = new MessageTrackingLogChunkStat();
+          logStats.put(log.getName(), logStat);
+        }
+        logStat.log(mTracking, log);
+      }
+    }
     return trackingCount;
   }
   

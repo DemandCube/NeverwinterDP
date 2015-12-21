@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.message.MessageTracking;
-import com.neverwinterdp.message.MessageTrackingLogChunk;
+import com.neverwinterdp.message.MessageTrackingChunkStat;
 import com.neverwinterdp.message.MessageTrackingLog;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorInterceptor;
@@ -14,7 +14,7 @@ public class OperatorMessageTrackingInterceptor implements DataStreamOperatorInt
   
   private int                  currentChunkId = 0;
   private AtomicInteger        idTracker = new AtomicInteger();
-  private MessageTrackingLogChunk messageTrackingChunk;
+  private MessageTrackingChunkStat messageTrackingChunk;
   
   @Override
   public void preProcess(DataStreamOperatorContext ctx, Message message) throws Exception {
@@ -28,18 +28,16 @@ public class OperatorMessageTrackingInterceptor implements DataStreamOperatorInt
       message.setMessageTracking(mTracking);
     }
     DataStreamOperatorDescriptor descriptor = ctx.getDescriptor();
-    long timestamp = System.currentTimeMillis() ;
-    MessageTrackingLog log = new MessageTrackingLog(descriptor.getOperatorName(), timestamp, (short) 0);
     String[] tag = { 
       "vm:" + ctx.getVM().getId(), "executor:" + ctx.getTaskExecutor().getId()
     };
-    log.setTags(tag);
+    MessageTrackingLog log = new MessageTrackingLog(descriptor.getOperatorName(), tag);
     mTracking.add(log);
     if(messageTrackingChunk == null) {
       int chunkId = 0;
-      messageTrackingChunk = new MessageTrackingLogChunk("", chunkId, MAX_MESSAGE_PER_CHUNK);
+      messageTrackingChunk = new MessageTrackingChunkStat("", chunkId, MAX_MESSAGE_PER_CHUNK);
     }
-    messageTrackingChunk.log(mTracking, log);
+    mTracking.add(log);
   }
   
   private MessageTracking createMessageTracking() throws Exception {
