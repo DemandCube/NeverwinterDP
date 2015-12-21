@@ -3,13 +3,12 @@ package com.neverwinterdp.storage.kafka.source;
 import java.nio.ByteBuffer;
 
 import kafka.javaapi.PartitionMetadata;
-import kafka.message.Message;
 import kafka.message.MessageAndOffset;
 
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.PartitionStreamConfig;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.source.CommitPoint;
 import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
 
@@ -28,10 +27,10 @@ public class RawKafkaSourceStreamReader implements SourcePartitionStreamReader {
   public String getName() { return partitionConfig.attribute("name"); }
 
   @Override
-  public Record next(long maxWait) throws Exception {
+  public Message next(long maxWait) throws Exception {
     MessageAndOffset messageAndOffSet = partitionReader.nextMessageAndOffset(maxWait) ;
     if(messageAndOffSet == null) return null ;
-    Message message = messageAndOffSet.message();
+    kafka.message.Message message = messageAndOffSet.message();
     ByteBuffer payload = message.payload();
     byte[] messageBytes = new byte[payload.limit()];
     payload.get(messageBytes);
@@ -39,12 +38,12 @@ public class RawKafkaSourceStreamReader implements SourcePartitionStreamReader {
     ByteBuffer key = message.key();
     byte[] keyBytes = new byte[key.limit()];
     key.get(keyBytes);
-    Record dataflowMessage = new Record(new String(keyBytes), messageBytes) ;
+    Message dataflowMessage = new Message(new String(keyBytes), messageBytes) ;
     return dataflowMessage;
   }
 
   @Override
-  public Record[] next(int size, long maxWait) throws Exception {
+  public Message[] next(int size, long maxWait) throws Exception {
     throw new Exception("To implement") ;
   }
   

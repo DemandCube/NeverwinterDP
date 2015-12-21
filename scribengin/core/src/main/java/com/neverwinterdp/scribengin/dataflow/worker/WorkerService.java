@@ -29,7 +29,7 @@ import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.yara.MetricRegistry;
 
 public class WorkerService {
-private Logger logger ;
+  private Logger logger ;
   
   @Inject
   private VMDescriptor vmDescriptor;
@@ -51,16 +51,6 @@ private Logger logger ;
   
   private Notifier         notifier ;
   private boolean simulateKill = false ;
-  
-  public Logger getLogger() { return logger; }
-  
-  public VMDescriptor getVMDescriptor() { return vmDescriptor; }
-  
-  public DataflowRegistry getDataflowRegistry() { return dflRegistry; }
-  
-  public StorageService getStorageService() { return storageService; }
-
-  public MetricRegistry getMetricRegistry() { return metricRegistry; }
   
   @Inject
   public void onInject(Injector container, LoggerFactory lfactory) throws Exception {
@@ -93,6 +83,16 @@ private Logger logger ;
     String workerEvtPath = broadcaster.getEventPath();
     dataflowWorkerEventWatcher = new DataflowWorkerEventWatcher(dflRegistry, workerEvtPath, vmDescriptor.getId());
   }
+  
+  public Logger getLogger() { return logger; }
+  
+  public VMDescriptor getVMDescriptor() { return vmDescriptor; }
+  
+  public DataflowRegistry getDataflowRegistry() { return dflRegistry; }
+  
+  public StorageService getStorageService() { return storageService; }
+
+  public MetricRegistry getMetricRegistry() { return metricRegistry; }
   
   public void run() throws Exception {
     System.out.println("DataflowMasterService: run()");

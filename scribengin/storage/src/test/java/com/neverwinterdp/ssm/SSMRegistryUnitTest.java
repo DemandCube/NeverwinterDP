@@ -50,6 +50,8 @@ public class SSMRegistryUnitTest {
     int NUM_OF_SEGMENTS = 3;
     SSMRegistry segStorageReg = new SSMRegistry(registry, "/seg-storage");
     segStorageReg.initRegistry();
+    SSMRegistryPrinter rPrinter = new SSMRegistryPrinter(System.out, segStorageReg);
+    
     SSMWriterDescriptor writer = segStorageReg.createWriter("test");
     for(int i = 0; i < NUM_OF_SEGMENTS; i++) {
       SegmentDescriptor segment = segStorageReg.newSegment(writer);
@@ -58,10 +60,9 @@ public class SSMRegistryUnitTest {
     List<String> segments = segStorageReg.getSegments();
     Assert.assertEquals(NUM_OF_SEGMENTS, segments.size());
     
-    SegmentDescriptor segment0 = segStorageReg.getSegmentById(0);
+    SegmentDescriptor segment0 = segStorageReg.getSegmentById(1);
     Assert.assertNotNull(segment0);
   
-    SSMRegistryPrinter rPrinter = new SSMRegistryPrinter(System.out, segStorageReg);
     rPrinter.print();
   }
   

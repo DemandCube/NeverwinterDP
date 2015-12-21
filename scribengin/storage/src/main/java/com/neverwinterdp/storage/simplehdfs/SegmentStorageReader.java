@@ -10,7 +10,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import com.neverwinterdp.storage.Record;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.source.CommitPoint;
 import com.neverwinterdp.util.JSONSerializer;
 
@@ -65,9 +65,9 @@ public class SegmentStorageReader<T> {
     return JSONSerializer.INSTANCE.fromBytes(data, type);
   }
 
-  public Record[] next(int size, long maxWait) throws IOException {
+  public Message[] next(int size, long maxWait) throws IOException {
     List<T> holder = new ArrayList<>();
-    Record[] array = new Record[holder.size()];
+    Message[] array = new Message[holder.size()];
     for (int i = 0; i < size; i++) {
       T record = next(maxWait);
       if (record != null)

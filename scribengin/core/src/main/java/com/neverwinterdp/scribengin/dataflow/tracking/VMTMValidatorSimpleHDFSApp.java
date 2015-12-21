@@ -14,8 +14,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.simplehdfs.SimpleHDFSStorage;
 import com.neverwinterdp.storage.simplehdfs.source.HDFSSource;
@@ -176,7 +176,7 @@ public class VMTMValidatorSimpleHDFSApp extends VMApp {
     void doRun() throws Exception {
       HDFSSourcePartitionStream stream = null;
       while((stream = streamQueue.poll(10, TimeUnit.MILLISECONDS)) != null) {
-        Record record = null;
+        Message record = null;
         HDFSSourcePartitionStreamReader reader = stream.getReader("validator") ;
         while((record = reader.next(1000)) != null) {
           byte[] data = record.getData();

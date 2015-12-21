@@ -1,8 +1,8 @@
 package com.neverwinterdp.storage.es.sink;
 
 import com.neverwinterdp.es.ESObjectClient;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.PartitionStreamConfig;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.es.ESStorage;
 import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
@@ -20,7 +20,7 @@ public class ESStreamWriter implements SinkPartitionStreamWriter {
   }
   
   @Override
-  public void append(Record dataflowMessage) throws Exception {
+  public void append(Message dataflowMessage) throws Exception {
     Object obj = JSONSerializer.INSTANCE.fromBytes(dataflowMessage.getData(), storage.getMappingType());
     esObjClient.put(obj, dataflowMessage.getKey());
   }

@@ -10,8 +10,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.hdfs.HDFSStorage;
 import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.hdfs.source.HDFSSource;
@@ -135,7 +135,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
     void doRun() throws Exception {
       HDFSSourcePartitionStreamReader streamReader = null;
       while((streamReader = streamReaderQueue.poll(10, TimeUnit.MILLISECONDS)) != null) {
-        Record record = null;
+        Message record = null;
         while((record = nextWithRetry(streamReader, 1000, 3)) != null) {
           byte[] data = record.getData();
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(data, TrackingMessage.class);
@@ -148,7 +148,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
       }
     }
     
-    Record nextWithRetry(HDFSSourcePartitionStreamReader streamReader, long maxWait, int numOfRetry) throws Exception {
+    Message nextWithRetry(HDFSSourcePartitionStreamReader streamReader, long maxWait, int numOfRetry) throws Exception {
       Exception error = null;
       for(int i = 0; i < numOfRetry; i++) {
         try {

@@ -2,8 +2,8 @@ package com.neverwinterdp.storage.kafka.sink;
 
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.kafka.producer.KafkaWriter;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.PartitionStreamConfig;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
 
@@ -21,7 +21,7 @@ public class KafkaSinkPartitionStreamWriter implements SinkPartitionStreamWriter
   }
   
   @Override
-  public void append(Record record) throws Exception {
+  public void append(Message record) throws Exception {
     writer.send(topic, record, 5000);
   }
 

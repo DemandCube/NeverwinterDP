@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
-import com.neverwinterdp.storage.Record;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.kafka.KafkaStorage;
 import com.neverwinterdp.storage.kafka.sink.KafkaSink;
 import com.neverwinterdp.storage.kafka.source.KafkaSource;
@@ -16,16 +16,14 @@ import com.neverwinterdp.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.storage.source.SourcePartitionStream;
 import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
+import com.neverwinterdp.util.log.LoggerFactory;
 
 public class SinkSourceUnitTest {
-  static {
-    System.setProperty("log4j.configuration", "file:src/test/resources/test-log4j.properties");
-  }
-
   private KafkaCluster cluster;
 
   @Before
   public void setUp() throws Exception {
+    LoggerFactory.log4jUseConsoleOutputConfig("WARN");
     cluster = new KafkaCluster("./build/cluster", 1, 1);
     cluster.setNumOfPartition(5);
     cluster.start();
@@ -50,7 +48,7 @@ public class SinkSourceUnitTest {
     SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < 10; i++) {
       String hello = "Hello " + i ;
-      Record dataflowMessage = new Record("key-" + i, hello.getBytes());
+      Message dataflowMessage = new Message("key-" + i, hello.getBytes());
       writer.append(dataflowMessage);
     }
     writer.close();
@@ -62,9 +60,9 @@ public class SinkSourceUnitTest {
     for(int i = 0; i < streams.length; i++) {
       System.out.println("Stream id: " + streams[i].getPartitionStreamConfig().getPartitionStreamId());
       SourcePartitionStreamReader reader = streams[i].getReader("kafka");
-      Record dataflowMessage = null;
-      while((dataflowMessage = reader.next(1000)) != null) {
-        System.out.println("Record: " + new String(dataflowMessage.getData()));
+      Message message = null;
+      while((message = reader.next(1000)) != null) {
+        System.out.println("Record: " + new String(message.getData()));
       }
     }
   }

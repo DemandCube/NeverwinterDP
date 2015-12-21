@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.storage.Record;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.simplehdfs.SimpleHDFSStorage;
 import com.neverwinterdp.storage.simplehdfs.Segment;
@@ -61,7 +61,7 @@ public class SinkSourceUnitTest {
     for(int i = 0; i < NUM_OF_COMMIT; i++) {
       for(int j = 0; j < NUM_OF_RECORD_PER_COMMIT; j ++) {
         String key = "stream=" + stream.getPartitionStreamId() +",buffer=" + i + ",record=" + j;
-        writer.append(Record.create(key, key));
+        writer.append(Message.create(key, key));
       }
       writer.commit();
     }
@@ -88,7 +88,7 @@ public class SinkSourceUnitTest {
     SinkPartitionStream stream0 = sink.getPartitionStream(0);
     SinkPartitionStreamWriter writer = stream0.getWriter();
     for(int i = 0; i < 10; i ++) {
-      writer.append(Record.create("key-" + i, "record " + i));
+      writer.append(Message.create("key-" + i, "record " + i));
     }
     writer.rollback();
     writer.close();
@@ -139,7 +139,7 @@ public class SinkSourceUnitTest {
         byte[] data = new byte[512];
         for(int i = 0; i < numOfSegment; i++) {
           for(int j = 0; j < 5000; j ++) {
-            writer.append(Record.create("key-" + i, data));
+            writer.append(Message.create("key-" + i, data));
           }
           writer.commit();
         }

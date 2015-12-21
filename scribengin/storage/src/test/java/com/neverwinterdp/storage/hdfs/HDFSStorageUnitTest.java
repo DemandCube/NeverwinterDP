@@ -8,9 +8,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.hdfs.sink.HDFSSink;
 import com.neverwinterdp.storage.hdfs.sink.HDFSSinkPartitionStream;
@@ -65,7 +65,7 @@ public class HDFSStorageUnitTest {
     for(int i = 0; i < sinkStream.length; i++) {
       HDFSSinkPartitionStreamWriter writer = sinkStream[i].getWriter();
       for(int j = 0; j < 1000; j++) {
-        writer.append(Record.create("key-" + j, "record " + j));
+        writer.append(Message.create("key-" + j, "record " + j));
       }
       writer.commit();
       writer.close();
@@ -75,9 +75,9 @@ public class HDFSStorageUnitTest {
     SourcePartitionStream[] sourceStream = source.getLatestSourcePartition().getPartitionStreams();
     for(int i = 0; i < sourceStream.length; i++) {
       SourcePartitionStreamReader reader = sourceStream[i].getReader("reader-for-stream-" + i);
-      Record record = null;
+      Message message = null;
       int count = 0;
-      while((record = reader.next(3000)) != null) {
+      while((message = reader.next(3000)) != null) {
         count++;
       }
       System.out.println(reader.getName() + ": " + count);

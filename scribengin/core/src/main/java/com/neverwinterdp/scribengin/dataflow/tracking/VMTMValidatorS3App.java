@@ -14,8 +14,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 
 import com.amazonaws.services.s3.model.MultiObjectDeleteException;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.s3.S3Client;
 import com.neverwinterdp.storage.s3.S3Storage;
@@ -201,7 +201,7 @@ public class VMTMValidatorS3App extends VMApp {
     void doRun() throws Exception {
       S3SourcePartitionStream stream = null;
       while((stream = streamQueue.poll(100, TimeUnit.MILLISECONDS)) != null) {
-        Record record = null;
+        Message record = null;
         S3SourcePartitionStreamReader reader = stream.getReader("validator") ;
         while((record = reader.next(1000)) != null) {
           byte[] data = record.getData();

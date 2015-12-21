@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.storage.Record;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.es.sink.ESSink;
 import com.neverwinterdp.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
@@ -46,7 +46,7 @@ public class ESSinkUnitTest {
       log4jRec.withTimestamp(System.currentTimeMillis());
       log4jRec.setLevel("INFO");
       log4jRec.setMessage("message " + i);
-      Record dataflowMessage = new Record("key-" + i, JSONSerializer.INSTANCE.toBytes(log4jRec));
+      Message dataflowMessage = new Message("key-" + i, JSONSerializer.INSTANCE.toBytes(log4jRec));
       writer.append(dataflowMessage);
     }
     writer.close();

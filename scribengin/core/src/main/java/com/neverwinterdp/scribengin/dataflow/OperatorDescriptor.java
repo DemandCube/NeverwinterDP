@@ -5,6 +5,7 @@ import java.util.Set;
 public class OperatorDescriptor {
   private String      name ;
   private String      operator;
+  private Set<String> interceptors;
   
   private Set<String> inputs;
   private Set<String> outputs;
@@ -14,6 +15,9 @@ public class OperatorDescriptor {
 
   public String getOperator() { return operator; }
   public void   setOperator(String operator) { this.operator = operator;}
+  
+  public Set<String> getInterceptors() { return interceptors; }
+  public void setInterceptors(Set<String> interceptors) { this.interceptors = interceptors;}
   
   public Set<String> getInputs() { return inputs; }
   public void        setInputs(Set<String> inputs) { this.inputs = inputs; }

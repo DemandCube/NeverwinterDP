@@ -1,45 +1,48 @@
 package com.neverwinterdp.scribengin.dataflow.runtime;
 
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.TaskStatus;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.registry.task.dedicated.TaskSlotExecutor;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperator;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.WorkerService;
-import com.neverwinterdp.storage.Record;
 
 public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStreamOperatorDescriptor>{
-  private WorkerService                            workerService;
+  private WorkerService                                      workerService;
   private DedicatedTaskContext<DataStreamOperatorDescriptor> taskContext;
-  private DataStreamOperatorDescriptor                       operatorTaskConfig;
+  private DataStreamOperatorDescriptor                       operatorTaskDescriptor;
   private DataStreamOperator                                 operator;
-  private DataStreamOperatorRuntimeContext                          context;
-  
-  private long                                     startTime = 0;
-  private long                                     lastFlushTime = System.currentTimeMillis();
-  private long                                     lastNoMessageTime = lastFlushTime;
-  
+  private DataStreamOperatorRuntimeContext                   context;
+
+  private long startTime         = 0;
+  private long lastFlushTime     = System.currentTimeMillis();
+  private long lastNoMessageTime = lastFlushTime;
+
   public DataStreamOperatorTaskSlotExecutor(WorkerService service, DedicatedTaskContext<DataStreamOperatorDescriptor> taskContext) throws Exception {
     super(taskContext);
     this.workerService = service;
-    this.taskContext     = taskContext;
-    this.operatorTaskConfig      = taskContext.getTaskDescriptor(false);
-    Class<DataStreamOperator> opType = (Class<DataStreamOperator>) Class.forName(operatorTaskConfig.getOperator());
+    this.taskContext   = taskContext;
+    this.operatorTaskDescriptor      = taskContext.getTaskDescriptor(false);
+    
+    Class<DataStreamOperator> opType = (Class<DataStreamOperator>) Class.forName(operatorTaskDescriptor.getOperator());
     operator = opType.newInstance();
     
     startTime = System.currentTimeMillis();
     DataflowRegistry dRegistry = workerService.getDataflowRegistry();
-    DataStreamOperatorReport report = dRegistry.getTaskRegistry().getTaskReport(operatorTaskConfig);
+    DataStreamOperatorReport report = dRegistry.getTaskRegistry().getTaskReport(operatorTaskDescriptor);
     report.incrAssignedCount();
-    dRegistry.getTaskRegistry().save(operatorTaskConfig, report);
-    context = new DataStreamOperatorRuntimeContext(workerService, operatorTaskConfig, report);
-    dRegistry.getTaskRegistry().save(operatorTaskConfig, report);
+    dRegistry.getTaskRegistry().save(operatorTaskDescriptor, report);
+    TaskExecutorDescriptor taskExecutorDescriptor = taskContext.getTaskExecutorDescriptor();
+    context = new DataStreamOperatorRuntimeContext(workerService, taskExecutorDescriptor, operatorTaskDescriptor, report);
+    dRegistry.getTaskRegistry().save(operatorTaskDescriptor, report);
   }
   
   public DedicatedTaskContext<DataStreamOperatorDescriptor> getTaskContext() { return this.taskContext; }
   
-  public DataStreamOperatorDescriptor getDescriptor() { return operatorTaskConfig ; }
+  public DataStreamOperatorDescriptor getDataStreamOperatorDescriptor() { return operatorTaskDescriptor ; }
   
   public boolean isComplete() { return context.isComplete() ; }
   
@@ -56,7 +59,7 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
     int recCount = 0;
     try {
       while(!isInterrupted()) {
-        Record record = context.nextRecord(1000);
+        Message record = context.nextMessage(1000);
         if(record == null) break ;
 
         recCount++;

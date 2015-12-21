@@ -2,11 +2,11 @@ package com.neverwinterdp.storage.hdfs.sink;
 
 import java.io.IOException;
 
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.ssm.SSMWriter;
 import com.neverwinterdp.ssm.hdfs.HdfsSSM;
 import com.neverwinterdp.storage.PartitionStreamConfig;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.util.JSONSerializer;
@@ -29,7 +29,7 @@ public class HDFSSinkPartitionStreamWriter implements SinkPartitionStreamWriter 
   public PartitionStreamConfig getPartitionConfig() { return partitionConfig; }
 
   @Override
-  public void append(Record record) throws Exception {
+  public void append(Message record) throws Exception {
     writer.write(JSONSerializer.INSTANCE.toBytes(record));
   }
 

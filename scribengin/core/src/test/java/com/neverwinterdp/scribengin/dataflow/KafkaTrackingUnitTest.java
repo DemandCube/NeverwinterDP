@@ -42,7 +42,6 @@ public class KafkaTrackingUnitTest  {
     String dfsAppHome = "";
     
     TrackingDataflowBuilder dflBuilder = new TrackingDataflowBuilder("tracking");
-    dflBuilder.setHDFSAggregateOutput();
     
     VMConfig vmGeneratorConfig = dflBuilder.buildVMTMGeneratorKafka();
     new VMSubmitter(vmClient, dfsAppHome, vmGeneratorConfig).submit().waitForRunning(30000);
@@ -53,7 +52,7 @@ public class KafkaTrackingUnitTest  {
     
     new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForRunning(60000);
     
-    VMConfig vmValidatorConfig = dflBuilder.buildHDFSVMTMValidator();
+    VMConfig vmValidatorConfig = dflBuilder.buildKafkaVMTMValidator();
     new VMSubmitter(vmClient, dfsAppHome, vmValidatorConfig).submit().waitForRunning(30000);
     
     dflBuilder.runMonitor(shell);

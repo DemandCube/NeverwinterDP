@@ -5,8 +5,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.PartitionStreamConfig;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.s3.S3Client;
 import com.neverwinterdp.storage.s3.S3Folder;
@@ -36,7 +36,7 @@ public class S3SinkPartitionStreamWriter implements SinkPartitionStreamWriter {
   }
   
   @Override
-  public void append(Record dataflowMessage) throws Exception {
+  public void append(Message dataflowMessage) throws Exception {
     if(currentWriter == null) {
       String bucketName          = storageConfig.attribute(S3Storage.BUCKET_NAME);
       String storageFolder       = storageConfig.attribute(S3Storage.STORAGE_PATH);
@@ -112,7 +112,7 @@ public class S3SinkPartitionStreamWriter implements SinkPartitionStreamWriter {
       }
     }
     
-    public void append(Record record) throws Exception {
+    public void append(Message record) throws Exception {
       if(currentWriter == null) {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.addUserMetadata("transaction", "prepare");

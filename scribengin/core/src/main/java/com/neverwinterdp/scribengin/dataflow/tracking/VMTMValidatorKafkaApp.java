@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
@@ -102,9 +102,9 @@ public class VMTMValidatorKafkaApp extends VMApp {
             try {
               while(true) {
                 KafkaPartitionReader pReader = readerQueue.take();
-                Record rec = null;
+                Message rec = null;
                 int count = 0;
-                while((rec = pReader.nextAs(Record.class, 100)) != null) {
+                while((rec = pReader.nextAs(Message.class, 100)) != null) {
                   TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(rec.getData(), TrackingMessage.class);
                   onTrackingMessage(tMesg);
                   count++;

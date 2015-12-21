@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.neverwinterdp.storage.Record;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.s3.S3Client;
 import com.neverwinterdp.storage.s3.S3Storage;
@@ -82,7 +82,7 @@ public class S3SinkSourceIntegrationTest {
     for(int i = 0; i < NUM_OF_COMMIT; i++) {
       for(int j = 0; j < NUM_OF_RECORD_PER_COMMIT; j ++) {
         String key = "stream=" + stream.getPartitionStreamId() +",buffer=" + i + ",record=" + j;
-        writer.append(Record.create(key, key));
+        writer.append(Message.create(key, key));
       }
       writer.commit();
     }
@@ -100,7 +100,7 @@ public class S3SinkSourceIntegrationTest {
     SinkPartitionStreamWriter writer = stream.getWriter();
     int NUM_OF_RECORDS = 10;
     for(int i = 0; i < NUM_OF_RECORDS; i ++) {
-      writer.append(Record.create("key-" + i, "record " + i));
+      writer.append(Message.create("key-" + i, "record " + i));
     }
     
     Assert.assertEquals(0, count(storage));
@@ -140,16 +140,16 @@ public class S3SinkSourceIntegrationTest {
     S3SourcePartition partition = source.getLatestSourcePartition();
     SourcePartitionStream[] sourceStreams = partition.getPartitionStreams();
 
-    int recordCount = 0 ;
+    int messageCount = 0 ;
     for (int i = 0; i < sourceStreams.length; i++) {
       SourcePartitionStream stream = sourceStreams[i];
       SourcePartitionStreamReader reader = stream.getReader(stream.getPartitionStreamConfig().getLocation());
       while (reader.next(1000) != null) {
-        recordCount++;
+        messageCount++;
       }
       reader.close();
     }
-    return recordCount;
+    return messageCount;
   }
   
   
@@ -172,7 +172,7 @@ public class S3SinkSourceIntegrationTest {
         byte[] data = new byte[512];
         for(int i = 0; i < numOfPartitions; i++) {
           for(int j = 0; j < numRecords; j ++) {
-            writer.append(Record.create("key-" + i, data));
+            writer.append(Message.create("key-" + i, data));
           }
           writer.commit();
         }

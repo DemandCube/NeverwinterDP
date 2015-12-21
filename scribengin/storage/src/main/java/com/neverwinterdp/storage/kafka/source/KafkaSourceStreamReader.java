@@ -2,8 +2,8 @@ package com.neverwinterdp.storage.kafka.source;
 
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.PartitionStreamConfig;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.source.CommitPoint;
 import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
 
@@ -24,12 +24,12 @@ public class KafkaSourceStreamReader implements SourcePartitionStreamReader {
   public String getName() { return partitionConfig.attribute("name"); }
 
   @Override
-  public Record next(long maxWait) throws Exception {
-    return partitionReader.nextAs(Record.class, maxWait);
+  public Message next(long maxWait) throws Exception {
+    return partitionReader.nextAs(Message.class, maxWait);
   }
 
   @Override
-  public Record[] next(int size, long maxWait) throws Exception {
+  public Message[] next(int size, long maxWait) throws Exception {
     throw new Exception("To implement") ;
   }
 

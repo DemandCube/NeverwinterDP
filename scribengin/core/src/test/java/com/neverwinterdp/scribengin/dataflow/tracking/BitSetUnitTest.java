@@ -13,6 +13,7 @@ public class BitSetUnitTest {
   public void testBitSet() throws IOException {
     int NUM_OF_BITS = 32 * 1024;
     BitSet bitSet = new BitSet(NUM_OF_BITS);
+    
     System.out.println("before compressed: " + IOUtil.compress(bitSet.toByteArray()).length);
     Random rand = new Random();
     int idx = 0;
@@ -22,8 +23,8 @@ public class BitSetUnitTest {
         idx += rand.nextInt(5);
       }
     }
-    System.out.println("half compressed: " + IOUtil.compress(bitSet.toByteArray()).length);
     
+    System.out.println("half compressed: " + IOUtil.compress(bitSet.toByteArray()).length);
     while(idx < NUM_OF_BITS) {
       bitSet.set(idx, true);
       while(rand.nextDouble() < 0.25) {

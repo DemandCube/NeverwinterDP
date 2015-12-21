@@ -2,11 +2,11 @@ package com.neverwinterdp.storage.hdfs.source;
 
 import java.io.IOException;
 
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.ssm.SSMReader;
 import com.neverwinterdp.ssm.hdfs.HdfsSSM;
 import com.neverwinterdp.storage.PartitionStreamConfig;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.source.CommitPoint;
 import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
@@ -34,16 +34,16 @@ public class HDFSSourcePartitionStreamReader implements SourcePartitionStreamRea
   public String getName() { return name; }
 
   @Override
-  public Record next(long maxWait) throws Exception {
+  public Message next(long maxWait) throws Exception {
     byte[] data = partitionReader.nextRecord(maxWait);
     if(data == null) {
       return null;
     }
-    return JSONSerializer.INSTANCE.fromBytes(data, Record.class);
+    return JSONSerializer.INSTANCE.fromBytes(data, Message.class);
   }
 
   @Override
-  public Record[] next(int size, long maxWait) throws Exception {
+  public Message[] next(int size, long maxWait) throws Exception {
     throw new Exception("TODO: implement this method");
   }
 

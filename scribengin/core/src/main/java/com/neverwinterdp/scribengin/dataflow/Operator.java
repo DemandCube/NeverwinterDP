@@ -7,8 +7,9 @@ public class Operator<I, O> {
   private String                              name;
   private Dataflow<?, ?>                      dataflow;
   private Class<? extends DataStreamOperator> dataStreamOperator;
-  private Set<String>                         inputs  = new HashSet<String>();
-  private Set<String>                         outputs = new HashSet<String>();
+  private Set<String>                         interceptors = new HashSet<>();
+  private Set<String>                         inputs       = new HashSet<>();
+  private Set<String>                         outputs      = new HashSet<>();
 
   Operator(Dataflow<?, ?> dataflow, String name, Class<? extends DataStreamOperator> dataStreamOperator) {
     this.dataflow           = dataflow;
@@ -18,6 +19,11 @@ public class Operator<I, O> {
   
   public String getName() { return name; }
   public void setName(String name) { this.name = name; }
+  
+  public Operator<I, O> add(Class<? extends DataStreamOperatorInterceptor> type) {
+    interceptors.add(type.getName());
+    return this;
+  }
   
   public Operator<I, O> connect(DataSet<O> out) {
     out(out);
@@ -53,9 +59,9 @@ public class Operator<I, O> {
     OperatorDescriptor descriptor = new OperatorDescriptor();
     descriptor.setName(name);
     descriptor.setOperator(dataStreamOperator.getName());
+    descriptor.setInterceptors(interceptors);
     descriptor.setInputs(inputs);
     descriptor.setOutputs(outputs);
     return descriptor ;
   }
-  
 }

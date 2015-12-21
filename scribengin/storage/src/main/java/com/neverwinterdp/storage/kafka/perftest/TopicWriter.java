@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.neverwinterdp.kafka.KafkaClient;
-import com.neverwinterdp.storage.Record;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.kafka.sink.KafkaSink;
 import com.neverwinterdp.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
@@ -93,7 +93,7 @@ public class TopicWriter {
           String key = "message-" + id;
           byte[] data = new byte[512];
           random.nextBytes(data);
-          Record record = new Record(key, data);
+          Message record = new Message(key, data);
           currentWriter.append(record);
           reporter.incrWrite(topicConfig.topic, 1);
           if(topicConfig.writerWriteBreakInPeriod > 0 && id % 1000 == 0) {

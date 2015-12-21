@@ -5,10 +5,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.neverwinterdp.message.Message;
+import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.worker.WorkerService;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.StorageService;
@@ -18,10 +19,12 @@ import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.storage.source.SourcePartition;
 import com.neverwinterdp.storage.source.SourcePartitionStream;
 import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
+import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.yara.Meter;
 
 public class DataStreamOperatorRuntimeContext implements DataStreamOperatorContext {
   private WorkerService                workerService;
+  private TaskExecutorDescriptor       taskExecutor;
   private DataStreamOperatorDescriptor descriptor;
   private DataStreamOperatorReport     report;
 
@@ -32,10 +35,11 @@ public class DataStreamOperatorRuntimeContext implements DataStreamOperatorConte
   private Meter   dataflowReadMeter;
   private Meter   dataflowRecordMeter;
 
-  public DataStreamOperatorRuntimeContext(WorkerService workerService, DataStreamOperatorDescriptor taskConfig, DataStreamOperatorReport report) throws Exception {
+  public DataStreamOperatorRuntimeContext(WorkerService workerService, TaskExecutorDescriptor taskExecutor, DataStreamOperatorDescriptor taskConfig, DataStreamOperatorReport report) throws Exception {
     this.workerService = workerService;
-    this.descriptor  = taskConfig;
-    this.report = report;
+    this.taskExecutor  = taskExecutor;
+    this.descriptor    = taskConfig;
+    this.report        = report;
     
     DataflowRegistry dflRegistry = workerService.getDataflowRegistry();
     StorageService storageService = workerService.getStorageService();
@@ -59,15 +63,23 @@ public class DataStreamOperatorRuntimeContext implements DataStreamOperatorConte
   public DataStreamOperatorDescriptor getDescriptor() { return this.descriptor; }
   
   public DataStreamOperatorReport getReport() { return this.report; }
+
+  public TaskExecutorDescriptor getTaskExecutor() { return taskExecutor; }
+  
+  public VMDescriptor getVM() { return workerService.getVMDescriptor(); }
+  
+  public <T> T getService(Class<T> type) {
+    return null;
+  }
   
   public boolean isComplete() { return this.complete ; }
   
   public void setComplete() { this.complete = true; }
-  
+
   public Set<String> getAvailableOutputs() { return descriptor.getOutputs(); }
   
-  public Record nextRecord(long maxWaitForDataRead) throws Exception {
-    Record dataflowMessage = inputContext.assignedPartitionReader.next(maxWaitForDataRead);
+  public Message nextMessage(long maxWaitForDataRead) throws Exception {
+    Message dataflowMessage = inputContext.assignedPartitionReader.next(maxWaitForDataRead);
     if(dataflowMessage != null) {
       dataflowReadMeter.mark(dataflowMessage.getData().length + dataflowMessage.getKey().length());
       dataflowRecordMeter.mark(1);
@@ -75,7 +87,7 @@ public class DataStreamOperatorRuntimeContext implements DataStreamOperatorConte
     return dataflowMessage ;
   }
   
-  public void write(String name, Record record) throws Exception {
+  public void write(String name, Message record) throws Exception {
     OutputContext sinkContext = outputContexts.get(name);
     sinkContext.assignedPartitionWriter.append(record);
     Meter meter = 

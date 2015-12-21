@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.apache.hadoop.fs.FileSystem;
 
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.PartitionStreamConfig;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.simplehdfs.HDFSStoragePartitioner;
 import com.neverwinterdp.storage.simplehdfs.Segment;
@@ -20,7 +20,7 @@ public class HDFSSinkPartitionStreamWriter implements SinkPartitionStreamWriter 
   private HDFSStoragePartitioner       partitioner;
   
   private String                       currentPartition;
-  private SegmentStorageWriter<Record> writer;
+  private SegmentStorageWriter<Message> writer;
   private long                         smallDataSizeAccumulate  = 0;
   private long                         mediumDataSizeAccumulate = 0;
 
@@ -34,7 +34,7 @@ public class HDFSSinkPartitionStreamWriter implements SinkPartitionStreamWriter 
   public PartitionStreamConfig getPartitionConfig() { return partitionConfig; }
   
   @Override
-  public void append(Record obj) throws Exception {
+  public void append(Message obj) throws Exception {
     if(writer == null) createWriter();
     writer.append(obj);
     long dataSize = obj.getData().length + obj.getKey().length() ;
@@ -89,8 +89,8 @@ public class HDFSSinkPartitionStreamWriter implements SinkPartitionStreamWriter 
     int partitionStreamId = partitionConfig.getPartitionStreamId();
     currentPartition = partitioner.getCurrentPartition();
     String streamLoc = storageConfig.getLocation() + "/" + currentPartition + "/partition-stream-" + partitionStreamId;
-    SegmentStorage<Record> storage = new SegmentStorage<>(fs, streamLoc, Record.class);
-    writer = new SegmentStorageWriter<Record>(storage);
+    SegmentStorage<Message> storage = new SegmentStorage<>(fs, streamLoc, Message.class);
+    writer = new SegmentStorageWriter<Message>(storage);
     smallDataSizeAccumulate  = storage.getBufferSegments().dataSize();
     mediumDataSizeAccumulate = storage.getSmallSegments().dataSize();
   }

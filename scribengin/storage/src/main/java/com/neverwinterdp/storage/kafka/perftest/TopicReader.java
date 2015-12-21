@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.neverwinterdp.kafka.KafkaClient;
-import com.neverwinterdp.storage.Record;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.kafka.source.KafkaSource;
 import com.neverwinterdp.storage.kafka.source.KafkaSourcePartition;
 import com.neverwinterdp.storage.source.SourcePartitionStream;
@@ -89,8 +89,8 @@ public class TopicReader {
       while(true) {
         currentReader = stream.getReader(topic + ".reader");
         for(int i = 0; i < readPerReader; i++) {
-          Record record = currentReader.next(10000);
-          if(record == null) {
+          Message message = currentReader.next(10000);
+          if(message == null) {
             currentReader.commit();
             currentReader.close();
             return;

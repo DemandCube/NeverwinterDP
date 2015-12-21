@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.amazonaws.services.s3.model.S3Object;
+import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.PartitionStreamConfig;
-import com.neverwinterdp.storage.Record;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.s3.S3Client;
 import com.neverwinterdp.storage.s3.S3Folder;
@@ -55,7 +55,7 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
 
   public String getName() { return name; }
 
-  public Record next(long maxWait) throws Exception {
+  public Message next(long maxWait) throws Exception {
     if(streamFolder == null) return null ;
     if(currentSegmenttReader == null) {
       currentSegmenttReader = nextSegmentReader();
@@ -65,7 +65,7 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
     
     if(currentSegmenttReader.hasNext()) {
       byte[] data = currentSegmenttReader.next();
-      return JSONSerializer.INSTANCE.fromBytes(data, Record.class);
+      return JSONSerializer.INSTANCE.fromBytes(data, Message.class);
     } else {
       currentSegmenttReader.close();
       currentSegmenttReader = null ;
@@ -73,14 +73,14 @@ public class S3SourcePartitionStreamReader implements SourcePartitionStreamReade
     }
   }
 
-  public Record[] next(int size, long maxWait) throws Exception {
-    List<Record> holder = new ArrayList<Record>();
+  public Message[] next(int size, long maxWait) throws Exception {
+    List<Message> holder = new ArrayList<Message>();
     for (int i = 0; i < size; i++) {
-      Record record = next(maxWait);
+      Message record = next(maxWait);
       if (record != null) holder.add(record);
       else break;
     }
-    Record[] array = new Record[holder.size()];
+    Message[] array = new Message[holder.size()];
     holder.toArray(array);
     return array;
   }
