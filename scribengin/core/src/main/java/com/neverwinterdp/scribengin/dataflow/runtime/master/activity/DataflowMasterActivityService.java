@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.master.activity;
+package com.neverwinterdp.scribengin.dataflow.runtime.master.activity;
 
 import com.google.inject.Injector;
 import com.neverwinterdp.registry.activity.ActivityService;

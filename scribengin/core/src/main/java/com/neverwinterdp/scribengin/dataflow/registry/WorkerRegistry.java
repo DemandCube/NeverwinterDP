@@ -11,7 +11,7 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
-import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
+import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerStatus;
 import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.yara.MetricRegistry;
 import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;

@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.master;
+package com.neverwinterdp.scribengin.dataflow.runtime.master;
 
 import org.slf4j.Logger;
 

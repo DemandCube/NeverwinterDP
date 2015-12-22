@@ -1,11 +1,9 @@
-package com.neverwinterdp.scribengin.dataflow.runtime;
+package com.neverwinterdp.scribengin.dataflow;
 
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.message.MessageTracking;
-import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
-import com.neverwinterdp.scribengin.dataflow.DataStreamSourceInterceptor;
 
-public class MessageTrackingInputDataStreamInterceptor extends DataStreamSourceInterceptor {
+public class MTInputDataStreamInterceptor extends DataStreamSourceInterceptor {
   
   @Override
   public void onInit(DataStreamOperatorContext ctx) throws Exception {

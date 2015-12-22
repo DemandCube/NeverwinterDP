@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.master;
+package com.neverwinterdp.scribengin.dataflow.runtime.master;
 
 import java.util.HashMap;
 import java.util.Map;

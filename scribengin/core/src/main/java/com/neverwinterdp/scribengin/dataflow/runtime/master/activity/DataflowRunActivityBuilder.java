@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.master.activity;
+package com.neverwinterdp.scribengin.dataflow.runtime.master.activity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +12,8 @@ import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.activity.ActivityStepBuilder;
 import com.neverwinterdp.registry.activity.ActivityStepExecutor;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
-import com.neverwinterdp.scribengin.dataflow.master.MasterService;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.runtime.master.MasterService;
 
 public class DataflowRunActivityBuilder extends AllocateWorkerActivityBuilder {
   public Activity build() {

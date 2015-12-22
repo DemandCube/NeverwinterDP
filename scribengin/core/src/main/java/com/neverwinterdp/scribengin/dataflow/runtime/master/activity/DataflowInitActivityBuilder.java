@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.master.activity;
+package com.neverwinterdp.scribengin.dataflow.runtime.master.activity;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -18,12 +18,12 @@ import com.neverwinterdp.registry.activity.ActivityStepExecutor;
 import com.neverwinterdp.scribengin.dataflow.DataSetDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.OperatorDescriptor;
-import com.neverwinterdp.scribengin.dataflow.master.MasterService;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.OperatorRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.StreamRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
+import com.neverwinterdp.scribengin.dataflow.runtime.master.MasterService;
 import com.neverwinterdp.storage.PartitionStreamConfig;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;

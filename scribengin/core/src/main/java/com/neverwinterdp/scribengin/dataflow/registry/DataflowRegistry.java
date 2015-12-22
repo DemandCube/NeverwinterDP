@@ -11,13 +11,13 @@ import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.SequenceIdTracker;
 import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
-import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReportWithStatus;
-import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerRuntimeReport;
+import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerRuntimeReport;
 
 @Singleton
 public class DataflowRegistry {
@@ -28,12 +28,6 @@ public class DataflowRegistry {
   final static public String DATAFLOW_HISTORY_PATH = SCRIBENGIN_PATH + "/dataflows/history";
   
   final static public String NOTIFICATIONS_PATH    = "notifications";
-  
-  final static public String  DATAFLOWS_ID_TRACKERS       = DATAFLOWS_PATH   + "/id-trackers";
-  final static public String  DATAFLOW_ID_TRACKER         = DATAFLOWS_ID_TRACKERS + "/dataflow-id";
-  final static public String  DATAFLOW_MASTER_ID_TRACKER  = DATAFLOWS_ID_TRACKERS + "/dataflow-master-id";
-  final static public String  DATAFLOW_WORKER_ID_TRACKER  = DATAFLOWS_ID_TRACKERS + "/dataflow-worker-id";
-  
   
   @Inject
   @Named("dataflow.registry.path")
@@ -50,7 +44,10 @@ public class DataflowRegistry {
   private MasterRegistry       masterRegistry;
   private WorkerRegistry       workerRegistry;
   private DataflowTaskRegistry taskRegistry;
-
+  
+  private SequenceIdTracker    workerIdTracker;
+  private SequenceIdTracker    masterIdTracker;
+  
   private Notifier dataflowTaskNotifier;
   private Notifier dataflowWorkerNotifier;
   
@@ -72,6 +69,10 @@ public class DataflowRegistry {
     workerRegistry   = new WorkerRegistry(registry, dataflowPath);
     
     taskRegistry = new DataflowTaskRegistry(registry, dataflowPath);
+    
+    String idTrackerPath = dataflowPath +  "/id-tracker"  ;
+    masterIdTracker = new SequenceIdTracker(registry, idTrackerPath + "/master", false);
+    workerIdTracker = new SequenceIdTracker(registry, idTrackerPath + "/worker", false);
     
     String notificationPath = dataflowPath +  "/" + NOTIFICATIONS_PATH;
     dataflowTaskNotifier   = new Notifier(registry, notificationPath, "dataflow-tasks");
@@ -112,6 +113,12 @@ public class DataflowRegistry {
       workerRegistry.initRegistry(transaction);
       taskRegistry.initRegistry(transaction);
 
+      String idTrackerPath = dataflowPath +  "/id-tracker"  ;
+      transaction.create(idTrackerPath, new byte[0], NodeCreateMode.PERSISTENT);
+      masterIdTracker.initRegistry(transaction);
+      workerIdTracker.initRegistry(transaction);
+      
+      
       String notificationPath = dataflowPath +  "/" + NOTIFICATIONS_PATH;
       transaction.create(notificationPath, new byte[0], NodeCreateMode.PERSISTENT);
       dataflowTaskNotifier.initRegistry(transaction);
@@ -138,6 +145,10 @@ public class DataflowRegistry {
   public WorkerRegistry getWorkerRegistry() { return workerRegistry; }
   
   public DataflowTaskRegistry getTaskRegistry() { return taskRegistry; }
+  
+  public SequenceIdTracker getMasterTracker() { return masterIdTracker; }
+  
+  public SequenceIdTracker getWorkerIdTracker() { return workerIdTracker; }
   
   public Notifier getDataflowTaskNotifier() { return this.dataflowTaskNotifier ; }
   

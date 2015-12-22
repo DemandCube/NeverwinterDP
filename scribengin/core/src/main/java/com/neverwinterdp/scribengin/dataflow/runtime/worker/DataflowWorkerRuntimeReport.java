@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.worker;
+package com.neverwinterdp.scribengin.dataflow.runtime.worker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
-import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
+import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerStatus;
 
 public class DataflowWorkerRuntimeReport {
   private String                               worker;

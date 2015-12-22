@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.master.activity;
+package com.neverwinterdp.scribengin.dataflow.runtime.master.activity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,10 +16,10 @@ import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.activity.ActivityStepBuilder;
 import com.neverwinterdp.registry.activity.ActivityStepExecutor;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.master.MasterService;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
-import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
-import com.neverwinterdp.scribengin.dataflow.worker.VMWorkerApp;
+import com.neverwinterdp.scribengin.dataflow.runtime.master.MasterService;
+import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerStatus;
+import com.neverwinterdp.scribengin.dataflow.runtime.worker.VMWorkerApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.vm.client.VMClient;
@@ -67,15 +67,13 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
     public void execute(ActivityExecutionContext context, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
       DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
-      SequenceIdTracker idTracker = 
-        new SequenceIdTracker(dflRegistry.getRegistry(), DataflowRegistry.DATAFLOW_WORKER_ID_TRACKER, true);
       List<String> activeWorkers = dflRegistry.getWorkerRegistry().getActiveWorkerIds();
       //TODO: fix this hack
       int numOfInstanceToAllocate = 1;
       if(activeWorkers.size() == 0) numOfInstanceToAllocate = dflConfig.getWorker().getNumOfInstances();
 
       for(int i = 0; i < numOfInstanceToAllocate; i++) {
-        String workerId = dflConfig.getId() + "-worker-" + idTracker.nextSeqId();
+        String workerId = dflConfig.getId() + "-worker-" + dflRegistry.getWorkerIdTracker().nextSeqId();
         allocate(dflRegistry, dflConfig, workerId);
       }
     }

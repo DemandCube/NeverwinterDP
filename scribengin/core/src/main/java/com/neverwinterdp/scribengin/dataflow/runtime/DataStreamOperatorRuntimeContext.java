@@ -9,7 +9,7 @@ import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
-import com.neverwinterdp.scribengin.dataflow.worker.WorkerService;
+import com.neverwinterdp.scribengin.dataflow.runtime.worker.WorkerService;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.StorageService;

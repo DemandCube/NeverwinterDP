@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.master;
+package com.neverwinterdp.scribengin.dataflow.runtime.master;
 
 import org.slf4j.Logger;
 
@@ -8,12 +8,12 @@ import com.google.inject.Singleton;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskService;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
-import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowInitActivityBuilder;
-import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowMasterActivityService;
-import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowRunActivityBuilder;
-import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowStopActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
+import com.neverwinterdp.scribengin.dataflow.runtime.master.activity.DataflowInitActivityBuilder;
+import com.neverwinterdp.scribengin.dataflow.runtime.master.activity.DataflowMasterActivityService;
+import com.neverwinterdp.scribengin.dataflow.runtime.master.activity.DataflowRunActivityBuilder;
+import com.neverwinterdp.scribengin.dataflow.runtime.master.activity.DataflowStopActivityBuilder;
 import com.neverwinterdp.storage.StorageService;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMConfig;

@@ -16,7 +16,7 @@ import com.beust.jcommander.Parameter;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.registry.WorkerRegistry;
-import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
+import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerStatus;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.vm.client.shell.CommandInput;
 import com.neverwinterdp.vm.client.shell.Shell;

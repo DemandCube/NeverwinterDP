@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.neverwinterdp.scribengin.dataflow.runtime.MessageTrackingInputDataStreamInterceptor;
-import com.neverwinterdp.scribengin.dataflow.runtime.MessageTrackingOutputDataStreamInterceptor;
 import com.neverwinterdp.storage.StorageConfig;
 
 abstract public class DataSet<T> {
@@ -21,10 +19,10 @@ abstract public class DataSet<T> {
     this.name = name;
     this.type = type ;
     if(type == DataSetType.Input) {
-      addSourceInterceptor("input", MessageTrackingInputDataStreamInterceptor.class);
+      addSourceInterceptor("input", MTInputDataStreamInterceptor.class);
     }
     if(type == DataSetType.Output) {
-      addSinkInterceptor("output", MessageTrackingOutputDataStreamInterceptor.class);
+      addSinkInterceptor("output", MTOutputDataStreamInterceptor.class);
     }
   }
   

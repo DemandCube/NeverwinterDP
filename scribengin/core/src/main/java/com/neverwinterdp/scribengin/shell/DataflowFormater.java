@@ -18,7 +18,7 @@ import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReport;
 import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReportWithStatus;
-import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerRuntimeReport;
+import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerRuntimeReport;
 import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.util.text.TabularFormater;

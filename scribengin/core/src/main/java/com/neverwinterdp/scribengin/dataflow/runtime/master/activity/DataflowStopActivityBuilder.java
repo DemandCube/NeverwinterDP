@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.master.activity;
+package com.neverwinterdp.scribengin.dataflow.runtime.master.activity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +18,8 @@ import com.neverwinterdp.registry.txevent.TXEventNotificationCompleteListener;
 import com.neverwinterdp.registry.txevent.TXEventNotificationWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
-import com.neverwinterdp.scribengin.dataflow.master.MasterService;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.runtime.master.MasterService;
 
 public class DataflowStopActivityBuilder extends ActivityBuilder {
   public Activity build() {

@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.master;
+package com.neverwinterdp.scribengin.dataflow.runtime.master;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,10 +9,10 @@ import com.neverwinterdp.registry.activity.Activity;
 import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.event.NodeEventWatcher;
 import com.neverwinterdp.registry.notification.Notifier;
-import com.neverwinterdp.scribengin.dataflow.master.activity.AllocateWorkerActivityBuilder;
-import com.neverwinterdp.scribengin.dataflow.master.activity.DataflowMasterActivityService;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
-import com.neverwinterdp.scribengin.dataflow.worker.DataflowWorkerStatus;
+import com.neverwinterdp.scribengin.dataflow.runtime.master.activity.AllocateWorkerActivityBuilder;
+import com.neverwinterdp.scribengin.dataflow.runtime.master.activity.DataflowMasterActivityService;
+import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerStatus;
 import com.neverwinterdp.vm.VMDescriptor;
 
 public class DataflowWorkerMonitor {

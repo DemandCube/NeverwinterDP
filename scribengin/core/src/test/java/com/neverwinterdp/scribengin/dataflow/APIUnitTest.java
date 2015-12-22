@@ -7,7 +7,6 @@ import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.KafkaDataSet;
 import com.neverwinterdp.scribengin.dataflow.KafkaWireDataSetFactory;
 import com.neverwinterdp.scribengin.dataflow.Operator;
-import com.neverwinterdp.scribengin.dataflow.runtime.MessageTrackingInputDataStreamInterceptor;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessagePerister;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessageSplitter;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;

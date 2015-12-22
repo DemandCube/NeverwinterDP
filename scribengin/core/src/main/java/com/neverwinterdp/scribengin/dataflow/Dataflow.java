@@ -76,6 +76,7 @@ public class Dataflow<IN, OUT> {
   
   public <I, O> Operator<I, O> createOperator(String name, Class<? extends DataStreamOperator> dataStreamOperator) {
     Operator<I, O> operator = new Operator<I, O>(this, name, dataStreamOperator);
+    operator.add(MTDataStreamOperatorInterceptor.class);
     operators.put(name, operator);
     return operator;
   }
