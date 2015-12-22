@@ -7,6 +7,7 @@ import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.KafkaDataSet;
 import com.neverwinterdp.scribengin.dataflow.KafkaWireDataSetFactory;
 import com.neverwinterdp.scribengin.dataflow.Operator;
+import com.neverwinterdp.scribengin.dataflow.runtime.MessageTrackingInputDataStreamInterceptor;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessagePerister;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessageSplitter;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
@@ -28,7 +29,8 @@ public class APIUnitTest {
     Operator<Message, Message> warnOp     = dfl.createOperator("warn",     TrackingMessagePerister.class);
     Operator<Message, Message> errorOp    = dfl.createOperator("error",    TrackingMessagePerister.class);
 
-    inputDs.connect(splitterOp);
+    inputDs.
+      connect(splitterOp);
     splitterOp.
       connect(infoOp).
       connect(warnOp).

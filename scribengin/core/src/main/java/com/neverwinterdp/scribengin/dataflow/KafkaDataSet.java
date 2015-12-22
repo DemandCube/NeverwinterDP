@@ -1,5 +1,6 @@
 package com.neverwinterdp.scribengin.dataflow;
 
+import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 
 public class KafkaDataSet<T> extends DataSet<T> {
@@ -24,5 +25,7 @@ public class KafkaDataSet<T> extends DataSet<T> {
   }
   
   @Override
-  public KafkaStorageConfig getStorageConfig() { return kafkaStorageConfig; }
+  protected StorageConfig createStorageConfig() { 
+    return new KafkaStorageConfig(kafkaStorageConfig); 
+  }
 }

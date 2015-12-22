@@ -1,10 +1,7 @@
 package com.neverwinterdp.message;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -51,36 +48,44 @@ final static public String WORKING_DIR = "build/working";
     mRegistry.initRegistry();
     
     ExecutorService executorService = Executors.newFixedThreadPool(3);
-    String[] logName = {"input", "splitter", "output"};
     for(int i = 0; i < 3; i++) {
-      executorService.submit(new TrackingMessageProducer(mRegistry, logName, 10000));
+      executorService.submit(new TrackingMessageProducer(mRegistry, 10000));
     }
     
     executorService.shutdown();
     while(!executorService.isTerminated()) {
       executorService.awaitTermination(3, TimeUnit.SECONDS);
-      for(String selLogName : logName) {
-        MessageTrackingReporter reporter = mRegistry.mergeMessageTrackingLogChunk(selLogName);
-        registry.get("/").dump(System.out);
-        System.out.println(reporter.toFormattedText());
-      }
+      registry.get("/").dump(System.out);
     }
+    
+    //MessageTrackingReporter inputReporter = mRegistry.mergeMessageTrackingLogChunk("input");
+    //System.out.println(inputReporter.toFormattedText());
+    
+    MessageTrackingReporter outputReporter = mRegistry.mergeMessageTrackingLogChunk("output");
+    System.out.println(outputReporter.toFormattedText());
+    
+    registry.get("/").dump(System.out);
   }
   
   static public class TrackingMessageProducer implements Runnable {
-    private MessageTrackingRegistry          mRegistry;
-    private String[]                         logName;
-    private int                              chunkSize;
-    private List<TrackingMessageLogProducer> logProducers = new ArrayList<>();
+    private MessageTrackingRegistry mRegistry;
+    private int                     chunkSize;
+    private TrackingMessageLogger   inputLogger;
+    private TrackingMessageLogger   outputLogger;
+    private TrackingMessageLogger   splitterLogger;
+    private TrackingMessageLogger   infoLogger;
+    private TrackingMessageLogger   warnLogger;
+    private TrackingMessageLogger   errorLogger;
 
-    public TrackingMessageProducer(MessageTrackingRegistry mRegistry, String[] logName, int chunkSize) {
+    public TrackingMessageProducer(MessageTrackingRegistry mRegistry, int chunkSize) {
       this.mRegistry = mRegistry;
-      this.logName      = logName ;
       this.chunkSize = chunkSize;
-     for(int i = 0; i < logName.length; i++) {
-       TrackingMessageLogProducer logProducer = new TrackingMessageLogProducer(mRegistry, logName[i], chunkSize);
-       logProducers.add(logProducer);
-     }
+      inputLogger    = new TrackingMessageLogger("input");
+      outputLogger   = new TrackingMessageLogger("output");
+      splitterLogger = new TrackingMessageLogger("operator.splitter");
+      infoLogger     = new TrackingMessageLogger("operator.persister.info");
+      warnLogger     = new TrackingMessageLogger("operator.persister.warn");
+      errorLogger    = new TrackingMessageLogger("operator.persister.error");
     }
     
     @Override
@@ -93,60 +98,55 @@ final static public String WORKING_DIR = "build/working";
     }
     
     private void doRun() throws Exception {
-      for(int i = 0; i < 10; i++) generateChunk();
+      for(int i = 0; i < 10; i++) {
+        int chunkId = mRegistry.nextMessageChunkId();
+        List<MessageTracking> messageTrackingChunkHolder = generateMessageTracking(chunkId);
+        inputLogger.log(messageTrackingChunkHolder);
+        //saveChunk("input", chunkId, messageTrackingChunkHolder);
+        splitterLogger.log(messageTrackingChunkHolder);
+        if(i % 3 == 0) {
+          infoLogger.log(messageTrackingChunkHolder);
+        } else if(i % 3 == 1) {
+          warnLogger.log(messageTrackingChunkHolder);
+        } else {
+          errorLogger.log(messageTrackingChunkHolder);
+        }
+        outputLogger.log(messageTrackingChunkHolder);
+        saveChunk("output", chunkId, messageTrackingChunkHolder);
+      }
     }
     
-    private void generateChunk() throws Exception {
-      int chunkId = mRegistry.nextMessageChunkId();
+    private List<MessageTracking> generateMessageTracking(int chunkId) throws Exception {
+      List<MessageTracking> holder = new ArrayList<MessageTracking>();
       for(int j = 0; j < chunkSize; j++) {
         MessageTracking mTracking = new MessageTracking(chunkId, j);
-        for(int k = 0; k < logProducers.size(); k++) {
-          TrackingMessageLogProducer logProducer = logProducers.get(k);
-          logProducer.produce(mTracking);
-        }
-        if(j % 3000 == 0) flush();
+        holder.add(mTracking);
       }
-      flush();
+      return holder;
     }
     
-    private void flush() throws Exception {
-      for(int k = 0; k < logProducers.size(); k++) {
-        TrackingMessageLogProducer logProducer = logProducers.get(k);
-        logProducer.flush();
+    private void saveChunk(String name, int chunkId, List<MessageTracking> holder) throws Exception {
+      MessageTrackingChunkStat chunk = new MessageTrackingChunkStat(name, chunkId, chunkSize);
+      for(int j = 0; j < holder.size(); j++) {
+        MessageTracking mTracking = holder.get(j);
+        chunk.log(mTracking);
       }
+      chunk.update();
+      mRegistry.saveMessageTrackingChunkStat(chunk);
     }
   }
   
-  static public class TrackingMessageLogProducer  {
-    private MessageTrackingRegistry               mRegistry;
-    private String                                logName;
-    private int                                   chunkSize;
-    private Map<Integer, MessageTrackingChunkStat> chunks = new HashMap<>();
-    
-    public TrackingMessageLogProducer(MessageTrackingRegistry mRegistry, String name, int chunkSize) {
-      this.mRegistry    = mRegistry;
-      this.logName      = name;
-      this.chunkSize    = chunkSize;
+  static public class TrackingMessageLogger  {
+    private String logName;
+
+    public TrackingMessageLogger(String name) {
+      this.logName = name;
     }
     
-    public void produce(MessageTracking mTracking) {
-      mTracking.add(new MessageTrackingLog(logName, null));
-      MessageTrackingChunkStat chunk = chunks.get(mTracking.getChunkId());
-      if(chunk == null) {
-        chunk = new MessageTrackingChunkStat(logName, mTracking.getChunkId(), chunkSize);
-        chunks.put(chunk.getChunkId(), chunk);
-      }
-      chunk.log(mTracking);
-    }
-    
-    public void flush() throws Exception {
-      Iterator<MessageTrackingChunkStat> i = chunks.values().iterator();
-      while(i.hasNext()) {
-        MessageTrackingChunkStat chunk = i.next();
-        chunk.update();
-        mRegistry.saveMessageTrackingChunkStat(chunk);
-        if(chunk.isComplete()) i.remove();
-        Thread.sleep(250);
+    public void log(List<MessageTracking> mTrackings) {
+      for(int i = 0; i < mTrackings.size(); i++) {
+        MessageTracking mTracking = mTrackings.get(i);
+        mTracking.add(new MessageTrackingLog(logName, null));
       }
     }
   }

@@ -33,11 +33,20 @@ public class AggregateMessageTrackingChunkStat {
   public Map<String, MessageTrackingLogChunkStat> getLogStats() { return logStats; }
   public void setLogStats(Map<String, MessageTrackingLogChunkStat> logStats) { this.logStats = logStats; }
   
-  public void merge(MessageTrackingChunkStat chunk) {
-    if(fromChunkId < 0) fromChunkId = chunk.getChunkId();
-    toChunkId = chunk.getChunkId();
-    trackingLostCount += chunk.getTrackingLostCount();
-    trackingDuplicatedCount += chunk.getTrackingDuplicatedCount();
+  public void merge(MessageTrackingChunkStat otherChunk) {
+    if(fromChunkId < 0) fromChunkId = otherChunk.getChunkId();
+    toChunkId = otherChunk.getChunkId();
+    trackingLostCount += otherChunk.getTrackingLostCount();
+    trackingDuplicatedCount += otherChunk.getTrackingDuplicatedCount();
+    Map<String, MessageTrackingLogChunkStat> otherLogStats = otherChunk.getLogStats();
+    for(String logName : otherLogStats.keySet()) {
+      MessageTrackingLogChunkStat logStat = logStats.get(logName);
+      if(logStat == null) {
+        logStat = new MessageTrackingLogChunkStat();
+        logStats.put(logName, logStat);
+      }
+      logStat.merge(otherLogStats.get(logName));
+    }
   }
   
   public void merge(AggregateMessageTrackingChunkStat other) {

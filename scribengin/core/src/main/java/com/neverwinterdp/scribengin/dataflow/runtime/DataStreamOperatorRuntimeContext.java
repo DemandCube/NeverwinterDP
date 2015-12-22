@@ -87,12 +87,13 @@ public class DataStreamOperatorRuntimeContext implements DataStreamOperatorConte
     return dataflowMessage ;
   }
   
-  public void write(String name, Message record) throws Exception {
+  public void write(String name, Message message) throws Exception {
     OutputContext sinkContext = outputContexts.get(name);
-    sinkContext.assignedPartitionWriter.append(record);
+    sinkContext.assignedPartitionWriter.append(message);
+    
     Meter meter = 
         workerService.getMetricRegistry().getMeter("dataflow.sink." + name + ".throughput.byte", "byte") ;
-    meter.mark(record.getData().length + record.getKey().length());
+    meter.mark(message.getData().length + message.getKey().length());
     Meter recordMetter = 
         workerService.getMetricRegistry().getMeter("dataflow.sink." + name + ".throughput.record", "record") ;
     recordMetter.mark(1);

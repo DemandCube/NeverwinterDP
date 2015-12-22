@@ -2,8 +2,8 @@ package com.neverwinterdp.message;
 
 public class MessageTrackingLogChunkStat {
   private int  count;
-  private long avgDeliveryTime;
-  private long sumAvgDeliveryTime;
+  private long avgDeliveryTime = 0l;
+  private long sumAvgDeliveryTime = 0l;
   
   public MessageTrackingLogChunkStat() {
   }
@@ -16,7 +16,7 @@ public class MessageTrackingLogChunkStat {
 
   public void log(MessageTracking mTracking, MessageTrackingLog log) {
     count++ ;
-    sumAvgDeliveryTime += mTracking.getTimestamp() - log.getTimestamp();
+    sumAvgDeliveryTime += log.getTimestamp() - mTracking.getTimestamp() ;
     avgDeliveryTime = sumAvgDeliveryTime/count;
   }
   

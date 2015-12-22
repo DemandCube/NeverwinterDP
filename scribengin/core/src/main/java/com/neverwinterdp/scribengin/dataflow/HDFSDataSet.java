@@ -18,5 +18,7 @@ public class HDFSDataSet<T> extends DataSet<T>{
   }
 
   @Override
-  public StorageConfig getStorageConfig() { return hdfsStorageConfig; }
+  protected StorageConfig createStorageConfig() { 
+    return new HDFSStorageConfig(hdfsStorageConfig); 
+  }
 }

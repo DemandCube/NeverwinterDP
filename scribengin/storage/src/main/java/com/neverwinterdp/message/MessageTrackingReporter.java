@@ -1,7 +1,13 @@
 package com.neverwinterdp.message;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.elasticsearch.common.collect.Lists;
 
 import com.neverwinterdp.util.text.TabularFormater;
 
@@ -61,11 +67,19 @@ public class MessageTrackingReporter {
   }
   
   public String toFormattedText() {
-    TabularFormater ft = new TabularFormater("From", "To", "Lost", "Duplicated");
+    TabularFormater ft = new TabularFormater("From - To", "Stat", "Lost", "Duplicated", "Count", "Avg Delivery");
     ft.setTitle(name + " report");
     for(int i = 0; i < aggregateChunkReports.size(); i++) {
       AggregateMessageTrackingChunkStat sel = aggregateChunkReports.get(i) ;
-      ft.addRow(sel.getFromChunkId(), sel.getToChunkId(), sel.getTrackingLostCount(), sel.getTrackingDuplicatedCount());
+      ft.addRow(sel.getFromChunkId() + " - " + sel.getToChunkId(), "", "", "", "", "");
+      ft.addRow("", "Tracking", sel.getTrackingLostCount(), sel.getTrackingDuplicatedCount(), "", "");
+      Map<String, MessageTrackingLogChunkStat> logStats = sel.getLogStats();
+      List<String> logStatKeys = new ArrayList<>(logStats.keySet());
+      Collections.sort(logStatKeys);
+      for(String logName : logStatKeys) {
+        MessageTrackingLogChunkStat selLogChunkStat = logStats.get(logName);
+        ft.addRow("", logName, "", "", selLogChunkStat.getCount(), selLogChunkStat.getAvgDeliveryTime());
+      }
     }
     return ft.getFormattedText();
   }

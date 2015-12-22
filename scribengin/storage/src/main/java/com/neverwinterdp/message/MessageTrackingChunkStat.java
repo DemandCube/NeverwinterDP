@@ -136,9 +136,7 @@ public class MessageTrackingChunkStat {
     else trackingNoLostTo = noLostTo ;
     
     trackingLostCount = lostCount;
-    if(trackingNoLostTo + 1 == chunkSize) {
-      complete = true;
-    }
+    if(trackingNoLostTo + 1 == chunkSize) complete = true;
   }
   
   public String toChunkIdName() { return toChunkIdName(chunkId); }
