@@ -4,8 +4,6 @@ import org.junit.Test;
 
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.KafkaDataSet;
-import com.neverwinterdp.scribengin.dataflow.KafkaWireDataSetFactory;
 import com.neverwinterdp.scribengin.dataflow.Operator;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessagePerister;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessageSplitter;

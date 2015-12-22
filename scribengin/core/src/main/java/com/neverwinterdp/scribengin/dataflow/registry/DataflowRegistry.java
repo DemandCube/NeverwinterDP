@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.neverwinterdp.message.MessageTrackingRegistry;
 import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
@@ -38,13 +39,14 @@ public class DataflowRegistry {
 
   private Node statusNode;
 
-  private ConfigRegistry       configRegistry;
-  private StreamRegistry       streamRegistry;
-  private OperatorRegistry     operatorRegistry;
-  private MasterRegistry       masterRegistry;
-  private WorkerRegistry       workerRegistry;
-  private DataflowTaskRegistry taskRegistry;
-  
+  private ConfigRegistry          configRegistry;
+  private StreamRegistry          streamRegistry;
+  private OperatorRegistry        operatorRegistry;
+  private MasterRegistry          masterRegistry;
+  private WorkerRegistry          workerRegistry;
+  private DataflowTaskRegistry    taskRegistry;
+  private MessageTrackingRegistry messageTrackingRegistry;
+
   private SequenceIdTracker    workerIdTracker;
   private SequenceIdTracker    masterIdTracker;
   
@@ -69,6 +71,8 @@ public class DataflowRegistry {
     workerRegistry   = new WorkerRegistry(registry, dataflowPath);
     
     taskRegistry = new DataflowTaskRegistry(registry, dataflowPath);
+    
+    messageTrackingRegistry = new MessageTrackingRegistry(registry, dataflowPath + "/message-tracking");
     
     String idTrackerPath = dataflowPath +  "/id-tracker"  ;
     masterIdTracker = new SequenceIdTracker(registry, idTrackerPath + "/master", false);
@@ -113,11 +117,12 @@ public class DataflowRegistry {
       workerRegistry.initRegistry(transaction);
       taskRegistry.initRegistry(transaction);
 
+      messageTrackingRegistry.initRegistry(transaction);
+      
       String idTrackerPath = dataflowPath +  "/id-tracker"  ;
       transaction.create(idTrackerPath, new byte[0], NodeCreateMode.PERSISTENT);
       masterIdTracker.initRegistry(transaction);
       workerIdTracker.initRegistry(transaction);
-      
       
       String notificationPath = dataflowPath +  "/" + NOTIFICATIONS_PATH;
       transaction.create(notificationPath, new byte[0], NodeCreateMode.PERSISTENT);
@@ -145,6 +150,8 @@ public class DataflowRegistry {
   public WorkerRegistry getWorkerRegistry() { return workerRegistry; }
   
   public DataflowTaskRegistry getTaskRegistry() { return taskRegistry; }
+  
+  public MessageTrackingRegistry getMessageTrackingRegistry() { return messageTrackingRegistry; }
   
   public SequenceIdTracker getMasterTracker() { return masterIdTracker; }
   

@@ -5,8 +5,8 @@ import java.util.Set;
 public class OperatorDescriptor {
   private String      name ;
   private String      operator;
-  private Set<String> interceptors;
   
+  private Set<String> interceptors;
   private Set<String> inputs;
   private Set<String> outputs;
   

@@ -66,7 +66,7 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext context, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
+      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowDescriptor();
       List<String> activeWorkers = dflRegistry.getWorkerRegistry().getActiveWorkerIds();
       //TODO: fix this hack
       int numOfInstanceToAllocate = 1;
@@ -115,7 +115,7 @@ public class AllocateWorkerActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
+      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowDescriptor();
       long maxWait = dflConfig.getWorker().getMaxWaitForRunningStatus();
       dflRegistry.
         getWorkerRegistry().

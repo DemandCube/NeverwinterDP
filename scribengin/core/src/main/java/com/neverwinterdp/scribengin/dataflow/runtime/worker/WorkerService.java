@@ -43,6 +43,8 @@ public class WorkerService {
   @Inject
   private MetricRegistry   metricRegistry ;
   
+  private Injector         serviceContainer;
+  
   private DedicatedTaskService<DataStreamOperatorDescriptor> taskService;
   
   private DataflowWorkerEventWatcher   dataflowWorkerEventWatcher ;
@@ -55,6 +57,7 @@ public class WorkerService {
   @Inject
   public void onInject(Injector container, LoggerFactory lfactory) throws Exception {
     logger = lfactory.getLogger(WorkerService.class);
+    serviceContainer = container;
   }
   
   public void init() throws Exception {
@@ -69,7 +72,7 @@ public class WorkerService {
       }
     };
     
-    DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
+    DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowDescriptor();
     taskService = new DedicatedTaskService<DataStreamOperatorDescriptor>(dflRegistry.getTaskRegistry(), taskSlotExecutorFactory);
     for(int i = 0; i < dflConfig.getWorker().getNumOfExecutor(); i++) {
       TaskExecutorDescriptor executor = new TaskExecutorDescriptor(vmDescriptor.getId() + "-executor-" + i, vmDescriptor.getId());
@@ -94,6 +97,8 @@ public class WorkerService {
 
   public MetricRegistry getMetricRegistry() { return metricRegistry; }
   
+  public Injector getServiceContainer() { return this.serviceContainer; }
+  
   public void run() throws Exception {
     System.out.println("DataflowMasterService: run()");
     workerStatus = DataflowWorkerStatus.RUNNING;
@@ -103,7 +108,7 @@ public class WorkerService {
   
   public void waitForTermination() throws RegistryException, InterruptedException {
     System.out.println("DataflowWorkerService: waitForTermination()");
-    long maxRunTime = dflRegistry.getConfigRegistry().getDataflowConfig().getMaxRunTime();
+    long maxRunTime = dflRegistry.getConfigRegistry().getDataflowDescriptor().getMaxRunTime();
     try {
       taskService.getTaskExecutorService().awaitTermination(maxRunTime, TimeUnit.MILLISECONDS);
     } catch(InterruptedException ex) {

@@ -62,7 +62,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
       StreamRegistry streamRegistry = dflRegistry.getStreamRegistry();
       StorageService storageService = service.getStorageService();
-      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
+      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowDescriptor();
       DataSetDescriptor streamConfig  = dflConfig.getStreamConfig();
       Map<String, StorageConfig> storageConfigs = streamConfig.getStreams();
       for(Map.Entry<String, StorageConfig> entry : storageConfigs.entrySet()) {
@@ -92,7 +92,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
       OperatorRegistry operatorRegistry = dflRegistry.getOperatorRegistry();
-      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
+      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowDescriptor();
       Map<String, OperatorDescriptor> operators = dflConfig.getOperators();
       for(Map.Entry<String, OperatorDescriptor> entry : operators.entrySet()) {
         String name = entry.getKey();
@@ -110,7 +110,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowConfig();
+      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowDescriptor();
       Map<String, OperatorDescriptor> operators = dflConfig.getOperators();
       for(Map.Entry<String, OperatorDescriptor> entry : operators.entrySet()) {
         String opName = entry.getKey();

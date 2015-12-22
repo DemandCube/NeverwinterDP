@@ -1,7 +1,6 @@
 package com.neverwinterdp.scribengin.dataflow.registry;
 
 import com.neverwinterdp.registry.Node;
-import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
@@ -25,11 +24,11 @@ public class ConfigRegistry {
   void initRegistry(Transaction transaction) throws RegistryException {
   }
   
-  public DataflowDescriptor getDataflowConfig() throws RegistryException {
-    return getDataflowConfig(false);
+  public DataflowDescriptor getDataflowDescriptor() throws RegistryException {
+    return getDataflowDescriptor(false);
   }
   
-  public DataflowDescriptor getDataflowConfig(boolean refresh) throws RegistryException {
+  public DataflowDescriptor getDataflowDescriptor(boolean refresh) throws RegistryException {
     if(config == null || refresh) {
       config = configNode.getDataAs(DataflowDescriptor.class);
     }
