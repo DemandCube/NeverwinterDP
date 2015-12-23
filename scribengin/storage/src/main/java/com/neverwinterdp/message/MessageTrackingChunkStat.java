@@ -10,6 +10,7 @@ import java.util.zip.DataFormatException;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neverwinterdp.util.io.IOUtil;
+import com.neverwinterdp.util.text.TabularFormater;
 
 public class MessageTrackingChunkStat {
   static DecimalFormat ID_FORMAT = new DecimalFormat("00000000");
@@ -126,7 +127,7 @@ public class MessageTrackingChunkStat {
   synchronized public void update() {
     int lostCount = 0;
     int noLostTo = -1;
-    for(int i = 0; i < trackingProgress; i++) {
+    for(int i = 0; i <= trackingProgress; i++) {
       if(!bitSet.get(i)) {
         if(noLostTo < 0) noLostTo = i;
         lostCount++ ;
@@ -139,7 +140,39 @@ public class MessageTrackingChunkStat {
     if(trackingNoLostTo + 1 == chunkSize) complete = true;
   }
   
+  synchronized void merge(MessageTrackingChunkStat other) {
+    System.err.println("merge...............");
+    if(other.trackingProgress > trackingProgress) trackingProgress = other.trackingProgress;
+    trackingDuplicatedCount += other.trackingDuplicatedCount;
+    trackingCount += other.trackingCount;
+    
+    for(int idx = 0; idx <= trackingProgress; idx++) {
+      if(other.bitSet.get(idx)) {
+        if(bitSet.get(idx)) trackingDuplicatedCount++;
+        bitSet.set(idx, true);
+      }
+    }
+    update();
+  }
+  
   public String toChunkIdName() { return toChunkIdName(chunkId); }
+  
+  public String toFormattedText() {
+    return toFormattedText(this);
+  }
+  
+  static public String toFormattedText(MessageTrackingChunkStat ... chunk) {
+    TabularFormater ft = 
+      new TabularFormater("Name", "Chunk Id", "Chunk Size", "Count", "Progress", "No Lost To", "Duplicated");
+    for(int i = 0; i < chunk.length; i++) {
+      chunk[i].update();
+      ft.addRow(
+        chunk[i].getName(), chunk[i].getChunkId(), chunk[i].getChunkSize(), 
+        chunk[i].getTrackingCount(), chunk[i].getTrackingProgress(), chunk[i].getTrackingNoLostTo(), chunk[i].getTrackingDuplicatedCount()
+      );
+    }
+    return ft.getFormattedText() ;
+  }
   
   final static public String toChunkIdName(int chunkId) {
     return "chunk-" + ID_FORMAT.format(chunkId);

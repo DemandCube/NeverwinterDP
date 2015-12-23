@@ -58,9 +58,6 @@ final static public String WORKING_DIR = "build/working";
       registry.get("/").dump(System.out);
     }
     
-    //MessageTrackingReporter inputReporter = mRegistry.mergeMessageTrackingLogChunk("input");
-    //System.out.println(inputReporter.toFormattedText());
-    
     MessageTrackingReporter outputReporter = mRegistry.mergeMessageTrackingLogChunk("output");
     System.out.println(outputReporter.toFormattedText());
     
