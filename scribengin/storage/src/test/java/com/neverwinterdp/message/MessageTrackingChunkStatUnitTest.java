@@ -1,6 +1,7 @@
 package com.neverwinterdp.message;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,6 +38,27 @@ final static public String WORKING_DIR = "build/working";
   }
   
   @Test
+  public void testMerge() throws Exception {
+    int chunkId = 1;
+    MessageTrackingChunkStat chunk = new MessageTrackingChunkStat("input", chunkId, 10000);
+    log(chunk, 0, 1000);
+    
+    MessageTrackingChunkStat chunk1 = new MessageTrackingChunkStat("input", chunkId, 10000);
+    log(chunk1, 1000, 3000);
+
+    MessageTrackingChunkStat chunk2 = new MessageTrackingChunkStat("input", chunkId, 10000);
+    log(chunk2, 3000, 10000);
+
+    chunk.merge(chunk1);
+    System.out.println("Merge chunk and chunk1");
+    System.out.println(chunk.toFormattedText());
+    
+    chunk.merge(chunk2);
+    System.out.println("Merge chunk, chunk1, chunk2");
+    System.out.println(chunk.toFormattedText());
+  }
+  
+  @Test
   public void testMessageTrackingChunkStat() throws Exception {
     MessageTrackingRegistry mRegistry = new MessageTrackingRegistry(registry, "/tracking-message");
     mRegistry.initRegistry();
@@ -47,21 +69,28 @@ final static public String WORKING_DIR = "build/working";
     
     MessageTrackingChunkStat inputChunk1 = new MessageTrackingChunkStat("input", chunkId, 10000);
     mRegistry.saveProgress(log(inputChunk1, 1000, 3000));
-    registry.get("/").dump(System.out);
+
+    MessageTrackingChunkStat mergeChunk = mRegistry.mergeProgress("input", chunkId);
+    Assert.assertFalse(mergeChunk.isComplete());
+    mergeChunk = mRegistry.getProgress("input", chunkId);
+    Assert.assertNotNull(mergeChunk);
     
     MessageTrackingChunkStat inputChunk2 = new MessageTrackingChunkStat("input", chunkId, 10000);
     mRegistry.saveProgress(log(inputChunk2, 3000, 10000));
-    registry.get("/").dump(System.out);
     
-    MessageTrackingChunkStat mergeChunk = mRegistry.mergeProgress("input", chunkId);
-    registry.get("/").dump(System.out);
+    mergeChunk = mRegistry.mergeProgress("input", chunkId);
+    Assert.assertTrue(mergeChunk.isComplete());
     System.out.println(mergeChunk.toFormattedText());
-    System.out.println("complete = " + mergeChunk.isComplete());
+    
+    registry.get("/").dump(System.out);
+    mergeChunk = mRegistry.getFinished("input", chunkId);
+    Assert.assertNotNull(mergeChunk);
   }
   
   MessageTrackingChunkStat log(MessageTrackingChunkStat chunk, int from, int to) {
     for(int i = from; i < to; i++) {
       MessageTracking mTracking = new MessageTracking(chunk.getChunkId(), i);
+      mTracking.add(new MessageTrackingLog("input", null));
       chunk.log(mTracking);
     }
     return chunk;

@@ -24,7 +24,6 @@ public class MTDataStreamOperatorInterceptor implements DataStreamOperatorInterc
     String[] tag = { 
       "vm:" + ctx.getVM().getId(), "executor:" + ctx.getTaskExecutor().getId()
     };
-    MessageTrackingLog log = new MessageTrackingLog(logName, tag);
-    mTracking.add(log);
+    mTracking.add(new MessageTrackingLog(logName, tag));
   }
 }

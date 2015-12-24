@@ -141,7 +141,6 @@ public class MessageTrackingChunkStat {
   }
   
   synchronized void merge(MessageTrackingChunkStat other) {
-    System.err.println("merge...............");
     if(other.trackingProgress > trackingProgress) trackingProgress = other.trackingProgress;
     trackingDuplicatedCount += other.trackingDuplicatedCount;
     trackingCount += other.trackingCount;
@@ -151,6 +150,14 @@ public class MessageTrackingChunkStat {
         if(bitSet.get(idx)) trackingDuplicatedCount++;
         bitSet.set(idx, true);
       }
+    }
+    for(String otherLogKey : other.logStats.keySet()) {
+      MessageTrackingLogChunkStat logStat = logStats.get(otherLogKey);
+      if(logStat == null) {
+        logStat = new MessageTrackingLogChunkStat();
+        logStats.put(otherLogKey, logStat);
+      }
+      logStat.merge(other.logStats.get(otherLogKey));
     }
     update();
   }
@@ -163,13 +170,17 @@ public class MessageTrackingChunkStat {
   
   static public String toFormattedText(MessageTrackingChunkStat ... chunk) {
     TabularFormater ft = 
-      new TabularFormater("Name", "Chunk Id", "Chunk Size", "Count", "Progress", "No Lost To", "Duplicated");
+      new TabularFormater("Name", "Chunk Id", "Type", "Chunk Size", "Count", "Progress", "No Lost To", "Duplicated");
     for(int i = 0; i < chunk.length; i++) {
       chunk[i].update();
       ft.addRow(
-        chunk[i].getName(), chunk[i].getChunkId(), chunk[i].getChunkSize(), 
+        chunk[i].getName(), chunk[i].getChunkId(), "Tracking", chunk[i].getChunkSize(), 
         chunk[i].getTrackingCount(), chunk[i].getTrackingProgress(), chunk[i].getTrackingNoLostTo(), chunk[i].getTrackingDuplicatedCount()
       );
+      for(String logKey : chunk[i].logStats.keySet()) {
+        MessageTrackingLogChunkStat logStat = chunk[i].logStats.get(logKey);
+        ft.addRow("", "", logKey, "", logStat.getCount(), "", "", "");
+      }
     }
     return ft.getFormattedText() ;
   }

@@ -1,7 +1,7 @@
 package com.neverwinterdp.message;
 
 public class MessageTrackingLogChunkStat {
-  private int  count;
+  private int  count = 0;
   private long avgDeliveryTime = 0l;
   private long sumAvgDeliveryTime = 0l;
   
@@ -22,8 +22,7 @@ public class MessageTrackingLogChunkStat {
   
   public void merge(MessageTrackingLogChunkStat other) {
     int  newCount = count + other.count;
-    long newAvgDeliveryTime = ((count * avgDeliveryTime) + (other.count * other.avgDeliveryTime))/newCount;
-    this.count           = newCount;
-    this.avgDeliveryTime = newAvgDeliveryTime;
+    avgDeliveryTime = ((count * avgDeliveryTime) + (other.count * other.avgDeliveryTime))/newCount;
+    count           = newCount;
   }
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 public class AggregateMessageTrackingChunkStat {
   private int  fromChunkId = -1;
   private int  toChunkId   = -1;
+  private long trackingCount ;
   private long trackingLostCount;
   private long trackingDuplicatedCount;
   private Map<String, MessageTrackingLogChunkStat> logStats = new HashMap<>();
@@ -20,6 +21,11 @@ public class AggregateMessageTrackingChunkStat {
     this.toChunkId = toChunkId;
   }
 
+  public long getTrackingCount() { return trackingCount; }
+  public void setTrackingCount(long trackingCount) {
+    this.trackingCount = trackingCount;
+  }
+  
   public long getTrackingLostCount() { return trackingLostCount; }
   public void setTrackingLostCount(long trackingLostCount) {
     this.trackingLostCount = trackingLostCount;
@@ -36,16 +42,17 @@ public class AggregateMessageTrackingChunkStat {
   public void merge(MessageTrackingChunkStat otherChunk) {
     if(fromChunkId < 0) fromChunkId = otherChunk.getChunkId();
     toChunkId = otherChunk.getChunkId();
+    trackingCount +=  otherChunk.getTrackingCount();
     trackingLostCount += otherChunk.getTrackingLostCount();
     trackingDuplicatedCount += otherChunk.getTrackingDuplicatedCount();
     Map<String, MessageTrackingLogChunkStat> otherLogStats = otherChunk.getLogStats();
-    for(String logName : otherLogStats.keySet()) {
-      MessageTrackingLogChunkStat logStat = logStats.get(logName);
+    for(String otherLogName : otherLogStats.keySet()) {
+      MessageTrackingLogChunkStat logStat = logStats.get(otherLogName);
       if(logStat == null) {
         logStat = new MessageTrackingLogChunkStat();
-        logStats.put(logName, logStat);
+        logStats.put(otherLogName, logStat);
       }
-      logStat.merge(otherLogStats.get(logName));
+      logStat.merge(otherLogStats.get(otherLogName));
     }
   }
   

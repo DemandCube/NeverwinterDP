@@ -58,8 +58,15 @@ public class MessageTrackingRegistry {
   public MessageTrackingChunkStat getProgress(final String name, final int chunkId) throws RegistryException {
     Node reportNode = trackingLogNode.getChild(name);
     Node progressNode = reportNode.getChild(PROGRESS);
-    String idName = MessageTrackingChunkStat.toChunkIdName(chunkId);
-    Node chunkNode = progressNode.getChild(idName);
+    Node chunkNode = progressNode.getChild(MessageTrackingChunkStat.toChunkIdName(chunkId));
+    MessageTrackingChunkStat mergeChunk = chunkNode.getDataAs(MessageTrackingChunkStat.class);
+    return mergeChunk;
+  }
+  
+  public MessageTrackingChunkStat getFinished(final String name, final int chunkId) throws RegistryException {
+    Node reportNode = trackingLogNode.getChild(name);
+    Node finishedNode = reportNode.getChild(FINISHED);
+    Node chunkNode = finishedNode.getChild(MessageTrackingChunkStat.toChunkIdName(chunkId));
     MessageTrackingChunkStat mergeChunk = chunkNode.getDataAs(MessageTrackingChunkStat.class);
     return mergeChunk;
   }
@@ -111,24 +118,43 @@ public class MessageTrackingRegistry {
   }
   
   public MessageTrackingChunkStat mergeProgress(final String name, final int chunkId) throws RegistryException {
+    final String idName  = MessageTrackingChunkStat.toChunkIdName(chunkId);
+    return mergeProgress(name, idName);
+  }
+  
+  public MessageTrackingChunkStat mergeProgress(final String name, final String idName) throws RegistryException {
     BatchOperations<MessageTrackingChunkStat> op = new BatchOperations<MessageTrackingChunkStat>() {
       @Override
       public MessageTrackingChunkStat execute(Registry registry) throws RegistryException {
         Node   reportNode   = trackingLogNode.getChild(name);
         Node   progressNode = reportNode.getChild(PROGRESS);
-        String idName       = MessageTrackingChunkStat.toChunkIdName(chunkId);
-        Node   chunkNode    = progressNode.getChild(idName);
-        MessageTrackingChunkStat mergeChunk = chunkNode.getDataAs(MessageTrackingChunkStat.class);
-        List<String> updates = chunkNode.getChildren();
-        for(int i = 0; i < updates.size(); i++) {
-          Node chunkUpdateNode = chunkNode.getChild(updates.get(i));
-          MessageTrackingChunkStat updateChunk = chunkUpdateNode.getDataAs(MessageTrackingChunkStat.class);
-          mergeChunk.merge(updateChunk);
+        
+        Node   progressChunkNode = progressNode.getChild(idName);
+        MessageTrackingChunkStat mergeChunk = progressChunkNode.getDataAs(MessageTrackingChunkStat.class);
+        List<String> progressUpdates = progressChunkNode.getChildren();
+        if(progressUpdates.size() > 0) {
+          for(int i = 0; i < progressUpdates.size(); i++) {
+            Node chunkUpdateNode = progressChunkNode.getChild(progressUpdates.get(i));
+            MessageTrackingChunkStat updateChunk = chunkUpdateNode.getDataAs(MessageTrackingChunkStat.class);
+            mergeChunk.merge(updateChunk);
+          }
+        } else {
+          mergeChunk.update();
         }
         Transaction transaction = registry.getTransaction();
-        transaction.setData(chunkNode, mergeChunk);
-        for(int i = 0; i < updates.size(); i++) {
-          transaction.deleteChild(chunkNode, updates.get(i));
+        if(mergeChunk.isComplete()) {
+          Node   finishedNode = reportNode.getChild(FINISHED);
+          Node   finishedChunkNode = finishedNode.getChild(idName);
+          transaction.create(finishedChunkNode, mergeChunk, NodeCreateMode.PERSISTENT);
+          for(int i = 0; i < progressUpdates.size(); i++) {
+            transaction.deleteChild(progressChunkNode, progressUpdates.get(i));
+          }
+          transaction.delete(progressChunkNode.getPath());
+        } else {
+          transaction.setData(progressChunkNode, mergeChunk);
+          for(int i = 0; i < progressUpdates.size(); i++) {
+            transaction.deleteChild(progressChunkNode, progressUpdates.get(i));
+          }
         }
         transaction.commit();
         return mergeChunk;
@@ -137,76 +163,16 @@ public class MessageTrackingRegistry {
     return registry.executeBatch(op, 3, 3000);
   }
   
-  public void saveMessageTrackingChunkStat(final MessageTrackingChunkStat chunk) throws RegistryException {
-    if(!createdTrackingNames.contains(chunk.getName())) {
-      BatchOperations<Boolean> op = new BatchOperations<Boolean>() {
-        @Override
-        public Boolean execute(Registry registry) throws RegistryException {
-          Node reportNode = trackingLogNode.getChild(chunk.getName());
-          if(reportNode.exists()) return true;
-          
-          Transaction transaction = registry.getTransaction();
-          transaction.create(reportNode, null, NodeCreateMode.PERSISTENT);
-          Node progressNode = reportNode.getChild(PROGRESS);
-          transaction.create(progressNode, null, NodeCreateMode.PERSISTENT);
-          Node finishedNode = reportNode.getChild(FINISHED);
-          transaction.create(finishedNode, null, NodeCreateMode.PERSISTENT);
-          transaction.commit();
-          
-          return true;
-        }
-      };
-      Lock lock = locksNode.getLock("write", "Lock to Create Report structure") ;
-      lock.execute(op, 3, 3000);
-      createdTrackingNames.add(chunk.getName());
+  public void mergeProgress(final String name) throws RegistryException {
+    Node   reportNode   = trackingLogNode.getChild(name);
+    Node   progressNode = reportNode.getChild(PROGRESS);
+    List<String> progressChunks = progressNode.getChildren();
+    for(int i = 0 ; i < progressChunks.size(); i++) {
+      String progressChunk = progressChunks.get(i);
+      mergeProgress(name, progressChunk);
     }
-    
-    Node reportNode = trackingLogNode.getChild(chunk.getName());
-    if(chunk.isComplete()) saveComplete(reportNode, chunk) ;
-    else saveProgress(reportNode, chunk) ;
   }
-  
-  void saveComplete(final Node reportNode, final MessageTrackingChunkStat chunk) throws RegistryException {
-    BatchOperations<Boolean> saveCompleteOp = new BatchOperations<Boolean>() {
-      @Override
-      public Boolean execute(Registry registry) throws RegistryException {
-        Transaction transaction = registry.getTransaction();
-        String idName = chunk.toChunkIdName();
-        if(chunk.isPersisted()) {
-          Node progressNode = reportNode.getChild(PROGRESS);
-          transaction.deleteChild(progressNode, idName);
-        } 
-        Node finishedNode = reportNode.getChild(FINISHED);
-        transaction.createChild(finishedNode, idName, chunk, NodeCreateMode.PERSISTENT);
-        transaction.commit();
-        return true;
-      }
-    };
-    registry.executeBatch(saveCompleteOp, 3, 3000);
-  }
-  
-  void saveProgress(final Node reportNode, final MessageTrackingChunkStat chunk) throws RegistryException {
-    BatchOperations<Boolean> saveProgressOp = new BatchOperations<Boolean>() {
-      @Override
-      public Boolean execute(Registry registry) throws RegistryException {
-        Transaction transaction = registry.getTransaction();
-        Node progressNode = reportNode.getChild(PROGRESS);
-        String idName     = chunk.toChunkIdName();
-        Node   chunkNode  = progressNode.getChild(idName);
-        
-        if(chunk.isPersisted()) {
-          transaction.setData(chunkNode, chunk);
-        } else {
-          transaction.create(chunkNode, chunk, NodeCreateMode.PERSISTENT);
-          chunk.setPersisted(true);
-        }
-        transaction.commit();
-        return true;
-      }
-    };
-    registry.executeBatch(saveProgressOp, 3, 3000);
-  }
-  
+
   public MessageTrackingReporter mergeMessageTrackingLogChunk(String name) throws RegistryException {
     final Node reportNode = trackingLogNode.getChild(name);
     MessageTrackingReporter reporter = null;

@@ -72,7 +72,7 @@ public class MessageTrackingReporter {
     for(int i = 0; i < aggregateChunkReports.size(); i++) {
       AggregateMessageTrackingChunkStat sel = aggregateChunkReports.get(i) ;
       ft.addRow(sel.getFromChunkId() + " - " + sel.getToChunkId(), "", "", "", "", "");
-      ft.addRow("", "Tracking", sel.getTrackingLostCount(), sel.getTrackingDuplicatedCount(), "", "");
+      ft.addRow("", "Tracking", sel.getTrackingLostCount(), sel.getTrackingDuplicatedCount(), sel.getTrackingCount(), "");
       Map<String, MessageTrackingLogChunkStat> logStats = sel.getLogStats();
       List<String> logStatKeys = new ArrayList<>(logStats.keySet());
       Collections.sort(logStatKeys);

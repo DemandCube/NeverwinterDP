@@ -58,6 +58,7 @@ final static public String WORKING_DIR = "build/working";
       registry.get("/").dump(System.out);
     }
     
+    mRegistry.mergeProgress("output");
     MessageTrackingReporter outputReporter = mRegistry.mergeMessageTrackingLogChunk("output");
     System.out.println(outputReporter.toFormattedText());
     
@@ -123,13 +124,17 @@ final static public String WORKING_DIR = "build/working";
     }
     
     private void saveChunk(String name, int chunkId, List<MessageTracking> holder) throws Exception {
-      MessageTrackingChunkStat chunk = new MessageTrackingChunkStat(name, chunkId, chunkSize);
-      for(int j = 0; j < holder.size(); j++) {
-        MessageTracking mTracking = holder.get(j);
-        chunk.log(mTracking);
+      int idx = 0;
+      for(int i = 0; i < 3; i++) {
+        MessageTrackingChunkStat chunk = new MessageTrackingChunkStat(name, chunkId, chunkSize);
+        while(idx < chunkSize) {
+          MessageTracking mTracking = holder.get(idx);
+          chunk.log(mTracking);
+          idx++;
+          if(idx > (i + 1) * 3333) break;
+        }
+        mRegistry.saveProgress(chunk);
       }
-      chunk.update();
-      mRegistry.saveMessageTrackingChunkStat(chunk);
     }
   }
   
