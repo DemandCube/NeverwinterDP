@@ -18,7 +18,7 @@ public class MTOutputDataStreamInterceptor extends DataStreamSinkInterceptor {
     String[] tag = { 
       "vm:" + ctx.getVM().getId(), "executor:" + ctx.getTaskExecutor().getId()
     };
-    messageTracking.add(new MessageTrackingLog("input", tag));
+    messageTracking.add(new MessageTrackingLog("output", tag));
     mtService.log(messageTracking);
   }
 }

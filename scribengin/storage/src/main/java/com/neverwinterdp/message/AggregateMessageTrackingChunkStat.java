@@ -39,6 +39,12 @@ public class AggregateMessageTrackingChunkStat {
   public Map<String, MessageTrackingLogChunkStat> getLogStats() { return logStats; }
   public void setLogStats(Map<String, MessageTrackingLogChunkStat> logStats) { this.logStats = logStats; }
   
+  public long getLogNameCount(String logName) {
+    MessageTrackingLogChunkStat logChunkStat = logStats.get(logName);
+    if(logChunkStat == null) return 0;
+    return logChunkStat.getCount() ;
+  }
+  
   public void merge(MessageTrackingChunkStat otherChunk) {
     if(fromChunkId < 0) fromChunkId = otherChunk.getChunkId();
     toChunkId = otherChunk.getChunkId();

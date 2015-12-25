@@ -3,7 +3,6 @@ package com.neverwinterdp.scribengin.dataflow.runtime;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
 import com.neverwinterdp.scribengin.dataflow.DataStreamSinkInterceptor;
-import com.neverwinterdp.scribengin.dataflow.DataStreamSourceInterceptor;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.sink.Sink;

@@ -49,7 +49,7 @@ final static public String WORKING_DIR = "build/working";
     
     ExecutorService executorService = Executors.newFixedThreadPool(3);
     for(int i = 0; i < 3; i++) {
-      executorService.submit(new TrackingMessageProducer(mRegistry, 10000));
+      executorService.submit(new TrackingMessageProducer(mRegistry, 10, 10000));
     }
     
     executorService.shutdown();
@@ -58,7 +58,9 @@ final static public String WORKING_DIR = "build/working";
       registry.get("/").dump(System.out);
     }
     
+    new TrackingMessageProducer(mRegistry, 1, 10000).generateMessageTracking(mRegistry.nextMessageChunkId(), 0, 5000);
     mRegistry.mergeProgress("output");
+    
     MessageTrackingReporter outputReporter = mRegistry.mergeMessageTrackingLogChunk("output");
     System.out.println(outputReporter.toFormattedText());
     
@@ -68,6 +70,7 @@ final static public String WORKING_DIR = "build/working";
   static public class TrackingMessageProducer implements Runnable {
     private MessageTrackingRegistry mRegistry;
     private int                     chunkSize;
+    private int                     numOfChunks;
     private TrackingMessageLogger   inputLogger;
     private TrackingMessageLogger   outputLogger;
     private TrackingMessageLogger   splitterLogger;
@@ -75,9 +78,10 @@ final static public String WORKING_DIR = "build/working";
     private TrackingMessageLogger   warnLogger;
     private TrackingMessageLogger   errorLogger;
 
-    public TrackingMessageProducer(MessageTrackingRegistry mRegistry, int chunkSize) {
+    public TrackingMessageProducer(MessageTrackingRegistry mRegistry, int numOfChunks, int chunkSize) {
       this.mRegistry = mRegistry;
       this.chunkSize = chunkSize;
+      this.numOfChunks = numOfChunks;
       inputLogger    = new TrackingMessageLogger("input");
       outputLogger   = new TrackingMessageLogger("output");
       splitterLogger = new TrackingMessageLogger("operator.splitter");
@@ -89,52 +93,44 @@ final static public String WORKING_DIR = "build/working";
     @Override
     public void run() {
       try {
-        doRun();
+        for(int i = 0; i < numOfChunks; i++) {
+          generateMessageTracking(mRegistry.nextMessageChunkId(), 0, chunkSize);
+        }
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
-    
-    private void doRun() throws Exception {
-      for(int i = 0; i < 10; i++) {
-        int chunkId = mRegistry.nextMessageChunkId();
-        List<MessageTracking> messageTrackingChunkHolder = generateMessageTracking(chunkId);
-        inputLogger.log(messageTrackingChunkHolder);
-        //saveChunk("input", chunkId, messageTrackingChunkHolder);
-        splitterLogger.log(messageTrackingChunkHolder);
-        if(i % 3 == 0) {
-          infoLogger.log(messageTrackingChunkHolder);
-        } else if(i % 3 == 1) {
-          warnLogger.log(messageTrackingChunkHolder);
-        } else {
-          errorLogger.log(messageTrackingChunkHolder);
-        }
-        outputLogger.log(messageTrackingChunkHolder);
-        saveChunk("output", chunkId, messageTrackingChunkHolder);
-      }
-    }
-    
-    private List<MessageTracking> generateMessageTracking(int chunkId) throws Exception {
+
+    public void generateMessageTracking(int chunkId, int from, int to) throws Exception {
       List<MessageTracking> holder = new ArrayList<MessageTracking>();
-      for(int j = 0; j < chunkSize; j++) {
+      for(int j = from; j < to; j++) {
         MessageTracking mTracking = new MessageTracking(chunkId, j);
+        inputLogger.log(mTracking);
+        splitterLogger.log(mTracking);
+        if(j % 3 == 0) {
+          infoLogger.log(mTracking);
+        } else if(j % 3 == 1) {
+          warnLogger.log(mTracking);
+        } else {
+          errorLogger.log(mTracking);
+        }
+        outputLogger.log(mTracking);
         holder.add(mTracking);
       }
-      return holder;
+      saveChunk("output", chunkId, holder);
     }
     
     private void saveChunk(String name, int chunkId, List<MessageTracking> holder) throws Exception {
-      int idx = 0;
-      for(int i = 0; i < 3; i++) {
-        MessageTrackingChunkStat chunk = new MessageTrackingChunkStat(name, chunkId, chunkSize);
-        while(idx < chunkSize) {
-          MessageTracking mTracking = holder.get(idx);
-          chunk.log(mTracking);
-          idx++;
-          if(idx > (i + 1) * 3333) break;
+      MessageTrackingChunkStat chunk = new MessageTrackingChunkStat(name, chunkId, chunkSize);
+      for(int i = 0; i < holder.size(); i++) {
+        MessageTracking mTracking = holder.get(i);
+        chunk.log(mTracking);
+        if((i + 1) % 1000 == 0) {
+          mRegistry.saveProgress(chunk);
+          chunk = new MessageTrackingChunkStat(name, chunkId, chunkSize);
         }
-        mRegistry.saveProgress(chunk);
       }
+      if(chunk.getTrackingCount() > 0) mRegistry.saveProgress(chunk);
     }
   }
   
@@ -145,11 +141,8 @@ final static public String WORKING_DIR = "build/working";
       this.logName = name;
     }
     
-    public void log(List<MessageTracking> mTrackings) {
-      for(int i = 0; i < mTrackings.size(); i++) {
-        MessageTracking mTracking = mTrackings.get(i);
-        mTracking.add(new MessageTrackingLog(logName, null));
-      }
+    public void log(MessageTracking mTracking) {
+      mTracking.add(new MessageTrackingLog(logName, null));
     }
   }
 }

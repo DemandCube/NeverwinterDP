@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
+import com.neverwinterdp.message.MessageTrackingRegistry;
+import com.neverwinterdp.message.MessageTrackingReporter;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
@@ -140,10 +142,10 @@ public class DataflowCommand extends Command {
       info(dRegistry, console, dataflowId);
     }
     
-    public void info(DataflowRegistry dRegistry, Console console, String dflId) throws Exception {
-      DataflowFormater dflFormater = new DataflowFormater(dRegistry) ;
+    public void info(DataflowRegistry dflRegistry, Console console, String dflId) throws Exception {
+      DataflowFormater dflFormater = new DataflowFormater(dflRegistry) ;
       
-      console.h1("Dataflow " + dRegistry.getDataflowPath());
+      console.h1("Dataflow " + dflRegistry.getDataflowPath());
       
       console.println(dflFormater.getInfo());
       
@@ -161,9 +163,12 @@ public class DataflowCommand extends Command {
       if(all || activities) console.println(dflFormater.getActivitiesInfo());
       
       if(all || metricReport) {
-        List<MetricRegistrySnapshot> snapshots = dRegistry.getWorkerRegistry().getMetrics();
+        List<MetricRegistrySnapshot> snapshots = dflRegistry.getWorkerRegistry().getMetrics();
         console.println(MetricRegistrySnapshot.getFormattedText(snapshots));
       }
+      MessageTrackingRegistry mRegistry = dflRegistry.getMessageTrackingRegistry();
+      MessageTrackingReporter outputReporter = mRegistry.mergeMessageTrackingLogChunk("output");
+      console.println(outputReporter.toFormattedText());
     }
 
     @Override

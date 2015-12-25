@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.PreDestroy;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.neverwinterdp.message.MessageTracking;
@@ -50,7 +52,7 @@ public class MTService {
     chunk.log(mTracking);
   }
   
-  void flush() throws RegistryException {
+  public void flush() throws RegistryException {
     Iterator<Integer> i = chunkStats.keySet().iterator();
     while(i.hasNext()) {
       Integer chunkId = i.next();
@@ -59,9 +61,21 @@ public class MTService {
     }
   }
   
+  @PreDestroy
+  public void onDestroy() throws InterruptedException, RegistryException {
+    if(flushThread != null) {
+      boolean flushThreadTerminated = flushThread.terminate(30000);
+      flushThread = null;
+      if(flushThreadTerminated) flush();
+    }
+  }
+  
   public class FlushThread extends Thread {
+    private boolean interrupt = false;
+    private boolean terminated = false;
+    
     public void run() {
-      while(true) {
+      while(!interrupt) {
         try {
           flush();
           Thread.sleep(10000);
@@ -70,6 +84,18 @@ public class MTService {
         } catch (InterruptedException e) {
         }
       }
+      synchronized(this) {
+        terminated = true;
+        notifyAll();
+      }
+    }
+    
+    synchronized public boolean terminate(long maxWaitTime) throws InterruptedException {
+      interrupt = true;
+      if(!terminated) {
+        wait(maxWaitTime);
+      }
+      return terminated;
     }
   }
 }

@@ -27,7 +27,8 @@ public class TrackingMonitor extends SubCommand {
   @Override
   public void execute(Shell shell, CommandInput cmdInput) throws Exception {
     ScribenginShell scribenginShell = (ScribenginShell) shell;
-    TrackingRegistry trackingRegistry = new TrackingRegistry(scribenginShell.getVMClient().getRegistry(), reportPath, false);
+    TrackingRegistry trackingRegistry = 
+      new TrackingRegistry(scribenginShell.getVMClient().getRegistry(), reportPath, false);
     
     if(maxRuntime <= 0) {
       report(scribenginShell, trackingRegistry);
@@ -46,9 +47,7 @@ public class TrackingMonitor extends SubCommand {
   boolean report(ScribenginShell shell, TrackingRegistry trackingRegistry) throws Exception {
     StringBuilder command = new StringBuilder();
     command.append("dataflow info --dataflow-id " + dataflowId + " --show-tasks --show-workers");
-    if(historyWorkers) {
-      command.append(" --show-history-workers ");
-    }
+    if(historyWorkers) command.append(" --show-history-workers ");
     shell.execute(command.toString());
 
     List<TrackingMessageReport> generatedReports = trackingRegistry.getGeneratorReports();
