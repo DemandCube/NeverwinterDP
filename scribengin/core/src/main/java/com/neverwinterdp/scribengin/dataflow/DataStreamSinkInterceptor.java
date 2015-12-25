@@ -9,6 +9,12 @@ abstract public class DataStreamSinkInterceptor {
   public void onWrite(DataStreamOperatorContext ctx, Message message) throws Exception {
   }
   
+  public void onPrepareCommit(DataStreamOperatorContext ctx) throws Exception {
+  }
+  
+  public void onCompleteCommit(DataStreamOperatorContext ctx) throws Exception {
+  }
+  
   static public DataStreamSinkInterceptor[] load(DataStreamOperatorContext ctx, String[] type) throws Exception {
     if(type == null || type.length == 0) {
       return new DataStreamSinkInterceptor[0];

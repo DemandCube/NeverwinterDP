@@ -3,6 +3,7 @@ package com.neverwinterdp.scribengin.dataflow.runtime;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
 import com.neverwinterdp.scribengin.dataflow.DataStreamSinkInterceptor;
+import com.neverwinterdp.scribengin.dataflow.MTService;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.sink.Sink;
@@ -15,6 +16,7 @@ public class OutputDataStreamContext {
   private SinkPartitionStream         assignedPartition;
   private SinkPartitionStreamWriter   assignedPartitionWriter;
   private DataStreamSinkInterceptor[] interceptor;
+  private MTService                   mtService;
 
   public OutputDataStreamContext(DataStreamOperatorRuntimeContext ctx, Storage storage, int partitionId) throws Exception {
     sink = storage.getSink();
@@ -23,6 +25,7 @@ public class OutputDataStreamContext {
       assignedPartition = sink.getPartitionStream(partitionId);
     }
     assignedPartitionWriter = assignedPartition.getWriter();
+    mtService = ctx.getService(MTService.class);
     
     StorageConfig storageConfig = storage.getStorageConfig();
     String interceptorTypes = storageConfig.attribute(DataSet.DATAFLOW_SINK_INTERCEPTORS);
@@ -30,18 +33,18 @@ public class OutputDataStreamContext {
   }
   
   public void write(DataStreamOperatorRuntimeContext ctx, Message message) throws Exception {
-    for(DataStreamSinkInterceptor sel : interceptor) {
-      sel.onWrite(ctx, message);
-    }
+    for(DataStreamSinkInterceptor sel : interceptor) sel.onWrite(ctx, message);
     assignedPartitionWriter.append(message);
   }
 
-  public void prepareCommit() throws Exception {
+  public void prepareCommit(DataStreamOperatorRuntimeContext ctx) throws Exception {
     assignedPartitionWriter.prepareCommit();
+    for(DataStreamSinkInterceptor sel : interceptor) sel.onPrepareCommit(ctx);
   }
 
-  public void completeCommit() throws Exception {
+  public void completeCommit(DataStreamOperatorRuntimeContext ctx) throws Exception {
     assignedPartitionWriter.completeCommit();
+    for(DataStreamSinkInterceptor sel : interceptor) sel.onCompleteCommit(ctx);
   }
 
   public void rollback() throws Exception {

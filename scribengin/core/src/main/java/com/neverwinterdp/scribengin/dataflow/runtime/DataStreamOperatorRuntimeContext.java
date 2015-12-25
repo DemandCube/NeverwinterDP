@@ -97,7 +97,7 @@ public class DataStreamOperatorRuntimeContext implements DataStreamOperatorConte
     Iterator<OutputDataStreamContext> i = outputContexts.values().iterator();
     while (i.hasNext()) {
       OutputDataStreamContext ctx = i.next();
-      ctx.prepareCommit();
+      ctx.prepareCommit(this);
     }
     inputContext.prepareCommit();;
   }
@@ -106,7 +106,7 @@ public class DataStreamOperatorRuntimeContext implements DataStreamOperatorConte
     Iterator<OutputDataStreamContext> i = outputContexts.values().iterator();
     while (i.hasNext()) {
       OutputDataStreamContext ctx = i.next();
-      ctx.completeCommit();
+      ctx.completeCommit(this);
     }
     //The source should commit after sink commit. In the case the source or sink does not support
     //2 phases commit, it will cause the data to duplicate only, not loss

@@ -32,6 +32,8 @@ public class MasterService {
   @Inject
   private StorageService storageService ;
   
+  private MessageTrackingMergerService mtMergerService;
+  
   private DataflowWorkerMonitor workerMonitor;
   
   private DataflowTaskMonitor  taskMonitor;
@@ -65,6 +67,8 @@ public class MasterService {
     taskService = new DedicatedTaskService<>(dflRegistry.getTaskRegistry(), null);
     taskMonitor = new DataflowTaskMonitor();
     taskService.addTaskMonitor(taskMonitor);
+    
+    mtMergerService = new MessageTrackingMergerService(dflRegistry);
     System.out.println("DataflowMasterService: init(), done!!!");
   }
   
@@ -87,6 +91,8 @@ public class MasterService {
     System.out.println("DataflowMasterService: waitForTermination(), taskService.onDestroy();");
     activityService.onDestroy();
     System.out.println("DataflowMasterService: waitForTermination(), activityService.onDestroy()");
+    
+    mtMergerService.onDestroy();
     //finish
     dflRegistry.setStatus(DataflowLifecycleStatus.FINISH);
     System.out.println("DataflowMasterService: waitForTermination(), done!!!");

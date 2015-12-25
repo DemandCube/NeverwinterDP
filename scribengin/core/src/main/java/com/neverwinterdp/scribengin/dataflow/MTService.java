@@ -4,8 +4,6 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.PreDestroy;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.neverwinterdp.message.MessageTracking;
@@ -16,12 +14,13 @@ import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 
 @Singleton
 public class MTService {
+  static AtomicInteger counter = new AtomicInteger();
+  
   private int                     trackingWindowSize;
   private AtomicInteger           windowIdTracker ;
   private int                     currentChunkId ;
   private MessageTrackingRegistry trackingRegistry;
   private ConcurrentHashMap<Integer, MessageTrackingChunkStat> chunkStats = new ConcurrentHashMap<>();
-  private FlushThread flushThread;
 
   @Inject
   public void onInject(DataflowRegistry dflRegistry) throws RegistryException {
@@ -29,8 +28,6 @@ public class MTService {
     this.trackingRegistry = dflRegistry.getMessageTrackingRegistry();
     this.trackingWindowSize = dflDescriptor.getTrackingWindowSize();
     windowIdTracker = new AtomicInteger(trackingWindowSize);
-    flushThread = new FlushThread();
-    flushThread.start();
   }
   
   synchronized public MessageTracking nextMessageTracking() throws RegistryException {
@@ -50,52 +47,16 @@ public class MTService {
       chunkStats.put(chunk.getChunkId(), chunk);
     }
     chunk.log(mTracking);
+    counter.incrementAndGet();
   }
   
   public void flush() throws RegistryException {
+    if(chunkStats.size() == 0) return;
     Iterator<Integer> i = chunkStats.keySet().iterator();
     while(i.hasNext()) {
       Integer chunkId = i.next();
       MessageTrackingChunkStat chunkStat = chunkStats.remove(chunkId);
       trackingRegistry.saveProgress(chunkStat);
-    }
-  }
-  
-  @PreDestroy
-  public void onDestroy() throws InterruptedException, RegistryException {
-    if(flushThread != null) {
-      boolean flushThreadTerminated = flushThread.terminate(30000);
-      flushThread = null;
-      if(flushThreadTerminated) flush();
-    }
-  }
-  
-  public class FlushThread extends Thread {
-    private boolean interrupt = false;
-    private boolean terminated = false;
-    
-    public void run() {
-      while(!interrupt) {
-        try {
-          flush();
-          Thread.sleep(10000);
-        } catch (RegistryException e) {
-          e.printStackTrace();
-        } catch (InterruptedException e) {
-        }
-      }
-      synchronized(this) {
-        terminated = true;
-        notifyAll();
-      }
-    }
-    
-    synchronized public boolean terminate(long maxWaitTime) throws InterruptedException {
-      interrupt = true;
-      if(!terminated) {
-        wait(maxWaitTime);
-      }
-      return terminated;
     }
   }
 }

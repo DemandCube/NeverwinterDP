@@ -21,4 +21,9 @@ public class MTOutputDataStreamInterceptor extends DataStreamSinkInterceptor {
     messageTracking.add(new MessageTrackingLog("output", tag));
     mtService.log(messageTracking);
   }
+  
+  @Override
+  public void onCompleteCommit(DataStreamOperatorContext ctx) throws Exception {
+    mtService.flush();
+  }
 }
