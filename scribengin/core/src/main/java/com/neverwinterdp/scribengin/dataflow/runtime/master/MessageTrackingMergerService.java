@@ -26,7 +26,6 @@ public class MessageTrackingMergerService {
   public void flush() throws RegistryException {
     trackingRegistry.mergeProgress("output");
     trackingRegistry.mergeFinishedMessageTrackingLogChunk("output");
-    System.err.println("MessageTrackingMergerService: flush()");
   }
   
   public class FlushThread extends Thread {

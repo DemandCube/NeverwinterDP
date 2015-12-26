@@ -13,6 +13,10 @@ public class DummyTaskSlotExecutor extends TaskSlotExecutor<TaskDescriptor> {
   }
 
   @Override
+  public void onEvent(TaskExecutorEvent event) throws Exception {
+  }
+  
+  @Override
   public void executeSlot() throws Exception {
     DedicatedTaskContext<TaskDescriptor> context = getTaskContext();
     TaskExecutorDescriptor executor = context.getTaskExecutorDescriptor();
@@ -24,5 +28,4 @@ public class DummyTaskSlotExecutor extends TaskSlotExecutor<TaskDescriptor> {
       System.out.println("Task " + context.getTaskId() + ", execute by executor " + executor.getId() + ", complete = false");
     }
   }
-
 }

@@ -6,13 +6,21 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class TaskExecutorService<T> {
-  private List<TaskExecutor<T>> taskExecutors = new ArrayList<TaskExecutor<T>>();
+  private List<TaskExecutor<T>>    taskExecutors = new ArrayList<TaskExecutor<T>>();
   private List<TaskExecutorThread> taskExecutorsThreads = new ArrayList<>();
   
   private TaskSlotTimerThread taskSlotTimer ;
   
+  public  List<TaskExecutor<T>> getTaskExecutors() { return taskExecutors; }
+  
   public void add(TaskExecutor<T> executor) {
     taskExecutors.add(executor);
+  }
+  
+  public void broadcast(TaskExecutorEvent event) throws Exception {
+    for(int i = 0; i < taskExecutors.size(); i++) {
+      taskExecutors.get(i).broadcast(event);
+    }
   }
   
   public void startExecutors() throws InterruptedException {
@@ -30,8 +38,6 @@ public class TaskExecutorService<T> {
     taskSlotTimer = new TaskSlotTimerThread();
     taskSlotTimer.start();
   }
-  
-  
   
   public void shutdown() throws InterruptedException {
     if(taskSlotTimer  != null) {

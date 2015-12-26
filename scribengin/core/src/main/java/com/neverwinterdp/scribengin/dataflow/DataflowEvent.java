@@ -1,5 +1,5 @@
 package com.neverwinterdp.scribengin.dataflow;
 
 public enum DataflowEvent {
-  STOP, PAUSE, RESUME
+  StopInput, StopWorker, Pause, Resume
 }

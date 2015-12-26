@@ -61,10 +61,34 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
       }
       
       List<String> workers = dflRegistry.getWorkerRegistry().getActiveWorkerIds() ;
-      TXEvent pEvent = new TXEvent("stop", DataflowEvent.STOP);
+      TXEvent pEvent = new TXEvent("stop", DataflowEvent.StopWorker);
       TXEventBroadcaster broadcaster = dflRegistry.getWorkerRegistry().getWorkerEventBroadcaster();
-      TXEventNotificationWatcher watcher = 
-          broadcaster.broadcast(pEvent, new TXEventNotificationCompleteListener());
+      TXEventNotificationWatcher watcher = broadcaster.broadcast(pEvent, new TXEventNotificationCompleteListener());
+      int countNotification = watcher.waitForNotifications(workers.size(), 60 * 1000);
+      if(countNotification != workers.size()) {
+        throw new Exception("Expect " + workers.size() + ", but only get " + countNotification) ;
+      }
+      watcher.complete();
+    }
+  }
+  
+  @Singleton
+  static public class BroadcastStopInputStepExecutor implements ActivityStepExecutor {
+    @Inject
+    private MasterService service ;
+    
+    @Override
+    public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
+      DataflowRegistry dflRegistry = service.getDataflowRegistry();
+      if(DataflowLifecycleStatus.RUNNING != dflRegistry.getStatus()) {
+        ctx.setAbort(true);
+        return ;
+      }
+      
+      List<String> workers = dflRegistry.getWorkerRegistry().getActiveWorkerIds() ;
+      TXEvent pEvent = new TXEvent("stop-input", DataflowEvent.StopInput);
+      TXEventBroadcaster broadcaster = dflRegistry.getWorkerRegistry().getWorkerEventBroadcaster();
+      TXEventNotificationWatcher watcher = broadcaster.broadcast(pEvent, new TXEventNotificationCompleteListener());
       int countNotification = watcher.waitForNotifications(workers.size(), 60 * 1000);
       if(countNotification != workers.size()) {
         throw new Exception("Expect " + workers.size() + ", but only get " + countNotification) ;

@@ -8,7 +8,7 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.TaskStatus;
 
-public class DedicatedTaskService<T> {
+final public class DedicatedTaskService<T> {
   private DedicatedTaskRegistry<T>   taskRegistry;
   private DedicatedTaskWatcher<T>    taskWatcher ;
   private TaskExecutorService<T>     taskExecutorService;

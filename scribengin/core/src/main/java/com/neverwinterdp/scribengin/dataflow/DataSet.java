@@ -7,8 +7,10 @@ import java.util.Map;
 import com.neverwinterdp.storage.StorageConfig;
 
 abstract public class DataSet<T> {
+  final static public String DATAFLOW_SOURCE_INPUT        = "dataflow.source.input";
   final static public String DATAFLOW_SOURCE_INTERCEPTORS = "dataflow.source.interceptors";
-  final static public String DATAFLOW_SINK_INTERCEPTORS = "dataflow.sink.interceptors";
+  
+  final static public String DATAFLOW_SINK_INTERCEPTORS   = "dataflow.sink.interceptors";
   
   private String name;
   private DataSetType   type = DataSetType.Wire;
@@ -55,6 +57,10 @@ abstract public class DataSet<T> {
     StorageConfig storageConfig = createStorageConfig() ;
     if(sourceInterceptors.size() > 0) {
       storageConfig.attribute(DATAFLOW_SOURCE_INTERCEPTORS, joinClassTypes(sourceInterceptors.values()));
+    }
+
+    if(type == DataSetType.Input) {
+      storageConfig.attribute(DATAFLOW_SOURCE_INPUT, true);
     }
     if(sinkInterceptors.size() > 0) {
       storageConfig.attribute(DATAFLOW_SINK_INTERCEPTORS,joinClassTypes(sinkInterceptors.values()));

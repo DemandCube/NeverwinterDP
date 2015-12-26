@@ -63,4 +63,14 @@ public class StorageConfig extends HashMap<String, String> {
     if(value == null) return defaultValue;
     return Integer.parseInt(value);
   }
+  
+  public void attribute(String name, boolean value) {
+    put(name, Boolean.toString(value));
+  }
+  
+  public boolean booleanAttribute(String name, boolean defaultValue) {
+    String value = get(name);
+    if(value == null) return defaultValue;
+    return Boolean.parseBoolean(value);
+  }
 }

@@ -80,6 +80,8 @@ public class DataStreamOperatorRuntimeContext implements DataStreamOperatorConte
 
   public Set<String> getAvailableOutputs() { return descriptor.getOutputs(); }
   
+  public InputDataStreamContext getInputDataStreamContext() { return inputContext; }
+  
   public Message nextMessage(long maxWaitForDataRead) throws Exception {
     Message message = inputContext.nextMessage(this, maxWaitForDataRead);
     if(message != null) {

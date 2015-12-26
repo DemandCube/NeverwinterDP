@@ -12,6 +12,7 @@ import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskService;
+import com.neverwinterdp.registry.task.dedicated.TaskExecutorEvent;
 import com.neverwinterdp.registry.task.dedicated.TaskSlotExecutor;
 import com.neverwinterdp.registry.task.dedicated.TaskSlotExecutorFactory;
 import com.neverwinterdp.registry.txevent.TXEvent;
@@ -125,6 +126,11 @@ public class WorkerService {
     dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getId(), metricRegistry);
   }
   
+  public void stopInput() throws Exception {
+    TaskExecutorEvent event = new TaskExecutorEvent("StopInput");
+    taskService.getTaskExecutorService().broadcast(event);;
+  }
+  
   public void shutdown() throws InterruptedException, RegistryException {
     taskService.onDestroy();
     dataflowWorkerEventWatcher.setComplete();
@@ -153,12 +159,14 @@ public class WorkerService {
     
     public void onTXEvent(TXEvent txEvent) throws Exception {
       DataflowEvent taskEvent = txEvent.getDataAs(DataflowEvent.class);
-      if(taskEvent == DataflowEvent.PAUSE) {
+      if(taskEvent == DataflowEvent.Pause) {
         logger.info("Dataflow worker detect pause event!");
-      } else if(taskEvent == DataflowEvent.STOP) {
-        logger.info("Dataflow worker detect stop event!");
+      } else if(taskEvent == DataflowEvent.StopInput) {
+        logger.info("Dataflow worker detect stop input event!");
+      } else if(taskEvent == DataflowEvent.StopWorker) {
+        logger.info("Dataflow worker detect stop worker event!");
         shutdown() ;
-      } else if(taskEvent == DataflowEvent.RESUME) {
+      } else if(taskEvent == DataflowEvent.Resume) {
         logger.info("Dataflow worker detect resume event!");
       }
       notify(txEvent, TXEventNotification.Status.Complete);

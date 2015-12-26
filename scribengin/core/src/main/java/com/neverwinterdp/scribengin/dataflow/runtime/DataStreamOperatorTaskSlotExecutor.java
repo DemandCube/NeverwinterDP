@@ -5,12 +5,11 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.TaskStatus;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
+import com.neverwinterdp.registry.task.dedicated.TaskExecutorEvent;
 import com.neverwinterdp.registry.task.dedicated.TaskSlotExecutor;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperator;
-import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorInterceptor;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.WorkerService;
-import com.neverwinterdp.util.text.StringUtil;
 
 public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStreamOperatorDescriptor>{
   private WorkerService                                      workerService;
@@ -42,7 +41,7 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
     dRegistry.getTaskRegistry().save(dsOperatorDescriptor, report);
   }
   
-  public DedicatedTaskContext<DataStreamOperatorDescriptor> getTaskContext() { return this.taskContext; }
+  public DedicatedTaskContext<DataStreamOperatorDescriptor> getTaskContext() { return taskContext; }
   
   public DataStreamOperatorDescriptor getDataStreamOperatorDescriptor() { return dsOperatorDescriptor ; }
   
@@ -52,6 +51,14 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
   public void onShutdown() throws Exception {
     context.commit();
     context.close();
+  }
+  
+  @Override
+  public void onEvent(TaskExecutorEvent event) throws Exception {
+    if("StopInput".equals(event.getName())) {
+      InputDataStreamContext inputContext = context.getInputDataStreamContext();
+      if(inputContext.isInputSource()) inputContext.stopInput();
+    }
   }
   
   @Override
@@ -74,10 +81,6 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
         if(lastNoMessageTime < 0) lastNoMessageTime = currentTime;
         report.setAssignedWithNoMessageProcess(report.getAssignedWithNoMessageProcess() + 1);
         report.setLastAssignedWithNoMessageProcess(report.getLastAssignedWithNoMessageProcess() + 1);
-        if(lastNoMessageTime + 180000 < currentTime) {
-          getTaskContext().setComplete();
-          context.setComplete();
-        }
       } else {
         report.setLastAssignedWithNoMessageProcess(0);
         lastNoMessageTime = -1;

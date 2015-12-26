@@ -148,7 +148,10 @@ public class TrackingDataflowBuilder {
     );
       
     shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED") ;
-    shell.execute("dataflow info  --dataflow-id " + dataflowId + " --show-tasks --show-workers --show-history-workers ");
-    shell.execute("registry dump");
+    shell.execute(
+      "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
+      "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + trackingConfig.getReportPath()
+    );
+    //shell.execute("registry dump");
   }
 }

@@ -15,18 +15,28 @@ public class InputDataStreamContext {
   private SourcePartitionStream         assignedPartition;
   private SourcePartitionStreamReader   assignedPartitionReader;
   private DataStreamSourceInterceptor[] interceptor;
-
+  private boolean                       inputSource ;
+  private boolean                       stopInput ;
+  
   public InputDataStreamContext(DataStreamOperatorRuntimeContext ctx, Storage storage, int partitionId) throws Exception {
     source = storage.getSource().getLatestSourcePartition();
     assignedPartition = source.getPartitionStream(partitionId);
     assignedPartitionReader = assignedPartition.getReader("DataflowTask");
-
     StorageConfig storageConfig = storage.getStorageConfig();
+    inputSource  = storageConfig.booleanAttribute(DataSet.DATAFLOW_SOURCE_INPUT, false);
     String interceptorTypes = storageConfig.attribute(DataSet.DATAFLOW_SOURCE_INTERCEPTORS);
     interceptor = DataStreamSourceInterceptor.load(ctx, StringUtil.toStringArray(interceptorTypes));
   }
   
+  public boolean isInputSource() { return inputSource ; }
+
+  public void stopInput() { stopInput = true; }
+  
   public Message nextMessage(DataStreamOperatorRuntimeContext ctx, long maxWaitForDataRead) throws Exception {
+    if(stopInput) {
+      System.err.println("InputDataStreamContext: Stop Input for " + ctx.getDescriptor().getOperatorName());
+      return null ;
+    }
     Message message = assignedPartitionReader.next(maxWaitForDataRead);
     if (message != null) {
       for (DataStreamSourceInterceptor sel : interceptor) {

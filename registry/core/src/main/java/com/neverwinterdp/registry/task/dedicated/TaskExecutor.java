@@ -7,7 +7,7 @@ import java.util.List;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.TaskStatus;
 
-public class TaskExecutor<T> implements Runnable {
+final public class TaskExecutor<T> implements Runnable {
   private DedicatedTaskService<T>       taskService;
   private TaskExecutorDescriptor        executor;
   private int                           numOfTaskSlot;
@@ -24,8 +24,17 @@ public class TaskExecutor<T> implements Runnable {
   
   public TaskExecutorDescriptor getTaskExecutorDescriptor () { return this.executor; }
   
+  public List<TaskSlotExecutor<T>> getTaskSlotExecutors() { return taskSlotExecutors; }
+  
   public void add(TaskSlotExecutor<T> taskSlotExecutor) {
     taskSlotExecutors.add(taskSlotExecutor);
+  }
+  
+  public void broadcast(TaskExecutorEvent event) throws Exception {
+    for(int i = 0; i < taskSlotExecutors.size(); i++) {
+      TaskSlotExecutor<T> slotExecutor = taskSlotExecutors.get(i);
+      slotExecutor.onEvent(event);
+    }
   }
   
   public void onSwitchTaskSlot() {
@@ -68,7 +77,6 @@ public class TaskExecutor<T> implements Runnable {
     }
   }
   
-  
   void runTaskExecutors() throws Exception {
     Iterator<TaskSlotExecutor<T>> executorItr = taskSlotExecutors.iterator();
     while(executorItr.hasNext()) {
@@ -78,7 +86,6 @@ public class TaskExecutor<T> implements Runnable {
       currentRunningTaskSlotExecutor.onPreExecuteSlot();
       currentRunningTaskSlotExecutor.executeSlot();
       currentRunningTaskSlotExecutor.onPostExecuteSlot();
-      
       
       DedicatedTaskContext<T> context = currentRunningTaskSlotExecutor.getTaskContext();
       if(context.isComplete()) {
