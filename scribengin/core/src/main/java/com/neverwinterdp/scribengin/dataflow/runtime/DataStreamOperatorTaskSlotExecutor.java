@@ -7,16 +7,18 @@ import com.neverwinterdp.registry.task.TaskStatus;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.registry.task.dedicated.TaskSlotExecutor;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperator;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorInterceptor;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.WorkerService;
+import com.neverwinterdp.util.text.StringUtil;
 
 public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStreamOperatorDescriptor>{
   private WorkerService                                      workerService;
   private DedicatedTaskContext<DataStreamOperatorDescriptor> taskContext;
-  private DataStreamOperatorDescriptor                       operatorTaskDescriptor;
+  private DataStreamOperatorDescriptor                       dsOperatorDescriptor;
   private DataStreamOperator                                 operator;
   private DataStreamOperatorRuntimeContext                   context;
-
+  
   private long startTime         = 0;
   private long lastFlushTime     = System.currentTimeMillis();
   private long lastNoMessageTime = lastFlushTime;
@@ -25,24 +27,24 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
     super(taskContext);
     this.workerService = service;
     this.taskContext   = taskContext;
-    this.operatorTaskDescriptor      = taskContext.getTaskDescriptor(false);
+    this.dsOperatorDescriptor      = taskContext.getTaskDescriptor(false);
     
-    Class<DataStreamOperator> opType = (Class<DataStreamOperator>) Class.forName(operatorTaskDescriptor.getOperator());
+    Class<DataStreamOperator> opType = (Class<DataStreamOperator>) Class.forName(dsOperatorDescriptor.getOperator());
     operator = opType.newInstance();
     
     startTime = System.currentTimeMillis();
     DataflowRegistry dRegistry = workerService.getDataflowRegistry();
-    DataStreamOperatorReport report = dRegistry.getTaskRegistry().getTaskReport(operatorTaskDescriptor);
+    DataStreamOperatorReport report = dRegistry.getTaskRegistry().getTaskReport(dsOperatorDescriptor);
     report.incrAssignedCount();
-    dRegistry.getTaskRegistry().save(operatorTaskDescriptor, report);
+    dRegistry.getTaskRegistry().save(dsOperatorDescriptor, report);
     TaskExecutorDescriptor taskExecutorDescriptor = taskContext.getTaskExecutorDescriptor();
-    context = new DataStreamOperatorRuntimeContext(workerService, taskExecutorDescriptor, operatorTaskDescriptor, report);
-    dRegistry.getTaskRegistry().save(operatorTaskDescriptor, report);
+    context = new DataStreamOperatorRuntimeContext(workerService, taskExecutorDescriptor, dsOperatorDescriptor, report);
+    dRegistry.getTaskRegistry().save(dsOperatorDescriptor, report);
   }
   
   public DedicatedTaskContext<DataStreamOperatorDescriptor> getTaskContext() { return this.taskContext; }
   
-  public DataStreamOperatorDescriptor getDataStreamOperatorDescriptor() { return operatorTaskDescriptor ; }
+  public DataStreamOperatorDescriptor getDataStreamOperatorDescriptor() { return dsOperatorDescriptor ; }
   
   public boolean isComplete() { return context.isComplete() ; }
   
@@ -59,12 +61,12 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
     int recCount = 0;
     try {
       while(!isInterrupted()) {
-        Message record = context.nextMessage(1000);
-        if(record == null) break ;
+        Message message = context.nextMessage(1000);
+        if(message == null) break ;
 
         recCount++;
         report.incrProcessCount();
-        operator.process(context, record);
+        operator.process(context, message);
       } //end while
       
       long currentTime = System.currentTimeMillis();

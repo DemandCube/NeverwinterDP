@@ -17,6 +17,7 @@ public class DataStreamOperatorDescriptor {
   private int         inputPartitionId;
   private Set<String> outputs;
   private String      operator;
+  private Set<String> interceptors;
 
   public DataStreamOperatorDescriptor() {
   }
@@ -38,4 +39,9 @@ public class DataStreamOperatorDescriptor {
 
   public String getOperator() { return operator; }
   public void setOperator(String operator) { this.operator = operator; }
+
+  public Set<String> getInterceptors() { return interceptors; }
+  public void setInterceptors(Set<String> interceptors) {
+    this.interceptors = interceptors;
+  }
 }

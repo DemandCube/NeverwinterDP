@@ -47,7 +47,7 @@ public class Message {
   }
   
   static public Message create(String key, byte[] data) {
-    Message dataflowMessage = new Message(key, data) ;
-    return dataflowMessage;
+    Message message = new Message(key, data) ;
+    return message;
   }
 }

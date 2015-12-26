@@ -75,7 +75,6 @@ public class DataflowCommand extends Command {
     @Parameter(names = "--wait-for-running-timeout", description = "The dataflow path to deploy")
     private long waitForRunningTimeout = 120000;
     
-    
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
       ScribenginShell scribenginShell = (ScribenginShell) shell;
@@ -167,8 +166,8 @@ public class DataflowCommand extends Command {
         console.println(MetricRegistrySnapshot.getFormattedText(snapshots));
       }
       MessageTrackingRegistry mRegistry = dflRegistry.getMessageTrackingRegistry();
-      MessageTrackingReporter outputReporter = mRegistry.mergeMessageTrackingLogChunk("output");
-      console.println(outputReporter.toFormattedText());
+      MessageTrackingReporter reporter = mRegistry.getMessageTrackingReporter("output");
+      console.println(reporter.toFormattedText());
     }
 
     @Override

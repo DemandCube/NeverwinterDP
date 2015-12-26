@@ -194,9 +194,11 @@ public class MessageTrackingRegistry {
 
   public MessageTrackingReporter getMessageTrackingReporter(String name) throws RegistryException {
     MessageTrackingReporter reporter = new MessageTrackingReporter(name);
-    final Node reportNode = trackingLogNode.getChild(name);
-    MessageTrackingReporter finishedReporter = new  MessageTrackingReporter(name);
-    if(reportNode.exists()) finishedReporter = reportNode.getDataAs(MessageTrackingReporter.class);
+    Node reportNode = trackingLogNode.getChild(name);
+    Node finishedNode = reportNode.getChild(FINISHED);
+    MessageTrackingReporter finishedReporter = null; 
+    if(finishedNode.exists()) finishedReporter = finishedNode.getDataAs(MessageTrackingReporter.class);
+    if(finishedReporter == null) finishedReporter = new  MessageTrackingReporter(name);
     MessageTrackingReporter progressReporter = mergeProgressMessageTrackingLogChunk(name);
     reporter.setFinishedAggregateChunkReports(finishedReporter.getFinishedAggregateChunkReports());
     reporter.setProgressAggregateChunkReports(progressReporter.getProgressAggregateChunkReports());
@@ -243,8 +245,6 @@ public class MessageTrackingRegistry {
       }
     };
     registry.executeBatch(saveCompleteOp, 3, 3000);
-    System.err.println("Merge Finished");
-    System.err.println(reporter.toFormattedText());
     return reporter;
   }
   

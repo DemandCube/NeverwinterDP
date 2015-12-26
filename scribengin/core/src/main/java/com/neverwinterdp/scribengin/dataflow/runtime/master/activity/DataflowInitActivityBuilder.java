@@ -110,32 +110,33 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowDescriptor();
-      Map<String, OperatorDescriptor> operators = dflConfig.getOperators();
+      DataflowDescriptor dflDescriptor = dflRegistry.getConfigRegistry().getDataflowDescriptor();
+      Map<String, OperatorDescriptor> operators = dflDescriptor.getOperators();
       for(Map.Entry<String, OperatorDescriptor> entry : operators.entrySet()) {
         String opName = entry.getKey();
-        OperatorDescriptor opConfig = entry.getValue();
-        createTasks(opName, opConfig);
+        OperatorDescriptor opDescriptor = entry.getValue();
+        createDataStreamOperator(opName, opDescriptor);
       }
     }
     
-    void createTasks(String opName, OperatorDescriptor opConfig) throws RegistryException {
+    void createDataStreamOperator(String opName, OperatorDescriptor opDescriptor) throws RegistryException {
       DecimalFormat SEQ_ID_FORMATTER = new DecimalFormat("0000");
       StreamRegistry streamRegistry = service.getDataflowRegistry().getStreamRegistry();
       DataflowTaskRegistry taskRegistry = service.getDataflowRegistry().getTaskRegistry();
-      for(String input : opConfig.getInputs()) {
+      for(String input : opDescriptor.getInputs()) {
         List<PartitionStreamConfig> pConfigs = streamRegistry.getStreamInputPartitions(input);
         for(int i = 0; i < pConfigs.size(); i++) {
           PartitionStreamConfig pConfig = pConfigs.get(i);
           String taskId =  opName + ":" + input + "-" + SEQ_ID_FORMATTER.format(pConfig.getPartitionStreamId());
-          DataStreamOperatorDescriptor taskConfig = new DataStreamOperatorDescriptor();
-          taskConfig.setTaskId(taskId);
-          taskConfig.setOperatorName(opName);
-          taskConfig.setInput(input);
-          taskConfig.setInputPartitionId(pConfig.getPartitionStreamId());
-          taskConfig.setOutputs(opConfig.getOutputs());
-          taskConfig.setOperator(opConfig.getOperator());
-          taskRegistry.offer(taskConfig);
+          DataStreamOperatorDescriptor dsOperatorDescriptor = new DataStreamOperatorDescriptor();
+          dsOperatorDescriptor.setTaskId(taskId);
+          dsOperatorDescriptor.setOperatorName(opName);
+          dsOperatorDescriptor.setInput(input);
+          dsOperatorDescriptor.setInputPartitionId(pConfig.getPartitionStreamId());
+          dsOperatorDescriptor.setOutputs(opDescriptor.getOutputs());
+          dsOperatorDescriptor.setOperator(opDescriptor.getOperator());
+          dsOperatorDescriptor.setInterceptors(opDescriptor.getInterceptors());
+          taskRegistry.offer(dsOperatorDescriptor);
         }
       }
     }

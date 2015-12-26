@@ -8,11 +8,13 @@ import java.util.Set;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorInterceptor;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.WorkerService;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.StorageService;
+import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.yara.Meter;
 
@@ -24,34 +26,40 @@ public class DataStreamOperatorRuntimeContext implements DataStreamOperatorConte
 
   private InputDataStreamContext               inputContext;
   private Map<String, OutputDataStreamContext> outputContexts = new HashMap<>();
+  private DataStreamOperatorInterceptor[]      interceptors;
   
   private boolean complete = false;
   private Meter   dataflowReadMeter;
   private Meter   dataflowRecordMeter;
 
-  public DataStreamOperatorRuntimeContext(WorkerService workerService, TaskExecutorDescriptor taskExecutor, DataStreamOperatorDescriptor taskConfig, DataStreamOperatorReport report) throws Exception {
+  public DataStreamOperatorRuntimeContext(WorkerService workerService, TaskExecutorDescriptor taskExecutor,
+                                          DataStreamOperatorDescriptor dsOperatorDescriptor, 
+                                          DataStreamOperatorReport report) throws Exception {
     this.workerService = workerService;
     this.taskExecutor  = taskExecutor;
-    this.descriptor    = taskConfig;
+    this.descriptor    = dsOperatorDescriptor;
     this.report        = report;
     
     DataflowRegistry dflRegistry = workerService.getDataflowRegistry();
     StorageService storageService = workerService.getStorageService();
-    StorageConfig inputConfig = dflRegistry.getStreamRegistry().getStream(taskConfig.getInput()) ;
+    StorageConfig inputConfig = dflRegistry.getStreamRegistry().getStream(dsOperatorDescriptor.getInput()) ;
     Storage inputStorage = storageService.getStorage(inputConfig);
-    int partitionId = taskConfig.getInputPartitionId();
+    int partitionId = dsOperatorDescriptor.getInputPartitionId();
     inputContext = new InputDataStreamContext(this, inputStorage, partitionId);
-    for(String output : taskConfig.getOutputs()) {
+    for(String output : dsOperatorDescriptor.getOutputs()) {
       StorageConfig outputConfig = dflRegistry.getStreamRegistry().getStream(output) ;
       Storage outputStorage = storageService.getStorage(outputConfig);
       OutputDataStreamContext outputContext = new OutputDataStreamContext(this, outputStorage, partitionId);
       outputContexts.put(output, outputContext);
     }
-
+    
+    String[] interceptorTypes =  StringUtil.toArray(dsOperatorDescriptor.getInterceptors()) ;
+    interceptors = DataStreamOperatorInterceptor.load(this, interceptorTypes);
+    
     dataflowReadMeter   = 
-        workerService.getMetricRegistry().getMeter("dataflow.source." + taskConfig.getInput() + ".throughput.byte", "byte") ;
+        workerService.getMetricRegistry().getMeter("dataflow.source." + dsOperatorDescriptor.getInput() + ".throughput.byte", "byte") ;
     dataflowRecordMeter = 
-        workerService.getMetricRegistry().getMeter("dataflow.source." + taskConfig.getInput() + ".throughput.record", "record") ;
+        workerService.getMetricRegistry().getMeter("dataflow.source." + dsOperatorDescriptor.getInput() + ".throughput.record", "record") ;
   }
   
   public DataStreamOperatorDescriptor getDescriptor() { return this.descriptor; }
@@ -73,16 +81,22 @@ public class DataStreamOperatorRuntimeContext implements DataStreamOperatorConte
   public Set<String> getAvailableOutputs() { return descriptor.getOutputs(); }
   
   public Message nextMessage(long maxWaitForDataRead) throws Exception {
-    Message dataflowMessage = inputContext.nextMessage(this, maxWaitForDataRead);
-    if(dataflowMessage != null) {
-      dataflowReadMeter.mark(dataflowMessage.getData().length + dataflowMessage.getKey().length());
+    Message message = inputContext.nextMessage(this, maxWaitForDataRead);
+    if(message != null) {
+      dataflowReadMeter.mark(message.getData().length + message.getKey().length());
       dataflowRecordMeter.mark(1);
+      for(DataStreamOperatorInterceptor sel : interceptors) {
+        sel.preProcess(this, message);
+      }
     }
-    return dataflowMessage ;
+    return message ;
   }
   
   public void write(String name, Message message) throws Exception {
     OutputDataStreamContext sinkContext = outputContexts.get(name);
+    for(DataStreamOperatorInterceptor selInterceptor : interceptors) {
+      selInterceptor.postProcess(this, message);
+    }
     sinkContext.write(this, message);
     
     Meter meter = 

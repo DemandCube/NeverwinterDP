@@ -1,10 +1,14 @@
 package com.neverwinterdp.scribengin.dataflow.tracking;
 
+import com.neverwinterdp.message.MessageTrackingReporter;
+import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
+import com.neverwinterdp.scribengin.dataflow.DataflowClient;
 import com.neverwinterdp.scribengin.dataflow.KafkaDataSet;
 import com.neverwinterdp.scribengin.dataflow.KafkaWireDataSetFactory;
 import com.neverwinterdp.scribengin.dataflow.Operator;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
@@ -117,11 +121,26 @@ public class TrackingDataflowBuilder {
   }
   
   public void runMonitor(ScribenginShell shell) throws Exception {
-    shell.execute(
-      "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
-      "  --dataflow-id " + dataflowId + " --show-history-workers " +
-      "  --report-path " + trackingConfig.getReportPath() + " --max-runtime " + trackingConfig.getValidatorMaxRuntime() +"  --print-period 10000"
-    );
+    long numOfInputMessages = trackingConfig.getNumOfChunk() * trackingConfig.getNumOfMessagePerChunk();
+    ScribenginClient sclient = shell.getScribenginClient();
+    DataflowClient dflClient = sclient.getDataflowClient(dataflowId);
+    DataflowRegistry dflRegistry = dflClient.getDataflowRegistry();
+    
+    while(true) {
+      MessageTrackingReporter reporter = dflRegistry.getMessageTrackingRegistry().getMessageTrackingReporter("output");
+      long inputCount = reporter.getLogNameCount("input");
+      long outputCount = reporter.getLogNameCount("output");
+      
+      shell.execute(
+        "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
+        "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + trackingConfig.getReportPath()
+      );
+      
+      if(numOfInputMessages == inputCount && numOfInputMessages == outputCount ){
+        break;
+      }
+      Thread.sleep(10000);
+    }
       
     shell.execute(
       "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingJUnitShellPlugin" +
