@@ -76,7 +76,6 @@ public class TrackingValidatorService {
       bitSetReport = new TrackingMessageReportBitSet(message.getVmId(), message.getChunkId(), expectNumOfMessagePerChunk);
       bitSetReports.add(reportName, bitSetReport);
       trackingRegistry.addValidatorReport(bitSetReport.getReport());
-      System.err.println("Create Report " + reportName);
     }
     bitSetReport.log(message);
   }
@@ -93,7 +92,6 @@ public class TrackingValidatorService {
       try {
         if(size() == rollableSize) {
           trackingRegistry.updateValidatorReport(eldest.getValue().updateAndGetReport());
-          System.err.println("Remove BitSet Tracking: " + eldest.getKey());
           return true;
         }
       } catch (RegistryException e) {

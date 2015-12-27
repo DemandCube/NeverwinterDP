@@ -22,7 +22,7 @@ public class TXEvent {
   }
 
   public <T> TXEvent(String name, T obj) {
-    this(name, System.currentTimeMillis() + 60000,JSONSerializer.INSTANCE.toBytes(obj));
+    this(name, System.currentTimeMillis() + 60000, JSONSerializer.INSTANCE.toBytes(obj));
   }
   
   public <T> TXEvent(String name, long expiredTime, T obj) {

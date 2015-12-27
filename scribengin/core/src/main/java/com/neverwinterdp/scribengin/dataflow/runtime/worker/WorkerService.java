@@ -20,7 +20,6 @@ import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.registry.txevent.TXEventNotification;
 import com.neverwinterdp.registry.txevent.TXEventWatcher;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
-import com.neverwinterdp.scribengin.dataflow.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorTaskSlotExecutor;
@@ -108,7 +107,7 @@ public class WorkerService {
   }
   
   public void waitForTermination() throws RegistryException, InterruptedException {
-    System.out.println("DataflowWorkerService: waitForTermination()");
+    System.out.println("DataflowWorkerService: Start waitForTermination()");
     long maxRunTime = dflRegistry.getConfigRegistry().getDataflowDescriptor().getMaxRunTime();
     try {
       taskService.getTaskExecutorService().awaitTermination(maxRunTime, TimeUnit.MILLISECONDS);
@@ -119,11 +118,12 @@ public class WorkerService {
       }
       throw ex;
     }
-    taskService.onDestroy();
     dataflowWorkerEventWatcher.setComplete();
+    taskService.onDestroy();
     workerStatus = DataflowWorkerStatus.TERMINATED;
     dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
     dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getId(), metricRegistry);
+    System.out.println("DataflowWorkerService: Finisht waitForTermination()");
   }
   
   public void stopInput() throws Exception {
@@ -158,16 +158,12 @@ public class WorkerService {
     }
     
     public void onTXEvent(TXEvent txEvent) throws Exception {
-      DataflowEvent taskEvent = txEvent.getDataAs(DataflowEvent.class);
-      if(taskEvent == DataflowEvent.Pause) {
-        logger.info("Dataflow worker detect pause event!");
-      } else if(taskEvent == DataflowEvent.StopInput) {
+      DataflowWorkerEvent taskEvent = txEvent.getDataAs(DataflowWorkerEvent.class);
+      if(taskEvent == DataflowWorkerEvent.StopInput) {
         logger.info("Dataflow worker detect stop input event!");
-      } else if(taskEvent == DataflowEvent.StopWorker) {
+      } else if(taskEvent == DataflowWorkerEvent.StopWorker) {
         logger.info("Dataflow worker detect stop worker event!");
         shutdown() ;
-      } else if(taskEvent == DataflowEvent.Resume) {
-        logger.info("Dataflow worker detect resume event!");
       }
       notify(txEvent, TXEventNotification.Status.Complete);
     }

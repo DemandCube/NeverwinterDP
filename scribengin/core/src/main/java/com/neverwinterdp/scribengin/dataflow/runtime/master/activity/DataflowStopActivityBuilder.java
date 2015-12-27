@@ -16,10 +16,10 @@ import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.registry.txevent.TXEventNotificationCompleteListener;
 import com.neverwinterdp.registry.txevent.TXEventNotificationWatcher;
-import com.neverwinterdp.scribengin.dataflow.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.master.MasterService;
+import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerEvent;
 
 public class DataflowStopActivityBuilder extends ActivityBuilder {
   public Activity build() {
@@ -36,6 +36,10 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
     @Override
     public List<ActivityStep> build(Activity activity, Injector container) throws Exception {
       List<ActivityStep> steps = new ArrayList<>() ;
+      steps.add(new ActivityStep().
+          withType("broadcast-stop-input-dataflow-worker").
+          withExecutor(BroadcastStopInputStepExecutor.class));
+      
       steps.add(new ActivityStep().
           withType("broadcast-stop-dataflow-worker").
           withExecutor(BroadcastStopWorkerStepExecutor.class));
@@ -61,7 +65,7 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
       }
       
       List<String> workers = dflRegistry.getWorkerRegistry().getActiveWorkerIds() ;
-      TXEvent pEvent = new TXEvent("stop", DataflowEvent.StopWorker);
+      TXEvent pEvent = new TXEvent("stop", DataflowWorkerEvent.StopWorker);
       TXEventBroadcaster broadcaster = dflRegistry.getWorkerRegistry().getWorkerEventBroadcaster();
       TXEventNotificationWatcher watcher = broadcaster.broadcast(pEvent, new TXEventNotificationCompleteListener());
       int countNotification = watcher.waitForNotifications(workers.size(), 60 * 1000);
@@ -86,7 +90,7 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
       }
       
       List<String> workers = dflRegistry.getWorkerRegistry().getActiveWorkerIds() ;
-      TXEvent pEvent = new TXEvent("stop-input", DataflowEvent.StopInput);
+      TXEvent pEvent = new TXEvent("stop-input", DataflowWorkerEvent.StopInput);
       TXEventBroadcaster broadcaster = dflRegistry.getWorkerRegistry().getWorkerEventBroadcaster();
       TXEventNotificationWatcher watcher = broadcaster.broadcast(pEvent, new TXEventNotificationCompleteListener());
       int countNotification = watcher.waitForNotifications(workers.size(), 60 * 1000);

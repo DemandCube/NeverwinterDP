@@ -1,14 +1,18 @@
 package com.neverwinterdp.scribengin.dataflow.tracking;
 
 import com.neverwinterdp.message.MessageTrackingReporter;
+import com.neverwinterdp.registry.txevent.TXEvent;
+import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
+import com.neverwinterdp.scribengin.dataflow.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.KafkaDataSet;
 import com.neverwinterdp.scribengin.dataflow.KafkaWireDataSetFactory;
 import com.neverwinterdp.scribengin.dataflow.Operator;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerEvent;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
@@ -46,6 +50,11 @@ public class TrackingDataflowBuilder {
   
   public TrackingDataflowBuilder setHDFSAggregateOutput() {
     this.outputType = OutputType.hdfs;
+    return this;
+  }
+  
+  public TrackingDataflowBuilder setMaxRuntime(long maxRuntime) {
+    trackingConfig.setValidatorMaxRuntime(maxRuntime);
     return this;
   }
   
@@ -139,9 +148,14 @@ public class TrackingDataflowBuilder {
       if(numOfInputMessages == inputCount && numOfInputMessages == outputCount ){
         break;
       }
+      
       Thread.sleep(10000);
     }
-      
+    
+    System.err.println("Should call stop the dataflow here!!!!!!!!!!!");
+    TXEvent stopEvent = new TXEvent("stop", DataflowEvent.Stop);
+    dflRegistry.getMasterRegistry().getMaserEventBroadcaster().broadcast(stopEvent);
+    
     shell.execute(
       "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingJUnitShellPlugin" +
       "  --dataflow-id " + dataflowId + "  --report-path " + trackingConfig.getReportPath() + " --junit-report-file build/junit-report.xml"

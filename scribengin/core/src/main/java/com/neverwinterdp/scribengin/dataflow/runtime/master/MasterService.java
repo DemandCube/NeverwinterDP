@@ -7,6 +7,11 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskService;
+import com.neverwinterdp.registry.txevent.TXEvent;
+import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
+import com.neverwinterdp.registry.txevent.TXEventNotification;
+import com.neverwinterdp.registry.txevent.TXEventWatcher;
+import com.neverwinterdp.scribengin.dataflow.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
@@ -14,6 +19,7 @@ import com.neverwinterdp.scribengin.dataflow.runtime.master.activity.DataflowIni
 import com.neverwinterdp.scribengin.dataflow.runtime.master.activity.DataflowMasterActivityService;
 import com.neverwinterdp.scribengin.dataflow.runtime.master.activity.DataflowRunActivityBuilder;
 import com.neverwinterdp.scribengin.dataflow.runtime.master.activity.DataflowStopActivityBuilder;
+import com.neverwinterdp.scribengin.dataflow.runtime.worker.WorkerService.DataflowWorkerEventWatcher;
 import com.neverwinterdp.storage.StorageService;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMConfig;
@@ -24,8 +30,8 @@ public class MasterService {
   private Logger logger ;
   
   @Inject
-  private VMConfig vmConfig;
- 
+  private VMDescriptor vmDescriptor;
+  
   @Inject
   private DataflowRegistry dflRegistry;
   
@@ -39,7 +45,9 @@ public class MasterService {
   private DataflowTaskMonitor  taskMonitor;
   private DedicatedTaskService<DataStreamOperatorDescriptor> taskService ;
   
-  public VMConfig getVMConfig() { return vmConfig; }
+  private DataflowMasterEventWatcher   dataflowMasterEventWatcher ;
+  
+  public VMConfig getVMConfig() { return vmDescriptor.getVmConfig(); }
   
   private DataflowMasterActivityService activityService;
 
@@ -58,7 +66,7 @@ public class MasterService {
   }
   
   public void init() throws Exception {
-    System.out.println("DataflowMasterService: init()");
+    logger.info("Start init()");
     dflRegistry.setStatus(DataflowLifecycleStatus.INIT);
     dflRegistry.initRegistry();
     
@@ -67,24 +75,39 @@ public class MasterService {
     taskService = new DedicatedTaskService<>(dflRegistry.getTaskRegistry(), null);
     taskMonitor = new DataflowTaskMonitor();
     taskService.addTaskMonitor(taskMonitor);
+
+    TXEventBroadcaster broadcaster = dflRegistry.getMasterRegistry().getMaserEventBroadcaster();
+    String masterEvtPath = broadcaster.getEventPath();
+    dataflowMasterEventWatcher = new DataflowMasterEventWatcher(dflRegistry, masterEvtPath, vmDescriptor.getId());
     
     mtMergerService = new MessageTrackingMergerService(dflRegistry);
-    System.out.println("DataflowMasterService: init(), done!!!");
+    
+    logger.info("Finish init()");
   }
   
   public void run() throws Exception {
-    System.out.println("DataflowMasterService: run()");
+    logger.info("Start run()");
     activityService.queue(new DataflowInitActivityBuilder().build());
     activityService.queue(new DataflowRunActivityBuilder().build());
+    logger.info("Finish run()");
+  }
+  
+  public void stop() throws Exception {
+    activityService.queue(new DataflowStopActivityBuilder().build());
   }
   
   public void waitForTermination() throws Exception {
-    long maxRunTime = dflRegistry.getConfigRegistry().getDataflowDescriptor().getMaxRunTime();
-    System.out.println("DataflowMasterService: waitForTermination()");
-    taskMonitor.waitForAllTaskFinish(maxRunTime);
-    activityService.queue(new DataflowStopActivityBuilder().build());
-    workerMonitor.waitForAllWorkerTerminated();
+    //long maxRunTime = dflRegistry.getConfigRegistry().getDataflowDescriptor().getMaxRunTime();
+    //System.out.println("DataflowMasterService: waitForTermination()");
+    
+    System.out.println("DataflowMasterService: taskMonitor.waitForAllTaskFinish(30000);");
     taskMonitor.waitForAllTaskFinish(30000);
+    System.out.println("DataflowMasterService: start workerMonitor.waitForAllWorkerTerminated();");
+    workerMonitor.waitForAllWorkerTerminated();
+    System.out.println("DataflowMasterService: finish workerMonitor.waitForAllWorkerTerminated();");
+    
+    //System.out.println("DataflowMasterService: taskMonitor.waitForAllTaskFinish(maxRunTime);");
+    //taskMonitor.waitForAllTaskFinish(maxRunTime);
     System.out.println("DataflowMasterService: waitForTermination(), wait for all task terminate");
     
     taskService.onDestroy();
@@ -96,5 +119,20 @@ public class MasterService {
     //finish
     dflRegistry.setStatus(DataflowLifecycleStatus.FINISH);
     System.out.println("DataflowMasterService: waitForTermination(), done!!!");
+  }
+  
+  public class DataflowMasterEventWatcher extends TXEventWatcher {
+    public DataflowMasterEventWatcher(DataflowRegistry dflRegistry, String eventsPath, String clientId) throws RegistryException {
+      super(dflRegistry.getRegistry(), eventsPath, clientId);
+    }
+    
+    public void onTXEvent(TXEvent txEvent) throws Exception {
+      DataflowEvent taskEvent = txEvent.getDataAs(DataflowEvent.class);
+      if(taskEvent == DataflowEvent.Stop) {
+        stop();
+        logger.info("Dataflow Master detect the stop event!");
+      }
+      notify(txEvent, TXEventNotification.Status.Complete);
+    }
   }
 }
