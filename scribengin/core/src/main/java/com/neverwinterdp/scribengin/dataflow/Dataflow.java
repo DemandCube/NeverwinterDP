@@ -33,6 +33,11 @@ public class Dataflow<IN, OUT> {
     return this;
   }
   
+  public Dataflow<IN, OUT> setTrackingWindowSize(int size) {
+    dataflowDescriptor.setTrackingWindowSize(size);;
+    return this;
+  }
+  
   public Dataflow<IN, OUT> setDefaultParallelism(int parallelism) {
     dataflowDescriptor.getStreamConfig().setParallelism(parallelism);
     return this;

@@ -66,7 +66,8 @@ public class TrackingLauncher  extends SubCommand {
     TrackingDataflowBuilder dflBuilder = new TrackingDataflowBuilder(dataflowId);
     dflBuilder.
       setNumOfWorker(numOfWorker).
-      setNumOfExecutorPerWorker(numOfExecutorPerWorker);
+      setNumOfExecutorPerWorker(numOfExecutorPerWorker).
+      setTrackingWindowSize(10000);
     
     dflBuilder.getTrackingConfig().setReportPath(trackingReportPath);
     

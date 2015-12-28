@@ -25,6 +25,7 @@ public class TrackingDataflowBuilder {
   
   private int numOfWorker            = 2;
   private int numOfExecutorPerWorker = 5;
+  private int trackingWindowSize     = 1000;
  
   public TrackingDataflowBuilder(String dataflowId) {
     this.dataflowId = dataflowId;
@@ -61,6 +62,11 @@ public class TrackingDataflowBuilder {
     return this;
   }
   
+  public TrackingDataflowBuilder setTrackingWindowSize(int size) {
+    trackingWindowSize = size;
+    return this;
+  }
+  
   public TrackingDataflowBuilder setNumOfWorker(int num) {
     numOfWorker = num;
     return this;
@@ -77,7 +83,8 @@ public class TrackingDataflowBuilder {
       useWireDataSetFactory(new KafkaWireDataSetFactory("127.0.0.1:2181")).
       setDefaultParallelism(8).
       setDefaultReplication(2).
-      setMaxRuntime(trackingConfig.getValidatorMaxRuntime());
+      setMaxRuntime(trackingConfig.getValidatorMaxRuntime()).
+      setTrackingWindowSize(trackingWindowSize);
     dfl.getWorkerDescriptor().setNumOfInstances(numOfWorker);
     dfl.getWorkerDescriptor().setNumOfExecutor(numOfExecutorPerWorker);
     
