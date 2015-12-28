@@ -17,12 +17,12 @@ DFS_APP_HOME="/applications/tracking-sample"
 TRACKING_REPORT_PATH="/applications/tracking-sample/reports"
 
 $SHELL plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingLauncher \
-  --dfs-app-home $DFS_APP_HOME --local-app-home $APP_DIR --tracking-report-path $TRACKING_REPORT_PATH  $@ 
+  --dfs-app-home $DFS_APP_HOME --local-app-home $APP_DIR --tracking-report-path $TRACKING_REPORT_PATH --dataflow-id tracking $@ 
 #########################################################################################################################
 # MONITOR                                                                                                               #
 #########################################################################################################################
 MONITOR_COMMAND="\
-$SHELL plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor --dataflow-id tracking-dataflow --report-path $TRACKING_REPORT_PATH --show-history-workers"
+$SHELL plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor --dataflow-id tracking --report-path $TRACKING_REPORT_PATH --show-history-workers"
 
 echo -e "\n\n"
 echo "##To Tracking The Dataflow Progress##"
