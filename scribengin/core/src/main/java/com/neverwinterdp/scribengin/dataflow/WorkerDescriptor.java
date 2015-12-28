@@ -2,7 +2,7 @@ package com.neverwinterdp.scribengin.dataflow;
 
 public class WorkerDescriptor {
   private int     numOfInstances          = 2;
-  private int     memory                  = 128;
+  private int     memory                  = 512;
   private int     cpuCores                = 1;
   private int     numOfExecutor           = 2;
   

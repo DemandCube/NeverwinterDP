@@ -2,7 +2,7 @@ package com.neverwinterdp.scribengin.dataflow;
 
 public class MasterDescriptor {
   private int     numOfInstances        = 1;
-  private int     memory                = 128;
+  private int     memory                = 512;
   private int     cpuCores              = 1;
   
   private String  log4jConfigUrl = "classpath:scribengin/log4j/vm-log4j.properties";
