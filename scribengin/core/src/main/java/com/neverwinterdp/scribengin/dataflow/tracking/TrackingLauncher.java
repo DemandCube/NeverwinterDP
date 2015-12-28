@@ -59,11 +59,6 @@ public class TrackingLauncher  extends SubCommand {
   @Parameter(names = "--validator-max-run-time", description = "")
   private int validatorMaxRuntime = -1;
   
-  public TrackingLauncher(String[] args) throws Exception {
-    new JCommander(this, args);
-  }
-  
-  
   @Override
   public void execute(Shell s, CommandInput cmdInput) throws Exception {
     ScribenginShell shell = (ScribenginShell) s;
