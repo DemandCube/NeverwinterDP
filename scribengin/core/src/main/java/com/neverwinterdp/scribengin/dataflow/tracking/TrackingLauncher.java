@@ -103,7 +103,12 @@ public class TrackingLauncher  extends SubCommand {
     
     new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForRunning(60000);
     
-    VMConfig vmValidatorConfig = dflBuilder.buildKafkaVMTMValidator();
+    VMConfig vmValidatorConfig = null;
+    if("hdfs".equalsIgnoreCase(dataflowStorage)) {
+      vmValidatorConfig = dflBuilder.buildHDFSVMTMValidator();
+    } else {
+      vmValidatorConfig = dflBuilder.buildKafkaVMTMValidator();
+    }
     new VMSubmitter(vmClient, dfsAppHome, vmValidatorConfig).submit().waitForRunning(30000);
   }
 
