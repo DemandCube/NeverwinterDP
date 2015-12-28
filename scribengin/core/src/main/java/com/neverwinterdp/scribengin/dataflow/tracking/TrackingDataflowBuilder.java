@@ -2,7 +2,6 @@ package com.neverwinterdp.scribengin.dataflow.tracking;
 
 import com.neverwinterdp.message.MessageTrackingReporter;
 import com.neverwinterdp.registry.txevent.TXEvent;
-import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
@@ -12,7 +11,6 @@ import com.neverwinterdp.scribengin.dataflow.KafkaDataSet;
 import com.neverwinterdp.scribengin.dataflow.KafkaWireDataSetFactory;
 import com.neverwinterdp.scribengin.dataflow.Operator;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
-import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerEvent;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
@@ -24,6 +22,8 @@ public class TrackingDataflowBuilder {
   private String         dataflowId = "tracking";
   private OutputType     outputType = OutputType.kafka;
   private TrackingConfig trackingConfig;
+  private int numOfWorker = 2;
+  private int numOfExecutorPerWorker = 5;
  
   public TrackingDataflowBuilder(String dataflowId) {
     this.dataflowId = dataflowId;
@@ -60,6 +60,16 @@ public class TrackingDataflowBuilder {
     return this;
   }
   
+  public TrackingDataflowBuilder setNumOfWorker(int num) {
+    numOfWorker = num;
+    return this;
+  }
+  
+  public TrackingDataflowBuilder setNumOfExecutorPerWorker(int num) {
+    numOfExecutorPerWorker = num;
+    return this;
+  }
+  
   public Dataflow<TrackingMessage, TrackingMessage> buildDataflow() {
     Dataflow<TrackingMessage, TrackingMessage> dfl = new Dataflow<>(dataflowId);
     dfl.
@@ -67,8 +77,8 @@ public class TrackingDataflowBuilder {
       setDefaultParallelism(5).
       setDefaultReplication(1).
       setMaxRuntime(trackingConfig.getValidatorMaxRuntime());
-    dfl.getWorkerDescriptor().setNumOfInstances(2);
-    dfl.getWorkerDescriptor().setNumOfExecutor(5);
+    dfl.getWorkerDescriptor().setNumOfInstances(numOfWorker);
+    dfl.getWorkerDescriptor().setNumOfExecutor(numOfExecutorPerWorker);
     
     KafkaDataSet<TrackingMessage> inputDs = 
         dfl.createInput(new KafkaStorageConfig("input", "127.0.0.1:2181", "tracking.input"));
