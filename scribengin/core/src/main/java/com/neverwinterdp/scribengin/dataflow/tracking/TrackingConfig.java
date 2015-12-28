@@ -4,10 +4,10 @@ import com.neverwinterdp.vm.VMAppConfig;
 
 @SuppressWarnings("serial")
 public class TrackingConfig extends VMAppConfig {
-  final static public String REPORT_PATH              = "tracking.report-path";
-  final static public String MESSAGE_SIZE             = "tracking.message-size";
-  final static public String NUM_OF_CHUNK             = "tracking.num-of-chunk";
-  final static public String NUM_OF_MESSAGE_PER_CHUNK = "tracking.num-of-message-per-chunk";
+  final static public String REPORT_PATH                = "tracking.report-path";
+  final static public String MESSAGE_SIZE               = "tracking.message-size";
+  final static public String NUM_OF_CHUNK               = "tracking.num-of-chunk";
+  final static public String NUM_OF_MESSAGE_PER_CHUNK   = "tracking.num-of-message-per-chunk";
 
   final static public String GENERATOR_NUM_OF_WRITER    = "generator.num-of-writer";
   final static public String GENERATOR_BREAK_IN_PERIOD  = "generator.break-in-period";
