@@ -152,7 +152,6 @@ public class TrackingDataflowBuilder {
       Thread.sleep(10000);
     }
     
-    Thread.sleep(60000);
     System.err.println("Should call stop the dataflow here!!!!!!!!!!!");
     TXEvent stopEvent = new TXEvent("stop", DataflowEvent.Stop);
     dflRegistry.getMasterRegistry().getMaserEventBroadcaster().broadcast(stopEvent);
