@@ -3,8 +3,6 @@ package com.neverwinterdp.scribengin.dataflow.tracking;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
-
-import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
@@ -14,8 +12,11 @@ import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.client.VMSubmitter;
+import com.neverwinterdp.vm.client.shell.CommandInput;
+import com.neverwinterdp.vm.client.shell.Shell;
+import com.neverwinterdp.vm.client.shell.SubCommand;
 
-public class Main {
+public class TrackingLauncher  extends SubCommand {
   @ParametersDelegate
   private RegistryConfig registryConfig;
 
@@ -61,13 +62,14 @@ public class Main {
   @Parameter(names = "--validator-max-run-time", description = "")
   private int validatorMaxRuntime = -1;
   
-  public Main(String[] args) throws Exception {
+  public TrackingLauncher(String[] args) throws Exception {
     new JCommander(this, args);
   }
   
-  public void run() throws Exception {
-    Registry registry = registryConfig.newInstance();
-    ScribenginShell shell = new ScribenginShell(registry);
+  
+  @Override
+  public void execute(Shell s, CommandInput cmdInput) throws Exception {
+    ScribenginShell shell = (ScribenginShell) s;
     VMClient vmClient = shell.getVMClient();
     
     vmClient.uploadApp(localAppHome, dfsAppHome);
@@ -105,11 +107,8 @@ public class Main {
     
     VMConfig vmValidatorConfig = dflBuilder.buildKafkaVMTMValidator();
     new VMSubmitter(vmClient, dfsAppHome, vmValidatorConfig).submit().waitForRunning(30000);
-    
   }
-  
-  static public void main(String[] args) throws Exception {
-    Main main = new Main(args);
-    main.run();
-  }
+
+  @Override
+  public String getDescription() { return "Tracking app launcher"; }
 }
