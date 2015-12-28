@@ -44,6 +44,9 @@ public class TrackingLauncher  extends SubCommand {
   @Parameter(names = "--dataflow-id", description = "")
   private String dataflowId        = "tracking";
   
+  @Parameter(names = "--dataflow-storage", description = "")
+  private String dataflowStorage   = "kafka";
+  
   @Parameter(names = "--dataflow-num-of-worker", description = "")
   private int numOfWorker = 8;
   
@@ -68,6 +71,10 @@ public class TrackingLauncher  extends SubCommand {
       setNumOfWorker(numOfWorker).
       setNumOfExecutorPerWorker(numOfExecutorPerWorker).
       setTrackingWindowSize(10000);
+    
+    if("hdfs".equalsIgnoreCase(dataflowStorage)) {
+      dflBuilder.setHDFSAggregateOutput();
+    }
     
     dflBuilder.getTrackingConfig().setReportPath(trackingReportPath);
     
