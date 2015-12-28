@@ -82,7 +82,7 @@ public class TrackingLauncher  extends SubCommand {
     dflBuilder.getTrackingConfig().setGeneratorBreakInPeriod(generatorBreakInPeriod);
     dflBuilder.getTrackingConfig().setNumOfChunk(generatorNumOfChunks);
     dflBuilder.getTrackingConfig().setNumOfMessagePerChunk(generatorNumOfMessagePerChunk);
-    dflBuilder.getTrackingConfig().setKafkaZKConnects(registryConfig.getConnect());
+    dflBuilder.getTrackingConfig().setKafkaZKConnects(vmClient.getRegistry().getRegistryConfig().getConnect());
     dflBuilder.getTrackingConfig().setKafkaNumOfPartition(generatorKafkaNumOfPartition);
     dflBuilder.getTrackingConfig().setKafkaNumOfReplication(generatorKafkaNumOfReplication);
     
