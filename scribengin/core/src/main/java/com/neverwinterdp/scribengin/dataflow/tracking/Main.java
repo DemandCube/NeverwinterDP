@@ -34,8 +34,11 @@ public class Main {
   @Parameter(names = "--generator-num-of-message-per-chunk", description = "Generator num of message per chunk")
   private int generatorNumOfMessagePerChunk = 1000;
   
-  @Parameter(names = "--generator-num-of-writer", description = "Generator num of chunk")
+  @Parameter(names = "--generator-num-of-writer", description = "")
   private int generatorNumOfWriter = 3;
+  
+  @Parameter(names = "--generator-break-in-period", description = "")
+  private long generatorBreakInPeriod = 50;
   
   @Parameter(names = "--generator-kafka-num-of-partition", description = "")
   private int generatorKafkaNumOfPartition = 8;
@@ -43,13 +46,13 @@ public class Main {
   @Parameter(names = "--generator-kafka-num-of-replication", description = "")
   private int generatorKafkaNumOfReplication = 2;
   
-  @Parameter(names = "--dataflow-id", description = "Generator num of chunk")
+  @Parameter(names = "--dataflow-id", description = "")
   private String dataflowId        = "tracking";
   
-  @Parameter(names = "--dataflow-num-of-worker", description = "Dataflow num of worker")
+  @Parameter(names = "--dataflow-num-of-worker", description = "")
   private int numOfWorker = 8;
   
-  @Parameter(names = "--dataflow-num-of-executor-per-worker", description = "Dataflow num of worker")
+  @Parameter(names = "--dataflow-num-of-executor-per-worker", description = "")
   private int numOfExecutorPerWorker = 2;
   
   @Parameter(names = "--validator-num-of-reader", description = "")
@@ -77,6 +80,7 @@ public class Main {
     dflBuilder.getTrackingConfig().setReportPath(trackingReportPath);
     
     dflBuilder.getTrackingConfig().setGeneratorNumOfWriter(generatorNumOfWriter);
+    dflBuilder.getTrackingConfig().setGeneratorBreakInPeriod(generatorBreakInPeriod);
     dflBuilder.getTrackingConfig().setNumOfChunk(generatorNumOfChunks);
     dflBuilder.getTrackingConfig().setNumOfMessagePerChunk(generatorNumOfMessagePerChunk);
     dflBuilder.getTrackingConfig().setKafkaZKConnects(registryConfig.getConnect());
