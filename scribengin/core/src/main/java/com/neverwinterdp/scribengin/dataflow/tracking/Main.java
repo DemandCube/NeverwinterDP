@@ -59,7 +59,7 @@ public class Main {
   private int validatorNumOfReader = 3;
   
   @Parameter(names = "--validator-max-run-time", description = "")
-  private int validatorMaxRuntime = 90000;
+  private int validatorMaxRuntime = -1;
   
   public Main(String[] args) throws Exception {
     new JCommander(this, args);
@@ -86,6 +86,10 @@ public class Main {
     dflBuilder.getTrackingConfig().setKafkaZKConnects(registryConfig.getConnect());
     dflBuilder.getTrackingConfig().setKafkaNumOfPartition(generatorKafkaNumOfPartition);
     dflBuilder.getTrackingConfig().setKafkaNumOfReplication(generatorKafkaNumOfReplication);
+    
+    if(validatorMaxRuntime < 1) {
+      validatorMaxRuntime = 180000 + (generatorNumOfMessagePerChunk * generatorNumOfChunks)/3;
+    }
     
     dflBuilder.getTrackingConfig().setValidatorMaxRuntime(validatorMaxRuntime);
     dflBuilder.getTrackingConfig().setValidatorNumOfReader(validatorNumOfReader);
