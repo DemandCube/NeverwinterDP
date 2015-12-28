@@ -54,7 +54,7 @@ public class TrackingLauncher  extends SubCommand {
   private int validatorNumOfReader = 3;
   
   @Parameter(names = "--validator-max-run-time", description = "")
-  private int validatorMaxRuntime = -1;
+  private long validatorMaxRuntime = -1;
   
   @Override
   public void execute(Shell s, CommandInput cmdInput) throws Exception {

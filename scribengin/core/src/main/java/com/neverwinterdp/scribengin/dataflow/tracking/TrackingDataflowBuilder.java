@@ -22,7 +22,8 @@ public class TrackingDataflowBuilder {
   private String         dataflowId = "tracking";
   private OutputType     outputType = OutputType.kafka;
   private TrackingConfig trackingConfig;
-  private int numOfWorker = 2;
+  
+  private int numOfWorker            = 2;
   private int numOfExecutorPerWorker = 5;
  
   public TrackingDataflowBuilder(String dataflowId) {
@@ -74,8 +75,8 @@ public class TrackingDataflowBuilder {
     Dataflow<TrackingMessage, TrackingMessage> dfl = new Dataflow<>(dataflowId);
     dfl.
       useWireDataSetFactory(new KafkaWireDataSetFactory("127.0.0.1:2181")).
-      setDefaultParallelism(5).
-      setDefaultReplication(1).
+      setDefaultParallelism(8).
+      setDefaultReplication(2).
       setMaxRuntime(trackingConfig.getValidatorMaxRuntime());
     dfl.getWorkerDescriptor().setNumOfInstances(numOfWorker);
     dfl.getWorkerDescriptor().setNumOfExecutor(numOfExecutorPerWorker);
