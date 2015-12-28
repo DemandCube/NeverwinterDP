@@ -1,6 +1,5 @@
 package com.neverwinterdp.scribengin.dataflow;
 
-import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,8 +13,6 @@ import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 
 @Singleton
 public class MTService {
-  static AtomicInteger counter = new AtomicInteger();
-  
   private int                     trackingWindowSize;
   private AtomicInteger           windowIdTracker ;
   private int                     currentChunkId ;
@@ -47,16 +44,21 @@ public class MTService {
       chunkStats.put(chunk.getChunkId(), chunk);
     }
     chunk.log(mTracking);
-    counter.incrementAndGet();
+  }
+  
+  synchronized MessageTrackingChunkStat[] takeAll() {
+    if(chunkStats.size() == 0) return null;
+    MessageTrackingChunkStat[] array = new MessageTrackingChunkStat[chunkStats.size()];
+    chunkStats.values().toArray(array);
+    chunkStats.clear();
+    return array;
   }
   
   public void flush() throws RegistryException {
-    if(chunkStats.size() == 0) return;
-    Iterator<Integer> i = chunkStats.keySet().iterator();
-    while(i.hasNext()) {
-      Integer chunkId = i.next();
-      MessageTrackingChunkStat chunkStat = chunkStats.remove(chunkId);
-      trackingRegistry.saveProgress(chunkStat);
+    MessageTrackingChunkStat[] array = takeAll();
+    if(array == null) return;
+    for(MessageTrackingChunkStat sel : array) {
+      trackingRegistry.saveProgress(sel);
     }
   }
 }

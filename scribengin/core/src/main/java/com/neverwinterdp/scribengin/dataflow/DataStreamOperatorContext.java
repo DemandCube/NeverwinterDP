@@ -9,6 +9,7 @@ import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReport;
 import com.neverwinterdp.vm.VMDescriptor;
 
 public interface DataStreamOperatorContext {
+  public String getId();
   
   public DataStreamOperatorDescriptor getDescriptor() ;
   

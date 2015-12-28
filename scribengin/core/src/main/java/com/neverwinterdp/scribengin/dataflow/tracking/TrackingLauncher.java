@@ -26,7 +26,7 @@ public class TrackingLauncher  extends SubCommand {
   @Parameter(names = "--generator-num-of-chunk", description = "Generator num of chunk")
   private int generatorNumOfChunks          = 10;
   
-  @Parameter(names = "--generator-num-of-message-per-chunk", description = "Generator num of message per chunk")
+  @Parameter(names = "--generator-num-of-message-per-chunk", description = "")
   private int generatorNumOfMessagePerChunk = 1000;
   
   @Parameter(names = "--generator-num-of-writer", description = "")

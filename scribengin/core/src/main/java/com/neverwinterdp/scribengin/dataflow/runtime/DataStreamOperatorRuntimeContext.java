@@ -19,6 +19,8 @@ import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.yara.Meter;
 
 public class DataStreamOperatorRuntimeContext implements DataStreamOperatorContext {
+  private String id ;
+  
   private WorkerService                workerService;
   private TaskExecutorDescriptor       taskExecutor;
   private DataStreamOperatorDescriptor descriptor;
@@ -33,34 +35,38 @@ public class DataStreamOperatorRuntimeContext implements DataStreamOperatorConte
   private Meter   dataflowRecordMeter;
 
   public DataStreamOperatorRuntimeContext(WorkerService workerService, TaskExecutorDescriptor taskExecutor,
-                                          DataStreamOperatorDescriptor dsOperatorDescriptor, 
+                                          DataStreamOperatorDescriptor dsOpDescriptor, 
                                           DataStreamOperatorReport report) throws Exception {
     this.workerService = workerService;
     this.taskExecutor  = taskExecutor;
-    this.descriptor    = dsOperatorDescriptor;
+    this.descriptor    = dsOpDescriptor;
     this.report        = report;
     
+    this.id = dsOpDescriptor.getOperatorName() + ":" + dsOpDescriptor.getInput() + ":" + dsOpDescriptor.getInputPartitionId();
+   
     DataflowRegistry dflRegistry = workerService.getDataflowRegistry();
     StorageService storageService = workerService.getStorageService();
-    StorageConfig inputConfig = dflRegistry.getStreamRegistry().getStream(dsOperatorDescriptor.getInput()) ;
+    StorageConfig inputConfig = dflRegistry.getStreamRegistry().getStream(dsOpDescriptor.getInput()) ;
     Storage inputStorage = storageService.getStorage(inputConfig);
-    int partitionId = dsOperatorDescriptor.getInputPartitionId();
+    int partitionId = dsOpDescriptor.getInputPartitionId();
     inputContext = new InputDataStreamContext(this, inputStorage, partitionId);
-    for(String output : dsOperatorDescriptor.getOutputs()) {
+    for(String output : dsOpDescriptor.getOutputs()) {
       StorageConfig outputConfig = dflRegistry.getStreamRegistry().getStream(output) ;
       Storage outputStorage = storageService.getStorage(outputConfig);
       OutputDataStreamContext outputContext = new OutputDataStreamContext(this, outputStorage, partitionId);
       outputContexts.put(output, outputContext);
     }
     
-    String[] interceptorTypes =  StringUtil.toArray(dsOperatorDescriptor.getInterceptors()) ;
+    String[] interceptorTypes =  StringUtil.toArray(dsOpDescriptor.getInterceptors()) ;
     interceptors = DataStreamOperatorInterceptor.load(this, interceptorTypes);
     
     dataflowReadMeter   = 
-        workerService.getMetricRegistry().getMeter("dataflow.source." + dsOperatorDescriptor.getInput() + ".throughput.byte", "byte") ;
+        workerService.getMetricRegistry().getMeter("dataflow.source." + dsOpDescriptor.getInput() + ".throughput.byte", "byte") ;
     dataflowRecordMeter = 
-        workerService.getMetricRegistry().getMeter("dataflow.source." + dsOperatorDescriptor.getInput() + ".throughput.record", "record") ;
+        workerService.getMetricRegistry().getMeter("dataflow.source." + dsOpDescriptor.getInput() + ".throughput.record", "record") ;
   }
+  
+  public String getId() { return id; }
   
   public DataStreamOperatorDescriptor getDescriptor() { return this.descriptor; }
   
