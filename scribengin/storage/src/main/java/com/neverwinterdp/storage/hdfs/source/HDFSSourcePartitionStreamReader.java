@@ -32,7 +32,9 @@ public class HDFSSourcePartitionStreamReader implements SourcePartitionStreamRea
   
   @Override
   public String getName() { return name; }
-
+  
+  public PartitionStreamConfig getPartitionStreamConfig() { return partitionConfig; }
+  
   @Override
   public Message next(long maxWait) throws Exception {
     byte[] data = partitionReader.nextRecord(maxWait);

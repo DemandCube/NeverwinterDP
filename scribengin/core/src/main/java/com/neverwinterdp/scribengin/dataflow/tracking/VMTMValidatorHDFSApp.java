@@ -138,6 +138,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
         HDFSSourcePartitionStreamReader streamReader = streamReaderQueue.poll(10, TimeUnit.MILLISECONDS);
         Message record = null;
         int count = 0;
+        System.err.println("working on the partition stream " + streamReader.getPartitionStreamConfig().getPartitionStreamId());
         while((record = nextWithRetry(streamReader, 1000, 3)) != null) {
           byte[] data = record.getData();
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(data, TrackingMessage.class);
@@ -148,6 +149,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
           if(count > 10000) break;
         }
         streamReader.commit();
+        System.err.println("finish working on the partition stream " + streamReader.getPartitionStreamConfig().getPartitionStreamId() + ", count = " + count);
         streamReaderQueue.put(streamReader);
       }
     }
