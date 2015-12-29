@@ -49,6 +49,7 @@ public class KafkaTrackingUnitTest  {
     new VMSubmitter(vmClient, dfsAppHome, vmGeneratorConfig).submit().waitForRunning(30000);
     
     Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
+    dfl.setDefaultReplication(1);
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
     
@@ -58,5 +59,6 @@ public class KafkaTrackingUnitTest  {
     new VMSubmitter(vmClient, dfsAppHome, vmValidatorConfig).submit().waitForRunning(30000);
     
     dflBuilder.runMonitor(shell);
+    shell.execute("registry dump");
   }
 }

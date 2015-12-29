@@ -186,6 +186,5 @@ public class TrackingDataflowBuilder {
       "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
       "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + trackingConfig.getReportPath()
     );
-    //shell.execute("registry dump");
   }
 }
