@@ -30,6 +30,8 @@ abstract public class DataSet<T> {
   
   public String getName() { return this.name; }
   
+  public DataSetType getDataSetType() { return this.type ;}
+  
   public <OUT> DataSet<T> connect(Operator<T, OUT> operator) {
     operator.in(this);
     return this;
@@ -58,13 +60,16 @@ abstract public class DataSet<T> {
     if(sourceInterceptors.size() > 0) {
       storageConfig.attribute(DATAFLOW_SOURCE_INTERCEPTORS, joinClassTypes(sourceInterceptors.values()));
     }
-
-    if(type == DataSetType.Input) {
-      storageConfig.attribute(DATAFLOW_SOURCE_INPUT, true);
-    }
+    
     if(sinkInterceptors.size() > 0) {
       storageConfig.attribute(DATAFLOW_SINK_INTERCEPTORS,joinClassTypes(sinkInterceptors.values()));
     }
+
+    if(type == DataSetType.Input) {
+      storageConfig.attribute(DATAFLOW_SOURCE_INPUT, true);
+    } else if(type == DataSetType.Output) {
+    }
+    
     return storageConfig;
   }
   

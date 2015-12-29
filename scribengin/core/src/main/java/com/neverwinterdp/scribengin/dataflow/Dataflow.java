@@ -3,6 +3,7 @@ package com.neverwinterdp.scribengin.dataflow;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 
@@ -108,6 +109,10 @@ public class Dataflow<IN, OUT> {
     config.getStreamConfig().clear();
     for(int i = 0; i < dataStreams.length; i++) {
       DataSet<?> sel = dataStreams[i];
+      StorageConfig storageConfig = sel.getStorageConfig();
+      if(sel.getDataSetType() == DataSetType.Output) {
+        storageConfig.setPartitionStream(config.getStreamConfig().getParallelism());
+      }
       config.getStreamConfig().add(sel.getName(), sel.getStorageConfig());
     }
     Operator<?, ?>[] operators = getOperators();
