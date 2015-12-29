@@ -107,6 +107,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
       for(int i = 0; i < 3; i++) {
         validatorService.submit(new HDFSPartitionStreamReader(streamReaderQueue, tmQueue));
       }
+      
       validatorService.shutdown();
       while(!validatorService.awaitTermination(5, TimeUnit.MINUTES)) {
         partition.deleteReadDataByActiveReader();
@@ -120,7 +121,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
     
     HDFSPartitionStreamReader(BlockingQueue<HDFSSourcePartitionStreamReader> queue, BlockingQueue<TrackingMessage> tmQueue) {
       this.streamReaderQueue = queue ;
-      this.tmQueue    = tmQueue;
+      this.tmQueue           = tmQueue;
     }
     
     @Override
@@ -136,12 +137,14 @@ public class VMTMValidatorHDFSApp extends VMApp {
       HDFSSourcePartitionStreamReader streamReader = null;
       while((streamReader = streamReaderQueue.poll(10, TimeUnit.MILLISECONDS)) != null) {
         Message record = null;
-        while((record = nextWithRetry(streamReader, 1000, 3)) != null) {
+        int count = 0;
+        while(count < 10000 && (record = nextWithRetry(streamReader, 1000, 3)) != null) {
           byte[] data = record.getData();
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(data, TrackingMessage.class);
           if(!tmQueue.offer(tMesg, 90000, TimeUnit.MILLISECONDS)) {
             throw new Exception("Cannot queue the messages after 5s, increase the buffer");
           }
+          count++;
         }
         streamReader.commit();
         streamReaderQueue.put(streamReader);
