@@ -49,6 +49,7 @@ public class KafkaTrackingUnitTest  {
     new VMSubmitter(vmClient, dfsAppHome, vmGeneratorConfig).submit().waitForRunning(30000);
     
     Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
+    dfl.setDefaultParallelism(5);
     dfl.setDefaultReplication(1);
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
