@@ -103,7 +103,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
         streamReaderQueue.put(reader);
       }
       
-      ExecutorService validatorService = Executors.newFixedThreadPool(1);
+      ExecutorService validatorService = Executors.newFixedThreadPool(3);
       for(int i = 0; i < 3; i++) {
         validatorService.submit(new HDFSPartitionStreamReader(streamReaderQueue, tmQueue));
       }
