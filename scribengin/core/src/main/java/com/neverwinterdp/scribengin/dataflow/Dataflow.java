@@ -113,7 +113,7 @@ public class Dataflow<IN, OUT> {
       if(sel.getDataSetType() == DataSetType.Output) {
         storageConfig.setPartitionStream(config.getStreamConfig().getParallelism());
       }
-      config.getStreamConfig().add(sel.getName(), sel.getStorageConfig());
+      config.getStreamConfig().add(sel.getName(), storageConfig);
     }
     Operator<?, ?>[] operators = getOperators();
     config.clearOperators();
