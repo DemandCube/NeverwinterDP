@@ -64,7 +64,18 @@ public class AggregateMessageTrackingChunkStat {
   
   public void merge(AggregateMessageTrackingChunkStat other) {
     toChunkId = other.getToChunkId();
+    trackingCount +=  other.getTrackingCount();
     trackingLostCount += other.getTrackingLostCount();
     trackingDuplicatedCount += other.getTrackingDuplicatedCount();
+    
+    Map<String, MessageTrackingLogChunkStat> otherLogStats = other.getLogStats();
+    for(String otherLogName : otherLogStats.keySet()) {
+      MessageTrackingLogChunkStat logStat = logStats.get(otherLogName);
+      if(logStat == null) {
+        logStat = new MessageTrackingLogChunkStat();
+        logStats.put(otherLogName, logStat);
+      }
+      logStat.merge(otherLogStats.get(otherLogName));
+    }
   }
 }

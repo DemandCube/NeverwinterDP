@@ -106,7 +106,7 @@ public class MessageTrackingChunkStat {
     
     if(idx > trackingProgress) trackingProgress = idx;
     if(bitSet.get(idx)) trackingDuplicatedCount++;
-    bitSet.set(idx, true);
+    else bitSet.set(idx, true);
     trackingCount++;
     
     List<MessageTrackingLog> logs = mTracking.getLogs();

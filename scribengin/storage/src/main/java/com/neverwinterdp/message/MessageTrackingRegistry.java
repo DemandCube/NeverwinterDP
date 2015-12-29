@@ -199,7 +199,7 @@ public class MessageTrackingRegistry {
     MessageTrackingReporter finishedReporter = null; 
     if(finishedNode.exists()) finishedReporter = finishedNode.getDataAs(MessageTrackingReporter.class);
     if(finishedReporter == null) finishedReporter = new  MessageTrackingReporter(name);
-    MessageTrackingReporter progressReporter = mergeProgressMessageTrackingLogChunk(name);
+    MessageTrackingReporter progressReporter = mergeProgressMessageTrackingChunkStat(name);
     reporter.setFinishedAggregateChunkReports(finishedReporter.getFinishedAggregateChunkReports());
     reporter.setProgressAggregateChunkReports(progressReporter.getProgressAggregateChunkReports());
     return reporter;
@@ -207,7 +207,7 @@ public class MessageTrackingRegistry {
   
   public MessageTrackingReporter mergeMessageTrackingLogChunk(String name) throws RegistryException {
     MessageTrackingReporter reporter = new MessageTrackingReporter(name);
-    MessageTrackingReporter progressReporter = mergeProgressMessageTrackingLogChunk(name);
+    MessageTrackingReporter progressReporter = mergeProgressMessageTrackingChunkStat(name);
     MessageTrackingReporter finishedReporter = mergeFinishedMessageTrackingLogChunk(name);
     reporter.setFinishedAggregateChunkReports(finishedReporter.getFinishedAggregateChunkReports());
     reporter.setProgressAggregateChunkReports(progressReporter.getProgressAggregateChunkReports());
@@ -248,7 +248,7 @@ public class MessageTrackingRegistry {
     return reporter;
   }
   
-  public MessageTrackingReporter mergeProgressMessageTrackingLogChunk(String name) throws RegistryException {
+  public MessageTrackingReporter mergeProgressMessageTrackingChunkStat(String name) throws RegistryException {
     final Node reportNode = trackingLogNode.getChild(name);
     final Node progressNode = reportNode.getChild(PROGRESS);
     if(!progressNode.exists()) return new  MessageTrackingReporter(name);
