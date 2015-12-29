@@ -9,13 +9,12 @@ import com.neverwinterdp.scribengin.LocalScribenginCluster;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingDataflowBuilder;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessage;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
-import com.neverwinterdp.storage.simplehdfs.DFSFileSystemExperimentTest;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.client.VMSubmitter;
 
-public class HDFSTrackingUnitTest  {
+public class HDFSTrackingExperimentTest  {
   LocalScribenginCluster localScribenginCluster ;
   ScribenginShell shell;
   
