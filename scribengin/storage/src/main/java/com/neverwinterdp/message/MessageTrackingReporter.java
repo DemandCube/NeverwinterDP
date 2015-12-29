@@ -104,7 +104,7 @@ public class MessageTrackingReporter {
   
   public String toFormattedText() {
     StringBuilder b = new StringBuilder();
-    b.append(toFormattedText("Finishied " + name + " report", finishedAggregateChunkReports));
+    b.append(toFormattedText("Finished " + name + " report", finishedAggregateChunkReports));
     b.append(toFormattedText("Progress " + name + " report", progressAggregateChunkReports));
     return b.toString();
   }
