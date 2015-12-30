@@ -70,7 +70,7 @@ public class TrackingLauncher  extends SubCommand {
     dflBuilder.
       setNumOfWorker(numOfWorker).
       setNumOfExecutorPerWorker(numOfExecutorPerWorker).
-      setTrackingWindowSize(5000);
+      setTrackingWindowSize(10000);
     
     if("hdfs".equalsIgnoreCase(dataflowStorage)) {
       dflBuilder.setHDFSAggregateOutput();

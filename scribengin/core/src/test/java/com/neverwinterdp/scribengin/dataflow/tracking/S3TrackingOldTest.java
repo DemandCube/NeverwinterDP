@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import com.neverwinterdp.storage.s3.S3Client;
 
-public class S3TrackingSamplIntegrationTest  {
+public class S3TrackingOldTest  {
   String bucketName = "tracking-sample-integration-test-bucket";
   S3Client s3Client;
   TrackingSampleRunner trackingSampleRunner = new TrackingSampleRunner();

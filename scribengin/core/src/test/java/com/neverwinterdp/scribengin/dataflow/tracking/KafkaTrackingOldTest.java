@@ -5,7 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class KafkaTrackingSampleUnitTest  {
+public class KafkaTrackingOldTest  {
   TrackingSampleRunner trackingSampleRunner = new TrackingSampleRunner();
   
   @Before
