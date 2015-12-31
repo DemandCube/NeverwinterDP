@@ -1,10 +1,18 @@
 Scribengin Quickstart
 =====================
 
-##General Steps To Setup##
+#Contents#
+1. [Overview](#general-steps-to-setup)
+2. [Build NeverwinterDP](#build-neverwinterdp)
+3. [Setup a cluster automatically in Docker](#docker-setup) 
+4. [Launching Scribengin manually](#launching-scribengin-manually)
+
+---
+
+#General Steps To Setup#
 
 1. You need to check out NeverwinterDP code and build
-    * Check out NeverwinterDP code from https://github.com/Nventdata/NeverwinterDP
+    * Check out NeverwinterDP from https://github.com/Nventdata/NeverwinterDP
     * Build Scribengin with gradle
 2. Setup the scribengin cluster using Docker, Digital Ocean, or any VM provider
     * Install java and other requirement on the VMs
@@ -12,7 +20,9 @@ Scribengin Quickstart
     * Run Zookeeper, Hadoop, and YARN
     * Optionally run Kafka, Elasticsearch...
 
-##Check Out And Build NeverwinterDP Code##
+---
+
+#Build NeverwinterDP#
 
 Checkout NeverwinterDP 
 
@@ -38,35 +48,39 @@ Build and release the NeverwinterDP code
 gradle clean build install release -x test
 ```
 
-You will find the release in ```NeverwinterDP/release/build/release/neverwinterdp```
+You will find the release, binaries, and shell scripts in ```NeverwinterDP/release/build/release/neverwinterdp```
 
-You need tot set the NEVERWINTERDP_HOME environment variable (optional) in order the other cluster script can build and deploy the scribengin automatically
+You need to set the NEVERWINTERDP_HOME environment variable (optional) in order the other cluster script can build and deploy Scribengin automatically
 
 ```
 export NEVERWINTERDP_HOME=/your/path/to/NeverwinterDP
 ```
 
-If you do not set NEVERWINTERDP_HOME, you will need to specify the option ```--neverwinterdp-home /path/to/NeverwinterDP``` when running any automation scripts.
 
 
+---
 
-##Docker Setup##
+#Docker Setup#
 This will require access to Nvent's private repos.  Continue on to [Launching Scribengin cluster manually](#launching-scribengin-cluster-manually) if you do not have access. 
+
+The following steps will deploy all the necessary components to run Scribengin locally by using Docker.
 
 ###Prerequisites###
 
 1. [Install Ansible](http://docs.ansible.com/ansible/intro_installation.html)
 2. [Install and configure Docker](https://docs.docker.com/engine/installation/)
 3. [Install Gradle](https://docs.gradle.org/current/userguide/installation.html)
-4. Make sure the user you are running as has write permissions for /etc/hosts
+4. Install Java 7 
+5. Install Python 2.7
+6. Make sure the user you are running as has write permissions for /etc/hosts
     * Setup scripts will update your /etc/hosts file, but will not remove any entries that are already there
-5. Setup your SSH config
+7. Setup your SSH config
 
     ```
        echo -e "Host *\n  StrictHostKeyChecking no" >> ~/.ssh/config
     ``` 
     
-6. If you want to work with S3, set up your credentials file in this format    
+8. If you want to work with S3, set up your credentials file in this format    
 
      `````
      user@machine $ cat ~/.aws/credentials
@@ -83,7 +97,7 @@ This will require access to Nvent's private repos.  Continue on to [Launching Sc
 2. Set up for neverwinter tools
         
         #Run the setup script for tools (only necessary ONCE)
-        $> sudo ./neverwinterdp-deployments/tools/cluster/setup.sh
+        sudo ./neverwinterdp-deployments/tools/cluster/setup.sh
 
 3. Build docker image with scribengin in one step
         
@@ -134,20 +148,24 @@ This will require access to Nvent's private repos.  Continue on to [Launching Sc
 ###Navigate to Kibana to view real time metrics###
 
 ```
-  Point your browser to http://monitoring-1:5601
-  You can change the interval at which Kibana refreshes itself in the top panel, or manually refresh the page
+Point your browser to http://monitoring-1:5601
+You can change the interval at which Kibana refreshes itself in the top panel, or manually refresh the page
 ```
 
+###SSH onto a cluster node###
+```
+#neverwinterdp user has sudo permissions
+ssh neverwinterdp@[node-name]
+```
 
 ###Launching a dataflow from a preconfigured test###
 
 ```
-  #There are lots of tests under the integration-tests folder apart from these ones listed below
-  #The kafka test is a simple, quick test 
-  ./tests/scribengin/tracking/integration/kafka-run-test.sh
+#The kafka test is a simple, quick test 
+./tests/scribengin/tracking/integration/kafka-run-test.sh
     
-  #The kafka stability test is a more complicated, longer running test
-  ./tests/scribengin/tracking/stability/stability-kafka-test.sh
+#The kafka stability test is a more complicated, longer running test
+./tests/scribengin/tracking/stability/stability-kafka-test.sh
 ```
 
 ###Getting status of a running dataflow
@@ -162,13 +180,13 @@ This will require access to Nvent's private repos.  Continue on to [Launching Sc
 
 ---
 
-##Launching Scribengin cluster manually##
+#Launching Scribengin manually#
 
 ###Prerequisite services to configure and launch###
 
 1. Zookeeper
-2. YARN
-3. Hadoop4
+2. Hadoop4
+3. YARN
 4. Elasticsearch
 5. Kafka
 
@@ -178,9 +196,11 @@ This will require access to Nvent's private repos.  Continue on to [Launching Sc
 1.  Follow [instructions to build and release Scribengin](#check-out-and-build-neverwinterdp-code)
 2.  Launch the VM Master in YARN
         
-        #Suppose you configure your cluster with zookeeper server with the name zookeeper-1 and hadoop master with 
-        #the name hadoop-master. If not you have to edit the shell.sh script according to your server name
-        #APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
+        #After building, you'll need to edit the file:
+        #NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh
+            #-Dshell.zk-connect    - [hostname]:[port] of your Zookeeper server
+            #-Dshell.hadoop-master - [hostname] of your master Hadoop node
+        APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
 
           
         #From release/neverwinterdp directory
