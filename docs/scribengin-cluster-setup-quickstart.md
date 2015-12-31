@@ -78,35 +78,28 @@ This will require access to Nvent's private repos.  Continue on to [Launching Sc
 ###Launching Scribengin cluster in Docker Using neverwinterdp-deployments###
 1. Clone deployments and tools repo
         
-        ```
         git clone git clone https://<bitbucket_user>@bitbucket.org/nventdata/neverwinterdp-deployments.git
-        ```
 
 2. Set up for neverwinter tools
         
-        ```
         #Run the setup script for tools (only necessary ONCE)
         $> sudo ./neverwinterdp-deployments/tools/cluster/setup.sh
-        ```
 
 3. Build docker image with scribengin in one step
-
-        ```
+        
         #Build images, launch containers, run ansible
         ./neverwinterdp-deployments/docker/scribengin/docker.sh  cluster --launch
 
         #If you decided not to set NEVERWINTERDP_HOME, then you can pass it in manually here
         ./neverwinterdp-deployments/docker/scribengin/docker.sh  cluster --launch --neverwinterdp-home=/your/path/to/NeverwinterDP
-        ```
 
 4. If you wish to DESTROY your cluster (clean images and containers)
-
-        ```
+        
         ./neverwinterdp-deployments/docker/scribengin/docker.sh cluster --clean-containers --clean-image
-        ```
 
 5. Checking the status of your cluster
-        ```
+        
+
         $> ./tools/statusCommander/statusCommander.py
         Role           Hostname         IP           ProcessIdentifier       ProcessID    Status
         -------------  ---------------  -----------  ----------------------  -----------  --------
@@ -136,7 +129,7 @@ This will require access to Nvent's private repos.  Continue on to [Launching Sc
                                                      NodeManager             1261         Running
         elasticsearch  elasticsearch-1  172.17.0.10
                                                      Main                    442          Running
-        ```
+
 
 ###Navigate to Kibana to view real time metrics###
 
@@ -184,8 +177,7 @@ This will require access to Nvent's private repos.  Continue on to [Launching Sc
 
 1.  Follow [instructions to build and release Scribengin](#check-out-and-build-neverwinterdp-code)
 2.  Launch the VM Master in YARN
-
-        ```
+        
         #Suppose you configure your cluster with zookeeper server with the name zookeeper-1 and hadoop master with 
         #the name hadoop-master. If not you have to edit the shell.sh script according to your server name
         #APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
@@ -200,17 +192,13 @@ This will require access to Nvent's private repos.  Continue on to [Launching Sc
         
         #To check the scribengin status
         ./scribengin/bin/shell.sh vm info
-        ```  
 
 3.  Upload your compiled dataflow to HDFS
-
-        ```
+        
         ./scribengin/bin/shell.sh vm upload-app --local $APP_DIR --dfs $DFS_APP_HOME
-        ```
 
 4.  Deploy your dataflow by submitting the app to YARN
-
-        ```
+        
         ./scribengin/bin/shell.sh dataflow submit \
             --dfs-app-home $DFS_APP_HOME \
             --dataflow-config $DATAFLOW_DESCRIPTOR_FILE \
@@ -220,7 +208,7 @@ This will require access to Nvent's private repos.  Continue on to [Launching Sc
             --dataflow-num-of-executor-per-worker $DATAFLOW_NUM_OF_EXECUTOR_PER_WORKER \
             --dataflow-worker-enable-gc  \
             --wait-for-running-timeout 180000
-        ```
+
 
 
 
