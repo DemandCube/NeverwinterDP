@@ -42,7 +42,7 @@ public class KafkaTrackingUnitTest  {
     String dfsAppHome = "";
     
     TrackingDataflowBuilder dflBuilder = new TrackingDataflowBuilder("tracking");
-    dflBuilder.getTrackingConfig().setNumOfMessagePerChunk(5000);
+    dflBuilder.getTrackingConfig().setNumOfMessagePerChunk(1000);
     dflBuilder.setMaxRuntime(90000);
     
     VMConfig vmGeneratorConfig = dflBuilder.buildVMTMGeneratorKafka();
@@ -54,8 +54,12 @@ public class KafkaTrackingUnitTest  {
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
     
-    new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForRunning(60000);
-    
+    try {
+      new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForRunning(60000);
+    } catch (Exception ex) {
+      shell.execute("registry dump");
+      throw ex;
+    }
     VMConfig vmValidatorConfig = dflBuilder.buildKafkaVMTMValidator();
     new VMSubmitter(vmClient, dfsAppHome, vmValidatorConfig).submit().waitForRunning(30000);
     

@@ -198,7 +198,9 @@ public class VM {
         try {
           setVMStatus(VMStatus.TERMINATED);
           appContainer.getInstance(CloseableInjector.class).close();
+          appContainer.onDestroy();
           logger.info("Destroyed: " + vmDescriptor.getId() );
+          System.err.println("Destroyed: " + vmDescriptor.getId() );
         } catch (RegistryException e) {
           System.err.println("Set terminated vm status for " + vmDescriptor.getId() );
           logger.error("Error in vm registry", e);

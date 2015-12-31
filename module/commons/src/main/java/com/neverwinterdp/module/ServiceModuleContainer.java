@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.mycila.guice.ext.closeable.CloseableModule;
+import com.mycila.guice.ext.jsr250.Jsr250Module;
 import com.neverwinterdp.module.ModuleRegistration.RunningStatus;
 import com.neverwinterdp.util.log.LoggerFactory;
 

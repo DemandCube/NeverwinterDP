@@ -5,7 +5,7 @@ import org.junit.Test;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.Operator;
-import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessagePerister;
+import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessagePersister;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessageSplitter;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
@@ -22,9 +22,9 @@ public class APIUnitTest {
         dfl.createOutput(new KafkaStorageConfig("aggregate", "127.0.0.1:2181", "aggregate"));
    
     Operator<Message, Message> splitterOp = dfl.createOperator("splitter", TrackingMessageSplitter.class);
-    Operator<Message, Message> infoOp     = dfl.createOperator("info",     TrackingMessagePerister.class);
-    Operator<Message, Message> warnOp     = dfl.createOperator("warn",     TrackingMessagePerister.class);
-    Operator<Message, Message> errorOp    = dfl.createOperator("error",    TrackingMessagePerister.class);
+    Operator<Message, Message> infoOp     = dfl.createOperator("info",     TrackingMessagePersister.class);
+    Operator<Message, Message> warnOp     = dfl.createOperator("warn",     TrackingMessagePersister.class);
+    Operator<Message, Message> errorOp    = dfl.createOperator("error",    TrackingMessagePersister.class);
 
     inputDs.
       connect(splitterOp);

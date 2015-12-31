@@ -100,9 +100,9 @@ public class TrackingDataflowBuilder {
         dfl.createOutput(new KafkaStorageConfig("aggregate", trackingConfig.getKafkaZKConnects(), trackingConfig.getKafkaValidateTopic()));
     }
     Operator<TrackingMessage, TrackingMessage> splitterOp = dfl.createOperator("splitter", TrackingMessageSplitter.class);
-    Operator<TrackingMessage, TrackingMessage> infoOp     = dfl.createOperator("info", TrackingMessagePerister.class);
-    Operator<TrackingMessage, TrackingMessage> warnOp     = dfl.createOperator("warn", TrackingMessagePerister.class);
-    Operator<TrackingMessage, TrackingMessage> errorOp    = dfl.createOperator("error", TrackingMessagePerister.class);
+    Operator<TrackingMessage, TrackingMessage> infoOp     = dfl.createOperator("info", TrackingMessagePersister.class);
+    Operator<TrackingMessage, TrackingMessage> warnOp     = dfl.createOperator("warn", TrackingMessagePersister.class);
+    Operator<TrackingMessage, TrackingMessage> errorOp    = dfl.createOperator("error", TrackingMessagePersister.class);
 
     inputDs.
       useRawReader().
@@ -173,15 +173,13 @@ public class TrackingDataflowBuilder {
     }
     
     System.err.println("Should call stop the dataflow here!!!!!!!!!!!");
-    TXEvent stopEvent = new TXEvent("stop", DataflowEvent.Stop);
-    dflRegistry.getMasterRegistry().getMaserEventBroadcaster().broadcast(stopEvent);
-    
+    shell.execute("dataflow stop --dataflow-id " + dataflowId);
+
     shell.execute(
       "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingJUnitShellPlugin" +
       "  --dataflow-id " + dataflowId + "  --report-path " + trackingConfig.getReportPath() + " --junit-report-file build/junit-report.xml"
     );
       
-    shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED") ;
     shell.execute(
       "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
       "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + trackingConfig.getReportPath()

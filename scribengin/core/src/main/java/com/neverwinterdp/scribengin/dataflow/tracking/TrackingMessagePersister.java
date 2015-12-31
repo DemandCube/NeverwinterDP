@@ -7,7 +7,7 @@ import com.neverwinterdp.scribengin.dataflow.DataStreamOperator;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
 import com.neverwinterdp.util.JSONSerializer;
 
-public class TrackingMessagePerister extends DataStreamOperator {
+public class TrackingMessagePersister extends DataStreamOperator {
   int count = 0 ;
   
   @Override

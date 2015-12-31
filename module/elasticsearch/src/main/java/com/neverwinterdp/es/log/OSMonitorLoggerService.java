@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.annotation.PreDestroy;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.neverwinterdp.monitor.jhiccup.JHiccupInfo;
 import com.neverwinterdp.monitor.jhiccup.JHiccupMeter;
 import com.neverwinterdp.os.ClassLoadedInfo;
@@ -16,6 +17,7 @@ import com.neverwinterdp.os.OSManagement;
 import com.neverwinterdp.os.RuntimeEnv;
 import com.neverwinterdp.os.ThreadCountInfo;
 
+@Singleton
 public class OSMonitorLoggerService extends ObjectLoggerService {
   private OSManagement              osManagement;
   private JHiccupMeter              jhiccupMetter;
@@ -45,6 +47,8 @@ public class OSMonitorLoggerService extends ObjectLoggerService {
   
   @PreDestroy
   public void onDestroy() throws IOException {
+    System.err.println("OSMonitorLoggerService: onDestroy.........................");
+    metricCollectorThread.interrupt();
     close();
   }
   
@@ -52,11 +56,6 @@ public class OSMonitorLoggerService extends ObjectLoggerService {
     public void run() {
       try {
         while(true) {
-//          DetailThreadInfo[] info = osManagement.getDetailThreadInfo();
-//          for(DetailThreadInfo sel : info) {
-//            log(sel.uniqueId(), sel);
-//          }
-
           for(FileStoreInfo sel : osManagement.getFileStoreInfo()) {
             log(sel.uniqueId(), sel);
           }

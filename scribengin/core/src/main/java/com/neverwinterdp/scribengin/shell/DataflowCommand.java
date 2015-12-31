@@ -6,9 +6,11 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.message.MessageTrackingRegistry;
 import com.neverwinterdp.message.MessageTrackingReporter;
+import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
@@ -25,6 +27,7 @@ public class DataflowCommand extends Command {
   public DataflowCommand() {
     add("list",               ListDataflow.class) ;
     add("submit",             Submit.class) ;
+    add("stop",               Stop.class) ;
     add("info",               Info.class) ;
     add("monitor",            Monitor.class) ;
     add("wait-for-status",    WaitForStatus.class) ;
@@ -211,6 +214,30 @@ public class DataflowCommand extends Command {
     @Override
     public String getDescription() {
       return "monitor and display more info about dataflows";
+    }
+  }
+  
+  static public class Stop extends SubCommand {
+    @Parameter(names = "--dataflow-id", required=true, description = "The dataflow id")
+    String dataflowId ;
+    
+    @Parameter(names = "--timeout" , description = "Dump the information period")
+    private long timeout = 90 * 1000;
+    
+    @Override
+    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
+      ScribenginShell scribenginShell = (ScribenginShell) shell;
+      ScribenginClient scribenginClient = scribenginShell.getScribenginClient();
+      DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId);
+      TXEvent stopEvent = new TXEvent("stop", DataflowEvent.Stop);
+      dflClient.getDataflowRegistry().getMasterRegistry().getMaserEventBroadcaster().broadcast(stopEvent);
+      shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED --timeout " + timeout) ;
+      shell.execute("dataflow info" + "  --dataflow-id " + dataflowId + " --show-history-workers");
+    }
+    
+    @Override
+    public String getDescription() {
+      return "Stop Command";
     }
   }
   

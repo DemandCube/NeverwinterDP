@@ -9,40 +9,43 @@ import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.vm.client.VMClient;
 
 public class DataflowSubmitter {
-  private ScribenginClient scribenginClient;
-  private DataflowDescriptor   dflConfig;
+  private ScribenginClient   scribenginClient;
+  private DataflowDescriptor dflDescriptor;
+  private VMDescriptor       vmDataflowMasterDescriptor;
   
   
-  public DataflowSubmitter(ScribenginClient scribenginClient, DataflowDescriptor dflConfig) {
+  public DataflowSubmitter(ScribenginClient scribenginClient, DataflowDescriptor dflDescriptor) {
     this.scribenginClient = scribenginClient;
-    this.dflConfig = dflConfig;
+    this.dflDescriptor    = dflDescriptor;
   }
   
   public DataflowSubmitter(ScribenginClient scribenginClient, Dataflow<?, ?> dataflow) {
     this(scribenginClient, dataflow.buildDataflowDescriptor());
   }
   
-  public DataflowSubmitter(Registry registry, DataflowDescriptor dflConfig) {
-    this(new ScribenginClient(registry), dflConfig);
+  public DataflowSubmitter(Registry registry, DataflowDescriptor dflDescriptor) {
+    this(new ScribenginClient(registry), dflDescriptor);
   }
+  
+  public VMDescriptor getVMDataflowMasterDescriptor() { return vmDataflowMasterDescriptor; }
   
   public DataflowSubmitter submit() throws Exception {
     VMClient vmClient = scribenginClient.getVMClient();
     Registry registry = scribenginClient.getRegistry();
     DataflowRegistry dflRegistry = new DataflowRegistry();
-    String dataflowPath = dflRegistry.create(registry, dflConfig);
+    String dataflowPath = dflRegistry.create(registry, dflDescriptor);
     VMConfig vmConfig = new VMConfig() ;
     vmConfig.
-      setVmId(dflConfig.getId() + "-master").
+      setVmId(dflDescriptor.getId() + "-master").
       addRoles("dataflow-master").
       setRegistryConfig(vmClient.getRegistry().getRegistryConfig()).
       setVmApplication(VMMasterApp.class.getName()).
-      setRequestCpuCores(dflConfig.getMaster().getCpuCores()).
-      setRequestMemory(dflConfig.getMaster().getMemory()).
-      setLog4jConfigUrl(dflConfig.getMaster().getLog4jConfigUrl()).
+      setRequestCpuCores(dflDescriptor.getMaster().getCpuCores()).
+      setRequestMemory(dflDescriptor.getMaster().getMemory()).
+      setLog4jConfigUrl(dflDescriptor.getMaster().getLog4jConfigUrl()).
       addProperty("dataflow.registry.path", dataflowPath);
     vmClient.configureEnvironment(vmConfig);
-    VMDescriptor vmDescriptor = vmClient.allocate(vmConfig);
+    vmDataflowMasterDescriptor = vmClient.allocate(vmConfig);
     return this ;
   }
   
@@ -57,7 +60,7 @@ public class DataflowSubmitter {
   }
   
   void waitForEqualOrGreaterThanStatus(long timeout, DataflowLifecycleStatus status) throws Exception {
-    DataflowClient dflClient = scribenginClient.getDataflowClient(dflConfig.getId(), timeout);
+    DataflowClient dflClient = scribenginClient.getDataflowClient(dflDescriptor.getId(), timeout);
     dflClient.waitForEqualOrGreaterThanStatus(3000, timeout, status);
   }
 }
