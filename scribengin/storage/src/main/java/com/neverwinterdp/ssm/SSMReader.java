@@ -38,15 +38,17 @@ abstract public class SSMReader {
   
   public byte[] nextRecord(long maxWait) throws IOException, RegistryException, InterruptedException {
     if(currentSegmentReader != null && currentSegmentReader.hasAvailableData()) {
-      return currentSegmentReader.nextRecord();
+      byte[] data = currentSegmentReader.nextRecord();
+      return data;
     }
     long stopTime = System.currentTimeMillis() + maxWait;
     while(System.currentTimeMillis() < stopTime) {
       currentSegmentReader = select();
       if(currentSegmentReader != null) {
-        return currentSegmentReader.nextRecord();
+        byte[] data = currentSegmentReader.nextRecord();
+        return data;
       } else {
-        Thread.sleep(1000);
+        Thread.sleep(500);
       }
     }
     return null;

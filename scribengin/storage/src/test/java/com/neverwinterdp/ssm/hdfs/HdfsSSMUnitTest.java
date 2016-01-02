@@ -1,5 +1,6 @@
 package com.neverwinterdp.ssm.hdfs;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -14,6 +15,7 @@ import org.junit.Test;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
+import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.ssm.SSMConsistencyVerifier;
 import com.neverwinterdp.ssm.SSMReader;
 import com.neverwinterdp.ssm.SSMWriter;
@@ -75,9 +77,8 @@ public class HdfsSSMUnitTest {
     TrackingRecordValidator validator = new TrackingRecordValidator(reader, NUM_OF_RECORDS, 500);
     validator.run();
     validator.report();
-    //reader.closeAndRemove();
-    storage.cleanReadSegmentByActiveReader();
-    //storage.dump();
+    //storage.cleanReadSegmentByActiveReader();
+    storage.dump();
   }
   
   @Test
@@ -111,6 +112,54 @@ public class HdfsSSMUnitTest {
     validator.run();
     validator.report();
     storage.dump();
+  }
+  
+
+  @Test
+  public void testConcurrentReadWrite() throws Exception {
+    final int NUM_OF_COMMIT = 10;
+    final HdfsSSM storage = new HdfsSSM(fs, WORKING_DIR + "/seg-storage", registry, "/seg-storage");
+    Thread writer = new Thread() {
+      public void run() {
+        try {
+          SSMWriter ssmWriter = storage.getWriter("writer");
+          for(int j = 1; j <= NUM_OF_COMMIT; j++) {
+            for(int i = 0; i < 1000; i++) {
+              byte[] data = ("commit = " + j + ", record = " + i).getBytes();
+              ssmWriter.write(data);
+            }
+            ssmWriter.commit();
+            System.err.println("Write 1000");
+            Thread.sleep(1000);
+          }
+        } catch (RegistryException | IOException | InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    };
+    writer.start();
+    
+    Thread reader = new Thread() {
+      public void run() {
+        try {
+          SSMReader ssmReader = storage.getReader("reader");
+          int count = 0;
+          byte[] data = null;
+          while((data = ssmReader.nextRecord(2000)) != null) {
+            count++;
+            if(count % 1000 == 0) {
+              ssmReader.prepareCommit();
+              ssmReader.completeCommit();
+              System.err.println("Read count = " + count);
+            }
+          }
+        } catch (RegistryException | IOException | InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    };
+    reader.start();
+    reader.join();
   }
   
   @Test
