@@ -32,7 +32,7 @@ abstract public class SSMConsistencyVerifier {
   
   SegmentConsistency verify(SegmentDescriptor segment) throws RegistryException, IOException {
     SegmentConsistency sc = new SegmentConsistency(segment.getSegmentId());
-    if(segment.getStatus() == SegmentDescriptor.Status.COMPLETE) {
+    if(segment.getStatus() == SegmentDescriptor.Status.WritingComplete) {
       sc.setStatus(Consistency.GOOD);
       if(segment.getFinishedTime() >= segment.getCreatedTime()) sc.setTime(Consistency.GOOD);
       else sc.setTime(Consistency.ERROR);
@@ -40,7 +40,7 @@ abstract public class SSMConsistencyVerifier {
       if(segment.getDataSegmentLastCommitPos() == getDataSegmentLength(segment)) sc.setCommit(Consistency.GOOD);
       else if(segment.getDataSegmentLastCommitPos() < getDataSegmentLength(segment)) sc.setCommit(Consistency.OK);
       else sc.setCommit(Consistency.ERROR);
-    } else if(segment.getStatus() == SegmentDescriptor.Status.WRITING) {
+    } else if(segment.getStatus() == SegmentDescriptor.Status.Writing) {
       sc.setStatus(Consistency.GOOD);
       if(segment.getFinishedTime() == -1) sc.setTime(Consistency.GOOD);
       else sc.setTime(Consistency.ERROR);

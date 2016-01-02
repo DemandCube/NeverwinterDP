@@ -270,7 +270,7 @@ public class SSMRegistry {
   public void commit(Transaction trans, SSMReaderDescriptor reader, SegmentDescriptor segment, SegmentReadDescriptor segRead, boolean complete) throws RegistryException {
     Node readerNode      = readersActiveNode.getChild(reader.getReaderId());
     Node readSegmentNode = readerNode.getChild(segment.getSegmentId());
-    if(complete || segment.getStatus() == SegmentDescriptor.Status.COMPLETE) {
+    if(complete || segment.getStatus() == SegmentDescriptor.Status.WritingComplete) {
       if(complete || segment.getDataSegmentLastCommitPos() == segRead.getCommitReadDataPosition()) {
         trans.delete(readSegmentNode.getPath());
       } else {

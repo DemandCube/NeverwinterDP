@@ -7,14 +7,14 @@ import com.neverwinterdp.util.text.DateUtil;
 public class SegmentDescriptor {
   static DecimalFormat ID_FORMAT = new DecimalFormat("000000");
   
-  static public enum Status { WRITING, COMPLETE }
+  static public enum Status { Writing, WritingComplete, Complete }
   
   private int    id ;
   private String segmentId;
   private String creator;
   private long   createdTime;
   private long   finishedTime = -1l;
-  private Status status = Status.WRITING;
+  private Status status = Status.Writing;
 
   private long   from = -1l;
   private long   to   = -1l;

@@ -67,7 +67,7 @@ abstract public class SegmentWriter {
   public void close() throws IOException, RegistryException {
     bufferClose();
     segment.setFinishedTime(System.currentTimeMillis());
-    segment.setStatus(SegmentDescriptor.Status.COMPLETE);
+    segment.setStatus(SegmentDescriptor.Status.WritingComplete);
     registry.finish(writer, segment);
     closed = true;
   }

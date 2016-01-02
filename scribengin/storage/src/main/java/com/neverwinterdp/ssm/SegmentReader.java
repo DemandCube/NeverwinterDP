@@ -46,9 +46,9 @@ abstract public class SegmentReader {
     if(currentReadPos < lastCommitPos) return DataAvailability.YES;
     
     Status status = segment.getStatus();
-    if(status == Status.COMPLETE) {
+    if(status == Status.WritingComplete) {
       if(currentReadPos == lastCommitPos) return DataAvailability.EOS;
-    } else if(status == Status.WRITING) {
+    } else if(status == Status.Writing) {
       if(currentReadPos == lastCommitPos) return DataAvailability.WAITING;
     }
     throw new IOException("Unknown condition: status = " + status + ", current read position = " + currentReadPos + ", last commit pos= " + lastCommitPos);
@@ -65,7 +65,7 @@ abstract public class SegmentReader {
   public void prepareCommit(Transaction trans) throws IOException, RegistryException {
     segmentReadDescriptor.setCommitReadDataPosition(readRecordIndex);
     segmentReadDescriptor.setCommitReadDataPosition(getCurrentReadPosition());
-    if(segment.getStatus() == SegmentDescriptor.Status.COMPLETE) {
+    if(segment.getStatus() == SegmentDescriptor.Status.WritingComplete) {
       if(segment.getDataSegmentLastCommitPos() == segmentReadDescriptor.getCommitReadDataPosition()) {
         complete = true;
       }
