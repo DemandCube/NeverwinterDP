@@ -91,8 +91,8 @@ abstract public class SSMConsistencyVerifier {
         DateUtil.asCompactDateTime(segment.getCreatedTime()),
         DateUtil.asCompactDateTime(segment.getFinishedTime()),
         segment.getStatus(),
-        segment.getFrom(),
-        segment.getTo(),
+        segment.getRecordFrom(),
+        segment.getRecordTo(),
         segment.getDataSegmentNumOfRecords(),
         segment.getDataSegmentLastCommitPos(),
         segment.getDataSegmentCommitCount()

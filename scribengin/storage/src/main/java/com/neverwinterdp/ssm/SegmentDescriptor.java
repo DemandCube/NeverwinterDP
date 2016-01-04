@@ -16,8 +16,8 @@ public class SegmentDescriptor {
   private long   finishedTime = -1l;
   private Status status = Status.Writing;
 
-  private long   from = -1l;
-  private long   to   = -1l;
+  private long   recordFrom = -1l;
+  private long   recordTo   = -1l;
   
   private long   dataSegmentNumOfRecords;
   private long   dataSegmentLastCommitPos;
@@ -49,11 +49,11 @@ public class SegmentDescriptor {
   public Status getStatus() { return status; }
   public void setStatus(Status status) { this.status = status; }
 
-  public long getFrom() { return from; }
-  public void setFrom(long from) { this.from = from; }
+  public long getRecordFrom() { return recordFrom; }
+  public void setRecordFrom(long from) { this.recordFrom = from; }
 
-  public long getTo() { return to; }
-  public void setTo(long to) { this.to = to; }
+  public long getRecordTo() { return recordTo; }
+  public void setRecordTo(long to) { this.recordTo = to; }
 
   public long getDataSegmentNumOfRecords() { return dataSegmentNumOfRecords; }
   public void setDataSegmentNumOfRecords(long dataSegmentNumOfRecords) {
@@ -78,8 +78,8 @@ public class SegmentDescriptor {
     b.append("createdTime=").append(DateUtil.asCompactDateTime(createdTime)).append(", ");
     b.append("finishedTime=").append(DateUtil.asCompactDateTime(finishedTime)).append(", ");
     b.append("status=").append(status).append(", ");
-    b.append("from=").append(from).append(", ");
-    b.append("to=").append(to).append(", ");
+    b.append("from=").append(recordFrom).append(", ");
+    b.append("to=").append(recordTo).append(", ");
     b.append("dataSegmentNumOfRecords=").append(dataSegmentNumOfRecords).append(", ");
     b.append("dataSegmentLastCommitPos=").append(dataSegmentLastCommitPos).append(", ");
     b.append("dataSegmentCommitCount=").append(dataSegmentCommitCount);

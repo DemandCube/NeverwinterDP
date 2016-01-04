@@ -22,7 +22,8 @@ public class SSMRegistryPrinter {
   }
   
   public void printSegments() throws IOException, RegistryException {
-    println("  ", "segments");
+    SegmentsDescriptor segsDescriptor = segStorageReg.getSegmentsDescriptor();
+    println("  ", "segments:", segsDescriptor.toString());
     List<String> segments = segStorageReg.getSegments() ;
     for(int i = 0; i < segments.size(); i++) {
       SegmentDescriptor segment = segStorageReg.getSegmentBySegmentId(segments.get(i));

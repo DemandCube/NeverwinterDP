@@ -1,7 +1,5 @@
 package com.neverwinterdp.ssm;
 
-import java.util.TreeSet;
-
 import com.neverwinterdp.util.text.DateUtil;
 
 public class SSMReaderDescriptor {

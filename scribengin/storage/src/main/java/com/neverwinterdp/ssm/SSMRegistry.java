@@ -2,7 +2,10 @@ package com.neverwinterdp.ssm;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+
+import org.apache.kafka.common.protocol.Errors;
 
 import com.neverwinterdp.registry.BatchOperations;
 import com.neverwinterdp.registry.ErrorCode;
@@ -33,8 +36,8 @@ public class SSMRegistry {
 
   private Node              readersNode;
   private Node              readersActiveNode;
-  private Node              readersHeartbeatNode;
   private Node              readersHistoryNode;
+  private Node              readersHeartbeatNode;
 
   private Node              writersNode;
   private Node              writersActiveNode;
@@ -78,22 +81,24 @@ public class SSMRegistry {
   }
   
   public void initRegistry(Transaction trans) throws RegistryException {
-    trans.create(registryNode,       null, NodeCreateMode.PERSISTENT);
-    trans.create(segmentsNode,       null, NodeCreateMode.PERSISTENT);
+    trans.create(registryNode,         null, NodeCreateMode.PERSISTENT);
+    
+    SegmentsDescriptor segsDescriptor = new SegmentsDescriptor();
+    trans.create(segmentsNode, segsDescriptor, NodeCreateMode.PERSISTENT);
     
     trans.create(readersNode,          null, NodeCreateMode.PERSISTENT);
-    trans.create(readersActiveNode,       null, NodeCreateMode.PERSISTENT);
+    trans.create(readersActiveNode,    null, NodeCreateMode.PERSISTENT);
     trans.create(readersHeartbeatNode, null, NodeCreateMode.PERSISTENT);
     trans.create(readersHistoryNode,   null, NodeCreateMode.PERSISTENT);
     
     trans.create(writersNode,          null, NodeCreateMode.PERSISTENT);
-    trans.create(writersActiveNode,       null, NodeCreateMode.PERSISTENT);
+    trans.create(writersActiveNode,    null, NodeCreateMode.PERSISTENT);
     trans.create(writersHeartbeatNode, null, NodeCreateMode.PERSISTENT);
     trans.create(writersHistoryNode,   null, NodeCreateMode.PERSISTENT);
     writerIdTracker.initRegistry(trans);
     
-    trans.create(actionQueueNode,    null, NodeCreateMode.PERSISTENT);
-    trans.create(lockNode,           null, NodeCreateMode.PERSISTENT);
+    trans.create(actionQueueNode,      null, NodeCreateMode.PERSISTENT);
+    trans.create(lockNode,             null, NodeCreateMode.PERSISTENT);
     segmentIdTracker.initRegistry(trans);
   }
   
@@ -104,6 +109,10 @@ public class SSMRegistry {
   public Registry getRegistry() { return registry ; }
   
   public String getRegistryPath() { return registryPath ; }
+  
+  public SegmentsDescriptor getSegmentsDescriptor() throws RegistryException {
+    return segmentsNode.getDataAs(SegmentsDescriptor.class);
+  }
   
   public List<String> getSegments() throws RegistryException {
     List<String> segments = segmentsNode.getChildren() ;
@@ -178,48 +187,7 @@ public class SSMRegistry {
   }
   
   public List<String> cleanReadSegmentByActiveReader() throws RegistryException {
-    BatchOperations<List<String>> op = new BatchOperations<List<String>>() {
-      @Override
-      public List<String> execute(Registry registry) throws RegistryException {
-        //System.err.println("cleanReadSegmentByActiveReader(): " + registryPath);
-        List<String> deleteSegments = new ArrayList<>();
-        List<String> readers = readersActiveNode.getChildren() ;
-        String minReadSegmentId = null;
-        for(int i = 0; i < readers.size(); i++) {
-          String reader = readers.get(i);
-          //System.err.println("  reader: " + reader);
-          List<String> readSegments = readersActiveNode.getChild(reader).getChildren();
-          //System.err.println("    read segments: " + readSegments);
-          String readerMinReadSegment = null;
-          if(readSegments.size() == 0)  {
-            SSMReaderDescriptor readerDescriptor = readersActiveNode.getChild(reader).getDataAs(SSMReaderDescriptor.class);
-            readerMinReadSegment = readerDescriptor.getLastReadSegmentId();
-          } else {
-            Collections.sort(readSegments);
-            readerMinReadSegment = readSegments.get(0);
-          }
-          //System.err.println("    readerMinReadSegment: " + readerMinReadSegment);
-          
-          if(minReadSegmentId == null) minReadSegmentId = readerMinReadSegment;
-          else if(minReadSegmentId.compareTo(readerMinReadSegment) > 0) minReadSegmentId = readerMinReadSegment;
-        }
-        //System.err.println("  minReadSegmentId: " + minReadSegmentId);
-        if(minReadSegmentId == null) return deleteSegments;
-        
-        List<String> segments = segmentsNode.getChildren();
-        Transaction transaction = registry.getTransaction();
-        for(int i = 0; i < segments.size(); i++) {
-          String segmentId = segments.get(i);
-          if(segmentId.compareTo(minReadSegmentId) < 0) {
-            transaction.deleteChild(segmentsNode, segmentId);
-            deleteSegments.add(segmentId);
-          }
-        }
-        transaction.commit();
-        System.err.println("  delete: " + deleteSegments);
-        return deleteSegments;
-      }
-    };
+    CleanReadSegmentByActiveReader op = new CleanReadSegmentByActiveReader() ;
     Lock lock = lockNode.getLock("write", "Lock to remove the segments that are already read by the active reader") ;
     return lock.execute(op, 3, 3000);
   }
@@ -337,7 +305,137 @@ public class SSMRegistry {
     writer.setFinishedTime(System.currentTimeMillis());
     transaction.deleteChild(writersHeartbeatNode, writer.getId());
     transaction.deleteChild(writersActiveNode, writer.getId());
-    transaction.createChild(writersHistoryNode,   writer.getId() + "-", writer, NodeCreateMode.PERSISTENT_SEQUENTIAL);
+    transaction.createChild(writersHistoryNode, writer.getId() + "-", writer, NodeCreateMode.PERSISTENT_SEQUENTIAL);
     transaction.commit();
+  }
+  
+  public void manageSegments() throws RegistryException {
+    ManageSegments op = new ManageSegments() ;
+    Lock lock = lockNode.getLock("write", "Lock to manage the segments") ;
+    lock.execute(op, 3, 3000);
+  }
+
+  public SegmentTag findSegmentTagByRecordPosition(long pos) throws RegistryException {
+    return null;
+  }
+  
+  public SegmentTag findSegmentTagByTime(Date datetime) throws RegistryException {
+    return null;
+  }
+  
+  public void createSegmentTag(SegmentTag tag) throws RegistryException {
+    
+  }
+  
+  public class CleanReadSegmentByActiveReader implements BatchOperations<List<String>> {
+    @Override
+    public List<String> execute(Registry registry) throws RegistryException {
+      //System.err.println("cleanReadSegmentByActiveReader(): " + registryPath);
+      List<String> deleteSegments = new ArrayList<>();
+      String minReadSegmentId = getMinReadSemgmentIdByActiveReader();
+      
+      if(minReadSegmentId == null) minReadSegmentId = getMinReadSemgmentIdByHistoryReader();
+      //System.err.println("  minReadSegmentId: " + minReadSegmentId);
+      if(minReadSegmentId == null) return deleteSegments;
+      
+      List<String> segments = segmentsNode.getChildren();
+      Transaction transaction = registry.getTransaction();
+      for(int i = 0; i < segments.size(); i++) {
+        String segmentId = segments.get(i);
+        if(segmentId.compareTo(minReadSegmentId) < 0) {
+          transaction.deleteChild(segmentsNode, segmentId);
+          deleteSegments.add(segmentId);
+        }
+      }
+      transaction.commit();
+      //System.err.println("  delete: " + deleteSegments);
+      return deleteSegments;
+    }
+    
+    String getMinReadSemgmentIdByActiveReader() throws RegistryException {
+      List<String> readers = readersActiveNode.getChildren() ;
+      String minReadSegmentId = null;
+      for(int i = 0; i < readers.size(); i++) {
+        String reader = readers.get(i);
+        //System.err.println("  reader: " + reader);
+        List<String> readSegments = readersActiveNode.getChild(reader).getChildren();
+        //System.err.println("    read segments: " + readSegments);
+        String readerMinReadSegment = null;
+        if(readSegments.size() == 0)  {
+          SSMReaderDescriptor readerDescriptor = readersActiveNode.getChild(reader).getDataAs(SSMReaderDescriptor.class);
+          readerMinReadSegment = readerDescriptor.getLastReadSegmentId();
+          //Since the reader has been completely read the segment, move to the next segment
+          int  readerMinReadSegmentId = SegmentDescriptor.extractId(readerMinReadSegment);
+          readerMinReadSegment = SegmentDescriptor.toSegmentId(readerMinReadSegmentId + 1) ;
+        } else {
+          Collections.sort(readSegments);
+          readerMinReadSegment = readSegments.get(0);
+        }
+        //System.err.println("    readerMinReadSegment: " + readerMinReadSegment);
+        if(minReadSegmentId == null) minReadSegmentId = readerMinReadSegment;
+        else if(minReadSegmentId.compareTo(readerMinReadSegment) > 0) minReadSegmentId = readerMinReadSegment;
+      }
+      return minReadSegmentId;
+    }
+    
+    String getMinReadSemgmentIdByHistoryReader() throws RegistryException {
+      List<String> readers = readersHistoryNode.getChildren() ;
+      String minReadSegmentId = null;
+      for(int i = 0; i < readers.size(); i++) {
+        String reader = readers.get(i);
+        //System.err.println("  history reader: " + reader);
+        String readerMinReadSegment = null;
+        SSMReaderDescriptor readerDescriptor = readersHistoryNode.getChild(reader).getDataAs(SSMReaderDescriptor.class);
+        readerMinReadSegment = readerDescriptor.getLastReadSegmentId();
+        //Since the reader has been completely read the segment, move to the next segment
+        int  readerMinReadSegmentId = SegmentDescriptor.extractId(readerMinReadSegment);
+        readerMinReadSegment = SegmentDescriptor.toSegmentId(readerMinReadSegmentId + 1) ;
+        //System.err.println("    history readerMinReadSegment: " + readerMinReadSegment);
+        if(minReadSegmentId == null) minReadSegmentId = readerMinReadSegment;
+        else if(minReadSegmentId.compareTo(readerMinReadSegment) > 0) minReadSegmentId = readerMinReadSegment;
+      }
+      return minReadSegmentId;
+    }
+  }
+  
+  public class ManageSegments implements BatchOperations<Boolean> {
+    @Override
+    public Boolean execute(Registry registry) throws RegistryException {
+      SegmentsDescriptor segsDescriptor = segmentsNode.getDataAs(SegmentsDescriptor.class);
+      List<String> segments = getSegments();
+      Transaction transaction = registry.getTransaction();
+      long managedToRecord = segsDescriptor.getManagedToRecord();
+      for(int i = 0; i < segments.size(); i++) {
+        String segmentIdName = segments.get(i);
+        int segmentId = SegmentDescriptor.extractId(segmentIdName);
+        if(segmentId <= segsDescriptor.getLastManagedSegment()) {
+          continue;
+        }
+        
+        Node segmentNode = segmentsNode.getChild(segmentIdName);
+        SegmentDescriptor segDescriptor = segmentNode.getDataAs(SegmentDescriptor.class);
+        if(segDescriptor.getStatus() == SegmentDescriptor.Status.Writing) {
+          break;
+        }
+        
+        if(segmentId == segsDescriptor.getLastManagedSegment() + 1) {
+          if(segDescriptor.getStatus() != SegmentDescriptor.Status.WritingComplete) {
+            throw new RegistryException(ErrorCode.Unknown, "Expect the WritingComplete status for segment " + segDescriptor.getSegmentId());
+          }
+          segDescriptor.setStatus(SegmentDescriptor.Status.Complete);
+          segDescriptor.setRecordFrom(managedToRecord);
+          managedToRecord += segDescriptor.getDataSegmentNumOfRecords();
+          segDescriptor.setRecordTo(managedToRecord);
+          segsDescriptor.setManagedToRecord(managedToRecord);
+          segsDescriptor.setLastManagedSegment(segDescriptor.getId());
+          transaction.setData(segmentNode, segDescriptor);
+        } else {
+          throw new RegistryException(ErrorCode.Unknown, "The management is corrupted");
+        }
+      }
+      transaction.setData(segmentsNode, segsDescriptor);
+      transaction.commit();
+      return true;
+    }
   }
 }

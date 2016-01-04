@@ -72,9 +72,11 @@ public class HdfsSSMUnitTest {
     System.out.println(scVerifier.getSegmentDescriptorTextReport());
     System.out.println(scVerifier.getSegmentConsistencyTextReport());
     Assert.assertEquals(SegmentConsistency.Consistency.GOOD, scVerifier.getMinCommitConsistency());
+    storage.getRegistry().manageSegments();
+    storage.dump();
     
     SSMReader reader = storage.getReader("reader");
-    TrackingRecordValidator validator = new TrackingRecordValidator(reader, NUM_OF_RECORDS, 500);
+    TrackingRecordValidator validator = new TrackingRecordValidator(reader, NUM_OF_RECORDS, 500).setRandomRollbackRatio(0);
     validator.run();
     validator.report();
     reader.closeAndRemove();
@@ -154,13 +156,13 @@ public class HdfsSSMUnitTest {
               System.err.println("Read count = " + count);
             }
           }
-        } catch (RegistryException | IOException | InterruptedException e) {
+        } catch(RegistryException | IOException | InterruptedException e) {
           e.printStackTrace();
         }
       }
     };
     reader.start();
-    reader.join();
+    reader.join() ;
   }
   
   @Test
