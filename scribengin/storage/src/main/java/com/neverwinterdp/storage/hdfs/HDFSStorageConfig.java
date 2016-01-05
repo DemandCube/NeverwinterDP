@@ -2,6 +2,7 @@ package com.neverwinterdp.storage.hdfs;
 
 import com.neverwinterdp.storage.StorageConfig;
 
+@SuppressWarnings("serial")
 public class HDFSStorageConfig extends StorageConfig {
   final static public String NAME          = "name";
   final static public String REGISTRY_PATH = "registry.path" ;

@@ -1,12 +1,10 @@
 package com.neverwinterdp.ssm;
 
-import com.neverwinterdp.util.text.DateUtil;
-
-public class SegmentTag {
+public class SSMTagDescriptor {
   private String name;
   private String description;
   private int    segmentId;
-  private long   recordPosition;
+  private long   segmentRecordPosition;
   
   public String getName() { return name; }
   public void setName(String name) { this.name = name; }
@@ -17,8 +15,8 @@ public class SegmentTag {
   public int getSegmentId() { return segmentId; }
   public void setSegmentId(int segmentId) { this.segmentId = segmentId; }
   
-  public long getRecordPosition() { return recordPosition; }
-  public void setRecordPosition(long recordPosition) { this.recordPosition = recordPosition; }
+  public long getSegmentRecordPosition() { return segmentRecordPosition; }
+  public void setSegmentRecordPosition(long pos) { segmentRecordPosition = pos; }
   
   public String toString() {
     StringBuilder b = new StringBuilder();
@@ -26,7 +24,7 @@ public class SegmentTag {
     b.append("name=").append(name).append(", ");
     b.append("description=").append(description).append(", ");
     b.append("segmentId=").append(segmentId).append(", ");
-    b.append("recordPosition=").append(recordPosition);
+    b.append("segmentRecordPosition=").append(segmentRecordPosition);
     b.append("}");
     return b.toString();
   }

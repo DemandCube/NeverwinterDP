@@ -1,5 +1,6 @@
 package com.neverwinterdp.storage.hdfs;
 
+import java.util.Date;
 import java.util.List;
 
 import com.neverwinterdp.registry.ErrorCode;
@@ -9,6 +10,7 @@ import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.ssm.SSMRegistry;
+import com.neverwinterdp.ssm.SSMTagDescriptor;
 import com.neverwinterdp.storage.StorageConfig;
 
 public class HDFSStorageRegistry {
@@ -18,7 +20,8 @@ public class HDFSStorageRegistry {
 
   private Node rootNode;
   private Node partitionsNode;
-
+  private Node tagsNode;
+  
   public HDFSStorageRegistry(Registry registry, StorageConfig sconfig) throws RegistryException {
     this(registry, new HDFSStorageConfig(sconfig));
   }
@@ -30,6 +33,7 @@ public class HDFSStorageRegistry {
     
     rootNode       = registry.get(registryPath);
     partitionsNode = rootNode.getChild("partitions");
+    tagsNode       = rootNode.getChild("tags");
     
     if(exists()) {
       this.storageConfig = rootNode.getDataAs(HDFSStorageConfig.class) ;
@@ -61,6 +65,7 @@ public class HDFSStorageRegistry {
     
     transaction.create(rootNode, storageConfig, NodeCreateMode.PERSISTENT);
     transaction.create(partitionsNode, null, NodeCreateMode.PERSISTENT);
+    transaction.create(tagsNode,       null, NodeCreateMode.PERSISTENT);
     int numOfPartitions = storageConfig.getPartitionStream();
     for(int i = 0; i < numOfPartitions; i++) {
       String partitionRegistryPath = partitionsNode.getPath() + "/partition-" + i;
@@ -86,8 +91,73 @@ public class HDFSStorageRegistry {
   }
   
   public SSMRegistry getPartitionRegistry(String partitionId) throws RegistryException {
-    String partitionRegPath = partitionsNode.getPath() + "/" + partitionId ;
+    String partitionRegPath = partitionsNode.getPath() + "/partition-" + partitionId ;
     SSMRegistry ssmRegistry = new SSMRegistry(registry, partitionRegPath);
     return ssmRegistry;
+  }
+  
+  public List<String> getTags() throws RegistryException {
+    return tagsNode.getChildren();
+  }
+  
+  public HDFSStorageTag getTagByName(String name) throws RegistryException {
+    HDFSStorageTag tag = new HDFSStorageTag();
+    tag.setTagDescription(tagsNode.getChild(name).getDataAs(HDFSStorageTag.TagDescription.class));
+    int numOfPartitions = storageConfig.getPartitionStream();
+    for(int i = 0; i < numOfPartitions; i++) {
+      SSMRegistry ssmRegistry = getPartitionRegistry(i);
+      SSMTagDescriptor partitionTag = ssmRegistry.getTagByName(name);
+      tag.add(i, partitionTag);
+    }
+    return tag;
+  }
+  
+  public HDFSStorageTag createTagByDateTime(String name, String desc, Date datetime) throws RegistryException {
+    Transaction transaction = registry.getTransaction();
+    HDFSStorageTag tag = new HDFSStorageTag();
+    tag.getTagDescription().setName(name);
+    tag.getTagDescription().setDescription(desc);
+    int numOfPartitions = storageConfig.getPartitionStream();
+    for(int i = 0; i < numOfPartitions; i++) {
+      SSMRegistry ssmRegistry = getPartitionRegistry(i);
+      SSMTagDescriptor partitionTag = ssmRegistry.findTagByTime(datetime);
+      partitionTag.setName(name);
+      partitionTag.setDescription(desc);
+      tag.add(i, partitionTag);
+      ssmRegistry.createTag(transaction, partitionTag);
+    }
+    transaction.createChild(tagsNode, tag.getTagDescription().getName(), tag.getTagDescription(), NodeCreateMode.PERSISTENT);
+    transaction.commit();
+    return tag;
+  }
+  
+  public HDFSStorageTag createTagByPosition(String name, String desc, long pos) throws RegistryException {
+    Transaction transaction = registry.getTransaction();
+    HDFSStorageTag tag = new HDFSStorageTag();
+    tag.getTagDescription().setName(name);
+    tag.getTagDescription().setDescription(desc);
+    int numOfPartitions = storageConfig.getPartitionStream();
+    for(int i = 0; i < numOfPartitions; i++) {
+      SSMRegistry ssmRegistry = getPartitionRegistry(i);
+      SSMTagDescriptor partitionTag = ssmRegistry.findTagByRecordPosition(pos);
+      partitionTag.setName(name);
+      partitionTag.setDescription(desc);
+      tag.add(i, partitionTag);
+      ssmRegistry.createTag(transaction, partitionTag);
+    }
+    transaction.createChild(tagsNode, tag.getTagDescription().getName(), tag.getTagDescription(), NodeCreateMode.PERSISTENT);
+    transaction.commit();
+    return tag;
+  }
+  
+  public void deleteTag(String name) throws RegistryException {
+    Transaction transaction = registry.getTransaction();
+    int numOfPartitions = storageConfig.getPartitionStream();
+    for(int i = 0; i < numOfPartitions; i++) {
+      SSMRegistry ssmRegistry = getPartitionRegistry(i);
+      ssmRegistry.deleteTag(transaction, name);
+    }
+    transaction.deleteChild(tagsNode, name);
+    transaction.commit();
   }
 }

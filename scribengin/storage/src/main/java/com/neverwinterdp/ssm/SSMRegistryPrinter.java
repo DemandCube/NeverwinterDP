@@ -17,7 +17,7 @@ public class SSMRegistryPrinter {
   public void print() throws IOException, RegistryException {
      println("", segStorageReg.getRegistryPath());
      printSegments();
-     printSegmentsTags();
+     printSSMTags();
      printReaders();
      printWriters();
   }
@@ -32,11 +32,11 @@ public class SSMRegistryPrinter {
     }
   }
   
-  public void printSegmentsTags() throws IOException, RegistryException {
-    List<SegmentTag> tags = segStorageReg.getSegmentTags();
-    println("  ", "segment-tags:");
+  public void printSSMTags() throws IOException, RegistryException {
+    List<SSMTagDescriptor> tags = segStorageReg.getTags();
+    println("  ", "tags:");
     for(int i = 0; i < tags.size(); i++) {
-      SegmentTag tag = tags.get(i);
+      SSMTagDescriptor tag = tags.get(i);
       println("    "  , tag.toString()) ;
     }
   }

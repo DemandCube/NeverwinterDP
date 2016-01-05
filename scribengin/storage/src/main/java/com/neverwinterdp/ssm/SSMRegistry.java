@@ -16,8 +16,8 @@ import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.lock.Lock;
 
 public class SSMRegistry {
-  final static public String SEGMENTS          = "segments";
-  final static public String SEGMENT_TAGS      = "segment-tags";
+  final static public String SEGMENTS  = "segments";
+  final static public String TAGS      = "tags";
   
   final static public String READERS           = "readers";
   final static public String READERS_ACTIVE    = READERS + "/active";
@@ -34,7 +34,7 @@ public class SSMRegistry {
 
   private Node registryNode;
   private Node segmentsNode;
-  private Node segmentTagsNode;
+  private Node tagsNode;
 
   private Node              readersNode;
   private Node              readersActiveNode;
@@ -57,7 +57,7 @@ public class SSMRegistry {
     
     registryNode       = registry.get(registryPath);
     segmentsNode       = registryNode.getChild(SEGMENTS);
-    segmentTagsNode    = registryNode.getChild(SEGMENT_TAGS);
+    tagsNode    = registryNode.getChild(TAGS);
     
     readersNode          = registryNode.getChild(READERS);
     readersActiveNode    = registryNode.getDescendant(READERS_ACTIVE);
@@ -84,8 +84,9 @@ public class SSMRegistry {
     trans.create(registryNode,         null, NodeCreateMode.PERSISTENT);
     
     SegmentsDescriptor segsDescriptor = new SegmentsDescriptor();
-    trans.create(segmentsNode,    segsDescriptor, NodeCreateMode.PERSISTENT);
-    trans.create(segmentTagsNode, null,           NodeCreateMode.PERSISTENT);
+    trans.create(segmentsNode, segsDescriptor, NodeCreateMode.PERSISTENT);
+    
+    trans.create(tagsNode, null, NodeCreateMode.PERSISTENT);
     
     trans.create(readersNode,          null, NodeCreateMode.PERSISTENT);
     trans.create(readersActiveNode,    null, NodeCreateMode.PERSISTENT);
@@ -315,42 +316,41 @@ public class SSMRegistry {
     lock.execute(op, 3, 3000);
   }
 
-  public List<SegmentTag> getSegmentTags() throws RegistryException {
-    return segmentTagsNode.getChildrenAs(SegmentTag.class);
+  public List<SSMTagDescriptor> getTags() throws RegistryException {
+    return tagsNode.getChildrenAs(SSMTagDescriptor.class);
   }
   
-  public SegmentTag getSegmentTagByName(String name) throws RegistryException {
-    SegmentTag tag = segmentTagsNode.getChild(name).getDataAs(SegmentTag.class);
+  public SSMTagDescriptor getTagByName(String name) throws RegistryException {
+    SSMTagDescriptor tag = tagsNode.getChild(name).getDataAs(SSMTagDescriptor.class);
     return tag;
   }
   
-  public SegmentTag findSegmentTagByRecordPosition(final long pos) throws RegistryException {
-    BatchOperations<SegmentTag> op = new BatchOperations<SegmentTag>() {
+  public SSMTagDescriptor findTagByRecordPosition(final long pos) throws RegistryException {
+    BatchOperations<SSMTagDescriptor> op = new BatchOperations<SSMTagDescriptor>() {
       @Override
-      public SegmentTag execute(Registry registry) throws RegistryException {
+      public SSMTagDescriptor execute(Registry registry) throws RegistryException {
         List<String> segments = getSegments() ;
         for(int i = 0; i < segments.size(); i++) {
           String segmentIdName = segments.get(i);
           SegmentDescriptor segDescriptor = segmentsNode.getChild(segmentIdName).getDataAs(SegmentDescriptor.class);
           if(segDescriptor.getStatus() != SegmentDescriptor.Status.Complete) return null;
           if(pos >= segDescriptor.getRecordFrom() && pos <= segDescriptor.getRecordTo()) {
-            SegmentTag tag = new SegmentTag();
+            SSMTagDescriptor tag = new SSMTagDescriptor();
             tag.setSegmentId(segDescriptor.getId());
-            tag.setRecordPosition(pos);
+            tag.setSegmentRecordPosition(pos);
             return tag;
           }
         }
         return null;
       }
     };
-    Lock lock = lockNode.getLock("write", "Lock to find the segment tag by position") ;
-    return lock.execute(op, 3, 3000);
+    return registry.executeBatch(op, 3, 3000);
   }
   
-  public SegmentTag findSegmentTagByTime(final Date datetime) throws RegistryException {
-    BatchOperations<SegmentTag> op = new BatchOperations<SegmentTag>() {
+  public SSMTagDescriptor findTagByTime(final Date datetime) throws RegistryException {
+    BatchOperations<SSMTagDescriptor> op = new BatchOperations<SSMTagDescriptor>() {
       @Override
-      public SegmentTag execute(Registry registry) throws RegistryException {
+      public SSMTagDescriptor execute(Registry registry) throws RegistryException {
         List<String> segments = getSegments() ;
         long time =  datetime.getTime();
         SegmentDescriptor lastValidSegmentDescriptor = null;
@@ -367,9 +367,9 @@ public class SSMRegistry {
           }
         }
         if(lastValidSegmentDescriptor != null) {
-          SegmentTag tag = new SegmentTag();
+          SSMTagDescriptor tag = new SSMTagDescriptor();
           tag.setSegmentId(lastValidSegmentDescriptor.getId());
-          tag.setRecordPosition(lastValidSegmentDescriptor.getRecordFrom());
+          tag.setSegmentRecordPosition(lastValidSegmentDescriptor.getRecordFrom());
           return tag;
         }
         return null;
@@ -379,20 +379,36 @@ public class SSMRegistry {
     return lock.execute(op, 3, 3000);
   }
   
-  public SegmentTag createSegmentTag(final SegmentTag tag) throws RegistryException {
-    BatchOperations<SegmentTag> op = new BatchOperations<SegmentTag>() {
+  public SSMTagDescriptor createTag(final SSMTagDescriptor tag) throws RegistryException {
+    BatchOperations<SSMTagDescriptor> op = new BatchOperations<SSMTagDescriptor>() {
       @Override
-      public SegmentTag execute(Registry registry) throws RegistryException {
+      public SSMTagDescriptor execute(Registry registry) throws RegistryException {
         if(tag.getName() == null) {
           throw new RegistryException(ErrorCode.Unknown, "The segment tag name cannot be null");
         }
-        segmentTagsNode.createChild(tag.getName(), tag, NodeCreateMode.PERSISTENT);
+        tagsNode.createChild(tag.getName(), tag, NodeCreateMode.PERSISTENT);
         return tag;
       }
     };
     Lock lock = lockNode.getLock("write", "Lock to find the segment tag by position") ;
     return lock.execute(op, 3, 3000);
   }
+
+  public void deleteTag(String name) throws RegistryException {
+    tagsNode.getChild(name).delete();
+  }
+  
+  public void createTag(Transaction transaction, final SSMTagDescriptor tag) throws RegistryException {
+    if(tag.getName() == null) {
+      throw new RegistryException(ErrorCode.Unknown, "The segment tag name cannot be null");
+    }
+    transaction.createChild(tagsNode, tag.getName(), tag, NodeCreateMode.PERSISTENT);
+  }
+  
+  public void deleteTag(Transaction transaction, final String name) throws RegistryException {
+    transaction.deleteChild(tagsNode, name);
+  }
+
   
   public class CleanReadSegmentByActiveReader implements BatchOperations<List<String>> {
     @Override
