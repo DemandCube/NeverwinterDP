@@ -1,22 +1,30 @@
 Scribengin Quickstart
 =====================
 
-##General Steps To Setup##
+#Contents#
+1. [Overview](#general-steps-to-setup)
+2. [Build NeverwinterDP](#build-neverwinterdp)
+3. [Setup a cluster automatically in Docker](#docker-setup) 
+4. [Launching Scribengin manually](#launching-scribengin-manually)
+
+---
+
+#General Steps To Setup#
 
 1. You need to check out NeverwinterDP code and build
-    * Check out NeverwinterDP code from https://github.com/Nventdata/NeverwinterDP
-    * Build with the gradle command
-    * Build the scribengin release
-2. Setup the scribengin cluster using docker, digitalocean vm or aws vm
-    * Install  java and other requirement on the vm
-    * Update the /etc/hosts so the vm know about each other
-    * Run zookeeper on one vm
-    * Run hadoop master and hadoop workers cluster
-    * Optionally run kafka, elasticsearch...
+    * Check out NeverwinterDP from https://github.com/Nventdata/NeverwinterDP
+    * Build Scribengin with gradle
+2. Setup the scribengin cluster using Docker, Digital Ocean, or any VM provider
+    * Install java and other requirement on the VMs
+    * Update /etc/hosts so the VMs know about each other
+    * Run Zookeeper, Hadoop, and YARN
+    * Optionally run Kafka, Elasticsearch...
 
-##Check Out And Build NeverwinterDP Code##
+---
 
-Checkout The NeverwinterDP code repository
+#Build NeverwinterDP#
+
+Checkout NeverwinterDP 
 
 ```
 git clone https://github.com/Nventdata/NeverwinterDP
@@ -34,46 +42,45 @@ Pull for the latest code
 git pull origin dev/master 
 ```
 
-Build the NeverwinterDP code
+Build and release the NeverwinterDP code
 
 ```
-gradle clean build install -x test
+gradle clean build install release -x test
 ```
 
-Create the release
+You will find the release, binaries, and shell scripts in ```NeverwinterDP/release/build/release/neverwinterdp```
 
-```
-cd release
-gradle release -x test
-```
-You will find the release in NeverwinterDP/release/build/release/neverwinterdp
-
-You need tot set NEVERWINTERDP_HOME environment variable (optional) in order the other cluster script can build and deploy the scribengin automatically
+You need to set the NEVERWINTERDP_HOME environment variable (optional) in order the other cluster script can build and deploy Scribengin automatically
 
 ```
 export NEVERWINTERDP_HOME=/your/path/to/NeverwinterDP
 ```
 
-In case you do not setup the NEVERWINTERDP_HOME variable, you need to give --neverwinterdp-home /path/to/NeverwinterDP option when run the cluster setup script.
 
 
+---
 
-##Docker Setup##
+#Docker Setup#
+This will require access to Nvent's private repos.  Continue on to [Launching Scribengin cluster manually](#launching-scribengin-cluster-manually) if you do not have access. 
+
+The following steps will deploy all the necessary components to run Scribengin locally by using Docker.
 
 ###Prerequisites###
 
-1. Install Ansible
-2. Install Docker
-3. Install Gradle
-4. Make sure the user you are running as has write permissions for /etc/hosts
+1. [Install Ansible](http://docs.ansible.com/ansible/intro_installation.html)
+2. [Install and configure Docker](https://docs.docker.com/engine/installation/)
+3. [Install Gradle](https://docs.gradle.org/current/userguide/installation.html)
+4. Install Java 7 
+5. Install Python 2.7
+6. Make sure the user you are running as has write permissions for /etc/hosts
     * Setup scripts will update your /etc/hosts file, but will not remove any entries that are already there
-    * Setup your SSH config
+7. Setup your SSH config
 
     ```
        echo -e "Host *\n  StrictHostKeyChecking no" >> ~/.ssh/config
     ``` 
     
-     * If you want to work with S3, set up your credentials file in this format    
+8. If you want to work with S3, set up your credentials file in this format    
 
      `````
      user@machine $ cat ~/.aws/credentials
@@ -81,150 +88,140 @@ In case you do not setup the NEVERWINTERDP_HOME variable, you need to give --nev
      aws_access_key_id=XXXXX
      aws_secret_access_key=YYYYYY
      ````` 
- 
 
 ###Launching Scribengin cluster in Docker Using neverwinterdp-deployments###
+1. Clone deployments and tools repo
+        
+        git clone git clone https://<bitbucket_user>@bitbucket.org/nventdata/neverwinterdp-deployments.git
 
-Neverwinterdp team develop various script to build, manage, monitor  the cluster automatically, to checkout neverwinterdp-deployments project 
+2. Set up for neverwinter tools
+        
+        #Run the setup script for tools (only necessary ONCE)
+        sudo ./neverwinterdp-deployments/tools/cluster/setup.sh
 
-```
- git clone git clone https://<bitbucket_user>@bitbucket.org/nventdata/neverwinterdp-deployments.git
-```
+3. Build docker image with scribengin in one step
+        
+        #Build images, launch containers, run ansible
+        ./neverwinterdp-deployments/docker/scribengin/docker.sh  cluster --launch
 
-#####Build docker image with scribengin in one step####
-If you're running on a Mac, run the following command, then follow the instructions on the screen for which environment variables to export
+        #If you decided not to set NEVERWINTERDP_HOME, then you can pass it in manually here
+        ./neverwinterdp-deployments/docker/scribengin/docker.sh  cluster --launch --neverwinterdp-home=/your/path/to/NeverwinterDP
 
-``````
-boot2docker up
-``````
+4. If you wish to DESTROY your cluster (clean images and containers)
+        
+        ./neverwinterdp-deployments/docker/scribengin/docker.sh cluster --clean-containers --clean-image
 
-Build images, launch containers, run ansible
+5. Checking the status of your cluster
+        
 
-``````
- ./neverwinterdp-deployments/docker/scribengin/docker.sh  cluster --launch
+        $> ./tools/statusCommander/statusCommander.py
+        Role           Hostname         IP           ProcessIdentifier       ProcessID    Status
+        -------------  ---------------  -----------  ----------------------  -----------  --------
+        monitoring     monitoring-1     172.17.0.11
+                                                     /opt/kibana/bin/kibana  1910         Running
+        hadoop_master  hadoop-master    172.17.0.2
+                                                     SecondaryNameNode       1261         Running
+                                                     ResourceManager         1376         Running
+                                                     NameNode                1179         Running
+        zookeeper      zookeeper-1      172.17.0.6
+                                                     QuorumPeerMain          622          Running
+        kafka          kafka-3          172.17.0.9
+                                                     Kafka                   686          Running
+                       kafka-2          172.17.0.8
+                                                     Kafka                   684          Running
+                       kafka-1          172.17.0.7
+                                                     Kafka                   684          Running
+        hadoop_worker  hadoop-worker-3  172.17.0.5
+                                                     DataNode                1179         Running
+                                                     NodeManager             1261         Running
+                       hadoop-worker-2  172.17.0.4
+                                                     DataNode                1177         Running
+                                                     NodeManager             1259         Running
+                                                     vm-master-1             3898         Running
+                       hadoop-worker-1  172.17.0.3
+                                                     DataNode                1179         Running
+                                                     NodeManager             1261         Running
+        elasticsearch  elasticsearch-1  172.17.0.10
+                                                     Main                    442          Running
 
- #If you decided not to set NEVERWINTERDP_HOME, then you can pass it in manually here
- ./neverwinterdp-deployments/docker/scribengin/docker.sh  cluster --launch--neverwinterdp-home=/your/path/to/NeverwinterDP
-
-``````
-
-If you wish to DESTROY your cluster (clean images and containers)
-
-``````
-./neverwinterdp-deployments/docker/scribengin/docker.sh cluster --clean-containers --clean-image
-
-``````
-
-###Checking the status of your cluster
-```
-    #Run the setup script for clusterCommander once
-    $> sudo ./neverwinterdp-deployments/tools/cluster/setup.sh
-    
-    #Then run
-    $> ./neverwinterdp-deployments/tools/cluster/clusterCommander.py status
-    Role           Hostname         ProcessIdentifier          ProcessID    HomeDir                             Status
-    -------------  ---------------  -------------------------  -----------  ----------------------------------  --------
-    elasticsearch  elasticsearch-1
-                                    com.neverwinterdp.es.Main  216          /opt/elasticsearch/                 Running
-    generic        monitoring-1
-                                    /opt/kibana/bin/kibana     205          /opt/kibana                         Running
-    hadoop-master  hadoop-master
-                                    NameNode                   470          /opt/hadoop                         Running
-                                    SecondaryNameNode          565          /opt/hadoop                         Running
-                                    SecondaryNameNode          565          /opt/hadoop                         Running
-                                    ResourceManager            640          /opt/hadoop                         Running
-    hadoop-worker  hadoop-worker-3
-                                    DataNode                   450          /opt/hadoop                         Running
-                                    NodeManager                553          /opt/hadoop                         Running
-                                    vm-master-1                2576         /opt/neverwinterdp/scribengin/bin/  Running
-    hadoop-worker  hadoop-worker-2
-                                    DataNode                   437          /opt/hadoop                         Running
-                                    NodeManager                540          /opt/hadoop                         Running
-                                    vm-scribengin-master-2     2362         /opt/neverwinterdp/scribengin/bin/  Running
-    hadoop-worker  hadoop-worker-1
-                                    DataNode                   437          /opt/hadoop                         Running
-                                    NodeManager                540          /opt/hadoop                         Running
-                                    vm-scribengin-master-1     2362         /opt/neverwinterdp/scribengin/bin/  Running
-    kafka          kafka-3
-                                    Kafka                      316          /opt/kafka                          Running
-    kafka          kafka-2
-                                    Kafka                      316          /opt/kafka                          Running
-    kafka          kafka-1
-                                    Kafka                      316          /opt/kafka                          Running
-    zookeeper      zookeeper-1
-                                    QuorumPeerMain             285          /opt/zookeeper                      Running
-```
 
 ###Navigate to Kibana to view real time metrics###
 
 ```
-  Point your browser to http://monitoring-1:5601
-  You can change the interval at which Kibana refreshes itself in the top panel, or manually refresh the page
+Point your browser to http://monitoring-1:5601
+You can change the interval at which Kibana refreshes itself in the top panel, or manually refresh the page
 ```
 
+###SSH onto a cluster node###
+```
+#neverwinterdp user has sudo permissions
+ssh neverwinterdp@[node-name]
+```
 
 ###Launching a dataflow from a preconfigured test###
 
 ```
-  #There are lots of tests under the integration-tests folder apart from these ones listed below
-  #The kafka test is a simple, quick test 
-  ./neverwinterdp-deployments/tests/scribengin/integration-tests/Scribengin_Integration_Kafka.sh
+#The kafka test is a simple, quick test 
+./tests/scribengin/tracking/integration/kafka-run-test.sh
     
-  #The Log Sample test is a more complicated, longer running test
-  ./neverwinterdp-deployments/tests/scribengin/integration-tests/Log_Sample_Chain.sh
+#The kafka stability test is a more complicated, longer running test
+./tests/scribengin/tracking/stability/stability-kafka-test.sh
 ```
 
+###Getting status of a running dataflow
+```
+./scribengin/bin/shell.sh plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor \
+   --dataflow-id [DATAFLOW NAME] \
+   --report-path /applications/tracking-sample/reports \
+   --max-runtime 0 \
+   --print-period 15000 \
+   --show-history-workers
+```
 
+---
 
-###Launching Scribengin cluster manually###
+#Launching Scribengin manually#
 
-In order to launch the dataflow, we expect that you read the document how to build the cluster with the docker script or digitalocean script. Basically you will need those server install and run:
+###Prerequisite services to configure and launch###
 
 1. Zookeeper
-2. Kafka
-3. Hadoop4. 
+2. Hadoop4
+3. YARN
 4. Elasticsearch
-5. Build the NeverwinterDP release or download a NeverwinterDP release
-6. Run vm-master and scribengin on top of hadoop yarn as an yarn application
+5. Kafka
 
-Suppose that you already have zookeeper, hadoop, kafka and elasticsearch setup correctly
 
-To launch the vm-master and scribengin master
+###To launch###
 
-````
-  #Suppose you configure your cluster with zookeeper server with the name zookeeper-1 and hadoop master with 
-  #the name hadoop-master. If not you have to edit the shell.sh script according to your server name
-  #APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
+1.  Follow [instructions to build and release Scribengin](#check-out-and-build-neverwinterdp-code)
+2.  Launch the VM Master in YARN
+        
+        #After building, you'll need to edit the file:
+        #NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh
+            #-Dshell.zk-connect    - [hostname]:[port] of your Zookeeper server
+            #-Dshell.hadoop-master - [hostname] of your master Hadoop node
+        APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
 
-    
-  #From release/neverwinterdp directory
-  cd  path/release/neverwinterdp
-    
-  #To run the vm-master on top of hadoop yarn
-  ./scribengin/bin/shell.sh vm start
+          
+        #From release/neverwinterdp directory
+        cd  path/release/neverwinterdp
+          
+        #To run the vm-master on top of hadoop yarn
+        ./scribengin/bin/shell.sh vm start
+        
+        
+        #To check the scribengin status
+        ./scribengin/bin/shell.sh vm info
+
+3.  Use the Scribengin API to upload your Dataflow.  
+
+
+
+
+
+
+
+
+
+
   
-  #To run the scribengin-master
-  ./scribengin/bin/shell.sh scribengin start
-  
-  #To check the scribengin status
-  ./scribengin/bin/shell.sh scribengin info
-  
-  
-````
-
-To launch the log-sample splitter dataflow
-
-````
-  #Suppose you configure your cluster with zookeeper server with the name zookeeper-1 and hadoop master with 
-  #the name hadoop-master. If not you have to edit the run-splitter.sh script according to your server name
-  #APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
-
-  #From release/neverwinterdp directory
-  cd  path/release/neverwinterdp
-    
-  #To run the vm-master on top of hadoop yarn
-  ./dataflow/log-sample/bin/run-splitter.sh
-  
-````
-
-See dataflow-development-howto.md for more information about the log sample dataflow and more detail instructions
