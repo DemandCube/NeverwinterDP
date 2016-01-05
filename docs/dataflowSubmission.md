@@ -24,7 +24,7 @@ To be able to submit your dataflow to Scribengin, first you'll need to :
 
 The dataflow we'll be building in this example will look like this.  We'll be reading in from kafka, storing the data into 3 split topics for buffering, then moving all the data back into Kafka under a new topic.
 
-![API Example](API_Example.png)
+![API Example](images/API_Example.png)
 
 ---
 
