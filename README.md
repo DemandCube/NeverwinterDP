@@ -1,6 +1,18 @@
 
 Scribengin
 ==========
+
+#Contents#
+1. [Overview](#overview)
+2. [The Problem](#the-problem)
+2. [Definitions](#definitions)
+3. [Technologies Used](#technologies-used)
+4. [Design](#design)
+5. [Developer Setup](#developer-setup)
+6. [Releasing Code](#release)
+7. [Developer Notes on Scribengin modules](#developer-notes-on-scribengin-modules)
+
+####Overview
 Pronounced "Scribe Engine" 
 
 Scribengin is a highly reliable (HA) and performant event/logging transport that registers data under defined schemas in a variety of end systems.  Scribengin enables you to have multiple flows of data from a source to a sink. Scribengin will tolerate system failures of individual nodes and will do a complete recovery in the case of complete system failure.
@@ -35,11 +47,16 @@ The core problem is how to reliably and at scale have a distributed application 
 
 
 ####Design
-![Scribengin Cluster Design](/docs/images/ScribenginCluster.png "Scribengin Cluster Design")
+![Scribengin Cluster Design](docs/images/ScribenginStructureOverviewV2.png "Scribengin Cluster Design")
+
+####API Guide
+[QuickStart Guide](docs/scribengin-cluster-setup-quickstart.md)
 
 
-####Dataflow Submission
-![Scribengin Dataflow Submission Design](/docs/images/dataflowsubmission.png "Scribengin Dataflow Submission Design")
+####API and Dataflow Submission
+[API and Dataflow Submission Guide](docs/dataflowSubmission.md)
+
+
 
 
 ####Developer Setup
@@ -54,12 +71,15 @@ cd NeverwinterDP
 
 ####Release
 ```
-cd NeverwinterDP/release
+cd NeverwinterDP
 ../gradlew clean build release -x test
+
+#Code and jars will be released to NeverwinterDP/release/build/release/
 ```
 
 
 ####Developer Notes on Scribengin modules
+- [Check the code organization how-to for more info](docs/code-organization-howto.md)
 - scribengin.core
   - Core scribengin code
   - Scribe, Dataflows, VM Master, Dataflow Masters
