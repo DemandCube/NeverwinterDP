@@ -28,6 +28,7 @@ Reads and writes data from sources/sinks:
 The core problem is how to reliably and at scale have a distributed application write data to multiple destination data systems.  This requires the ability to todo data mapping, partitioning with optional filtering to the destination system.
 
 ####The Scribengin Solution:
+A distributed, highly reliable ETL system that can handle multiple sources and sinks
 ![Scribengin](docs/images/ScribeIntro.png "Scribengin")
 
 ####Definitions
@@ -50,7 +51,7 @@ The core problem is how to reliably and at scale have a distributed application 
 ####Design
 ![Scribengin Cluster Design](docs/images/ScribenginStructureOverviewV2.png "Scribengin Cluster Design")
 
-####API Guide
+####Quickstart Guide
 [QuickStart Guide](docs/scribengin-cluster-setup-quickstart.md)
 
 
