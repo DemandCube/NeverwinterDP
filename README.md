@@ -71,6 +71,11 @@ cd NeverwinterDP
 #Now you can import the project into Eclipse
 ```
 
+####Developer Info
+- [How the code is organized](code-organization-howto.md)
+- [Code Conventions](code-convention-howto.md)
+
+
 ####Release
 ```
 cd NeverwinterDP
