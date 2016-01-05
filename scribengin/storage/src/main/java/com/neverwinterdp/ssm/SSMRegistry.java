@@ -432,8 +432,8 @@ public class SSMRegistry {
           SSMReaderDescriptor readerDescriptor = readersActiveNode.getChild(reader).getDataAs(SSMReaderDescriptor.class);
           readerMinReadSegment = readerDescriptor.getLastReadSegmentId();
           //Since the reader has been completely read the segment, move to the next segment
-          int  readerMinReadSegmentId = SegmentDescriptor.extractId(readerMinReadSegment);
-          readerMinReadSegment = SegmentDescriptor.toSegmentId(readerMinReadSegmentId + 1) ;
+          //int  readerMinReadSegmentId = SegmentDescriptor.extractId(readerMinReadSegment);
+          //readerMinReadSegment = SegmentDescriptor.toSegmentId(readerMinReadSegmentId + 1) ;
         } else {
           Collections.sort(readSegments);
           readerMinReadSegment = readSegments.get(0);
@@ -455,8 +455,8 @@ public class SSMRegistry {
         SSMReaderDescriptor readerDescriptor = readersHistoryNode.getChild(reader).getDataAs(SSMReaderDescriptor.class);
         readerMinReadSegment = readerDescriptor.getLastReadSegmentId();
         //Since the reader has been completely read the segment, move to the next segment
-        int  readerMinReadSegmentId = SegmentDescriptor.extractId(readerMinReadSegment);
-        readerMinReadSegment = SegmentDescriptor.toSegmentId(readerMinReadSegmentId + 1) ;
+        //int  readerMinReadSegmentId = SegmentDescriptor.extractId(readerMinReadSegment);
+        //readerMinReadSegment = SegmentDescriptor.toSegmentId(readerMinReadSegmentId + 1) ;
         //System.err.println("    history readerMinReadSegment: " + readerMinReadSegment);
         if(minReadSegmentId == null) minReadSegmentId = readerMinReadSegment;
         else if(minReadSegmentId.compareTo(readerMinReadSegment) > 0) minReadSegmentId = readerMinReadSegment;
