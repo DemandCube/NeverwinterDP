@@ -20,6 +20,7 @@ import com.neverwinterdp.ssm.SSMConsistencyVerifier;
 import com.neverwinterdp.ssm.SSMReader;
 import com.neverwinterdp.ssm.SSMWriter;
 import com.neverwinterdp.ssm.SegmentConsistency;
+import com.neverwinterdp.ssm.SegmentTag;
 import com.neverwinterdp.ssm.hdfs.HdfsSSM;
 import com.neverwinterdp.ssm.test.TrackingRecordGenerator;
 import com.neverwinterdp.ssm.test.TrackingRecordValidator;
@@ -73,6 +74,9 @@ public class HdfsSSMUnitTest {
     System.out.println(scVerifier.getSegmentConsistencyTextReport());
     Assert.assertEquals(SegmentConsistency.Consistency.GOOD, scVerifier.getMinCommitConsistency());
     storage.getRegistry().manageSegments();
+    SegmentTag  posTag = storage.getRegistry().findSegmentTagByRecordPosition(500);
+    posTag.setName("tag-500");
+    storage.getRegistry().createSegmentTag(posTag);
     storage.dump();
     
     SSMReader reader = storage.getReader("reader");

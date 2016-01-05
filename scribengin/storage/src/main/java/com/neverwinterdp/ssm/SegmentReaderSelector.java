@@ -83,10 +83,11 @@ public class SegmentReaderSelector {
     while(i.hasNext()) {
       SegmentReader reader = i.next();
       reader.completeCommit(transaction);
-      System.err.println("SegmentReaderSelector: completeCommit() segment = " + reader.getSegmentDescriptor().getSegmentId());
+      //System.err.println("SegmentReaderSelector: completeCommit() segment = " + reader.getSegmentDescriptor().getSegmentId());
       if(reader.isComplete()) {
+        reader.close();
         i.remove();
-        System.err.println("  remove segment reader = " + reader.getSegmentDescriptor().getSegmentId());
+        //System.err.println("  remove segment reader = " + reader.getSegmentDescriptor().getSegmentId());
       }
     }
   }
