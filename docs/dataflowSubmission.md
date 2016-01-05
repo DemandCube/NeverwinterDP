@@ -3,6 +3,7 @@ API Guide for Dataflow Submission
 
 #Contents#
 1. [Overview](#overview)
+2. [Terminology](#terminology)
 2. [Sample dataflow](#sample-dataflow)
 3. [Sample Code](#sample-code)
 
@@ -10,7 +11,7 @@ API Guide for Dataflow Submission
 
 #Overview#
 
-Use the Scribengin API to submit your dataflow to a running instance of Scribengin.
+In this guide we'll walk through how to use the Scribengin API to build a dataflow.  This is an arbitrary dataflow used to showcase the capabilities of the Scribengin system and API.  We'll use the Scribengin API to submit your dataflow to a running instance of Scribengin.
 
 To be able to submit your dataflow to Scribengin, first you'll need to :
 
@@ -18,6 +19,14 @@ To be able to submit your dataflow to Scribengin, first you'll need to :
 2. Have that dataflow jar somewhere on your system locally
 3. Start a Scribengin Cluster
 4. Write a dataflow submission application like below
+
+---
+
+#Terminology#
+
+DataSet - Input/Output sources and sinks
+
+Operator - Reads in from a dataset or another operator, and outputs to an operator or dataset.  Can perform filtering, transformation, or enhancement of data passing through
 
 ---
 #Sample Dataflow#
