@@ -133,7 +133,7 @@ The project contains a single class VMSampleApp which prints out a sample hello 
 Scribengin moves data from any source to any sink in a fast and reliable manner.
 
 ##Scribengin Design##
-![Scribengin Internal Diagram](images/ScribenginCluster.png "Scribengin Internal Diagram")
+![Scribengin Internal Diagram](images/ScribenginStructureOverview.png "Scribengin Internal Diagram")
 
 ###core###
 
