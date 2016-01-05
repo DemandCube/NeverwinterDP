@@ -35,7 +35,7 @@ The core problem is how to reliably and at scale have a distributed application 
 
 
 ####Design
-![Scribengin Cluster Design](/docs/imagesScribenginCluster.png "Scribengin Cluster Design")
+![Scribengin Cluster Design](/docs/images/ScribenginCluster.png "Scribengin Cluster Design")
 
 
 ####Dataflow Submission
