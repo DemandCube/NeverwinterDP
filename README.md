@@ -27,7 +27,8 @@ Reads and writes data from sources/sinks:
 ####The Problem
 The core problem is how to reliably and at scale have a distributed application write data to multiple destination data systems.  This requires the ability to todo data mapping, partitioning with optional filtering to the destination system.
 
-
+####The Scribengin Solution:
+![Scribengin](docs/images/ScribeIntro.png "Scribengin")
 
 ####Definitions
 
