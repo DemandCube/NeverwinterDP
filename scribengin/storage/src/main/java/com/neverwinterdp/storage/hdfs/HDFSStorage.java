@@ -20,6 +20,8 @@ public class HDFSStorage extends Storage {
     storageRegistry = new HDFSStorageRegistry(registry, storageConfig);
   }
 
+  public HDFSStorageRegistry getHDFSStorageRegistry() { return storageRegistry; }
+  
   @Override
   public void refresh() throws Exception {
   }

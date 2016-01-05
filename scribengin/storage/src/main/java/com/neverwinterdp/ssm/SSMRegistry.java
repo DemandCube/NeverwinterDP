@@ -188,7 +188,7 @@ public class SSMRegistry {
   }
   
   public List<String> cleanReadSegmentByActiveReader() throws RegistryException {
-    CleanReadSegmentByActiveReader op = new CleanReadSegmentByActiveReader() ;
+    CleanReadSegmentByReaderOperation op = new CleanReadSegmentByReaderOperation() ;
     Lock lock = lockNode.getLock("write", "Lock to remove the segments that are already read by the active reader") ;
     return lock.execute(op, 3, 3000);
   }
@@ -310,8 +310,8 @@ public class SSMRegistry {
     transaction.commit();
   }
   
-  public void manageSegments() throws RegistryException {
-    ManageSegments op = new ManageSegments() ;
+  public void doManagement() throws RegistryException {
+    ManageSegmentOperation op = new ManageSegmentOperation() ;
     Lock lock = lockNode.getLock("write", "Lock to manage the segments") ;
     lock.execute(op, 3, 3000);
   }
@@ -410,7 +410,7 @@ public class SSMRegistry {
   }
 
   
-  public class CleanReadSegmentByActiveReader implements BatchOperations<List<String>> {
+  public class CleanReadSegmentByReaderOperation implements BatchOperations<List<String>> {
     @Override
     public List<String> execute(Registry registry) throws RegistryException {
       //System.err.println("cleanReadSegmentByActiveReader(): " + registryPath);
@@ -481,7 +481,7 @@ public class SSMRegistry {
     }
   }
   
-  public class ManageSegments implements BatchOperations<Boolean> {
+  public class ManageSegmentOperation implements BatchOperations<Boolean> {
     @Override
     public Boolean execute(Registry registry) throws RegistryException {
       SegmentsDescriptor segsDescriptor = segmentsNode.getDataAs(SegmentsDescriptor.class);

@@ -73,7 +73,7 @@ public class HdfsSSMUnitTest {
     System.out.println(scVerifier.getSegmentDescriptorTextReport());
     System.out.println(scVerifier.getSegmentConsistencyTextReport());
     Assert.assertEquals(SegmentConsistency.Consistency.GOOD, scVerifier.getMinCommitConsistency());
-    storage.getRegistry().manageSegments();
+    storage.getRegistry().doManagement();
     SSMTagDescriptor  posTag = storage.getRegistry().findTagByRecordPosition(500);
     posTag.setName("tag-500");
     storage.getRegistry().createTag(posTag);

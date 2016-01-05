@@ -96,6 +96,14 @@ public class HDFSStorageRegistry {
     return ssmRegistry;
   }
   
+  public void doManagement() throws RegistryException {
+    int numOfPartitions = storageConfig.getPartitionStream();
+    for(int i = 0; i < numOfPartitions; i++) {
+      SSMRegistry ssmRegistry = getPartitionRegistry(i);
+      ssmRegistry.doManagement();
+    }
+  }
+  
   public List<String> getTags() throws RegistryException {
     return tagsNode.getChildren();
   }

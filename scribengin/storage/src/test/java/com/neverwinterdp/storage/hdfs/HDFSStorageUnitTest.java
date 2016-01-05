@@ -11,13 +11,13 @@ import org.junit.Test;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
-import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.hdfs.sink.HDFSSink;
 import com.neverwinterdp.storage.hdfs.sink.HDFSSinkPartitionStream;
 import com.neverwinterdp.storage.hdfs.sink.HDFSSinkPartitionStreamWriter;
 import com.neverwinterdp.storage.hdfs.source.HDFSSource;
 import com.neverwinterdp.storage.source.SourcePartitionStream;
 import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.zookeeper.tool.server.EmbededZKServerSet;
@@ -82,5 +82,10 @@ public class HDFSStorageUnitTest {
       }
       System.out.println(reader.getName() + ": " + count);
     }
+    
+    HDFSStorageRegistry hdfsStorageRegistry = storage.getHDFSStorageRegistry();
+    hdfsStorageRegistry.doManagement();
+    HDFSStorageTag tag100 = hdfsStorageRegistry.createTagByPosition("tag-100", "Tag at pos 100", 100);
+    System.err.println(JSONSerializer.INSTANCE.toString(tag100));
   }
 }
