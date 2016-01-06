@@ -130,7 +130,7 @@ The following steps will deploy all the necessary components to run Scribengin t
         
         ./neverwinterdp-deployments/tools/serviceCommander/serviceCommander.py \ 
           --cluster --install --configure --clean --start \
-           --profile-type stability \
+          --profile-type stability \
           --inventory-file [path to your inventory]
 
 4. Now you're ready to launch your dataflow!  Check the quickstart guide for instructions on that
