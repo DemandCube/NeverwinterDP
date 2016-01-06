@@ -5,15 +5,15 @@ import java.util.List;
 
 public class MessageTracking {
   private long                     timestamp ;
-  private int                      chunkId;
+  private int                      windowId;
   private int                      trackingId;
   private List<MessageTrackingLog> logs;
 
   public MessageTracking() {}
   
-  public MessageTracking(int chunkId, int trackingId) {
+  public MessageTracking(int windowId, int trackingId) {
     this.timestamp  = System.currentTimeMillis();
-    this.chunkId    = chunkId;
+    this.windowId    = windowId;
     this.trackingId = trackingId;
     this.logs       = new ArrayList<>();
   }
@@ -21,8 +21,8 @@ public class MessageTracking {
   public long getTimestamp() { return timestamp; }
   public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 
-  public int  getChunkId() { return chunkId; }
-  public void setChunkId(int chunkId) { this.chunkId = chunkId; }
+  public int  getWindowId() { return windowId; }
+  public void setWindowId(int chunkId) { this.windowId = chunkId; }
 
   public int  getTrackingId() { return trackingId; }
   public void setTrackingId(int trackingId) { this.trackingId = trackingId; }

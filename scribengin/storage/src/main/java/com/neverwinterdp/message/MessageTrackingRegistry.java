@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.neverwinterdp.message.WindowId.Tracker;
 import com.neverwinterdp.registry.BatchOperations;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
@@ -16,6 +17,7 @@ import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.lock.Lock;
 
 public class MessageTrackingRegistry {
+  
   final static public String FINISHED  = "finished";
   final static public String PROGRESS  = "progress";
   
@@ -26,10 +28,12 @@ public class MessageTrackingRegistry {
   
   private Node               trackingNode;
   private Node               locksNode;
-  private SequenceIdTracker  messageChunkIdTracker;
+
+  private Node               windowIdNode;
+  private SequenceIdTracker  windowIdTracker;
   
-  private HashSet<String>      trackingNames = new HashSet<>();
-  private ProgressChunkTracker progressChunkTracker = new ProgressChunkTracker();
+  private HashSet<String>      trackingNames           = new HashSet<>();
+  private ProgressWindowTracker progressWindowIdTracker = new ProgressWindowTracker();
   
   public MessageTrackingRegistry(Registry registry, String registryPath) throws RegistryException {
     this.registry         = registry;
@@ -38,7 +42,9 @@ public class MessageTrackingRegistry {
     rootNode     = registry.get(registryPath);
     trackingNode = rootNode.getChild("tracking");
     locksNode    = rootNode.getChild("locks");
-    messageChunkIdTracker = new SequenceIdTracker(registry, rootNode.getPath() + "/chunk-id-tracker", false);
+    
+    windowIdNode    = rootNode.getChild("window-id");
+    windowIdTracker= new SequenceIdTracker(registry, windowIdNode.getPath() + "/tracker", false);
   }
   
   public void initRegistry() throws RegistryException {
@@ -51,37 +57,53 @@ public class MessageTrackingRegistry {
     transaction.create(rootNode, null, NodeCreateMode.PERSISTENT);
     transaction.create(trackingNode, null, NodeCreateMode.PERSISTENT);
     transaction.create(locksNode, null, NodeCreateMode.PERSISTENT);
-    messageChunkIdTracker.initRegistry(transaction);
+    
+    transaction.create(windowIdNode, new WindowId(), NodeCreateMode.PERSISTENT);
+    windowIdTracker.initRegistry(transaction);
   }
   
-  public int nextMessageChunkId() throws RegistryException { 
-    int chunkId = messageChunkIdTracker.nextInt(); 
-    return chunkId;
+  public int nextWindowId() throws RegistryException { 
+    return windowIdTracker.nextInt();
   }
   
-  public MessageTrackingChunkStat getProgress(final String name, final int chunkId) throws RegistryException {
-    Node reportNode = trackingNode.getChild(name);
+  public int nextWindowId(String checkCompleteWithTracker, int windowIdLimit) throws RegistryException { 
+    WindowId windowId = windowIdNode.getDataAs(WindowId.class);
+    int completeWindowCount = 0;
+    Tracker tracker = windowId.getTracker(checkCompleteWithTracker, false);
+    if(tracker != null) {
+      completeWindowCount = tracker.getCompleteWindowCount();
+    }
+    
+    int currentWindowId = windowIdTracker.currentInt();
+    if(currentWindowId - completeWindowCount < windowIdLimit)  {
+      return windowIdTracker.nextInt();
+    } 
+    return -1;
+  }
+  
+  public WindowMessageTrackingStat getProgress(final String name, final int windowId) throws RegistryException {
+    Node reportNode   = trackingNode.getChild(name);
     Node progressNode = reportNode.getChild(PROGRESS);
-    Node chunkNode = progressNode.getChild(MessageTrackingChunkStat.toChunkIdName(chunkId));
-    MessageTrackingChunkStat mergeChunk = chunkNode.getDataAs(MessageTrackingChunkStat.class);
-    return mergeChunk;
+    Node windowNode    = progressNode.getChild(WindowMessageTrackingStat.toWindowIdName(windowId));
+    WindowMessageTrackingStat mergeWindow = windowNode.getDataAs(WindowMessageTrackingStat.class);
+    return mergeWindow;
   }
   
-  public MessageTrackingChunkStat getFinished(final String name, final int chunkId) throws RegistryException {
+  public WindowMessageTrackingStat getFinished(final String name, final int windowId) throws RegistryException {
     Node reportNode   = trackingNode.getChild(name);
     Node finishedNode = reportNode.getChild(FINISHED);
-    Node chunkNode    = finishedNode.getChild(MessageTrackingChunkStat.toChunkIdName(chunkId));
-    MessageTrackingChunkStat mergeChunk = chunkNode.getDataAs(MessageTrackingChunkStat.class);
-    return mergeChunk;
+    Node windowNode    = finishedNode.getChild(WindowMessageTrackingStat.toWindowIdName(windowId));
+    WindowMessageTrackingStat mergeWindow = windowNode.getDataAs(WindowMessageTrackingStat.class);
+    return mergeWindow;
   }
   
-  public void saveProgress(final MessageTrackingChunkStat chunk) throws RegistryException {
+  public void saveProgress(final WindowMessageTrackingStat windowStat) throws RegistryException {
     //check and create tracking structure according to the save point name
-    if(!trackingNames.contains(chunk.getName())) {
+    if(!trackingNames.contains(windowStat.getName())) {
       BatchOperations<Boolean> op = new BatchOperations<Boolean>() {
         @Override
         public Boolean execute(Registry registry) throws RegistryException {
-          Node reportNode = trackingNode.getChild(chunk.getName());
+          Node reportNode = trackingNode.getChild(windowStat.getName());
           if(reportNode.exists()) return true;
           
           Transaction transaction = registry.getTransaction();
@@ -97,37 +119,37 @@ public class MessageTrackingRegistry {
       };
       Lock lock = locksNode.getLock("write", "Lock to Create Report structure") ;
       lock.execute(op, 3, 3000);
-      trackingNames.add(chunk.getName());
+      trackingNames.add(windowStat.getName());
     }
     
-    Node reportNode      = trackingNode.getChild(chunk.getName());
+    Node reportNode      = trackingNode.getChild(windowStat.getName());
     Node progressNode    = reportNode.getChild(PROGRESS);
-    String idName        = chunk.toChunkIdName();
-    final Node chunkNode = progressNode.getChild(idName);
+    String idName        = windowStat.toWindowIdName();
+    final Node windowNode = progressNode.getChild(idName);
     
-    if(!progressChunkTracker.isCreated(chunk.getName(), chunk.getChunkId())) {
+    if(!progressWindowIdTracker.isCreated(windowStat.getName(), windowStat.getWindowId())) {
       BatchOperations<Boolean> saveProgressOp = new BatchOperations<Boolean>() {
         @Override
         public Boolean execute(Registry registry) throws RegistryException {
           Transaction transaction = registry.getTransaction();
-          if(!chunkNode.exists()) {
-            transaction.create(chunkNode, chunk, NodeCreateMode.PERSISTENT);
+          if(!windowNode.exists()) {
+            transaction.create(windowNode, windowStat, NodeCreateMode.PERSISTENT);
           } else {
-            transaction.createChild(chunkNode, "", chunk, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
+            transaction.createChild(windowNode, "", windowStat, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
           }
           transaction.commit();
           return true;
         }
       };
-      Lock lock = locksNode.getLock("write", "Lock to create the chunk progress for chunk name = " + chunk.getChunkSize() + ", chunk id = " + chunk.getChunkId()) ;
+      Lock lock = locksNode.getLock("write", "Lock to create the window progress for window size = " + windowStat.getWindowSize() + ", window id = " + windowStat.getWindowId()) ;
       lock.execute(saveProgressOp, 3, 3000);
-      progressChunkTracker.create(chunk.getName(), chunk.getChunkId());
+      progressWindowIdTracker.create(windowStat.getName(), windowStat.getWindowId());
     } else {
       BatchOperations<Boolean> saveProgressOp = new BatchOperations<Boolean>() {
         @Override
         public Boolean execute(Registry registry) throws RegistryException {
           Transaction transaction = registry.getTransaction();
-          transaction.createChild(chunkNode, "", chunk, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
+          transaction.createChild(windowNode, "", windowStat, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
           transaction.commit();
           return true;
         }
@@ -136,25 +158,25 @@ public class MessageTrackingRegistry {
     }
   }
   
-  public MessageTrackingChunkStat mergeProgress(final String name, final int chunkId) throws RegistryException {
-    final String idName  = MessageTrackingChunkStat.toChunkIdName(chunkId);
+  public WindowMessageTrackingStat mergeProgress(final String name, final int windowId) throws RegistryException {
+    final String idName  = WindowMessageTrackingStat.toWindowIdName(windowId);
     return mergeProgress(name, idName);
   }
   
-  public MessageTrackingChunkStat mergeProgress(final String name, final String idName) throws RegistryException {
-    BatchOperations<MessageTrackingChunkStat> op = new BatchOperations<MessageTrackingChunkStat>() {
+  public WindowMessageTrackingStat mergeProgress(final String name, final String idName) throws RegistryException {
+    BatchOperations<WindowMessageTrackingStat> op = new BatchOperations<WindowMessageTrackingStat>() {
       @Override
-      public MessageTrackingChunkStat execute(Registry registry) throws RegistryException {
+      public WindowMessageTrackingStat execute(Registry registry) throws RegistryException {
         Node   reportNode   = trackingNode.getChild(name);
         Node   progressNode = reportNode.getChild(PROGRESS);
         
         Node   progressChunkNode = progressNode.getChild(idName);
-        MessageTrackingChunkStat mergeChunk = progressChunkNode.getDataAs(MessageTrackingChunkStat.class);
+        WindowMessageTrackingStat mergeChunk = progressChunkNode.getDataAs(WindowMessageTrackingStat.class);
         List<String> progressUpdates = progressChunkNode.getChildren();
         if(progressUpdates.size() > 0) {
           for(int i = 0; i < progressUpdates.size(); i++) {
-            Node chunkUpdateNode = progressChunkNode.getChild(progressUpdates.get(i));
-            MessageTrackingChunkStat updateChunk = chunkUpdateNode.getDataAs(MessageTrackingChunkStat.class);
+            Node windowUpdateNode = progressChunkNode.getChild(progressUpdates.get(i));
+            WindowMessageTrackingStat updateChunk = windowUpdateNode.getDataAs(WindowMessageTrackingStat.class);
             mergeChunk.merge(updateChunk);
           }
         } else {
@@ -186,61 +208,66 @@ public class MessageTrackingRegistry {
     Node   reportNode   = trackingNode.getChild(name);
     Node   progressNode = reportNode.getChild(PROGRESS);
     if(!progressNode.exists()) return;
-    List<String> progressChunks = progressNode.getChildren();
-    for(int i = 0 ; i < progressChunks.size(); i++) {
-      String progressChunk = progressChunks.get(i);
+    List<String> progressWindows = progressNode.getChildren();
+    for(int i = 0 ; i < progressWindows.size(); i++) {
+      String progressChunk = progressWindows.get(i);
       mergeProgress(name, progressChunk);
     }
   }
 
-  public MessageTrackingReporter getMessageTrackingReporter(String name) throws RegistryException {
-    MessageTrackingReporter reporter = new MessageTrackingReporter(name);
+  public MessageTrackingReport getMessageTrackingReporter(String name) throws RegistryException {
+    MessageTrackingReport reporter = new MessageTrackingReport(name);
     Node reportNode = trackingNode.getChild(name);
     Node finishedNode = reportNode.getChild(FINISHED);
-    MessageTrackingReporter finishedReporter = null; 
-    if(finishedNode.exists()) finishedReporter = finishedNode.getDataAs(MessageTrackingReporter.class);
-    if(finishedReporter == null) finishedReporter = new  MessageTrackingReporter(name);
-    MessageTrackingReporter progressReporter = mergeProgressMessageTrackingChunkStat(name);
-    reporter.setFinishedAggregateChunkReports(finishedReporter.getFinishedAggregateChunkReports());
-    reporter.setProgressAggregateChunkReports(progressReporter.getProgressAggregateChunkReports());
+    MessageTrackingReport finishedReporter = null; 
+    if(finishedNode.exists()) finishedReporter = finishedNode.getDataAs(MessageTrackingReport.class);
+    if(finishedReporter == null) finishedReporter = new  MessageTrackingReport(name);
+    MessageTrackingReport progressReporter = getProgressReport(name);
+    reporter.setFinishedWindowStats(finishedReporter.getFinishedWindowStats());
+    reporter.setProgressWindowStats(progressReporter.getProgressWindowStats());
     return reporter;
   }
   
-  public MessageTrackingReporter mergeMessageTrackingLogChunk(String name) throws RegistryException {
-    MessageTrackingReporter reporter = new MessageTrackingReporter(name);
-    MessageTrackingReporter progressReporter = mergeProgressMessageTrackingChunkStat(name);
-    MessageTrackingReporter finishedReporter = mergeFinishedMessageTrackingLogChunk(name);
-    reporter.setFinishedAggregateChunkReports(finishedReporter.getFinishedAggregateChunkReports());
-    reporter.setProgressAggregateChunkReports(progressReporter.getProgressAggregateChunkReports());
-    return reporter;
+  public MessageTrackingReport mergeReport(String name) throws RegistryException {
+    MessageTrackingReport report = new MessageTrackingReport(name);
+    MessageTrackingReport progressReport = getProgressReport(name);
+    MessageTrackingReport finishedReport = mergeFinishedReport(name);
+    report.setFinishedWindowStats(finishedReport.getFinishedWindowStats());
+    report.setProgressWindowStats(progressReport.getProgressWindowStats());
+    return report;
   }
   
-  public MessageTrackingReporter mergeFinishedMessageTrackingLogChunk(String name) throws RegistryException {
+  public MessageTrackingReport mergeFinishedReport(final String name) throws RegistryException {
     final Node reportNode = trackingNode.getChild(name);
     final Node finishedNode = reportNode.getChild(FINISHED);
-    if(!finishedNode.exists()) return new  MessageTrackingReporter(name);
+    if(!finishedNode.exists()) return new  MessageTrackingReport(name);
 
-    MessageTrackingReporter reporter = finishedNode.getDataAs(MessageTrackingReporter.class);
-    if(reporter == null) reporter = new  MessageTrackingReporter(name);
+    MessageTrackingReport reporter = finishedNode.getDataAs(MessageTrackingReport.class);
+    if(reporter == null) reporter = new  MessageTrackingReport(name);
     
-    final List<String> finishedChunks = finishedNode.getChildren();
-    Collections.sort(finishedChunks);
-    for(int i= 0; i < finishedChunks.size(); i++) {
-      Node chunkNode = finishedNode.getChild(finishedChunks.get(i));
-      MessageTrackingChunkStat chunk = chunkNode.getDataAs( MessageTrackingChunkStat.class);
-      reporter.mergeFinished(chunk);
+    final List<String> finishedWindows = finishedNode.getChildren();
+    Collections.sort(finishedWindows);
+    for(int i= 0; i < finishedWindows.size(); i++) {
+      Node windowNode = finishedNode.getChild(finishedWindows.get(i));
+      WindowMessageTrackingStat windowStat = windowNode.getDataAs( WindowMessageTrackingStat.class);
+      reporter.mergeFinished(windowStat);
     }
     reporter.optimize();
     
-    final MessageTrackingReporter reporterToSave = reporter;
+    final MessageTrackingReport reporterToSave = reporter;
     BatchOperations<Boolean> saveCompleteOp = new BatchOperations<Boolean>() {
       @Override
       public Boolean execute(Registry registry) throws RegistryException {
         Transaction transaction = registry.getTransaction();
         transaction.setData(finishedNode, reporterToSave);
-        for(int i= 0; i < finishedChunks.size(); i++) {
-          transaction.deleteChild(finishedNode, finishedChunks.get(i));
+        for(int i= 0; i < finishedWindows.size(); i++) {
+          transaction.deleteChild(finishedNode, finishedWindows.get(i));
         }
+        
+        WindowId windowId = windowIdNode.getDataAs(WindowId.class);
+        Tracker tracker = windowId.getTracker(name, true);
+        tracker.setCompleteWindowCount(reporterToSave.getInSequenceCompleteWindow());
+        transaction.setData(windowIdNode, windowId);
         transaction.commit();
         return true;
       }
@@ -249,35 +276,35 @@ public class MessageTrackingRegistry {
     return reporter;
   }
   
-  public MessageTrackingReporter mergeProgressMessageTrackingChunkStat(String name) throws RegistryException {
+  public MessageTrackingReport getProgressReport(String name) throws RegistryException {
     final Node reportNode = trackingNode.getChild(name);
     final Node progressNode = reportNode.getChild(PROGRESS);
-    if(!progressNode.exists()) return new  MessageTrackingReporter(name);
+    if(!progressNode.exists()) return new  MessageTrackingReport(name);
     
-    MessageTrackingReporter reporter  = new  MessageTrackingReporter(name);
+    MessageTrackingReport reporter  = new  MessageTrackingReport(name);
     
     final List<String> progressChunks = progressNode.getChildren();
     Collections.sort(progressChunks);
     for(int i= 0; i < progressChunks.size(); i++) {
-      Node chunkNode = progressNode.getChild(progressChunks.get(i));
-      MessageTrackingChunkStat chunk = chunkNode.getDataAs( MessageTrackingChunkStat.class);
-      reporter.mergeProgress(chunk);
+      Node windowNode = progressNode.getChild(progressChunks.get(i));
+      WindowMessageTrackingStat windowStat = windowNode.getDataAs( WindowMessageTrackingStat.class);
+      reporter.mergeProgress(windowStat);
     }
     reporter.optimize();
     return reporter;
   }
   
   @SuppressWarnings("serial")
-  static public class ProgressChunkTracker extends LinkedHashMap<String, String> {
+  static public class ProgressWindowTracker extends LinkedHashMap<String, String> {
     private static final int MAX_ENTRIES = 1000;
     
-    public void create(String name, int chunkId) {
-      String key = name + ":" + chunkId;
+    public void create(String name, int windowId) {
+      String key = name + ":" + windowId;
       put(key, key);
     }
     
-    public boolean isCreated(String name, int chunkId) {
-      String key = name + ":" + chunkId;
+    public boolean isCreated(String name, int windowId) {
+      String key = name + ":" + windowId;
       return containsKey(key);
     }
 

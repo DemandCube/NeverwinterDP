@@ -12,30 +12,30 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
-public class MessageTrackingChunkStat {
+public class WindowMessageTrackingStat {
   static DecimalFormat ID_FORMAT = new DecimalFormat("00000000");
   
-  private String                                   name;
-  private int                                      chunkId;
-  private int                                      chunkSize;
-  private int                                      trackingProgress;
-  private int                                      trackingNoLostTo;
-  private int                                      trackingLostCount;
-  private int                                      trackingDuplicatedCount;
-  private int                                      trackingCount;
-  private Map<String, MessageTrackingLogChunkStat> logStats;
+  private String                                    name;
+  private int                                       windowId;
+  private int                                       windowSize;
+  private int                                       trackingProgress;
+  private int                                       trackingNoLostTo;
+  private int                                       trackingLostCount;
+  private int                                       trackingDuplicatedCount;
+  private int                                       trackingCount;
+  private Map<String, WindowMessageTrackingLogStat> logStats;
   
   private boolean complete = false;
 
   transient private boolean persisted = false;
   transient private BitSet  bitSet;
 
-  public MessageTrackingChunkStat() {}
+  public WindowMessageTrackingStat() {}
   
-  public MessageTrackingChunkStat(String name, int chunkId, int chunkSize) {
+  public WindowMessageTrackingStat(String name, int windowId, int chunkSize) {
     this.name      = name ;
-    this.chunkId   =  chunkId;
-    this.chunkSize = chunkSize;
+    this.windowId  =  windowId;
+    this.windowSize = chunkSize;
     this.logStats  = new HashMap<>();
     this.bitSet    = new BitSet(chunkSize);
   }
@@ -43,11 +43,11 @@ public class MessageTrackingChunkStat {
   public String getName() { return name; }
   public void setName(String name) { this.name = name; }
 
-  public int getChunkId() { return chunkId; }
-  public void setChunkId(int chunkId) { this.chunkId = chunkId; }
+  public int getWindowId() { return windowId; }
+  public void setWindowId(int windowId) { this.windowId = windowId; }
 
-  public int getChunkSize() { return chunkSize; }
-  public void setChunkSize(int chunkSize) { this.chunkSize = chunkSize;}
+  public int getWindowSize() { return windowSize; }
+  public void setWindowSize(int size) { this.windowSize = size;}
 
   public int getTrackingProgress() { return trackingProgress; }
   public void setTrackingProgress(int trackingProgress) {
@@ -74,8 +74,8 @@ public class MessageTrackingChunkStat {
     this.trackingCount = trackingCount;
   }
 
-  public Map<String, MessageTrackingLogChunkStat> getLogStats() { return logStats; }
-  public void setLogStats(Map<String, MessageTrackingLogChunkStat> logStats) { this.logStats = logStats; }
+  public Map<String, WindowMessageTrackingLogStat> getLogStats() { return logStats; }
+  public void setLogStats(Map<String, WindowMessageTrackingLogStat> logStats) { this.logStats = logStats; }
 
   public boolean isComplete() { return complete;}
   public void setComplete(boolean complete) {
@@ -96,12 +96,12 @@ public class MessageTrackingChunkStat {
   public void    setPersisted(boolean b) { persisted = b; }
   
   synchronized public int log(MessageTracking mTracking) {
-    if(mTracking.getChunkId() != chunkId) {
-      throw new RuntimeException("The chunk id is not matched, chunkId = " + chunkId + ", message chunk id = " + mTracking.getChunkId());
+    if(mTracking.getWindowId() != windowId) {
+      throw new RuntimeException("The chunk id is not matched, chunkId = " + windowId + ", message chunk id = " + mTracking.getWindowId());
     }
     int idx = mTracking.getTrackingId();
-    if(idx > chunkSize) {
-      throw new RuntimeException("The tracking id is greater than the chunk size" + chunkSize);
+    if(idx > windowSize) {
+      throw new RuntimeException("The tracking id is greater than the chunk size" + windowSize);
     }
     
     if(idx > trackingProgress) trackingProgress = idx;
@@ -113,9 +113,9 @@ public class MessageTrackingChunkStat {
     if(logs != null) {
       for(int i = 0; i < logs.size(); i++) {
         MessageTrackingLog log = logs.get(i);
-        MessageTrackingLogChunkStat logStat = logStats.get(log.getName());
+        WindowMessageTrackingLogStat logStat = logStats.get(log.getName());
         if(logStat == null) {
-          logStat = new MessageTrackingLogChunkStat();
+          logStat = new WindowMessageTrackingLogStat();
           logStats.put(log.getName(), logStat);
         }
         logStat.log(mTracking, log);
@@ -137,10 +137,10 @@ public class MessageTrackingChunkStat {
     else trackingNoLostTo = noLostTo ;
     
     trackingLostCount = lostCount;
-    if(trackingNoLostTo + 1 == chunkSize) complete = true;
+    if(trackingNoLostTo + 1 == windowSize) complete = true;
   }
   
-  synchronized void merge(MessageTrackingChunkStat other) {
+  synchronized void merge(WindowMessageTrackingStat other) {
     if(other.trackingProgress > trackingProgress) trackingProgress = other.trackingProgress;
     trackingDuplicatedCount += other.trackingDuplicatedCount;
     trackingCount += other.trackingCount;
@@ -152,9 +152,9 @@ public class MessageTrackingChunkStat {
       }
     }
     for(String otherLogKey : other.logStats.keySet()) {
-      MessageTrackingLogChunkStat logStat = logStats.get(otherLogKey);
+      WindowMessageTrackingLogStat logStat = logStats.get(otherLogKey);
       if(logStat == null) {
-        logStat = new MessageTrackingLogChunkStat();
+        logStat = new WindowMessageTrackingLogStat();
         logStats.put(otherLogKey, logStat);
       }
       logStat.merge(other.logStats.get(otherLogKey));
@@ -162,30 +162,30 @@ public class MessageTrackingChunkStat {
     update();
   }
   
-  public String toChunkIdName() { return toChunkIdName(chunkId); }
+  public String toWindowIdName() { return toWindowIdName(windowId); }
   
   public String toFormattedText() {
     return toFormattedText(this);
   }
   
-  static public String toFormattedText(MessageTrackingChunkStat ... chunk) {
+  static public String toFormattedText(WindowMessageTrackingStat ... window) {
     TabularFormater ft = 
-      new TabularFormater("Name", "Chunk Id", "Type", "Chunk Size", "Count", "Progress", "No Lost To", "Duplicated");
-    for(int i = 0; i < chunk.length; i++) {
-      chunk[i].update();
+      new TabularFormater("Name", "Window Id", "Type", "Window Size", "Count", "Progress", "No Lost To", "Duplicated");
+    for(int i = 0; i < window.length; i++) {
+      window[i].update();
       ft.addRow(
-        chunk[i].getName(), chunk[i].getChunkId(), "Tracking", chunk[i].getChunkSize(), 
-        chunk[i].getTrackingCount(), chunk[i].getTrackingProgress(), chunk[i].getTrackingNoLostTo(), chunk[i].getTrackingDuplicatedCount()
+        window[i].getName(), window[i].getWindowId(), "Tracking", window[i].getWindowSize(), 
+        window[i].getTrackingCount(), window[i].getTrackingProgress(), window[i].getTrackingNoLostTo(), window[i].getTrackingDuplicatedCount()
       );
-      for(String logKey : chunk[i].logStats.keySet()) {
-        MessageTrackingLogChunkStat logStat = chunk[i].logStats.get(logKey);
+      for(String logKey : window[i].logStats.keySet()) {
+        WindowMessageTrackingLogStat logStat = window[i].logStats.get(logKey);
         ft.addRow("", "", logKey, "", logStat.getCount(), "", "", "");
       }
     }
     return ft.getFormattedText() ;
   }
   
-  final static public String toChunkIdName(int chunkId) {
+  final static public String toWindowIdName(int chunkId) {
     return "chunk-" + ID_FORMAT.format(chunkId);
   }
 }

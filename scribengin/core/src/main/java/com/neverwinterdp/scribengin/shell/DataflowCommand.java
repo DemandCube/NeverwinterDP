@@ -5,7 +5,7 @@ import java.util.List;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.message.MessageTrackingRegistry;
-import com.neverwinterdp.message.MessageTrackingReporter;
+import com.neverwinterdp.message.MessageTrackingReport;
 import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
@@ -171,10 +171,10 @@ public class DataflowCommand extends Command {
       
       MessageTrackingRegistry mRegistry = dflRegistry.getMessageTrackingRegistry();
       
-      MessageTrackingReporter inputReporter = mRegistry.getMessageTrackingReporter("input");
+      MessageTrackingReport inputReporter = mRegistry.getMessageTrackingReporter("input");
       console.println(inputReporter.toFormattedText());
       
-      MessageTrackingReporter outputReporter = mRegistry.getMessageTrackingReporter("output");
+      MessageTrackingReport outputReporter = mRegistry.getMessageTrackingReporter("output");
       console.println(outputReporter.toFormattedText());
     }
 

@@ -1,6 +1,6 @@
 package com.neverwinterdp.scribengin.dataflow.tracking;
 
-import com.neverwinterdp.message.MessageTrackingReporter;
+import com.neverwinterdp.message.MessageTrackingReport;
 import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
@@ -156,8 +156,8 @@ public class TrackingDataflowBuilder {
     DataflowRegistry dflRegistry = dflClient.getDataflowRegistry();
     
     while(true) {
-      MessageTrackingReporter inputReporter  = dflRegistry.getMessageTrackingRegistry().getMessageTrackingReporter("input");
-      MessageTrackingReporter outputReporter = dflRegistry.getMessageTrackingRegistry().getMessageTrackingReporter("output");
+      MessageTrackingReport inputReporter  = dflRegistry.getMessageTrackingRegistry().getMessageTrackingReporter("input");
+      MessageTrackingReport outputReporter = dflRegistry.getMessageTrackingRegistry().getMessageTrackingReporter("output");
       long inputCount  = inputReporter.getTrackingCount();
       long outputCount = outputReporter.getTrackingCount();
       

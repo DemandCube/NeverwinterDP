@@ -1,7 +1,7 @@
 package com.neverwinterdp.message;
 
 public class MessageTrackingLog {
-  private long   timestamp;
+  private long     timestamp;
   private String   name;
   private String[] tag;
 

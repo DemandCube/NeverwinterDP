@@ -25,10 +25,10 @@ public class MTMergerService {
   
   public void flush() throws RegistryException {
     trackingRegistry.mergeProgress("input");
-    trackingRegistry.mergeFinishedMessageTrackingLogChunk("input");
+    trackingRegistry.mergeFinishedReport("input");
     
     trackingRegistry.mergeProgress("output");
-    trackingRegistry.mergeFinishedMessageTrackingLogChunk("output");
+    trackingRegistry.mergeFinishedReport("output");
   }
   
   public class FlushThread extends Thread {

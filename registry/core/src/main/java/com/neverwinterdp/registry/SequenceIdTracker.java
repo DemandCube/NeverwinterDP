@@ -2,8 +2,6 @@ package com.neverwinterdp.registry;
 
 import java.text.DecimalFormat;
 
-
-
 public class SequenceIdTracker {
   final static public byte[] EMPTY_DATA = new byte[0] ;
   static DecimalFormat SEQ_ID_FORMATER = new DecimalFormat("0000000000");
@@ -23,6 +21,11 @@ public class SequenceIdTracker {
   
   public void initRegistry(Transaction transaction) throws RegistryException {
     transaction.create(path, null, NodeCreateMode.PERSISTENT);
+  }
+  
+  public int currentInt() throws RegistryException {
+    NodeInfo nodeInfo = registry.getInfo(path);
+    return nodeInfo.getVersion();
   }
   
   public int nextInt() throws RegistryException {

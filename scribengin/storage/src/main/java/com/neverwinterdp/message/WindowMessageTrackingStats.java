@@ -3,22 +3,22 @@ package com.neverwinterdp.message;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AggregateMessageTrackingChunkStat {
-  private int  fromChunkId = -1;
-  private int  toChunkId   = -1;
+public class WindowMessageTrackingStats {
+  private int  fromWindowId = -1;
+  private int  toWindowId   = -1;
   private long trackingCount ;
   private long trackingLostCount;
   private long trackingDuplicatedCount;
-  private Map<String, MessageTrackingLogChunkStat> logStats = new HashMap<>();
+  private Map<String, WindowMessageTrackingLogStat> logStats = new HashMap<>();
   
-  public int getFromChunkId() { return fromChunkId;}
-  public void setFromChunkId(int fromChunkId) {
-    this.fromChunkId = fromChunkId;
+  public int getFromWindowId() { return fromWindowId;}
+  public void setFromWindowId(int fromWindowId) {
+    this.fromWindowId = fromWindowId;
   }
 
-  public int getToChunkId() { return toChunkId; }
-  public void setToChunkId(int toChunkId) {
-    this.toChunkId = toChunkId;
+  public int getToWindowId() { return toWindowId; }
+  public void setToWindowId(int toWindowId) {
+    this.toWindowId = toWindowId;
   }
 
   public long getTrackingCount() { return trackingCount; }
@@ -36,43 +36,43 @@ public class AggregateMessageTrackingChunkStat {
     this.trackingDuplicatedCount = trackingDuplicatedCount;
   }
   
-  public Map<String, MessageTrackingLogChunkStat> getLogStats() { return logStats; }
-  public void setLogStats(Map<String, MessageTrackingLogChunkStat> logStats) { this.logStats = logStats; }
+  public Map<String, WindowMessageTrackingLogStat> getLogStats() { return logStats; }
+  public void setLogStats(Map<String, WindowMessageTrackingLogStat> logStats) { this.logStats = logStats; }
   
   public long getLogNameCount(String logName) {
-    MessageTrackingLogChunkStat logChunkStat = logStats.get(logName);
+    WindowMessageTrackingLogStat logChunkStat = logStats.get(logName);
     if(logChunkStat == null) return 0;
     return logChunkStat.getCount() ;
   }
   
-  public void merge(MessageTrackingChunkStat otherChunk) {
-    if(fromChunkId < 0) fromChunkId = otherChunk.getChunkId();
-    toChunkId = otherChunk.getChunkId();
+  public void merge(WindowMessageTrackingStat otherChunk) {
+    if(fromWindowId < 0) fromWindowId = otherChunk.getWindowId();
+    toWindowId = otherChunk.getWindowId();
     trackingCount +=  otherChunk.getTrackingCount();
     trackingLostCount += otherChunk.getTrackingLostCount();
     trackingDuplicatedCount += otherChunk.getTrackingDuplicatedCount();
-    Map<String, MessageTrackingLogChunkStat> otherLogStats = otherChunk.getLogStats();
+    Map<String, WindowMessageTrackingLogStat> otherLogStats = otherChunk.getLogStats();
     for(String otherLogName : otherLogStats.keySet()) {
-      MessageTrackingLogChunkStat logStat = logStats.get(otherLogName);
+      WindowMessageTrackingLogStat logStat = logStats.get(otherLogName);
       if(logStat == null) {
-        logStat = new MessageTrackingLogChunkStat();
+        logStat = new WindowMessageTrackingLogStat();
         logStats.put(otherLogName, logStat);
       }
       logStat.merge(otherLogStats.get(otherLogName));
     }
   }
   
-  public void merge(AggregateMessageTrackingChunkStat other) {
-    toChunkId = other.getToChunkId();
+  public void merge(WindowMessageTrackingStats other) {
+    toWindowId = other.getToWindowId();
     trackingCount +=  other.getTrackingCount();
     trackingLostCount += other.getTrackingLostCount();
     trackingDuplicatedCount += other.getTrackingDuplicatedCount();
     
-    Map<String, MessageTrackingLogChunkStat> otherLogStats = other.getLogStats();
+    Map<String, WindowMessageTrackingLogStat> otherLogStats = other.getLogStats();
     for(String otherLogName : otherLogStats.keySet()) {
-      MessageTrackingLogChunkStat logStat = logStats.get(otherLogName);
+      WindowMessageTrackingLogStat logStat = logStats.get(otherLogName);
       if(logStat == null) {
-        logStat = new MessageTrackingLogChunkStat();
+        logStat = new WindowMessageTrackingLogStat();
         logStats.put(otherLogName, logStat);
       }
       logStat.merge(otherLogStats.get(otherLogName));

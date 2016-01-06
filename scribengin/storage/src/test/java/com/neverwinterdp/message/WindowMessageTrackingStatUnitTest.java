@@ -12,7 +12,7 @@ import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.zookeeper.tool.server.EmbededZKServerSet;
 
-public class MessageTrackingChunkStatUnitTest {
+public class WindowMessageTrackingStatUnitTest {
 final static public String WORKING_DIR = "build/working";
   
   private EmbededZKServerSet zkCluster;
@@ -40,13 +40,13 @@ final static public String WORKING_DIR = "build/working";
   @Test
   public void testMerge() throws Exception {
     int chunkId = 1;
-    MessageTrackingChunkStat chunk = new MessageTrackingChunkStat("input", chunkId, 10000);
+    WindowMessageTrackingStat chunk = new WindowMessageTrackingStat("input", chunkId, 10000);
     log(chunk, 0, 1000);
     
-    MessageTrackingChunkStat chunk1 = new MessageTrackingChunkStat("input", chunkId, 10000);
+    WindowMessageTrackingStat chunk1 = new WindowMessageTrackingStat("input", chunkId, 10000);
     log(chunk1, 1000, 3000);
 
-    MessageTrackingChunkStat chunk2 = new MessageTrackingChunkStat("input", chunkId, 10000);
+    WindowMessageTrackingStat chunk2 = new WindowMessageTrackingStat("input", chunkId, 10000);
     log(chunk2, 3000, 10000);
 
     chunk.merge(chunk1);
@@ -59,37 +59,37 @@ final static public String WORKING_DIR = "build/working";
   }
   
   @Test
-  public void testMessageTrackingChunkStat() throws Exception {
+  public void testWindowMessageTrackingStat() throws Exception {
     MessageTrackingRegistry mRegistry = new MessageTrackingRegistry(registry, "/tracking-message");
     mRegistry.initRegistry();
     
-    int chunkId = mRegistry.nextMessageChunkId();
-    MessageTrackingChunkStat inputChunk = new MessageTrackingChunkStat("input", chunkId, 10000);
-    mRegistry.saveProgress(log(inputChunk, 0, 1000));
+    int windowId = mRegistry.nextWindowId("input", 3);
+    WindowMessageTrackingStat inputWindow1 = new WindowMessageTrackingStat("input", windowId, 10000);
+    mRegistry.saveProgress(log(inputWindow1, 0, 1000));
     
-    MessageTrackingChunkStat inputChunk1 = new MessageTrackingChunkStat("input", chunkId, 10000);
-    mRegistry.saveProgress(log(inputChunk1, 1000, 3000));
+    WindowMessageTrackingStat inputWindow2 = new WindowMessageTrackingStat("input", windowId, 10000);
+    mRegistry.saveProgress(log(inputWindow2, 1000, 3000));
 
-    MessageTrackingChunkStat mergeChunk = mRegistry.mergeProgress("input", chunkId);
-    Assert.assertFalse(mergeChunk.isComplete());
-    mergeChunk = mRegistry.getProgress("input", chunkId);
-    Assert.assertNotNull(mergeChunk);
+    WindowMessageTrackingStat mergeWindow = mRegistry.mergeProgress("input", windowId);
+    Assert.assertFalse(mergeWindow.isComplete());
+    mergeWindow = mRegistry.getProgress("input", windowId);
+    Assert.assertNotNull(mergeWindow);
     
-    MessageTrackingChunkStat inputChunk2 = new MessageTrackingChunkStat("input", chunkId, 10000);
-    mRegistry.saveProgress(log(inputChunk2, 3000, 10000));
+    WindowMessageTrackingStat inputWindow3 = new WindowMessageTrackingStat("input", windowId, 10000);
+    mRegistry.saveProgress(log(inputWindow3, 3000, 10000));
     
-    mergeChunk = mRegistry.mergeProgress("input", chunkId);
-    Assert.assertTrue(mergeChunk.isComplete());
-    System.out.println(mergeChunk.toFormattedText());
+    mergeWindow = mRegistry.mergeProgress("input", windowId);
+    Assert.assertTrue(mergeWindow.isComplete());
+    System.out.println(mergeWindow.toFormattedText());
     
     registry.get("/").dump(System.out);
-    mergeChunk = mRegistry.getFinished("input", chunkId);
-    Assert.assertNotNull(mergeChunk);
+    mergeWindow = mRegistry.getFinished("input", windowId);
+    Assert.assertNotNull(mergeWindow);
   }
   
-  MessageTrackingChunkStat log(MessageTrackingChunkStat chunk, int from, int to) {
+  WindowMessageTrackingStat log(WindowMessageTrackingStat chunk, int from, int to) {
     for(int i = from; i < to; i++) {
-      MessageTracking mTracking = new MessageTracking(chunk.getChunkId(), i);
+      MessageTracking mTracking = new MessageTracking(chunk.getWindowId(), i);
       mTracking.add(new MessageTrackingLog("input", null));
       chunk.log(mTracking);
     }

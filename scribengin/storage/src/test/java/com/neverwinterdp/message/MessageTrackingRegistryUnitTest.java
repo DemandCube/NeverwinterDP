@@ -55,17 +55,25 @@ final static public String WORKING_DIR = "build/working";
     executorService.shutdown();
     while(!executorService.isTerminated()) {
       executorService.awaitTermination(3, TimeUnit.SECONDS);
-      registry.get("/").dump(System.out);
+      
+      mRegistry.mergeProgress("input");
+      MessageTrackingReport inputReport = mRegistry.mergeReport("input");
+      System.err.println(inputReport.toFormattedText());
+      
+      mRegistry.mergeProgress("output");
+      MessageTrackingReport outputReport = mRegistry.mergeReport("output");
+      System.err.println(outputReport.toFormattedText());
     }
     
-    new TrackingMessageProducer(mRegistry, 1, 10000).generateMessageTracking(mRegistry.nextMessageChunkId(), 0, 5000);
+    int windowId = mRegistry.nextWindowId("output", 1);
+    new TrackingMessageProducer(mRegistry, 1, 10000).generateMessageTracking(windowId, 0, 5000);
     mRegistry.mergeProgress("input");
     mRegistry.mergeProgress("output");
     
-    MessageTrackingReporter inputReporter = mRegistry.mergeMessageTrackingLogChunk("input");
+    MessageTrackingReport inputReporter = mRegistry.mergeReport("input");
     System.out.println(inputReporter.toFormattedText());
     
-    MessageTrackingReporter outputReporter = mRegistry.mergeMessageTrackingLogChunk("output");
+    MessageTrackingReport outputReporter = mRegistry.mergeReport("output");
     System.out.println(outputReporter.toFormattedText());
     
     registry.get("/").dump(System.out);
@@ -98,21 +106,25 @@ final static public String WORKING_DIR = "build/working";
     public void run() {
       try {
         for(int i = 0; i < numOfChunks; i++) {
-          generateMessageTracking(mRegistry.nextMessageChunkId(), 0, chunkSize);
+          int windowId = -1; // mRegistry.nextWindowId(); 
+          while((windowId = mRegistry.nextWindowId("output", 5)) < 0) {
+            Thread.sleep(250);
+          }
+          generateMessageTracking(windowId, 0, chunkSize);
         }
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
 
-    public void generateMessageTracking(int chunkId, int from, int to) throws Exception {
+    public void generateMessageTracking(int windowId, int from, int to) throws Exception {
       List<MessageTracking> holder = new ArrayList<MessageTracking>();
       for(int i = from; i < to; i++) {
-        MessageTracking mTracking = new MessageTracking(chunkId, i);
+        MessageTracking mTracking = new MessageTracking(windowId, i);
         inputLogger.log(mTracking);
         holder.add(mTracking);
       }
-      saveChunk("input", chunkId, holder);
+      saveWindow("input", windowId, holder);
     
       for(int i = 0; i < holder.size(); i++) {
         MessageTracking mTracking = holder.get(i);
@@ -126,20 +138,20 @@ final static public String WORKING_DIR = "build/working";
         }
         outputLogger.log(mTracking);
       }
-      saveChunk("output", chunkId, holder);
+      saveWindow("output", windowId, holder);
     }
     
-    private void saveChunk(String name, int chunkId, List<MessageTracking> holder) throws Exception {
-      MessageTrackingChunkStat chunk = new MessageTrackingChunkStat(name, chunkId, chunkSize);
+    private void saveWindow(String name, int windowId, List<MessageTracking> holder) throws Exception {
+      WindowMessageTrackingStat windowStat = new WindowMessageTrackingStat(name, windowId, chunkSize);
       for(int i = 0; i < holder.size(); i++) {
         MessageTracking mTracking = holder.get(i);
-        chunk.log(mTracking);
+        windowStat.log(mTracking);
         if((i + 1) % 1000 == 0) {
-          mRegistry.saveProgress(chunk);
-          chunk = new MessageTrackingChunkStat(name, chunkId, chunkSize);
+          mRegistry.saveProgress(windowStat);
+          windowStat = new WindowMessageTrackingStat(name, windowId, chunkSize);
         }
       }
-      if(chunk.getTrackingCount() > 0) mRegistry.saveProgress(chunk);
+      if(windowStat.getTrackingCount() > 0) mRegistry.saveProgress(windowStat);
     }
   }
   
