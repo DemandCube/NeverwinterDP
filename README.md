@@ -53,13 +53,16 @@ A distributed, highly reliable ETL system that can handle multiple sources and s
 
 ####Quickstart Guide
 Get started quickly!
+
 [QuickStart Guide](docs/scribengin-cluster-setup-quickstart.md)
 
 ####API and Dataflow Submission
 How to submit a dataflow to a running Scribengin cluster
+
 [API and Dataflow Submission Guide](docs/dataflowSubmission.md)
 
 ####How to launch a cluster in an arbitrary environment (i.e. in-house cluster, AWS, etc)
+
 [Arbitrary Cluster Guide](docs/arbitrary-cluster-guide.md)
 
 
