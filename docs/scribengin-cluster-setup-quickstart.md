@@ -4,8 +4,13 @@ Scribengin Quickstart
 #Contents#
 1. [Overview](#general-steps-to-setup)
 2. [Build NeverwinterDP](#build-neverwinterdp)
+3. [Automation Prerequisites](#automation-prerequisites)
 3. [Setup a cluster automatically in Docker](#docker-setup) 
-4. [Launching Scribengin manually](#launching-scribengin-manually)
+4. [Setup a cluster automatically in Digital Ocean](#digital-ocean-setup) 
+5. [Setup a cluster automatically somewhere else](#arbitrary-cluster-setup) 
+4. [Launching Scribengin manually in an already setup YARN cluster ](#manually-launching)
+5. [Launching a Datafow from a preconfigured test](#launching-a-dataflow-from-a-preconfigured-test)
+5. [Monitoring Scribengin](#monitoring-scribengin)
 
 ---
 
@@ -19,6 +24,8 @@ Scribengin Quickstart
     * Update /etc/hosts so the VMs know about each other
     * Run Zookeeper, Hadoop, and YARN
     * Optionally run Kafka, Elasticsearch...
+3. Launch the VM Master (Scribengin's YARN Application Master)
+4. Submit your dataflow
 
 ---
 
@@ -59,13 +66,7 @@ export NEVERWINTERDP_HOME=/your/path/to/NeverwinterDP
 
 
 ---
-
-#Docker Setup#
-This will require access to Nvent's private repos.  Continue on to [Launching Scribengin cluster manually](#launching-scribengin-cluster-manually) if you do not have access. 
-
-The following steps will deploy all the necessary components to run Scribengin locally by using Docker.
-
-###Prerequisites###
+#Automation Prerequisites#
 
 1. [Install Ansible](http://docs.ansible.com/ansible/intro_installation.html)
 2. [Install and configure Docker](https://docs.docker.com/engine/installation/)
@@ -89,7 +90,12 @@ The following steps will deploy all the necessary components to run Scribengin l
      aws_secret_access_key=YYYYYY
      ````` 
 
-###Launching Scribengin cluster in Docker Using neverwinterdp-deployments###
+
+#Docker Setup#
+This will require access to Nvent's private repos.  Continue on to [Launching Scribengin cluster manually](#manually-launching) if you do not have access. 
+
+The following steps will deploy all the necessary components to run Scribengin locally by using Docker.
+
 1. Clone deployments and tools repo
         
         git clone git clone https://<bitbucket_user>@bitbucket.org/nventdata/neverwinterdp-deployments.git
@@ -111,39 +117,148 @@ The following steps will deploy all the necessary components to run Scribengin l
         
         ./neverwinterdp-deployments/docker/scribengin/docker.sh cluster --clean-containers --clean-image
 
-5. Checking the status of your cluster
+
+#Digital Ocean Setup#
+This will require access to Nvent's private repos.  Continue on to [Launching Scribengin cluster manually](#manually-launching) if you do not have access. 
+
+The following steps will deploy all the necessary components to run Scribengin in the cloud via Digital Ocean.  You'll also need a Digital Ocean account and a Digital Ocean token (see step 3)
+
+1. Clone deployments and tools repo
         
+        git clone git clone https://<bitbucket_user>@bitbucket.org/nventdata/neverwinterdp-deployments.git
 
-        $> ./tools/statusCommander/statusCommander.py
-        Role           Hostname         IP           ProcessIdentifier       ProcessID    Status
-        -------------  ---------------  -----------  ----------------------  -----------  --------
-        monitoring     monitoring-1     172.17.0.11
-                                                     /opt/kibana/bin/kibana  1910         Running
-        hadoop_master  hadoop-master    172.17.0.2
-                                                     SecondaryNameNode       1261         Running
-                                                     ResourceManager         1376         Running
-                                                     NameNode                1179         Running
-        zookeeper      zookeeper-1      172.17.0.6
-                                                     QuorumPeerMain          622          Running
-        kafka          kafka-3          172.17.0.9
-                                                     Kafka                   686          Running
-                       kafka-2          172.17.0.8
-                                                     Kafka                   684          Running
-                       kafka-1          172.17.0.7
-                                                     Kafka                   684          Running
-        hadoop_worker  hadoop-worker-3  172.17.0.5
-                                                     DataNode                1179         Running
-                                                     NodeManager             1261         Running
-                       hadoop-worker-2  172.17.0.4
-                                                     DataNode                1177         Running
-                                                     NodeManager             1259         Running
-                                                     vm-master-1             3898         Running
-                       hadoop-worker-1  172.17.0.3
-                                                     DataNode                1179         Running
-                                                     NodeManager             1261         Running
-        elasticsearch  elasticsearch-1  172.17.0.10
-                                                     Main                    442          Running
+2. Set up for neverwinter tools
+        
+        #Run the setup script for tools (only necessary ONCE)
+        sudo ./neverwinterdp-deployments/tools/cluster/setup.sh
 
+3. Set up your Digital Ocean token
+
+        #To get a token visit - 
+        #  https://cloud.digitalocean.com/settings/applications#access-tokens
+        echo "TOKENGOESHERE" > ~/.digitaloceantoken
+
+
+4. Run the Digital Ocean automation
+        
+        cd ./neverwinterdp-deployments/tools/
+
+        ./cluster/clusterCommander.py \
+          digitalocean \
+          --launch --neverwinterdp-home $NEVERWINTERDP_HOME \
+          --ansible-inventory \
+          --create-containers $ROOT/ansible/profile/stability.yml \
+          --subdomain $SUBDOMAIN --region nyc3
+
+5. Install Scribengin and necessary cluster services
+        
+        ./serviceCommander/serviceCommander.py \ 
+          --cluster --install --configure --profile-type stability
+
+#Arbitrary Cluster Setup
+[Follow the steps in this guide for information on how to use Nvent's private automation to launch in any arbitrary cluster](arbitrary-cluster-guide.md)
+
+#Manually Launching#
+
+These steps will be necessary if you do not have access to Nvent's private automation repo's
+
+###Prerequisites
+
+1. Set up at least one Hadoop4 node
+2. Set up YARN on Hadoop
+3. Set up at least one Zookeeper node
+4. Set up at least one ElasticSearch node
+5. Set up any machines for sources/sinks (i.e. Kafka, etc)
+6. Create a user on all the machines (These tweaks make things run smoothly without interruption)
+  - username: neverwinterdp
+  - ssh keys set up in ~/.ssh
+  - has passwordless sudo
+7. Set up all node's /etc/hosts file.  See [Machine Naming Conventions Below](#machine-naming-conventions)
+
+        ##SCRIBENGIN CLUSTER START##
+        10.0.0.1 elasticsearch-1 
+        10.0.0.2 hadoop-master
+        10.0.0.3 hadoop-worker-1
+        10.0.0.4 hadoop-worker-2
+        10.0.0.5 hadoop-worker-3
+        10.0.0.6 zookeeper-1 
+        ##SCRIBENGIN CLUSTER END##
+
+
+###Machine Naming conventions
+  
+  We strongly suggest aptly naming the nodes in your cluster.
+
+  - hadoop-master
+    - Only one node of this is required
+    - Runs Hadoop and YARN master processes
+    - Needs to run
+      - SecondaryNameNode
+      - ResourceManager
+      - NameNode
+    - Since there is only ONE master, no sequential naming
+  - hadoop-worker-*
+    - Running Hadoop and YARN slave processes
+    - Named sequentially, i.e.
+      - hadoop-worker-1
+      - hadoop-worker-2
+      - etc...
+    - Needs to run
+      - DataNode
+      - NodeManager
+  - elasticsearch-*
+    - Running elasticsearch
+    - Named sequentially
+    - Handles receiving logs and metric information
+  - zookeeper-*
+    - Runs zookeeper quorum
+    - Named sequentially
+
+###Launching Scribengin
+
+1. Make sure you have the JAVA_HOME environment variable correctly set
+2. [Build NeverwinterDP](#build-neverwinterdp)
+3.  Launch the VM Master in YARN
+        
+        #After building, if you didn't edit your /etc/hosts file, you'll need to edit the file:
+        #NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh
+            #-Dshell.zk-connect    - [hostname]:[port] of your Zookeeper server
+            #-Dshell.hadoop-master - [hostname] of your master Hadoop node
+        APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
+
+          
+        #From release/neverwinterdp directory
+        cd  NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/
+          
+        #To run the vm-master on top of hadoop yarn
+        ./shell.sh vm start
+        
+        
+        #To check the scribengin status
+        ./shell.sh vm info
+
+4.  [Use the Scribengin API to upload your Dataflow.](dataflowSubmission.md)
+
+
+#Launching a dataflow from a preconfigured test#
+
+This test can be launched manually from the public NeverwinterDP repo
+```
+./NeverwinterDP/release/build/release/neverwinterdp/dataflow/tracking-sample/bin/run-tracking.sh
+```
+
+These tests are in Nvent's private automation repo
+
+```
+#The kafka test is a simple, quick test 
+./neverwinterdp-deployments/tests/scribengin/tracking/integration/kafka-run-test.sh
+    
+#The kafka stability test is a more complicated, longer running test
+./neverwinterdp-deployments/tests/scribengin/tracking/stability/stability-kafka-test.sh
+```
+
+
+#Monitoring Scribengin
 
 ###Navigate to Kibana to view real time metrics###
 
@@ -158,18 +273,11 @@ You can change the interval at which Kibana refreshes itself in the top panel, o
 ssh neverwinterdp@[node-name]
 ```
 
-###Launching a dataflow from a preconfigured test###
-
-```
-#The kafka test is a simple, quick test 
-./tests/scribengin/tracking/integration/kafka-run-test.sh
-    
-#The kafka stability test is a more complicated, longer running test
-./tests/scribengin/tracking/stability/stability-kafka-test.sh
-```
 
 ###Getting status of a running dataflow
 ```
+#After you launch a dataflow on the command line, it will give you a command
+# you can run to monitor the dataflow.  It will look similar to this.
 ./scribengin/bin/shell.sh plugin com.neverwinterdp.scribengin.dataflow.tool.tracking.TrackingMonitor \
    --dataflow-id [DATAFLOW NAME] \
    --report-path /applications/tracking-sample/reports \
@@ -177,43 +285,6 @@ ssh neverwinterdp@[node-name]
    --print-period 15000 \
    --show-history-workers
 ```
-
----
-
-#Launching Scribengin manually#
-
-###Prerequisite services to configure and launch###
-
-1. Zookeeper
-2. Hadoop4
-3. YARN
-4. Elasticsearch
-5. Kafka
-
-
-###To launch###
-
-1.  Follow [instructions to build and release Scribengin](#check-out-and-build-neverwinterdp-code)
-2.  Launch the VM Master in YARN
-        
-        #After building, you'll need to edit the file:
-        #NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh
-            #-Dshell.zk-connect    - [hostname]:[port] of your Zookeeper server
-            #-Dshell.hadoop-master - [hostname] of your master Hadoop node
-        APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
-
-          
-        #From release/neverwinterdp directory
-        cd  path/release/neverwinterdp
-          
-        #To run the vm-master on top of hadoop yarn
-        ./scribengin/bin/shell.sh vm start
-        
-        
-        #To check the scribengin status
-        ./scribengin/bin/shell.sh vm info
-
-3.  [Use the Scribengin API to upload your Dataflow.](dataflowSubmission.md)
 
 
 
