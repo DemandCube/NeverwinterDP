@@ -133,5 +133,5 @@ The following steps will deploy all the necessary components to run Scribengin t
           --profile-type stability \
           --inventory-file [path to your inventory]
 
-4. Now you're ready to launch your dataflow!  Check the quickstart guide for instructions on that
+4. Now you're ready to launch your dataflow!  Check the [quickstart guide](scribengin-cluster-setup-quickstart.md#launching-scribengin) for instructions on that
 
