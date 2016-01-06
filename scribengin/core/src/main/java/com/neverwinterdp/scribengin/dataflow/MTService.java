@@ -13,11 +13,13 @@ import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 
 @Singleton
 public class MTService {
-  private int                     trackingWindowSize;
-  private AtomicInteger           windowIdTracker ;
-  private int                     currentChunkId ;
-  private MessageTrackingRegistry trackingRegistry;
-  private ConcurrentHashMap<Integer, MessageTrackingChunkStat> chunkStats = new ConcurrentHashMap<>();
+  private int                        trackingWindowSize;
+  private AtomicInteger              windowIdTracker ;
+  private int                        currentChunkId ;
+  private MessageTrackingRegistry    trackingRegistry;
+  
+  private ConcurrentHashMap<Integer, MessageTrackingChunkStat> outputChunkStats = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<Integer, MessageTrackingChunkStat> inputChunkStats  = new ConcurrentHashMap<>();
 
   @Inject
   public void onInject(DataflowRegistry dflRegistry) throws RegistryException {
@@ -37,28 +39,44 @@ public class MTService {
     return new MessageTracking(currentChunkId, currentWindowId);
   }
 
-  synchronized public void log(MessageTracking mTracking) throws RegistryException {
-    MessageTrackingChunkStat chunk = chunkStats.get(mTracking.getChunkId());
-    if(chunk == null) {
-      chunk = new  MessageTrackingChunkStat("output", mTracking.getChunkId(), trackingWindowSize);
-      chunkStats.put(chunk.getChunkId(), chunk);
+  public void logInput(MessageTracking mTracking) throws RegistryException {
+    log(inputChunkStats, "input", mTracking);
+  }
+  
+  public void logOutput(MessageTracking mTracking) throws RegistryException {
+    log(outputChunkStats, "output", mTracking);
+  }
+  
+  void log(ConcurrentHashMap<Integer, MessageTrackingChunkStat> holder, String name, MessageTracking mTracking) throws RegistryException {
+    synchronized(holder) {
+      MessageTrackingChunkStat chunk = holder.get(mTracking.getChunkId());
+      if(chunk == null) {
+        chunk = new  MessageTrackingChunkStat(name, mTracking.getChunkId(), trackingWindowSize);
+        holder.put(chunk.getChunkId(), chunk);
+      }
+      chunk.log(mTracking);
     }
-    chunk.log(mTracking);
   }
   
-  synchronized MessageTrackingChunkStat[] takeAll() {
-    if(chunkStats.size() == 0) return null;
-    MessageTrackingChunkStat[] array = new MessageTrackingChunkStat[chunkStats.size()];
-    chunkStats.values().toArray(array);
-    chunkStats.clear();
-    return array;
+  MessageTrackingChunkStat[] takeAll(ConcurrentHashMap<Integer, MessageTrackingChunkStat> map) {
+    synchronized(map) {
+      if(map.size() == 0) return null;
+      MessageTrackingChunkStat[] array = new MessageTrackingChunkStat[map.size()];
+      map.values().toArray(array);
+      map.clear();
+      return array;
+    }
   }
   
-  public void flush() throws RegistryException {
-    MessageTrackingChunkStat[] array = takeAll();
+  public void flushInput() throws RegistryException {
+    MessageTrackingChunkStat[] array = takeAll(inputChunkStats);
     if(array == null) return;
-    for(MessageTrackingChunkStat sel : array) {
-      trackingRegistry.saveProgress(sel);
-    }
+    for(MessageTrackingChunkStat sel : array) trackingRegistry.saveProgress(sel);
+  }
+  
+  public void flushOutput() throws RegistryException {
+    MessageTrackingChunkStat[] array = takeAll(outputChunkStats);
+    if(array == null) return;
+    for(MessageTrackingChunkStat sel : array) trackingRegistry.saveProgress(sel);
   }
 }

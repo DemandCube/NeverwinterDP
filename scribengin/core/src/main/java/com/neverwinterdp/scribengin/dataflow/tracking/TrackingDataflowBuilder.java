@@ -156,9 +156,10 @@ public class TrackingDataflowBuilder {
     DataflowRegistry dflRegistry = dflClient.getDataflowRegistry();
     
     while(true) {
-      MessageTrackingReporter reporter = dflRegistry.getMessageTrackingRegistry().getMessageTrackingReporter("output");
-      long inputCount = reporter.getLogNameCount("input");
-      long outputCount = reporter.getLogNameCount("output");
+      MessageTrackingReporter inputReporter  = dflRegistry.getMessageTrackingRegistry().getMessageTrackingReporter("input");
+      MessageTrackingReporter outputReporter = dflRegistry.getMessageTrackingRegistry().getMessageTrackingReporter("output");
+      long inputCount  = inputReporter.getTrackingCount();
+      long outputCount = outputReporter.getTrackingCount();
       
       shell.execute(
         "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +

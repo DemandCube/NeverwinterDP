@@ -38,7 +38,7 @@ public class MasterService {
   @Inject
   private StorageService storageService ;
   
-  private MessageTrackingMergerService mtMergerService;
+  private MTMergerService mtMergerService;
   
   private DataflowWorkerMonitor workerMonitor;
   
@@ -80,7 +80,7 @@ public class MasterService {
     String masterEvtPath = broadcaster.getEventPath();
     dataflowMasterEventWatcher = new DataflowMasterEventWatcher(dflRegistry, masterEvtPath, vmDescriptor.getId());
     
-    mtMergerService = new MessageTrackingMergerService(dflRegistry);
+    mtMergerService = new MTMergerService(dflRegistry);
     
     logger.info("Finish init()");
   }

@@ -9,7 +9,7 @@ public class KafkaWireDataSetFactory implements WireDataSetFactory {
   
   @Override
   public <T> KafkaDataSet<T> createDataStream(Dataflow<?, ?> dfl, String name) {
-    KafkaDataSet<T> ds = new KafkaDataSet<T>(name, DataSetType.Wire, zkConnects, dfl.getDataflowId() + "." + name);
+    KafkaDataSet<T> ds = new KafkaDataSet<T>(name, DataStreamType.Wire, zkConnects, dfl.getDataflowId() + "." + name);
     return ds;
   }
 }

@@ -50,19 +50,19 @@ public class Dataflow<IN, OUT> {
   }
   
   public KafkaDataSet<IN> createInput(KafkaStorageConfig config) {
-    KafkaDataSet<IN> ds = new KafkaDataSet<IN>(DataSetType.Input, config);
+    KafkaDataSet<IN> ds = new KafkaDataSet<IN>(DataStreamType.Input, config);
     dataSets.put(ds.getName(), ds);
     return ds;
   }
 
   public KafkaDataSet<OUT> createOutput(KafkaStorageConfig config) {
-    KafkaDataSet<OUT> ds = new KafkaDataSet<OUT>(DataSetType.Output, config);
+    KafkaDataSet<OUT> ds = new KafkaDataSet<OUT>(DataStreamType.Output, config);
     dataSets.put(ds.getName(), ds);
     return ds;
   }
   
   public HDFSDataSet<OUT> createOutput(HDFSStorageConfig config) {
-    HDFSDataSet<OUT> ds = new HDFSDataSet<OUT>(DataSetType.Output, config);
+    HDFSDataSet<OUT> ds = new HDFSDataSet<OUT>(DataStreamType.Output, config);
     dataSets.put(ds.getName(), ds);
     return ds;
   }
@@ -110,7 +110,7 @@ public class Dataflow<IN, OUT> {
     for(int i = 0; i < dataStreams.length; i++) {
       DataSet<?> sel = dataStreams[i];
       StorageConfig storageConfig = sel.getStorageConfig();
-      if(sel.getDataSetType() == DataSetType.Output) {
+      if(sel.getDataStreamType() == DataStreamType.Output) {
         storageConfig.setPartitionStream(config.getStreamConfig().getParallelism());
       }
       config.getStreamConfig().add(sel.getName(), storageConfig);

@@ -4,11 +4,11 @@ import com.neverwinterdp.message.MessageTrackingRegistry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 
-public class MessageTrackingMergerService {
+public class MTMergerService {
   private MessageTrackingRegistry trackingRegistry;
   private FlushThread flushThread;
   
-  public MessageTrackingMergerService(DataflowRegistry dflRegistry) {
+  public MTMergerService(DataflowRegistry dflRegistry) {
     trackingRegistry = dflRegistry.getMessageTrackingRegistry();
     flushThread = new FlushThread();
     flushThread.start();
@@ -24,6 +24,9 @@ public class MessageTrackingMergerService {
   }
   
   public void flush() throws RegistryException {
+    trackingRegistry.mergeProgress("input");
+    trackingRegistry.mergeFinishedMessageTrackingLogChunk("input");
+    
     trackingRegistry.mergeProgress("output");
     trackingRegistry.mergeFinishedMessageTrackingLogChunk("output");
   }
