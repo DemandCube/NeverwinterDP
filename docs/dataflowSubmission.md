@@ -54,6 +54,7 @@ import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.client.VMSubmitter;
 import com.neverwinterdp.vm.client.shell.CommandInput;
 import com.neverwinterdp.vm.client.shell.Shell;
+import java.util.Set;
 
 
 public class DataflowLauncher {
@@ -173,8 +174,55 @@ public class DataflowLauncher {
     //This builds and prints out the dataflow Descriptor that we've just built
     DataflowDescriptor testDflConfig = dfl.buildDataflowDescriptor();
     System.out.println(JSONSerializer.INSTANCE.toString(testDflConfig));
+    return dfl;
   }
 
+}
+
+//Our first operator class
+//Operators must extend DataStreamOperator and override process()
+public class TrackingMessageSplitter extends DataStreamOperator {
+  int count = 0;
+  
+  @Override
+  public void process(DataStreamOperatorContext ctx, Message record) throws Exception {
+    TrackingMessage tMessage = JSONSerializer.INSTANCE.fromBytes(record.getData(), TrackingMessage.class) ;
+    int remain = tMessage.getTrackId() % 3;
+    tMessage.setStartDeliveryTime(System.currentTimeMillis());
+    record.setData(JSONSerializer.INSTANCE.toBytes(tMessage));
+    if(remain == 0) {
+      ctx.write("splitter-to-error", record);
+    } else if(remain == 1) {
+      ctx.write("splitter-to-warn", record);
+    } else {
+      ctx.write("splitter-to-info", record);
+    }
+    count++ ;
+    if(count > 0 && count % 10000 == 0) {
+      ctx.commit();
+    }
+  }
+}
+
+//Our other operator class
+public class TrackingMessagePersister extends DataStreamOperator {
+  int count = 0 ;
+  
+  @Override
+  public void process(DataStreamOperatorContext ctx, Message record) throws Exception {
+    TrackingMessage tMessage = JSONSerializer.INSTANCE.fromBytes(record.getData(), TrackingMessage.class) ;
+    tMessage.setEndDeliveryTime(System.currentTimeMillis());
+    record.setData(JSONSerializer.INSTANCE.toBytes(tMessage));
+    Set<String> sink = ctx.getAvailableOutputs();
+    for(String selSink : sink) {
+      ctx.write(selSink, record);
+    }
+    
+    count++;
+    if(count > 0 && count % 10000 == 0) {
+      ctx.commit();
+    }
+  }
 }
 
 ```
