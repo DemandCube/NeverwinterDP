@@ -8,6 +8,7 @@ import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.registry.task.dedicated.TaskExecutorEvent;
 import com.neverwinterdp.registry.task.dedicated.TaskSlotExecutor;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperator;
+import com.neverwinterdp.scribengin.dataflow.DataStreamType;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.WorkerService;
 
@@ -57,7 +58,7 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
   public void onEvent(TaskExecutorEvent event) throws Exception {
     if("StopInput".equals(event.getName())) {
       InputDataStreamContext inputContext = context.getInputDataStreamContext();
-      if(inputContext.isInputSource()) inputContext.stopInput();
+      if(inputContext.getDataStreamType() == DataStreamType.Input) inputContext.stopInput();
     }
   }
   

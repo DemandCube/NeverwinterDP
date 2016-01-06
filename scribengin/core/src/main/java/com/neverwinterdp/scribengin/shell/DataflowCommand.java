@@ -168,9 +168,14 @@ public class DataflowCommand extends Command {
         List<MetricRegistrySnapshot> snapshots = dflRegistry.getWorkerRegistry().getMetrics();
         console.println(MetricRegistrySnapshot.getFormattedText(snapshots));
       }
+      
       MessageTrackingRegistry mRegistry = dflRegistry.getMessageTrackingRegistry();
-      MessageTrackingReporter reporter = mRegistry.getMessageTrackingReporter("output");
-      console.println(reporter.toFormattedText());
+      
+      MessageTrackingReporter inputReporter = mRegistry.getMessageTrackingReporter("input");
+      console.println(inputReporter.toFormattedText());
+      
+      MessageTrackingReporter outputReporter = mRegistry.getMessageTrackingReporter("output");
+      console.println(outputReporter.toFormattedText());
     }
 
     @Override

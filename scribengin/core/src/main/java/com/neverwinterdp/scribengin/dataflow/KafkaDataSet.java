@@ -6,12 +6,12 @@ import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 public class KafkaDataSet<T> extends DataSet<T> {
   private KafkaStorageConfig kafkaStorageConfig;
   
-  public KafkaDataSet(DataSetType type, KafkaStorageConfig kafkaStorageConfig) {
+  public KafkaDataSet(DataStreamType type, KafkaStorageConfig kafkaStorageConfig) {
     super(kafkaStorageConfig.getName(), type);
     this.kafkaStorageConfig = kafkaStorageConfig;
   }
   
-  public KafkaDataSet(String name, DataSetType type, String zkConnects, String topic) {
+  public KafkaDataSet(String name, DataStreamType type, String zkConnects, String topic) {
     super(name, type);
     kafkaStorageConfig = new KafkaStorageConfig();
     kafkaStorageConfig.setName(name);

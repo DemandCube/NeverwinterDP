@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neverwinterdp.util.text.TabularFormater;
 
 public class MessageTrackingReporter {
@@ -37,6 +38,22 @@ public class MessageTrackingReporter {
   
   public void setProgressAggregateChunkReports(List<AggregateMessageTrackingChunkStat> aggregateChunkReports) {
     progressAggregateChunkReports = aggregateChunkReports;
+  }
+  
+  @JsonIgnore
+  public long getTrackingCount() {
+    long count = getTrackingCount(finishedAggregateChunkReports);
+    count += getTrackingCount(progressAggregateChunkReports);
+    return count;
+  }
+
+  long getTrackingCount(List<AggregateMessageTrackingChunkStat> chunkReportHolder) {
+    long count = 0;
+    for(int i = 0; i < chunkReportHolder.size(); i++) {
+      AggregateMessageTrackingChunkStat stat = chunkReportHolder.get(i);
+      count += stat.getTrackingCount();
+    }
+    return count;
   }
   
   public long getLogNameCount(String logName) {
