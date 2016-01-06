@@ -128,7 +128,7 @@ The following steps will deploy all the necessary components to run Scribengin t
 
 3. Install Scribengin and necessary cluster services
         
-        ./serviceCommander/serviceCommander.py \ 
+        ./neverwinterdp-deployments/tools/serviceCommander/serviceCommander.py \ 
           --cluster --install --configure --clean --start \
            --profile-type stability \
           --inventory-file [path to your inventory]
