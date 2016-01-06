@@ -65,6 +65,8 @@ The hostfile on all machines in the cluster must also have this entry.
 
 If you plan on running tests/launching dataflows from your local machine, also include this entry in your own /etc/hosts file
 
+        #Insert an entry like this into all the cluster machine's /etc/hosts file
+        #Insert onto your local dev box if you wish to run anything from your local machine as well
         ##SCRIBENGIN CLUSTER START##
         10.0.0.1 hadoop-master
         10.0.0.2 elasticsearch-1 
@@ -127,7 +129,9 @@ The following steps will deploy all the necessary components to run Scribengin t
 3. Install Scribengin and necessary cluster services
         
         ./serviceCommander/serviceCommander.py \ 
-          --cluster --install --configure --profile-type stability
+          --cluster --install --configure --clean --start \
+           --profile-type stability \
+          --inventory-file [path to your inventory]
 
 4. Now you're ready to launch your dataflow!  Check the quickstart guide for instructions on that
 
