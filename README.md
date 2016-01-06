@@ -52,13 +52,15 @@ A distributed, highly reliable ETL system that can handle multiple sources and s
 ![Scribengin Cluster Design](docs/images/ScribenginStructureOverviewV2.png "Scribengin Cluster Design")
 
 ####Quickstart Guide
+Get started quickly!
 [QuickStart Guide](docs/scribengin-cluster-setup-quickstart.md)
 
-
 ####API and Dataflow Submission
+How to submit a dataflow to a running Scribengin cluster
 [API and Dataflow Submission Guide](docs/dataflowSubmission.md)
 
-
+####How to launch a cluster in an arbitrary environment (i.e. in-house cluster, AWS, etc)
+[Arbitrary Cluster Guide](docs/arbitrary-cluster-guide.md)
 
 
 ####Developer Setup
@@ -72,9 +74,9 @@ cd NeverwinterDP
 ```
 
 ####Developer Info
-- [How the code is organized](code-organization-howto.md)
-- [Code Conventions](code-convention-howto.md)
-
+- [How the code is organized](docs/code-organization-howto.md)
+- [Code Conventions](docs/code-convention-howto.md)
+- [Operator Development Guide](docs/operator-dev-guide.md)
 
 ####Release
 ```
