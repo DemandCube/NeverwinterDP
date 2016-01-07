@@ -90,9 +90,13 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
       }
       report.addAccRuntime(currentTime - startTime);
       
-      if(context.isComplete() || report.getProcessCount() > windowSize || lastFlushTime + 5000 < currentTime) {
+      if(recCount > 0) {
         context.commit();
       }
+      
+//      if(context.isComplete() || report.getProcessCount() > windowSize || lastFlushTime + 5000 < currentTime) {
+//        context.commit();
+//      }
     } catch(InterruptedException ex) {
       throw ex ;
     } catch(RegistryException error) {
