@@ -36,6 +36,7 @@ public class KafkaTrackingUnitTest  {
   public void teardown() throws Exception {
     localScribenginCluster.shutdown();
   }
+  
   @Test
   public void testTracking() throws Exception {
     VMClient vmClient = shell.getVMClient();

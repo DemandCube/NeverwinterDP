@@ -9,6 +9,12 @@ abstract public class DataStreamSourceInterceptor {
   public void onRead(DataStreamOperatorContext ctx, Message message) throws Exception {
   }
   
+  public void onPrepareCommit(DataStreamOperatorContext ctx) throws Exception {
+  }
+  
+  public void onCompleteCommit(DataStreamOperatorContext ctx) throws Exception {
+  }
+  
   static public DataStreamSourceInterceptor[] load(DataStreamOperatorContext ctx, String[] type) throws Exception {
     if(type == null || type.length == 0) {
       return new DataStreamSourceInterceptor[0];

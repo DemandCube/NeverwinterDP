@@ -7,8 +7,9 @@ public class DataflowDescriptor {
   private String  id;
   private String  name;
   private String  dataflowAppHome;
-  private long    maxRunTime         = 90000;
-  private int     trackingWindowSize = 1000;
+  private long    maxRunTime             = 90000;
+  private int     trackingWindowSize     = 1000;
+  private int     slidingWindowSize      =   15;
  
   private MasterDescriptor master;
   private WorkerDescriptor worker;
@@ -41,6 +42,9 @@ public class DataflowDescriptor {
   
   public int getTrackingWindowSize() { return trackingWindowSize; }
   public void setTrackingWindowSize(int size) { this.trackingWindowSize = size; }
+
+  public int getSlidingWindowSize() { return slidingWindowSize; }
+  public void setSlidingWindowSize(int size) { this.slidingWindowSize = size; }
 
   public MasterDescriptor getMaster() { return master; }
   public void setMaster(MasterDescriptor master) { this.master = master; }

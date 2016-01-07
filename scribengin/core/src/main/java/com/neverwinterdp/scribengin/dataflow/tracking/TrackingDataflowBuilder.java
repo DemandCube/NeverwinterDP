@@ -26,6 +26,7 @@ public class TrackingDataflowBuilder {
   private int numOfWorker            = 2;
   private int numOfExecutorPerWorker = 5;
   private int trackingWindowSize     = 1000;
+  private int slidingWindowSize      =   15;
  
   public TrackingDataflowBuilder(String dataflowId) {
     this.dataflowId = dataflowId;
@@ -67,6 +68,11 @@ public class TrackingDataflowBuilder {
     return this;
   }
   
+  public TrackingDataflowBuilder setSlidingWindowSize(int size) {
+    slidingWindowSize = size;
+    return this;
+  }
+  
   public TrackingDataflowBuilder setNumOfWorker(int num) {
     numOfWorker = num;
     return this;
@@ -84,7 +90,8 @@ public class TrackingDataflowBuilder {
       setDefaultParallelism(8).
       setDefaultReplication(2).
       setMaxRuntime(trackingConfig.getValidatorMaxRuntime()).
-      setTrackingWindowSize(trackingWindowSize);
+      setTrackingWindowSize(trackingWindowSize).
+      setSlidingWindowSize(slidingWindowSize);
     dfl.getWorkerDescriptor().setNumOfInstances(numOfWorker);
     dfl.getWorkerDescriptor().setNumOfExecutor(numOfExecutorPerWorker);
     

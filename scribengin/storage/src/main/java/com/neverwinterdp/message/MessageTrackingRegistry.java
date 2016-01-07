@@ -76,8 +76,11 @@ public class MessageTrackingRegistry {
     
     int currentWindowId = windowIdTracker.currentInt();
     if(currentWindowId - completeWindowCount < windowIdLimit)  {
-      return windowIdTracker.nextInt();
-    } 
+      int retWindowId = windowIdTracker.nextInt();
+      //System.err.println("currentWindowId = " + currentWindowId + ", completeWindowCount = " + completeWindowCount +", windowId = " + retWindowId);
+      return retWindowId;
+    }
+    //System.err.println("currentWindowId = " + currentWindowId + ", completeWindowCount = " + completeWindowCount +", windowId = -1");
     return -1;
   }
   
@@ -266,7 +269,7 @@ public class MessageTrackingRegistry {
         
         WindowId windowId = windowIdNode.getDataAs(WindowId.class);
         Tracker tracker = windowId.getTracker(name, true);
-        tracker.setCompleteWindowCount(reporterToSave.getInSequenceCompleteWindow());
+        tracker.setCompleteWindowCount(reporterToSave.getCompleteWindowCount());
         transaction.setData(windowIdNode, windowId);
         transaction.commit();
         return true;

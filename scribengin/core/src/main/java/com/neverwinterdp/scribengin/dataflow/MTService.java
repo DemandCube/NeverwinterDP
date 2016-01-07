@@ -3,80 +3,92 @@ package com.neverwinterdp.scribengin.dataflow;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.neverwinterdp.message.MessageTracking;
-import com.neverwinterdp.message.WindowMessageTrackingStat;
 import com.neverwinterdp.message.MessageTrackingRegistry;
+import com.neverwinterdp.message.WindowMessageTrackingStat;
+import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 
-@Singleton
 public class MTService {
+  private String                     name;
   private int                        trackingWindowSize;
-  private AtomicInteger              windowIdTracker ;
-  private int                        currentChunkId ;
+  private int                        slidingWindowSize;
+  private AtomicInteger              windowTrackingIdTracker ;
+  private int                        currentWindowId = -1;
   private MessageTrackingRegistry    trackingRegistry;
   
-  private ConcurrentHashMap<Integer, WindowMessageTrackingStat> outputChunkStats = new ConcurrentHashMap<>();
-  private ConcurrentHashMap<Integer, WindowMessageTrackingStat> inputChunkStats  = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<Integer, WindowMessageTrackingStat> windowStats = new ConcurrentHashMap<>();
 
-  @Inject
-  public void onInject(DataflowRegistry dflRegistry) throws RegistryException {
+  public MTService(String name, DataflowRegistry dflRegistry) throws RegistryException {
+    this.name = name;
     DataflowDescriptor dflDescriptor = dflRegistry.getConfigRegistry().getDataflowDescriptor();
-    this.trackingRegistry = dflRegistry.getMessageTrackingRegistry();
+    this.trackingRegistry   = dflRegistry.getMessageTrackingRegistry();
     this.trackingWindowSize = dflDescriptor.getTrackingWindowSize();
-    windowIdTracker = new AtomicInteger(trackingWindowSize);
+    this.slidingWindowSize = dflDescriptor.getSlidingWindowSize();
+    windowTrackingIdTracker = new AtomicInteger(0);
   }
   
-  synchronized public MessageTracking nextMessageTracking() throws RegistryException {
-    int currentWindowId = windowIdTracker.incrementAndGet();
-    if(currentWindowId >= trackingWindowSize) {
-      currentChunkId = trackingRegistry.nextWindowId();
-      windowIdTracker.set(0);
-      currentWindowId = 0;
+  int nextWindowId(long maxWaitForDataRead) throws RegistryException, InterruptedException {
+    int windowId = trackingRegistry.nextWindowId("output", slidingWindowSize);
+    if(windowId > -1) return windowId;
+    
+    long stopTime = System.currentTimeMillis() + maxWaitForDataRead;
+    while(System.currentTimeMillis() < stopTime) {
+      windowId = trackingRegistry.nextWindowId("output", slidingWindowSize);
+      if(windowId > -1) return windowId;
+      Thread.sleep(500);
     }
-    return new MessageTracking(currentChunkId, currentWindowId);
+    return windowId;
+  }
+  
+  public boolean hasNextMessageTracking(long maxWaitForDataRead) throws RegistryException, InterruptedException {
+    if(currentWindowId == -1) {
+      currentWindowId = nextWindowId(maxWaitForDataRead);
+      if(currentWindowId == -1) return false;
+      windowTrackingIdTracker.set(0);
+    }
+    
+    if(windowTrackingIdTracker.get() < trackingWindowSize) {
+      return true;
+    } else {
+      currentWindowId = nextWindowId(maxWaitForDataRead);
+      if(currentWindowId == -1) return false;
+      windowTrackingIdTracker.set(0);
+    }
+    return true;
+  }
+  
+  public MessageTracking nextMessageTracking() throws RegistryException {
+    if(windowTrackingIdTracker.get() >= trackingWindowSize || currentWindowId == -1) {
+      throw new RegistryException(ErrorCode.Unknown, "the tracking window id or the current window id is not in the valid state");
+    }
+    
+    int windowTrackingId = windowTrackingIdTracker.getAndIncrement();
+    return new MessageTracking(currentWindowId, windowTrackingId);
   }
 
-  public void logInput(MessageTracking mTracking) throws RegistryException {
-    log(inputChunkStats, "input", mTracking);
-  }
-  
-  public void logOutput(MessageTracking mTracking) throws RegistryException {
-    log(outputChunkStats, "output", mTracking);
-  }
-  
-  void log(ConcurrentHashMap<Integer, WindowMessageTrackingStat> holder, String name, MessageTracking mTracking) throws RegistryException {
-    synchronized(holder) {
-      WindowMessageTrackingStat chunk = holder.get(mTracking.getWindowId());
-      if(chunk == null) {
-        chunk = new  WindowMessageTrackingStat(name, mTracking.getWindowId(), trackingWindowSize);
-        holder.put(chunk.getWindowId(), chunk);
-      }
-      chunk.log(mTracking);
+  public void log(MessageTracking mTracking) throws RegistryException {
+    WindowMessageTrackingStat windowStat = windowStats.get(mTracking.getWindowId());
+    if(windowStat == null) {
+      windowStat = new  WindowMessageTrackingStat(name, mTracking.getWindowId(), trackingWindowSize);
+      windowStats.put(windowStat.getWindowId(), windowStat);
     }
+    windowStat.log(mTracking);
   }
   
-  WindowMessageTrackingStat[] takeAll(ConcurrentHashMap<Integer, WindowMessageTrackingStat> map) {
-    synchronized(map) {
-      if(map.size() == 0) return null;
-      WindowMessageTrackingStat[] array = new WindowMessageTrackingStat[map.size()];
-      map.values().toArray(array);
-      map.clear();
-      return array;
-    }
+  WindowMessageTrackingStat[] takeAll() {
+    if(windowStats.size() == 0) return null;
+    WindowMessageTrackingStat[] array = new WindowMessageTrackingStat[windowStats.size()];
+    windowStats.values().toArray(array);
+    windowStats.clear();
+    return array;
   }
   
-  public void flushInput() throws RegistryException {
-    WindowMessageTrackingStat[] array = takeAll(inputChunkStats);
+  public void flush() throws RegistryException {
+    WindowMessageTrackingStat[] array = takeAll();
     if(array == null) return;
     for(WindowMessageTrackingStat sel : array) trackingRegistry.saveProgress(sel);
-  }
-  
-  public void flushOutput() throws RegistryException {
-    WindowMessageTrackingStat[] array = takeAll(outputChunkStats);
-    if(array == null) return;
-    for(WindowMessageTrackingStat sel : array) trackingRegistry.saveProgress(sel);
+    System.err.println("MTService flush(), name = " + name + ", num of window = " + array.length);
   }
 }

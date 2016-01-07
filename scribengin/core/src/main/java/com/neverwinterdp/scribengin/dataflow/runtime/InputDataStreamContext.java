@@ -4,10 +4,10 @@ import com.neverwinterdp.message.Message;
 import com.neverwinterdp.message.MessageTracking;
 import com.neverwinterdp.message.MessageTrackingLog;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
-import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
 import com.neverwinterdp.scribengin.dataflow.DataStreamSourceInterceptor;
 import com.neverwinterdp.scribengin.dataflow.DataStreamType;
 import com.neverwinterdp.scribengin.dataflow.MTService;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.source.SourcePartition;
@@ -35,11 +35,11 @@ public class InputDataStreamContext {
     
     if(storageConfig.booleanAttribute(DataSet.DATAFLOW_SOURCE_INPUT, false)) {
       dataStreamType = DataStreamType.Input;
+      mtService = new MTService("input", ctx.getService(DataflowRegistry.class));
     }
     
     String interceptorTypes = storageConfig.attribute(DataSet.DATAFLOW_SOURCE_INTERCEPTORS);
     interceptor = DataStreamSourceInterceptor.load(ctx, StringUtil.toStringArray(interceptorTypes));
-    mtService = ctx.getService(MTService.class);
   }
   
   public DataStreamType getDataStreamType() { return dataStreamType; }
@@ -47,13 +47,24 @@ public class InputDataStreamContext {
   public void stopInput() { stopInput = true; }
   
   public Message nextMessage(DataStreamOperatorRuntimeContext ctx, long maxWaitForDataRead) throws Exception {
+    try {
     if(stopInput) return null;
+    
+    if(dataStreamType == DataStreamType.Input) {
+      if(!mtService.hasNextMessageTracking(maxWaitForDataRead)) return null;
+    }
+    
     Message message = assignedPartitionReader.next(maxWaitForDataRead);
     if (message != null) {
-      if(this.dataStreamType == DataStreamType.Input) {
-        MessageTracking messageTracking = createMessageTracking(ctx);
+      if(dataStreamType == DataStreamType.Input) {
+        MessageTracking messageTracking = mtService.nextMessageTracking();
+        String[] tag = { 
+          "vm:" + ctx.getVM().getId(), "executor:" + ctx.getTaskExecutor().getId()
+        };
+        messageTracking.add(new MessageTrackingLog("input", tag));
+        
         message.setMessageTracking(messageTracking);
-        mtService.logInput(messageTracking);
+        mtService.log(messageTracking);
       }
       
       for (DataStreamSourceInterceptor sel : interceptor) {
@@ -61,15 +72,29 @@ public class InputDataStreamContext {
       }
     }
     return message;
+    } catch(Throwable t) {
+      t.printStackTrace();
+      return null;
+    }
   }
   
-  public void prepareCommit() throws Exception {
+  public void prepareCommit(DataStreamOperatorRuntimeContext ctx) throws Exception {
     assignedPartitionReader.prepareCommit();
+    for (DataStreamSourceInterceptor sel : interceptor) {
+      sel.onPrepareCommit(ctx);
+    }
   }
 
-  public void completeCommit() throws Exception {
+  public void completeCommit(DataStreamOperatorRuntimeContext ctx) throws Exception {
     assignedPartitionReader.completeCommit();
-    if(dataStreamType == DataStreamType.Input) mtService.flushInput();
+    
+    for (DataStreamSourceInterceptor sel : interceptor) {
+      sel.onCompleteCommit(ctx);
+    }
+    
+    if(dataStreamType == DataStreamType.Input) {
+      mtService.flush();
+    }
   }
 
   public void rollback() throws Exception {
@@ -78,14 +103,5 @@ public class InputDataStreamContext {
 
   public void close() throws Exception {
     assignedPartitionReader.close();
-  }
-  
-  MessageTracking createMessageTracking(DataStreamOperatorContext ctx) throws Exception {
-    MessageTracking mTracking = mtService.nextMessageTracking();
-    String[] tag = { 
-      "vm:" + ctx.getVM().getId(), "executor:" + ctx.getTaskExecutor().getId()
-    };
-    mTracking.add(new MessageTrackingLog("input", tag));
-    return mTracking;
   }
 }

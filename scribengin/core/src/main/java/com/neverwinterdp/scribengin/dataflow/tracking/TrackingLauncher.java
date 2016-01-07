@@ -53,6 +53,12 @@ public class TrackingLauncher  extends SubCommand {
   @Parameter(names = "--dataflow-num-of-executor-per-worker", description = "")
   private int numOfExecutorPerWorker = 2;
   
+  @Parameter(names = "--dataflow-tracking-window-size", description = "")
+  private int trackingWindowSize = 1000;
+  
+  @Parameter(names = "--dataflow-sliding-window-size", description = "")
+  private int slidingWindowSize = 100;
+  
   @Parameter(names = "--validator-num-of-reader", description = "")
   private int validatorNumOfReader = 3;
   
@@ -70,7 +76,8 @@ public class TrackingLauncher  extends SubCommand {
     dflBuilder.
       setNumOfWorker(numOfWorker).
       setNumOfExecutorPerWorker(numOfExecutorPerWorker).
-      setTrackingWindowSize(10000);
+      setTrackingWindowSize(trackingWindowSize).
+      setSlidingWindowSize(slidingWindowSize);
     
     if("hdfs".equalsIgnoreCase(dataflowStorage)) {
       dflBuilder.setHDFSAggregateOutput();

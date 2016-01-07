@@ -39,6 +39,11 @@ public class Dataflow<IN, OUT> {
     return this;
   }
   
+  public Dataflow<IN, OUT> setSlidingWindowSize(int size) {
+    dataflowDescriptor.setSlidingWindowSize(size);;
+    return this;
+  }
+  
   public Dataflow<IN, OUT> setDefaultParallelism(int parallelism) {
     dataflowDescriptor.getStreamConfig().setParallelism(parallelism);
     return this;

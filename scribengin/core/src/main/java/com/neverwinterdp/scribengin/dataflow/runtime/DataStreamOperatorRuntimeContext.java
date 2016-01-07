@@ -121,7 +121,7 @@ public class DataStreamOperatorRuntimeContext implements DataStreamOperatorConte
       OutputDataStreamContext ctx = i.next();
       ctx.prepareCommit(this);
     }
-    inputContext.prepareCommit();;
+    inputContext.prepareCommit(this);
   }
   
   private void completeCommit() throws Exception {
@@ -132,7 +132,7 @@ public class DataStreamOperatorRuntimeContext implements DataStreamOperatorConte
     }
     //The source should commit after sink commit. In the case the source or sink does not support
     //2 phases commit, it will cause the data to duplicate only, not loss
-    inputContext.completeCommit();
+    inputContext.completeCommit(this);
   }
   
   public void commit() throws Exception {

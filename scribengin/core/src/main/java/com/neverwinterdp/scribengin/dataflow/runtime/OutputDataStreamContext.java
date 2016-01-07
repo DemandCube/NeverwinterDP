@@ -4,10 +4,10 @@ import com.neverwinterdp.message.Message;
 import com.neverwinterdp.message.MessageTracking;
 import com.neverwinterdp.message.MessageTrackingLog;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
-import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
 import com.neverwinterdp.scribengin.dataflow.DataStreamSinkInterceptor;
 import com.neverwinterdp.scribengin.dataflow.DataStreamType;
 import com.neverwinterdp.scribengin.dataflow.MTService;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.sink.Sink;
@@ -30,14 +30,13 @@ public class OutputDataStreamContext {
       assignedPartition = sink.getPartitionStream(partitionId);
     }
     assignedPartitionWriter = assignedPartition.getWriter();
-    mtService = ctx.getService(MTService.class);
     
     StorageConfig storageConfig = storage.getStorageConfig();
     
     if(storageConfig.booleanAttribute(DataSet.DATAFLOW_SINK_OUTPUT, false)) {
       dataStreamType = DataStreamType.Output;
+      mtService = new MTService("output", ctx.getService(DataflowRegistry.class));
     }
-    
     
     String interceptorTypes = storageConfig.attribute(DataSet.DATAFLOW_SINK_INTERCEPTORS);
     interceptor = DataStreamSinkInterceptor.load(ctx, StringUtil.toStringArray(interceptorTypes));
@@ -53,20 +52,24 @@ public class OutputDataStreamContext {
           "vm:" + ctx.getVM().getId(), "executor:" + ctx.getTaskExecutor().getId()
       };
       messageTracking.add(new MessageTrackingLog("output", tag));
-      mtService.logOutput(messageTracking);
+      mtService.log(messageTracking);
     }
   }
 
   public void prepareCommit(DataStreamOperatorRuntimeContext ctx) throws Exception {
     assignedPartitionWriter.prepareCommit();
-    for(DataStreamSinkInterceptor sel : interceptor) sel.onPrepareCommit(ctx);
+    for(DataStreamSinkInterceptor sel : interceptor) {
+      sel.onPrepareCommit(ctx);
+    }
   }
 
   public void completeCommit(DataStreamOperatorRuntimeContext ctx) throws Exception {
     assignedPartitionWriter.completeCommit();
-    for(DataStreamSinkInterceptor sel : interceptor) sel.onCompleteCommit(ctx);
+    for(DataStreamSinkInterceptor sel : interceptor) {
+      sel.onCompleteCommit(ctx);
+    }
     if(dataStreamType == DataStreamType.Output) {
-      mtService.flushOutput();
+      mtService.flush();
     }
   }
   

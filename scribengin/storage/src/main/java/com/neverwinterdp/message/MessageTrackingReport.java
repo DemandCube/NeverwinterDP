@@ -41,9 +41,19 @@ public class MessageTrackingReport {
   }
   
   @JsonIgnore
-  public int getInSequenceCompleteWindow() {
+  public int getInSequenceCompleteWindowCount() {
     if(finishedWindowStats.size() == 0) return 0;
     return finishedWindowStats.get(0).getToWindowId();
+  }
+  
+  @JsonIgnore
+  public int getCompleteWindowCount() {
+    int count = 0 ;
+    for(int i = 0; i < finishedWindowStats.size(); i++) {
+      WindowMessageTrackingStats stats = finishedWindowStats.get(i);
+      count += (stats.getToWindowId() - stats.getFromWindowId()) + 1;
+    }
+    return count;
   }
   
   @JsonIgnore
