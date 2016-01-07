@@ -39,6 +39,11 @@ public class VMTMValidatorKafkaApp extends VMApp {
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, trackingConfig);
     validatorService.addReader(new KafkaTrackingMessageReader(trackingConfig));
     validatorService.start();
+    
+    logger.info("reportPath     = "            + trackingConfig.getReportPath());
+    logger.info("maxRuntime     = "            + trackingConfig.getValidatorMaxRuntime());
+    logger.info("validate topic = " + trackingConfig.getKafkaValidateTopic());
+    
     validatorService.awaitForTermination(trackingConfig.getValidatorMaxRuntime(), TimeUnit.MILLISECONDS);
     kafkaClient.close();
   }
@@ -102,10 +107,10 @@ public class VMTMValidatorKafkaApp extends VMApp {
             try {
               while(true) {
                 KafkaPartitionReader pReader = readerQueue.take();
-                Message rec = null;
+                Message message = null;
                 int count = 0;
-                while((rec = pReader.nextAs(Message.class, 100)) != null) {
-                  TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(rec.getData(), TrackingMessage.class);
+                while((message = pReader.nextAs(Message.class, 100)) != null) {
+                  TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(message.getData(), TrackingMessage.class);
                   onTrackingMessage(tMesg);
                   count++;
                   if(count == 5000) break;
@@ -113,7 +118,8 @@ public class VMTMValidatorKafkaApp extends VMApp {
                 readerQueue.offer(pReader);
               }
             } catch (InterruptedException e) {
-            } catch (Exception e) {
+              logger.error("Interrupted", e);
+            } catch (Throwable e) {
               logger.error("Fail to load the data from kafka", e);
             } finally {
               try {
@@ -137,9 +143,5 @@ public class VMTMValidatorKafkaApp extends VMApp {
     }
     
     abstract public void onTrackingMessage(TrackingMessage tMesg) throws Exception ;
-  }
-  
-  abstract public class KafkaTopicReaderThread extends Thread {
-    
   }
 }
