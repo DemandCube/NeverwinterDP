@@ -18,7 +18,8 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
   private DataStreamOperatorDescriptor                       dsOperatorDescriptor;
   private DataStreamOperator                                 operator;
   private DataStreamOperatorRuntimeContext                   context;
-  
+
+  private int  windowSize = 5000; 
   private long startTime         = 0;
   private long lastFlushTime     = System.currentTimeMillis();
   private long lastNoMessageTime = lastFlushTime;
@@ -40,6 +41,7 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
     TaskExecutorDescriptor taskExecutorDescriptor = taskContext.getTaskExecutorDescriptor();
     context = new DataStreamOperatorRuntimeContext(workerService, taskExecutorDescriptor, dsOperatorDescriptor, report);
     dRegistry.getTaskRegistry().save(dsOperatorDescriptor, report);
+    windowSize = dRegistry.getConfigRegistry().getDataflowDescriptor().getTrackingWindowSize();
   }
   
   public DedicatedTaskContext<DataStreamOperatorDescriptor> getTaskContext() { return taskContext; }
@@ -88,7 +90,7 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
       }
       report.addAccRuntime(currentTime - startTime);
       
-      if(context.isComplete() || report.getProcessCount() > 10000 || lastFlushTime + 5000 < currentTime) {
+      if(context.isComplete() || report.getProcessCount() > windowSize || lastFlushTime + 5000 < currentTime) {
         context.commit();
       }
     } catch(InterruptedException ex) {

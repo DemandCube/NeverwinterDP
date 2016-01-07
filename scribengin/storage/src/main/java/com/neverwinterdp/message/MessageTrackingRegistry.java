@@ -269,7 +269,7 @@ public class MessageTrackingRegistry {
         
         WindowId windowId = windowIdNode.getDataAs(WindowId.class);
         Tracker tracker = windowId.getTracker(name, true);
-        tracker.setCompleteWindowCount(reporterToSave.getCompleteWindowCount());
+        tracker.setCompleteWindowCount(reporterToSave.getInSequenceCompleteWindowCount());
         transaction.setData(windowIdNode, windowId);
         transaction.commit();
         return true;
