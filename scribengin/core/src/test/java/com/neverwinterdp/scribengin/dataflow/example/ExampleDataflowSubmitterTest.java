@@ -30,8 +30,6 @@ public class ExampleDataflowSubmitterTest {
   
   LocalScribenginCluster localScribenginCluster ;
   ScribenginShell shell;
-  String inputTopic = "input.topic";
-  String outputTopic = "output.topic";
   int numMessages = 10000;
   
   
@@ -57,14 +55,15 @@ public class ExampleDataflowSubmitterTest {
   
   @Test
   public void TestExampleDataflowSubmitterTest() throws Exception{
-    sendKafkaData(localScribenginCluster.getKafkaCluster().getKafkaConnect());
+    ExampleDataflowSubmitter eds = new ExampleDataflowSubmitter(shell, new Properties());
     
+    sendKafkaData(localScribenginCluster.getKafkaCluster().getKafkaConnect(), eds.getInputTopic());
     
-    ExampleDataflowSubmitter eds = new ExampleDataflowSubmitter(shell);
     eds.submitDataflow(localScribenginCluster.getKafkaCluster().getZKConnect());
     shell.execute("registry dump");
     
-    ConsumerIterator<byte[], byte[]> it = getConsumerIterator(localScribenginCluster.getKafkaCluster().getZKConnect());
+    ConsumerIterator<byte[], byte[]> it = 
+        getConsumerIterator(localScribenginCluster.getKafkaCluster().getZKConnect(), eds.getOutputTopic());
     
     int numReceived = 0;
     boolean[] assertionArray = new boolean[numMessages];
@@ -88,7 +87,7 @@ public class ExampleDataflowSubmitterTest {
   }
   
   
-  private void sendKafkaData(String kafkaConnect){
+  private void sendKafkaData(String kafkaConnect, String inputTopic){
     Properties props = new Properties();
     props.put("metadata.broker.list", kafkaConnect);
     props.put("serializer.class", "kafka.serializer.StringEncoder");
@@ -103,7 +102,7 @@ public class ExampleDataflowSubmitterTest {
     producer.close();
   }
   
-  private ConsumerIterator<byte[], byte[]> getConsumerIterator(String zkConnect){
+  private ConsumerIterator<byte[], byte[]> getConsumerIterator(String zkConnect, String outputTopic){
     Properties props = new Properties();
     props.put("zookeeper.connect", zkConnect);
     props.put("group.id", "default");

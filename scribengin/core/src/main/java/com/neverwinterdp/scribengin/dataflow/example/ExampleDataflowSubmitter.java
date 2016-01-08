@@ -1,5 +1,7 @@
 package com.neverwinterdp.scribengin.dataflow.example;
 
+import java.util.Properties;
+
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
@@ -12,24 +14,38 @@ import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class ExampleDataflowSubmitter {
-  private String dataflowID = "ExampleDataflow";
-  private int defaultReplication = 1;
-  private int defaultParallelism = 8;
-  private int maxRunTime         = 10000;
-  private int windowSize         = 1000;
-  private int slidingWindowSize  = 500;
+  private String dataflowID;
+  private int defaultReplication;
+  private int defaultParallelism;
+  private int maxRunTime;
+  private int windowSize;
+  private int slidingWindowSize;
   
-  private int numOfWorker                = 4;
-  private int numOfExecutorPerWorker     = 2;
+  private int numOfWorker;
+  private int numOfExecutorPerWorker;
   
-  private String inputTopic = "input.topic";
-  private String outputTopic = "output.topic";
+  private String inputTopic;
+  private String outputTopic;
   
   private ScribenginShell shell;
   private DataflowSubmitter submitter;
   
-  public ExampleDataflowSubmitter(ScribenginShell shell){
+  public ExampleDataflowSubmitter(ScribenginShell shell, Properties props){
     this.shell = shell;
+    
+    dataflowID = props.getProperty("dataflow.id", "ExampleDataflow");
+    defaultReplication = Integer.parseInt(props.getProperty("dataflow.replication", "1"));
+    defaultParallelism = Integer.parseInt(props.getProperty("dataflow.parallelism", "8"));
+    maxRunTime         = Integer.parseInt(props.getProperty("dataflow.maxRunTime", "10000"));
+    windowSize         = Integer.parseInt(props.getProperty("dataflow.windowSize", "1000"));
+    slidingWindowSize  = Integer.parseInt(props.getProperty("dataflow.slidingWindowSize", "500"));
+    
+    numOfWorker                = Integer.parseInt(props.getProperty("dataflow.numWorker", "4"));
+    numOfExecutorPerWorker     = Integer.parseInt(props.getProperty("dataflow.numExecutorPerWorker", "2"));
+    
+    inputTopic = props.getProperty("dataflow.inputTopic", "input.topic");
+    outputTopic = props.getProperty("dataflow.outputTopic", "output.topic");
+    
   }
   
   public void submitDataflow(String kafkaZkConnect) throws Exception{
@@ -84,4 +100,100 @@ public class ExampleDataflowSubmitter {
     
   }
   
+  
+  public String getDataflowID() {
+    return dataflowID;
+  }
+
+  public void setDataflowID(String dataflowID) {
+    this.dataflowID = dataflowID;
+  }
+
+  public int getDefaultReplication() {
+    return defaultReplication;
+  }
+
+  public void setDefaultReplication(int defaultReplication) {
+    this.defaultReplication = defaultReplication;
+  }
+
+  public int getDefaultParallelism() {
+    return defaultParallelism;
+  }
+
+  public void setDefaultParallelism(int defaultParallelism) {
+    this.defaultParallelism = defaultParallelism;
+  }
+
+  public int getMaxRunTime() {
+    return maxRunTime;
+  }
+
+  public void setMaxRunTime(int maxRunTime) {
+    this.maxRunTime = maxRunTime;
+  }
+
+  public int getWindowSize() {
+    return windowSize;
+  }
+
+  public void setWindowSize(int windowSize) {
+    this.windowSize = windowSize;
+  }
+
+  public int getSlidingWindowSize() {
+    return slidingWindowSize;
+  }
+
+  public void setSlidingWindowSize(int slidingWindowSize) {
+    this.slidingWindowSize = slidingWindowSize;
+  }
+
+  public int getNumOfWorker() {
+    return numOfWorker;
+  }
+
+  public void setNumOfWorker(int numOfWorker) {
+    this.numOfWorker = numOfWorker;
+  }
+
+  public int getNumOfExecutorPerWorker() {
+    return numOfExecutorPerWorker;
+  }
+
+  public void setNumOfExecutorPerWorker(int numOfExecutorPerWorker) {
+    this.numOfExecutorPerWorker = numOfExecutorPerWorker;
+  }
+
+  public String getInputTopic() {
+    return inputTopic;
+  }
+
+  public void setInputTopic(String inputTopic) {
+    this.inputTopic = inputTopic;
+  }
+
+  public String getOutputTopic() {
+    return outputTopic;
+  }
+
+  public void setOutputTopic(String outputTopic) {
+    this.outputTopic = outputTopic;
+  }
+
+  public ScribenginShell getShell() {
+    return shell;
+  }
+
+  public void setShell(ScribenginShell shell) {
+    this.shell = shell;
+  }
+
+  public DataflowSubmitter getSubmitter() {
+    return submitter;
+  }
+
+  public void setSubmitter(DataflowSubmitter submitter) {
+    this.submitter = submitter;
+  }
 }
