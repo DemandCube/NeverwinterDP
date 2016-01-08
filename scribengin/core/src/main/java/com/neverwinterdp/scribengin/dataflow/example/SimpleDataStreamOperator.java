@@ -1,0 +1,24 @@
+package com.neverwinterdp.scribengin.dataflow.example;
+
+import java.util.Set;
+
+import com.neverwinterdp.message.Message;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperator;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
+
+public class SimpleDataStreamOperator extends DataStreamOperator{
+
+  @Override
+  public void process(DataStreamOperatorContext ctx, Message record)
+      throws Exception {
+    
+    //Get all sinks
+    Set<String> sink = ctx.getAvailableOutputs();
+    //For each sink, write the record
+    for(String selSink : sink) {
+      ctx.write(selSink, record);
+    }
+    //ctx.commit();
+  }
+
+}

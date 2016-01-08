@@ -4,7 +4,7 @@ Operator Development Guide
 #Contents#
 1. [Overview](#overview)
 2. [A Simple Operator](#a-simple-operator)
-3. [A Better Operator](#a-better-operator)
+3. [A Committing Operator](#a-committing-operator)
 4. [Filtering Data and Choosing a Sink to Write to](#filtering-data-and-choosing-a-sink-to-write-to)
 5. [Enhancing Data](#enhancing-data)
 
@@ -14,7 +14,7 @@ An Operator is how Scribengin processes data.  When data comes in through a sour
 
 #A Simple Operator
 
-This operator is super simple.  The process() method gets passed in the DataStreamOperatorContext and a Message.  This operator simply takes the Message it receives (from the source) and writes it to all available sinks.
+This operator is super simple.  The process() method gets passed in the DataStreamOperatorContext and a Message.  This operator simply takes the Message it receives (from the source) and writes it to all available sinks.  The Operator will automatically handle committing.
 
 ```java
 import java.util.Set;
@@ -35,14 +35,12 @@ public class SimpleOperator extends DataStreamOperator {
     for(String selSink : sink) {
       ctx.write(selSink, record);
     }
-    //Commit the records to the sink
-    ctx.commit();
   }
 }
 ```
 
 
-#A Better Operator
+#A Committing Operator
 
 How do we improve?  
 
@@ -52,8 +50,8 @@ Therefor, we would benefit from not running commit() every time we get a message
 
 ```java
 
-public class BetterOperator extends DataStreamOperator {
-  int count = 0 ;
+public class CommittingOperator extends DataStreamOperator {
+  private int count = 0 ;
   
   @Override
   public void process(DataStreamOperatorContext ctx, Message record) throws Exception {
@@ -80,8 +78,7 @@ In this example, we'll demonstrate how to choose which sink to use.
 This example assumes you have set up two separate and available sinks.  This will be done when setting up your dataflow.  For information on how to setup your dataflow, refer to [the Dataflow Submission API Guide](dataflowSubmission.md)
 
 ```java
-public class SplittingOperator extends DataStreamOperator {
-  int count = 0;
+public class FilteringOperator extends DataStreamOperator {
   
   @Override
   public void process(DataStreamOperatorContext ctx, Message record) throws Exception {
@@ -100,12 +97,7 @@ public class SplittingOperator extends DataStreamOperator {
       //Otherwise we'll write it to a sink called "everything-else-sink"
       ctx.write("everything-else-sink", record)
     }
-    
-    //Then go through the usual commit() logic
-    count++ ;
-    if(count > 0 && count % 10000 == 0) {
-      ctx.commit();
-    }
+
   }
 }
 ```
@@ -121,13 +113,15 @@ In this next example, we'll be enhancing our data by adding a prefix to all our 
 ```java
 import java.io.ByteArrayOutputStream;
 
-public class SplittingOperator extends DataStreamOperator {
-  int count = 0;
-  static byte[] enhance = new String("Scribengin ROCKS! ").getBytes();
-  static ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+public class EnhancingOperator extends DataStreamOperator {
+  private static byte[] enhance = new String("Scribengin ROCKS! ").getBytes();
+  private ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
 
   @Override
   public void process(DataStreamOperatorContext ctx, Message record) throws Exception {
+
+    //Reset our ByteArrayOutputStream so we can reuse it
+    outputStream.reset();
 
     //We'll use a ByteArrayOutputStream to 
     //  concatenate our static enhancement string with
@@ -138,20 +132,12 @@ public class SplittingOperator extends DataStreamOperator {
     //Set the record's data to our newly enhanced data
     record.setData(outputStream.toByteArray());
 
-    //Reset our ByteArrayOutputStream so we can reuse it next time
-    outputStream.reset();
-    
     //Write the modified record to all sinks
     Set<String> sink = ctx.getAvailableOutputs();
     for(String selSink : sink) {
       ctx.write(selSink, record);
     }
     
-    //Then go through the usual commit() logic
-    count++ ;
-    if(count > 0 && count % 10000 == 0) {
-      ctx.commit();
-    }
   }
 }
 ```

@@ -21,13 +21,107 @@ To be able to submit your dataflow to Scribengin, first you'll need to :
 3. Start a Scribengin Cluster
 4. Write a dataflow submission application like below
 
+
 ---
 
 #Terminology#
 
 DataSet - Input/Output sources and sinks
 
-Operator - Reads in from a dataset or another operator, and outputs to an operator or dataset.  Can perform filtering, transformation, or enhancement of data passing through
+Operator - Reads in from a dataset or another operator, and outputs to an operator or dataset.  Can perform filtering, transformation, or enhancement of data passing through.  For a guide on how to write your own Operator, refer to [the Operator Developer Guide](operator-dev-guide.md)
+
+---
+#Simple Dataflow#
+
+The following is a very simple dataflow and operator.  What this will set up is reading data from one kafka topic and simply moving it to another topic.
+
+![Simple API Example](images/API_Example_Simple.png)
+
+```java
+
+//The main function will handle actually submitting 
+//the job to the Scribengin registry for running
+public static void main(String[] args) {
+    //Set up your connection to Scribengin, and point 
+    //your registry config to the appropriate registry -
+    //This will be your zookeeper connection
+    RegistryConfig registryConfig = RegistryConfig.getDefault();
+    registryConfig.setConnect("zookeeper-1:2181");
+    //Connect to registry
+    Registry registry = new RegistryImpl(registryConfig);
+    registry.connect();
+    //Create a connection to Scribengin
+    ScribenginClient client = new ScribenginClient(registry);
+
+    //Build the dataflow (See buildDataflow function below for configuration)
+    Dataflow<Message, Message> dfl = buildDataflow();
+    //Get the dataflow's descriptor
+    DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
+    //Output the descriptor in human-readable JSON
+    System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
+    
+    //Ensure all your sources and sinks are up and running first, then...
+
+    //Submit the dataflow and wait until it starts running
+    new DataflowSubmitter(client, dfl).submit().waitForRunning(60000);
+}
+
+public Dataflow<Message, Message> buildDataflow() {
+    //Create a new dataflow, specify input/output objects
+    Dataflow<Message, Message> dfl = new Dataflow<>(dataflowId);
+
+    dfl.
+      useWireDataSetFactory(new KafkaWireDataSetFactory("zookeeper-1:2181")).
+      setDefaultParallelism(8).
+      setDefaultReplication(2).
+      setMaxRuntime(trackingConfig.getValidatorMaxRuntime()).
+      setTrackingWindowSize(trackingWindowSize).
+      setSlidingWindowSize(slidingWindowSize);
+
+    //Number of workers (YARN containers) to request
+    dfl.getWorkerDescriptor().setNumOfInstances(numOfWorker);
+    //Number of executors per worker (basically, number of threads per worker)
+    dfl.getWorkerDescriptor().setNumOfExecutor(numOfExecutorPerWorker);
+    
+    //Define our input source - set name, ZK host:port, and input topic name
+    KafkaDataSet<TrackingMessage> inputDs = 
+        dfl.createInput(new KafkaStorageConfig("input", "zookeeper-1:2181", "input.topic"));
+    
+    //Define our output sink - set name, ZK host:port, and output topic name
+    DataSet<TrackingMessage> outputDs = 
+        dfl.createOutput(new KafkaStorageConfig("output", "zookeeper-1:2181", "ouput.topic"));
+    
+    //Define which operator to use.  
+    //This will be the logic that ties the input to the output
+    Operator<TrackingMessage, TrackingMessage> operator     = dfl.createOperator("simpleOperator", SimpleOperator.class);
+    
+    //Connect your input to the operator
+    inputDs.useRawReader().connect(operator);
+    //Connect your operator to the output
+    operator.connect(outputDs);
+
+    return dfl;
+  }
+
+  //Our simple operator
+  //For more information on writing an operator, see the Operator Dev Guide
+  public class SimpleOperator extends DataStreamOperator {
+  
+  //Your Operator must at least override the method process()
+  @Override
+  public void process(DataStreamOperatorContext ctx, Message record) throws Exception {
+
+    //Get all sinks
+    Set<String> sink = ctx.getAvailableOutputs();
+    //For each sink, write the record
+    for(String selSink : sink) {
+      ctx.write(selSink, record);
+    }
+    //Commit the records to the sink
+    ctx.commit();
+  }
+}
+```
 
 ---
 #Sample Dataflow#
@@ -37,6 +131,7 @@ The dataflow we'll be building in this example will look like this.  We'll be re
 We'll be stringing this all together by wiring together different Operators.  For a guide on how to write your own Operator, refer to [the Operator Developer Guide](operator-dev-guide.md)
 
 ![API Example](images/API_Example.png)
+
 
 ---
 
@@ -86,13 +181,17 @@ public class DataflowLauncher {
   private int numOfExecutorPerWorker = 2;
   
   //This function focuses on uploading the dataflow jar and then submitting a dataflow configuration
-  public void execute(Shell s) throws Exception {
+  public static void main(String args[]) throws Exception {
     //Connect with Scribengin
-    ScribenginShell shell = (ScribenginShell) s;
-    VMClient vmClient = shell.getVMClient();
+    RegistryConfig registryConfig = RegistryConfig.getDefault();
+    registryConfig.setConnect("zookeeper-1:2181");
+    Registry registry = new RegistryImpl(registryConfig);
+    registry.connect();
+    ScribenginClient client = new ScribenginClient(registry);
+
     
     //Upload the dataflow jar
-    vmClient.uploadApp(localAppHome, dfsAppHome);
+    client.vmClient.uploadApp(localAppHome, dfsAppHome);
     
     //In the next steps, we'll build our configuration for the dataflow
 
@@ -126,7 +225,7 @@ public class DataflowLauncher {
     //Ensure all your sources and sinks are up and running first, then...
 
     //Submit the dataflow and wait until it starts running
-    new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForRunning(60000);
+    new DataflowSubmitter(client, dfl).submit().waitForRunning(60000);
     
   }
 
