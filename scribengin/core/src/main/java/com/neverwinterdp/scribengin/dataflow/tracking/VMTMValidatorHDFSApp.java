@@ -104,7 +104,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
       }
       
       ExecutorService validatorService = Executors.newFixedThreadPool(3);
-      for(int i = 0; i < 3; i++) {
+      for(int i = 0; i < 5; i++) {
         validatorService.submit(new HDFSPartitionStreamReader(streamReaderQueue, tmQueue));
       }
       
@@ -136,10 +136,10 @@ public class VMTMValidatorHDFSApp extends VMApp {
     void doRun() throws Exception {
       while(true) {
         HDFSSourcePartitionStreamReader streamReader = streamReaderQueue.poll(10, TimeUnit.MILLISECONDS);
-        Message record = null;
+        Message message = null;
         int count = 0;
-        while((record = nextWithRetry(streamReader, 1000, 3)) != null) {
-          byte[] data = record.getData();
+        while((message = nextWithRetry(streamReader, 1000, 3)) != null) {
+          byte[] data = message.getData();
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(data, TrackingMessage.class);
           if(!tmQueue.offer(tMesg, 90000, TimeUnit.MILLISECONDS)) {
             throw new Exception("Cannot queue the messages after 5s, increase the buffer");
