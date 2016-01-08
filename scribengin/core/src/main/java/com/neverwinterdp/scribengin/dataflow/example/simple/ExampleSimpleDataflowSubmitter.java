@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.example;
+package com.neverwinterdp.scribengin.dataflow.example.simple;
 
 import java.util.Properties;
 
@@ -13,13 +13,11 @@ import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
 
-public class ExampleDataflowSubmitter {
+public class ExampleSimpleDataflowSubmitter {
   private String dataflowID;
   private int defaultReplication;
   private int defaultParallelism;
   private int maxRunTime;
-  private int windowSize;
-  private int slidingWindowSize;
   
   private int numOfWorker;
   private int numOfExecutorPerWorker;
@@ -30,24 +28,46 @@ public class ExampleDataflowSubmitter {
   private ScribenginShell shell;
   private DataflowSubmitter submitter;
   
-  public ExampleDataflowSubmitter(ScribenginShell shell, Properties props){
+  public ExampleSimpleDataflowSubmitter(ScribenginShell shell){
+    this(shell, new Properties());
+  }
+  
+  /**
+   * Constructor - sets shell to access Scribengin and configuration properties 
+   * @param shell ScribenginShell to connect to Scribengin with
+   * @param props Properties to configure the dataflow
+   */
+  public ExampleSimpleDataflowSubmitter(ScribenginShell shell, Properties props){
+    //This it the shell to communicate with Scribengin with
     this.shell = shell;
     
+    //The dataflow's ID.  All dataflows require a unique ID when running
     dataflowID = props.getProperty("dataflow.id", "ExampleDataflow");
-    defaultReplication = Integer.parseInt(props.getProperty("dataflow.replication", "1"));
-    defaultParallelism = Integer.parseInt(props.getProperty("dataflow.parallelism", "8"));
-    maxRunTime         = Integer.parseInt(props.getProperty("dataflow.maxRunTime", "10000"));
-    windowSize         = Integer.parseInt(props.getProperty("dataflow.windowSize", "1000"));
-    slidingWindowSize  = Integer.parseInt(props.getProperty("dataflow.slidingWindowSize", "500"));
     
+    //The default replication factor for Kafka
+    defaultReplication = Integer.parseInt(props.getProperty("dataflow.replication", "1"));
+    //The number of DataStreams to deploy 
+    defaultParallelism = Integer.parseInt(props.getProperty("dataflow.parallelism", "8"));
+    //Max amount of time (in ms) to run the dataflow 
+    maxRunTime         = Integer.parseInt(props.getProperty("dataflow.maxRunTime", "10000"));
+    
+    //The number of workers to deploy (i.e. YARN containers)
     numOfWorker                = Integer.parseInt(props.getProperty("dataflow.numWorker", "4"));
+    //The number of executors per worker (i.e. threads per YARN container)
     numOfExecutorPerWorker     = Integer.parseInt(props.getProperty("dataflow.numExecutorPerWorker", "2"));
     
+    //The kafka input topic
     inputTopic = props.getProperty("dataflow.inputTopic", "input.topic");
+    //The kafka output topic
     outputTopic = props.getProperty("dataflow.outputTopic", "output.topic");
     
   }
   
+  /**
+   * The logic to submit the dataflow
+   * @param kafkaZkConnect [host]:[port] of Kafka's Zookeeper conenction 
+   * @throws Exception
+   */
   public void submitDataflow(String kafkaZkConnect) throws Exception{
     Dataflow<Message, Message> dfl = buildDataflow(kafkaZkConnect);
     //Get the dataflow's descriptor
@@ -62,18 +82,28 @@ public class ExampleDataflowSubmitter {
     
   }
   
+  /**
+   * Wait for the dataflow to complete within the given timeout
+   * @param timeout Timeout in ms
+   * @throws Exception
+   */
   public void waitForDataflowCompletion(int timeout) throws Exception{
     this.submitter.waitForFinish(timeout);
   }
   
+  /**
+   * The logic to build the dataflow configuration
+   * @param kafkaZkConnect [host]:[port] of Kafka's Zookeeper conenction 
+   * @return
+   */
   public Dataflow<Message,Message> buildDataflow(String kafkaZkConnect){
+    //Create the new Dataflow object
+    // <Message,Message> pertains to the <input,output> object for the data
     Dataflow<Message,Message> dfl = new Dataflow<Message,Message>(dataflowID);
     dfl.
       setDefaultParallelism(defaultParallelism).
       setDefaultReplication(defaultReplication).
-      setMaxRuntime(maxRunTime).
-      setTrackingWindowSize(windowSize).
-      setSlidingWindowSize(slidingWindowSize);
+      setMaxRuntime(maxRunTime);
     
     dfl.getWorkerDescriptor().setNumOfInstances(numOfWorker);
     dfl.getWorkerDescriptor().setNumOfExecutor(numOfExecutorPerWorker);
@@ -97,7 +127,6 @@ public class ExampleDataflowSubmitter {
     operator.connect(outputDs);
 
     return dfl;
-    
   }
   
   
@@ -133,21 +162,6 @@ public class ExampleDataflowSubmitter {
     this.maxRunTime = maxRunTime;
   }
 
-  public int getWindowSize() {
-    return windowSize;
-  }
-
-  public void setWindowSize(int windowSize) {
-    this.windowSize = windowSize;
-  }
-
-  public int getSlidingWindowSize() {
-    return slidingWindowSize;
-  }
-
-  public void setSlidingWindowSize(int slidingWindowSize) {
-    this.slidingWindowSize = slidingWindowSize;
-  }
 
   public int getNumOfWorker() {
     return numOfWorker;

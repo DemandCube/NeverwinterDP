@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.example;
+package com.neverwinterdp.scribengin.dataflow.example.simple;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -23,16 +23,21 @@ import org.junit.Test;
 
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
+import com.neverwinterdp.scribengin.dataflow.example.simple.ExampleSimpleDataflowSubmitter;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.util.JSONSerializer;
 
-public class ExampleDataflowSubmitterTest {
+public class ExampleSimpleDataflowSubmitterTest {
   
   LocalScribenginCluster localScribenginCluster ;
   ScribenginShell shell;
   int numMessages = 10000;
   
-  
+  /**
+   * Setup a local Scribengin cluster
+   * This sets up kafka, zk, and vm-master
+   * @throws Exception
+   */
   @Before
   public void setup() throws Exception{
     String BASE_DIR = "build/working";
@@ -48,28 +53,49 @@ public class ExampleDataflowSubmitterTest {
     
   }
   
+  /**
+   * Destroy the local Scribengin cluster and clean up 
+   * @throws Exception
+   */
   @After
   public void teardown() throws Exception{
     localScribenginCluster.shutdown();
   }
   
+  /**
+   * Test our Simple Dataflow Submitter
+   * 1. Write data to Kafka into the input topic
+   * 2. Run our dataflow
+   * 3. Use a Kafka Consumer to read the data in the output topic and make sure its all present 
+   * @throws Exception
+   */
   @Test
-  public void TestExampleDataflowSubmitterTest() throws Exception{
-    ExampleDataflowSubmitter eds = new ExampleDataflowSubmitter(shell, new Properties());
+  public void TestExampleSimpleDataflowSubmitterTest() throws Exception{
+    //Create a new DataflowSubmitter with default properties
+    ExampleSimpleDataflowSubmitter eds = new ExampleSimpleDataflowSubmitter(shell);
     
+    //Populate kafka input topic with data
     sendKafkaData(localScribenginCluster.getKafkaCluster().getKafkaConnect(), eds.getInputTopic());
     
+    //Submit the dataflow and wait for it to start running
     eds.submitDataflow(localScribenginCluster.getKafkaCluster().getZKConnect());
+    //Output the registry for debugging purposes
     shell.execute("registry dump");
     
+    //Get basic info on the dataflow
+    shell.execute("dataflow info --dataflow-id ExampleDataflow");
+    
+    //Get the kafka output topic iterator
     ConsumerIterator<byte[], byte[]> it = 
         getConsumerIterator(localScribenginCluster.getKafkaCluster().getZKConnect(), eds.getOutputTopic());
     
+    //Do some very simple verification to ensure our data has been moved correctly
     int numReceived = 0;
     boolean[] assertionArray = new boolean[numMessages];
     
     //while(it.hasNext()){
     for(int i = 0; i < numMessages; i++){
+      //This is how we serialize our data back into our Messsage object
       Message message = JSONSerializer.INSTANCE.fromBytes(it.next().message(), Message.class);
       String data = new String(message.getData());
       assertionArray[Integer.parseInt(data)] = true;
@@ -82,7 +108,7 @@ public class ExampleDataflowSubmitterTest {
       assertTrue(b);
     }
     
-    shell.execute("dataflow info --dataflow-id ExampleDataflow");
+    
     
   }
   
