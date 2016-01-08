@@ -26,6 +26,7 @@ public class ExampleDataflowSubmitter {
   private String outputTopic = "output.topic";
   
   private ScribenginShell shell;
+  private DataflowSubmitter submitter;
   
   public ExampleDataflowSubmitter(ScribenginShell shell){
     this.shell = shell;
@@ -41,8 +42,12 @@ public class ExampleDataflowSubmitter {
     //Ensure all your sources and sinks are up and running first, then...
 
     //Submit the dataflow and wait until it starts running
-    new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForRunning(60000);
+    submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForRunning(60000);
     
+  }
+  
+  public void waitForDataflowCompletion(int timeout) throws Exception{
+    this.submitter.waitForFinish(timeout);
   }
   
   public Dataflow<Message,Message> buildDataflow(String kafkaZkConnect){

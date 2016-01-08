@@ -57,35 +57,14 @@ public class ExampleDataflowSubmitterTest {
   
   @Test
   public void TestExampleDataflowSubmitterTest() throws Exception{
-    Properties props = new Properties();
-    
-    props.put("metadata.broker.list", localScribenginCluster.getKafkaCluster().getKafkaConnect());
-    props.put("serializer.class", "kafka.serializer.StringEncoder");
-    props.put("partitioner.class", "kafka.producer.DefaultPartitioner");
-    props.put("request.required.acks", "1");
-    props.put("zookeeper.connect", localScribenginCluster.getKafkaCluster().getZKConnect());
-    props.put("group.id", "default");
-    ProducerConfig config = new ProducerConfig(props);
-    
-    Producer<String, String> producer = new Producer<String, String>(config);
-    for(int i = 0; i < numMessages; i++){
-      producer.send(new KeyedMessage<String, String>(inputTopic, "test", Integer.toString(i)));
-    }
-    producer.close();
+    sendKafkaData(localScribenginCluster.getKafkaCluster().getKafkaConnect());
     
     
     ExampleDataflowSubmitter eds = new ExampleDataflowSubmitter(shell);
     eds.submitDataflow(localScribenginCluster.getKafkaCluster().getZKConnect());
     shell.execute("registry dump");
     
-    
-    ConsumerConfig consumerConfig = new ConsumerConfig(props);
-    ConsumerConnector consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
-    Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
-    topicCountMap.put(outputTopic, new Integer(1));
-    Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumerConnector.createMessageStreams(topicCountMap);
-    KafkaStream<byte[], byte[]> stream =  consumerMap.get(outputTopic).get(0);
-    ConsumerIterator<byte[], byte[]> it = stream.iterator();
+    ConsumerIterator<byte[], byte[]> it = getConsumerIterator(localScribenginCluster.getKafkaCluster().getZKConnect());
     
     int numReceived = 0;
     boolean[] assertionArray = new boolean[numMessages];
@@ -104,9 +83,39 @@ public class ExampleDataflowSubmitterTest {
       assertTrue(b);
     }
     
-    shell.execute("dataflow stop --dataflow-id ExampleDataflow");
+    shell.execute("dataflow info --dataflow-id ExampleDataflow");
+    
   }
   
+  
+  private void sendKafkaData(String kafkaConnect){
+    Properties props = new Properties();
+    props.put("metadata.broker.list", kafkaConnect);
+    props.put("serializer.class", "kafka.serializer.StringEncoder");
+    props.put("partitioner.class", "kafka.producer.DefaultPartitioner");
+    props.put("request.required.acks", "1");
+    ProducerConfig config = new ProducerConfig(props);
+    
+    Producer<String, String> producer = new Producer<String, String>(config);
+    for(int i = 0; i < numMessages; i++){
+      producer.send(new KeyedMessage<String, String>(inputTopic, "test", Integer.toString(i)));
+    }
+    producer.close();
+  }
+  
+  private ConsumerIterator<byte[], byte[]> getConsumerIterator(String zkConnect){
+    Properties props = new Properties();
+    props.put("zookeeper.connect", zkConnect);
+    props.put("group.id", "default");
+    
+    ConsumerConfig consumerConfig = new ConsumerConfig(props);
+    ConsumerConnector consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
+    Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
+    topicCountMap.put(outputTopic, new Integer(1));
+    Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumerConnector.createMessageStreams(topicCountMap);
+    KafkaStream<byte[], byte[]> stream =  consumerMap.get(outputTopic).get(0);
+    return stream.iterator();
+  }
   
 }
 
