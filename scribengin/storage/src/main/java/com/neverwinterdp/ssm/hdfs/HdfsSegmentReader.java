@@ -29,21 +29,25 @@ public class HdfsSegmentReader extends SegmentReader {
     this.storageLocation = storageLoc;
     
     segmentFullPath = storageLocation + "/" + segment.getSegmentId() + ".dat";
-    dataIs  = fs.open(new Path(segmentFullPath)) ;
+    
+    
     if(segmentReadDescriptor.getCommitReadDataPosition() > 0) {
       currentReadPos = segmentReadDescriptor.getCommitReadDataPosition();
-      dataIs.seek(currentReadPos);
     }
   }
 
+  void openDataInputStream() throws IOException {
+    dataIs  = fs.open(new Path(segmentFullPath)) ;
+    if(currentReadPos > 0) dataIs.seek(currentReadPos);
+  }
+  
   @Override
   protected byte[] dataNextRecord() throws IOException {
     try {
+      if(dataIs == null) openDataInputStream();
       return dataNextRecordWithRetry();
     } catch(IOException ex) {
-      System.err.println(
-          "dataNextRecord() error, currentReadPos = " + currentReadPos +
-          ", commit pos = " + segment.getDataSegmentLastCommitPos());
+      System.err.println("dataNextRecord() currentReadPos = " + currentReadPos + ", commit pos = " + segment.getDataSegmentLastCommitPos());
       ex.printStackTrace();
       throw ex;
     }
@@ -58,8 +62,7 @@ public class HdfsSegmentReader extends SegmentReader {
       return data;
     } catch(EOFException ex) {
       dataIs.close();
-      dataIs  = fs.open(new Path(segmentFullPath)) ;
-      dataIs.seek(currentReadPos);
+      openDataInputStream();
     }
     int size    = dataIs.readInt();
     byte[] data = new byte[size];
