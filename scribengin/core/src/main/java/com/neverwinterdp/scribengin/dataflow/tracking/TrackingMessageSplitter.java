@@ -22,8 +22,8 @@ public class TrackingMessageSplitter extends DataStreamOperator {
       ctx.write("splitter-to-info", record);
     }
     count++ ;
-    if(count > 0 && count % 10000 == 0) {
-      ctx.commit();
-    }
+//    if(count > 0 && count % 10000 == 0) {
+//      ctx.commit();
+//    }
   }
 }

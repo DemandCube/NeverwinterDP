@@ -87,7 +87,7 @@ public class TaskExecutorService<T> {
       try {
         while(true) {
           for(int i = 0; i < taskExecutors.size(); i++) {
-            Thread.sleep(3000);
+            Thread.sleep(5000);
             taskExecutors.get(i).onSwitchTaskSlot();
           }
         }
