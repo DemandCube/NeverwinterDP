@@ -79,6 +79,7 @@ cd NeverwinterDP
 ####Developer Info
 - [How the code is organized](docs/code-organization-howto.md)
 - [Code Conventions](docs/code-convention-howto.md)
+- [Learn to Write a Dataflow](docs/dataflowDevelopment/dataflowDevTableOfContents.md)
 - [Operator Development Guide](docs/operator-dev-guide.md)
 
 ####Release
