@@ -68,6 +68,15 @@ public class Node {
   public <T> T getDataAs(Class<T> type) throws RegistryException { 
     return registry.getDataAs(path, type);
   }
+  
+  public <T> T getDataAsWithDefault(Class<T> type, T defaultValue) throws RegistryException { 
+    try {
+      return registry.getDataAs(path, type);
+    } catch(RegistryException ex) {
+      if(ex.getErrorCode() == ErrorCode.NoNode) return defaultValue;
+      throw ex;
+    }
+  }
 
   public <T> T getDataAs(Class<T> type, DataMapperCallback<T> callback) throws RegistryException { 
     return registry.getDataAs(path, type, callback);

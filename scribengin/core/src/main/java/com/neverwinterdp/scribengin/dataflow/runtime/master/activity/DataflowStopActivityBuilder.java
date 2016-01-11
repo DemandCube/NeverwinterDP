@@ -6,6 +6,8 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.neverwinterdp.message.MessageTrackingRegistry;
+import com.neverwinterdp.message.MessageTrackingReport;
 import com.neverwinterdp.registry.activity.Activity;
 import com.neverwinterdp.registry.activity.ActivityBuilder;
 import com.neverwinterdp.registry.activity.ActivityExecutionContext;
@@ -59,7 +61,7 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      if(DataflowLifecycleStatus.RUNNING != dflRegistry.getStatus()) {
+      if(DataflowLifecycleStatus.RUNNING != dflRegistry.getDataflowStatus()) {
         ctx.setAbort(true);
         return ;
       }
@@ -84,11 +86,13 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      if(DataflowLifecycleStatus.RUNNING != dflRegistry.getStatus()) {
+      if(DataflowLifecycleStatus.RUNNING != dflRegistry.getDataflowStatus()) {
         ctx.setAbort(true);
         return ;
       }
       
+      
+      System.err.println("BroadcastStopInputStepExecutor: start broadcast StopInput");
       List<String> workers = dflRegistry.getWorkerRegistry().getActiveWorkerIds() ;
       TXEvent pEvent = new TXEvent("stop-input", DataflowWorkerEvent.StopInput);
       TXEventBroadcaster broadcaster = dflRegistry.getWorkerRegistry().getWorkerEventBroadcaster();
@@ -98,6 +102,24 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
         throw new Exception("Expect " + workers.size() + ", but only get " + countNotification) ;
       }
       watcher.complete();
+      System.err.println("BroadcastStopInputStepExecutor: complete broadcast StopInput, num of worker = " + workers.size());
+      
+      MessageTrackingRegistry mtRegistry = dflRegistry.getMessageTrackingRegistry();
+      int checkCount = 0;
+      boolean noMessageLeft = false;
+      while(checkCount < 60 && !noMessageLeft) {
+        Thread.sleep(500);
+        MessageTrackingReport inputReporter  = mtRegistry.getMessageTrackingReporter("input");
+        MessageTrackingReport outputReporter = mtRegistry.getMessageTrackingReporter("output");
+        long inputCount  = inputReporter.getTrackingCount();
+        long outputCount = outputReporter.getTrackingCount();
+        System.err.println("BroadcastStopInputStepExecutor: inputCount = " + inputCount + ", outputCount = " + outputCount);
+        if(inputCount == outputCount) noMessageLeft = true;
+        checkCount++;
+      }
+      if(!noMessageLeft) {
+        throw new Exception("Expect no message in the scribengin") ;
+      }
     }
   }
   
@@ -109,7 +131,7 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      dflRegistry.setStatus(DataflowLifecycleStatus.STOP);
+      dflRegistry.setDataflowStatus(DataflowLifecycleStatus.STOP);
       System.err.println("DataflowService Stop Activity set STOP status done!!!") ;
     }
   }

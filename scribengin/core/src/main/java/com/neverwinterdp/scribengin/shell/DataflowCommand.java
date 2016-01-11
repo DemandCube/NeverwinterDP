@@ -209,7 +209,7 @@ public class DataflowCommand extends Command {
       while(stopTime > System.currentTimeMillis()) {
         info(dRegistry, console, dataflowId);
         if(stopOnDflStatus != null) {
-          DataflowLifecycleStatus dflStatus = dRegistry.getStatus();
+          DataflowLifecycleStatus dflStatus = dRegistry.getDataflowStatus();
           if(dflStatus.equalOrGreaterThan(stopOnDflStatus)) break;
         }
         Thread.sleep(period);
@@ -256,6 +256,9 @@ public class DataflowCommand extends Command {
     @Parameter(names = "--timeout" , description = "Dump the information period")
     private long timeout = 3 * 60 * 60 * 1000;
     
+    @Parameter(names = "--report-period" , description = "")
+    private long reportPeriod = 1000000000;
+    
     @Override
     public void execute(Shell shell, CommandInput cmdInput) throws Exception {
       ScribenginShell scribenginShell = (ScribenginShell) shell;
@@ -265,10 +268,16 @@ public class DataflowCommand extends Command {
       
       DataflowLifecycleStatus stopOnDflStatus = DataflowLifecycleStatus.valueOf(stopOnStatus);
       long stopTime = System.currentTimeMillis() + timeout;
+      int reportTime = 0 ;
       while(stopTime > System.currentTimeMillis()) {
-        DataflowLifecycleStatus dflStatus = dRegistry.getStatus();
+        DataflowLifecycleStatus dflStatus = dRegistry.getDataflowStatus();
         if(dflStatus.equalOrGreaterThan(stopOnDflStatus)) break;
+        if(reportTime > reportPeriod) {
+          shell.execute("dataflow info" + "  --dataflow-id " + dataflowId + " --show-history-workers");
+          reportTime = 0;
+        }
         Thread.sleep(1000);
+        reportTime += 1000;
       }
     }
     

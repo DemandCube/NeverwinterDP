@@ -36,11 +36,12 @@ abstract public class SegmentReader {
     return getCurrentReadPosition() < segment.getDataSegmentLastCommitPos();
   }
   
-  public void updateSegmentDescriptor() throws RegistryException {
+  public DataAvailability updateAndGetSegmentDescriptor() throws RegistryException, IOException {
     segment = registry.getSegmentBySegmentId(segment.getSegmentId());
+    return getDataAvailability();
   }
   
-  public DataAvailability updateAndGetDataAvailability() throws IOException {
+  public DataAvailability getDataAvailability() throws IOException {
     long currentReadPos = getCurrentReadPosition();
     long lastCommitPos  = segment.getDataSegmentLastCommitPos();
     if(currentReadPos < lastCommitPos) return DataAvailability.YES;
@@ -65,7 +66,8 @@ abstract public class SegmentReader {
   public void prepareCommit(Transaction trans) throws IOException, RegistryException {
     segmentReadDescriptor.setCommitReadDataPosition(readRecordIndex);
     segmentReadDescriptor.setCommitReadDataPosition(getCurrentReadPosition());
-    if(segment.getStatus() == SegmentDescriptor.Status.WritingComplete || segment.getStatus() == SegmentDescriptor.Status.Complete) {
+    if(segment.getStatus() == SegmentDescriptor.Status.WritingComplete || 
+       segment.getStatus() == SegmentDescriptor.Status.Complete) {
       if(segment.getDataSegmentLastCommitPos() == segmentReadDescriptor.getCommitReadDataPosition()) {
         complete = true;
       }

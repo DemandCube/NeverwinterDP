@@ -15,10 +15,10 @@ import com.neverwinterdp.vm.client.shell.SubCommand;
 
 public class TrackingLauncher  extends SubCommand {
   @Parameter(names = "--local-app-home", required = true, description = "Generator num of chunk")
-  private String localAppHome        = null;
+  String localAppHome        = null;
   
   @Parameter(names = "--dfs-app-home", description = "Generator num of chunk")
-  private String dfsAppHome        = "/applications/tracking-sample";
+  String dfsAppHome        = "/applications/tracking-sample";
   
   @Parameter(names = "--tracking-report-path", description = "Generator num of chunk")
   private String trackingReportPath  = "/applications/tracking-sample/reports";
@@ -69,9 +69,42 @@ public class TrackingLauncher  extends SubCommand {
   public void execute(Shell s, CommandInput cmdInput) throws Exception {
     ScribenginShell shell = (ScribenginShell) s;
     VMClient vmClient = shell.getVMClient();
-    
+    TrackingDataflowBuilder dflBuilder = setup(vmClient);
     vmClient.uploadApp(localAppHome, dfsAppHome);
-    
+    execute(shell, dflBuilder);
+  }
+  
+  public void execute(ScribenginShell shell, TrackingDataflowBuilder dflBuilder) throws Exception {
+    VMClient vmClient = shell.getVMClient();
+    submitVMGenerator(vmClient, dflBuilder);
+    submitDataflow(shell, dflBuilder.buildDataflow());
+    submitVMValidator(vmClient, dflBuilder);
+  }
+
+  protected void submitVMGenerator(VMClient vmClient, TrackingDataflowBuilder dflBuilder) throws Exception {
+    VMConfig vmGeneratorConfig = dflBuilder.buildVMTMGeneratorKafka();
+    new VMSubmitter(vmClient, dfsAppHome, vmGeneratorConfig).submit().waitForRunning(30000);
+  }
+  
+  protected DataflowSubmitter submitDataflow(ScribenginShell shell, Dataflow<TrackingMessage, TrackingMessage> dfl) throws Exception {
+    DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
+    System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
+    DataflowSubmitter submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl);
+    submitter.submit().waitForRunning(60000);
+    return submitter;
+  }
+  
+  protected void submitVMValidator(VMClient vmClient, TrackingDataflowBuilder dflBuilder) throws Exception {
+    VMConfig vmValidatorConfig = null;
+    if("hdfs".equalsIgnoreCase(dataflowStorage)) {
+      vmValidatorConfig = dflBuilder.buildHDFSVMTMValidator();
+    } else {
+      vmValidatorConfig = dflBuilder.buildKafkaVMTMValidator();
+    }
+    new VMSubmitter(vmClient, dfsAppHome, vmValidatorConfig).submit().waitForRunning(30000);
+  }
+  
+  protected TrackingDataflowBuilder setup(VMClient vmClient) {
     TrackingDataflowBuilder dflBuilder = new TrackingDataflowBuilder(dataflowId);
     dflBuilder.
       setNumOfWorker(numOfWorker).
@@ -100,25 +133,9 @@ public class TrackingLauncher  extends SubCommand {
     
     dflBuilder.getTrackingConfig().setValidatorMaxRuntime(validatorMaxRuntime);
     dflBuilder.getTrackingConfig().setValidatorNumOfReader(validatorNumOfReader);
-    
-    VMConfig vmGeneratorConfig = dflBuilder.buildVMTMGeneratorKafka();
-    new VMSubmitter(vmClient, dfsAppHome, vmGeneratorConfig).submit().waitForRunning(30000);
-    
-    Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
-    DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
-    System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
-    
-    new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForRunning(60000);
-    
-    VMConfig vmValidatorConfig = null;
-    if("hdfs".equalsIgnoreCase(dataflowStorage)) {
-      vmValidatorConfig = dflBuilder.buildHDFSVMTMValidator();
-    } else {
-      vmValidatorConfig = dflBuilder.buildKafkaVMTMValidator();
-    }
-    new VMSubmitter(vmClient, dfsAppHome, vmValidatorConfig).submit().waitForRunning(30000);
+    return dflBuilder;
   }
-
+  
   @Override
   public String getDescription() { return "Tracking app launcher"; }
 }

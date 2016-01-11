@@ -30,7 +30,7 @@ public class InputDataStreamContext {
   public InputDataStreamContext(DataStreamOperatorRuntimeContext ctx, Storage storage, int partitionId) throws Exception {
     source = storage.getSource().getLatestSourcePartition();
     assignedPartition = source.getPartitionStream(partitionId);
-    assignedPartitionReader = assignedPartition.getReader("DataflowTask");
+    assignedPartitionReader = assignedPartition.getReader("DataflowInput-" + ctx.getDescriptor().getOperatorName());
     StorageConfig storageConfig = storage.getStorageConfig();
     
     if(storageConfig.booleanAttribute(DataSet.DATAFLOW_SOURCE_INPUT, false)) {
@@ -43,6 +43,8 @@ public class InputDataStreamContext {
   }
   
   public DataStreamType getDataStreamType() { return dataStreamType; }
+  
+  public boolean isStopInput() { return stopInput; }
   
   public void stopInput() { stopInput = true; }
   

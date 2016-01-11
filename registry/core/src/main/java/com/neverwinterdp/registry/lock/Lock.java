@@ -22,6 +22,7 @@ public class Lock {
   
   private String      description;
   private LockWatcher currentLockWatcher;
+  private boolean     debug = false;
   
   public Lock(Registry registry, String dir, String name) {
     this(registry, dir, name, "") ;
@@ -41,6 +42,8 @@ public class Lock {
   public String getLockDir() { return this.lockDir ; }
   
   public String getDescription() { return this.description; }
+  
+  public void setDebug(boolean b) { debug = b; }
   
   public LockId lock(long timeout) throws RegistryException {
     if(lockId != null) {
@@ -66,12 +69,21 @@ public class Lock {
   public <T> T execute(BatchOperations<T> op, int retry, long timeoutThreshold) throws RegistryException {
     RegistryException lastError = null ;;
     for(int i = 0;i < retry; i++) {
+      long startDebugLock = 0l;
       try {
+        if(debug) {
+          startDebugLock = System.currentTimeMillis();
+        }
         lock(timeoutThreshold * (i + 1)) ;
         T result = op.execute(registry);
         return result;
       } catch (RegistryException e) {
-        if(e.getErrorCode() == ErrorCode.Connection || e.getErrorCode() == ErrorCode.Timeout) {
+        if(debug && lockId == null) {
+          long waitTime = System.currentTimeMillis() - startDebugLock;
+          System.err.println("DEBUG [Lock]: " + description + " - waitTime = " + waitTime + ", lockId = " + lockId);
+        }
+        
+        if(e.getErrorCode().isConnectionProblem()) {
           lastError = e;
         } else {
           throw e;

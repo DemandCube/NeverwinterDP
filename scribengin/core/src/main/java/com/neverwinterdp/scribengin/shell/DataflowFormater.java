@@ -48,7 +48,8 @@ public class DataflowFormater {
   
   public String getInfo() throws RegistryException {
     Node dataflowNode = registry.get(dataflowPath);
-    DataflowLifecycleStatus  status = dataflowNode.getChild("status").getDataAs(DataflowLifecycleStatus.class);
+    DataflowLifecycleStatus  status = 
+      dataflowNode.getChild(DataflowRegistry.DATAFLOW_STATUS).getDataAs(DataflowLifecycleStatus.class);
     TabularFormater infoFt = new TabularFormater("Dataflow Info", "");
     infoFt.addRow("Id", dataflowNode.getName());
     infoFt.addRow("Status", status);

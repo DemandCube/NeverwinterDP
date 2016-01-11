@@ -22,9 +22,9 @@ public class MasterRegistry {
   public MasterRegistry(Registry registry, String dataflowPath) throws RegistryException {
     this.registry         = registry;
     this.dataflowPath     = dataflowPath;
-    this.masterNode       = registry.get(dataflowPath + "/master");
-    this.masterLeaderNode = registry.get(dataflowPath + "/master/leader");
-    this.activitiesNode   = registry.get(dataflowPath + "/master/activities");
+    masterNode       = registry.get(dataflowPath + "/master");
+    masterLeaderNode = registry.get(dataflowPath + "/master/leader");
+    activitiesNode   = registry.get(dataflowPath + "/master/activities");
     masterEventBroadcaster = new TXEventBroadcaster(registry, dataflowPath + "/" + MASTER_EVENT_PATH, false);
   }
   

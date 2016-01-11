@@ -28,7 +28,11 @@ public class DataflowRegistry {
   final static public String DATAFLOW_ACTIVE_PATH  = SCRIBENGIN_PATH + "/dataflows/active";
   final static public String DATAFLOW_HISTORY_PATH = SCRIBENGIN_PATH + "/dataflows/history";
   
+  final static public String DATAFLOW_STATUS       = "dataflow-status";
+  final static public String REGISTRY_STATUS       = "registry-status";
   final static public String NOTIFICATIONS_PATH    = "notifications";
+  
+  static public enum RegistryStatus { Create, InitStructure, Ready } 
   
   @Inject
   @Named("dataflow.registry.path")
@@ -37,7 +41,8 @@ public class DataflowRegistry {
   @Inject
   private Registry registry;
 
-  private Node statusNode;
+  private Node  registryStatusNode;
+  private Node  dataflowStatusNode;
 
   private ConfigRegistry          configRegistry;
   private StreamRegistry          streamRegistry;
@@ -47,14 +52,41 @@ public class DataflowRegistry {
   private DataflowTaskRegistry    taskRegistry;
   private MessageTrackingRegistry messageTrackingRegistry;
 
-  private SequenceIdTracker    workerIdTracker;
-  private SequenceIdTracker    masterIdTracker;
+  private SequenceIdTracker       workerIdTracker;
+  private SequenceIdTracker       masterIdTracker;
   
   private Notifier dataflowTaskNotifier;
   private Notifier dataflowWorkerNotifier;
   
   public DataflowRegistry() {
   }
+  
+  
+  public DataflowRegistry(Registry registry, DataflowDescriptor config) throws RegistryException {
+    this.registry = registry;
+    dataflowPath = DATAFLOW_ALL_PATH + "/" + config.getId();
+    init();
+
+    if(!registry.exists(dataflowPath)) {
+      Node dataflowNode = registry.createIfNotExist(dataflowPath);
+      Transaction transaction = registry.getTransaction();
+      transaction.createChild(dataflowNode, REGISTRY_STATUS, RegistryStatus.Create, NodeCreateMode.PERSISTENT);
+      transaction.createChild(dataflowNode, DATAFLOW_STATUS, DataflowLifecycleStatus.CREATE, NodeCreateMode.PERSISTENT);
+      transaction.createChild(dataflowNode, "config", config, NodeCreateMode.PERSISTENT);
+      configRegistry.create(transaction);
+      streamRegistry.create(transaction);
+      operatorRegistry.create(transaction);
+      masterRegistry.create(transaction);
+      workerRegistry.create(transaction);
+      
+      String idTrackerPath = dataflowPath +  "/id-tracker"  ;
+      transaction.create(idTrackerPath, new byte[0], NodeCreateMode.PERSISTENT);
+      masterIdTracker.initRegistry(transaction);
+      workerIdTracker.initRegistry(transaction);
+      transaction.commit();
+    }
+  }
+  
   
   public DataflowRegistry(Registry registry, String dataflowPath) throws RegistryException {
     this.registry     = registry;
@@ -63,7 +95,8 @@ public class DataflowRegistry {
   }
   
   void init() throws RegistryException {
-    statusNode = registry.get(dataflowPath + "/status") ;
+    dataflowStatusNode       = registry.get(dataflowPath + "/" + DATAFLOW_STATUS) ;
+    registryStatusNode       = registry.get(dataflowPath + "/" + REGISTRY_STATUS) ;
     configRegistry   = new ConfigRegistry(registry, dataflowPath);
     streamRegistry   = new StreamRegistry(registry, dataflowPath);
     operatorRegistry = new OperatorRegistry(registry, dataflowPath);
@@ -88,27 +121,11 @@ public class DataflowRegistry {
     init();
   }
   
-  public String create(Registry registry, DataflowDescriptor config) throws RegistryException {
-    this.registry = registry;
-    dataflowPath = DATAFLOW_ALL_PATH + "/" + config.getId();
-    init();
-    
-    Node dataflowNode = registry.createIfNotExist(dataflowPath);
-    Transaction transaction = registry.getTransaction();
-    transaction.createChild(dataflowNode, "status", DataflowLifecycleStatus.CREATE, NodeCreateMode.PERSISTENT);
-    transaction.createChild(dataflowNode, "config", config, NodeCreateMode.PERSISTENT);
-    configRegistry.create(transaction);
-    streamRegistry.create(transaction);
-    operatorRegistry.create(transaction);
-    masterRegistry.create(transaction);
-    workerRegistry.create(transaction);
-    transaction.commit();
-    return dataflowPath;
-  }
-  
   public void initRegistry() throws RegistryException {
     try {
-      init();
+      RegistryStatus registryStatus = getRegistryStatus();
+      if(registryStatus != RegistryStatus.Create) return;
+      
       Transaction transaction = registry.getTransaction();
       configRegistry.initRegistry(transaction);
       streamRegistry.initRegistry(transaction);
@@ -118,16 +135,12 @@ public class DataflowRegistry {
       taskRegistry.initRegistry(transaction);
 
       messageTrackingRegistry.initRegistry(transaction);
-      
-      String idTrackerPath = dataflowPath +  "/id-tracker"  ;
-      transaction.create(idTrackerPath, new byte[0], NodeCreateMode.PERSISTENT);
-      masterIdTracker.initRegistry(transaction);
-      workerIdTracker.initRegistry(transaction);
-      
-      String notificationPath = dataflowPath +  "/" + NOTIFICATIONS_PATH;
+
+      String notificationPath = dataflowPath + "/" + NOTIFICATIONS_PATH;
       transaction.create(notificationPath, new byte[0], NodeCreateMode.PERSISTENT);
       dataflowTaskNotifier.initRegistry(transaction);
       dataflowWorkerNotifier.initRegistry(transaction);
+      transaction.setData(registryStatusNode, RegistryStatus.InitStructure);
       transaction.commit();
     } catch(Throwable ex) {
       ex.printStackTrace();
@@ -138,6 +151,23 @@ public class DataflowRegistry {
   public String getDataflowPath() { return this.dataflowPath; }
   
   public Registry getRegistry() { return this.registry ; }
+  
+  public RegistryStatus getRegistryStatus() throws RegistryException {
+    return registryStatusNode.getDataAs(RegistryStatus.class) ;
+  }
+  
+  public void setRegistryReadyStatus() throws RegistryException {
+    registryStatusNode.setData(RegistryStatus.Ready);
+  }
+  
+  public DataflowLifecycleStatus getDataflowStatus() throws RegistryException {
+    return dataflowStatusNode.getDataAs(DataflowLifecycleStatus.class) ;
+  }
+  
+  public void setDataflowStatus(DataflowLifecycleStatus status) throws RegistryException {
+    dataflowStatusNode.setData(status);
+  }
+  
   
   public ConfigRegistry getConfigRegistry() { return configRegistry; }
   
@@ -153,7 +183,7 @@ public class DataflowRegistry {
   
   public MessageTrackingRegistry getMessageTrackingRegistry() { return messageTrackingRegistry; }
   
-  public SequenceIdTracker getMasterTracker() { return masterIdTracker; }
+  public SequenceIdTracker getMasterIdTracker() { return masterIdTracker; }
   
   public SequenceIdTracker getWorkerIdTracker() { return workerIdTracker; }
   
@@ -161,16 +191,8 @@ public class DataflowRegistry {
   
   public Notifier getDataflowWorkerNotifier() { return this.dataflowWorkerNotifier ; }
   
-  public DataflowLifecycleStatus getStatus() throws RegistryException {
-    return statusNode.getDataAs(DataflowLifecycleStatus.class) ;
-  }
-  
-  public void setStatus(DataflowLifecycleStatus status) throws RegistryException {
-    statusNode.setData(status);
-  }
-  
-  static  public DataflowLifecycleStatus getStatus(Registry registry, String dataflowPath) throws RegistryException {
-    return registry.getDataAs(dataflowPath + "/status" , DataflowLifecycleStatus.class) ;
+  static  public DataflowLifecycleStatus getDataflowStatus(Registry registry, String dataflowPath) throws RegistryException {
+    return registry.getDataAs(dataflowPath + "/" + DATAFLOW_STATUS , DataflowLifecycleStatus.class) ;
   }
   
   static public ActivityRegistry getMasterActivityRegistry(Registry registry, String dataflowPath) throws RegistryException {

@@ -19,7 +19,6 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
   private DataStreamOperator                                 operator;
   private DataStreamOperatorRuntimeContext                   context;
 
-  private int  windowSize = 5000; 
   private long startTime         = 0;
   private long lastFlushTime     = System.currentTimeMillis();
   private long lastNoMessageTime = lastFlushTime;
@@ -41,7 +40,6 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
     TaskExecutorDescriptor taskExecutorDescriptor = taskContext.getTaskExecutorDescriptor();
     context = new DataStreamOperatorRuntimeContext(workerService, taskExecutorDescriptor, dsOperatorDescriptor, report);
     dRegistry.getTaskRegistry().save(dsOperatorDescriptor, report);
-    windowSize = dRegistry.getConfigRegistry().getDataflowDescriptor().getTrackingWindowSize();
   }
   
   public DedicatedTaskContext<DataStreamOperatorDescriptor> getTaskContext() { return taskContext; }
@@ -60,12 +58,16 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
   public void onEvent(TaskExecutorEvent event) throws Exception {
     if("StopInput".equals(event.getName())) {
       InputDataStreamContext inputContext = context.getInputDataStreamContext();
-      if(inputContext.getDataStreamType() == DataStreamType.Input) inputContext.stopInput();
+      if(inputContext.getDataStreamType() == DataStreamType.Input) {
+        inputContext.stopInput();
+        System.err.println("DataStreamOperatorTaskSlotExecutor: event StopInput");
+      }
     }
   }
   
   @Override
-  public void executeSlot() throws Exception {
+  public long executeSlot() throws Exception {
+    if(context.getInputDataStreamContext().isStopInput()) return 0l;
     startTime = System.currentTimeMillis();
     DataStreamOperatorReport report = context.getReport();
     int recCount = 0;
@@ -88,15 +90,10 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
         report.setLastAssignedWithNoMessageProcess(0);
         lastNoMessageTime = -1;
       }
+      long runtime = currentTime - startTime;
       report.addAccRuntime(currentTime - startTime);
-      
-      if(recCount > 0) {
-        context.commit();
-      }
-      
-//      if(context.isComplete() || report.getProcessCount() > windowSize || lastFlushTime + 5000 < currentTime) {
-//        context.commit();
-//      }
+      if(recCount > 0) context.commit();
+      return runtime;
     } catch(InterruptedException ex) {
       throw ex ;
     } catch(RegistryException error) {
@@ -106,6 +103,7 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
       error.printStackTrace();
       System.err.println("Rollback");
       rollback(error);
+      return System.currentTimeMillis() - startTime;
     } catch(Throwable t) {
       System.err.println("Catch Throwable");
       t.printStackTrace();

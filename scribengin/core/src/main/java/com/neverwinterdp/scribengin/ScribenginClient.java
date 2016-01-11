@@ -46,7 +46,7 @@ public class ScribenginClient {
     DataflowLifecycleStatus status = null;
     long stopTime = System.currentTimeMillis() + timeout;
     while(System.currentTimeMillis() < stopTime) {
-      String statusPath = dataflowPath + "/status";
+      String statusPath = dataflowPath + "/" + DataflowRegistry.DATAFLOW_STATUS;
       if(getRegistry().exists(statusPath)) {
         status = registry.get(statusPath).getDataAs(DataflowLifecycleStatus.class) ;
         if(status != null && status.equalOrGreaterThan(exepectStatus)) {

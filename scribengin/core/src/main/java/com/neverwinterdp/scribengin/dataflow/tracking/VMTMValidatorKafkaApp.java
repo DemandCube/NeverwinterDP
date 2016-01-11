@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 
@@ -43,9 +44,12 @@ public class VMTMValidatorKafkaApp extends VMApp {
     logger.info("reportPath     = "            + trackingConfig.getReportPath());
     logger.info("maxRuntime     = "            + trackingConfig.getValidatorMaxRuntime());
     logger.info("validate topic = " + trackingConfig.getKafkaValidateTopic());
-    
+    long startWait = System.currentTimeMillis();
     validatorService.awaitForTermination(trackingConfig.getValidatorMaxRuntime(), TimeUnit.MILLISECONDS);
     kafkaClient.close();
+    long waitTime = System.currentTimeMillis() - startWait;
+    System.err.println("VMTMValidatorKafkaApp: Finish run(), waitTime = " + waitTime);
+    logger.info("Finish run()");
   }
 
   public class KafkaTrackingMessageReader extends TrackingMessageReader {
@@ -101,6 +105,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
     public void start() {
       int NUM_OF_THREAD = 3;
       executorService = Executors.newFixedThreadPool(NUM_OF_THREAD);
+      final AtomicInteger accCommit = new AtomicInteger();
       for(int i = 0; i < NUM_OF_THREAD; i++) {
         Runnable runnable = new Runnable() {
           public void run() {
@@ -109,16 +114,20 @@ public class VMTMValidatorKafkaApp extends VMApp {
                 KafkaPartitionReader pReader = readerQueue.take();
                 Message message = null;
                 int count = 0;
-                while((message = pReader.nextAs(Message.class, 100)) != null) {
+                while((message = pReader.nextAs(Message.class, 250)) != null) {
                   TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(message.getData(), TrackingMessage.class);
                   onTrackingMessage(tMesg);
                   count++;
                   if(count == 5000) break;
                 }
+                accCommit.addAndGet(count);
+                //System.err.println("VMTMValidatorKafkaApp:  reader = "  + pReader.getPartition() + ", commit = " + count + ", acc commit = " + accCommit.get());
+                pReader.commit();
                 readerQueue.offer(pReader);
               }
             } catch (InterruptedException e) {
               logger.error("Interrupted", e);
+              System.err.println("VMTMValidatorKafkaApp:  KafkaPartitionReader is interruptted" );
             } catch (Throwable e) {
               logger.error("Fail to load the data from kafka", e);
             } finally {

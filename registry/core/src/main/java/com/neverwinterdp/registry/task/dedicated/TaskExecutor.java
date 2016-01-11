@@ -79,12 +79,13 @@ final public class TaskExecutor<T> implements Runnable {
   
   void runTaskExecutors() throws Exception {
     Iterator<TaskSlotExecutor<T>> executorItr = taskSlotExecutors.iterator();
+    long totalRuntime = 0;
     while(executorItr.hasNext()) {
       currentRunningTaskSlotExecutor = executorItr.next();
       currentRunningTaskSlotExecutor.clearInterrupt();
 
       currentRunningTaskSlotExecutor.onPreExecuteSlot();
-      currentRunningTaskSlotExecutor.executeSlot();
+      totalRuntime += currentRunningTaskSlotExecutor.executeSlot();
       currentRunningTaskSlotExecutor.onPostExecuteSlot();
       
       DedicatedTaskContext<T> context = currentRunningTaskSlotExecutor.getTaskContext();
@@ -93,5 +94,6 @@ final public class TaskExecutor<T> implements Runnable {
         taskService.finish(executor, context.getTaskId(), TaskStatus.TERMINATED);
       }
     }
+    if(totalRuntime <  1000) Thread.sleep(1000);
   }
 }

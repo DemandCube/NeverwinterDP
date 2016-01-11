@@ -152,6 +152,14 @@ public class DedicatedTaskRegistry<T> {
     return tasksListNode.getChild(taskId).getChild(TASK_STATUS_PATH).getDataAs(TaskStatus.class) ;
   }
   
+  public int countExecutorHeartbeat() throws RegistryException {
+    return executorsHeartbeatNode.getChildren().size();
+  }
+  
+  public int countActiveExecutors() throws RegistryException {
+    return  executorsActiveNode.getChildren().size();
+  }
+  
   public void offer(String taskId, T taskDescriptor) throws RegistryException {
     Transaction transaction = registry.getTransaction() ;
     transaction.createChild(tasksListNode, taskId, taskDescriptor, NodeCreateMode.PERSISTENT);

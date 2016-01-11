@@ -58,8 +58,8 @@ public class ActivityService extends ActivityRegistry {
     queue.shutdown();
     activityScheduler.interrupt();
     int count = 0 ;
-    while(activeActivities.size() > 0 && count < 30) {
-      Thread.sleep(100);
+    while(activeActivities.size() > 0 && count < 60) {
+      Thread.sleep(500);
       count++;
     }
   }

@@ -106,26 +106,6 @@ public class WorkerService {
     taskService.getTaskExecutorService().startExecutors(3000);
   }
   
-  public void waitForTermination() throws RegistryException, InterruptedException {
-    System.out.println("DataflowWorkerService: Start waitForTermination()");
-    long maxRunTime = dflRegistry.getConfigRegistry().getDataflowDescriptor().getMaxRunTime();
-    try {
-      taskService.getTaskExecutorService().awaitTermination(maxRunTime, TimeUnit.MILLISECONDS);
-    } catch(InterruptedException ex) {
-      if(simulateKill) {
-        dataflowWorkerEventWatcher.setComplete();
-        throw new RuntimeException("Simulate Kill", ex) ;
-      }
-      throw ex;
-    }
-    dataflowWorkerEventWatcher.setComplete();
-    taskService.onDestroy();
-    workerStatus = DataflowWorkerStatus.TERMINATED;
-    dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
-    dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getId(), metricRegistry);
-    System.out.println("DataflowWorkerService: Finisht waitForTermination()");
-  }
-  
   public void stopInput() throws Exception {
     TaskExecutorEvent event = new TaskExecutorEvent("StopInput");
     taskService.getTaskExecutorService().broadcast(event);;
@@ -137,6 +117,27 @@ public class WorkerService {
     workerStatus = DataflowWorkerStatus.TERMINATED_WITH_INTERRUPT;
     dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
     dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getId(), metricRegistry);
+  }
+  
+  
+  public void waitForTermination() throws RegistryException, InterruptedException {
+    System.out.println("DataflowWorkerService: Start waitForTermination()");
+    try {
+      taskService.getTaskExecutorService().awaitTermination();
+    } catch(InterruptedException ex) {
+      if(simulateKill) {
+        dataflowWorkerEventWatcher.setComplete();
+        throw new RuntimeException("Simulate Kill", ex) ;
+      }
+      throw ex;
+    }
+    dataflowWorkerEventWatcher.setComplete();
+    
+    taskService.onDestroy();
+    workerStatus = DataflowWorkerStatus.TERMINATED;
+    dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
+    dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getId(), metricRegistry);
+    System.out.println("DataflowWorkerService: Finisht waitForTermination()");
   }
   
   public void simulateKill() throws Exception {
@@ -161,8 +162,10 @@ public class WorkerService {
       DataflowWorkerEvent taskEvent = txEvent.getDataAs(DataflowWorkerEvent.class);
       if(taskEvent == DataflowWorkerEvent.StopInput) {
         logger.info("Dataflow worker detect stop input event!");
+        stopInput();
       } else if(taskEvent == DataflowWorkerEvent.StopWorker) {
-        logger.info("Dataflow worker detect stop worker event!");
+        logger.info("Dataflow worker detect stop worker event. worker = " + vmDescriptor.getId());
+        System.err.println("Dataflow worker detect stop worker event. worker = " + vmDescriptor.getId());
         shutdown() ;
       }
       notify(txEvent, TXEventNotification.Status.Complete);

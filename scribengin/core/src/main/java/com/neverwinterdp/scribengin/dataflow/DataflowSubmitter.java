@@ -32,11 +32,13 @@ public class DataflowSubmitter {
   public DataflowSubmitter submit() throws Exception {
     VMClient vmClient = scribenginClient.getVMClient();
     Registry registry = scribenginClient.getRegistry();
-    DataflowRegistry dflRegistry = new DataflowRegistry();
-    String dataflowPath = dflRegistry.create(registry, dflDescriptor);
+    DataflowRegistry dflRegistry = new DataflowRegistry(registry, dflDescriptor);
+    String dataflowPath = dflRegistry.getDataflowPath();
+    
     VMConfig vmConfig = new VMConfig() ;
+    String masterId = dflDescriptor.getId() + "-master-" + dflRegistry.getMasterIdTracker().nextSeqId();
     vmConfig.
-      setVmId(dflDescriptor.getId() + "-master").
+      setVmId(masterId).
       addRoles("dataflow-master").
       setRegistryConfig(vmClient.getRegistry().getRegistryConfig()).
       setVmApplication(VMMasterApp.class.getName()).
