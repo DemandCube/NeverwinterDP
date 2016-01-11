@@ -93,6 +93,6 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
         "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
         "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + reportPath
     );
-    shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED --timeout 90000") ;
+    shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED --timeout 90000 --report-period 10000") ;
   }
 }
