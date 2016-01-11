@@ -1,5 +1,6 @@
 package com.neverwinterdp.scribengin.dataflow.tracking;
 
+import com.beust.jcommander.Parameter;
 import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
@@ -9,9 +10,17 @@ import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.vm.client.VMClient;
 
 public class TrackingWithSimulationLauncher extends TrackingLauncher {
+  @Parameter(names = "--simulation-report-period", description = "")
+  long simulationReportPeriod = 5000;
+  
+  @Parameter(names = "--simulation-period", description = "")
+  long simulationPeriod = 30000;
+  
+  @Parameter(names = "--simulation-max", description = "")
+  int simulationMax = 2;
+  
   private int stopCount  = 0;
   private int startCount = 0;
-  
   
   @Override
   public void execute(ScribenginShell shell, TrackingDataflowBuilder dflBuilder) throws Exception {
@@ -24,9 +33,22 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     startDataflow(shell, dfl);
     
     submitVMValidator(vmClient, dflBuilder);
-    
-    for(int i = 0; i < 2; i++) {
-      Thread.sleep(30000);
+    String reportPath = dflBuilder.getTrackingConfig().getReportPath();
+    for(int i = 0; i < simulationMax; i++) {
+      long stopTime = System.currentTimeMillis() + simulationPeriod;
+      long reportTime = 0;
+      while(System.currentTimeMillis() < stopTime) {
+        Thread.sleep(1000);
+        reportTime +=  1000;
+        if(reportTime >= simulationReportPeriod) {
+          shell.execute("dataflow info" + "  --dataflow-id " + dfl.getDataflowId() + " --show-history-workers");
+          shell.execute(
+              "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
+              "  --dataflow-id " + dfl.getDataflowId() + " --show-history-workers  --report-path " + reportPath
+          );
+          reportTime = 0;
+        }
+      }
       stopDataflow(shell, dflBuilder);
       submitDataflow(shell, dfl);
     }
@@ -47,12 +69,15 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     ScribenginShell scribenginShell = (ScribenginShell) shell;
     ScribenginClient scribenginClient = scribenginShell.getScribenginClient();
     String dataflowId = dflBuilder.getDataflowId();
+    String reportPath = dflBuilder.getTrackingConfig().getReportPath();
     DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId);
     TXEvent stopEvent = new TXEvent("stop", DataflowEvent.Stop);
     dflClient.getDataflowRegistry().getMasterRegistry().getMaserEventBroadcaster().broadcast(stopEvent);
     shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED --timeout 60000") ;
-    shell.execute("dataflow info" + "  --dataflow-id " + dataflowId + " --show-history-workers");
-    shell.execute("registry dump");
+    shell.execute(
+      "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
+      "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + reportPath
+    );
     stopCount++ ;
   }
 }

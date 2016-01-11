@@ -5,15 +5,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
-import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingDataflowBuilder;
-import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessage;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingWithSimulationLauncher;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
-import com.neverwinterdp.util.JSONSerializer;
-import com.neverwinterdp.vm.client.VMClient;
 
 public class KafkaWithSimulationIntegrationTest  {
   LocalScribenginCluster localScribenginCluster ;
@@ -46,8 +41,8 @@ public class KafkaWithSimulationIntegrationTest  {
     dflBuilder.setMaxRuntime(300000);
     dflBuilder.setSlidingWindowSize(300);
     
-    StartStopThread startStopThread = new StartStopThread(dflBuilder);
-    startStopThread.start();
+    TrackingWithSimulationLauncher launcher = new TrackingWithSimulationLauncher();
+    launcher.execute(shell, dflBuilder);
     
     dflBuilder.runMonitor(shell);
     shell.execute("registry dump");
@@ -55,9 +50,6 @@ public class KafkaWithSimulationIntegrationTest  {
   
   public class StartStopThread extends Thread {
     TrackingDataflowBuilder dflBuilder;
-    
-    int startCount = 0;
-    int stopCount  = 0;
     
     public StartStopThread(TrackingDataflowBuilder dflBuilder) {
       this.dflBuilder = dflBuilder;
@@ -70,6 +62,13 @@ public class KafkaWithSimulationIntegrationTest  {
       } catch (Exception e) {
         e.printStackTrace();
       }
+      synchronized(this) {
+        notifyAll();
+      }
+    }
+    
+    public synchronized void waitForTermination() throws InterruptedException {
+      wait();
     }
   }
 }
