@@ -14,9 +14,8 @@ public class KafkaSourceStreamReader implements SourcePartitionStreamReader {
   private KafkaPartitionReader partitionReader ;
   private CommitPoint lastCommitInfo ;
   
-  public KafkaSourceStreamReader(KafkaClient kafkaClient, PartitionStreamConfig pConfig, PartitionMetadata pmd) throws Exception {
+  public KafkaSourceStreamReader(String readerName, KafkaClient kafkaClient, PartitionStreamConfig pConfig, PartitionMetadata pmd) throws Exception {
     this.partitionConfig = pConfig;
-    String readerName = pConfig.attribute("name");
     this.partitionReader = new KafkaPartitionReader(readerName, kafkaClient, pConfig.attribute("topic"), pmd);
   }
   

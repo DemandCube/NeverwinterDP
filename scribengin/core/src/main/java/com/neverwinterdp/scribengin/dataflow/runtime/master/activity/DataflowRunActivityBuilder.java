@@ -56,7 +56,7 @@ public class DataflowRunActivityBuilder extends AllocateWorkerActivityBuilder {
     @Override
     public void execute(ActivityExecutionContext ctx, Activity activity, ActivityStep step) throws Exception {
       DataflowRegistry dflRegistry = service.getDataflowRegistry();
-      dflRegistry.setStatus(DataflowLifecycleStatus.RUNNING);
+      dflRegistry.setDataflowStatus(DataflowLifecycleStatus.RUNNING);
     }
   }
 }

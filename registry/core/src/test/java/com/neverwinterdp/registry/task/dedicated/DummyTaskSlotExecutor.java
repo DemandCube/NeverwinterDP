@@ -17,7 +17,7 @@ public class DummyTaskSlotExecutor extends TaskSlotExecutor<TaskDescriptor> {
   }
   
   @Override
-  public void executeSlot() throws Exception {
+  public long executeSlot() throws Exception {
     DedicatedTaskContext<TaskDescriptor> context = getTaskContext();
     TaskExecutorDescriptor executor = context.getTaskExecutorDescriptor();
     Thread.sleep(100);
@@ -27,5 +27,6 @@ public class DummyTaskSlotExecutor extends TaskSlotExecutor<TaskDescriptor> {
     } else {
       System.out.println("Task " + context.getTaskId() + ", execute by executor " + executor.getId() + ", complete = false");
     }
+    return 100;
   }
 }

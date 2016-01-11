@@ -15,7 +15,7 @@ public class ConfigRegistry {
   public ConfigRegistry(Registry registry, String dataflowPath) throws RegistryException {
     this.registry         = registry;
     this.dataflowPath     = dataflowPath;
-    configNode = registry.get(dataflowPath + "/config");
+    configNode            = registry.get(dataflowPath + "/config");
   }
   
   void create(Transaction transaction) throws RegistryException {

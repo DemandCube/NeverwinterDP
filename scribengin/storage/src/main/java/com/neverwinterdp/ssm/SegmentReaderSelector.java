@@ -37,7 +37,7 @@ public class SegmentReaderSelector {
       }
     }
     allSegmentReaders.add(segmentReader);
-    DataAvailability dataAvailability = segmentReader.updateAndGetDataAvailability();
+    DataAvailability dataAvailability = segmentReader.getDataAvailability();
     if(dataAvailability != DataAvailability.EOS) {
       activeSegmentReaders.add(segmentReader);
     }
@@ -48,7 +48,7 @@ public class SegmentReaderSelector {
     Iterator<SegmentReader> i = activeSegmentReaders.iterator();
     while(i.hasNext()) {
       SegmentReader segReader = i.next();
-      DataAvailability dataAvailability = segReader.updateAndGetDataAvailability(); 
+      DataAvailability dataAvailability = segReader.getDataAvailability(); 
       if(dataAvailability == DataAvailability.YES) {
         return segReader;
       } else if(dataAvailability == DataAvailability.EOS) {
@@ -59,8 +59,7 @@ public class SegmentReaderSelector {
     i = activeSegmentReaders.iterator();
     while(i.hasNext()) {
       SegmentReader segReader = i.next();
-      segReader.updateSegmentDescriptor();
-      DataAvailability dataAvailability = segReader.updateAndGetDataAvailability(); 
+      DataAvailability dataAvailability = segReader.updateAndGetSegmentDescriptor(); 
       if(dataAvailability == DataAvailability.YES) {
         return segReader;
       } else if(dataAvailability == DataAvailability.EOS) {
@@ -83,11 +82,9 @@ public class SegmentReaderSelector {
     while(i.hasNext()) {
       SegmentReader reader = i.next();
       reader.completeCommit(transaction);
-      //System.err.println("SegmentReaderSelector: completeCommit() segment = " + reader.getSegmentDescriptor().getSegmentId());
       if(reader.isComplete()) {
         reader.close();
         i.remove();
-        //System.err.println("  remove segment reader = " + reader.getSegmentDescriptor().getSegmentId());
       }
     }
   }
@@ -98,7 +95,7 @@ public class SegmentReaderSelector {
     while(i.hasNext()) {
       SegmentReader reader = i.next();
       reader.rollback(transaction);
-      DataAvailability availability  = reader.updateAndGetDataAvailability() ;
+      DataAvailability availability  = reader.getDataAvailability() ;
       if(availability == DataAvailability.YES || availability == DataAvailability.YES) {
         activeSegmentReaders.add(reader);
       }

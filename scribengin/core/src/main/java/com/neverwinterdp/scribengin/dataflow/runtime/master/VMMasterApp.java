@@ -55,7 +55,7 @@ public class VMMasterApp extends VMApp {
       System.err.println("VMDataflowServiceApp: on elected " + getVM().getDescriptor().getId() + "with registry " + registry.hashCode()) ;
       try {
         if(registry.exists(dataflowRegistryPath + "/status")) {
-          DataflowLifecycleStatus currentStatus =  DataflowRegistry.getStatus(registry, dataflowRegistryPath);
+          DataflowLifecycleStatus currentStatus =  DataflowRegistry.getDataflowStatus(registry, dataflowRegistryPath);
           if(currentStatus == DataflowLifecycleStatus.FINISH) {
             terminate(TerminateEvent.Shutdown);
             return;
@@ -102,7 +102,7 @@ public class VMMasterApp extends VMApp {
         service.init();
         service.run();
         service. waitForTermination();
-        service.getDataflowRegistry().setStatus(DataflowLifecycleStatus.TERMINATED);
+        service.getDataflowRegistry().setDataflowStatus(DataflowLifecycleStatus.TERMINATED);
         System.out.println("VMMasterApp Done !!!!!!!!!");
       } catch (Exception e) {
         logger.error("Error: ", e);

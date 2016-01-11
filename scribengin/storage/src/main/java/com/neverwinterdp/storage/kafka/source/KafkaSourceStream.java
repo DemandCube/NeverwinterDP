@@ -27,12 +27,12 @@ public class KafkaSourceStream implements SourcePartitionStream {
   public PartitionStreamConfig getPartitionStreamConfig() { return partitionConfig; }
 
   @Override
-  public SourcePartitionStreamReader getReader(String name) throws Exception {
+  public SourcePartitionStreamReader getReader(String readerName) throws Exception {
     String readerType = partitionConfig.attribute("reader") ;
     if("raw".equalsIgnoreCase(readerType)) {
-      return new RawKafkaSourceStreamReader(kafkaClient, partitionConfig, partitionMetadata); 
+      return new RawKafkaSourceStreamReader(readerName, kafkaClient, partitionConfig, partitionMetadata); 
     } else {
-      return new KafkaSourceStreamReader(kafkaClient, partitionConfig, partitionMetadata);
+      return new KafkaSourceStreamReader(readerName, kafkaClient, partitionConfig, partitionMetadata);
     }
   }
 }

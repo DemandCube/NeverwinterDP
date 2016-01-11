@@ -7,8 +7,8 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
 
 abstract public class SSMReader {
-  protected SSMRegistry         registry;
-  protected SSMReaderDescriptor readerDescriptor;
+  protected SSMRegistry              registry;
+  protected SSMReaderDescriptor      readerDescriptor;
   private   SegmentReaderSelector    segmentReaderSelector;
   private   SegmentReader            currentSegmentReader;
   

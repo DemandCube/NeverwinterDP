@@ -10,35 +10,27 @@ import com.neverwinterdp.registry.task.TaskStatus;
 
 final public class DedicatedTaskService<T> {
   private DedicatedTaskRegistry<T>   taskRegistry;
-  private DedicatedTaskWatcher<T>    taskWatcher ;
   private TaskExecutorService<T>     taskExecutorService;
   private TaskSlotExecutorFactory<T> taskSlotExecutorFactory;
 
   public DedicatedTaskService(DedicatedTaskRegistry<T> taskRegistry, TaskSlotExecutorFactory<T> taskSlotExecutorFactory) throws RegistryException {
     this.taskRegistry = taskRegistry;
     this.taskSlotExecutorFactory = taskSlotExecutorFactory;
-    taskWatcher = new DedicatedTaskWatcher<T>(taskRegistry);
     taskExecutorService = new TaskExecutorService<T>();
   }
   
   @PreDestroy
   public void onDestroy() throws InterruptedException {
-    taskWatcher.onDestroy();
     taskExecutorService.shutdown();
   } 
   
   public void simulateKill() {
-    taskWatcher.onDestroy();
     taskExecutorService.simulateKill();
   }
   
   public DedicatedTaskRegistry<T> getTaskRegistry() { return this.taskRegistry; }
   
   public TaskSlotExecutorFactory<T> getTaskSlotExecutorFactory() { return taskSlotExecutorFactory; }
-  
-  public void addTaskMonitor(DedicatedTaskMonitor<T> monitor) {
-    taskWatcher.addTaskMonitor(monitor);
-  }
   
   public void offer(String taskId, T taskDescriptor) throws RegistryException {
     taskRegistry.offer(taskId, taskDescriptor);

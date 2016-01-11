@@ -6,55 +6,59 @@ import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 
 public class MTMergerService {
   private MessageTrackingRegistry trackingRegistry;
-  private FlushThread flushThread;
-  
+  private FlushThread             flushThread;
+
   public MTMergerService(DataflowRegistry dflRegistry) {
     trackingRegistry = dflRegistry.getMessageTrackingRegistry();
     flushThread = new FlushThread();
     flushThread.start();
   }
-  
+
   public void onDestroy() throws InterruptedException, RegistryException {
-    if(flushThread != null) {
+    if (flushThread != null) {
       boolean flushThreadTerminated = flushThread.terminate(30000);
-      if(flushThreadTerminated) {
+      flushThread = null;
+      if (flushThreadTerminated) {
         flush();
       }
     }
   }
-  
+
   public void flush() throws RegistryException {
     trackingRegistry.mergeProgress("input");
     trackingRegistry.mergeFinishedReport("input");
-    
+
     trackingRegistry.mergeProgress("output");
     trackingRegistry.mergeFinishedReport("output");
   }
-  
+
   public class FlushThread extends Thread {
     boolean interrupted = false;
-    boolean terminated = false;
-    
+    boolean terminated  = false;
+
     public void run() {
-      while(!interrupted) {
+      while (!interrupted) {
         try {
           flush();
-          Thread.sleep(15000);
+          if(interrupted) break;
+          Thread.sleep(5000);
+        } catch (InterruptedException e) {
         } catch (RegistryException e) {
           e.printStackTrace();
-        } catch (InterruptedException e) {
         }
       }
-      synchronized(this) {
+      synchronized (this) {
         terminated = true;
         notifyAll();
       }
     }
-    
+
     synchronized boolean terminate(long maxWaitTime) throws InterruptedException {
       interrupted = true;
-      interrupt();
-      if(!terminated) {
+      if(getState() == State.TIMED_WAITING) {
+        interrupt();
+      }
+      if (!terminated) {
         wait(maxWaitTime);
       }
       return terminated;

@@ -144,8 +144,13 @@ public class MessageTrackingRegistry {
           return true;
         }
       };
-      Lock lock = locksNode.getLock("write", "Lock to create the window progress for window size = " + windowStat.getWindowSize() + ", window id = " + windowStat.getWindowId()) ;
-      lock.execute(saveProgressOp, 3, 3000);
+      String lockMessage = 
+          "Lock to create the window progress for name = " + windowStat.getName() + 
+          ", windowSize = " + windowStat.getWindowSize() + 
+          ", window id = " + windowStat.getWindowId() + ", thread = " + Thread.currentThread().getId();
+      Lock lock = locksNode.getLock("write", lockMessage) ;
+      lock.setDebug(true);
+      lock.execute(saveProgressOp, 3, 5000);
       progressWindowIdTracker.create(windowStat.getName(), windowStat.getWindowId());
     } else {
       BatchOperations<Boolean> saveProgressOp = new BatchOperations<Boolean>() {
@@ -286,11 +291,12 @@ public class MessageTrackingRegistry {
     
     MessageTrackingReport reporter  = new  MessageTrackingReport(name);
     
-    final List<String> progressChunks = progressNode.getChildren();
-    Collections.sort(progressChunks);
-    for(int i= 0; i < progressChunks.size(); i++) {
-      Node windowNode = progressNode.getChild(progressChunks.get(i));
-      WindowMessageTrackingStat windowStat = windowNode.getDataAs( WindowMessageTrackingStat.class);
+    final List<String> progressWindows = progressNode.getChildren();
+    Collections.sort(progressWindows);
+    for(int i= 0; i < progressWindows.size(); i++) {
+      Node windowNode = progressNode.getChild(progressWindows.get(i));
+      WindowMessageTrackingStat windowStat = windowNode.getDataAsWithDefault( WindowMessageTrackingStat.class, null);
+      if(windowStat == null) continue;
       reporter.mergeProgress(windowStat);
     }
     reporter.optimize();

@@ -209,7 +209,7 @@ public class DataflowCommand extends Command {
       while(stopTime > System.currentTimeMillis()) {
         info(dRegistry, console, dataflowId);
         if(stopOnDflStatus != null) {
-          DataflowLifecycleStatus dflStatus = dRegistry.getStatus();
+          DataflowLifecycleStatus dflStatus = dRegistry.getDataflowStatus();
           if(dflStatus.equalOrGreaterThan(stopOnDflStatus)) break;
         }
         Thread.sleep(period);
@@ -266,7 +266,7 @@ public class DataflowCommand extends Command {
       DataflowLifecycleStatus stopOnDflStatus = DataflowLifecycleStatus.valueOf(stopOnStatus);
       long stopTime = System.currentTimeMillis() + timeout;
       while(stopTime > System.currentTimeMillis()) {
-        DataflowLifecycleStatus dflStatus = dRegistry.getStatus();
+        DataflowLifecycleStatus dflStatus = dRegistry.getDataflowStatus();
         if(dflStatus.equalOrGreaterThan(stopOnDflStatus)) break;
         Thread.sleep(1000);
       }

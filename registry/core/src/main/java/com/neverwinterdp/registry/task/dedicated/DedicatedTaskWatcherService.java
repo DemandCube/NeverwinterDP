@@ -7,7 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 
-class DedicatedTaskWatcher<T> {
+public class DedicatedTaskWatcherService<T> {
   private AddRemoveNodeChildrenWatcher<T> availableTaskWatcher;
   private AddRemoveNodeChildrenWatcher<T> finishedTaskWatcher;
   private AddRemoveNodeChildrenWatcher<T> executorsWatcher;
@@ -17,7 +17,7 @@ class DedicatedTaskWatcher<T> {
   private LinkedBlockingQueue<TaskOperation<T>> taskOperationQueue = new LinkedBlockingQueue<TaskOperation<T>>();
   private TaskOperationExecutor                 taskOperationExecutor;
   
-  public DedicatedTaskWatcher(DedicatedTaskRegistry<T> tRegistry) throws RegistryException {
+  public DedicatedTaskWatcherService(DedicatedTaskRegistry<T> tRegistry) throws RegistryException {
     this.taskRegistry = tRegistry;
     Registry registry = tRegistry.getRegistry() ;
     availableTaskWatcher = new AddRemoveNodeChildrenWatcher<T>(registry, tRegistry.getTaskAvailableNode()) {

@@ -22,7 +22,7 @@ abstract public class TaskSlotExecutor<T> {
   public void onPreExecuteSlot() throws Exception {
   }
   
-  abstract public void executeSlot() throws Exception;
+  abstract public long executeSlot() throws Exception;
 
   public void onPostExecuteSlot() throws Exception {
   }

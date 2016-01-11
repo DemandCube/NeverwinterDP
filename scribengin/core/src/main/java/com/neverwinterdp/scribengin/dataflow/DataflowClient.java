@@ -33,13 +33,13 @@ public class DataflowClient {
   }
   
   public DataflowLifecycleStatus getStatus() throws RegistryException {
-    return dflRegistry.getStatus() ;
+    return dflRegistry.getDataflowStatus() ;
   }
   
   public void waitForEqualOrGreaterThanStatus(long checkPeriod, long timeout, DataflowLifecycleStatus status) throws Exception {
     long stopTime = System.currentTimeMillis() + timeout;
     while(System.currentTimeMillis() < stopTime) {
-      DataflowLifecycleStatus currentStatus = dflRegistry.getStatus();
+      DataflowLifecycleStatus currentStatus = dflRegistry.getDataflowStatus();
       if(currentStatus.equalOrGreaterThan(status)) return;
       Thread.sleep(checkPeriod);
     }

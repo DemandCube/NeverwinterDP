@@ -117,6 +117,7 @@ public class DataflowInitActivityBuilder extends ActivityBuilder {
         OperatorDescriptor opDescriptor = entry.getValue();
         createDataStreamOperator(opName, opDescriptor);
       }
+      dflRegistry.setRegistryReadyStatus();
     }
     
     void createDataStreamOperator(String opName, OperatorDescriptor opDescriptor) throws RegistryException {

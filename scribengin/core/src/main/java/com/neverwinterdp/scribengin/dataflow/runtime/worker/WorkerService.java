@@ -119,6 +119,7 @@ public class WorkerService {
       throw ex;
     }
     dataflowWorkerEventWatcher.setComplete();
+    
     taskService.onDestroy();
     workerStatus = DataflowWorkerStatus.TERMINATED;
     dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
@@ -161,8 +162,10 @@ public class WorkerService {
       DataflowWorkerEvent taskEvent = txEvent.getDataAs(DataflowWorkerEvent.class);
       if(taskEvent == DataflowWorkerEvent.StopInput) {
         logger.info("Dataflow worker detect stop input event!");
+        stopInput();
       } else if(taskEvent == DataflowWorkerEvent.StopWorker) {
-        logger.info("Dataflow worker detect stop worker event!");
+        logger.info("Dataflow worker detect stop worker event. worker = " + vmDescriptor.getId());
+        System.err.println("Dataflow worker detect stop worker event. worker = " + vmDescriptor.getId());
         shutdown() ;
       }
       notify(txEvent, TXEventNotification.Status.Complete);

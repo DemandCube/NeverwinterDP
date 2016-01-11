@@ -51,6 +51,8 @@ public class TrackingDataflowBuilder {
     trackingConfig.setHDFSAggregateLocation("build/working/storage/hdfs/tracking-aggregate");
   }
   
+  public String getDataflowId() { return this.dataflowId; }
+  
   public TrackingConfig getTrackingConfig() { return trackingConfig; }
   
   public TrackingDataflowBuilder setHDFSAggregateOutput() {

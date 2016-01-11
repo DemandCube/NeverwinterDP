@@ -89,6 +89,5 @@ public class MTService {
     WindowMessageTrackingStat[] array = takeAll();
     if(array == null) return;
     for(WindowMessageTrackingStat sel : array) trackingRegistry.saveProgress(sel);
-    System.err.println("MTService flush(), name = " + name + ", num of window = " + array.length);
   }
 }
