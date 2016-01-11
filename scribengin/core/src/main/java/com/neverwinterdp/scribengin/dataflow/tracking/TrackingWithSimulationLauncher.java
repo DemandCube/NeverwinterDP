@@ -87,7 +87,7 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       if(inputCount == outputCount ){
         break;
       }
-      Thread.sleep(simulationReportPeriod);
+      Thread.sleep(1000);
     }
     shell.execute(
         "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
