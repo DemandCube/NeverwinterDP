@@ -106,11 +106,24 @@ public class WorkerService {
     taskService.getTaskExecutorService().startExecutors(3000);
   }
   
+  public void stopInput() throws Exception {
+    TaskExecutorEvent event = new TaskExecutorEvent("StopInput");
+    taskService.getTaskExecutorService().broadcast(event);;
+  }
+  
+  public void shutdown() throws InterruptedException, RegistryException {
+    taskService.onDestroy();
+    dataflowWorkerEventWatcher.setComplete();
+    workerStatus = DataflowWorkerStatus.TERMINATED_WITH_INTERRUPT;
+    dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
+    dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getId(), metricRegistry);
+  }
+  
+  
   public void waitForTermination() throws RegistryException, InterruptedException {
     System.out.println("DataflowWorkerService: Start waitForTermination()");
-    long maxRunTime = dflRegistry.getConfigRegistry().getDataflowDescriptor().getMaxRunTime();
     try {
-      taskService.getTaskExecutorService().awaitTermination(maxRunTime, TimeUnit.MILLISECONDS);
+      taskService.getTaskExecutorService().awaitTermination();
     } catch(InterruptedException ex) {
       if(simulateKill) {
         dataflowWorkerEventWatcher.setComplete();
@@ -125,19 +138,6 @@ public class WorkerService {
     dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
     dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getId(), metricRegistry);
     System.out.println("DataflowWorkerService: Finisht waitForTermination()");
-  }
-  
-  public void stopInput() throws Exception {
-    TaskExecutorEvent event = new TaskExecutorEvent("StopInput");
-    taskService.getTaskExecutorService().broadcast(event);;
-  }
-  
-  public void shutdown() throws InterruptedException, RegistryException {
-    taskService.onDestroy();
-    dataflowWorkerEventWatcher.setComplete();
-    workerStatus = DataflowWorkerStatus.TERMINATED_WITH_INTERRUPT;
-    dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
-    dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getId(), metricRegistry);
   }
   
   public void simulateKill() throws Exception {

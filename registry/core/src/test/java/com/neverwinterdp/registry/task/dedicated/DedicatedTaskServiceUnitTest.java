@@ -107,7 +107,7 @@ public class DedicatedTaskServiceUnitTest {
       service.addExecutor(executor, 3);
     }
     service.getTaskExecutorService().startExecutors();
-    service.getTaskExecutorService().awaitTermination(5, TimeUnit.SECONDS);
+    service.getTaskExecutorService().awaitTermination();
     service.getTaskRegistry().getTasksRootNode().dump(System.out);
     registry.get("/").dump(System.out);
     service.onDestroy();

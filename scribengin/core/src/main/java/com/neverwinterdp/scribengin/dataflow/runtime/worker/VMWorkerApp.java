@@ -53,9 +53,7 @@ public class VMWorkerApp extends VMApp {
       @Override
       public void onEvent(VMApp vmApp, TerminateEvent terminateEvent) {
         try {
-          if(terminateEvent == TerminateEvent.Shutdown) {
-            dataflowTaskExecutorService.shutdown();
-          } else if(terminateEvent == TerminateEvent.SimulateKill) {
+          if(terminateEvent == TerminateEvent.SimulateKill) {
             logger.info("Execute the simulate kill event");
             dataflowTaskExecutorService.simulateKill();
           } else if(terminateEvent == TerminateEvent.Kill) {

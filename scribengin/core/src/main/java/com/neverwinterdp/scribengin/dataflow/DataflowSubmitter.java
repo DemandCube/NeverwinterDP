@@ -36,7 +36,7 @@ public class DataflowSubmitter {
     String dataflowPath = dflRegistry.getDataflowPath();
     
     VMConfig vmConfig = new VMConfig() ;
-    String masterId = dflDescriptor.getId() + "-master" + dflRegistry.getMasterIdTracker().nextSeqId();
+    String masterId = dflDescriptor.getId() + "-master-" + dflRegistry.getMasterIdTracker().nextSeqId();
     vmConfig.
       setVmId(masterId).
       addRoles("dataflow-master").

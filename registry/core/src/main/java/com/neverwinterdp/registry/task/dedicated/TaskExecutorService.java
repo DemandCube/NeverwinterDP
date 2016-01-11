@@ -48,17 +48,12 @@ public class TaskExecutorService<T> {
       for(TaskExecutor<T> executor : taskExecutors) {
         executor.shutdown();
       }
-      awaitTermination(30, TimeUnit.SECONDS);
     }
   }
   
-  synchronized public void awaitTermination(long maxWaitTime, TimeUnit unit) throws InterruptedException {
-    maxWaitTime = unit.toMillis(maxWaitTime);
-    long startTime = System.currentTimeMillis();
+  synchronized public void awaitTermination() throws InterruptedException {
     while(taskExecutorsThreads.size() > 0) {
-      long remainWaitTime = maxWaitTime - (System.currentTimeMillis() - startTime);
-      if(remainWaitTime <= 0) break;
-      wait(remainWaitTime);
+      wait(3000);
       Iterator<TaskExecutorThread> i = taskExecutorsThreads.iterator();
       while(i.hasNext()) {
         if(!i.next().isAlive()) {
