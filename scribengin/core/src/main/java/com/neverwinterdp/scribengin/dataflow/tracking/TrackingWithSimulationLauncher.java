@@ -1,6 +1,8 @@
 package com.neverwinterdp.scribengin.dataflow.tracking;
 
 import com.beust.jcommander.Parameter;
+import com.neverwinterdp.message.MessageTrackingRegistry;
+import com.neverwinterdp.message.MessageTrackingReport;
 import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
@@ -73,11 +75,24 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId);
     TXEvent stopEvent = new TXEvent("stop", DataflowEvent.Stop);
     dflClient.getDataflowRegistry().getMasterRegistry().getMaserEventBroadcaster().broadcast(stopEvent);
-    shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED --timeout 60000") ;
-    shell.execute(
-      "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
-      "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + reportPath
-    );
     stopCount++ ;
+    
+    MessageTrackingRegistry mtRegistry = dflClient.getDataflowRegistry().getMessageTrackingRegistry();
+    while(true) {
+      MessageTrackingReport inputReporter  = mtRegistry.getMessageTrackingReporter("input");
+      MessageTrackingReport outputReporter = mtRegistry.getMessageTrackingReporter("output");
+      long inputCount  = inputReporter.getTrackingCount();
+      long outputCount = outputReporter.getTrackingCount();
+      System.err.println("Stop: input count = " + inputCount + ", output count = " + outputCount);
+      if(inputCount == outputCount ){
+        break;
+      }
+      Thread.sleep(simulationReportPeriod);
+    }
+    shell.execute(
+        "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
+        "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + reportPath
+    );
+    shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED --timeout 90000") ;
   }
 }
