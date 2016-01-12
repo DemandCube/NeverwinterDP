@@ -45,7 +45,7 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
         if(reportTime >= simulationReportPeriod) {
           shell.execute(
               "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
-              "  --dataflow-id " + dfl.getDataflowId() + "--report-path " + reportPath
+              "  --dataflow-id " + dfl.getDataflowId() + " --report-path " + reportPath
           );
           reportTime = 0;
         }
