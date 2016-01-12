@@ -30,7 +30,7 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     submitVMGenerator(vmClient, dflBuilder);
     
     Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
-    dfl.setDefaultParallelism(5);
+    dfl.setDefaultParallelism(8);
     dfl.setDefaultReplication(1);
     startDataflow(shell, dfl);
     

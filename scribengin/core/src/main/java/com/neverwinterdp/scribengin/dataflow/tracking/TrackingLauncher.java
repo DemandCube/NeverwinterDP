@@ -65,6 +65,9 @@ public class TrackingLauncher  extends SubCommand {
   @Parameter(names = "--validator-max-run-time", description = "")
   private long validatorMaxRuntime = -1;
   
+  @Parameter(names = "--validator-message-wait-timeout", description = "")
+  private long validatorMessageWaitTimeout = 30000;
+  
   @Override
   public void execute(Shell s, CommandInput cmdInput) throws Exception {
     ScribenginShell shell = (ScribenginShell) s;
@@ -126,6 +129,7 @@ public class TrackingLauncher  extends SubCommand {
     dflBuilder.getTrackingConfig().setKafkaZKConnects(vmClient.getRegistry().getRegistryConfig().getConnect());
     dflBuilder.getTrackingConfig().setKafkaNumOfPartition(generatorKafkaNumOfPartition);
     dflBuilder.getTrackingConfig().setKafkaNumOfReplication(generatorKafkaNumOfReplication);
+    dflBuilder.getTrackingConfig().setKafkaMessageWaitTimeout(validatorMessageWaitTimeout);;
     
     if(validatorMaxRuntime < 1) {
       validatorMaxRuntime = 180000 + (generatorNumOfMessagePerChunk * generatorNumOfChunks)/3;
