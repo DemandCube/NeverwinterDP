@@ -58,6 +58,7 @@ public class KafkaWithSimulationIntegrationTest  {
     public void run() {
       try {
         TrackingWithSimulationLauncher launcher = new TrackingWithSimulationLauncher();
+        launcher.setSimulateKill();
         launcher.execute(shell, dflBuilder);
       } catch (Exception e) {
         e.printStackTrace();

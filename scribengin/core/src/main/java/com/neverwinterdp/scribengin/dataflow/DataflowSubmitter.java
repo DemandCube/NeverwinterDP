@@ -51,6 +51,10 @@ public class DataflowSubmitter {
     return this ;
   }
   
+  public DataflowClient getDataflowClient(long timeout) throws Exception {
+    return scribenginClient.getDataflowClient(dflDescriptor.getId(), timeout);
+  }
+  
   public DataflowSubmitter waitForRunning(long timeout) throws Exception {
     waitForEqualOrGreaterThanStatus(timeout, DataflowLifecycleStatus.RUNNING) ;
     return this;

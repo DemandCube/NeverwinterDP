@@ -146,7 +146,7 @@ public class MessageTrackingRegistry {
       };
       String lockMessage = 
           "Lock to create the window progress for name = " + windowStat.getName() + 
-          ", windowSize = " + windowStat.getWindowSize() + 
+          ", windowSize = " + windowStat.getMaxWindowSize() + 
           ", window id = " + windowStat.getWindowId() + ", thread = " + Thread.currentThread().getId();
       Lock lock = locksNode.getLock("write", lockMessage) ;
       lock.setDebug(true);

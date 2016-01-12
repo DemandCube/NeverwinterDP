@@ -25,8 +25,10 @@ public class TrackingDataflowBuilder {
   
   private int numOfWorker            = 2;
   private int numOfExecutorPerWorker = 5;
+  private int defaultParallelism            = 5;
+  private int defaultReplication            = 1;
   private int trackingWindowSize     = 1000;
-  private int slidingWindowSize      =   15;
+  private int slidingWindowSize      = 15;
  
   public TrackingDataflowBuilder(String dataflowId) {
     this.dataflowId = dataflowId;
@@ -85,12 +87,22 @@ public class TrackingDataflowBuilder {
     return this;
   }
   
+  public TrackingDataflowBuilder setDefaultParallelism(int num) {
+    defaultParallelism = num;
+    return this;
+  }
+  
+  public TrackingDataflowBuilder setDefaultReplication(int num) {
+    defaultReplication = num;
+    return this;
+  }
+  
   public Dataflow<TrackingMessage, TrackingMessage> buildDataflow() {
     Dataflow<TrackingMessage, TrackingMessage> dfl = new Dataflow<>(dataflowId);
     dfl.
       useWireDataSetFactory(new KafkaWireDataSetFactory("127.0.0.1:2181")).
-      setDefaultParallelism(8).
-      setDefaultReplication(2).
+      setDefaultParallelism(defaultParallelism).
+      setDefaultReplication(defaultReplication).
       setMaxRuntime(trackingConfig.getValidatorMaxRuntime()).
       setTrackingWindowSize(trackingWindowSize).
       setSlidingWindowSize(slidingWindowSize);
@@ -99,6 +111,7 @@ public class TrackingDataflowBuilder {
     
     KafkaDataSet<TrackingMessage> inputDs = 
         dfl.createInput(new KafkaStorageConfig("input", "127.0.0.1:2181", "tracking.input"));
+    
     
     DataSet<TrackingMessage> aggregateDs = null;
     if(outputType == OutputType.hdfs) {
