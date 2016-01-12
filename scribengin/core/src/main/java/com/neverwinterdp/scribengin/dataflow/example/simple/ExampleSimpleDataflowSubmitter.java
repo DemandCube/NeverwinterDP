@@ -17,7 +17,6 @@ public class ExampleSimpleDataflowSubmitter {
   private String dataflowID;
   private int defaultReplication;
   private int defaultParallelism;
-  private int maxRunTime;
   
   private int numOfWorker;
   private int numOfExecutorPerWorker;
@@ -48,8 +47,6 @@ public class ExampleSimpleDataflowSubmitter {
     defaultReplication = Integer.parseInt(props.getProperty("dataflow.replication", "1"));
     //The number of DataStreams to deploy 
     defaultParallelism = Integer.parseInt(props.getProperty("dataflow.parallelism", "8"));
-    //Max amount of time (in ms) to run the dataflow 
-    maxRunTime         = Integer.parseInt(props.getProperty("dataflow.maxRunTime", "10000"));
     
     //The number of workers to deploy (i.e. YARN containers)
     numOfWorker                = Integer.parseInt(props.getProperty("dataflow.numWorker", "4"));
@@ -102,8 +99,7 @@ public class ExampleSimpleDataflowSubmitter {
     Dataflow<Message,Message> dfl = new Dataflow<Message,Message>(dataflowID);
     dfl.
       setDefaultParallelism(defaultParallelism).
-      setDefaultReplication(defaultReplication).
-      setMaxRuntime(maxRunTime);
+      setDefaultReplication(defaultReplication);
     
     dfl.getWorkerDescriptor().setNumOfInstances(numOfWorker);
     dfl.getWorkerDescriptor().setNumOfExecutor(numOfExecutorPerWorker);
@@ -152,14 +148,6 @@ public class ExampleSimpleDataflowSubmitter {
 
   public void setDefaultParallelism(int defaultParallelism) {
     this.defaultParallelism = defaultParallelism;
-  }
-
-  public int getMaxRunTime() {
-    return maxRunTime;
-  }
-
-  public void setMaxRunTime(int maxRunTime) {
-    this.maxRunTime = maxRunTime;
   }
 
 

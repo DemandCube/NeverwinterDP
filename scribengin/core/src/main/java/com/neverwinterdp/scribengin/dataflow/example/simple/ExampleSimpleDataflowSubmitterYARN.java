@@ -23,13 +23,17 @@ public class ExampleSimpleDataflowSubmitterYARN {
    * 
    */
   static class Settings {
+
+    @Parameter(names = {"--help", "-h"}, help = true, description = "Output this help message")
+    private boolean help;
+    
     @Parameter(names = "--dataflow-id", description = "Unique ID for the dataflow")
     private String dataflowId        = "ExampleDataflow";
     
     @Parameter(names = "--zkConnect", description="[host]:[port] of Zookeeper server")
     private String zkConnect = "zookeeper-1:2181";
     
-    @Parameter(names = "--hadoopMasterConnect", description="hostname of HadoopMaster")
+    @Parameter(names = "--hadoopMasterConnect", description="Hostname of HadoopMaster")
     private String hadoopMasterConnect = "hadoop-master";
     
     @Parameter(names = "--kafkaConnect", description="[host]:[port] of kafka broker")
@@ -41,11 +45,9 @@ public class ExampleSimpleDataflowSubmitterYARN {
     @Parameter(names = "--streamParallelism", description = "Number of Streams for Scribengin to deploy")
     private String streamParallelism = "8";
     
-    @Parameter(names = "--maxRunTime", description = "Maximum amount of time to run, -1 for infinite")
-    private String maxRunTime  = "10000";
     
     @Parameter(names = "--numOfWorker", description = "Number of workers to request")
-    private String numOfWorker = "4";
+    private String numOfWorker = "2";
     
     @Parameter(names = "--numOfExecutorPerWorker", description = "Number of Executors per worker to request")
     private String numOfExecutorPerWorker     = "2";
@@ -55,12 +57,6 @@ public class ExampleSimpleDataflowSubmitterYARN {
     
     @Parameter(names = "--outputTopic", description = "Name of output Kafka topic")
     private String outputTopic ="output.topic";
-        
-    @Parameter(names = "--dfs-app-home", description = "Application's home in HDFS")
-    private String dfsAppHome        = "/applications/dataflow-example";
-    
-    @Parameter(names = "--local-app-home", required = true, description = "Local path to jar file")
-    private String localAppHome        = null;
 
   }
   
@@ -68,7 +64,12 @@ public class ExampleSimpleDataflowSubmitterYARN {
   public static void main(String args[]) throws Exception {
     //Use JCommander to parse command line args
     Settings settings = new Settings();
-    new JCommander(settings, args);
+    JCommander j = new JCommander(settings, args);
+    
+    if (settings.help) {
+      j.usage();
+      return;
+    }
     
     //Create a registry configuration and point it to our running Registry (Zookeeper)
     RegistryConfig registryConfig = RegistryConfig.getDefault();
@@ -96,8 +97,7 @@ public class ExampleSimpleDataflowSubmitterYARN {
     Properties props = new Properties();
     props.put("dataflow.id", settings.dataflowId);
     props.put("dataflow.replication", settings.kafkaReplication); 
-    props.put("dataflow.parallelism", settings.streamParallelism); 
-    props.put("dataflow.maxRunTime", settings.maxRunTime);
+    props.put("dataflow.parallelism", settings.streamParallelism);
     props.put("dataflow.numWorker", settings.numOfWorker);
     props.put("dataflow.numExecutorPerWorker", settings.numOfExecutorPerWorker);
     props.put("dataflow.inputTopic", settings.inputTopic);
