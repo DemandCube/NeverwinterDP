@@ -58,11 +58,11 @@ final static public String WORKING_DIR = "build/working";
       
       mRegistry.mergeProgress("input");
       MessageTrackingReport inputReport = mRegistry.mergeReport("input");
-      System.err.println(inputReport.toFormattedText());
+      System.err.println(inputReport.toDetailFormattedText());
       
       mRegistry.mergeProgress("output");
       MessageTrackingReport outputReport = mRegistry.mergeReport("output");
-      System.err.println(outputReport.toFormattedText());
+      System.err.println(outputReport.toDetailFormattedText());
     }
     
     int windowId = mRegistry.nextWindowId("output", 1);
@@ -71,10 +71,10 @@ final static public String WORKING_DIR = "build/working";
     mRegistry.mergeProgress("output");
     
     MessageTrackingReport inputReporter = mRegistry.mergeReport("input");
-    System.out.println(inputReporter.toFormattedText());
+    System.out.println(inputReporter.toDetailFormattedText());
     
     MessageTrackingReport outputReporter = mRegistry.mergeReport("output");
-    System.out.println(outputReporter.toFormattedText());
+    System.out.println(outputReporter.toDetailFormattedText());
     
     registry.get("/").dump(System.out);
   }

@@ -16,17 +16,17 @@ public class MessageTrackingLogReporterUnitTest {
       reporter.mergeFinished(inputWindow);
     }
     
-    System.out.println(reporter.toFormattedText());
+    System.out.println(reporter.toDetailFormattedText());
     
     System.out.println("Merge 6 - 10");
     for(int i = 6; i <= 10; i++) {
       WindowMessageTrackingStat inputChunk = new WindowMessageTrackingStat("input", i, 10000);
       reporter.mergeFinished(inputChunk);
     }
-    System.out.println(reporter.toFormattedText());
+    System.out.println(reporter.toDetailFormattedText());
     
     System.out.println("After Merge:");
     reporter.optimize();
-    System.out.println(reporter.toFormattedText());
+    System.out.println(reporter.toDetailFormattedText());
   }
 }
