@@ -17,7 +17,7 @@ public class WindowMessageTrackingStat {
   
   private String                                    name;
   private int                                       windowId;
-  private int                                       windowSize;
+  private int                                       maxWindowSize;
   private int                                       trackingProgress;
   private int                                       trackingNoLostTo;
   private int                                       trackingLostCount;
@@ -32,12 +32,12 @@ public class WindowMessageTrackingStat {
 
   public WindowMessageTrackingStat() {}
   
-  public WindowMessageTrackingStat(String name, int windowId, int chunkSize) {
+  public WindowMessageTrackingStat(String name, int windowId, int maxWindowSize) {
     this.name      = name ;
     this.windowId  =  windowId;
-    this.windowSize = chunkSize;
+    this.maxWindowSize = maxWindowSize;
     this.logStats  = new HashMap<>();
-    this.bitSet    = new BitSet(chunkSize);
+    this.bitSet    = new BitSet(maxWindowSize);
   }
 
   public String getName() { return name; }
@@ -46,8 +46,8 @@ public class WindowMessageTrackingStat {
   public int getWindowId() { return windowId; }
   public void setWindowId(int windowId) { this.windowId = windowId; }
 
-  public int getWindowSize() { return windowSize; }
-  public void setWindowSize(int size) { this.windowSize = size;}
+  public int getMaxWindowSize() { return maxWindowSize; }
+  public void setMaxWindowSize(int size) { this.maxWindowSize = size;}
 
   public int getTrackingProgress() { return trackingProgress; }
   public void setTrackingProgress(int trackingProgress) {
@@ -100,14 +100,17 @@ public class WindowMessageTrackingStat {
       throw new RuntimeException("The chunk id is not matched, chunkId = " + windowId + ", message chunk id = " + mTracking.getWindowId());
     }
     int idx = mTracking.getTrackingId();
-    if(idx > windowSize) {
-      throw new RuntimeException("The tracking id is greater than the chunk size" + windowSize);
+    if(idx > maxWindowSize) {
+      throw new RuntimeException("The tracking id is greater than the chunk size" + maxWindowSize);
     }
     
     if(idx > trackingProgress) trackingProgress = idx;
-    if(bitSet.get(idx)) trackingDuplicatedCount++;
-    else bitSet.set(idx, true);
-    trackingCount++;
+    if(bitSet.get(idx)) {
+      trackingDuplicatedCount++;
+    } else {
+      bitSet.set(idx, true); 
+      trackingCount++;
+    }
     
     List<MessageTrackingLog> logs = mTracking.getLogs();
     if(logs != null) {
@@ -137,20 +140,21 @@ public class WindowMessageTrackingStat {
     else trackingNoLostTo = noLostTo ;
     
     trackingLostCount = lostCount;
-    if(trackingNoLostTo + 1 == windowSize) complete = true;
+    if(trackingNoLostTo + 1 == maxWindowSize) complete = true;
   }
   
   synchronized void merge(WindowMessageTrackingStat other) {
     if(other.trackingProgress > trackingProgress) trackingProgress = other.trackingProgress;
     trackingDuplicatedCount += other.trackingDuplicatedCount;
-    trackingCount += other.trackingCount;
     
     for(int idx = 0; idx <= trackingProgress; idx++) {
       if(other.bitSet.get(idx)) {
         if(bitSet.get(idx)) trackingDuplicatedCount++;
-        bitSet.set(idx, true);
+        else trackingCount++;
+        bitSet.set(idx, true) ;
       }
     }
+    
     for(String otherLogKey : other.logStats.keySet()) {
       WindowMessageTrackingLogStat logStat = logStats.get(otherLogKey);
       if(logStat == null) {
@@ -174,7 +178,7 @@ public class WindowMessageTrackingStat {
     for(int i = 0; i < window.length; i++) {
       window[i].update();
       ft.addRow(
-        window[i].getName(), window[i].getWindowId(), "Tracking", window[i].getWindowSize(), 
+        window[i].getName(), window[i].getWindowId(), "Tracking", window[i].getMaxWindowSize(), 
         window[i].getTrackingCount(), window[i].getTrackingProgress(), window[i].getTrackingNoLostTo(), window[i].getTrackingDuplicatedCount()
       );
       for(String logKey : window[i].logStats.keySet()) {

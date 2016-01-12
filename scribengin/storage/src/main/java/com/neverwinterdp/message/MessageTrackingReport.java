@@ -137,24 +137,33 @@ public class MessageTrackingReport {
   
   public String toFormattedText() {
     StringBuilder b = new StringBuilder();
-    b.append(toFormattedText("Finished " + name + " report", finishedWindowStats));
-    b.append(toFormattedText("Progress " + name + " report", progressWindowStats));
+    b.append(toFormattedText("Finished " + name + " report", finishedWindowStats, false));
+    b.append(toFormattedText("Progress " + name + " report", progressWindowStats, false));
     return b.toString();
   }
   
-  String toFormattedText(String title, List<WindowMessageTrackingStats> reportChunkHolder) {
+  public String toDetailFormattedText() {
+    StringBuilder b = new StringBuilder();
+    b.append(toFormattedText("Finished " + name + " report", finishedWindowStats, true));
+    b.append(toFormattedText("Progress " + name + " report", progressWindowStats, true));
+    return b.toString();
+  }
+  
+  String toFormattedText(String title, List<WindowMessageTrackingStats> reportChunkHolder, boolean detail) {
     TabularFormater ft = new TabularFormater("From - To", "Stat", "Lost", "Duplicated", "Count", "Avg Delivery");
     ft.setTitle(title);
     for(int i = 0; i < reportChunkHolder.size(); i++) {
       WindowMessageTrackingStats sel = reportChunkHolder.get(i) ;
       ft.addRow(sel.getFromWindowId() + " - " + sel.getToWindowId(), "", "", "", "", "");
       ft.addRow("", "Tracking", sel.getTrackingLostCount(), sel.getTrackingDuplicatedCount(), sel.getTrackingCount(), "");
-      Map<String, WindowMessageTrackingLogStat> logStats = sel.getLogStats();
-      List<String> logStatKeys = new ArrayList<>(logStats.keySet());
-      Collections.sort(logStatKeys);
-      for(String logName : logStatKeys) {
-        WindowMessageTrackingLogStat selLogChunkStat = logStats.get(logName);
-        ft.addRow("", logName, "", "", selLogChunkStat.getCount(), selLogChunkStat.getAvgDeliveryTime());
+      if(detail) {
+        Map<String, WindowMessageTrackingLogStat> logStats = sel.getLogStats();
+        List<String> logStatKeys = new ArrayList<>(logStats.keySet());
+        Collections.sort(logStatKeys);
+        for(String logName : logStatKeys) {
+          WindowMessageTrackingLogStat selLogChunkStat = logStats.get(logName);
+          ft.addRow("", logName, "", "", selLogChunkStat.getCount(), selLogChunkStat.getAvgDeliveryTime());
+        }
       }
     }
     return ft.getFormattedText();

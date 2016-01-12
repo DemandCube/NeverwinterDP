@@ -3,7 +3,6 @@ package com.neverwinterdp.registry.task.dedicated;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Assert;

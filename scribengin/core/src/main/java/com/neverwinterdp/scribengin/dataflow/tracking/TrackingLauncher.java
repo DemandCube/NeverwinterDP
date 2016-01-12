@@ -53,6 +53,12 @@ public class TrackingLauncher  extends SubCommand {
   @Parameter(names = "--dataflow-num-of-executor-per-worker", description = "")
   private int numOfExecutorPerWorker = 2;
   
+  @Parameter(names = "--dataflow-default-parallelism", description = "")
+  int dataflowDefaultParallelism = 8;
+  
+  @Parameter(names = "--dataflow-default-replication", description = "")
+  int dataflowDefaultReplication = 2;
+  
   @Parameter(names = "--dataflow-tracking-window-size", description = "")
   private int trackingWindowSize = 1000;
   
@@ -64,6 +70,9 @@ public class TrackingLauncher  extends SubCommand {
   
   @Parameter(names = "--validator-max-run-time", description = "")
   private long validatorMaxRuntime = -1;
+  
+  @Parameter(names = "--validator-message-wait-timeout", description = "")
+  private long validatorMessageWaitTimeout = 30000;
   
   @Override
   public void execute(Shell s, CommandInput cmdInput) throws Exception {
@@ -110,7 +119,9 @@ public class TrackingLauncher  extends SubCommand {
       setNumOfWorker(numOfWorker).
       setNumOfExecutorPerWorker(numOfExecutorPerWorker).
       setTrackingWindowSize(trackingWindowSize).
-      setSlidingWindowSize(slidingWindowSize);
+      setSlidingWindowSize(slidingWindowSize).
+      setDefaultParallelism(dataflowDefaultParallelism).
+      setDefaultReplication(dataflowDefaultReplication);
     
     if("hdfs".equalsIgnoreCase(dataflowStorage)) {
       dflBuilder.setHDFSAggregateOutput();
@@ -126,6 +137,7 @@ public class TrackingLauncher  extends SubCommand {
     dflBuilder.getTrackingConfig().setKafkaZKConnects(vmClient.getRegistry().getRegistryConfig().getConnect());
     dflBuilder.getTrackingConfig().setKafkaNumOfPartition(generatorKafkaNumOfPartition);
     dflBuilder.getTrackingConfig().setKafkaNumOfReplication(generatorKafkaNumOfReplication);
+    dflBuilder.getTrackingConfig().setKafkaMessageWaitTimeout(validatorMessageWaitTimeout);;
     
     if(validatorMaxRuntime < 1) {
       validatorMaxRuntime = 180000 + (generatorNumOfMessagePerChunk * generatorNumOfChunks)/3;
