@@ -105,9 +105,12 @@ public class WindowMessageTrackingStat {
     }
     
     if(idx > trackingProgress) trackingProgress = idx;
-    if(bitSet.get(idx)) trackingDuplicatedCount++;
-    else bitSet.set(idx, true);
-    trackingCount++;
+    if(bitSet.get(idx)) {
+      trackingDuplicatedCount++;
+    } else {
+      bitSet.set(idx, true); 
+      trackingCount++;
+    }
     
     List<MessageTrackingLog> logs = mTracking.getLogs();
     if(logs != null) {
@@ -143,14 +146,15 @@ public class WindowMessageTrackingStat {
   synchronized void merge(WindowMessageTrackingStat other) {
     if(other.trackingProgress > trackingProgress) trackingProgress = other.trackingProgress;
     trackingDuplicatedCount += other.trackingDuplicatedCount;
-    trackingCount += other.trackingCount;
     
     for(int idx = 0; idx <= trackingProgress; idx++) {
       if(other.bitSet.get(idx)) {
         if(bitSet.get(idx)) trackingDuplicatedCount++;
-        bitSet.set(idx, true);
+        else trackingCount++;
+        bitSet.set(idx, true) ;
       }
     }
+    
     for(String otherLogKey : other.logStats.keySet()) {
       WindowMessageTrackingLogStat logStat = logStats.get(otherLogKey);
       if(logStat == null) {
