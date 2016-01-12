@@ -70,9 +70,9 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
         }
       }
       if(i % 2 == 0) {
-        stopStartDataflow(shell, dflBuilder);
-      } else {
         killWorker(dflClient, dflBuilder.getDataflowId());
+      } else {
+        stopStartDataflow(shell, dflBuilder);
       }
     }
   }
