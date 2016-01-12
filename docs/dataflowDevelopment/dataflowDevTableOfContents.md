@@ -5,3 +5,6 @@ The following guides will walk you through how to develop a dataflow, starting w
 
 - [Setting up your dev environment](devEnvironmentSetup.md)
 - [A Simple Dataflow](simpleDataflowDev.md)
+- [A Wired Dataflow](wireDataflowDev.md)
+- [Configuring Dataflows](configuringDataflows.md)
+- [Learn to write a DataStreamOperator](../operator-dev-guide.md)

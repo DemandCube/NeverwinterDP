@@ -156,7 +156,9 @@ The following steps will deploy all the necessary components to run Scribengin i
           --cluster --install --configure --profile-type stability
 
 #Arbitrary Cluster Setup
-[Follow the steps in this guide for information on how to use Nvent's private automation to launch in any arbitrary cluster](arbitrary-cluster-guide.md)
+[Follow the steps in this guide for information on how to use Nvent's private automation to launch in any arbitrary cluster](arbitrary-cluster-guide.md).  These steps require access to Nvent's private repos.  
+
+If you do not have access to these private repos, please continue on to [Manually Launching](#manually-launching)
 
 #Manually Launching#
 
@@ -218,15 +220,17 @@ These steps will be necessary if you do not have access to Nvent's private autom
 
 1. Make sure you have the JAVA_HOME environment variable correctly set
 2. [Build NeverwinterDP](#build-neverwinterdp)
-3.  Launch the VM Master in YARN
+3.  Make sure the Scribengin shell script is set correctly
         
         #After building, if you didn't edit your /etc/hosts file, you'll need to edit the file:
         #NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh
-            #-Dshell.zk-connect    - [hostname]:[port] of your Zookeeper server
-            #-Dshell.hadoop-master - [hostname] of your master Hadoop node
+        #   -Dshell.zk-connect    - [hostname]:[port] of your Zookeeper server
+        #   -Dshell.hadoop-master - [hostname] of your master Hadoop node
+        
         APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
 
-          
+4.  Launch the VM Master in YARN
+        
         #From release/neverwinterdp directory
         cd  NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/
           

@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.example.simple;
+package com.neverwinterdp.scribengin.dataflow.example.wire;
 
 import java.util.Properties;
 
@@ -14,7 +14,7 @@ import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
 
-public class ExampleSimpleDataflowSubmitter {
+public class ExampleWireDataflowSubmitter {
   private String dataflowID;
   private int defaultReplication;
   private int defaultParallelism;
@@ -28,7 +28,7 @@ public class ExampleSimpleDataflowSubmitter {
   private ScribenginShell shell;
   private DataflowSubmitter submitter;
   
-  public ExampleSimpleDataflowSubmitter(ScribenginShell shell){
+  public ExampleWireDataflowSubmitter(ScribenginShell shell){
     this(shell, new Properties());
   }
   
@@ -37,22 +37,22 @@ public class ExampleSimpleDataflowSubmitter {
    * @param shell ScribenginShell to connect to Scribengin with
    * @param props Properties to configure the dataflow
    */
-  public ExampleSimpleDataflowSubmitter(ScribenginShell shell, Properties props){
+  public ExampleWireDataflowSubmitter(ScribenginShell shell, Properties props){
     //This it the shell to communicate with Scribengin with
     this.shell = shell;
     
     //The dataflow's ID.  All dataflows require a unique ID when running
-    dataflowID = props.getProperty("dataflow.id", "ExampleDataflow");
+    dataflowID = props.getProperty("dataflow.id", "WireDataflow");
     
     //The default replication factor for Kafka
     defaultReplication = Integer.parseInt(props.getProperty("dataflow.replication", "1"));
     //The number of DataStreams to deploy 
-    defaultParallelism = Integer.parseInt(props.getProperty("dataflow.parallelism", "8"));
+    defaultParallelism = Integer.parseInt(props.getProperty("dataflow.parallelism", "2"));
     
     //The number of workers to deploy (i.e. YARN containers)
-    numOfWorker                = Integer.parseInt(props.getProperty("dataflow.numWorker", "2"));
+    numOfWorker                = Integer.parseInt(props.getProperty("dataflow.numWorker", "5"));
     //The number of executors per worker (i.e. threads per YARN container)
-    numOfExecutorPerWorker     = Integer.parseInt(props.getProperty("dataflow.numExecutorPerWorker", "2"));
+    numOfExecutorPerWorker     = Integer.parseInt(props.getProperty("dataflow.numExecutorPerWorker", "5"));
     
     //The kafka input topic
     inputTopic = props.getProperty("dataflow.inputTopic", "input.topic");
@@ -91,6 +91,10 @@ public class ExampleSimpleDataflowSubmitter {
   
   /**
    * The logic to build the dataflow configuration
+   *   The main takeaway between this dataflow and the ExampleSimpleDataflowSubmitter
+   *   is the use of dfl.useWireDataSetFactory()
+   *   This factory allows us to tie together operators 
+   *   with Kafka topics between them
    * @param kafkaZkConnect [host]:[port] of Kafka's Zookeeper conenction 
    * @return
    */
@@ -98,9 +102,12 @@ public class ExampleSimpleDataflowSubmitter {
     //Create the new Dataflow object
     // <Message,Message> pertains to the <input,output> object for the data
     Dataflow<Message,Message> dfl = new Dataflow<Message,Message>(dataflowID);
+    
+    //Example of how to set the KafkaWireDataSetFactory
     dfl.
       setDefaultParallelism(defaultParallelism).
-      setDefaultReplication(defaultReplication);
+      setDefaultReplication(defaultReplication).
+      useWireDataSetFactory(new KafkaWireDataSetFactory(kafkaZkConnect));
     
     dfl.getWorkerDescriptor().setNumOfInstances(numOfWorker);
     dfl.getWorkerDescriptor().setNumOfExecutor(numOfExecutorPerWorker);
@@ -114,15 +121,24 @@ public class ExampleSimpleDataflowSubmitter {
     DataSet<Message> outputDs = 
         dfl.createOutput(new KafkaStorageConfig("output", kafkaZkConnect, outputTopic));
     
-    //Define which operator to use.  
-    //This will be the logic that ties the input to the output
-    Operator<Message, Message> operator     = dfl.createOperator("simpleOperator", SimpleDataStreamOperator.class);
+    //Define which operators to use.  
+    //This will be the logic that ties the datasets and operators together
+    Operator<Message, Message> splitter = dfl.createOperator("splitteroperator", SplitterDataStreamOperator.class);
+    Operator<Message, Message> odd      = dfl.createOperator("oddoperator", PersisterDataStreamOperator.class);
+    Operator<Message, Message> even     = dfl.createOperator("evenoperator", PersisterDataStreamOperator.class);
     
-    //Connect your input to the operator
-    inputDs.useRawReader().connect(operator);
-    //Connect your operator to the output
-    operator.connect(outputDs);
-
+    //Send all input to the splitter operator
+    inputDs.useRawReader().connect(splitter);
+    
+    //The splitter operator then connects to the odd and even operators
+    splitter.connect(odd)
+            .connect(even);
+    
+    //Both the odd and even operator connect to the output dataset
+    // This is arbitrary, we could connect them to any dataset or operator we wanted
+    odd.connect(outputDs);
+    even.connect(outputDs);
+    
     return dfl;
   }
   
