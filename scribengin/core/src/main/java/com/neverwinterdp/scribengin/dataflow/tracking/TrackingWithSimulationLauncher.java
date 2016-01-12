@@ -43,10 +43,9 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
         Thread.sleep(1000);
         reportTime +=  1000;
         if(reportTime >= simulationReportPeriod) {
-          shell.execute("dataflow info" + "  --dataflow-id " + dfl.getDataflowId() + " --show-history-workers");
           shell.execute(
               "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
-              "  --dataflow-id " + dfl.getDataflowId() + " --show-history-workers  --report-path " + reportPath
+              "  --dataflow-id " + dfl.getDataflowId() + "--report-path " + reportPath
           );
           reportTime = 0;
         }
@@ -71,7 +70,6 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     ScribenginShell scribenginShell = (ScribenginShell) shell;
     ScribenginClient scribenginClient = scribenginShell.getScribenginClient();
     String dataflowId = dflBuilder.getDataflowId();
-    String reportPath = dflBuilder.getTrackingConfig().getReportPath();
     DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId);
     TXEvent stopEvent = new TXEvent("stop", DataflowEvent.Stop);
     dflClient.getDataflowRegistry().getMasterRegistry().getMaserEventBroadcaster().broadcast(stopEvent);
@@ -89,10 +87,6 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       }
       Thread.sleep(1000);
     }
-    shell.execute(
-        "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
-        "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + reportPath
-    );
     shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED --timeout 90000 --report-period 10000") ;
   }
 }
