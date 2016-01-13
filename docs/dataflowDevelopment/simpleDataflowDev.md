@@ -367,6 +367,7 @@ public class ExampleSimpleDataflowSubmitterTest {
 
 Launching in a real cluster will take one last step.  Below, we'll see the code required to push our dataflow configuration to Scribengin.  We'll need a few key pieces of information - You'll need to specify the [host]:[port] of Scribengin's Registry (Zookeeper) as well as any dataflow configuration.  The following example sets defaults, but uses JCommander to pass options on the command line.
 
+![Scribengin Dataflow Submission Design](../images/dataflowsubmission.png "Scribengin Dataflow Submission Design")
 
 ###The Code
 ```java
@@ -516,6 +517,7 @@ java -Djava.ext.dirs=$LIB_DIR:/jre/lib/ext -Xshare:auto -Xms128m -Xmx1536m -XX:-
 com.neverwinterdp.scribengin.dataflow.example.simple.ExampleSimpleDataflowSubmitterYARN \
 --dataflow-id dataflowName --zkConnect 1.1.1.1:2181 --hadoopMasterConnect 2.2.2.2 --kafkaConnect 3.3.3.3:9092
 ```
+
 
 
 
