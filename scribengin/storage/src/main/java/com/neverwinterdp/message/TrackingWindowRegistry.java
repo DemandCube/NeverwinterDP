@@ -222,9 +222,9 @@ public class TrackingWindowRegistry {
           trackingFinishedNode.getChild(sel).getDataAsWithDefault(TrackingWindowStat.class, null);
       if(windowStat != null) report.mergeFinished(windowStat);
     }
-    for(String sel : trackingProgressNode.getChildren()) {
+    for(String sel : trackingProgressMergeNode.getChildren()) {
       TrackingWindowStat windowStat = 
-        trackingProgressNode.getChild(sel).getDataAsWithDefault(TrackingWindowStat.class, null);
+          trackingProgressMergeNode.getChild(sel).getDataAsWithDefault(TrackingWindowStat.class, null);
       if(windowStat != null) {
         windowStat.update();
         report.mergeProgress(windowStat);
