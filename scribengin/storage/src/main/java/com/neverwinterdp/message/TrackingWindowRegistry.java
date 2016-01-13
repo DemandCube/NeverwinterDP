@@ -1,9 +1,7 @@
 package com.neverwinterdp.message;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +12,6 @@ import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.SequenceIdTracker;
 import com.neverwinterdp.registry.Transaction;
-import com.neverwinterdp.registry.lock.Lock;
 
 public class TrackingWindowRegistry {
   
@@ -31,13 +28,10 @@ public class TrackingWindowRegistry {
   private Node               trackingProgressMergeNode;
   private Node               trackingProgressSaveNode;
   private Node               trackingFinishedNode;
-  private Node               trackingLocksNode;
 
   private Node               windowNode;
   private Node               windowCommitsNode;
   private SequenceIdTracker  windowIdTracker;
-  
-  private ProgressWindowTracker progressWindowIdTracker = new ProgressWindowTracker();
   
   public TrackingWindowRegistry(Registry registry, String registryPath) throws RegistryException {
     this.registry         = registry;
@@ -49,7 +43,6 @@ public class TrackingWindowRegistry {
     trackingProgressSaveNode  = trackingProgressNode.getChild("save");
     trackingProgressMergeNode = trackingProgressNode.getChild("merge");
     trackingFinishedNode      = trackingNode.getChild(FINISHED);
-    trackingLocksNode         = trackingNode.getChild("locks");
     
     windowNode        = rootNode.getChild("window");
     windowCommitsNode = windowNode.getChild("commits");
@@ -70,7 +63,6 @@ public class TrackingWindowRegistry {
     transaction.create(trackingProgressSaveNode, null, NodeCreateMode.PERSISTENT);
     transaction.create(trackingProgressMergeNode, null, NodeCreateMode.PERSISTENT);
     transaction.create(trackingFinishedNode, new  TrackingWindowReport("tracking"), NodeCreateMode.PERSISTENT);
-    transaction.create(trackingLocksNode, null, NodeCreateMode.PERSISTENT);
     
     transaction.create(windowNode, null, NodeCreateMode.PERSISTENT);
     transaction.create(windowCommitsNode, null, NodeCreateMode.PERSISTENT);
@@ -242,24 +234,5 @@ public class TrackingWindowRegistry {
       report.mergeProgress(sel);
     }
     return report;
-  }
-  
-  @SuppressWarnings("serial")
-  static public class ProgressWindowTracker extends LinkedHashMap<String, String> {
-    private static final int MAX_ENTRIES = 1000;
-    
-    public void create(String name, int windowId) {
-      String key = name + ":" + windowId;
-      put(key, key);
-    }
-    
-    public boolean isCreated(String name, int windowId) {
-      String key = name + ":" + windowId;
-      return containsKey(key);
-    }
-
-    protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
-       return size() > MAX_ENTRIES;
-    }
   }
 }
