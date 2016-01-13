@@ -91,7 +91,8 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     TrackingWindowRegistry mtRegistry = dflClient.getDataflowRegistry().getMessageTrackingRegistry();
     while(true) {
       TrackingWindowReport report  = mtRegistry.getReport();
-      System.err.println("Stop: tracking count = " + report.getTrackingCount());
+      int commitWindowLeft = mtRegistry.getProgressCommitWindows().size();
+      System.err.println("Stop: tracking count = " + report.getTrackingCount() + ",  commitWindowLeft = " + commitWindowLeft);
       if(mtRegistry.getProgressCommitWindows().size() == 0 && report.getTrackingCount() > 0) break;
       Thread.sleep(1000);
     }
