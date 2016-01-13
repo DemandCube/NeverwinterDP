@@ -13,7 +13,6 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.SequenceIdTracker;
 import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.lock.Lock;
-import com.neverwinterdp.util.JSONSerializer;
 
 public class TrackingWindowRegistry {
   
@@ -82,8 +81,8 @@ public class TrackingWindowRegistry {
       public Boolean execute(Registry registry) throws RegistryException {
         Transaction transaction = registry.getTransaction();
         for(TrackingWindow window : windows) {
-          Node windowNode = windowCommitsNode.getChild(window.toWindowIdName());
-          transaction.create(windowNode, window, NodeCreateMode.PERSISTENT);
+          Node commitWindowNode = windowCommitsNode.getChild(window.toWindowIdName());
+          transaction.create(commitWindowNode, window, NodeCreateMode.PERSISTENT);
         }
         transaction.commit();
         return true;
@@ -99,16 +98,15 @@ public class TrackingWindowRegistry {
         Transaction transaction = registry.getTransaction();
         for(TrackingWindowStat windowStat:  windowStats) {
           String idName        = windowStat.toWindowIdName();
-          Node windowNode = trackingProgressNode.getChild(idName);
+          Node progressWindowNode = trackingProgressNode.getChild(idName);
           if(!progressWindowIdTracker.isCreated(windowStat.getName(), windowStat.getWindowId())) {
-            if(!windowNode.exists()) {
-              transaction.create(windowNode, windowStat, NodeCreateMode.PERSISTENT);
+            if(!progressWindowNode.exists()) {
+              transaction.create(progressWindowNode, windowStat, NodeCreateMode.PERSISTENT);
             } else {
-              transaction.createChild(windowNode, "", windowStat, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
+              transaction.createChild(progressWindowNode, "", windowStat, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
             }
           } else {
-            transaction.createChild(windowNode, "", windowStat, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
-            transaction.commit();
+            transaction.createChild(progressWindowNode, "", windowStat, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
           }
         }
         transaction.commit();
@@ -116,8 +114,7 @@ public class TrackingWindowRegistry {
       }
     };
     String lockMessage = 
-        "Lock to create the window progress windows: count = " + windowStats.length + 
-        ", thread = " + Thread.currentThread().getId();
+        "Lock to create the window progress windows: count = " + windowStats.length + ", thread = " + Thread.currentThread().getId();
     Lock lock = trackingLocksNode.getLock("write", lockMessage) ;
     lock.setDebug(true);
     lock.execute(saveProgressOp, 3, 5000);
