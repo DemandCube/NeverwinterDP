@@ -110,6 +110,8 @@ public class ExampleSimpleDataflowSubmitterTest {
       assertEquals(1, b);
     }
     
+    //Get basic info on the dataflow
+    shell.execute("dataflow info --dataflow-id "+eds.getDataflowID());
   }
   
   

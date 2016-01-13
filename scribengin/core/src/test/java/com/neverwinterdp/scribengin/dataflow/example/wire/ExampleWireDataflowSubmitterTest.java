@@ -110,6 +110,9 @@ public class ExampleWireDataflowSubmitterTest {
     //And finally, the intermediate topics should have more than zero messages
     assertTrue(evenCount > 0);
     assertTrue(oddCount > 0);
+    
+    //Get basic info on the dataflow
+    shell.execute("dataflow info --dataflow-id "+eds.getDataflowID());
   }
   
   /**
