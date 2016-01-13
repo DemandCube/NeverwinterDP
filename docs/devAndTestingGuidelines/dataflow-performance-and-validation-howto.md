@@ -1,31 +1,36 @@
 #Hardware and JVM Memory Allocation#
 
-In order to have an optimize configuration. You need to know how much RAM do you have, how many processes  that your server have, how much RAM need to give to each process. If you allocate more RAM to your process than the amount of RAM that your server have. The os will have to use the swap space and make your server significantly slow down. For example hadoop master has 4 processes , namenode , secondary namenode, resource manager, datanode manager and if you allocate 1024 to each process while your server has only 2G RAM. Then it is a bad configuration 
+In order to have an optimized configuration, you need to know how much RAM you have, how many CPUs, how much RAM need to give to each process. If you allocate more RAM to your process than the amount of RAM that your server have, the os will have to use swap space and make your server significantly slow down. 
 
-Some rule to make a good configuration:
+For example - hadoop-master has 4 processes - namenode, secondary namenode, resource manager, datanode manager - and if you allocate 1024MB to each process while your server has only 2GB RAM, then it is a bad configuration.
 
-1. You should know your how much RAM is needed for the OS and the basic services. The rest should give to your server processes. For example zookeeper or kafka configuration, the linux os will need 512 - 1024M. If you have 2G RAM machine, then you can allocate 1024M or 1536M to kafka or zookeeper.
+Some rules to make a good configuration:
 
-2. Some service is io bound , cpu bound or memory bound. You need to know what type of bound that your service are. If your service is io bound or cpu bound then you give more RAM to your service, it won't make any different. Usually the rule are:
-    * If your service is a database like, elasticsearch, hbase, RDBM ... they are memory bound and the more RAM the better    
-    * If your service has a lot of client that connect to , it will be CPU bound.
-    * If your service is batch process, then it is io bound. In case the service is memory bound, a bigger instance with more memory will give better performance. In case of cpu bound or io bound, more small instances will give better performance, 4 instances of 4G RAM will give better performance  than 1 16G RAM instance.
+1. You should know your how much RAM is needed for the OS and the basic services. The rest should give to your server processes. For example, zookeeper or kafka configuration, the linux os will need 512 - 1024M. If you have 2G RAM machine, then you can allocate 1024M or 1536M to kafka or zookeeper.
+
+2. Some service is IO limited, CPU limited or memory limited. You need to know what type of limitations your services are likely to have.  If your service is IO bound or CPU bound and you give more RAM to your service, it won't make any difference. Usually, the rule of thumb is:
+    * If your service is a database like elasticsearch, hbase, RDBM ... they are memory bound and the more RAM the better
+    * If your service has a lot of clients that connect to it, it will be CPU bound.
+    * If your service is a batch process, then it is IO bound. In case the service is memory bound, a bigger instance with more memory will give better performance. 
+    * In case of CPU limited or IO limited, more small instances will give better performance. 4 instances of 4G RAM will give better performance  than 1 16G RAM instance.
 
 3. Our services:
-    * Zookeeper is likely CPU bound and memory bound. But if in the testing environment , we know that kafka only create only few topic and our registry take only dozen of MB, then allocate 4G or 8G RAM is a waste
-    * Kafka: Is definitely io bound and cpu bound more. Cpu bound is depended on the number of connection and topic.
-    * hadoop master: is memory bound and cpu bound depend on the number of connection. Most of memory is used to store DFS structure and the information of the blocks. We do not store much data on DFS so a 8G RAM should be enough. 3GB for the namenode and 1.5G for the other.
-    * hadoop-worker: Since hadoop worker is used to run your yarn application , it will depends on your nature of your yarn application and the number of yarn container that your app create. Give 1024 to yarn resource manager and dfs manager, the rest is reserved for yarn app. You can use 16G for hadoop-worker instance
+    * Zookeeper is likely CPU bound and memory bound.
+    * Kafka: Is definitely IO and CPU bound.  CPU limitations depend on the number of connections and topics.
+    * Hadoop-Master: is memory and CPU bound depending on the number of connections. 
+      * Most of memory is used to store DFS structure and the information of the blocks. 
+      * We do not store much data on DFS so a 8GB RAM should be enough. 3GB for the namenode and 1.5GB for the other processes.
+    * Hadoop-Worker: Since hadoop worker is used to run our YARN application, it will depends on your nature of the YARN application and the number of YARN containers created. Give 1024MB to yarn resource manager and dfs manager, the rest is reserved for yarn app. You can use 16GB for hadoop-worker instance
     * Elasticsearch:  database type so the more memory the better
-    * monitoring: just a servlet that connect to elasticsearch so 1GB - 2GB instance should be ok for all type of test
+    * Monitoring: just a servlet that connect to elasticsearch so 1GB - 2GB instance should be ok for all type of test
 
 
 #Message Generation And Validation#
 
 1. Technique to track the messages
     * The message generator should include the vm id or host id and an unique sequence number into the message
-    * The message generator should save the information such the host id, the number of messages it generates and all the other necessary information in order the validate tool can retrieve and assert
-    * The design should allow more than one vm can run the message generator at the same time and store the information in a hierarchy that the validate tool can aggregate the information 
+    * The message generator should save the information such as the host id, the number of messages it generates, and all the other necessary information in order for the validate tool to retrieve and assert
+    * The design should allow more than one vm can run the message generator at the same time and store the information in a hierarchy that the validate tool can use to aggregate the information 
 
 2. Technique to validate the messages
     * Create 1 vm or multiple vm, each vm should run one or more validate tool that validate 1 stream. The validate tool should parse the  message to extract the vm id and the sequence number. The final result should be stored into the registry.
@@ -35,7 +40,7 @@ Some rule to make a good configuration:
 
 #Performance And Validation Test Requirements#
 
-1. The permance test should allocate memory heap to zookeeper, kafka, hadoop services correctly and optimized
+1. The performance test should allocate memory heap to zookeeper, kafka, hadoop services correctly and optimized
 
 2. The performance test be run with different number of kafka and hadoop worker. Usually double number of hadoop worker and kafka should gain at least 65% - 90%. The level of parallelism, number of worker and executor, number of the kafka partitions should be configured correctly in order to use the allocated hardware.For example if we have 6 kafka instances and we create a topic with 3 partitions so only 3 kafka instances are used. Same for number of workers and executors.
 
