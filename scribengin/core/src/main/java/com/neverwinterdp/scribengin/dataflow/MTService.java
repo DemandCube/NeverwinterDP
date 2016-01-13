@@ -79,7 +79,7 @@ public class MTService {
     TrackingWindow[] array = new TrackingWindow[windows.size()];
     windows.values().toArray(array);
     windows.clear();
-    for(TrackingWindow sel : array) trackingRegistry.saveWindow(sel);
+    trackingRegistry.saveWindow(array);
     currentWindowId = -1;
   }
   
@@ -88,6 +88,6 @@ public class MTService {
     TrackingWindowStat[] array = new TrackingWindowStat[windowStats.size()];
     windowStats.values().toArray(array);
     windowStats.clear();
-    for(TrackingWindowStat sel : array) trackingRegistry.saveProgress(sel);
+    trackingRegistry.saveProgress(array);
   }
 }

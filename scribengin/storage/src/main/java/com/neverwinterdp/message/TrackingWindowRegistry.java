@@ -76,47 +76,53 @@ public class TrackingWindowRegistry {
     return windowCommitsNode.getChildren();
   }
   
-  public void saveWindow(TrackingWindow window) throws RegistryException {
-    windowCommitsNode.createChild(window.toWindowIdName(), window, NodeCreateMode.PERSISTENT);
+  public void saveWindow(final TrackingWindow ... windows) throws RegistryException {
+    BatchOperations<Boolean> saveOp = new BatchOperations<Boolean>() {
+      @Override
+      public Boolean execute(Registry registry) throws RegistryException {
+        Transaction transaction = registry.getTransaction();
+        for(TrackingWindow window : windows) {
+          Node windowNode = windowCommitsNode.getChild(window.toWindowIdName());
+          transaction.create(windowNode, window, NodeCreateMode.PERSISTENT);
+        }
+        transaction.commit();
+        return true;
+      }
+    };
+    registry.executeBatch(saveOp, 3, 5000);
   }
   
-  public void saveProgress(final TrackingWindowStat windowStat) throws RegistryException {
-    String idName        = windowStat.toWindowIdName();
-    final Node windowNode = trackingProgressNode.getChild(idName);
-    
-    if(!progressWindowIdTracker.isCreated(windowStat.getName(), windowStat.getWindowId())) {
-      BatchOperations<Boolean> saveProgressOp = new BatchOperations<Boolean>() {
-        @Override
-        public Boolean execute(Registry registry) throws RegistryException {
-          Transaction transaction = registry.getTransaction();
-          if(!windowNode.exists()) {
-            transaction.create(windowNode, windowStat, NodeCreateMode.PERSISTENT);
+  public void saveProgress(final TrackingWindowStat ... windowStats) throws RegistryException {
+    BatchOperations<Boolean> saveProgressOp = new BatchOperations<Boolean>() {
+      @Override
+      public Boolean execute(Registry registry) throws RegistryException {
+        Transaction transaction = registry.getTransaction();
+        for(TrackingWindowStat windowStat:  windowStats) {
+          String idName        = windowStat.toWindowIdName();
+          Node windowNode = trackingProgressNode.getChild(idName);
+          if(!progressWindowIdTracker.isCreated(windowStat.getName(), windowStat.getWindowId())) {
+            if(!windowNode.exists()) {
+              transaction.create(windowNode, windowStat, NodeCreateMode.PERSISTENT);
+            } else {
+              transaction.createChild(windowNode, "", windowStat, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
+            }
           } else {
             transaction.createChild(windowNode, "", windowStat, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
+            transaction.commit();
           }
-          transaction.commit();
-          return true;
         }
-      };
-      String lockMessage = 
-          "Lock to create the window progress for name = " + windowStat.getName() + 
-          ", maxWindowSize = " + windowStat.getMaxWindowSize() + 
-          ", window id = " + windowStat.getWindowId() + ", thread = " + Thread.currentThread().getId();
-      Lock lock = trackingLocksNode.getLock("write", lockMessage) ;
-      lock.setDebug(true);
-      lock.execute(saveProgressOp, 3, 5000);
-      progressWindowIdTracker.create(windowStat.getName(), windowStat.getWindowId());
-    } else {
-      BatchOperations<Boolean> saveProgressOp = new BatchOperations<Boolean>() {
-        @Override
-        public Boolean execute(Registry registry) throws RegistryException {
-          Transaction transaction = registry.getTransaction();
-          transaction.createChild(windowNode, "", windowStat, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
-          transaction.commit();
-          return true;
-        }
-      };
-      registry.executeBatch(saveProgressOp, 3, 3000);
+        transaction.commit();
+        return true;
+      }
+    };
+    String lockMessage = 
+        "Lock to create the window progress windows: count = " + windowStats.length + 
+        ", thread = " + Thread.currentThread().getId();
+    Lock lock = trackingLocksNode.getLock("write", lockMessage) ;
+    lock.setDebug(true);
+    lock.execute(saveProgressOp, 3, 5000);
+    for(TrackingWindowStat sel : windowStats) {
+      progressWindowIdTracker.create(sel.getName(), sel.getWindowId());
     }
   }
   
