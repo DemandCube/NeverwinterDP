@@ -1,6 +1,8 @@
 package com.neverwinterdp.message;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,8 @@ public class TrackingWindowRegistry {
   
   private Node               trackingNode;
   private Node               trackingProgressNode;
+  private Node               trackingProgressMergeNode;
+  private Node               trackingProgressSaveNode;
   private Node               trackingFinishedNode;
   private Node               trackingLocksNode;
 
@@ -41,11 +45,13 @@ public class TrackingWindowRegistry {
     
     rootNode     = registry.get(registryPath);
     trackingNode = rootNode.getChild("tracking");
-    trackingProgressNode    = trackingNode.getChild(PROGRESS);
-    trackingFinishedNode    = trackingNode.getChild(FINISHED);
-    trackingLocksNode        = trackingNode.getChild("locks");
+    trackingProgressNode      = trackingNode.getChild(PROGRESS);
+    trackingProgressSaveNode  = trackingProgressNode.getChild("save");
+    trackingProgressMergeNode = trackingProgressNode.getChild("merge");
+    trackingFinishedNode      = trackingNode.getChild(FINISHED);
+    trackingLocksNode         = trackingNode.getChild("locks");
     
-    windowNode       = rootNode.getChild("window");
+    windowNode        = rootNode.getChild("window");
     windowCommitsNode = windowNode.getChild("commits");
     windowIdTracker= new SequenceIdTracker(registry, windowNode.getPath() + "/id-tracker", false);
   }
@@ -61,6 +67,8 @@ public class TrackingWindowRegistry {
 
     transaction.create(trackingNode, null, NodeCreateMode.PERSISTENT);
     transaction.create(trackingProgressNode, null, NodeCreateMode.PERSISTENT);
+    transaction.create(trackingProgressSaveNode, null, NodeCreateMode.PERSISTENT);
+    transaction.create(trackingProgressMergeNode, null, NodeCreateMode.PERSISTENT);
     transaction.create(trackingFinishedNode, new  TrackingWindowReport("tracking"), NodeCreateMode.PERSISTENT);
     transaction.create(trackingLocksNode, null, NodeCreateMode.PERSISTENT);
     
@@ -97,88 +105,84 @@ public class TrackingWindowRegistry {
       public Boolean execute(Registry registry) throws RegistryException {
         Transaction transaction = registry.getTransaction();
         for(TrackingWindowStat windowStat:  windowStats) {
-          String idName        = windowStat.toWindowIdName();
-          Node progressWindowNode = trackingProgressNode.getChild(idName);
-          if(!progressWindowIdTracker.isCreated(windowStat.getName(), windowStat.getWindowId())) {
-            if(!progressWindowNode.exists()) {
-              transaction.create(progressWindowNode, windowStat, NodeCreateMode.PERSISTENT);
-            } else {
-              transaction.createChild(progressWindowNode, "", windowStat, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
-            }
-          } else {
-            transaction.createChild(progressWindowNode, "", windowStat, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
-          }
+          transaction.createChild(trackingProgressSaveNode, "", windowStat, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
         }
         transaction.commit();
         return true;
       }
     };
-    String lockMessage = 
-        "Lock to create the window progress windows: count = " + windowStats.length + ", thread = " + Thread.currentThread().getId();
-    Lock lock = trackingLocksNode.getLock("write", lockMessage) ;
-    lock.setDebug(true);
-    lock.execute(saveProgressOp, 3, 5000);
-    for(TrackingWindowStat sel : windowStats) {
-      progressWindowIdTracker.create(sel.getName(), sel.getWindowId());
-    }
+    registry.executeBatch(saveProgressOp, 3, 5000);
   }
-  
-  public TrackingWindowStat mergeProgress(final String windowIdName) throws RegistryException {
-    BatchOperations<TrackingWindowStat> op = new BatchOperations<TrackingWindowStat>() {
-      @Override
-      public TrackingWindowStat execute(Registry registry) throws RegistryException {
-        Node   progressWindowNode = trackingProgressNode.getChild(windowIdName);
-        TrackingWindowStat mergeWindowStat = progressWindowNode.getDataAs(TrackingWindowStat.class);
-       
-        Node windowCommitNode = windowCommitsNode.getChild(windowIdName);
-        TrackingWindow window = windowCommitNode.getDataAsWithDefault(TrackingWindow.class, null);
-        if(window != null) {
-          mergeWindowStat.setWindowSize(window.getWindowSize());
-        }
 
-        List<String> progressUpdates = progressWindowNode.getChildren();
-        if(progressUpdates.size() > 0) {
-          for(int i = 0; i < progressUpdates.size(); i++) {
-            Node windowUpdateNode = progressWindowNode.getChild(progressUpdates.get(i));
-            TrackingWindowStat updateWindowStat = windowUpdateNode.getDataAs(TrackingWindowStat.class);
-            mergeWindowStat.merge(updateWindowStat);
+  public TrackingWindowStat[] mergeSaveProgress() throws RegistryException {
+    BatchOperations<TrackingWindowStat[]> op = new BatchOperations<TrackingWindowStat[]>() {
+      @Override
+      public TrackingWindowStat[] execute(Registry registry) throws RegistryException {
+        Transaction transaction = registry.getTransaction();
+        Map<Integer, TrackingWindowStat> windowStatMap = new HashMap<>();
+        List<String> saveWindowStatIds = trackingProgressSaveNode.getChildren();
+        for(int i = 0; i < saveWindowStatIds.size(); i++) {
+          String saveWindowStatId = saveWindowStatIds.get(i);
+          Node saveWindowStatNode = trackingProgressSaveNode.getChild(saveWindowStatId);
+          TrackingWindowStat windowStat = saveWindowStatNode.getDataAs(TrackingWindowStat.class);
+          TrackingWindowStat exists = windowStatMap.get(windowStat.getWindowId());
+          if(exists != null) {
+            exists.merge(windowStat);
+          } else {
+            windowStat.update();
+            windowStatMap.put(windowStat.getWindowId(), windowStat);
           }
-        } else {
-          mergeWindowStat.update();
+          transaction.deleteChild(trackingProgressSaveNode, saveWindowStatId);
         }
         
-        Transaction transaction = registry.getTransaction();
-        if(mergeWindowStat.isComplete() && window != null) {
-          Node   finishedWindowNode = trackingFinishedNode.getChild(windowIdName);
-          transaction.create(finishedWindowNode, mergeWindowStat, NodeCreateMode.PERSISTENT);
-          for(int i = 0; i < progressUpdates.size(); i++) {
-            transaction.deleteChild(progressWindowNode, progressUpdates.get(i));
-          }
-          transaction.delete(progressWindowNode.getPath());
-        } else {
-          transaction.setData(progressWindowNode, mergeWindowStat);
-          for(int i = 0; i < progressUpdates.size(); i++) {
-            transaction.deleteChild(progressWindowNode, progressUpdates.get(i));
+        for(TrackingWindowStat windowStat : windowStatMap.values()) {
+          Node mergeWindowStatNode = trackingProgressMergeNode.getChild(windowStat.toWindowIdName());
+          TrackingWindowStat mergeWindowStat = mergeWindowStatNode.getDataAsWithDefault(TrackingWindowStat.class, null);
+          if(mergeWindowStat == null) {
+            transaction.create(mergeWindowStatNode, windowStat, NodeCreateMode.PERSISTENT);
+          } else {
+            mergeWindowStat.merge(windowStat);
+            transaction.setData(mergeWindowStatNode, mergeWindowStat);
           }
         }
         transaction.commit();
-        return mergeWindowStat;
+        TrackingWindowStat[] windowStats = new TrackingWindowStat[windowStatMap.size()];
+        windowStatMap.values().toArray(windowStats);
+        return windowStats;
       }
     };
-    return registry.executeBatch(op, 3, 3000);
+    return registry.executeBatch(op, 3, 5000);
   }
   
-  public TrackingWindowReport mergeProgress() throws RegistryException {
-    List<String> progressWindows = trackingProgressNode.getChildren();
-    TrackingWindowReport windowReport = new TrackingWindowReport("progress");
-    for(int i = 0 ; i < progressWindows.size(); i++) {
-      String windowIdName = progressWindows.get(i);
-      TrackingWindowStat windowStat = mergeProgress(windowIdName);
-      windowReport.mergeProgress(windowStat);
-    }
-    return windowReport;
+  public TrackingWindowStat[] mergeProgress() throws RegistryException {
+    BatchOperations<TrackingWindowStat[]> op = new BatchOperations<TrackingWindowStat[]>() {
+      @Override
+      public TrackingWindowStat[] execute(Registry registry) throws RegistryException {
+        Transaction transaction = registry.getTransaction();
+        List<String> windowStatIds = trackingProgressMergeNode.getChildren();
+        TrackingWindowStat[] windowStats = new TrackingWindowStat[windowStatIds.size()];
+        for(int i = 0; i < windowStatIds.size(); i++) {
+          String windowStatId = windowStatIds.get(i);
+          Node windowStatNode = trackingProgressMergeNode.getChild(windowStatId);
+          TrackingWindow window = windowCommitsNode.getChild(windowStatId).getDataAsWithDefault(TrackingWindow.class, null);
+          windowStats[i] = windowStatNode.getDataAs(TrackingWindowStat.class);
+          if(window != null) {
+            windowStats[i].setWindowSize(window.getWindowSize());
+            if(windowStats[i].getTrackingNoLostTo() + 1 == window.getWindowSize()) {
+              windowStats[i].setComplete(true);
+            }
+          }
+          if(windowStats[i].isComplete()) {
+            transaction.delete(windowStatNode.getPath());
+            transaction.createChild(trackingFinishedNode, windowStatId, windowStats[i], NodeCreateMode.PERSISTENT);
+          }
+        }
+        transaction.commit();
+        return windowStats;
+      }
+    };
+    return registry.executeBatch(op, 3, 5000);
   }
-  
   
   public TrackingWindowReport mergeFinished() throws RegistryException {
     final TrackingWindowReport report = trackingFinishedNode.getDataAs(TrackingWindowReport.class);
@@ -230,9 +234,13 @@ public class TrackingWindowRegistry {
   }
   
   public TrackingWindowReport merge() throws RegistryException {
+    mergeSaveProgress();
+    TrackingWindowStat[] progressWindowStats = mergeProgress();
     TrackingWindowReport report = mergeFinished();
-    TrackingWindowReport progress = mergeProgress();
-    report.setProgressWindowStats(progress.getProgressWindowStats());
+    for(TrackingWindowStat sel : progressWindowStats) {
+      if(sel.isComplete()) continue;
+      report.mergeProgress(sel);
+    }
     return report;
   }
   
