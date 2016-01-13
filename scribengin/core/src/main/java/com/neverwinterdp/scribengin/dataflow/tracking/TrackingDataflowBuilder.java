@@ -1,12 +1,10 @@
 package com.neverwinterdp.scribengin.dataflow.tracking;
 
-import com.neverwinterdp.message.MessageTrackingReport;
-import com.neverwinterdp.registry.txevent.TXEvent;
+import com.neverwinterdp.message.TrackingWindowReport;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
-import com.neverwinterdp.scribengin.dataflow.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.KafkaDataSet;
 import com.neverwinterdp.scribengin.dataflow.KafkaWireDataSetFactory;
 import com.neverwinterdp.scribengin.dataflow.Operator;
@@ -178,17 +176,13 @@ public class TrackingDataflowBuilder {
     DataflowRegistry dflRegistry = dflClient.getDataflowRegistry();
     
     while(true) {
-      MessageTrackingReport inputReporter  = dflRegistry.getMessageTrackingRegistry().getMessageTrackingReporter("input");
-      MessageTrackingReport outputReporter = dflRegistry.getMessageTrackingRegistry().getMessageTrackingReporter("output");
-      long inputCount  = inputReporter.getTrackingCount();
-      long outputCount = outputReporter.getTrackingCount();
-      
+      TrackingWindowReport report = dflRegistry.getMessageTrackingRegistry().getReport();
       shell.execute(
         "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
         "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + trackingConfig.getReportPath()
       );
       
-      if(numOfInputMessages == inputCount && numOfInputMessages == outputCount ){
+      if(numOfInputMessages == report.getTrackingCount()){
         break;
       }
       
@@ -198,14 +192,15 @@ public class TrackingDataflowBuilder {
     System.err.println("Should call stop the dataflow here!!!!!!!!!!!");
     shell.execute("dataflow stop --dataflow-id " + dataflowId);
 
-    shell.execute(
-      "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingJUnitShellPlugin" +
-      "  --dataflow-id " + dataflowId + "  --report-path " + trackingConfig.getReportPath() + " --junit-report-file build/junit-report.xml"
-    );
-      
+    Thread.sleep(10000);
     shell.execute(
       "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
       "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + trackingConfig.getReportPath()
+    );
+    
+    shell.execute(
+      "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingJUnitShellPlugin" +
+      "  --dataflow-id " + dataflowId + "  --report-path " + trackingConfig.getReportPath() + " --junit-report-file build/junit-report.xml"
     );
   }
 }

@@ -69,7 +69,7 @@ public class OutputDataStreamContext {
       sel.onCompleteCommit(ctx);
     }
     if(dataStreamType == DataStreamType.Output) {
-      mtService.flush();
+      mtService.flushWindowStats();
     }
   }
   

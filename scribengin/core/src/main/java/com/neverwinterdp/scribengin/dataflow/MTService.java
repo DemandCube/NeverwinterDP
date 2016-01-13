@@ -4,42 +4,34 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.neverwinterdp.message.MessageTracking;
-import com.neverwinterdp.message.MessageTrackingRegistry;
-import com.neverwinterdp.message.WindowMessageTrackingStat;
+import com.neverwinterdp.message.TrackingWindow;
+import com.neverwinterdp.message.TrackingWindowRegistry;
+import com.neverwinterdp.message.TrackingWindowStat;
 import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 
 public class MTService {
-  private String                     name;
-  private int                        trackingWindowSize;
-  private int                        slidingWindowSize;
-  private AtomicInteger              windowTrackingIdTracker ;
-  private int                        currentWindowId = -1;
-  private MessageTrackingRegistry    trackingRegistry;
+  private String                 name;
+  private int                    trackingWindowSize;
+  private AtomicInteger          windowTrackingIdTracker;
+  private int                    currentWindowId = -1;
+  private TrackingWindowRegistry trackingRegistry;
   
-  private ConcurrentHashMap<Integer, WindowMessageTrackingStat> windowStats = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<Integer, TrackingWindow> windows = new ConcurrentHashMap<>();
+  
+  private ConcurrentHashMap<Integer, TrackingWindowStat> windowStats = new ConcurrentHashMap<>();
 
   public MTService(String name, DataflowRegistry dflRegistry) throws RegistryException {
     this.name = name;
     DataflowDescriptor dflDescriptor = dflRegistry.getConfigRegistry().getDataflowDescriptor();
     this.trackingRegistry   = dflRegistry.getMessageTrackingRegistry();
     this.trackingWindowSize = dflDescriptor.getTrackingWindowSize();
-    this.slidingWindowSize = dflDescriptor.getSlidingWindowSize();
     windowTrackingIdTracker = new AtomicInteger(0);
   }
   
   int nextWindowId(long maxWaitForDataRead) throws RegistryException, InterruptedException {
-    int windowId = trackingRegistry.nextWindowId("output", slidingWindowSize);
-    if(windowId > -1) return windowId;
-    
-    long stopTime = System.currentTimeMillis() + maxWaitForDataRead;
-    while(System.currentTimeMillis() < stopTime) {
-      windowId = trackingRegistry.nextWindowId("output", slidingWindowSize);
-      if(windowId > -1) return windowId;
-      Thread.sleep(500);
-    }
-    return windowId;
+    return trackingRegistry.nextWindowId();
   }
   
   public boolean hasNextMessageTracking(long maxWaitForDataRead) throws RegistryException, InterruptedException {
@@ -63,31 +55,39 @@ public class MTService {
     if(windowTrackingIdTracker.get() >= trackingWindowSize || currentWindowId == -1) {
       throw new RegistryException(ErrorCode.Unknown, "the tracking window id or the current window id is not in the valid state");
     }
-    
     int windowTrackingId = windowTrackingIdTracker.getAndIncrement();
+    TrackingWindow window = windows.get(currentWindowId);
+    if(window == null) {
+      window = new TrackingWindow(this.currentWindowId, trackingWindowSize);
+      windows.put(currentWindowId, window);
+    }
+    window.setWindowSize(windowTrackingId + 1);
     return new MessageTracking(currentWindowId, windowTrackingId);
   }
 
   public void log(MessageTracking mTracking) throws RegistryException {
-    WindowMessageTrackingStat windowStat = windowStats.get(mTracking.getWindowId());
+    TrackingWindowStat windowStat = windowStats.get(mTracking.getWindowId());
     if(windowStat == null) {
-      windowStat = new  WindowMessageTrackingStat(name, mTracking.getWindowId(), trackingWindowSize);
+      windowStat = new  TrackingWindowStat(name, mTracking.getWindowId(), trackingWindowSize);
       windowStats.put(windowStat.getWindowId(), windowStat);
     }
     windowStat.log(mTracking);
   }
   
-  WindowMessageTrackingStat[] takeAll() {
-    if(windowStats.size() == 0) return null;
-    WindowMessageTrackingStat[] array = new WindowMessageTrackingStat[windowStats.size()];
-    windowStats.values().toArray(array);
-    windowStats.clear();
-    return array;
+  public void flushWindows() throws RegistryException {
+    if(windows.size() == 0) return ;
+    TrackingWindow[] array = new TrackingWindow[windows.size()];
+    windows.values().toArray(array);
+    windows.clear();
+    for(TrackingWindow sel : array) trackingRegistry.saveWindow(sel);
+    currentWindowId = -1;
   }
   
-  public void flush() throws RegistryException {
-    WindowMessageTrackingStat[] array = takeAll();
-    if(array == null) return;
-    for(WindowMessageTrackingStat sel : array) trackingRegistry.saveProgress(sel);
+  public void flushWindowStats() throws RegistryException {
+    if(windowStats.size() == 0) return ;
+    TrackingWindowStat[] array = new TrackingWindowStat[windowStats.size()];
+    windowStats.values().toArray(array);
+    windowStats.clear();
+    for(TrackingWindowStat sel : array) trackingRegistry.saveProgress(sel);
   }
 }

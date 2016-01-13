@@ -2,19 +2,23 @@ package com.neverwinterdp.registry.task.dedicated;
 
 abstract public class TaskSlotExecutor<T> {
   private DedicatedTaskContext<T> taskContext;
-  private boolean                 interrupt = false;
-
+  
+  private long tickTime;
+  private long tickTimeout;
+  
+  long lastInterrupt = System.currentTimeMillis();
+  
   public TaskSlotExecutor(DedicatedTaskContext<T> taskContext) {
     this.taskContext        = taskContext;
   }
 
   public DedicatedTaskContext<T> getTaskContext() { return taskContext ; }
   
-  public boolean isInterrupted() { return this.interrupt ; }
+  public void setTickTime(long time) { tickTime = time; }
   
-  public void interrupt() { interrupt = true; }
+  public void setTickTimeout(long time) { tickTimeout = time; }
   
-  public void clearInterrupt() { interrupt = false; }
+  public boolean isInterrupted() { return tickTime > tickTimeout ; }
   
   public void onInit() throws Exception {
   }

@@ -2,6 +2,7 @@ package com.neverwinterdp.vm.environment.yarn;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -11,9 +12,11 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.ApplicationConstants.Environment;
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
+import org.apache.hadoop.yarn.api.records.NodeReport;
 import org.apache.hadoop.yarn.api.records.Priority;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.client.api.NMClient;
+import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.Apps;
@@ -63,8 +66,7 @@ abstract public class YarnManager {
     Priority containerPriority = Priority.newInstance(priority);
     //Resource requirements for worker containers
     Resource resource = Resource.newInstance(memory, numOfCores);
-    VMRequest containerReq =  
-        new VMRequest(resource, null /* hosts*/, null /*racks*/, containerPriority);
+    VMRequest containerReq =  new VMRequest(resource, null /* hosts*/, null /*racks*/, containerPriority);
     return containerReq;
   }
   
@@ -122,5 +124,33 @@ abstract public class YarnManager {
   
   static public interface ContainerRequestCallback {
     public void onAllocate(YarnManager manager, VMRequest request, Container container) ;
+  }
+  
+  static public class RoundRobinHostSelector {
+    private List<String> nodes = new ArrayList<>();
+    
+    public RoundRobinHostSelector(Configuration conf) throws YarnException, IOException {
+      YarnClient yarnClient = YarnClient.createYarnClient();
+      yarnClient.init(conf);
+      yarnClient.start();
+      List<NodeReport> nodeReports = yarnClient.getNodeReports();
+      for(int i = 0; i < nodeReports.size(); i++) {
+        NodeReport nodeReport = nodeReports.get(i);
+        nodes.add(nodeReport.getNodeId().getHost());
+      }
+      yarnClient.close();
+    }
+    
+    synchronized public String[] selectNodes() {
+      if(nodes.size() == 0) {
+        return null ;
+      } else if(nodes.size() == 1) {
+        return new String[] {nodes.get(0) } ;
+      } else {
+        String[] retNodes = new String[nodes.size() - 1];
+        for(int i = 0; i < retNodes.length; i++) retNodes[i] = nodes.get(i);
+        return retNodes;
+      }
+    }
   }
 }

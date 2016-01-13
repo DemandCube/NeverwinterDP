@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.neverwinterdp.message.MessageTrackingRegistry;
+import com.neverwinterdp.message.TrackingWindowRegistry;
 import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
@@ -19,6 +19,7 @@ import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerRuntimeReport;
+import com.neverwinterdp.scribengin.dataflow.tracking.TrackingRegistry;
 
 @Singleton
 public class DataflowRegistry {
@@ -50,7 +51,7 @@ public class DataflowRegistry {
   private MasterRegistry          masterRegistry;
   private WorkerRegistry          workerRegistry;
   private DataflowTaskRegistry    taskRegistry;
-  private MessageTrackingRegistry messageTrackingRegistry;
+  private TrackingWindowRegistry  messageTrackingRegistry;
 
   private SequenceIdTracker       workerIdTracker;
   private SequenceIdTracker       masterIdTracker;
@@ -105,7 +106,7 @@ public class DataflowRegistry {
     
     taskRegistry = new DataflowTaskRegistry(registry, dataflowPath);
     
-    messageTrackingRegistry = new MessageTrackingRegistry(registry, dataflowPath + "/message-tracking");
+    messageTrackingRegistry = new TrackingWindowRegistry(registry, dataflowPath + "/message-tracking");
     
     String idTrackerPath = dataflowPath +  "/id-tracker"  ;
     masterIdTracker = new SequenceIdTracker(registry, idTrackerPath + "/master", false);
@@ -181,7 +182,7 @@ public class DataflowRegistry {
   
   public DataflowTaskRegistry getTaskRegistry() { return taskRegistry; }
   
-  public MessageTrackingRegistry getMessageTrackingRegistry() { return messageTrackingRegistry; }
+  public TrackingWindowRegistry getMessageTrackingRegistry() { return messageTrackingRegistry; }
   
   public SequenceIdTracker getMasterIdTracker() { return masterIdTracker; }
   

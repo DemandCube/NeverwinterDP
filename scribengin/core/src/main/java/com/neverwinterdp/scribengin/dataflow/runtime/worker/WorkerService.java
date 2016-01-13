@@ -1,6 +1,6 @@
 package com.neverwinterdp.scribengin.dataflow.runtime.worker;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Set;
 
 import org.slf4j.Logger;
 
@@ -140,6 +140,7 @@ public class WorkerService {
     System.out.println("DataflowWorkerService: Finisht waitForTermination()");
   }
   
+  @SuppressWarnings("deprecation")
   public void simulateKill() throws Exception {
     System.err.println("WorkerService: simulateKill()"); 
     logger.info("Start kill()");
@@ -147,7 +148,19 @@ public class WorkerService {
     simulateKill = true ;
     if(workerStatus.lessThan(DataflowWorkerStatus.TERMINATED)) {
       System.err.println("WorkerService: taskService.getTaskExecutorService().simulateKill()"); 
+      dflRegistry.getRegistry().shutdown();
       taskService.simulateKill();
+      String threadGroup = vmDescriptor.getId() + "-group";
+      Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+      for(Thread sel : threadSet) {
+        ThreadGroup tGroup = sel.getThreadGroup() ;
+        if(tGroup == null) continue;
+        if(threadGroup.equals(tGroup.getName())) {
+          Throwable forceStop = new Throwable("Kill thread in group " + threadGroup);
+          forceStop.setStackTrace(new StackTraceElement[0]);
+          sel.stop(forceStop);
+        }
+      }
     }
     notifier.info("finish-simulate-kill", "DataflowTaskExecutorService: finish simulateKill()");
     logger.info("Finish kill()");

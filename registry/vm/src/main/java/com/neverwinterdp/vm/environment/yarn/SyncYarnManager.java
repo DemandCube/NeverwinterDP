@@ -44,6 +44,7 @@ public class SyncYarnManager extends YarnManager {
       RegisterApplicationMasterResponse registerResponse = amrmClient.registerApplicationMaster(appHostName, 0, "");
       heartbeatThread = new HeartbeatThread();
       heartbeatThread.start();
+      
     } catch(Throwable t) {
       logger.error("Error: " , t);
       t.printStackTrace();

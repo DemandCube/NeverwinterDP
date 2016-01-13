@@ -43,8 +43,8 @@ public class KafkaTrackingUnitTest  {
     String dfsAppHome = "";
     
     TrackingDataflowBuilder dflBuilder = new TrackingDataflowBuilder("tracking");
-    dflBuilder.getTrackingConfig().setNumOfMessagePerChunk(3000);
-    dflBuilder.setMaxRuntime(90000);
+    dflBuilder.getTrackingConfig().setNumOfMessagePerChunk(10000);
+    dflBuilder.setMaxRuntime(120000);
     
     VMConfig vmGeneratorConfig = dflBuilder.buildVMTMGeneratorKafka();
     new VMSubmitter(vmClient, dfsAppHome, vmGeneratorConfig).submit().waitForRunning(30000);

@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
-import com.neverwinterdp.message.MessageTrackingRegistry;
-import com.neverwinterdp.message.MessageTrackingReport;
+import com.neverwinterdp.message.TrackingWindowRegistry;
+import com.neverwinterdp.message.TrackingWindowReport;
 import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
@@ -169,13 +169,8 @@ public class DataflowCommand extends Command {
         console.println(MetricRegistrySnapshot.getFormattedText(snapshots));
       }
       
-      MessageTrackingRegistry mRegistry = dflRegistry.getMessageTrackingRegistry();
-      
-      MessageTrackingReport inputReporter = mRegistry.getMessageTrackingReporter("input");
-      console.println(inputReporter.toFormattedText());
-      
-      MessageTrackingReport outputReporter = mRegistry.getMessageTrackingReporter("output");
-      console.println(outputReporter.toFormattedText());
+      TrackingWindowReport report = dflRegistry.getMessageTrackingRegistry().getReport();
+      console.println(report.toFormattedText());
     }
 
     @Override

@@ -3,13 +3,13 @@ package com.neverwinterdp.message;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WindowMessageTrackingStats {
+public class TrackingWindowStats {
   private int  fromWindowId = -1;
   private int  toWindowId   = -1;
   private long trackingCount ;
   private long trackingLostCount;
   private long trackingDuplicatedCount;
-  private Map<String, WindowMessageTrackingLogStat> logStats = new HashMap<>();
+  private Map<String, TrackingWindowLogStat> logStats = new HashMap<>();
   
   public int getFromWindowId() { return fromWindowId;}
   public void setFromWindowId(int fromWindowId) {
@@ -36,43 +36,45 @@ public class WindowMessageTrackingStats {
     this.trackingDuplicatedCount = trackingDuplicatedCount;
   }
   
-  public Map<String, WindowMessageTrackingLogStat> getLogStats() { return logStats; }
-  public void setLogStats(Map<String, WindowMessageTrackingLogStat> logStats) { this.logStats = logStats; }
+  public Map<String, TrackingWindowLogStat> getLogStats() { return logStats; }
+  public void setLogStats(Map<String, TrackingWindowLogStat> logStats) { this.logStats = logStats; }
   
   public long getLogNameCount(String logName) {
-    WindowMessageTrackingLogStat logChunkStat = logStats.get(logName);
+    TrackingWindowLogStat logChunkStat = logStats.get(logName);
     if(logChunkStat == null) return 0;
     return logChunkStat.getCount() ;
   }
   
-  public void merge(WindowMessageTrackingStat otherChunk) {
-    if(fromWindowId < 0) fromWindowId = otherChunk.getWindowId();
-    toWindowId = otherChunk.getWindowId();
-    trackingCount +=  otherChunk.getTrackingCount();
-    trackingLostCount += otherChunk.getTrackingLostCount();
-    trackingDuplicatedCount += otherChunk.getTrackingDuplicatedCount();
-    Map<String, WindowMessageTrackingLogStat> otherLogStats = otherChunk.getLogStats();
+  public void merge(TrackingWindowStat other) {
+    if(fromWindowId < 0) fromWindowId = other.getWindowId();
+    
+    toWindowId = other.getWindowId();
+    trackingCount +=  other.getTrackingCount();
+    trackingLostCount += other.getTrackingLostCount();
+    trackingDuplicatedCount += other.getTrackingDuplicatedCount();
+    
+    Map<String, TrackingWindowLogStat> otherLogStats = other.getLogStats();
     for(String otherLogName : otherLogStats.keySet()) {
-      WindowMessageTrackingLogStat logStat = logStats.get(otherLogName);
+      TrackingWindowLogStat logStat = logStats.get(otherLogName);
       if(logStat == null) {
-        logStat = new WindowMessageTrackingLogStat();
+        logStat = new TrackingWindowLogStat();
         logStats.put(otherLogName, logStat);
       }
       logStat.merge(otherLogStats.get(otherLogName));
     }
   }
   
-  public void merge(WindowMessageTrackingStats other) {
+  public void merge(TrackingWindowStats other) {
     toWindowId = other.getToWindowId();
     trackingCount +=  other.getTrackingCount();
     trackingLostCount += other.getTrackingLostCount();
     trackingDuplicatedCount += other.getTrackingDuplicatedCount();
     
-    Map<String, WindowMessageTrackingLogStat> otherLogStats = other.getLogStats();
+    Map<String, TrackingWindowLogStat> otherLogStats = other.getLogStats();
     for(String otherLogName : otherLogStats.keySet()) {
-      WindowMessageTrackingLogStat logStat = logStats.get(otherLogName);
+      TrackingWindowLogStat logStat = logStats.get(otherLogName);
       if(logStat == null) {
-        logStat = new WindowMessageTrackingLogStat();
+        logStat = new TrackingWindowLogStat();
         logStats.put(otherLogName, logStat);
       }
       logStat.merge(otherLogStats.get(otherLogName));

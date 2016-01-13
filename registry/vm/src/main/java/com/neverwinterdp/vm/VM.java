@@ -137,7 +137,7 @@ public class VM {
     VMApp vmApp = vmAppType.newInstance();
     vmApp.setVM(this);
     setVMStatus(VMStatus.RUNNING);
-    String threadName = "VM-" + vmApp.getVM().getDescriptor().getId();
+    String threadName = vmApp.getVM().getDescriptor().getId();
     vmApplicationRunner = new VMApplicationRunner(threadName, vmApp, vmConfig.getProperties()) ;
     vmApplicationRunner.start();
     logger.info("Finish run()");
@@ -182,7 +182,7 @@ public class VM {
     Map<String, String> properties;
     
     public VMApplicationRunner(String threadName, VMApp vmApplication, Map<String, String> props) {
-      super(new ThreadGroup(threadName), threadName);
+      super(new ThreadGroup(threadName + "-group"), threadName);
       this.vmApplication = vmApplication;
       this.properties = props;
     }

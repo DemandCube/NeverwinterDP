@@ -1,11 +1,14 @@
 package com.neverwinterdp.message;
 
-public class WindowMessageTrackingLogStat {
+import com.neverwinterdp.message.MessageTracking;
+import com.neverwinterdp.message.MessageTrackingLog;
+
+public class TrackingWindowLogStat {
   private int  count = 0;
   private long avgDeliveryTime = 0l;
   private long sumAvgDeliveryTime = 0l;
   
-  public WindowMessageTrackingLogStat() {
+  public TrackingWindowLogStat() {
   }
 
   public int getCount() { return count; }
@@ -20,7 +23,7 @@ public class WindowMessageTrackingLogStat {
     avgDeliveryTime = sumAvgDeliveryTime/count;
   }
   
-  public void merge(WindowMessageTrackingLogStat other) {
+  public void merge(TrackingWindowLogStat other) {
     int  newCount = count + other.count;
     avgDeliveryTime = ((count * avgDeliveryTime) + (other.count * other.avgDeliveryTime))/newCount;
     count           = newCount;

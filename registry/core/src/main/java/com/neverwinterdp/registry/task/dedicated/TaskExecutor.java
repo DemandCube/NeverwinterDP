@@ -8,14 +8,14 @@ import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.TaskStatus;
 
 final public class TaskExecutor<T> implements Runnable {
-  private DedicatedTaskService<T>       taskService;
-  private TaskExecutorDescriptor        executor;
-  private int                           numOfTaskSlot;
-  private List<TaskSlotExecutor<T>>     taskSlotExecutors = new ArrayList<>();
-  private TaskSlotExecutor<T>           currentRunningTaskSlotExecutor;
-  private boolean                       shutdown = false;
-  private Throwable                     error ;
-  
+  private DedicatedTaskService<T>   taskService;
+  private TaskExecutorDescriptor    executor;
+  private int                       numOfTaskSlot;
+  private List<TaskSlotExecutor<T>> taskSlotExecutors = new ArrayList<>();
+  private TaskSlotExecutor<T>       currentRunningTaskSlotExecutor;
+  private boolean                   shutdown          = false;
+  private Throwable                 error;
+
   public TaskExecutor(String id, DedicatedTaskService<T> taskService, int numOfTaskSlot) {
     executor = new TaskExecutorDescriptor(id, "NA");
     this.taskService = taskService;
@@ -37,8 +37,11 @@ final public class TaskExecutor<T> implements Runnable {
     }
   }
   
-  public void onSwitchTaskSlot() {
-    if(currentRunningTaskSlotExecutor != null) currentRunningTaskSlotExecutor.interrupt();
+  public void setTickTime(long time) {
+    Iterator<TaskSlotExecutor<T>> executorItr = taskSlotExecutors.iterator();
+    while(executorItr.hasNext()) {
+      executorItr.next().setTickTime(time);;
+    }
   }
   
   public void shutdown() { shutdown = true; }
@@ -63,6 +66,7 @@ final public class TaskExecutor<T> implements Runnable {
     } catch(InterruptedException e) {
     } catch(Throwable e) {
       error = e ;
+      e.printStackTrace();
     }
   }
   
@@ -82,12 +86,10 @@ final public class TaskExecutor<T> implements Runnable {
     long totalRuntime = 0;
     while(executorItr.hasNext()) {
       currentRunningTaskSlotExecutor = executorItr.next();
-      currentRunningTaskSlotExecutor.clearInterrupt();
-
+      currentRunningTaskSlotExecutor.setTickTimeout(System.currentTimeMillis() + 5000);;
       currentRunningTaskSlotExecutor.onPreExecuteSlot();
       totalRuntime += currentRunningTaskSlotExecutor.executeSlot();
       currentRunningTaskSlotExecutor.onPostExecuteSlot();
-      
       DedicatedTaskContext<T> context = currentRunningTaskSlotExecutor.getTaskContext();
       if(context.isComplete()) {
         executorItr.remove();

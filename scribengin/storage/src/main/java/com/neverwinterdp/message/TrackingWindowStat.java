@@ -9,33 +9,37 @@ import java.util.Map;
 import java.util.zip.DataFormatException;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.neverwinterdp.message.MessageTracking;
+import com.neverwinterdp.message.MessageTrackingLog;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
-public class WindowMessageTrackingStat {
+public class TrackingWindowStat {
   static DecimalFormat ID_FORMAT = new DecimalFormat("00000000");
   
-  private String                                    name;
-  private int                                       windowId;
-  private int                                       maxWindowSize;
-  private int                                       trackingProgress;
-  private int                                       trackingNoLostTo;
-  private int                                       trackingLostCount;
-  private int                                       trackingDuplicatedCount;
-  private int                                       trackingCount;
-  private Map<String, WindowMessageTrackingLogStat> logStats;
+  private String                             name;
+  private int                                windowId;
+  private int                                maxWindowSize;
+  private int                                windowSize;
+  private int                                trackingProgress;
+  private int                                trackingNoLostTo;
+  private int                                trackingLostCount;
+  private int                                trackingDuplicatedCount;
+  private int                                trackingCount;
+  private Map<String, TrackingWindowLogStat> logStats;
   
   private boolean complete = false;
 
   transient private boolean persisted = false;
   transient private BitSet  bitSet;
 
-  public WindowMessageTrackingStat() {}
+  public TrackingWindowStat() {}
   
-  public WindowMessageTrackingStat(String name, int windowId, int maxWindowSize) {
+  public TrackingWindowStat(String name, int windowId, int maxWindowSize) {
     this.name      = name ;
     this.windowId  =  windowId;
     this.maxWindowSize = maxWindowSize;
+    this.windowSize = maxWindowSize;
     this.logStats  = new HashMap<>();
     this.bitSet    = new BitSet(maxWindowSize);
   }
@@ -45,6 +49,9 @@ public class WindowMessageTrackingStat {
 
   public int getWindowId() { return windowId; }
   public void setWindowId(int windowId) { this.windowId = windowId; }
+
+  public int getWindowSize() { return windowSize; }
+  public void setWindowSize(int windowSize) { this.windowSize = windowSize; }
 
   public int getMaxWindowSize() { return maxWindowSize; }
   public void setMaxWindowSize(int size) { this.maxWindowSize = size;}
@@ -74,8 +81,8 @@ public class WindowMessageTrackingStat {
     this.trackingCount = trackingCount;
   }
 
-  public Map<String, WindowMessageTrackingLogStat> getLogStats() { return logStats; }
-  public void setLogStats(Map<String, WindowMessageTrackingLogStat> logStats) { this.logStats = logStats; }
+  public Map<String, TrackingWindowLogStat> getLogStats() { return logStats; }
+  public void setLogStats(Map<String, TrackingWindowLogStat> logStats) { this.logStats = logStats; }
 
   public boolean isComplete() { return complete;}
   public void setComplete(boolean complete) {
@@ -110,60 +117,67 @@ public class WindowMessageTrackingStat {
     } else {
       bitSet.set(idx, true); 
       trackingCount++;
-    }
-    
-    List<MessageTrackingLog> logs = mTracking.getLogs();
-    if(logs != null) {
-      for(int i = 0; i < logs.size(); i++) {
-        MessageTrackingLog log = logs.get(i);
-        WindowMessageTrackingLogStat logStat = logStats.get(log.getName());
-        if(logStat == null) {
-          logStat = new WindowMessageTrackingLogStat();
-          logStats.put(log.getName(), logStat);
+      List<MessageTrackingLog> logs = mTracking.getLogs();
+      if(logs != null) {
+        for(int i = 0; i < logs.size(); i++) {
+          MessageTrackingLog log = logs.get(i);
+          TrackingWindowLogStat logStat = logStats.get(log.getName());
+          if(logStat == null) {
+            logStat = new TrackingWindowLogStat();
+            logStats.put(log.getName(), logStat);
+          }
+          logStat.log(mTracking, log);
         }
-        logStat.log(mTracking, log);
       }
     }
     return trackingCount;
   }
   
   synchronized public void update() {
-    int lostCount = 0;
-    int noLostTo = -1;
+    trackingLostCount = 0;
+    trackingNoLostTo  = -1;
     for(int i = 0; i <= trackingProgress; i++) {
       if(!bitSet.get(i)) {
-        if(noLostTo < 0) noLostTo = i;
-        lostCount++ ;
+        if(trackingNoLostTo < 0) trackingNoLostTo = i;
+        trackingLostCount++ ;
       }
     }
-    if(noLostTo < 0) trackingNoLostTo = trackingProgress;
-    else trackingNoLostTo = noLostTo ;
-    
-    trackingLostCount = lostCount;
-    if(trackingNoLostTo + 1 == maxWindowSize) complete = true;
+    if(trackingNoLostTo < 0) trackingNoLostTo = trackingProgress;
+    if(trackingNoLostTo + 1 == windowSize) complete = true;
   }
   
-  synchronized void merge(WindowMessageTrackingStat other) {
+  synchronized public void merge(TrackingWindowStat other) {
     if(other.trackingProgress > trackingProgress) trackingProgress = other.trackingProgress;
     trackingDuplicatedCount += other.trackingDuplicatedCount;
     
+    trackingNoLostTo  = -1;
+    trackingLostCount = 0;
     for(int idx = 0; idx <= trackingProgress; idx++) {
       if(other.bitSet.get(idx)) {
-        if(bitSet.get(idx)) trackingDuplicatedCount++;
-        else trackingCount++;
-        bitSet.set(idx, true) ;
+        if(bitSet.get(idx)) {
+          trackingDuplicatedCount++;
+        } else {
+          trackingCount++;
+          bitSet.set(idx, true) ;
+        }
+      }
+      
+      if(!bitSet.get(idx)) {
+        if(trackingNoLostTo < 0) trackingNoLostTo = idx;
+        trackingLostCount++ ;
       }
     }
+    if(trackingNoLostTo < 0) trackingNoLostTo = trackingProgress;
+    if(trackingNoLostTo + 1 == windowSize) complete = true;
     
     for(String otherLogKey : other.logStats.keySet()) {
-      WindowMessageTrackingLogStat logStat = logStats.get(otherLogKey);
+      TrackingWindowLogStat logStat = logStats.get(otherLogKey);
       if(logStat == null) {
-        logStat = new WindowMessageTrackingLogStat();
+        logStat = new TrackingWindowLogStat();
         logStats.put(otherLogKey, logStat);
       }
       logStat.merge(other.logStats.get(otherLogKey));
     }
-    update();
   }
   
   public String toWindowIdName() { return toWindowIdName(windowId); }
@@ -172,17 +186,17 @@ public class WindowMessageTrackingStat {
     return toFormattedText(this);
   }
   
-  static public String toFormattedText(WindowMessageTrackingStat ... window) {
+  static public String toFormattedText(TrackingWindowStat ... window) {
     TabularFormater ft = 
       new TabularFormater("Name", "Window Id", "Type", "Window Size", "Count", "Progress", "No Lost To", "Duplicated");
     for(int i = 0; i < window.length; i++) {
       window[i].update();
       ft.addRow(
-        window[i].getName(), window[i].getWindowId(), "Tracking", window[i].getMaxWindowSize(), 
+        window[i].getName(), window[i].getWindowId(), "Tracking", window[i].getWindowSize(), 
         window[i].getTrackingCount(), window[i].getTrackingProgress(), window[i].getTrackingNoLostTo(), window[i].getTrackingDuplicatedCount()
       );
       for(String logKey : window[i].logStats.keySet()) {
-        WindowMessageTrackingLogStat logStat = window[i].logStats.get(logKey);
+        TrackingWindowLogStat logStat = window[i].logStats.get(logKey);
         ft.addRow("", "", logKey, "", logStat.getCount(), "", "", "");
       }
     }
@@ -190,6 +204,6 @@ public class WindowMessageTrackingStat {
   }
   
   final static public String toWindowIdName(int chunkId) {
-    return "chunk-" + ID_FORMAT.format(chunkId);
+    return "window-" + ID_FORMAT.format(chunkId);
   }
 }

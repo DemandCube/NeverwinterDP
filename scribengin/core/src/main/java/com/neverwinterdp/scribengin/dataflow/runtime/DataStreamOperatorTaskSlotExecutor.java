@@ -73,7 +73,7 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
     int recCount = 0;
     try {
       while(!isInterrupted()) {
-        Message message = context.nextMessage(1000);
+        Message message = context.nextMessage(500);
         if(message == null) break ;
 
         recCount++;

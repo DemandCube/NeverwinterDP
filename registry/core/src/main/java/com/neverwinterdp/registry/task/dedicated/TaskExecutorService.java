@@ -3,7 +3,6 @@ package com.neverwinterdp.registry.task.dedicated;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class TaskExecutorService<T> {
   private List<TaskExecutor<T>>    taskExecutors = new ArrayList<TaskExecutor<T>>();
@@ -81,9 +80,10 @@ public class TaskExecutorService<T> {
     public void run() {
       try {
         while(true) {
+          Thread.sleep(1000);
+          long time = System.currentTimeMillis();
           for(int i = 0; i < taskExecutors.size(); i++) {
-            Thread.sleep(5000);
-            taskExecutors.get(i).onSwitchTaskSlot();
+            taskExecutors.get(i).setTickTime(time);;
           }
         }
       } catch (InterruptedException e) {

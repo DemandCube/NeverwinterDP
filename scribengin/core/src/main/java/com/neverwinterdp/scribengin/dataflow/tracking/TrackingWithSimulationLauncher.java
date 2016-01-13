@@ -1,16 +1,12 @@
 package com.neverwinterdp.scribengin.dataflow.tracking;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import com.beust.jcommander.Parameter;
-import com.neverwinterdp.message.MessageTrackingRegistry;
-import com.neverwinterdp.message.MessageTrackingReport;
-import com.neverwinterdp.message.WindowMessageTrackingLogStat;
-import com.neverwinterdp.message.WindowMessageTrackingStats;
+import com.neverwinterdp.message.TrackingWindowRegistry;
+import com.neverwinterdp.message.TrackingWindowReport;
 import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
@@ -69,6 +65,8 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
           shell.console().println(SimulationLog.toFormattedText(simulationLogs));
         }
       }
+      
+//      stopStartDataflow(shell, dflBuilder);
       if(i % 2 == 0) {
         killWorker(dflClient, dflBuilder.getDataflowId());
       } else {
@@ -90,14 +88,11 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     TXEvent stopEvent = new TXEvent("stop", DataflowEvent.Stop);
     dflClient.getDataflowRegistry().getMasterRegistry().getMaserEventBroadcaster().broadcast(stopEvent);
     
-    MessageTrackingRegistry mtRegistry = dflClient.getDataflowRegistry().getMessageTrackingRegistry();
+    TrackingWindowRegistry mtRegistry = dflClient.getDataflowRegistry().getMessageTrackingRegistry();
     while(true) {
-      MessageTrackingReport inputReporter  = mtRegistry.getMessageTrackingReporter("input");
-      MessageTrackingReport outputReporter = mtRegistry.getMessageTrackingReporter("output");
-      long inputCount  = inputReporter.getTrackingCount();
-      long outputCount = outputReporter.getTrackingCount();
-      System.err.println("Stop: input count = " + inputCount + ", output count = " + outputCount);
-      if(inputCount == outputCount ) break;
+      TrackingWindowReport report  = mtRegistry.getReport();
+      System.err.println("Stop: tracking count = " + report.getTrackingCount());
+      if(mtRegistry.getProgressCommitWindows().size() == 0 && report.getTrackingCount() > 0) break;
       Thread.sleep(1000);
     }
     shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED --timeout 90000 --report-period 10000") ;
@@ -112,6 +107,7 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
   }
   
   public void killWorker(DataflowClient dflClient, String dataflowId) throws Exception {
+    System.err.println("Kill Worker");
     SimulationLog log = new SimulationLog("kill-dataflow-worker");
     List<VMDescriptor> vmDescriptors = dflClient.getActiveDataflowWorkers();
     if(vmDescriptors.size() == 0) {

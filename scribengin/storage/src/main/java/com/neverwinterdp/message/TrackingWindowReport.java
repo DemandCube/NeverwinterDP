@@ -8,14 +8,14 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.neverwinterdp.util.text.TabularFormater;
 
-public class MessageTrackingReport {
-  private String                           name;
-  private List<WindowMessageTrackingStats> finishedWindowStats;
-  private List<WindowMessageTrackingStats> progressWindowStats;
+public class TrackingWindowReport {
+  private String            name;
+  private List<TrackingWindowStats> finishedWindowStats;
+  private List<TrackingWindowStats> progressWindowStats;
   
-  public MessageTrackingReport() { }
+  public TrackingWindowReport() { }
   
-  public MessageTrackingReport(String name) {
+  public TrackingWindowReport(String name) {
     this.name                  = name ;
     finishedWindowStats = new ArrayList<>();
     progressWindowStats = new ArrayList<>();
@@ -24,21 +24,11 @@ public class MessageTrackingReport {
   public String getName() { return name; }
   public void setName(String name) { this.name = name; }
 
-  public List<WindowMessageTrackingStats> getFinishedWindowStats() { 
-    return finishedWindowStats; 
-  }
-  
-  public void setFinishedWindowStats(List<WindowMessageTrackingStats> stats) {
-    finishedWindowStats = stats;
-  }
+  public List<TrackingWindowStats> getFinishedWindowStats() {  return finishedWindowStats;  }
+  public void setFinishedWindowStats(List<TrackingWindowStats> stats) { finishedWindowStats = stats; }
 
-  public List<WindowMessageTrackingStats> getProgressWindowStats() { 
-    return progressWindowStats; 
-  }
-  
-  public void setProgressWindowStats(List<WindowMessageTrackingStats> stats) {
-    progressWindowStats = stats;
-  }
+  public List<TrackingWindowStats> getProgressWindowStats() { return progressWindowStats;  }
+  public void setProgressWindowStats(List<TrackingWindowStats> stats) { progressWindowStats = stats; }
   
   @JsonIgnore
   public int getInSequenceCompleteWindowCount() {
@@ -50,7 +40,7 @@ public class MessageTrackingReport {
   public int getCompleteWindowCount() {
     int count = 0 ;
     for(int i = 0; i < finishedWindowStats.size(); i++) {
-      WindowMessageTrackingStats stats = finishedWindowStats.get(i);
+      TrackingWindowStats stats = finishedWindowStats.get(i);
       count += (stats.getToWindowId() - stats.getFromWindowId()) + 1;
     }
     return count;
@@ -63,10 +53,10 @@ public class MessageTrackingReport {
     return count;
   }
 
-  long getTrackingCount(List<WindowMessageTrackingStats> chunkReportHolder) {
+  long getTrackingCount(List<TrackingWindowStats> chunkReportHolder) {
     long count = 0;
     for(int i = 0; i < chunkReportHolder.size(); i++) {
-      WindowMessageTrackingStats stat = chunkReportHolder.get(i);
+      TrackingWindowStats stat = chunkReportHolder.get(i);
       count += stat.getTrackingCount();
     }
     return count;
@@ -78,28 +68,28 @@ public class MessageTrackingReport {
     return count;
   }
   
-  long getLogNameCount(List<WindowMessageTrackingStats> chunkReportHolder, String logName) {
+  long getLogNameCount(List<TrackingWindowStats> chunkReportHolder, String logName) {
     long count = 0;
     for(int i = 0; i < chunkReportHolder.size(); i++) {
-      WindowMessageTrackingStats stat = chunkReportHolder.get(i);
+      TrackingWindowStats stat = chunkReportHolder.get(i);
       count += stat.getLogNameCount(logName);
     }
     return count;
   }
   
-  public void mergeFinished(WindowMessageTrackingStat stat) {
+  public void mergeFinished(TrackingWindowStat stat) {
     merge(finishedWindowStats, stat);
   }
   
-  public void mergeProgress(WindowMessageTrackingStat stat) {
+  public void mergeProgress(TrackingWindowStat stat) {
     merge(progressWindowStats, stat);
   }
   
-  void merge(List<WindowMessageTrackingStats> reportChunkHolder, WindowMessageTrackingStat chunk) {
+  void merge(List<TrackingWindowStats> reportChunkHolder, TrackingWindowStat chunk) {
     for(int i = 0; i < reportChunkHolder.size(); i++) {
-      WindowMessageTrackingStats sel = reportChunkHolder.get(i) ;
+      TrackingWindowStats sel = reportChunkHolder.get(i) ;
       if(chunk.getWindowId() < sel.getFromWindowId()) {
-        WindowMessageTrackingStats newChunkReport = new WindowMessageTrackingStats();
+        TrackingWindowStats newChunkReport = new TrackingWindowStats();
         newChunkReport.merge(chunk);
         reportChunkHolder.add(i, newChunkReport);
         return;
@@ -108,7 +98,7 @@ public class MessageTrackingReport {
         return;
       }
     }
-    WindowMessageTrackingStats newChunkReport = new WindowMessageTrackingStats();
+    TrackingWindowStats newChunkReport = new TrackingWindowStats();
     newChunkReport.merge(chunk);
     reportChunkHolder.add(newChunkReport);
   }
@@ -117,11 +107,11 @@ public class MessageTrackingReport {
     finishedWindowStats = optimize(finishedWindowStats);
   }
   
-  List<WindowMessageTrackingStats> optimize(List<WindowMessageTrackingStats> reportChunkHolder) {
-    List<WindowMessageTrackingStats> newHolder = new ArrayList<>();
-    WindowMessageTrackingStats previous = null;
+  List<TrackingWindowStats> optimize(List<TrackingWindowStats> reportChunkHolder) {
+    List<TrackingWindowStats> newHolder = new ArrayList<>();
+    TrackingWindowStats previous = null;
     for(int i = 0; i < reportChunkHolder.size(); i++) {
-      WindowMessageTrackingStats current = reportChunkHolder.get(i) ;
+      TrackingWindowStats current = reportChunkHolder.get(i) ;
       if(previous == null) {
         previous = current;
         newHolder.add(current);
@@ -149,19 +139,19 @@ public class MessageTrackingReport {
     return b.toString();
   }
   
-  String toFormattedText(String title, List<WindowMessageTrackingStats> reportChunkHolder, boolean detail) {
+  String toFormattedText(String title, List<TrackingWindowStats> windowStats, boolean detail) {
     TabularFormater ft = new TabularFormater("From - To", "Stat", "Lost", "Duplicated", "Count", "Avg Delivery");
     ft.setTitle(title);
-    for(int i = 0; i < reportChunkHolder.size(); i++) {
-      WindowMessageTrackingStats sel = reportChunkHolder.get(i) ;
+    for(int i = 0; i < windowStats.size(); i++) {
+      TrackingWindowStats sel = windowStats.get(i) ;
       ft.addRow(sel.getFromWindowId() + " - " + sel.getToWindowId(), "", "", "", "", "");
       ft.addRow("", "Tracking", sel.getTrackingLostCount(), sel.getTrackingDuplicatedCount(), sel.getTrackingCount(), "");
       if(detail) {
-        Map<String, WindowMessageTrackingLogStat> logStats = sel.getLogStats();
+        Map<String, TrackingWindowLogStat> logStats = sel.getLogStats();
         List<String> logStatKeys = new ArrayList<>(logStats.keySet());
         Collections.sort(logStatKeys);
         for(String logName : logStatKeys) {
-          WindowMessageTrackingLogStat selLogChunkStat = logStats.get(logName);
+          TrackingWindowLogStat selLogChunkStat = logStats.get(logName);
           ft.addRow("", logName, "", "", selLogChunkStat.getCount(), selLogChunkStat.getAvgDeliveryTime());
         }
       }

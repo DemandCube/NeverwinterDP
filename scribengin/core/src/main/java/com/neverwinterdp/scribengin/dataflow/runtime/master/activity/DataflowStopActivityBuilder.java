@@ -6,8 +6,8 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.neverwinterdp.message.MessageTrackingRegistry;
-import com.neverwinterdp.message.MessageTrackingReport;
+import com.neverwinterdp.message.TrackingWindowRegistry;
+import com.neverwinterdp.message.TrackingWindowReport;
 import com.neverwinterdp.registry.activity.Activity;
 import com.neverwinterdp.registry.activity.ActivityBuilder;
 import com.neverwinterdp.registry.activity.ActivityExecutionContext;
@@ -104,17 +104,15 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
       watcher.complete();
       System.err.println("BroadcastStopInputStepExecutor: complete broadcast StopInput, num of worker = " + workers.size());
       
-      MessageTrackingRegistry mtRegistry = dflRegistry.getMessageTrackingRegistry();
+      TrackingWindowRegistry mtRegistry = dflRegistry.getMessageTrackingRegistry();
       int checkCount = 0;
       boolean noMessageLeft = false;
-      while(checkCount < 60 && !noMessageLeft) {
+      while(checkCount < 120 && !noMessageLeft) {
         Thread.sleep(500);
-        MessageTrackingReport inputReporter  = mtRegistry.getMessageTrackingReporter("input");
-        MessageTrackingReport outputReporter = mtRegistry.getMessageTrackingReporter("output");
-        long inputCount  = inputReporter.getTrackingCount();
-        long outputCount = outputReporter.getTrackingCount();
-        System.err.println("BroadcastStopInputStepExecutor: inputCount = " + inputCount + ", outputCount = " + outputCount);
-        if(inputCount == outputCount) noMessageLeft = true;
+        TrackingWindowReport trackingReport  = mtRegistry.getReport();
+        int commitWindowLefts = mtRegistry.getProgressCommitWindows().size();
+        System.err.println("BroadcastStopInputStepExecutor: tracking count = " + trackingReport.getTrackingCount() + ", commitWindowLefts = " + commitWindowLefts);
+        if(commitWindowLefts == 0) noMessageLeft = true;
         checkCount++;
       }
       if(!noMessageLeft) {

@@ -66,7 +66,6 @@ public class InputDataStreamContext {
         messageTracking.add(new MessageTrackingLog("input", tag));
         
         message.setMessageTracking(messageTracking);
-        mtService.log(messageTracking);
       }
       
       for (DataStreamSourceInterceptor sel : interceptor) {
@@ -95,7 +94,7 @@ public class InputDataStreamContext {
     }
     
     if(dataStreamType == DataStreamType.Input) {
-      mtService.flush();
+      mtService.flushWindows();
     }
   }
 

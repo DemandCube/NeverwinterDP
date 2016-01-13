@@ -42,34 +42,10 @@ public class KafkaWithSimulationIntegrationTest  {
     dflBuilder.setSlidingWindowSize(300);
     
     TrackingWithSimulationLauncher launcher = new TrackingWithSimulationLauncher();
+    launcher.setSimulateKill();
     launcher.execute(shell, dflBuilder);
     
     dflBuilder.runMonitor(shell);
     shell.execute("registry dump");
-  }
-  
-  public class StartStopThread extends Thread {
-    TrackingDataflowBuilder dflBuilder;
-    
-    public StartStopThread(TrackingDataflowBuilder dflBuilder) {
-      this.dflBuilder = dflBuilder;
-    }
-    
-    public void run() {
-      try {
-        TrackingWithSimulationLauncher launcher = new TrackingWithSimulationLauncher();
-        launcher.setSimulateKill();
-        launcher.execute(shell, dflBuilder);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-      synchronized(this) {
-        notifyAll();
-      }
-    }
-    
-    public synchronized void waitForTermination() throws InterruptedException {
-      wait();
-    }
   }
 }

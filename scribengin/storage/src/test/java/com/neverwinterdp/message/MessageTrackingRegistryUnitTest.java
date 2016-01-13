@@ -1,10 +1,8 @@
 package com.neverwinterdp.message;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
@@ -13,6 +11,7 @@ import org.junit.Test;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
+import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.zookeeper.tool.server.EmbededZKServerSet;
@@ -44,126 +43,85 @@ final static public String WORKING_DIR = "build/working";
   
   @Test
   public void testMessageTrackingRegistry() throws Exception {
-    MessageTrackingRegistry mRegistry = new MessageTrackingRegistry(registry, "/tracking-message");
-    mRegistry.initRegistry();
+    int MAX_WINDOW_SIZE  = 10000;
+    int NUM_OF_COMMITTER = 3;
+    int NUM_OF_COMMIT_PER_COMMITTER = 10;
     
-    ExecutorService executorService = Executors.newFixedThreadPool(3);
-    for(int i = 0; i < 3; i++) {
-      executorService.submit(new TrackingMessageProducer(mRegistry, 10, 10000));
+    TrackingWindowRegistry tRegistry = new TrackingWindowRegistry(registry, "/tracking-message");
+    tRegistry.initRegistry();
+    
+    ExecutorService windowCommitterService = Executors.newFixedThreadPool(NUM_OF_COMMITTER);
+    for(int i = 0; i < NUM_OF_COMMITTER; i++) {
+      windowCommitterService.submit(new WindowCommitter(tRegistry, NUM_OF_COMMIT_PER_COMMITTER, MAX_WINDOW_SIZE));
+    }
+    windowCommitterService.shutdown();
+    
+    while(!windowCommitterService.isTerminated()) {
+      Thread.sleep(3000);
+      TrackingWindowReport report = tRegistry.merge();
+      System.out.println(report.toDetailFormattedText());
     }
     
-    executorService.shutdown();
-    while(!executorService.isTerminated()) {
-      executorService.awaitTermination(3, TimeUnit.SECONDS);
-      
-      mRegistry.mergeProgress("input");
-      MessageTrackingReport inputReport = mRegistry.mergeReport("input");
-      System.err.println(inputReport.toDetailFormattedText());
-      
-      mRegistry.mergeProgress("output");
-      MessageTrackingReport outputReport = mRegistry.mergeReport("output");
-      System.err.println(outputReport.toDetailFormattedText());
-    }
-    
-    int windowId = mRegistry.nextWindowId("output", 1);
-    new TrackingMessageProducer(mRegistry, 1, 10000).generateMessageTracking(windowId, 0, 5000);
-    mRegistry.mergeProgress("input");
-    mRegistry.mergeProgress("output");
-    
-    MessageTrackingReport inputReporter = mRegistry.mergeReport("input");
-    System.out.println(inputReporter.toDetailFormattedText());
-    
-    MessageTrackingReport outputReporter = mRegistry.mergeReport("output");
-    System.out.println(outputReporter.toDetailFormattedText());
+    TrackingWindowReport report = tRegistry.merge();
+    System.out.println(report.toDetailFormattedText());
     
     registry.get("/").dump(System.out);
-  }
+  }  
   
-  static public class TrackingMessageProducer implements Runnable {
-    private MessageTrackingRegistry mRegistry;
-    private int                     chunkSize;
-    private int                     numOfChunks;
-    private TrackingMessageLogger   inputLogger;
-    private TrackingMessageLogger   outputLogger;
-    private TrackingMessageLogger   splitterLogger;
-    private TrackingMessageLogger   infoLogger;
-    private TrackingMessageLogger   warnLogger;
-    private TrackingMessageLogger   errorLogger;
-
-    public TrackingMessageProducer(MessageTrackingRegistry mRegistry, int numOfChunks, int chunkSize) {
-      this.mRegistry = mRegistry;
-      this.chunkSize = chunkSize;
-      this.numOfChunks = numOfChunks;
-      inputLogger    = new TrackingMessageLogger("input");
-      outputLogger   = new TrackingMessageLogger("output");
-      splitterLogger = new TrackingMessageLogger("operator.splitter");
-      infoLogger     = new TrackingMessageLogger("operator.persister.info");
-      warnLogger     = new TrackingMessageLogger("operator.persister.warn");
-      errorLogger    = new TrackingMessageLogger("operator.persister.error");
+  public class WindowCommitter implements Runnable {
+    TrackingWindowRegistry tRegistry;
+    int numOfCommit;
+    int maxWindowSize ;
+    
+    public WindowCommitter(TrackingWindowRegistry tRegistry, int numOfCommit, int maxWindowSize) {
+      this.tRegistry = tRegistry;
+      this.numOfCommit = numOfCommit;
+      this.maxWindowSize = maxWindowSize;
     }
     
     @Override
     public void run() {
       try {
-        for(int i = 0; i < numOfChunks; i++) {
-          int windowId = -1; // mRegistry.nextWindowId(); 
-          while((windowId = mRegistry.nextWindowId("output", 5)) < 0) {
-            Thread.sleep(250);
-          }
-          generateMessageTracking(windowId, 0, chunkSize);
-        }
+        doRun();
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
-
-    public void generateMessageTracking(int windowId, int from, int to) throws Exception {
-      List<MessageTracking> holder = new ArrayList<MessageTracking>();
-      for(int i = from; i < to; i++) {
+    
+    public void doRun() throws RegistryException, InterruptedException {
+      Random rand = new Random();
+      for(int i = 0; i < numOfCommit; i++) {
+        int windowId = tRegistry.nextWindowId();
+        int windowSize = rand.nextInt(maxWindowSize);
+        if(windowSize < 1000) windowSize = 1000;
+        generateWindow(windowId, windowSize);
+      }
+    }
+    
+    public void generateWindow(int windowId, int windowSize) throws RegistryException, InterruptedException {
+      TrackingWindow window = new TrackingWindow(windowId, maxWindowSize);
+      if(windowSize < 1000) windowSize = 1000;
+      window.setWindowSize(windowSize);
+      tRegistry.saveWindow(window);
+      
+      TrackingWindowStat windowStat = null;
+      for(int i = 0; i < windowSize; i++) {
+        if(windowStat == null) {
+          windowStat = new TrackingWindowStat("output", windowId, maxWindowSize);
+        }
         MessageTracking mTracking = new MessageTracking(windowId, i);
-        inputLogger.log(mTracking);
-        holder.add(mTracking);
-      }
-      saveWindow("input", windowId, holder);
-    
-      for(int i = 0; i < holder.size(); i++) {
-        MessageTracking mTracking = holder.get(i);
-        splitterLogger.log(mTracking);
-        if(i % 3 == 0) {
-          infoLogger.log(mTracking);
-        } else if(i % 3 == 1) {
-          warnLogger.log(mTracking);
-        } else {
-          errorLogger.log(mTracking);
-        }
-        outputLogger.log(mTracking);
-      }
-      saveWindow("output", windowId, holder);
-    }
-    
-    private void saveWindow(String name, int windowId, List<MessageTracking> holder) throws Exception {
-      WindowMessageTrackingStat windowStat = new WindowMessageTrackingStat(name, windowId, chunkSize);
-      for(int i = 0; i < holder.size(); i++) {
-        MessageTracking mTracking = holder.get(i);
+        mTracking.add(new MessageTrackingLog("message-log", null));
         windowStat.log(mTracking);
-        if((i + 1) % 1000 == 0) {
-          mRegistry.saveProgress(windowStat);
-          windowStat = new WindowMessageTrackingStat(name, windowId, chunkSize);
+        if((i + 1) % 1753 == 0) {
+          windowStat.log(mTracking);
+          tRegistry.saveProgress(windowStat);
+          windowStat = null;
+          Thread.sleep(100);
         }
       }
-      if(windowStat.getTrackingCount() > 0) mRegistry.saveProgress(windowStat);
-    }
-  }
-  
-  static public class TrackingMessageLogger  {
-    private String logName;
-
-    public TrackingMessageLogger(String name) {
-      this.logName = name;
-    }
-    
-    public void log(MessageTracking mTracking) {
-      mTracking.add(new MessageTrackingLog(logName, null));
+      if(windowStat != null) {
+        tRegistry.saveProgress(windowStat);
+      }
     }
   }
 }
