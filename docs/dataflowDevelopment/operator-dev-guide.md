@@ -75,7 +75,7 @@ What if we have multiple sinks to write to?  Suppose you want to write to a diff
 
 In this example, we'll demonstrate how to choose which sink to use.
 
-This example assumes you have set up two separate and available sinks.  This will be done when setting up your dataflow.  For information on how to setup your dataflow, refer to [the Dataflow Submission API Guide](dataflowSubmission.md)
+This example assumes you have set up two separate and available sinks.  This will be done when setting up your dataflow.  For information on how to setup your dataflow and data sink names, refer to [the Dataflow Development API Guide](wireDataflowDev.md#creating-a-splitterdatastreamoperator)
 
 ```java
 public class FilteringOperator extends DataStreamOperator {
