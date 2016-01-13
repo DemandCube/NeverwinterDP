@@ -66,6 +66,11 @@ Get Scribengin launched quickly!  This will walk you how to start a Scribengin i
 - [Get your dev environment setup, learn to write a dataflow](docs/dataflowDevelopment/dataflowDevTableOfContents.md)
 - [Operator Development Guide](docs/dataflowDevelopment/operator-dev-guide.md)
 
+####Developer Guidelines
+- [Code Conventions](docs/devAndTestingGuidelines/code-convention-howto.md)
+- [Code Organization](docs/devAndTestingGuidelines/code-organization-howto.md)
+- [Dataflow Performance and Validation](docs/devAndTestingGuidelines/dataflow-performance-and-validation-howto.md)
+
 ####Release
 ```
 cd NeverwinterDP

@@ -46,34 +46,7 @@ Some rule to make a good configuration:
 5. For the performance test, the validated data has to be correct first, before the number of throughput, elapsed time... are considered
 
 
-#Metric Collection#
-
-Here is sample of metric that we should collect at a specific point of time. We can add more detail metric later.
-
-Timestamp                 Server         Metric Name                      Metric
-
-16/6/2015 13:00:30        host-1         CPU Usage                         # cycles(70%)
-  16/6/2015 13:00:30        host-1           Thread Count                               50
-  16/6/2015 13:00:30        host-1           Thread Blocked Count                        1
-  16/6/2015 13:00:30        host-1           GC                                # cycles(%)
-  16/6/2015 13:00:30        host-1         Memory Usage                         195MB(60%)
-16/6/2015 13:00:30        host-1         Disk Usage                            51GB(60%)
-  16/6/2015 13:00:30        host-1         Throughput in MB                         10MB/s
-  16/6/2015 13:00:30        host-1         Throughput in records             25k records/s
-  16/6/2015 13:00:30        host-1            Source read Avg                1 record/50ns           
-  16/6/2015 13:00:30        host-1            HDFS Sink Write Avg            1 record/50ns           
-  16/6/2015 13:00:30        host-1            Kafka Sink Write Avg           1 record/50ns           
-  16/6/2015 13:00:30        host-1         log Message Count                           175
-  16/6/2015 13:00:30        host-1           log info                                  100
-  16/6/2015 13:00:30        host-1           log warn                                   50
-  16/6/2015 13:00:30        host-1           log error                                  25
-
-
-1. We need to find a way to draw the chart with different metric measurement to show the relation of the problems, for ex when the CPU, Memory, IO reach the limit we expect more error... Probably a 3D chart can show this type of relations.
-
-2. We can add more metric to measure the CPU, Memory, IO for the other components such Logger, each sink, source....
-
-3. Interpret The Result And Expected Behaviors
+6. Interpret The Result And Expected Behaviors
     * Ideally, all the metric should be constant which mean IO, CPU, Memory usage
     * The server reach its physical limit when either CPU or IO reach the limit. For ex, if we see that the CPU reach 100% of usage, then we need to find the CPU hotspot to optimize. If we know that the disk transfer time is 50M/s and our throughput is 35-40MB/s then probably we reach the io limit and we have no more room to optimize. The only way to optimize is to allocate more machnine, allocate more stream, partition so we can have more task to run in parallel. 
     * For the data intensive application such hadoop, our scribengin application... We usually have the IO bound problem , not CPU bound. The disk I/O performance is affected by the transfer time and seek time. If we have an other component that write to the disk such the log , buffer... It can affect significantly our sink/source performance. SSD improve a lot the seek time. But we need to find out that our IO bound is caused by our sink/source operation or other operation or usage %.
