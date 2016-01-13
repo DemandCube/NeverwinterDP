@@ -209,7 +209,21 @@ public class TrackingWindowRegistry {
   }
   
   public TrackingWindowReport getReport() throws RegistryException {
-    return trackingFinishedNode.getDataAs(TrackingWindowReport.class);
+    TrackingWindowReport report = trackingFinishedNode.getDataAs(TrackingWindowReport.class);
+    for(String sel : trackingFinishedNode.getChildren()) {
+      TrackingWindowStat windowStat = 
+          trackingFinishedNode.getChild(sel).getDataAsWithDefault(TrackingWindowStat.class, null);
+      if(windowStat != null) report.mergeFinished(windowStat);
+    }
+    for(String sel : trackingProgressNode.getChildren()) {
+      TrackingWindowStat windowStat = 
+        trackingProgressNode.getChild(sel).getDataAsWithDefault(TrackingWindowStat.class, null);
+      if(windowStat != null) {
+        windowStat.update();
+        report.mergeProgress(windowStat);
+      }
+    }
+    return report;
   }
   
   public TrackingWindowReport merge() throws RegistryException {

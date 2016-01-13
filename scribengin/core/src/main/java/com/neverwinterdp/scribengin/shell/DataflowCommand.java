@@ -16,6 +16,7 @@ import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.IOUtil;
+import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.vm.client.shell.Command;
 import com.neverwinterdp.vm.client.shell.CommandInput;
 import com.neverwinterdp.vm.client.shell.Console;
@@ -171,6 +172,8 @@ public class DataflowCommand extends Command {
       
       TrackingWindowReport report = dflRegistry.getMessageTrackingRegistry().getReport();
       console.println(report.toFormattedText());
+      List<String> progressCommitWindows = dflRegistry.getMessageTrackingRegistry().getProgressCommitWindows();
+      console.println("Progress commit windows: " + StringUtil.join(progressCommitWindows, ","));
     }
 
     @Override
