@@ -86,7 +86,7 @@ final public class TaskExecutor<T> implements Runnable {
     long totalRuntime = 0;
     while(executorItr.hasNext()) {
       currentRunningTaskSlotExecutor = executorItr.next();
-      currentRunningTaskSlotExecutor.setTickTimeout(System.currentTimeMillis() + 5000);;
+      currentRunningTaskSlotExecutor.setTickTimeout(System.currentTimeMillis() + 10000);;
       currentRunningTaskSlotExecutor.onPreExecuteSlot();
       totalRuntime += currentRunningTaskSlotExecutor.executeSlot();
       currentRunningTaskSlotExecutor.onPostExecuteSlot();
