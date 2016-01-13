@@ -64,7 +64,7 @@ Get Scribengin launched quickly!  This will walk you how to start a Scribengin i
 
 ####Developer Info
 - [Get your dev environment setup, learn to write a dataflow](docs/dataflowDevelopment/dataflowDevTableOfContents.md)
-- [Operator Development Guide](docs/operator-dev-guide.md)
+- [Operator Development Guide](docs/dataflowDevelopment/operator-dev-guide.md)
 
 ####Release
 ```

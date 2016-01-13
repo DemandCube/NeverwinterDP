@@ -28,7 +28,7 @@ To be able to submit your dataflow to Scribengin, first you'll need to :
 
 DataSet - Input/Output sources and sinks
 
-Operator - Reads in from a dataset or another operator, and outputs to an operator or dataset.  Can perform filtering, transformation, or enhancement of data passing through.  For a guide on how to write your own Operator, refer to [the Operator Developer Guide](operator-dev-guide.md)
+Operator - Reads in from a dataset or another operator, and outputs to an operator or dataset.  Can perform filtering, transformation, or enhancement of data passing through.  For a guide on how to write your own Operator, refer to [the Operator Developer Guide](./dataflowDevelopment/operator-dev-guide.md)
 
 ---
 #Simple Dataflow#
@@ -128,7 +128,7 @@ public Dataflow<Message, Message> buildDataflow() {
 
 The dataflow we'll be building in this example will look like this.  We'll be reading in from kafka, storing the data into 3 split topics for buffering, then moving all the data back into Kafka under a new topic.
 
-We'll be stringing this all together by wiring together different Operators.  For a guide on how to write your own Operator, refer to [the Operator Developer Guide](operator-dev-guide.md)
+We'll be stringing this all together by wiring together different Operators.  For a guide on how to write your own Operator, refer to [the Operator Developer Guide](./dataflowDevelopment/operator-dev-guide.md)
 
 ![API Example](images/API_Example.png)
 
