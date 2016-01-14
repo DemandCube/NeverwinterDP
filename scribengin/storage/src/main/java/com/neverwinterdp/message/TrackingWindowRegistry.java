@@ -197,7 +197,10 @@ public class TrackingWindowRegistry {
         for(int i= 0; i < finishedWindows.size(); i++) {
           String windowIdName = finishedWindows.get(i);
           transaction.deleteChild(trackingFinishedNode, windowIdName);
-          transaction.deleteChild(windowCommitsNode, windowIdName);
+          //TODO: fix this, this should not happen
+          if(windowCommitsNode.hasChild(windowIdName)) {
+            transaction.deleteChild(windowCommitsNode, windowIdName);
+          }
         }
         transaction.commit();
         return true;
