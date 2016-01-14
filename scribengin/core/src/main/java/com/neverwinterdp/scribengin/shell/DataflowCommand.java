@@ -172,7 +172,7 @@ public class DataflowCommand extends Command {
       
       TrackingWindowReport report = dflRegistry.getMessageTrackingRegistry().getReport();
       console.println(report.toFormattedText());
-      List<String> progressCommitWindows = dflRegistry.getMessageTrackingRegistry().getProgressCommitWindows();
+      List<String> progressCommitWindows = dflRegistry.getMessageTrackingRegistry().getProgressCommitWindowIds();
       console.println("Progress commit windows: " + StringUtil.join(progressCommitWindows, ","));
     }
 

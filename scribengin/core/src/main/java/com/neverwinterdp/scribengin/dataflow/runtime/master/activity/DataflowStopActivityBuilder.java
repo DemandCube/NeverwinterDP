@@ -110,7 +110,7 @@ public class DataflowStopActivityBuilder extends ActivityBuilder {
       while(checkCount < 120 && !noMessageLeft) {
         Thread.sleep(500);
         TrackingWindowReport trackingReport  = mtRegistry.getReport();
-        int commitWindowLefts = mtRegistry.getProgressCommitWindows().size();
+        int commitWindowLefts = mtRegistry.getProgressCommitWindowIds().size();
         System.err.println("BroadcastStopInputStepExecutor: tracking count = " + trackingReport.getTrackingCount() + ", commitWindowLefts = " + commitWindowLefts);
         if(commitWindowLefts == 0) noMessageLeft = true;
         checkCount++;

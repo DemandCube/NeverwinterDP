@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.beust.jcommander.Parameter;
+import com.neverwinterdp.message.TrackingWindow;
 import com.neverwinterdp.message.TrackingWindowRegistry;
 import com.neverwinterdp.message.TrackingWindowReport;
 import com.neverwinterdp.registry.txevent.TXEvent;
@@ -90,12 +91,18 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     TrackingWindowRegistry mtRegistry = dflClient.getDataflowRegistry().getMessageTrackingRegistry();
     while(true) {
       TrackingWindowReport report  = mtRegistry.getReport();
-      int commitWindowLeft = mtRegistry.getProgressCommitWindows().size();
-      System.err.println("Stop: tracking count = " + report.getTrackingCount() + ",  commitWindowLeft = " + commitWindowLeft);
-      if(mtRegistry.getProgressCommitWindows().size() == 0 && report.getTrackingCount() > 0) break;
+      
+      List<TrackingWindow> commitWindows = mtRegistry.getProgressCommitWindows();
+      System.err.println("Stop: tracking count = " + report.getTrackingCount());
+      System.err.println(TrackingWindow.toFormattedText("Commit Tracking Windows", commitWindows));
+      System.err.println(report.toFormattedText());
+      if(commitWindows.size() == 0 && report.getTrackingCount() > 0) break;
       Thread.sleep(1000);
     }
-    shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED --timeout 90000 --report-period 10000") ;
+    
+    shell.execute(
+        "dataflow wait-for-status --dataflow-id "  + dataflowId + 
+        " --status TERMINATED --timeout 90000 --report-period 10000") ;
     
     System.err.println("--------------------------------------------------------------------------------------");
     System.err.println("Start Dataflow");
