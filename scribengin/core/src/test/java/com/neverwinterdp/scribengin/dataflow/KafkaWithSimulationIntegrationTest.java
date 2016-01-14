@@ -39,6 +39,7 @@ public class KafkaWithSimulationIntegrationTest  {
     dflBuilder.getTrackingConfig().setNumOfMessagePerChunk(30000);
     dflBuilder.getTrackingConfig().setKafkaMessageWaitTimeout(90000);
     dflBuilder.setMaxRuntime(300000);
+    dflBuilder.setTrackingWindowSize(5000);
     dflBuilder.setSlidingWindowSize(300);
     
     TrackingWithSimulationLauncher launcher = new TrackingWithSimulationLauncher();

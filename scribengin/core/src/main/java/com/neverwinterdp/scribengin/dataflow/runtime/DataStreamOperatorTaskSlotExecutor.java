@@ -27,7 +27,7 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
     super(taskContext);
     this.workerService = service;
     this.taskContext   = taskContext;
-    this.dsOperatorDescriptor      = taskContext.getTaskDescriptor(false);
+    this.dsOperatorDescriptor = taskContext.getTaskDescriptor(false);
     
     Class<DataStreamOperator> opType = (Class<DataStreamOperator>) Class.forName(dsOperatorDescriptor.getOperator());
     operator = opType.newInstance();
@@ -66,7 +66,7 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
   }
   
   @Override
-  public long executeSlot() throws Exception {
+  public long executeSlot() throws InterruptedException, Exception {
     if(context.getInputDataStreamContext().isStopInput()) return 0l;
     startTime = System.currentTimeMillis();
     DataStreamOperatorReport report = context.getReport();
@@ -80,6 +80,10 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
         report.incrProcessCount();
         operator.process(context, message);
       } //end while
+      if(isSimulateKill()) {
+        System.err.println("DataStreamOperatorTaskSlotExecutor: detect simulate kill for " + dsOperatorDescriptor.getOperatorName());
+        return 0;
+      }
       
       long currentTime = System.currentTimeMillis();
       if(recCount == 0) {
@@ -95,17 +99,17 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
       if(recCount > 0) context.commit();
       return runtime;
     } catch(InterruptedException ex) {
+      System.err.println("DataStreamOperatorTaskSlotExecutor: Catched an interrupt exception");
       throw ex ;
     } catch(RegistryException error) {
       throw error;
     } catch(Exception error) {
-      System.err.println("Catched a task exception");
+      System.err.println("DataStreamOperatorTaskSlotExecutor: Catched a task exception and rollback");
       error.printStackTrace();
-      System.err.println("Rollback");
       rollback(error);
       return System.currentTimeMillis() - startTime;
     } catch(Throwable t) {
-      System.err.println("Catch Throwable");
+      System.err.println("DataStreamOperatorTaskSlotExecutor: Catch an unknown error Throwable");
       t.printStackTrace();
       throw t;
     }

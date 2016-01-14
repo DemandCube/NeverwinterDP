@@ -59,14 +59,13 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
         if(reportTime >= simulationReportPeriod) {
           shell.execute(
               "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
-              "  --dataflow-id " + dfl.getDataflowId() + " --report-path " + reportPath
+              "  --dataflow-id " + dfl.getDataflowId() + " --show-history-workers " +  " --report-path " + reportPath
           );
           reportTime = 0;
           shell.console().println(SimulationLog.toFormattedText(simulationLogs));
         }
       }
       
-//      stopStartDataflow(shell, dflBuilder);
       if(i % 2 == 0) {
         killWorker(dflClient, dflBuilder.getDataflowId());
       } else {

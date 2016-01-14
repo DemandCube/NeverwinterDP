@@ -99,6 +99,8 @@ public class WorkerService {
   
   public Injector getServiceContainer() { return this.serviceContainer; }
   
+  public boolean isSimulateKill() { return simulateKill; }
+  
   public void run() throws Exception {
     System.out.println("DataflowMasterService: run()");
     workerStatus = DataflowWorkerStatus.RUNNING;
@@ -126,6 +128,7 @@ public class WorkerService {
       taskService.getTaskExecutorService().awaitTermination();
     } catch(InterruptedException ex) {
       if(simulateKill) {
+        System.err.println("DataflowWorkerService: Finish waitForTermination() with Simulate Kill");
         dataflowWorkerEventWatcher.setComplete();
         throw new RuntimeException("Simulate Kill", ex) ;
       }
@@ -142,27 +145,15 @@ public class WorkerService {
   
   @SuppressWarnings("deprecation")
   public void simulateKill() throws Exception {
-    System.err.println("WorkerService: simulateKill()"); 
+    System.err.println("WorkerService: start simulateKill()"); 
     logger.info("Start kill()");
-    notifier.info("start-simulate-kill", "DataflowTaskExecutorService: start simulateKill()");
     simulateKill = true ;
     if(workerStatus.lessThan(DataflowWorkerStatus.TERMINATED)) {
       System.err.println("WorkerService: taskService.getTaskExecutorService().simulateKill()"); 
-      dflRegistry.getRegistry().shutdown();
       taskService.simulateKill();
-      String threadGroup = vmDescriptor.getId() + "-group";
-      Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-      for(Thread sel : threadSet) {
-        ThreadGroup tGroup = sel.getThreadGroup() ;
-        if(tGroup == null) continue;
-        if(threadGroup.equals(tGroup.getName())) {
-          Throwable forceStop = new Throwable("Kill thread in group " + threadGroup);
-          forceStop.setStackTrace(new StackTraceElement[0]);
-          sel.stop(forceStop);
-        }
-      }
+      dflRegistry.getRegistry().shutdown();
     }
-    notifier.info("finish-simulate-kill", "DataflowTaskExecutorService: finish simulateKill()");
+    System.err.println("WorkerService: finish simulateKill()"); 
     logger.info("Finish kill()");
   }
   
