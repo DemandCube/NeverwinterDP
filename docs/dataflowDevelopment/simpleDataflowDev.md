@@ -503,7 +503,7 @@ cd NeverwinterDP
 
 ###Deploying
 
-[Follow the instructions on how to start Scribengin here](../scribengin-cluster-setup-quickstart.md#arbitrary-cluster-setup)
+[Follow the instructions on how to start Scribengin here](../deployment/scribengin-cluster-setup-quickstart.md#arbitrary-cluster-setup)
 
 ###Running
 
