@@ -512,8 +512,8 @@ public class SSMRegistry {
         if(segDescriptor.getStatus() == SegmentDescriptor.Status.Writing) {
           System.err.println("doManagement(): segment = " + segDescriptor.getId() + ", writerId = " + segDescriptor.getWriterId());
           if(!isActiveWriter(segDescriptor.getWriterId())) {
-            System.err.println("doManagement(): finishBrokenSegment()");
             finishBrokenSegment(transaction, segDescriptor);
+            System.err.println("  finishBrokenSegment() segment = " + segDescriptor.getId());
           } else {
             break;
           }
