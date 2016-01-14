@@ -80,6 +80,7 @@ public class HdfsSegmentReader extends SegmentReader {
   protected long getCurrentReadPosition() { return currentReadPos; }
   
   protected void doClose() throws IOException {
+    if(dataIs == null) return;
     dataIs.close();
   }
 }
