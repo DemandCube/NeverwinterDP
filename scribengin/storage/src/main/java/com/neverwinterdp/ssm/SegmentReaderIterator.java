@@ -14,7 +14,7 @@ public class SegmentReaderIterator {
   private List<SegmentReader> activeSegmentReaders;
   private int                 lastReadSegmentIdx = 0;
   private int                 lastAddedSegmentId = -1;
-  
+  private SegmentReader       currentReader;
   
   public SegmentReaderIterator() {
     allSegmentReaders    = new ArrayList<>();
@@ -45,6 +45,9 @@ public class SegmentReaderIterator {
   }
   
   public byte[] nextRecord() throws IOException, RegistryException {
+    if(currentReader != null && currentReader.hasAvailableData()) {
+      return currentReader.nextRecord();
+    }
     byte[] record = findNextRecord();
     if(record != null) return record;
     refresh();
@@ -56,9 +59,9 @@ public class SegmentReaderIterator {
     if(availableReaders == 0) return null;
     if(lastReadSegmentIdx >= availableReaders) lastReadSegmentIdx = 0;
     while(lastReadSegmentIdx < availableReaders) {
-      SegmentReader reader = activeSegmentReaders.get(lastReadSegmentIdx);
-      if(reader.hasAvailableData()) {
-        return reader.nextRecord();
+      currentReader = activeSegmentReaders.get(lastReadSegmentIdx);
+      if(currentReader.hasAvailableData()) {
+        return currentReader.nextRecord();
       }
       lastReadSegmentIdx++;
     }
