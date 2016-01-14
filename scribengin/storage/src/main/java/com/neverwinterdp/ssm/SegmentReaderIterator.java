@@ -54,10 +54,13 @@ public class SegmentReaderIterator {
   public byte[] findNextRecord() throws IOException, RegistryException {
     int availableReaders = activeSegmentReaders.size();
     if(availableReaders == 0) return null;
-    if(lastReadSegmentIdx > availableReaders) lastReadSegmentIdx = 0;
+    if(lastReadSegmentIdx >= availableReaders) lastReadSegmentIdx = 0;
     while(lastReadSegmentIdx < availableReaders) {
       SegmentReader reader = activeSegmentReaders.get(lastReadSegmentIdx);
-      if(reader.hasAvailableData()) return reader.nextRecord();
+      if(reader.hasAvailableData()) {
+        lastReadSegmentIdx++;
+        return reader.nextRecord();
+      }
       lastReadSegmentIdx++;
     }
     return null;

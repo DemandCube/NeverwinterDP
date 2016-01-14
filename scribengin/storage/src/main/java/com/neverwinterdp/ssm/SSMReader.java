@@ -37,20 +37,29 @@ abstract public class SSMReader {
   public byte[] nextRecord(long maxWait) throws IOException, RegistryException, InterruptedException {
     byte[] record = segmentReaderIterator.nextRecord();
     if(record != null) return record;
-    String lastReadSegment = readerDescriptor.getLastReadSegmentId();
-    SegmentDescriptor nextSegment = null;
-    if(lastReadSegment != null) {
-      int lastReadSegmentId = Integer.parseInt(lastReadSegment.substring(lastReadSegment.lastIndexOf('-') + 1));
-      nextSegment = registry.getNextSegmentDescriptor(lastReadSegmentId);
-    } else {
-      List<String> segments = registry.getSegments() ; 
-      if(segments.size() > 0) nextSegment = registry.getSegmentBySegmentId(segments.get(0));
+    
+    long stopTime = System.currentTimeMillis() + maxWait;
+    long checkPeriod = 500;
+    if(maxWait < checkPeriod) checkPeriod = maxWait;
+    while(System.currentTimeMillis() < stopTime) {
+      String lastReadSegment = readerDescriptor.getLastReadSegmentId();
+      SegmentDescriptor nextSegment = null;
+      if(lastReadSegment != null) {
+        int lastReadSegmentId = Integer.parseInt(lastReadSegment.substring(lastReadSegment.lastIndexOf('-') + 1));
+        nextSegment = registry.getNextSegmentDescriptor(lastReadSegmentId);
+      } else {
+        List<String> segments = registry.getSegments() ; 
+        if(segments.size() > 0) nextSegment = registry.getSegmentBySegmentId(segments.get(0));
+      }
+      if(nextSegment != null) {
+        SegmentReadDescriptor nextSegmentRead = registry.createSegmentReadDescriptor(readerDescriptor, nextSegment);
+        segmentReaderIterator.add(createSegmentReader(nextSegment, nextSegmentRead));
+      }
+      record = segmentReaderIterator.nextRecord();
+      if(record != null) return record;
+      Thread.sleep(checkPeriod);
     }
-    if(nextSegment != null) {
-      SegmentReadDescriptor nextSegmentRead = registry.createSegmentReadDescriptor(readerDescriptor, nextSegment);
-      segmentReaderIterator.add(createSegmentReader(nextSegment, nextSegmentRead));
-    }
-    return segmentReaderIterator.nextRecord();
+    return null;
   }
   
   public void prepareCommit() throws IOException, RegistryException {

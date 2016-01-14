@@ -141,6 +141,7 @@ public class HdfsSSMUnitTest {
             System.err.println("Write 1000");
             Thread.sleep(1000);
           }
+          ssmWriter.close();
         } catch (RegistryException | IOException | InterruptedException e) {
           e.printStackTrace();
         }
@@ -162,6 +163,7 @@ public class HdfsSSMUnitTest {
               System.err.println("Read count = " + count);
             }
           }
+          ssmReader.close();
         } catch(RegistryException | IOException | InterruptedException e) {
           e.printStackTrace();
         }
