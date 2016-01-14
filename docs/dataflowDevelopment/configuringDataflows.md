@@ -19,19 +19,7 @@ Configuring Dataflows
 
 Scribengin works by splitting data up into concurrent streams and dividing the work up between workers and executors.
 
-#Definitions
-
-A **Worker** is equivalent to a YARN container/VM/container for Scribengin to launch a node in.  Its the container requested by Scribengin from the VM Master.
-
-Each **Worker** contains multiple **Executors**.  An **Executor** can be thought of as a thread within the **Worker**.
-
-An **Operator** is a collection of **DataStreamOperators** that all share the same logic.
-
-Each **Executor** contains slots for two **DataStreamOperators**.  
-
-**DataStreamOperators** contain the arbitrary logic for transferring, transforming, filtering, and enhancing data.
-
-A **DataStream** is a partition of data going through Scribengin.
+[Refer to terminology for help on understanding terminology](../terminology.md)
 
 #Worker Breakdown
 
@@ -72,7 +60,7 @@ dfl.setDefaultParallelism(defaultParallelism);
 
 ##Default Replication
 
-The default replication to use for Kafka
+The default replication to use for Kafka, HDFS, or any other dataStore that supports replication.  Has no impact on dataSources that do not support configurable replication.
 
 ```java
 dfl.setDefaultReplication(defaultReplication).
