@@ -26,6 +26,10 @@ abstract public class SSM {
   
   abstract protected SSMReader createReader(String clientId, SSMRegistry registry) throws RegistryException, IOException;
 
+  public void doManagement() throws RegistryException, IOException {
+    registry.doManagement();
+  }
+  
   public void cleanReadSegmentByActiveReader() throws RegistryException, IOException {
     List<String> cleanSegments = registry.cleanReadSegmentByActiveReader();
     for(int i = 0; i < cleanSegments.size(); i++) {

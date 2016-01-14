@@ -11,7 +11,8 @@ public class SegmentDescriptor {
   
   private int    id ;
   private String segmentId;
-  private String creator;
+  private String writer;
+  private String writerId;
   private long   createdTime;
   private long   finishedTime = -1l;
   private Status status = Status.Writing;
@@ -37,8 +38,11 @@ public class SegmentDescriptor {
   public String getSegmentId() { return segmentId; }
   public void   setSegmentId(String name) { this.segmentId = name; }
 
-  public String getCreator() { return creator; }
-  public void setCreator(String creator) { this.creator = creator; }
+  public String getWriter() { return writer; }
+  public void setWriter(String creator) { this.writer = creator; }
+
+  public String getWriterId() { return writerId; }
+  public void setWriterId(String creatorId) { this.writerId = creatorId; }
 
   public long getCreatedTime() { return createdTime; }
   public void setCreatedTime(long createdTime) { this.createdTime = createdTime; }
@@ -74,7 +78,7 @@ public class SegmentDescriptor {
     StringBuilder b = new StringBuilder();
     b.append(segmentId).append(": {");
     b.append("id=").append(id).append(", ");
-    b.append("creator=").append(creator).append(", ");
+    b.append("creator=").append(writer).append(", ");
     b.append("createdTime=").append(DateUtil.asCompactDateTime(createdTime)).append(", ");
     b.append("finishedTime=").append(DateUtil.asCompactDateTime(finishedTime)).append(", ");
     b.append("status=").append(status).append(", ");

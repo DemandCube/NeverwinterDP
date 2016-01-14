@@ -18,7 +18,7 @@ public class SSMWriterDescriptor {
   
   public SSMWriterDescriptor() { }
   
-  public SSMWriterDescriptor(int id, String writer) {
+  public SSMWriterDescriptor(String writer, int id) {
     this.id          = writer + "-" + ID_FORMAT.format(id) ;
     this.writer      = writer;
     this.startedTime = System.currentTimeMillis();

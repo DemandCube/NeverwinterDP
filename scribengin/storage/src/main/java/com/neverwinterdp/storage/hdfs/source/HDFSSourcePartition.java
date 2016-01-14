@@ -59,6 +59,13 @@ public class HDFSSourcePartition implements SourcePartition {
     return stream;
   }
 
+  public void doManagement() throws Exception {
+    HDFSSourcePartitionStream[] streams = getPartitionStreams() ;
+    for(HDFSSourcePartitionStream sel : streams) {
+      sel.doManagement();
+    }
+  }
+  
   public void deleteReadDataByActiveReader() throws Exception {
     HDFSSourcePartitionStream[] streams = getPartitionStreams() ;
     for(HDFSSourcePartitionStream sel : streams) {

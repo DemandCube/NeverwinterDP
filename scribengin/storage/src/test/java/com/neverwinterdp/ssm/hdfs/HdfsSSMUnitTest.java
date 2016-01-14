@@ -65,6 +65,7 @@ public class HdfsSSMUnitTest {
     TrackingRecordGenerator storageWriter = 
       new TrackingRecordGenerator(storage.getWriter("test"), NUM_OF_COMMIT, NUM_OF_RECORD_PER_COMMIT);
     storageWriter.writeWithCommit();
+    storage.getRegistry().doManagement();
     storageWriter.writerCloseAndRemove();
     
     SSMConsistencyVerifier scVerifier = storage.getSegmentConsistencyVerifier();
@@ -74,6 +75,7 @@ public class HdfsSSMUnitTest {
     System.out.println(scVerifier.getSegmentConsistencyTextReport());
     Assert.assertEquals(SegmentConsistency.Consistency.GOOD, scVerifier.getMinCommitConsistency());
     storage.getRegistry().doManagement();
+    
     SSMTagDescriptor  posTag = storage.getRegistry().findTagByRecordPosition(500);
     posTag.setName("tag-500");
     storage.getRegistry().createTag(posTag);

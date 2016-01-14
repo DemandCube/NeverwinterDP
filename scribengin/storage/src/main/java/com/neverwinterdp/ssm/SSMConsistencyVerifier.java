@@ -87,7 +87,7 @@ abstract public class SSMConsistencyVerifier {
       SegmentDescriptor segment = segmentDescriptors.get(i);
       ft.addRow(
         segment.getSegmentId(),
-        segment.getCreator(), 
+        segment.getWriter(), 
         DateUtil.asCompactDateTime(segment.getCreatedTime()),
         DateUtil.asCompactDateTime(segment.getFinishedTime()),
         segment.getStatus(),

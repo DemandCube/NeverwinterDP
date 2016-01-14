@@ -146,7 +146,8 @@ public class SSMRegistry {
       public SegmentDescriptor execute(Registry registry) throws RegistryException {
         SegmentDescriptor segment = new SegmentDescriptor(segmentIdTracker.nextInt());
         
-        segment.setCreator(writer.getWriter());
+        segment.setWriter(writer.getWriter());
+        segment.setWriterId(writer.getId());
         Transaction transaction = registry.getTransaction();
         transaction.createChild(segmentsNode, segment.getSegmentId(), segment, NodeCreateMode.PERSISTENT);
         
@@ -179,6 +180,23 @@ public class SSMRegistry {
           writer.logFinishSegment();
           transaction.setData(writersActiveNode.getPath() + "/" + writer.getId(), writer);
         }
+        transaction.commit();
+        return segment;
+      }
+    };
+    Lock lock = lockNode.getLock("write", "Lock to update the segment " + segment.getSegmentId()) ;
+    lock.execute(op, 3, 3000);
+  }
+  
+  void finishBrokenSegment(final SegmentDescriptor segment) throws RegistryException {
+    BatchOperations<SegmentDescriptor> op = new BatchOperations<SegmentDescriptor>() {
+      @Override
+      public SegmentDescriptor execute(Registry registry) throws RegistryException {
+        Transaction transaction = registry.getTransaction();
+        Node segNode = segmentsNode.getChild(segment.getSegmentId());
+        segment.setFinishedTime(System.currentTimeMillis());
+        segment.setStatus( SegmentDescriptor.Status.WritingComplete);
+        transaction.setData(segNode.getPath(), segment);
         transaction.commit();
         return segment;
       }
@@ -288,8 +306,12 @@ public class SSMRegistry {
     return writersActiveNode.getChild(id).getDataAs(SSMWriterDescriptor.class);
   }
   
+  public boolean isActiveWriter(String writerId) throws RegistryException {
+    return writersHeartbeatNode.hasChild(writerId);
+  }
+  
   public SSMWriterDescriptor createWriter(String name) throws RegistryException {
-    SSMWriterDescriptor writer = new SSMWriterDescriptor(writerIdTracker.nextInt(), name) ;
+    SSMWriterDescriptor writer = new SSMWriterDescriptor(name, writerIdTracker.nextInt()) ;
     Transaction transaction = registry.getTransaction();
     transaction.createChild(writersActiveNode, writer.getId(), writer, NodeCreateMode.PERSISTENT);
     transaction.createChild(writersHeartbeatNode, writer.getId(), NodeCreateMode.EPHEMERAL);
@@ -498,7 +520,13 @@ public class SSMRegistry {
         Node segmentNode = segmentsNode.getChild(segmentIdName);
         SegmentDescriptor segDescriptor = segmentNode.getDataAs(SegmentDescriptor.class);
         if(segDescriptor.getStatus() == SegmentDescriptor.Status.Writing) {
-          break;
+          System.err.println("doManagement(): segment = " + segDescriptor.getId() + ", writerId = " + segDescriptor.getWriterId());
+          if(!isActiveWriter(segDescriptor.getWriterId())) {
+            System.err.println("doManagement(): finishBrokenSegment()");
+            finishBrokenSegment(segDescriptor);
+          } else {
+            break;
+          }
         }
         
         if(segmentId == segsDescriptor.getLastManagedSegment() + 1) {
