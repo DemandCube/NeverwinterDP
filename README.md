@@ -51,6 +51,11 @@ A distributed, highly reliable ETL system that can handle multiple sources and s
 ####Design
 ![Scribengin Cluster Design](docs/images/ScribenginStructureOverviewV2.png "Scribengin Cluster Design")
 
+####Terminology Guide
+Learn the Scribengin terminology, and get acquainted with Scribengin at a high level.
+
+- [Terminology Guide](docs/terminology.md)
+
 ####Quickstart Guide
 Get Scribengin launched quickly!  This will walk you how to start a Scribengin instance in YARN.
 
