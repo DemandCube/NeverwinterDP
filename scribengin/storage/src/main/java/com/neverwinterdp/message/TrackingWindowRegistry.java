@@ -71,8 +71,12 @@ public class TrackingWindowRegistry {
   
   public int nextWindowId() throws RegistryException { return windowIdTracker.nextInt(); }
   
-  public List<String> getProgressCommitWindows() throws RegistryException {
+  public List<String> getProgressCommitWindowIds() throws RegistryException {
     return windowCommitsNode.getChildren();
+  }
+  
+  public List<TrackingWindow> getProgressCommitWindows() throws RegistryException {
+    return windowCommitsNode.getChildrenAs(TrackingWindow.class);
   }
   
   public void saveWindow(final TrackingWindow ... windows) throws RegistryException {

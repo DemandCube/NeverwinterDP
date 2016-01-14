@@ -188,21 +188,11 @@ public class SSMRegistry {
     lock.execute(op, 3, 3000);
   }
   
-  void finishBrokenSegment(final SegmentDescriptor segment) throws RegistryException {
-    BatchOperations<SegmentDescriptor> op = new BatchOperations<SegmentDescriptor>() {
-      @Override
-      public SegmentDescriptor execute(Registry registry) throws RegistryException {
-        Transaction transaction = registry.getTransaction();
-        Node segNode = segmentsNode.getChild(segment.getSegmentId());
-        segment.setFinishedTime(System.currentTimeMillis());
-        segment.setStatus( SegmentDescriptor.Status.WritingComplete);
-        transaction.setData(segNode.getPath(), segment);
-        transaction.commit();
-        return segment;
-      }
-    };
-    Lock lock = lockNode.getLock("write", "Lock to update the segment " + segment.getSegmentId()) ;
-    lock.execute(op, 3, 3000);
+  void finishBrokenSegment(Transaction transaction, SegmentDescriptor segment) throws RegistryException {
+    Node segNode = segmentsNode.getChild(segment.getSegmentId());
+    segment.setFinishedTime(System.currentTimeMillis());
+    segment.setStatus( SegmentDescriptor.Status.WritingComplete);
+    transaction.setData(segNode.getPath(), segment);
   }
   
   public List<String> cleanReadSegmentByActiveReader() throws RegistryException {
@@ -523,7 +513,7 @@ public class SSMRegistry {
           System.err.println("doManagement(): segment = " + segDescriptor.getId() + ", writerId = " + segDescriptor.getWriterId());
           if(!isActiveWriter(segDescriptor.getWriterId())) {
             System.err.println("doManagement(): finishBrokenSegment()");
-            finishBrokenSegment(segDescriptor);
+            finishBrokenSegment(transaction, segDescriptor);
           } else {
             break;
           }
