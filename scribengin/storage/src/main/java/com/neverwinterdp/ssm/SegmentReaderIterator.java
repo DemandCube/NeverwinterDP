@@ -58,7 +58,6 @@ public class SegmentReaderIterator {
     while(lastReadSegmentIdx < availableReaders) {
       SegmentReader reader = activeSegmentReaders.get(lastReadSegmentIdx);
       if(reader.hasAvailableData()) {
-        lastReadSegmentIdx++;
         return reader.nextRecord();
       }
       lastReadSegmentIdx++;
