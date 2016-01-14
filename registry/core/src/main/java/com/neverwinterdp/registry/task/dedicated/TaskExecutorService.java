@@ -68,11 +68,10 @@ public class TaskExecutorService<T> {
   }
   
   
-  public void simulateKill() {
+  public void simulateKill() throws InterruptedException {
     taskSlotTimer.interrupt();
-    Iterator<TaskExecutorThread> i = taskExecutorsThreads.iterator();
-    while(i.hasNext()) {
-      i.next().interrupt();
+    for(TaskExecutor<T> executor : taskExecutors) {
+      executor.simulateKill();
     }
   }
   

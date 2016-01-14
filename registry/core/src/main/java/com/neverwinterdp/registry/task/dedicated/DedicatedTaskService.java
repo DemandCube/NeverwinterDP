@@ -24,7 +24,7 @@ final public class DedicatedTaskService<T> {
     taskExecutorService.shutdown();
   } 
   
-  public void simulateKill() {
+  public void simulateKill() throws InterruptedException {
     taskExecutorService.simulateKill();
   }
   

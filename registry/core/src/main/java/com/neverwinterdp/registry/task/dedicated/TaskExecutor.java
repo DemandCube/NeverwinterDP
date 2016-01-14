@@ -14,6 +14,7 @@ final public class TaskExecutor<T> implements Runnable {
   private List<TaskSlotExecutor<T>> taskSlotExecutors = new ArrayList<>();
   private TaskSlotExecutor<T>       currentRunningTaskSlotExecutor;
   private boolean                   shutdown          = false;
+  private boolean                   simulateKill      = false;
   private Throwable                 error;
 
   public TaskExecutor(String id, DedicatedTaskService<T> taskService, int numOfTaskSlot) {
@@ -48,9 +49,17 @@ final public class TaskExecutor<T> implements Runnable {
   
   public Throwable getError() { return error ; }
   
+  public void simulateKill() {
+    simulateKill = true;
+    for(TaskSlotExecutor<T> sel : taskSlotExecutors) {
+      sel.simulateKill();
+    }
+  }
+  
   public void run() {
     try {
       while(!shutdown) {
+        if(simulateKill) return;
         updateTaskSlotExecutors();
         if(taskSlotExecutors.size() == 0) {
           taskService.idleExecutor(executor);
@@ -64,6 +73,7 @@ final public class TaskExecutor<T> implements Runnable {
         taskSlotExecutor.onShutdown();
       }
     } catch(InterruptedException e) {
+      System.err.println("TaskExecutor: Catch an interrupt exception");
     } catch(Throwable e) {
       error = e ;
       e.printStackTrace();
@@ -81,10 +91,11 @@ final public class TaskExecutor<T> implements Runnable {
     }
   }
   
-  void runTaskExecutors() throws Exception {
+  void runTaskExecutors() throws InterruptedException, Exception {
     Iterator<TaskSlotExecutor<T>> executorItr = taskSlotExecutors.iterator();
     long totalRuntime = 0;
     while(executorItr.hasNext()) {
+      if(simulateKill) return;
       currentRunningTaskSlotExecutor = executorItr.next();
       currentRunningTaskSlotExecutor.setTickTimeout(System.currentTimeMillis() + 10000);;
       currentRunningTaskSlotExecutor.onPreExecuteSlot();

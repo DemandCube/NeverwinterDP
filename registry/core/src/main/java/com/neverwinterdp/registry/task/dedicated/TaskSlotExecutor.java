@@ -2,6 +2,7 @@ package com.neverwinterdp.registry.task.dedicated;
 
 abstract public class TaskSlotExecutor<T> {
   private DedicatedTaskContext<T> taskContext;
+  private boolean simulateKill = false;
   
   private long tickTime;
   private long tickTimeout;
@@ -20,13 +21,20 @@ abstract public class TaskSlotExecutor<T> {
   
   public boolean isInterrupted() { return tickTime > tickTimeout ; }
   
+  public boolean isSimulateKill() { return simulateKill ; }
+  
+  public void simulateKill() { 
+    tickTimeout = 0;
+    simulateKill = true; 
+  }
+  
   public void onInit() throws Exception {
   }
   
   public void onPreExecuteSlot() throws Exception {
   }
   
-  abstract public long executeSlot() throws Exception;
+  abstract public long executeSlot() throws InterruptedException, Exception;
 
   public void onPostExecuteSlot() throws Exception {
   }
