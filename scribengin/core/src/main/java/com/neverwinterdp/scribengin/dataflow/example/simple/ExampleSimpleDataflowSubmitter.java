@@ -76,7 +76,7 @@ public class ExampleSimpleDataflowSubmitter {
     //Ensure all your sources and sinks are up and running first, then...
 
     //Submit the dataflow and wait until it starts running
-    submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForRunning(60000);
+    submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForDataflowRunning(60000);
     
   }
   
@@ -86,7 +86,7 @@ public class ExampleSimpleDataflowSubmitter {
    * @throws Exception
    */
   public void waitForDataflowCompletion(int timeout) throws Exception{
-    this.submitter.waitForFinish(timeout);
+    this.submitter.waitForDataflowStop(timeout);
   }
   
   /**

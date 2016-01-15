@@ -52,7 +52,7 @@ public class HDFSTrackingExperimentTest  {
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
     
-    new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForRunning(60000);
+    new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForDataflowRunning(60000);
     
     VMConfig vmValidatorConfig = dflBuilder.buildHDFSVMTMValidator();
     new VMSubmitter(vmClient, dfsAppHome, vmValidatorConfig).submit().waitForRunning(30000);

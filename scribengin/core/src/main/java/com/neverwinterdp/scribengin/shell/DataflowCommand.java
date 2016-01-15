@@ -104,7 +104,7 @@ public class DataflowCommand extends Command {
       DataflowSubmitter submitter = new DataflowSubmitter(client, dflConfig);
       
       submitter.submit();
-      submitter.waitForRunning(waitForRunningTimeout);
+      submitter.waitForDataflowRunning(waitForRunningTimeout);
       shell.console().println("Finished waiting for the dataflow running status");
     }
 
@@ -233,8 +233,8 @@ public class DataflowCommand extends Command {
       ScribenginClient scribenginClient = scribenginShell.getScribenginClient();
       DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId);
       TXEvent stopEvent = new TXEvent("stop", DataflowEvent.Stop);
-      dflClient.getDataflowRegistry().getMasterRegistry().getMaserEventBroadcaster().broadcast(stopEvent);
-      shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status TERMINATED --timeout " + timeout) ;
+      dflClient.getDataflowRegistry().getMasterRegistry().getMasterEventBroadcaster().broadcast(stopEvent);
+      shell.execute("dataflow wait-for-status --dataflow-id "  + dataflowId + " --status STOP --timeout " + timeout) ;
       shell.execute("dataflow info" + "  --dataflow-id " + dataflowId + " --show-history-workers");
     }
     

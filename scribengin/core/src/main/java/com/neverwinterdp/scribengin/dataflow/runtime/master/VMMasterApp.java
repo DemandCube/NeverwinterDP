@@ -13,18 +13,16 @@ import com.neverwinterdp.registry.RefNode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.election.LeaderElection;
 import com.neverwinterdp.registry.election.LeaderElectionListener;
-import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
-import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMConfig.ClusterEnvironment;
 
 public class VMMasterApp extends VMApp {
-  private Logger                logger;
-  private String                dataflowRegistryPath;
-  private LeaderElection        election;
-  private MasterService dataflowService;
-  private ServiceRunnerThread   serviceRunnerThread;
+  private Logger              logger;
+  private String              dataflowRegistryPath;
+  private LeaderElection      election;
+  private MasterService       dataflowService;
+  private ServiceRunnerThread serviceRunnerThread;
 
   @Override
   public void run() throws Exception {
@@ -52,16 +50,8 @@ public class VMMasterApp extends VMApp {
     @Override
     public void onElected() {
       final Registry registry = getVM().getVMRegistry().getRegistry();
-      System.err.println("VMDataflowServiceApp: on elected " + getVM().getDescriptor().getId() + "with registry " + registry.hashCode()) ;
+      System.err.println("VMDataflowServiceApp: on elected " + getVM().getDescriptor().getId() + " with registry " + registry.hashCode()) ;
       try {
-        if(registry.exists(dataflowRegistryPath + "/status")) {
-          DataflowLifecycleStatus currentStatus =  DataflowRegistry.getDataflowStatus(registry, dataflowRegistryPath);
-          if(currentStatus == DataflowLifecycleStatus.FINISH) {
-            terminate(TerminateEvent.Shutdown);
-            return;
-          }
-        }
-        
         VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
         AppContainer appContainer = getVM().getAppContainer();
         Map<String, String> esLoggerModuleProps = new HashMap<String, String>();
@@ -102,7 +92,6 @@ public class VMMasterApp extends VMApp {
         service.init();
         service.run();
         service. waitForTermination();
-        service.getDataflowRegistry().setDataflowStatus(DataflowLifecycleStatus.TERMINATED);
         System.out.println("VMMasterApp Done !!!!!!!!!");
       } catch (Exception e) {
         logger.error("Error: ", e);

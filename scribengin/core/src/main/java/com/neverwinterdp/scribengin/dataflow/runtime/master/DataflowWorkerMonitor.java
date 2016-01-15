@@ -5,26 +5,27 @@ import java.util.Map;
 
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.registry.activity.Activity;
 import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.event.NodeEventWatcher;
 import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
-import com.neverwinterdp.scribengin.dataflow.runtime.master.activity.AllocateWorkerActivityBuilder;
-import com.neverwinterdp.scribengin.dataflow.runtime.master.activity.DataflowMasterActivityService;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerStatus;
 import com.neverwinterdp.vm.VMDescriptor;
 
 public class DataflowWorkerMonitor {
-  private DataflowRegistry dataflowRegistry ;
-  private DataflowMasterActivityService activityService ;
+  private MasterService service;
   private Map<String, DataflowWorkerHeartbeatListener> workerHeartbeatListeners = new HashMap<>();
+  private boolean simulateKill = false;
   
-  public DataflowWorkerMonitor(DataflowRegistry dflRegistry, DataflowMasterActivityService activityService) throws RegistryException {
-    this.dataflowRegistry = dflRegistry;
-    this.activityService = activityService ;
+  public DataflowWorkerMonitor(MasterService service) throws RegistryException {
+    this.service = service;
   }
 
+  synchronized public void simulateKill() {
+    simulateKill = true;
+    notifyAll();
+  }
+  
   synchronized public void addWorker(VMDescriptor vmDescriptor) throws RegistryException {
     DataflowWorkerHeartbeatListener listener = new DataflowWorkerHeartbeatListener (vmDescriptor) ;
     workerHeartbeatListeners.put(vmDescriptor.getRegistryPath(), listener);
@@ -32,19 +33,19 @@ public class DataflowWorkerMonitor {
   
   synchronized void onWorkerBrokenHeartbeat(String heartbeatPath) throws Exception {
     System.out.println("DataflowWorkerMonitor: onWorkerBrokenHeartbeat " + heartbeatPath);
-    Node heartbeatNode = new Node(dataflowRegistry.getRegistry(), heartbeatPath);
+    DataflowRegistry dflRegistry = service.getDataflowRegistry();
+    Node heartbeatNode = new Node(dflRegistry.getRegistry(), heartbeatPath);
     Node vmNode = heartbeatNode.getParentNode().getParentNode();
     workerHeartbeatListeners.remove(vmNode.getPath());
-    dataflowRegistry.getWorkerRegistry().historyWorker(vmNode.getName());
+    dflRegistry.getWorkerRegistry().historyWorker(vmNode.getName());
     
-    DataflowWorkerStatus dataflowWorkerStatus = dataflowRegistry.getWorkerRegistry().getDataflowWorkerStatus(vmNode.getName());
+    DataflowWorkerStatus dataflowWorkerStatus = dflRegistry.getWorkerRegistry().getDataflowWorkerStatus(vmNode.getName());
     if(dataflowWorkerStatus.lessThan(DataflowWorkerStatus.TERMINATED)) {
       DataflowWorkerStatus workerStatus = DataflowWorkerStatus.TERMINATED_WITH_ERROR;
-      dataflowRegistry.getWorkerRegistry().setWorkerStatus(vmNode.getName(), workerStatus);
+      dflRegistry.getWorkerRegistry().setWorkerStatus(vmNode.getName(), workerStatus);
       
-      Activity activity = new AllocateWorkerActivityBuilder().build();
-      activityService.queue(activity);
-      Notifier notifier = dataflowRegistry.getDataflowWorkerNotifier();
+      service.getDataflowActivityExecutor().add(new AllocateWorkerActivity(service));
+      Notifier notifier = dflRegistry.getDataflowWorkerNotifier();
       notifier.warn("dataflow-worker-faillure-detection", "Detect a failed dataflow worker " + vmNode.getName() + " and allocate a new one");
     } else {
       notifyWorkerTerminated();
@@ -57,14 +58,14 @@ public class DataflowWorkerMonitor {
   
   synchronized void waitForAllWorkerTerminated() throws InterruptedException {
     if(workerHeartbeatListeners.size() == 0) return;
-    while(workerHeartbeatListeners.size() > 0) {
+    while(workerHeartbeatListeners.size() > 0 && !simulateKill) {
       wait();
     }
   }
   
   public class DataflowWorkerHeartbeatListener extends NodeEventWatcher {
     public DataflowWorkerHeartbeatListener(VMDescriptor vmDescriptor) throws RegistryException {
-      super(dataflowRegistry.getRegistry(), true);
+      super(service.getDataflowRegistry().getRegistry(), true);
       watchExists(vmDescriptor.getRegistryPath() + "/status/heartbeat");
     }
     

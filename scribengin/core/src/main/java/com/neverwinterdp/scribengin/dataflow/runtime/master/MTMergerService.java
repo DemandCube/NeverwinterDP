@@ -10,6 +10,9 @@ public class MTMergerService {
 
   public MTMergerService(DataflowRegistry dflRegistry) {
     trackingRegistry = dflRegistry.getMessageTrackingRegistry();
+  }
+  
+  public void start() throws InterruptedException, RegistryException {
     flushThread = new FlushThread();
     flushThread.start();
   }
@@ -24,6 +27,10 @@ public class MTMergerService {
     }
   }
 
+  public void simulateKill() throws InterruptedException, RegistryException {
+    flushThread.terminate(30000);
+  }
+  
   public void flush() throws RegistryException {
     trackingRegistry.merge();
   }

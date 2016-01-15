@@ -1,7 +1,5 @@
 package com.neverwinterdp.scribengin.dataflow.runtime.worker;
 
-import java.util.Set;
-
 import org.slf4j.Logger;
 
 import com.google.inject.Inject;
@@ -102,7 +100,7 @@ public class WorkerService {
   public boolean isSimulateKill() { return simulateKill; }
   
   public void run() throws Exception {
-    System.out.println("DataflowMasterService: run()");
+    System.out.println("DataflowWorkerService: run()");
     workerStatus = DataflowWorkerStatus.RUNNING;
     dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
     taskService.getTaskExecutorService().startExecutors(3000);
@@ -143,10 +141,9 @@ public class WorkerService {
     System.out.println("DataflowWorkerService: Finisht waitForTermination()");
   }
   
-  @SuppressWarnings("deprecation")
   public void simulateKill() throws Exception {
     System.err.println("WorkerService: start simulateKill()"); 
-    logger.info("Start kill()");
+    logger.info("Start simulateKill()");
     simulateKill = true ;
     if(workerStatus.lessThan(DataflowWorkerStatus.TERMINATED)) {
       System.err.println("WorkerService: taskService.getTaskExecutorService().simulateKill()"); 
@@ -154,7 +151,7 @@ public class WorkerService {
       dflRegistry.getRegistry().shutdown();
     }
     System.err.println("WorkerService: finish simulateKill()"); 
-    logger.info("Finish kill()");
+    logger.info("Finish simulateKill()");
   }
   
   public class DataflowWorkerEventWatcher extends TXEventWatcher {
