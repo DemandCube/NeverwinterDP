@@ -1,37 +1,37 @@
-package com.neverwinterdp.scribengin.dataflow.example.simple;
+package com.neverwinterdp.scribengin.dataflow.example.hdfs;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
-import kafka.consumer.Consumer;
-import kafka.consumer.ConsumerConfig;
-import kafka.consumer.ConsumerIterator;
-import kafka.consumer.ConsumerTimeoutException;
-import kafka.consumer.KafkaStream;
-import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.message.Message;
+import com.neverwinterdp.registry.Registry;
+import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
-import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.storage.hdfs.HDFSStorage;
+import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
+import com.neverwinterdp.storage.hdfs.source.HDFSSource;
+import com.neverwinterdp.storage.source.SourcePartitionStream;
+import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
 
-public class ExampleSimpleDataflowSubmitterTest {
-  
+public class ExampleHdfsDataflowSubmitterTest {
   LocalScribenginCluster localScribenginCluster ;
   ScribenginShell shell;
   int numMessages = 10000;
+  String BASE_DIR = "build/working";
+  Registry registry;
   
   /**
    * Setup a local Scribengin cluster
@@ -40,7 +40,7 @@ public class ExampleSimpleDataflowSubmitterTest {
    */
   @Before
   public void setup() throws Exception{
-    String BASE_DIR = "build/working";
+    
     System.setProperty("app.home", BASE_DIR + "/scribengin");
     System.setProperty("vm.app.dir", BASE_DIR + "/scribengin");
     
@@ -48,7 +48,7 @@ public class ExampleSimpleDataflowSubmitterTest {
     localScribenginCluster.clean(); 
     localScribenginCluster.useLog4jConfig("classpath:scribengin/log4j/vm-log4j.properties");  
     localScribenginCluster.start();
-    
+    registry = RegistryConfig.getDefault().newInstance().connect();
     shell = localScribenginCluster.getShell();
     
   }
@@ -63,16 +63,16 @@ public class ExampleSimpleDataflowSubmitterTest {
   }
   
   /**
-   * Test our Simple Dataflow Submitter
+   * Test our HDFS Dataflow Submitter
    * 1. Write data to Kafka into the input topic
    * 2. Run our dataflow
-   * 3. Use a Kafka Consumer to read the data in the output topic and make sure its all present 
+   * 3. Use a HDFS stream reader to read the data in the output HDFS partition and make sure its all present 
    * @throws Exception
    */
   @Test
   public void TestExampleSimpleDataflowSubmitterTest() throws Exception{
     //Create a new DataflowSubmitter with default properties
-    ExampleSimpleDataflowSubmitter eds = new ExampleSimpleDataflowSubmitter(shell);
+    ExampleHdfsDataflowSubmitter eds = new ExampleHdfsDataflowSubmitter(shell);
     
     //Populate kafka input topic with data
     sendKafkaData(localScribenginCluster.getKafkaCluster().getKafkaConnect(), eds.getInputTopic());
@@ -85,33 +85,54 @@ public class ExampleSimpleDataflowSubmitterTest {
     //Get basic info on the dataflow
     shell.execute("dataflow info --dataflow-id "+eds.getDataflowID());
     
-    //Get the kafka output topic iterator
-    ConsumerIterator<byte[], byte[]> it = 
-        getConsumerIterator(localScribenginCluster.getKafkaCluster().getZKConnect(), eds.getOutputTopic());
+    //Give the dataflow a second to get going
+    Thread.sleep(1000);
     
     //Do some very simple verification to ensure our data has been moved correctly
-    int numReceived = 0;
-    int[] assertionArray = new int[numMessages];
-    Arrays.fill(assertionArray, 0);
+    //We'll use some basic HDFS classes to do the reading, so we'll configure our local HDFS FS here
+    Path path = new Path(eds.getHDFSLocation());
+    FileSystem fs = FileSystem.get(path.toUri(), new Configuration());
+    int numEntries = readDirsRecursive(fs, eds.getHDFSRegistryPath(), eds.getHDFSLocation());
+    fs.close();
     
-    try{
-      while(it.hasNext()){
-        //This is how we serialize our data back into our Messsage object
-        Message message = JSONSerializer.INSTANCE.fromBytes(it.next().message(), Message.class);
-        String data = new String(message.getData());
-        assertionArray[Integer.parseInt(data)]++;
-        //System.err.println(data);
-        numReceived++;
-      }
-    } catch (ConsumerTimeoutException e){}
-    
-    assertEquals(numReceived, numMessages);
-    for(int b: assertionArray){
-      assertEquals(1, b);
-    }
+    //Make sure all the messages were written
+    assertEquals(numEntries, numMessages);
     
     //Get basic info on the dataflow
     shell.execute("dataflow info --dataflow-id "+eds.getDataflowID());
+  }
+  
+  /**
+   * Use our HDFSSource to read our data through all partitions
+   * @param fs HDFS File system
+   * @param registryPath Path to HDFS info in the registry
+   * @param hdfsPath Path our data is saved to
+   * @return count of records in HDFS
+   * @throws Exception
+   */
+  private int readDirsRecursive(FileSystem fs, String registryPath, String hdfsPath) throws Exception{
+    int count = 0;
+    
+    //Configure our HDFS storage object
+    HDFSStorageConfig storageConfig = new HDFSStorageConfig("test", registryPath, hdfsPath);
+    HDFSStorage storage = new HDFSStorage(registry, fs, storageConfig);
+    
+    //Get our source object from the storage object
+    HDFSSource source = storage.getSource();
+    //Get all source streams
+    SourcePartitionStream[] sourceStream = source.getLatestSourcePartition().getPartitionStreams();
+    //Read from each individual source stream
+    for(int i = 0; i < sourceStream.length; i++) {
+      SourcePartitionStreamReader reader = sourceStream[i].getReader("reader-for-stream-" + i);
+      Message message = null;
+      //Count the number of messages
+      while((message = reader.next(3000)) != null) {
+        count++;
+      }
+      reader.close();
+    }
+    
+    return count;
   }
   
   /**
@@ -134,22 +155,4 @@ public class ExampleSimpleDataflowSubmitterTest {
     producer.close();
   }
   
-  private ConsumerIterator<byte[], byte[]> getConsumerIterator(String zkConnect, String topic){
-    Properties props = new Properties();
-    props.put("zookeeper.connect", zkConnect);
-    props.put("group.id", "default");
-    props.put("consumer.timeout.ms", "5000");
-    
-    ConsumerConfig consumerConfig = new ConsumerConfig(props);
-    ConsumerConnector consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
-    Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
-    topicCountMap.put(topic, new Integer(1));
-    Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumerConnector.createMessageStreams(topicCountMap);
-    KafkaStream<byte[], byte[]> stream =  consumerMap.get(topic).get(0);
-    return stream.iterator();
-  }
-  
 }
-
-
-

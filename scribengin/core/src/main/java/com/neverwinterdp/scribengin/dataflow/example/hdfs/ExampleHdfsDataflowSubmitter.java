@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.example.simple;
+package com.neverwinterdp.scribengin.dataflow.example.hdfs;
 
 import java.util.Properties;
 
@@ -9,11 +9,13 @@ import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
 import com.neverwinterdp.scribengin.dataflow.KafkaDataSet;
 import com.neverwinterdp.scribengin.dataflow.Operator;
+import com.neverwinterdp.scribengin.dataflow.example.simple.SimpleDataStreamOperator;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
+import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
 
-public class ExampleSimpleDataflowSubmitter {
+public class ExampleHdfsDataflowSubmitter {
   private String dataflowID;
   private int defaultReplication;
   private int defaultParallelism;
@@ -22,12 +24,14 @@ public class ExampleSimpleDataflowSubmitter {
   private int numOfExecutorPerWorker;
   
   private String inputTopic;
-  private String outputTopic;
+  
+  private String HDFSRegistryPath;
+  private String HDFSLocation;
   
   private ScribenginShell shell;
   private DataflowSubmitter submitter;
   
-  public ExampleSimpleDataflowSubmitter(ScribenginShell shell){
+  public ExampleHdfsDataflowSubmitter(ScribenginShell shell){
     this(shell, new Properties());
   }
   
@@ -36,7 +40,7 @@ public class ExampleSimpleDataflowSubmitter {
    * @param shell ScribenginShell to connect to Scribengin with
    * @param props Properties to configure the dataflow
    */
-  public ExampleSimpleDataflowSubmitter(ScribenginShell shell, Properties props){
+  public ExampleHdfsDataflowSubmitter(ScribenginShell shell, Properties props){
     //This it the shell to communicate with Scribengin with
     this.shell = shell;
     
@@ -55,8 +59,12 @@ public class ExampleSimpleDataflowSubmitter {
     
     //The kafka input topic
     inputTopic = props.getProperty("dataflow.inputTopic", "input.topic");
-    //The kafka output topic
-    outputTopic = props.getProperty("dataflow.outputTopic", "output.topic");
+    
+    //Where in the registry to store HDFS info (Not suggested to change this)
+    HDFSRegistryPath = props.getProperty("dataflow.hdfsRegistryPath", "/storage/hdfs/output");
+    
+    //Where in HDFS to store our data
+    HDFSLocation = props.getProperty("dataflow.hdfsLocation", "build/working/storage/hdfs/output");
     
   }
   
@@ -109,9 +117,11 @@ public class ExampleSimpleDataflowSubmitter {
     KafkaDataSet<Message> inputDs = 
         dfl.createInput(new KafkaStorageConfig("input", kafkaZkConnect, inputTopic));
     
-    //Define our output sink - set name, ZK host:port, and output topic name
-    DataSet<Message> outputDs = 
-        dfl.createOutput(new KafkaStorageConfig("output", kafkaZkConnect, outputTopic));
+    //Our output sink will be HDFS
+    //"output" - the dataset's name
+    //HDFSRegistryPath - where in the registry to HDFS config
+    //HDFSLocation - the path in HDFS to put our data
+    DataSet<Message> outputDs = dfl.createOutput(new HDFSStorageConfig("output", HDFSRegistryPath, HDFSLocation));
     
     //Define which operator to use.  
     //This will be the logic that ties the input to the output
@@ -175,14 +185,6 @@ public class ExampleSimpleDataflowSubmitter {
     this.inputTopic = inputTopic;
   }
 
-  public String getOutputTopic() {
-    return outputTopic;
-  }
-
-  public void setOutputTopic(String outputTopic) {
-    this.outputTopic = outputTopic;
-  }
-
   public ScribenginShell getShell() {
     return shell;
   }
@@ -198,4 +200,21 @@ public class ExampleSimpleDataflowSubmitter {
   public void setSubmitter(DataflowSubmitter submitter) {
     this.submitter = submitter;
   }
+  
+  public String getHDFSRegistryPath() {
+    return HDFSRegistryPath;
+  }
+
+  public void setHDFSRegistryPath(String hDFSRegistryPath) {
+    HDFSRegistryPath = hDFSRegistryPath;
+  }
+
+  public String getHDFSLocation() {
+    return HDFSLocation;
+  }
+
+  public void setHDFSLocation(String hDFSLocation) {
+    HDFSLocation = hDFSLocation;
+  }
+
 }
