@@ -67,11 +67,13 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
         }
       }
       
-      int mod = i % 3;
+      int mod = i % 4;
       if(mod == 0) {
         killLeaderMaster(dflClient, dflBuilder.getDataflowId());
       } else if(mod == 1) {
         killWorker(dflClient, dflBuilder.getDataflowId());
+      } else if(mod == 2) {
+        powerFailure(shell, dflBuilder);
       } else {
         stopStartDataflow(shell, dflBuilder);
       }
@@ -154,6 +156,43 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       dflClient.getScribenginClient().getVMClient().kill(masterVMDescriptor, 90000);
     }
     log.setFinishedTime(System.currentTimeMillis());
+    simulationLogs.add(log);
+  }
+  
+  
+  public void powerFailure(ScribenginShell shell, TrackingDataflowBuilder dflBuilder) throws Exception {
+    SimulationLog log = new SimulationLog("power-failure");
+    System.err.println("--------------------------------------------------------------------------------------");
+    System.err.println("Kill All the masters and worker");
+    System.err.println("--------------------------------------------------------------------------------------");
+    String dataflowId = dflBuilder.getDataflowId();
+    DataflowClient dflClient = shell.getScribenginClient().getDataflowClient(dataflowId);
+    
+    TXEvent killMasterEvent = new TXEvent("SimulateKillMaster", DataflowEvent.SimulateKillMaster);
+    for(VMDescriptor sel : dflClient.getDataflowRegistry().getMasterRegistry().getMasterVMDescriptors()) {
+      if(simulateKill) {
+        dflClient.getDataflowRegistry().getMasterRegistry().getMasterEventBroadcaster().broadcast(killMasterEvent);
+      } else {
+        dflClient.getScribenginClient().getVMClient().kill(sel, 90000);
+      }
+    }
+    
+    for(VMDescriptor sel : dflClient.getActiveDataflowWorkers()) {
+      if(simulateKill) {
+        dflClient.getScribenginClient().getVMClient().simulateKill(sel);
+      } else {
+        dflClient.getScribenginClient().getVMClient().kill(sel, 90000);
+      }
+    }
+    
+    System.err.println("--------------------------------------------------------------------------------------");
+    System.err.println("Start Dataflow");
+    System.err.println("--------------------------------------------------------------------------------------");
+    Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
+    submitDataflow(shell, dfl);
+    
+    log.setFinishedTime(System.currentTimeMillis());
+    log.setDescription("Kill all the workers and masters, then restart");
     simulationLogs.add(log);
   }
   
