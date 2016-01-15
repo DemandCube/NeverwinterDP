@@ -18,6 +18,7 @@ import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReport;
 import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReportWithStatus;
+import com.neverwinterdp.scribengin.dataflow.runtime.master.DataflowMasterRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerRuntimeReport;
 import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.util.text.StringUtil;
@@ -184,6 +185,22 @@ public class DataflowFormater {
             selExecutor.getId(), selExecutor.getStatus(), StringUtil.join(selExecutor.getAssignedTaskIds(), ",")
             );
       }
+    }
+    return taskFt.getFormattedText();
+  }
+  
+  public String getActiveDataflowMasterInfo() throws RegistryException {
+    List<DataflowMasterRuntimeReport> reports = DataflowRegistry.getDataflowMasterRuntimeReports(registry, dataflowPath);
+    return createDataflowMasterReport("Dataflow Master", reports);
+  }
+  
+  private String createDataflowMasterReport(String title, List<DataflowMasterRuntimeReport> reports) {
+    String[] header = { "Master", "Leader" } ;
+    TabularFormater taskFt = new TabularFormater(header);
+    taskFt.setTitle(title);
+    for(int i = 0; i < reports.size(); i++) {
+      DataflowMasterRuntimeReport report = reports.get(i);
+      taskFt.addRow(report.getVmId(), report.isLeader());
     }
     return taskFt.getFormattedText();
   }

@@ -22,7 +22,7 @@ $SHELL plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingLauncher \
 # MONITOR                                                                                                               #
 #########################################################################################################################
 MONITOR_COMMAND="\
-$SHELL plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor --dataflow-id tracking --report-path $TRACKING_REPORT_PATH --show-history-workers"
+$SHELL plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor --dataflow-id tracking --report-path $TRACKING_REPORT_PATH --show-history-vm"
 
 echo -e "\n\n"
 echo "##To Tracking The Dataflow Progress##"

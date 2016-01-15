@@ -60,7 +60,7 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
         if(reportTime >= simulationReportPeriod) {
           shell.execute(
               "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
-              "  --dataflow-id " + dfl.getDataflowId()  +  " --report-path " + reportPath //+ " --show-history-workers "
+              "  --dataflow-id " + dfl.getDataflowId()  +  " --report-path " + reportPath //+ " --show-history-vm "
           );
           reportTime = 0;
           shell.console().println(SimulationLog.toFormattedText(simulationLogs));
@@ -115,6 +115,7 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
     submitDataflow(shell, dfl);
     log.setFinishedTime(System.currentTimeMillis());
+    log.setDescription("Stop then start the dataflow again");
     simulationLogs.add(log);
   }
   

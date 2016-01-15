@@ -119,11 +119,11 @@ public class DataflowCommand extends Command {
     @Parameter(names = "--show-tasks", description = "The history dataflow id")
     boolean tasks = false;
     
-    @Parameter(names = "--show-workers", description = "Show the active dataflow worker")
-    boolean activeWorkers = false;
+    @Parameter(names = "--show-vm", description = "Show the active dataflow master and worker")
+    boolean activeVMs = false;
    
-    @Parameter(names = "--show-history-workers", description = "Show the history dataflow worker")
-    boolean historyWorkers = false;
+    @Parameter(names = "--show-history-vm", description = "Show the history dataflow master and worker")
+    boolean historyVMs = false;
     
     @Parameter(names = "--show-activities", description = "The history dataflow id")
     boolean activities = false;
@@ -159,9 +159,12 @@ public class DataflowCommand extends Command {
       }
       
       
-      if(all || activeWorkers) console.println(dflFormater.getDataflowActiveWorkerInfo());
+      if(all || activeVMs) {
+        console.println(dflFormater.getActiveDataflowMasterInfo());
+        console.println(dflFormater.getDataflowActiveWorkerInfo());
+      }
       
-      if(all || historyWorkers) console.println(dflFormater.getDataflowHistoryWorkerInfo());
+      if(all || historyVMs) console.println(dflFormater.getDataflowHistoryWorkerInfo());
       
       if(all || activities) console.println(dflFormater.getActivitiesInfo());
       
