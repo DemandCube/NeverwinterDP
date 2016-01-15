@@ -182,7 +182,11 @@ public class TrackingDataflowBuilder {
         "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + trackingConfig.getReportPath()
       );
       
-      if(numOfInputMessages == report.getTrackingCount()){
+      System.err.println(
+          "numOfInputMessages = " + numOfInputMessages + 
+          ", tracking count = " + report.getTrackingCount() +
+          ", duplicated = " + report.getTrackingDuplicatedCount());
+      if(numOfInputMessages <= report.getTrackingCount()) {
         break;
       }
       

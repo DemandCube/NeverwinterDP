@@ -52,12 +52,28 @@ public class TrackingWindowReport {
     count += getTrackingCount(progressWindowStats);
     return count;
   }
-
+  
   long getTrackingCount(List<TrackingWindowStats> chunkReportHolder) {
     long count = 0;
     for(int i = 0; i < chunkReportHolder.size(); i++) {
       TrackingWindowStats stat = chunkReportHolder.get(i);
       count += stat.getTrackingCount();
+    }
+    return count;
+  }
+
+  @JsonIgnore
+  public long getTrackingDuplicatedCount() {
+    long count = getTrackingDuplicatedCount(finishedWindowStats);
+    count += getTrackingDuplicatedCount(progressWindowStats);
+    return count;
+  }
+  
+  long getTrackingDuplicatedCount(List<TrackingWindowStats> holder) {
+    long count = 0;
+    for(int i = 0; i < holder.size(); i++) {
+      TrackingWindowStats stat = holder.get(i);
+      count += stat.getTrackingDuplicatedCount();
     }
     return count;
   }

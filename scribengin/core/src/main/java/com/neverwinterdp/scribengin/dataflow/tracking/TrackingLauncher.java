@@ -99,7 +99,7 @@ public class TrackingLauncher  extends SubCommand {
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
     DataflowSubmitter submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl);
-    submitter.submit().waitForRunning(60000);
+    submitter.submit().waitForDataflowRunning(60000);
     return submitter;
   }
   

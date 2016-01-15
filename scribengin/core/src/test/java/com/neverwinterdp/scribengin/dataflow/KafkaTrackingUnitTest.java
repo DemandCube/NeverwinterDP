@@ -56,7 +56,7 @@ public class KafkaTrackingUnitTest  {
     System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
     
     try {
-      new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForRunning(60000);
+      new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForDataflowRunning(60000);
     } catch (Exception ex) {
       shell.execute("registry dump");
       throw ex;

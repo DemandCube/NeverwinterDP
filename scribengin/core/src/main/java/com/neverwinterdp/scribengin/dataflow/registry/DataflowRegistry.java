@@ -10,6 +10,7 @@ import com.neverwinterdp.message.TrackingWindowRegistry;
 import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
+import com.neverwinterdp.registry.RefNode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.SequenceIdTracker;
@@ -18,8 +19,10 @@ import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
+import com.neverwinterdp.scribengin.dataflow.runtime.master.DataflowMasterRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingRegistry;
+import com.neverwinterdp.vm.VMDescriptor;
 
 @Singleton
 public class DataflowRegistry {
@@ -211,10 +214,29 @@ public class DataflowRegistry {
   static public List<DataflowWorkerRuntimeReport> getHistoryDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
     return getDataflowWorkerRuntimeReports(registry, dataflowPath, "history");
   }
+  static public List<DataflowMasterRuntimeReport> getDataflowMasterRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
+    Node masterLeaderNode = registry.get(dataflowPath + "/master/leader");
+    RefNode vmLeaderRef = masterLeaderNode.getDataAs(RefNode.class);
+    VMDescriptor vmLeader = registry.getDataAs(vmLeaderRef.getPath(), VMDescriptor.class);
+    
+    List<RefNode> refChildren = masterLeaderNode.getChildrenAs(RefNode.class);
+    List<DataflowMasterRuntimeReport> holder = new ArrayList<>();
+    for(int i = 0; i < refChildren.size(); i++) {
+      RefNode refNode = refChildren.get(i);
+      VMDescriptor vmDescriptor = registry.getDataAs(refNode.getPath(), VMDescriptor.class);
+      boolean leader = false;
+      if(vmLeader != null) leader = vmLeader.getId().equals(vmDescriptor.getId());
+      DataflowMasterRuntimeReport report = new DataflowMasterRuntimeReport();
+      report.setVmId(vmDescriptor.getId());
+      report.setLeader(leader);
+      holder.add(report);
+    }
+    return holder;
+  }
   
   static public List<DataflowWorkerRuntimeReport> getDataflowWorkerRuntimeReports(Registry registry, String dataflowPath, String category) throws RegistryException {
     try {
-      String workerAllPath = dataflowPath + "/workers/all";
+      String workerAllPath  = dataflowPath + "/workers/all";
       String workerListPath = dataflowPath + "/workers/" + category;
       List<String> workerIds = registry.getChildren(workerListPath) ;
       List<DataflowWorkerRuntimeReport> holder = new ArrayList<>();

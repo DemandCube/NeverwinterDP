@@ -6,6 +6,7 @@ import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.master.VMMasterApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
+import com.neverwinterdp.vm.VMStatus;
 import com.neverwinterdp.vm.client.VMClient;
 
 public class DataflowSubmitter {
@@ -55,13 +56,20 @@ public class DataflowSubmitter {
     return scribenginClient.getDataflowClient(dflDescriptor.getId(), timeout);
   }
   
-  public DataflowSubmitter waitForRunning(long timeout) throws Exception {
+  public DataflowSubmitter waitForMasterRunning(long timeout) throws Exception {
+    VMClient vmClient = scribenginClient.getVMClient();
+    vmClient.waitForEqualOrGreaterThan(vmDataflowMasterDescriptor.getId(), VMStatus.RUNNING, 3000, timeout);
+    return this;
+  }
+  
+  
+  public DataflowSubmitter waitForDataflowRunning(long timeout) throws Exception {
     waitForEqualOrGreaterThanStatus(timeout, DataflowLifecycleStatus.RUNNING) ;
     return this;
   }
   
-  public DataflowSubmitter waitForFinish(long timeout) throws Exception {
-    waitForEqualOrGreaterThanStatus(timeout, DataflowLifecycleStatus.FINISH) ;
+  public DataflowSubmitter waitForDataflowStop(long timeout) throws Exception {
+    waitForEqualOrGreaterThanStatus(timeout, DataflowLifecycleStatus.STOP) ;
     return this;
   }
   

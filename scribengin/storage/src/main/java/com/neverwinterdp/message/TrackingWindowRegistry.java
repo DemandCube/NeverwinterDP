@@ -96,18 +96,18 @@ public class TrackingWindowRegistry {
   }
   
   public void saveProgress(final TrackingWindowStat ... windowStats) throws RegistryException {
-    BatchOperations<Boolean> saveProgressOp = new BatchOperations<Boolean>() {
+    BatchOperations<Boolean> op = new BatchOperations<Boolean>() {
       @Override
       public Boolean execute(Registry registry) throws RegistryException {
         Transaction transaction = registry.getTransaction();
         for(TrackingWindowStat windowStat:  windowStats) {
-          transaction.createChild(trackingProgressSaveNode, "", windowStat, NodeCreateMode.EPHEMERAL_SEQUENTIAL);
+          transaction.createChild(trackingProgressSaveNode, "", windowStat, NodeCreateMode.PERSISTENT_SEQUENTIAL);
         }
         transaction.commit();
         return true;
       }
     };
-    registry.executeBatch(saveProgressOp, 3, 5000);
+    registry.executeBatch(op, 3, 5000);
   }
 
   public TrackingWindowStat[] mergeSaveProgress() throws RegistryException {
