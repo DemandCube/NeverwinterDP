@@ -1,6 +1,7 @@
 package com.neverwinterdp.scribengin.dataflow.runtime.master;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.neverwinterdp.registry.Node;
@@ -21,6 +22,13 @@ public class DataflowWorkerMonitor {
     this.service = service;
   }
 
+  public void onInit() throws RegistryException {
+    List<VMDescriptor> vmDescriptors = service.getDataflowRegistry().getWorkerRegistry().getActiveWorkers();
+    for(int i = 0; i < vmDescriptors.size(); i++) {
+      addWorker(vmDescriptors.get(i));
+    }
+  }
+  
   synchronized public void simulateKill() {
     simulateKill = true;
     notifyAll();

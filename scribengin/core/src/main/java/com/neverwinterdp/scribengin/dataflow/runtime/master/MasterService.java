@@ -98,6 +98,8 @@ public class MasterService {
     if(dflRegistry.getRegistryStatus() != DataflowRegistry.RegistryStatus.Ready) {
       new DataflowInitActivity(this).execute();
     }
+    workerMonitor.onInit();
+    
     activityExecutor.add(new DataflowAllocateMasterActivity(this));
     activityExecutor.add(new DataflowRunActivity(this));
   
