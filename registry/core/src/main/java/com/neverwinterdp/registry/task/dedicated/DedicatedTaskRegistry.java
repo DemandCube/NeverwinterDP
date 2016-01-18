@@ -3,7 +3,9 @@ package com.neverwinterdp.registry.task.dedicated;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.neverwinterdp.registry.BatchOperations;
 import com.neverwinterdp.registry.Node;
@@ -140,6 +142,8 @@ public class DedicatedTaskRegistry<T> {
 
   public Node getTaskFinishedNode() { return taskFinishedNode; }
   
+  
+  
   public Node getExecutorsHeartbeatNode() { return executorsHeartbeatNode; }
   
   public Notifier getTaskCoordinationNotifier() { return taskCoordinationNotifier; }
@@ -156,8 +160,16 @@ public class DedicatedTaskRegistry<T> {
     return executorsHeartbeatNode.getChildren().size();
   }
   
+  public List<String> getActiveExecutorIdsByHeartbeat() throws RegistryException {
+    return executorsHeartbeatNode.getChildren();
+  }
+  
   public int countActiveExecutors() throws RegistryException {
     return  executorsActiveNode.getChildren().size();
+  }
+  
+  public List<String> getActiveExecutorIds() throws RegistryException {
+    return executorsActiveNode.getChildren();
   }
   
   public void offer(String taskId, T taskDescriptor) throws RegistryException {
@@ -337,6 +349,27 @@ public class DedicatedTaskRegistry<T> {
     execute(executor, op);
   }
   
+  public void cleanDisconnectedExecutors() throws RegistryException {
+    BatchOperations<Boolean> op = new BatchOperations<Boolean>() {
+      @Override
+      public Boolean execute(Registry registry) throws RegistryException {
+        Transaction transaction = registry.getTransaction();
+        Set<String> aliveExecutorIds = new HashSet<String>(getActiveExecutorIdsByHeartbeat());
+        for(String selActiveExecutorId : getActiveExecutorIds()) {
+          if(aliveExecutorIds.contains(selActiveExecutorId)) {
+            TaskExecutorDescriptor executor = 
+                executorsAllNode.getChild(selActiveExecutorId).getDataAs(TaskExecutorDescriptor.class);
+            historyTaskExecutor(transaction, executor);
+          }
+        }
+        transaction.commit();
+        return true;
+      }
+    };
+    Lock lock = tasksLockNode.getLock("write", "Lock to clean all the disconnected executors") ;
+    lock.execute(op, 3, 3000);
+  }
+  
   public void historyTaskExecutor(String executorId) throws RegistryException {
     TaskExecutorDescriptor executor = executorsAllNode.getChild(executorId).getDataAs(TaskExecutorDescriptor.class);
     historyTaskExecutor(executor);
@@ -347,26 +380,30 @@ public class DedicatedTaskRegistry<T> {
       @Override
       public Boolean execute(Registry registry) throws RegistryException {
         Transaction transaction = registry.getTransaction();
-        String executorId = executor.getId();
-        if(executor.getStatus() == TaskExecutorDescriptor.TasExecutorStatus.IDLE) {
-          transaction.deleteDescendant(executorsIdleNode, executorId);
-        } else if(executor.getStatus() == TaskExecutorDescriptor.TasExecutorStatus.ACTIVE) {
-          transaction.deleteDescendant(executorsActiveNode, executorId);
-        } 
-        transaction.createDescendant(executorsHistoryNode, executorId, NodeCreateMode.PERSISTENT);
-        if(executor.getStatus().toString().indexOf("TERMINATED") < 0) {
-          List<String> taskIds = executorsAllNode.getChild(executorId).getChild("tasks").getChildren();
-          for(String taskId : taskIds) {
-            transaction.createChild(taskAvailableNode, taskId +  "-", NodeCreateMode.PERSISTENT_SEQUENTIAL);
-          }
-          executor.setStatus(TaskExecutorDescriptor.TasExecutorStatus.TERMINATED_WITH_ERROR);
-        }
-        transaction.setData(executorsAllNode.getChild(executorId), executor);
+        historyTaskExecutor(transaction, executor);
         transaction.commit();
         return true;
       }
     };
     execute(executor, op);
+  }
+  
+  void historyTaskExecutor(final Transaction transaction, final TaskExecutorDescriptor executor) throws RegistryException {
+    String executorId = executor.getId();
+    if(executor.getStatus() == TaskExecutorDescriptor.TasExecutorStatus.IDLE) {
+      transaction.deleteDescendant(executorsIdleNode, executorId);
+    } else if(executor.getStatus() == TaskExecutorDescriptor.TasExecutorStatus.ACTIVE) {
+      transaction.deleteDescendant(executorsActiveNode, executorId);
+    } 
+    transaction.createDescendant(executorsHistoryNode, executorId, NodeCreateMode.PERSISTENT);
+    if(executor.getStatus().toString().indexOf("TERMINATED") < 0) {
+      List<String> taskIds = executorsAllNode.getChild(executorId).getChild("tasks").getChildren();
+      for(String taskId : taskIds) {
+        transaction.createChild(taskAvailableNode, taskId +  "-", NodeCreateMode.PERSISTENT_SEQUENTIAL);
+      }
+      executor.setStatus(TaskExecutorDescriptor.TasExecutorStatus.TERMINATED_WITH_ERROR);
+    }
+    transaction.setData(executorsAllNode.getChild(executorId), executor);
   }
   
   void execute(final TaskExecutorDescriptor executor, BatchOperations<Boolean> op) throws RegistryException {

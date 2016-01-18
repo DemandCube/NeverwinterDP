@@ -128,7 +128,10 @@ public class DataflowRegistry {
   public void initRegistry() throws RegistryException {
     try {
       RegistryStatus registryStatus = getRegistryStatus();
-      if(registryStatus != RegistryStatus.Create) return;
+      if(registryStatus != RegistryStatus.Create) {
+        taskRegistry.cleanDisconnectedExecutors();
+        return;
+      }
       
       Transaction transaction = registry.getTransaction();
       configRegistry.initRegistry(transaction);
