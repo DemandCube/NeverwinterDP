@@ -70,11 +70,11 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       
       int mod = i % 4;
       if(mod == 0) {
-        killLeaderMaster(dflClient, dflBuilder.getDataflowId());
+        powerFailure(shell, dflBuilder);
       } else if(mod == 1) {
         killWorker(dflClient, dflBuilder.getDataflowId());
       } else if(mod == 2) {
-        powerFailure(shell, dflBuilder);
+        killLeaderMaster(dflClient, dflBuilder.getDataflowId());
       } else {
         stopStartDataflow(shell, dflBuilder);
       }
@@ -176,7 +176,8 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       dflClient.getDataflowRegistry().getMasterRegistry().getMasterEventBroadcaster().broadcast(killMasterEvent);
     } else {
       for(VMDescriptor sel : masterVMDescriptors) {
-        dflClient.getScribenginClient().getVMClient().kill(sel, 90000);
+        boolean killed = dflClient.getScribenginClient().getVMClient().kill(sel, 90000);
+        System.err.println("Killed master " + sel.getId() + " = " + killed);
       }
     }
     
@@ -185,7 +186,8 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       if(simulateKill) {
         dflClient.getScribenginClient().getVMClient().simulateKill(sel);
       } else {
-        dflClient.getScribenginClient().getVMClient().kill(sel, 90000);
+        boolean killed = dflClient.getScribenginClient().getVMClient().kill(sel, 90000);
+        System.err.println("Killed worker " + sel.getId() + " = " + killed);
       }
     }
     
