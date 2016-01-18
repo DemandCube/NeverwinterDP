@@ -356,7 +356,7 @@ public class DedicatedTaskRegistry<T> {
         Transaction transaction = registry.getTransaction();
         Set<String> aliveExecutorIds = new HashSet<String>(getActiveExecutorIdsByHeartbeat());
         for(String selActiveExecutorId : getActiveExecutorIds()) {
-          if(aliveExecutorIds.contains(selActiveExecutorId)) {
+          if(!aliveExecutorIds.contains(selActiveExecutorId)) {
             TaskExecutorDescriptor executor = 
                 executorsAllNode.getChild(selActiveExecutorId).getDataAs(TaskExecutorDescriptor.class);
             historyTaskExecutor(transaction, executor);
