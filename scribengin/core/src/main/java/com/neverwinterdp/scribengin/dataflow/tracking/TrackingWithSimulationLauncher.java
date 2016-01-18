@@ -18,6 +18,7 @@ import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 import com.neverwinterdp.vm.VMDescriptor;
+import com.neverwinterdp.vm.VMStatus;
 import com.neverwinterdp.vm.client.VMClient;
 
 public class TrackingWithSimulationLauncher extends TrackingLauncher {
@@ -169,22 +170,51 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     String dataflowId = dflBuilder.getDataflowId();
     DataflowClient dflClient = shell.getScribenginClient().getDataflowClient(dataflowId);
     
-    TXEvent killMasterEvent = new TXEvent("SimulateKillMaster", DataflowEvent.SimulateKillMaster);
-    for(VMDescriptor sel : dflClient.getDataflowRegistry().getMasterRegistry().getMasterVMDescriptors()) {
-      if(simulateKill) {
-        dflClient.getDataflowRegistry().getMasterRegistry().getMasterEventBroadcaster().broadcast(killMasterEvent);
-      } else {
+    List<VMDescriptor> masterVMDescriptors = dflClient.getDataflowRegistry().getMasterRegistry().getMasterVMDescriptors();
+    if(simulateKill) {
+      TXEvent killMasterEvent = new TXEvent("SimulateKillMaster", DataflowEvent.SimulateKillMaster);
+      dflClient.getDataflowRegistry().getMasterRegistry().getMasterEventBroadcaster().broadcast(killMasterEvent);
+    } else {
+      for(VMDescriptor sel : masterVMDescriptors) {
         dflClient.getScribenginClient().getVMClient().kill(sel, 90000);
       }
     }
     
-    for(VMDescriptor sel : dflClient.getActiveDataflowWorkers()) {
+    List<VMDescriptor> activeWorkers = dflClient.getActiveDataflowWorkers();
+    for(VMDescriptor sel : activeWorkers) {
       if(simulateKill) {
         dflClient.getScribenginClient().getVMClient().simulateKill(sel);
       } else {
         dflClient.getScribenginClient().getVMClient().kill(sel, 90000);
       }
     }
+    
+    boolean allTerminated = false;
+    while(!allTerminated) {
+      Thread.sleep(3000);
+      allTerminated = true;
+      for(VMDescriptor sel : masterVMDescriptors) {
+        VMStatus vmStatus = dflClient.getScribenginClient().getVMClient().getVMStatus(sel.getId()) ;
+        if(vmStatus.equalOrLessThan(VMStatus.RUNNING)) {
+          allTerminated = false;
+          System.err.println("Master " + sel.getId() + " is not terminated, current status = " + vmStatus);
+          break;
+        }
+      }
+      
+      if(!allTerminated) continue;
+      
+      for(VMDescriptor sel : activeWorkers) {
+        VMStatus vmStatus = dflClient.getScribenginClient().getVMClient().getVMStatus(sel.getId()) ;
+        if(vmStatus.equalOrLessThan(VMStatus.RUNNING)) {
+          allTerminated = false;
+          System.err.println("Worker " + sel.getId() + " is not terminated, current status = " + vmStatus);
+          break;
+        }
+      }
+    }
+    
+        
     
     System.err.println("--------------------------------------------------------------------------------------");
     System.err.println("Start Dataflow");

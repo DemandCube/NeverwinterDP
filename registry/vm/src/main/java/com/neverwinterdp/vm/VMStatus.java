@@ -20,4 +20,12 @@ public enum VMStatus {
   public boolean equalOrGreaterThan(VMStatus other) {
     return level >= other.level ;
   }
+  
+  public boolean lessThan(VMStatus other) {
+    return level < other.level ;
+  }
+  
+  public boolean equalOrLessThan(VMStatus other) {
+    return level <= other.level ;
+  }
 }

@@ -131,6 +131,11 @@ public class VMClient {
     return result.getResultAs(Boolean.class);
   }
 
+  public VMStatus getVMStatus(String vmId) throws Exception {
+    String vmStatusPath = VMService.getVMStatusPath(vmId);
+    return registry.getDataAs(vmStatusPath, VMStatus.class);
+  }
+  
   public void waitForEqualOrGreaterThan(String vmId, VMStatus status, long checkPeriod, long timeout) throws Exception {
     String vmStatusPath = VMService.getVMStatusPath(vmId);
     long stopTime = System.currentTimeMillis() + timeout;
