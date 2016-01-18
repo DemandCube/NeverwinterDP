@@ -61,7 +61,7 @@ public class InputDataStreamContext {
       if(dataStreamType == DataStreamType.Input) {
         MessageTracking messageTracking = mtService.nextMessageTracking();
         String[] tag = { 
-          "vm:" + ctx.getVM().getId(), "executor:" + ctx.getTaskExecutor().getId()
+          "vm:" + ctx.getVM().getVmId(), "executor:" + ctx.getTaskExecutor().getId()
         };
         messageTracking.add(new MessageTrackingLog("input", tag));
         

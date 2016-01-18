@@ -20,7 +20,7 @@ public class MTDataStreamOperatorInterceptor extends DataStreamOperatorIntercept
   
   void onMessage(String logName, DataStreamOperatorContext ctx, Message message) {
     String[] tag = { 
-      "vm:" + ctx.getVM().getId(), "executor:" + ctx.getTaskExecutor().getId()
+      "vm:" + ctx.getVM().getVmId(), "executor:" + ctx.getTaskExecutor().getId()
     };
     message.getMessageTracking().add(new MessageTrackingLog(logName, tag));
   }

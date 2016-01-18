@@ -18,7 +18,7 @@ public class VMDescriptor {
   }
   
   @JsonIgnore
-  public String getId() { return vmConfig.getVmId(); }
+  public String getVmId() { return vmConfig.getVmId(); }
   
   public String getRegistryPath() { return registryPath; }
   public void setRegistryPath(String path) { this.registryPath = path; }

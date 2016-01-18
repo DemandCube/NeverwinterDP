@@ -58,7 +58,7 @@ public class DataflowSubmitter {
   
   public DataflowSubmitter waitForMasterRunning(long timeout) throws Exception {
     VMClient vmClient = scribenginClient.getVMClient();
-    vmClient.waitForEqualOrGreaterThan(vmDataflowMasterDescriptor.getId(), VMStatus.RUNNING, 3000, timeout);
+    vmClient.waitForEqualOrGreaterThan(vmDataflowMasterDescriptor.getVmId(), VMStatus.RUNNING, 3000, timeout);
     return this;
   }
   

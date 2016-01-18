@@ -84,7 +84,7 @@ public class MasterService {
 
     TXEventBroadcaster broadcaster = dflRegistry.getMasterRegistry().getMasterEventBroadcaster();
     String masterEvtPath = broadcaster.getEventPath();
-    eventWatcher = new DataflowMasterEventWatcher(dflRegistry, masterEvtPath, vmDescriptor.getId());
+    eventWatcher = new DataflowMasterEventWatcher(dflRegistry, masterEvtPath, vmDescriptor.getVmId());
     
     mtMergerService  = new MTMergerService(dflRegistry);
     activityExecutor = new DataflowActivityExecutor();

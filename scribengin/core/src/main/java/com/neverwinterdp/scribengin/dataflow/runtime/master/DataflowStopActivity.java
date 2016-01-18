@@ -87,8 +87,8 @@ public class DataflowStopActivity implements DataflowMasterActivity {
     VMClient vmClient = new VMClient(dflRegistry.getRegistry());
     for(int i = 0; i < vmDescriptors.size(); i++) {
       VMDescriptor vmDescriptor = vmDescriptors.get(i);
-      if(!currentVMMaster.getVmId().equals(vmDescriptor.getId())) {
-        System.err.println("DataflowStopActivity: stop master " + vmDescriptor.getId());
+      if(!currentVMMaster.getVmId().equals(vmDescriptor.getVmId())) {
+        System.err.println("DataflowStopActivity: stop master " + vmDescriptor.getVmId());
         vmClient.shutdown(vmDescriptor);
       }
     }

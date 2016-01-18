@@ -46,7 +46,7 @@ public class VMWorkerApp extends VMApp {
     DataflowRegistry dflRegistry = workerModuleContainer.getInstance(DataflowRegistry.class);
     dflRegistry.getWorkerRegistry().addWorker(getVM().getDescriptor());
     MetricRegistry mRegistry = workerModuleContainer.getInstance(MetricRegistry.class);
-    dflRegistry.getWorkerRegistry().createMetric(vmDescriptor.getId(), mRegistry);
+    dflRegistry.getWorkerRegistry().createMetric(vmDescriptor.getVmId(), mRegistry);
     
     dataflowTaskExecutorService = workerModuleContainer.getInstance(WorkerService.class);
     addListener(new VMApp.VMAppTerminateEventListener() {
@@ -71,7 +71,7 @@ public class VMWorkerApp extends VMApp {
     dataflowTaskExecutorService.waitForTermination();
     dflRegistry.
       getWorkerRegistry().
-      setWorkerStatus(getVM().getDescriptor().getId(), DataflowWorkerStatus.TERMINATED);
+      setWorkerStatus(getVM().getDescriptor().getVmId(), DataflowWorkerStatus.TERMINATED);
     System.out.println("VMWorkerApp Done !!!!!!!!!");
   }
 }

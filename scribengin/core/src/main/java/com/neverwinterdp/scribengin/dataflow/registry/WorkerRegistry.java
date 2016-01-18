@@ -94,14 +94,14 @@ public class WorkerRegistry {
   public void addWorker(VMDescriptor vmDescriptor) throws RegistryException {
     Transaction transaction = registry.getTransaction() ;
     RefNode refNode = new RefNode(vmDescriptor.getRegistryPath()) ;
-    transaction.createChild(allWorkers, vmDescriptor.getId(), refNode, NodeCreateMode.PERSISTENT) ;
-    transaction.createDescendant(allWorkers, vmDescriptor.getId() + "/status", DataflowWorkerStatus.CREATE, NodeCreateMode.PERSISTENT) ;
-    transaction.createChild(activeWorkers, vmDescriptor.getId(), NodeCreateMode.PERSISTENT) ;
+    transaction.createChild(allWorkers, vmDescriptor.getVmId(), refNode, NodeCreateMode.PERSISTENT) ;
+    transaction.createDescendant(allWorkers, vmDescriptor.getVmId() + "/status", DataflowWorkerStatus.CREATE, NodeCreateMode.PERSISTENT) ;
+    transaction.createChild(activeWorkers, vmDescriptor.getVmId(), NodeCreateMode.PERSISTENT) ;
     transaction.commit();
   }
   
   public void setWorkerStatus(VMDescriptor vmDescriptor, DataflowWorkerStatus status) throws RegistryException {
-    setWorkerStatus(vmDescriptor.getId(), status);
+    setWorkerStatus(vmDescriptor.getVmId(), status);
   }
   
   public void setWorkerStatus(String vmId, DataflowWorkerStatus status) throws RegistryException {
@@ -118,13 +118,13 @@ public class WorkerRegistry {
   }
   
   public void createWorkerTaskExecutor(VMDescriptor vmDescriptor, TaskExecutorDescriptor descriptor) throws RegistryException {
-    Node worker = allWorkers.getChild(vmDescriptor.getId()) ;
+    Node worker = allWorkers.getChild(vmDescriptor.getVmId()) ;
     Node executors = worker.createDescendantIfNotExists("executors");
     executors.createChild(descriptor.getId(), descriptor, NodeCreateMode.PERSISTENT);
   }
   
   public void updateWorkerTaskExecutor(VMDescriptor vmDescriptor, TaskExecutorDescriptor descriptor) throws RegistryException {
-    Node worker = allWorkers.getChild(vmDescriptor.getId()) ;
+    Node worker = allWorkers.getChild(vmDescriptor.getVmId()) ;
     Node executor = worker.getDescendant("executors/" + descriptor.getId()) ;
     executor.setData(descriptor);
   }

@@ -73,16 +73,16 @@ public class WorkerService {
     DataflowDescriptor dflConfig = dflRegistry.getConfigRegistry().getDataflowDescriptor();
     taskService = new DedicatedTaskService<DataStreamOperatorDescriptor>(dflRegistry.getTaskRegistry(), taskSlotExecutorFactory);
     for(int i = 0; i < dflConfig.getWorker().getNumOfExecutor(); i++) {
-      TaskExecutorDescriptor executor = new TaskExecutorDescriptor(vmDescriptor.getId() + "-executor-" + i, vmDescriptor.getId());
+      TaskExecutorDescriptor executor = new TaskExecutorDescriptor(vmDescriptor.getVmId() + "-executor-" + i, vmDescriptor.getVmId());
       taskService.addExecutor(executor, 2);
     }
-    Node workerNode = dflRegistry.getWorkerRegistry().getWorkerNode(vmDescriptor.getId());
+    Node workerNode = dflRegistry.getWorkerRegistry().getWorkerNode(vmDescriptor.getVmId());
     notifier = new Notifier(dflRegistry.getRegistry(), workerNode.getPath() + "/notifications", "dataflow-worker-service");
     notifier.initRegistry();
     
     TXEventBroadcaster broadcaster = dflRegistry.getWorkerRegistry().getWorkerEventBroadcaster();
     String workerEvtPath = broadcaster.getEventPath();
-    dataflowWorkerEventWatcher = new DataflowWorkerEventWatcher(dflRegistry, workerEvtPath, vmDescriptor.getId());
+    dataflowWorkerEventWatcher = new DataflowWorkerEventWatcher(dflRegistry, workerEvtPath, vmDescriptor.getVmId());
   }
   
   public Logger getLogger() { return logger; }
@@ -116,7 +116,7 @@ public class WorkerService {
     dataflowWorkerEventWatcher.setComplete();
     workerStatus = DataflowWorkerStatus.TERMINATED_WITH_INTERRUPT;
     dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
-    dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getId(), metricRegistry);
+    dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getVmId(), metricRegistry);
   }
   
   
@@ -137,7 +137,7 @@ public class WorkerService {
     taskService.onDestroy();
     workerStatus = DataflowWorkerStatus.TERMINATED;
     dflRegistry.getWorkerRegistry().setWorkerStatus(vmDescriptor, workerStatus);
-    dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getId(), metricRegistry);
+    dflRegistry.getWorkerRegistry().saveMetric(vmDescriptor.getVmId(), metricRegistry);
     System.out.println("DataflowWorkerService: Finisht waitForTermination()");
   }
   
@@ -165,8 +165,8 @@ public class WorkerService {
         logger.info("Dataflow worker detect stop input event!");
         stopInput();
       } else if(taskEvent == DataflowWorkerEvent.StopWorker) {
-        logger.info("Dataflow worker detect stop worker event. worker = " + vmDescriptor.getId());
-        System.err.println("Dataflow worker detect stop worker event. worker = " + vmDescriptor.getId());
+        logger.info("Dataflow worker detect stop worker event. worker = " + vmDescriptor.getVmId());
+        System.err.println("Dataflow worker detect stop worker event. worker = " + vmDescriptor.getVmId());
         shutdown() ;
       }
       notify(txEvent, TXEventNotification.Status.Complete);

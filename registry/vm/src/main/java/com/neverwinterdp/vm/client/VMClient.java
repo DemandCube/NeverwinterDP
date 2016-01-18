@@ -127,7 +127,10 @@ public class VMClient {
   
   public boolean kill(VMDescriptor vmDescriptor, long timeout) throws Exception {
     CommandResult<?> result = execute(vmDescriptor, new VMCommand.Kill(), timeout);
-    if(result.isDiscardResult()) return true;
+    if(result.isDiscardResult()) {
+      System.err.println("VMClient: kill result is discarded");
+      return true;
+    }
     return result.getResultAs(Boolean.class);
   }
 

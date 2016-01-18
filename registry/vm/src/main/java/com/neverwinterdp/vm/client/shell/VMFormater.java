@@ -13,7 +13,7 @@ public class VMFormater {
     for(int i = 0; i < descriptors.size(); i++) {
       VMDescriptor descriptor = descriptors.get(i) ;
       formater.addRow(
-          descriptor.getId(), 
+          descriptor.getVmId(), 
           descriptor.getRegistryPath(),
           StringUtil.join(descriptor.getVmConfig().getRoles(), ","),
           descriptor.getCpuCores(),

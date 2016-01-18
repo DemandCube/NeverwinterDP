@@ -55,7 +55,7 @@ public class VMSubmitter {
   
   public void waitForStatus(long timeout, VMStatus[] status) throws Exception {
     WaitingOrderNodeEventListener eventListener = new WaitingOrderNodeEventListener(vmClient.getRegistry());
-    String vmStatusPath = VMService.getVMStatusPath(vmDescriptor.getId());
+    String vmStatusPath = VMService.getVMStatusPath(vmDescriptor.getVmId());
     String mesg = "Wait for one of the vm status " + StringUtil.join(status, ",");
     eventListener.add(vmStatusPath, status, mesg, true);
     eventListener.waitForEvents(timeout);
@@ -76,7 +76,7 @@ public class VMSubmitter {
   
   public String getFormattedResult() {
     TabularFormater formater = new TabularFormater("VM", "") ;
-    formater.addRow("VM ID",         vmDescriptor.getId());
+    formater.addRow("VM ID",         vmDescriptor.getVmId());
     formater.addRow("CPU Cores",     vmDescriptor.getCpuCores());
     formater.addRow("Memory",        vmDescriptor.getMemory());
     formater.addRow("Registry Path", vmDescriptor.getRegistryPath());

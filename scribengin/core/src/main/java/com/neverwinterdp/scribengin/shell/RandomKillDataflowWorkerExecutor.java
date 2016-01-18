@@ -112,15 +112,15 @@ public class RandomKillDataflowWorkerExecutor implements Runnable {
       try {
         VMDescriptor selWorker = selectRandomVM(dflClient.getActiveDataflowWorkers(), notifier);
         if(selWorker != null) {
-          executeLog.setDescription("Kill the dataflow worker " + selWorker.getId());
+          executeLog.setDescription("Kill the dataflow worker " + selWorker.getVmId());
           if(simulateKill) {
-            notifier.info("before-simulate-kill", "Before simulate kill " + selWorker.getId());
+            notifier.info("before-simulate-kill", "Before simulate kill " + selWorker.getVmId());
             dflClient.getScribenginClient().getVMClient().simulateKill(selWorker);
-            notifier.info("after-simulate-kill", "After simulate kill " + selWorker.getId());
+            notifier.info("after-simulate-kill", "After simulate kill " + selWorker.getVmId());
           } else {
-            notifier.info("before-kill", "Before kill " + selWorker.getId());
+            notifier.info("before-kill", "Before kill " + selWorker.getVmId());
             dflClient.getScribenginClient().getVMClient().kill(selWorker, 120000);
-            notifier.info("after-kill", "After kill " + selWorker.getId());
+            notifier.info("after-kill", "After kill " + selWorker.getVmId());
           }
         } else {
           executeLog.setDescription("No available worker is found to kill");
@@ -143,9 +143,9 @@ public class RandomKillDataflowWorkerExecutor implements Runnable {
       StringBuilder vmList = new StringBuilder() ;
       for(VMDescriptor sel : vmDescriptors) {
         if(vmList.length() > 0) vmList.append(", ");
-        vmList.append(sel.getId());
+        vmList.append(sel.getVmId());
       }
-      notifier.info("select-random-server", "Select " + selectedVM.getId() + " from " + vmList);
+      notifier.info("select-random-server", "Select " + selectedVM.getVmId() + " from " + vmList);
       return selectedVM;
     }
     

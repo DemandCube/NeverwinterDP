@@ -133,10 +133,10 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       
       if(selWorker != null) {
         if(simulateKill) {
-          log.setDescription("Simulate kill the worker " + selWorker.getId());
+          log.setDescription("Simulate kill the worker " + selWorker.getVmId());
           dflClient.getScribenginClient().getVMClient().simulateKill(selWorker);
         } else {
-          log.setDescription("Kill the worker " + selWorker.getId());
+          log.setDescription("Kill the worker " + selWorker.getVmId());
           dflClient.getScribenginClient().getVMClient().kill(selWorker, 90000);
         }
       }
@@ -154,7 +154,7 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       dflClient.getDataflowRegistry().getMasterRegistry().getMasterEventBroadcaster().broadcast(killEvent);
     } else {
       VMDescriptor masterVMDescriptor = dflClient.getDataflowRegistry().getMasterRegistry().getLeaderVMDescriptor();
-      log.setDescription("Kill the leader master " + masterVMDescriptor.getId());
+      log.setDescription("Kill the leader master " + masterVMDescriptor.getVmId());
       dflClient.getScribenginClient().getVMClient().kill(masterVMDescriptor, 90000);
     }
     log.setFinishedTime(System.currentTimeMillis());
@@ -177,17 +177,19 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     } else {
       for(VMDescriptor sel : masterVMDescriptors) {
         boolean killed = dflClient.getScribenginClient().getVMClient().kill(sel, 90000);
-        System.err.println("Killed master " + sel.getId() + " = " + killed);
+        System.err.println("Killed master " + sel.getVmId() + " = " + killed);
       }
     }
+    
+    VMClient vmClient = dflClient.getScribenginClient().getVMClient();
     
     List<VMDescriptor> activeWorkers = dflClient.getActiveDataflowWorkers();
     for(VMDescriptor sel : activeWorkers) {
       if(simulateKill) {
-        dflClient.getScribenginClient().getVMClient().simulateKill(sel);
+        vmClient.simulateKill(sel);
       } else {
-        boolean killed = dflClient.getScribenginClient().getVMClient().kill(sel, 90000);
-        System.err.println("Killed worker " + sel.getId() + " = " + killed);
+        boolean killed = vmClient.kill(sel, 90000);
+        System.err.println("Killed worker " + sel.getVmId() + " = " + killed);
       }
     }
     
@@ -195,24 +197,25 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     while(!allTerminated) {
       Thread.sleep(3000);
       allTerminated = true;
+      StringBuilder b = new StringBuilder();
       for(VMDescriptor sel : masterVMDescriptors) {
-        VMStatus vmStatus = dflClient.getScribenginClient().getVMClient().getVMStatus(sel.getId()) ;
+        VMStatus vmStatus = vmClient.getVMStatus(sel.getVmId()) ;
+        b.append(sel.getVmId() + "=" + sel.getVmId()).append(", ");
         if(vmStatus.equalOrLessThan(VMStatus.RUNNING)) {
           allTerminated = false;
-          System.err.println("Master " + sel.getId() + " is not terminated, current status = " + vmStatus);
-          break;
+          System.err.println("Master " + sel.getVmId() + " is not terminated, current status = " + vmStatus);
         }
       }
       
       if(!allTerminated) continue;
-      
+      b = new StringBuilder();
       for(VMDescriptor sel : activeWorkers) {
-        VMStatus vmStatus = dflClient.getScribenginClient().getVMClient().getVMStatus(sel.getId()) ;
+        VMStatus vmStatus = dflClient.getScribenginClient().getVMClient().getVMStatus(sel.getVmId()) ;
+        b.append(sel.getVmId() + "=" + sel.getVmId()).append(", ");
         if(vmStatus.equalOrLessThan(VMStatus.RUNNING)) {
           allTerminated = false;
-          System.err.println("Worker " + sel.getId() + " is not terminated, current status = " + vmStatus);
-          break;
         }
+        System.err.println("Worker status: " + b.toString());
       }
     }
     

@@ -37,6 +37,8 @@ public class VM {
   
   private VMApplicationRunner    vmApplicationRunner;
   
+  private Thread terminateThread = null; 
+  
   public VM(VMConfig vmConfig) throws Exception {
     if(vmConfig.isSelfRegistration()) {
       vmDescriptor = new VMDescriptor(vmConfig);
@@ -137,7 +139,7 @@ public class VM {
     VMApp vmApp = vmAppType.newInstance();
     vmApp.setVM(this);
     setVMStatus(VMStatus.RUNNING);
-    String threadName = vmApp.getVM().getDescriptor().getId();
+    String threadName = vmApp.getVM().getDescriptor().getVmId();
     vmApplicationRunner = new VMApplicationRunner(threadName, vmApp, vmConfig.getProperties()) ;
     vmApplicationRunner.start();
     logger.info("Finish run()");
@@ -149,21 +151,20 @@ public class VM {
   
   public void terminate(final TerminateEvent event, final long delay) throws Exception {
     if(vmApplicationRunner == null || !vmApplicationRunner.isAlive()) return;
-    Thread thread = new Thread() {
+    terminateThread = new Thread() {
       public void run() {
         try {
-          if(delay > 0) {
-            Thread.sleep(delay);
-          }
+          if(delay > 0) Thread.sleep(delay);
           vmApplicationRunner.vmApplication.terminate(event);
           if(!vmApplicationRunner.vmApplication.isWaittingForTerminate()) {
             vmApplicationRunner.interrupt();
           }
         } catch (InterruptedException e) {
+          logger.error("Error: cannot execute the event " + event + " due to the interrupt");
         }
       }
     };
-    thread.start();
+    terminateThread.start();
   }
 
   synchronized public void notifyComplete() {
@@ -199,10 +200,10 @@ public class VM {
           setVMStatus(VMStatus.TERMINATED);
           appContainer.getInstance(CloseableInjector.class).close();
           appContainer.onDestroy();
-          logger.info("Destroyed: " + vmDescriptor.getId() );
-          System.err.println("Destroyed: " + vmDescriptor.getId() );
+          logger.info("Destroyed: " + vmDescriptor.getVmId() );
+          System.err.println("Destroyed: " + vmDescriptor.getVmId() );
         } catch (RegistryException e) {
-          System.err.println("Set terminated vm status for " + vmDescriptor.getId() );
+          System.err.println("Set terminated vm status for " + vmDescriptor.getVmId() );
           logger.error("Error in vm registry", e);
         }
         notifyComplete();
@@ -211,11 +212,11 @@ public class VM {
   }
   
   static public VM getVM(VMDescriptor descriptor) {
-    return vms.get(descriptor.getId());
+    return vms.get(descriptor.getVmId());
   }
   
   static public void trackVM(VM vm) {
-    vms.put(vm.getDescriptor().getId(), vm);
+    vms.put(vm.getDescriptor().getVmId(), vm);
   }
   
   static public VM run(VMConfig vmConfig) throws Exception {

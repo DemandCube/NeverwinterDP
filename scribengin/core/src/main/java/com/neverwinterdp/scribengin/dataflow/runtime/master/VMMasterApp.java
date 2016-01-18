@@ -50,7 +50,7 @@ public class VMMasterApp extends VMApp {
     @Override
     public void onElected() {
       final Registry registry = getVM().getVMRegistry().getRegistry();
-      System.err.println("VMDataflowServiceApp: on elected " + getVM().getDescriptor().getId() + " with registry " + registry.hashCode()) ;
+      System.err.println("VMDataflowServiceApp: on elected " + getVM().getDescriptor().getVmId() + " with registry " + registry.hashCode()) ;
       try {
         VMConfig vmConfig = getVM().getDescriptor().getVmConfig();
         AppContainer appContainer = getVM().getAppContainer();

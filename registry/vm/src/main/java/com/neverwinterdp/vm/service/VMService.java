@@ -170,7 +170,7 @@ public class VMService {
     registry.createIfNotExist(HISTORY_PATH) ;
     registry.createIfNotExist(LEADER_PATH) ;
     
-    String vmPath  = ALL_PATH + "/" + descriptor.getVmConfig().getVmId();
+    String vmPath  = ALL_PATH + "/" + descriptor.getVmId();
     descriptor.setRegistryPath(vmPath);
     
     Transaction transaction = registry.getTransaction() ;

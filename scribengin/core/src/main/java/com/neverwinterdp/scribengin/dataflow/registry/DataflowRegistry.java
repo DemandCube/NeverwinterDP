@@ -225,9 +225,9 @@ public class DataflowRegistry {
       RefNode refNode = refChildren.get(i);
       VMDescriptor vmDescriptor = registry.getDataAs(refNode.getPath(), VMDescriptor.class);
       boolean leader = false;
-      if(vmLeader != null) leader = vmLeader.getId().equals(vmDescriptor.getId());
+      if(vmLeader != null) leader = vmLeader.getVmId().equals(vmDescriptor.getVmId());
       DataflowMasterRuntimeReport report = new DataflowMasterRuntimeReport();
-      report.setVmId(vmDescriptor.getId());
+      report.setVmId(vmDescriptor.getVmId());
       report.setLeader(leader);
       holder.add(report);
     }
