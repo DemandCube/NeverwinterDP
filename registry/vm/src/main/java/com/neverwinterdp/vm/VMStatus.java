@@ -1,7 +1,7 @@
 package com.neverwinterdp.vm;
 
 public enum VMStatus {
-  ALLOCATED((byte)0), INIT((byte)1), RUNNING((byte)2), TERMINATED((byte)3); 
+  ALLOCATED((byte)0), INIT((byte)1), RUNNING((byte)2), TERMINATED((byte)3), TERMINATED_WITH_ERROR((byte)4); 
   
   private byte level ;
   

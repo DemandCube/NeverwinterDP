@@ -17,6 +17,7 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.event.RegistryListener;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
+import com.neverwinterdp.vm.VMRegistry;
 import com.neverwinterdp.vm.VMStatus;
 import com.neverwinterdp.vm.event.VMHeartbeatNodeWatcher;
 
@@ -43,7 +44,6 @@ public class VMService {
   
   private RegistryListener registryListener;
   
-  
   @PostConstruct
   public void onInit() throws Exception {
     registry.createIfNotExist(MASTER_PATH + "/status") ;
@@ -54,7 +54,9 @@ public class VMService {
     registry.createIfNotExist(ACTIVE_PATH) ;
     registry.createIfNotExist(HISTORY_PATH) ;
     registry.setData(MASTER_PATH + "/status", Status.INIT);
+    
     registryListener = new RegistryListener(registry);
+  
   }
   
   public void shutdown() {
@@ -88,11 +90,25 @@ public class VMService {
     watch(descriptor);
   }
   
+  public VMStatus getVMStatus(String vmId) throws Exception {
+    String vmStatusPath = VMService.getVMStatusPath(vmId);
+    return registry.getDataAs(vmStatusPath, VMStatus.class);
+  }
+  
+  public void setVMStatus(String vmId, VMStatus status) throws Exception {
+    String vmStatusPath = VMService.getVMStatusPath(vmId);
+    registry.setData(vmStatusPath, status);
+  }
+  
   public void watch(VMDescriptor vmDescriptor) throws Exception {
     VMHeartbeatNodeWatcher heartbeatWatcher = new VMHeartbeatNodeWatcher(registry) {
       @Override
       public void onDisconnected(NodeEvent event, VMDescriptor vmDescriptor) {
         try {
+          VMStatus vmStatus = getVMStatus(vmDescriptor.getVmId());
+          if(vmStatus.equalOrLessThan(VMStatus.RUNNING)) {
+            setVMStatus(vmDescriptor.getVmId(), VMStatus.TERMINATED_WITH_ERROR);
+          }
           unregister(vmDescriptor);
         } catch (Exception e) {
           e.printStackTrace();
