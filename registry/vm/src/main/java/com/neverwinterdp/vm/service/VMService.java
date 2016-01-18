@@ -10,14 +10,13 @@ import com.google.inject.Singleton;
 import com.mycila.jmx.annotation.JmxBean;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
-import com.neverwinterdp.registry.Transaction;
-import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.Transaction;
+import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.event.RegistryListener;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
-import com.neverwinterdp.vm.VMRegistry;
 import com.neverwinterdp.vm.VMStatus;
 import com.neverwinterdp.vm.event.VMHeartbeatNodeWatcher;
 
@@ -157,6 +156,10 @@ public class VMService {
   static public String getVMStatusPath(String vmName) { return ALL_PATH + "/" + vmName + "/status" ; }
   
   static public String getVMHeartbeatPath(String vmName) { return ALL_PATH + "/" + vmName + "/status/heartbeat" ; }
+  
+  static public List<String> getActiveVMIds(Registry registry) throws RegistryException {
+    return registry.getChildren(ACTIVE_PATH) ;
+  }
   
   static public List<VMDescriptor> getActiveVMDescriptors(Registry registry) throws RegistryException {
     List<String> names = registry.getChildren(ACTIVE_PATH) ;

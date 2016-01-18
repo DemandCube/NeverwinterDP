@@ -19,8 +19,9 @@ public class VMRegistry {
 
   public VMRegistry() {}
   
-  public VMRegistry(Registry registry) {
+  public VMRegistry(Registry registry, String vmAllocatedPath) {
     this.registry = registry;
+    this.vmAllocatedPath = vmAllocatedPath;
   }
   
   public Registry getRegistry() { return this.registry; }

@@ -130,6 +130,7 @@ public class DataflowRegistry {
       RegistryStatus registryStatus = getRegistryStatus();
       if(registryStatus != RegistryStatus.Create) {
         taskRegistry.cleanDisconnectedExecutors();
+        workerRegistry.cleanDisconnectedWorkers();
         return;
       }
       

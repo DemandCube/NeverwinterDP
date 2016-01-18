@@ -1,7 +1,9 @@
 package com.neverwinterdp.scribengin.dataflow.registry;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
@@ -13,6 +15,8 @@ import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerStatus;
 import com.neverwinterdp.vm.VMDescriptor;
+import com.neverwinterdp.vm.VMRegistry;
+import com.neverwinterdp.vm.service.VMService;
 import com.neverwinterdp.yara.MetricRegistry;
 import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 
@@ -34,12 +38,12 @@ public class WorkerRegistry {
   public WorkerRegistry(Registry registry, String dataflowPath) throws RegistryException {
     this.registry         = registry;
     this.dataflowPath     = dataflowPath;
-
     workers = registry.get(dataflowPath + "/workers");
     allWorkers = registry.get(dataflowPath + "/" + ALL_WORKERS_PATH);
     activeWorkers = registry.get(dataflowPath + "/" + ACTIVE_WORKERS_PATH);
     historyWorkers = registry.get(dataflowPath + "/" + HISTORY_WORKERS_PATH);
     workerEventBroadcaster = new TXEventBroadcaster(registry, dataflowPath + "/" + WORKER_EVENT_PATH, false);
+    
   }
   
   void create(Transaction transaction) throws RegistryException {
@@ -110,11 +114,25 @@ public class WorkerRegistry {
     statusNode.setData(status);
   }
   
+  public void cleanDisconnectedWorkers() throws RegistryException {
+    Set<String> activeVMIds = new HashSet<String>(VMService.getActiveVMIds(registry));
+    List<String> activeWorkerVMIds= this.getActiveWorkerIds();
+    for(String activeWorkerVMId : activeWorkerVMIds) {
+      if(!activeVMIds.contains(activeWorkerVMId)) {
+        historyWorker(activeWorkerVMId);
+      }
+    }
+  }
+  
   public void historyWorker(String vmId) throws RegistryException {
     Transaction transaction = registry.getTransaction() ;
+    historyWorker(transaction, vmId);
+    transaction.commit();
+  }
+  
+  void historyWorker(Transaction transaction, String vmId) throws RegistryException {
     transaction.createChild(historyWorkers, vmId, NodeCreateMode.PERSISTENT) ;
     transaction.deleteChild(activeWorkers, vmId) ;
-    transaction.commit();
   }
   
   public void createWorkerTaskExecutor(VMDescriptor vmDescriptor, TaskExecutorDescriptor descriptor) throws RegistryException {
