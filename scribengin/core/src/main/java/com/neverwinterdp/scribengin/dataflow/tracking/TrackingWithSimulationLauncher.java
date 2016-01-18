@@ -200,7 +200,7 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       StringBuilder b = new StringBuilder();
       for(VMDescriptor sel : masterVMDescriptors) {
         VMStatus vmStatus = vmClient.getVMStatus(sel.getVmId()) ;
-        b.append(sel.getVmId() + "=" + sel.getVmId()).append(", ");
+        b.append(sel.getVmId() + "=" + vmStatus).append(", ");
         if(vmStatus.equalOrLessThan(VMStatus.RUNNING)) {
           allTerminated = false;
           System.err.println("Master " + sel.getVmId() + " is not terminated, current status = " + vmStatus);
@@ -211,7 +211,7 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       b = new StringBuilder();
       for(VMDescriptor sel : activeWorkers) {
         VMStatus vmStatus = dflClient.getScribenginClient().getVMClient().getVMStatus(sel.getVmId()) ;
-        b.append(sel.getVmId() + "=" + sel.getVmId()).append(", ");
+        b.append(sel.getVmId() + "=" + vmStatus).append(", ");
         if(vmStatus.equalOrLessThan(VMStatus.RUNNING)) {
           allTerminated = false;
         }
