@@ -17,16 +17,11 @@ Scribengin
 ####Overview
 Pronounced "Scribe Engine" 
 
-Scribengin is a highly reliable (HA) and performant event/logging transport that registers data under defined schemas in a variety of end systems.  Scribengin enables you to have multiple flows of data from a source to a sink. Scribengin will tolerate system failures of individual nodes and will do a complete recovery in the case of complete system failure.
-
-Reads and writes data from sources/sinks:
-- Kafka
-- HDFS
-- S3
+Scribengin is a highly reliable, highly available, and performant event/logging transport that registers data under defined schemas in a variety of end systems.  Scribengin enables you to have multiple flows of data from a data source to a data sink. Scribengin will tolerate system failures of individual nodes and will do a complete recovery in the case of system failure.
 
 
 ####The Problem
-The core problem is how to reliably and at scale have a distributed application write data to multiple destination data systems.  This requires the ability to todo data mapping, partitioning with optional filtering to the destination system.
+The core problem is how to reliably and scalably have a distributed application write data to multiple destination data systems.  This requires the ability to todo data mapping, partitioning, data enhancement, data transformation, and optional filtering to the destination system.
 
 ####The Scribengin Solution:
 A distributed, highly reliable ETL system that can handle multiple sources and sinks
