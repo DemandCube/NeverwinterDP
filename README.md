@@ -5,12 +5,14 @@ Scribengin
 #Contents#
 1. [Overview](#overview)
 2. [The Problem](#the-problem)
-2. [Definitions](#definitions)
-3. [Technologies Used](#technologies-used)
-4. [Design](#design)
-5. [Developer Setup](#developer-setup)
+3. [The Scribengin Solution](#the-scribengin-solution)
+4. [Feature List](#feature-list)
+5. [Terminology Guide](#terminology-guide)
+6. [Quickstart Guide](#quickstart-guide)
+7. [How to launch Scribengin in any cluster](#how-to-launch-a-cluster-in-an-arbitrary-environment-ie-in-house-cluster-aws-etc)
+5. [Developer Info](#developer-info)
+6. [Developer Guidelines](#developer-guidelines)
 6. [Releasing Code](#release)
-7. [Developer Notes on Scribengin modules](#developer-notes-on-scribengin-modules)
 
 ####Overview
 Pronounced "Scribe Engine" 
@@ -23,7 +25,6 @@ Reads and writes data from sources/sinks:
 - S3
 
 
-
 ####The Problem
 The core problem is how to reliably and at scale have a distributed application write data to multiple destination data systems.  This requires the ability to todo data mapping, partitioning with optional filtering to the destination system.
 
@@ -31,25 +32,12 @@ The core problem is how to reliably and at scale have a distributed application 
 A distributed, highly reliable ETL system that can handle multiple sources and sinks
 ![Scribengin](docs/images/ScribeIntro.png "Scribengin")
 
-####Definitions
-
-- A **Dataflow** - is data being moved from a source to a sink(s)
-- **Source** - is a system that is being read to get data from (Kafka, Kinesis e.g.)
-- **Sink** - is a destination system that is being written to (HDFS, Hbase, Hive e.g.)
-- **DataStreamOperator** - is a data processor used to filter, copy, duplicate, transform, etc. any data moving between source and sink
 
 
-####Technologies Used
-- Built in Java
-- Gradle
-- YARN
-- Zookeeper
-- Elasticsearch
-- Kafka, S3, HDFS - data sources/sinks
 
+###Feature List
 
-####Design
-![Scribengin Cluster Design](docs/images/ScribenginStructureOverviewV2.png "Scribengin Cluster Design")
+- [A high level overview of what Scribengin can do](docs/features.md)
 
 ####Terminology Guide
 Learn the Scribengin terminology, and get acquainted with Scribengin at a high level.
@@ -83,7 +71,6 @@ cd NeverwinterDP
 
 #Code and jars will be released to NeverwinterDP/release/build/release/
 ```
-
 
 
   
