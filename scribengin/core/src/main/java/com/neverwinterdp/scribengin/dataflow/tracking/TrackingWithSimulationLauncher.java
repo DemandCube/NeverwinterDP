@@ -169,19 +169,17 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     System.err.println("--------------------------------------------------------------------------------------");
     String dataflowId = dflBuilder.getDataflowId();
     DataflowClient dflClient = shell.getScribenginClient().getDataflowClient(dataflowId);
-    
+    VMClient vmClient = dflClient.getScribenginClient().getVMClient();
     List<VMDescriptor> masterVMDescriptors = dflClient.getDataflowRegistry().getMasterRegistry().getMasterVMDescriptors();
     if(simulateKill) {
       TXEvent killMasterEvent = new TXEvent("SimulateKillMaster", DataflowEvent.SimulateKillMaster);
       dflClient.getDataflowRegistry().getMasterRegistry().getMasterEventBroadcaster().broadcast(killMasterEvent);
     } else {
       for(VMDescriptor sel : masterVMDescriptors) {
-        boolean killed = dflClient.getScribenginClient().getVMClient().kill(sel, 90000);
+        boolean killed = vmClient.kill(sel, 90000);
         System.err.println("Killed master " + sel.getVmId() + " = " + killed);
       }
     }
-    
-    VMClient vmClient = dflClient.getScribenginClient().getVMClient();
     
     List<VMDescriptor> activeWorkers = dflClient.getActiveDataflowWorkers();
     for(VMDescriptor sel : activeWorkers) {
