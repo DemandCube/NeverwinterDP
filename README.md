@@ -79,7 +79,7 @@ Get Scribengin launched quickly!  This will walk you how to start a Scribengin i
 ####Release
 ```
 cd NeverwinterDP
-../gradlew clean build release -x test
+./gradlew clean build release -x test
 
 #Code and jars will be released to NeverwinterDP/release/build/release/
 ```
