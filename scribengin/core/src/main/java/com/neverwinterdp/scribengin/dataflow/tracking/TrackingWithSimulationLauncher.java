@@ -203,9 +203,9 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
         b.append(sel.getVmId() + "=" + vmStatus).append(", ");
         if(vmStatus.equalOrLessThan(VMStatus.RUNNING)) {
           allTerminated = false;
-          System.err.println("Master " + sel.getVmId() + " is not terminated, current status = " + vmStatus);
         }
       }
+      System.err.println("Master status: " + b.toString());
       
       if(!allTerminated) continue;
       b = new StringBuilder();
@@ -215,8 +215,8 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
         if(vmStatus.equalOrLessThan(VMStatus.RUNNING)) {
           allTerminated = false;
         }
-        System.err.println("Worker status: " + b.toString());
       }
+      System.err.println("Worker status: " + b.toString());
     }
     
         
