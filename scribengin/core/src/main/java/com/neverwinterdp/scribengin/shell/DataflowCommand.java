@@ -3,8 +3,6 @@ package com.neverwinterdp.scribengin.shell;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParametersDelegate;
-import com.neverwinterdp.message.TrackingWindowRegistry;
 import com.neverwinterdp.message.TrackingWindowReport;
 import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.scribengin.ScribenginClient;
@@ -32,7 +30,6 @@ public class DataflowCommand extends Command {
     add("info",               Info.class) ;
     add("monitor",            Monitor.class) ;
     add("wait-for-status",    WaitForStatus.class) ;
-    add("kill-worker-random", KillWorkerRandom.class) ;
   }
   
   @Override
@@ -286,19 +283,5 @@ public class DataflowCommand extends Command {
     public String getDescription() {
       return "wait for the dataflow status";
     }
-  }
-  
-  static public class KillWorkerRandom extends SubCommand {
-    @ParametersDelegate
-    RandomKillDataflowWorkerExecutor executor = new RandomKillDataflowWorkerExecutor();
-    
-    @Override
-    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
-      executor.init((ScribenginShell) shell);
-      executor.run();
-    }
-    
-    @Override
-    public String getDescription() { return "Kill Worker"; }
   }
 }

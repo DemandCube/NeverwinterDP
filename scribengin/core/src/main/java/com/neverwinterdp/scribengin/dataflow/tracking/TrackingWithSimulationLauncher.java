@@ -51,7 +51,6 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     
     submitVMValidator(vmClient, dflBuilder);
     
-    String reportPath = dflBuilder.getTrackingConfig().getReportPath();
     for(int i = 0; i < simulationMax; i++) {
       long stopTime = System.currentTimeMillis() + simulationPeriod;
       long reportTime = 0;
@@ -59,12 +58,8 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
         Thread.sleep(1000);
         reportTime +=  1000;
         if(reportTime >= simulationReportPeriod) {
-          shell.execute(
-              "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
-              "  --dataflow-id " + dfl.getDataflowId()  +  " --report-path " + reportPath //+ " --show-history-vm "
-          );
+          report(shell, dflBuilder);
           reportTime = 0;
-          shell.console().println(SimulationLog.toFormattedText(simulationLogs));
         }
       }
       
@@ -73,8 +68,10 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
         powerFailure(shell, dflBuilder);
       } else if(mod == 1) {
         killWorker(dflClient, dflBuilder.getDataflowId());
+        report(shell, dflBuilder);
       } else if(mod == 2) {
         killLeaderMaster(dflClient, dflBuilder.getDataflowId());
+        report(shell, dflBuilder);
       } else {
         stopStartDataflow(shell, dflBuilder);
       }
@@ -106,9 +103,7 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       Thread.sleep(1000);
     }
     
-    shell.execute(
-        "dataflow wait-for-status --dataflow-id "  + dataflowId + 
-        " --status STOP --timeout 90000 --report-period 10000") ;
+    report(shell, dflBuilder);
     
     System.err.println("--------------------------------------------------------------------------------------");
     System.err.println("Start Dataflow");
@@ -118,6 +113,7 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     log.setFinishedTime(System.currentTimeMillis());
     log.setDescription("Stop then start the dataflow again");
     simulationLogs.add(log);
+    report(shell, dflBuilder);
   }
   
   public void killWorker(DataflowClient dflClient, String dataflowId) throws Exception {
@@ -270,5 +266,14 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       }
       return ft.getFormattedText();
     }
+  }
+  
+  void report(ScribenginShell shell, TrackingDataflowBuilder dflBuilder) throws Exception {
+    shell.execute(
+        "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
+        "  --dataflow-id " + dflBuilder.getDataflowId()  +  
+        " --report-path " + dflBuilder.getTrackingConfig().getReportPath() //+ " --show-history-vm "
+    );
+    shell.console().println(SimulationLog.toFormattedText(simulationLogs));
   }
 }

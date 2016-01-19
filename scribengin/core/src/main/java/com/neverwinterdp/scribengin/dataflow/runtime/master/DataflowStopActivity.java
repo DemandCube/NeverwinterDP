@@ -3,7 +3,6 @@ package com.neverwinterdp.scribengin.dataflow.runtime.master;
 import java.util.List;
 
 import com.neverwinterdp.message.TrackingWindowRegistry;
-import com.neverwinterdp.message.TrackingWindowReport;
 import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.registry.txevent.TXEventNotificationCompleteListener;
@@ -35,7 +34,6 @@ public class DataflowStopActivity implements DataflowMasterActivity {
       return ;
     }
     
-    System.err.println("BroadcastStopInputStepExecutor: start broadcast StopInput");
     List<String> workers = dflRegistry.getWorkerRegistry().getActiveWorkerIds() ;
     TXEvent pEvent = new TXEvent("stop-input", DataflowWorkerEvent.StopInput);
     TXEventBroadcaster broadcaster = dflRegistry.getWorkerRegistry().getWorkerEventBroadcaster();
@@ -45,16 +43,13 @@ public class DataflowStopActivity implements DataflowMasterActivity {
       throw new Exception("Expect " + workers.size() + ", but only get " + countNotification) ;
     }
     watcher.complete();
-    System.err.println("BroadcastStopInputStepExecutor: complete broadcast StopInput, num of worker = " + workers.size());
     
     TrackingWindowRegistry mtRegistry = dflRegistry.getMessageTrackingRegistry();
     int checkCount = 0;
     boolean noMessageLeft = false;
     while(checkCount < 120 && !noMessageLeft) {
       Thread.sleep(500);
-      TrackingWindowReport trackingReport  = mtRegistry.getReport();
       int commitWindowLefts = mtRegistry.getProgressCommitWindowIds().size();
-      System.err.println("BroadcastStopInputStepExecutor: tracking count = " + trackingReport.getTrackingCount() + ", commitWindowLefts = " + commitWindowLefts);
       if(commitWindowLefts == 0) noMessageLeft = true;
       checkCount++;
     }
@@ -88,7 +83,6 @@ public class DataflowStopActivity implements DataflowMasterActivity {
     for(int i = 0; i < vmDescriptors.size(); i++) {
       VMDescriptor vmDescriptor = vmDescriptors.get(i);
       if(!currentVMMaster.getVmId().equals(vmDescriptor.getVmId())) {
-        System.err.println("DataflowStopActivity: stop master " + vmDescriptor.getVmId());
         vmClient.shutdown(vmDescriptor);
       }
     }
@@ -97,6 +91,5 @@ public class DataflowStopActivity implements DataflowMasterActivity {
   public void setStopStatus() throws Exception {
     DataflowRegistry dflRegistry = service.getDataflowRegistry();
     dflRegistry.setDataflowStatus(DataflowLifecycleStatus.STOP);
-    System.err.println("DataflowService Stop Activity set STOP status done!!!") ;
   }
 }
