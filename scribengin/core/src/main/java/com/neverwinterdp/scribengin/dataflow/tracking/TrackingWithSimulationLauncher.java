@@ -213,8 +213,6 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       System.err.println("Worker status: " + b.toString());
     }
     
-        
-    
     System.err.println("--------------------------------------------------------------------------------------");
     System.err.println("Start Dataflow");
     System.err.println("--------------------------------------------------------------------------------------");
@@ -224,6 +222,15 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     log.setFinishedTime(System.currentTimeMillis());
     log.setDescription("Kill all the workers and masters, then restart");
     simulationLogs.add(log);
+  }
+
+  void report(ScribenginShell shell, TrackingDataflowBuilder dflBuilder) throws Exception {
+    shell.execute(
+        "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
+        "  --dataflow-id " + dflBuilder.getDataflowId()  +  
+        " --report-path " + dflBuilder.getTrackingConfig().getReportPath() //+ " --show-history-vm "
+    );
+    shell.console().println(SimulationLog.toFormattedText(simulationLogs));
   }
   
   static public class SimulationLog {
@@ -252,11 +259,12 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     public long getExecutionTime() { return finishedTime -  startedTime; }
     
     static String toFormattedText(List<SimulationLog> logs) {
-      TabularFormater ft = new TabularFormater("Name", "Start", "Finish", "Duration(ms)", "Description");
+      TabularFormater ft = new TabularFormater("#", "Name", "Start", "Finish", "Duration(ms)", "Description");
       ft.setTitle("Simulation Log");
       for(int i = 0; i < logs.size(); i++) {
         SimulationLog sel = logs.get(i) ;
         ft.addRow(
+            (i + 1),
             sel.getName(), 
             DateUtil.asCompactDateTime(sel.startedTime), 
             DateUtil.asCompactDateTime(sel.finishedTime),
@@ -266,14 +274,5 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       }
       return ft.getFormattedText();
     }
-  }
-  
-  void report(ScribenginShell shell, TrackingDataflowBuilder dflBuilder) throws Exception {
-    shell.execute(
-        "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
-        "  --dataflow-id " + dflBuilder.getDataflowId()  +  
-        " --report-path " + dflBuilder.getTrackingConfig().getReportPath() //+ " --show-history-vm "
-    );
-    shell.console().println(SimulationLog.toFormattedText(simulationLogs));
   }
 }
