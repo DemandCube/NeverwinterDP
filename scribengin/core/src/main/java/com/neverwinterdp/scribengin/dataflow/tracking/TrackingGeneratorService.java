@@ -24,7 +24,7 @@ public class TrackingGeneratorService {
   private ExecutorService executorService;
   
   public TrackingGeneratorService(Registry registry, TrackingConfig trackingConfig) throws RegistryException {
-    trackingRegistry = new TrackingRegistry(registry, trackingConfig.getReportPath(), true);
+    trackingRegistry = new TrackingRegistry(registry, trackingConfig.getTrackingReportPath(), true);
     chunkGenerator = new ChunkGenerator();
     chunkGenerator.numOfChunk = trackingConfig.getNumOfChunk();
     chunkGenerator.numOfMessage = trackingConfig.getNumOfMessagePerChunk();

@@ -20,9 +20,6 @@ public class TrackingLauncher  extends SubCommand {
   @Parameter(names = "--dfs-app-home", description = "Generator num of chunk")
   String dfsAppHome        = "/applications/tracking-sample";
   
-  @Parameter(names = "--tracking-report-path", description = "Generator num of chunk")
-  private String trackingReportPath  = "/applications/tracking-sample/reports";
-
   @Parameter(names = "--generator-num-of-chunk", description = "Generator num of chunk")
   private int generatorNumOfChunks          = 10;
   
@@ -125,10 +122,8 @@ public class TrackingLauncher  extends SubCommand {
     
     if("hdfs".equalsIgnoreCase(dataflowStorage)) {
       dflBuilder.setHDFSAggregateOutput();
-      dflBuilder.getTrackingConfig().setHDFSAggregateLocation("/storage/hdfs/tracking-aggregate");
+      dflBuilder.getTrackingConfig().setHDFSStorageDir("/storage/hdfs/tracking-aggregate");
     }
-    
-    dflBuilder.getTrackingConfig().setReportPath(trackingReportPath);
     
     dflBuilder.getTrackingConfig().setGeneratorNumOfWriter(generatorNumOfWriter);
     dflBuilder.getTrackingConfig().setGeneratorBreakInPeriod(generatorBreakInPeriod);

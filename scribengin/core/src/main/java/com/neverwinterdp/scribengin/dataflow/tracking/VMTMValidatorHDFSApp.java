@@ -36,12 +36,11 @@ public class VMTMValidatorHDFSApp extends VMApp {
     Registry registry = getVM().getVMRegistry().getRegistry();
     registry.setRetryable(true);
     
-    logger.info("reportPath = "            + trackingConfig.getReportPath());
+    logger.info("reportPath = "            + trackingConfig.getTrackingReportPath());
     logger.info("maxRuntime = "            + trackingConfig.getValidatorMaxRuntime());
-    logger.info("storage registry path = " + trackingConfig.getHDFSAggregateRegistryPath());
     
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, trackingConfig);
-    validatorService.addReader(new HDFSTrackingMessageReader(registry, trackingConfig.getHDFSAggregateRegistryPath()));
+    validatorService.addReader(new HDFSTrackingMessageReader(registry));
     validatorService.start();
     validatorService.awaitForTermination(trackingConfig.getValidatorMaxRuntime(), TimeUnit.MILLISECONDS);
   }
@@ -50,8 +49,8 @@ public class VMTMValidatorHDFSApp extends VMApp {
     private BlockingQueue<TrackingMessage> tmQueue = new LinkedBlockingQueue<>(10000);
     private HDFSSourceReader hdfsSourceReader ;
     
-    HDFSTrackingMessageReader(Registry registry, String storageRegPath) {
-      hdfsSourceReader = new HDFSSourceReader(registry, storageRegPath, tmQueue) ;
+    HDFSTrackingMessageReader(Registry registry) {
+      hdfsSourceReader = new HDFSSourceReader(registry, tmQueue) ;
     }
     
     public void onInit(TrackingRegistry registry) throws Exception {
@@ -73,9 +72,9 @@ public class VMTMValidatorHDFSApp extends VMApp {
     private HDFSStorageConfig              storageConfig;
     private BlockingQueue<TrackingMessage> tmQueue;
 
-    HDFSSourceReader(Registry registry, String registryPath, BlockingQueue<TrackingMessage> tmQueue) {
+    HDFSSourceReader(Registry registry, BlockingQueue<TrackingMessage> tmQueue) {
       this.registry = registry;
-      storageConfig = new HDFSStorageConfig("hdfs", registryPath, "");
+      storageConfig = new HDFSStorageConfig("aggregate", null);
       this.tmQueue = tmQueue;
     }
     

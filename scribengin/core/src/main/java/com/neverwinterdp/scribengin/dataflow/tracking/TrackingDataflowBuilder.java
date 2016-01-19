@@ -32,7 +32,8 @@ public class TrackingDataflowBuilder {
     this.dataflowId = dataflowId;
   
     trackingConfig = new TrackingConfig();
-    trackingConfig.setReportPath("/applications/tracking-sample/reports");
+    String dataflowPath = DataflowRegistry.getDataflowPath(dataflowId);
+    trackingConfig.setTrackingReportPath(dataflowPath + "/tracking-reports");
     trackingConfig.setMessageSize(512);
     trackingConfig.setNumOfChunk(10);
     trackingConfig.setNumOfMessagePerChunk(1000);
@@ -47,8 +48,7 @@ public class TrackingDataflowBuilder {
     trackingConfig.setKafkaNumOfReplication(1);
     trackingConfig.setKafkaNumOfPartition(5);
     
-    trackingConfig.setHDFSAggregateRegistryPath("/storage/hdfs/tracking-aggregate");
-    trackingConfig.setHDFSAggregateLocation("build/working/storage/hdfs/tracking-aggregate");
+    trackingConfig.setHDFSStorageDir("/storage/hdfs");
   }
   
   public String getDataflowId() { return this.dataflowId; }
@@ -114,7 +114,7 @@ public class TrackingDataflowBuilder {
     DataSet<TrackingMessage> aggregateDs = null;
     if(outputType == OutputType.hdfs) {
       aggregateDs = 
-        dfl.createOutput(new HDFSStorageConfig("aggregate", trackingConfig.getHDFSAggregateRegistryPath(), trackingConfig.getHDFSAggregateLocation()));
+        dfl.createOutput(new HDFSStorageConfig("aggregate", trackingConfig.getHDFSStorageDir()));
     } else {
       aggregateDs = 
         dfl.createOutput(new KafkaStorageConfig("aggregate", trackingConfig.getKafkaZKConnects(), trackingConfig.getKafkaValidateTopic()));
@@ -179,7 +179,7 @@ public class TrackingDataflowBuilder {
       TrackingWindowReport report = dflRegistry.getMessageTrackingRegistry().getReport();
       shell.execute(
         "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
-        "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + trackingConfig.getReportPath()
+        "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + trackingConfig.getTrackingReportPath()
       );
       
       System.err.println(
@@ -199,12 +199,12 @@ public class TrackingDataflowBuilder {
     Thread.sleep(10000);
     shell.execute(
       "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
-      "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + trackingConfig.getReportPath()
+      "  --dataflow-id " + dataflowId + " --show-history-workers  --report-path " + trackingConfig.getTrackingReportPath()
     );
     
     shell.execute(
       "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingJUnitShellPlugin" +
-      "  --dataflow-id " + dataflowId + "  --report-path " + trackingConfig.getReportPath() + " --junit-report-file build/junit-report.xml"
+      "  --dataflow-id " + dataflowId + "  --report-path " + trackingConfig.getTrackingReportPath() + " --junit-report-file build/junit-report.xml"
     );
   }
 }

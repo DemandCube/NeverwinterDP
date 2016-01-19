@@ -15,12 +15,14 @@ import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.client.VMSubmitter;
 
 public class HDFSTaggingUnitTest  {
+  final static String BASE_DIR = "build/working";
+  
   LocalScribenginCluster localScribenginCluster ;
   ScribenginShell shell;
   
   @Before
   public void setup() throws Exception {
-    String BASE_DIR = "build/working";
+    
     System.setProperty("app.home", BASE_DIR + "/scribengin");
     System.setProperty("vm.app.dir", BASE_DIR + "/scribengin");
     
@@ -42,6 +44,7 @@ public class HDFSTaggingUnitTest  {
     String dfsAppHome = "";
     
     TrackingDataflowBuilder dflBuilder = new TrackingDataflowBuilder("tracking");
+    dflBuilder.getTrackingConfig().setHDFSStorageDir(BASE_DIR + "/storage/hdfs"); 
     dflBuilder.setHDFSAggregateOutput();
     
     VMConfig vmGeneratorConfig = dflBuilder.buildVMTMGeneratorKafka();

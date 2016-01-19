@@ -92,7 +92,7 @@ public class ExampleHdfsDataflowSubmitterTest {
     //We'll use some basic HDFS classes to do the reading, so we'll configure our local HDFS FS here
     Path path = new Path(eds.getHDFSLocation());
     FileSystem fs = FileSystem.get(path.toUri(), new Configuration());
-    int numEntries = readDirsRecursive(fs, eds.getHDFSRegistryPath(), eds.getHDFSLocation());
+    int numEntries = readDirsRecursive(fs, eds.getHDFSLocation());
     fs.close();
     
     //Make sure all the messages were written
@@ -110,11 +110,11 @@ public class ExampleHdfsDataflowSubmitterTest {
    * @return count of records in HDFS
    * @throws Exception
    */
-  private int readDirsRecursive(FileSystem fs, String registryPath, String hdfsPath) throws Exception{
+  private int readDirsRecursive(FileSystem fs, String hdfsPath) throws Exception{
     int count = 0;
     
     //Configure our HDFS storage object
-    HDFSStorageConfig storageConfig = new HDFSStorageConfig("test", registryPath, hdfsPath);
+    HDFSStorageConfig storageConfig = new HDFSStorageConfig("test", hdfsPath);
     HDFSStorage storage = new HDFSStorage(registry, fs, storageConfig);
     
     //Get our source object from the storage object

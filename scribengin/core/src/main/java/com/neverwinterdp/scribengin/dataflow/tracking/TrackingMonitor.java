@@ -3,6 +3,7 @@ package com.neverwinterdp.scribengin.dataflow.tracking;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
+import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.vm.client.shell.CommandInput;
 import com.neverwinterdp.vm.client.shell.Shell;
@@ -11,9 +12,6 @@ import com.neverwinterdp.vm.client.shell.SubCommand;
 public class TrackingMonitor extends SubCommand {
   @Parameter(names = "--dataflow-id", required=true, description = "The dataflow id")
   private String dataflowId ;
-  
-  @Parameter(names = "--report-path", required=true, description = "The report path in the registry")
-  private String reportPath ;
   
   @Parameter(names = "--show-history-vm", description = "Show the history dataflow worker")
   boolean historyWorkers = false;
@@ -27,8 +25,9 @@ public class TrackingMonitor extends SubCommand {
   @Override
   public void execute(Shell shell, CommandInput cmdInput) throws Exception {
     ScribenginShell scribenginShell = (ScribenginShell) shell;
+    String dataflowPath = DataflowRegistry.getDataflowPath(dataflowId);
     TrackingRegistry trackingRegistry = 
-      new TrackingRegistry(scribenginShell.getVMClient().getRegistry(), reportPath, false);
+      new TrackingRegistry(scribenginShell.getVMClient().getRegistry(), dataflowPath + "/tracking-reports", false);
     
     if(maxRuntime <= 0) {
       report(scribenginShell, trackingRegistry);

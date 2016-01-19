@@ -46,7 +46,7 @@ public class VMTMValidatorSimpleHDFSApp extends VMApp {
     String hdfsLocation        = vmConfig.getProperty("hdfs.location", "/tracking-sample/hdfs/aggregate");
     long   partitionRollPeriod = vmConfig.getPropertyAsLong("hdfs.partition-roll-period", (15 * 60 * 1000));
     
-    logger.info("reportPath = "          + trackingConfig.getReportPath());
+    logger.info("reportPath = "          + trackingConfig.getTrackingReportPath());
     logger.info("numOfReader = "         + numOfReader);
     logger.info("maxRuntime = "          + maxRuntime);
     logger.info("hdfsLocation = "        + hdfsLocation);

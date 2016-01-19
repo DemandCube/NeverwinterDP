@@ -11,12 +11,6 @@ public class HDFSDataSet<T> extends DataSet<T>{
     this.hdfsStorageConfig = hdfsStorageConfig;
   }
   
-  public HDFSDataSet(String name, DataStreamType type, String registryPath, String location) {
-    super(name, type);
-    hdfsStorageConfig = new HDFSStorageConfig(name, registryPath, location);
-    hdfsStorageConfig.setName(name);
-  }
-
   @Override
   protected StorageConfig createStorageConfig() { 
     return new HDFSStorageConfig(hdfsStorageConfig); 

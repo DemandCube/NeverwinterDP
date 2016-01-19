@@ -41,7 +41,7 @@ public class VMTMValidatorKafkaApp extends VMApp {
     validatorService.addReader(new KafkaTrackingMessageReader(trackingConfig));
     validatorService.start();
     
-    logger.info("reportPath         = " + trackingConfig.getReportPath());
+    logger.info("reportPath         = " + trackingConfig.getTrackingReportPath());
     logger.info("maxRuntime         = " + trackingConfig.getValidatorMaxRuntime());
     logger.info("maxMessageWaitTime = " + trackingConfig.getKafkaMessageWaitTimeout());
     logger.info("validate topic     = " + trackingConfig.getKafkaValidateTopic());

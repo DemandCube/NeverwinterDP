@@ -4,7 +4,7 @@ import com.neverwinterdp.vm.VMAppConfig;
 
 @SuppressWarnings("serial")
 public class TrackingConfig extends VMAppConfig {
-  final static public String REPORT_PATH                = "tracking.report-path";
+  final static public String TRACKING_REPORT_PATH                = "tracking.report-path";
   final static public String MESSAGE_SIZE               = "tracking.message-size";
   final static public String NUM_OF_CHUNK               = "tracking.num-of-chunk";
   final static public String NUM_OF_MESSAGE_PER_CHUNK   = "tracking.num-of-message-per-chunk";
@@ -22,17 +22,14 @@ public class TrackingConfig extends VMAppConfig {
   final static public String KAFKA_NUM_OF_REPLICATION   = "kafka.replication";
   final static public String KAFKA_MESSAGE_WAIT_TIMEOUT = "kafka.message-wait-timeout";
   
-  final static public String HDFS_AGGREGATE_REGISTTRY_PATH = "hdfs.aggregate.registry-path";
-  final static public String HDFS_AGGREGATE_LOCATION       = "hdfs.aggregate.location";
+  final static public String HDFS_STORAGE_DIR           = "hdfs.storage.dir";
   
   public TrackingConfig() {
-    setReportPath("/applications/tracking-message");
     setGeneratorNumOfWriter(1);
   }
   
-  public String getReportPath() { return attribute(REPORT_PATH); }
-  public void   setReportPath(String path) { attribute(REPORT_PATH, path); }
-
+  public String getTrackingReportPath() { return attribute(TRACKING_REPORT_PATH); }
+  public void   setTrackingReportPath(String path) { attribute(TRACKING_REPORT_PATH, path); }
   
   public int getMessageSize() { return intAttribute(MESSAGE_SIZE, 512); }
   public void setMessageSize(int size) { attribute(MESSAGE_SIZE, size); }
@@ -73,9 +70,6 @@ public class TrackingConfig extends VMAppConfig {
   public long getKafkaMessageWaitTimeout() { return longAttribute(KAFKA_MESSAGE_WAIT_TIMEOUT, 30000); }
   public void setKafkaMessageWaitTimeout(long timeout) { attribute(KAFKA_MESSAGE_WAIT_TIMEOUT, timeout); }
 
-  public String getHDFSAggregateRegistryPath() { return attribute(HDFS_AGGREGATE_REGISTTRY_PATH); }
-  public void setHDFSAggregateRegistryPath(String path) { attribute(HDFS_AGGREGATE_REGISTTRY_PATH, path); }
-  
-  public String getHDFSAggregateLocation() { return attribute(HDFS_AGGREGATE_LOCATION); }
-  public void   setHDFSAggregateLocation(String location) { attribute(HDFS_AGGREGATE_LOCATION, location); }
+  public String getHDFSStorageDir() { return attribute(HDFS_STORAGE_DIR); }
+  public void   setHDFSStorageDir(String dir) { attribute(HDFS_STORAGE_DIR, dir); }
 }

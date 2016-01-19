@@ -1,5 +1,6 @@
 package com.neverwinterdp.scribengin.dataflow.registry;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,13 +22,11 @@ import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.runtime.master.DataflowMasterRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerRuntimeReport;
-import com.neverwinterdp.scribengin.dataflow.tracking.TrackingRegistry;
 import com.neverwinterdp.vm.VMDescriptor;
 
 @Singleton
 public class DataflowRegistry {
   final static public String SCRIBENGIN_PATH       = "/scribengin";
-  final static public String DATAFLOWS_PATH        = SCRIBENGIN_PATH + "/dataflows";
   final static public String DATAFLOW_ALL_PATH     = SCRIBENGIN_PATH + "/dataflows/all";
   final static public String DATAFLOW_ACTIVE_PATH  = SCRIBENGIN_PATH + "/dataflows/active";
   final static public String DATAFLOW_HISTORY_PATH = SCRIBENGIN_PATH + "/dataflows/history";
@@ -66,25 +65,24 @@ public class DataflowRegistry {
   }
   
   
-  public DataflowRegistry(Registry registry, DataflowDescriptor config) throws RegistryException {
+  public DataflowRegistry(Registry registry, DataflowDescriptor descriptor) throws RegistryException {
     this.registry = registry;
-    dataflowPath = DATAFLOW_ALL_PATH + "/" + config.getId();
+    dataflowPath = DATAFLOW_ALL_PATH + "/" + descriptor.getId();
     init();
-
-    if(!registry.exists(dataflowPath)) {
+    
+    if(!registry.exists(dataflowPath + "/" + REGISTRY_STATUS)) {
       Node dataflowNode = registry.createIfNotExist(dataflowPath);
       Transaction transaction = registry.getTransaction();
       transaction.createChild(dataflowNode, REGISTRY_STATUS, RegistryStatus.Create, NodeCreateMode.PERSISTENT);
       transaction.createChild(dataflowNode, DATAFLOW_STATUS, DataflowLifecycleStatus.CREATE, NodeCreateMode.PERSISTENT);
-      transaction.createChild(dataflowNode, "config", config, NodeCreateMode.PERSISTENT);
+      transaction.createChild(dataflowNode, "config", descriptor, NodeCreateMode.PERSISTENT);
       configRegistry.create(transaction);
       streamRegistry.create(transaction);
       operatorRegistry.create(transaction);
       masterRegistry.create(transaction);
       workerRegistry.create(transaction);
       
-      String idTrackerPath = dataflowPath +  "/id-tracker"  ;
-      transaction.create(idTrackerPath, new byte[0], NodeCreateMode.PERSISTENT);
+      transaction.create(dataflowPath +  "/id-tracker", new byte[0], NodeCreateMode.PERSISTENT);
       masterIdTracker.initRegistry(transaction);
       workerIdTracker.initRegistry(transaction);
       transaction.commit();
@@ -198,6 +196,8 @@ public class DataflowRegistry {
   public Notifier getDataflowTaskNotifier() { return this.dataflowTaskNotifier ; }
   
   public Notifier getDataflowWorkerNotifier() { return this.dataflowWorkerNotifier ; }
+  
+  static public String getDataflowPath(String dataflowId) { return DATAFLOW_ALL_PATH + "/" + dataflowId; }
   
   static  public DataflowLifecycleStatus getDataflowStatus(Registry registry, String dataflowPath) throws RegistryException {
     return registry.getDataAs(dataflowPath + "/" + DATAFLOW_STATUS , DataflowLifecycleStatus.class) ;

@@ -51,7 +51,7 @@ public class VMTMValidatorS3App extends VMApp {
     String s3StoragePath       = vmConfig.getProperty("s3.storage.path", "tracking-sample");
     long   partitionRollPeriod = vmConfig.getPropertyAsLong("s3.partition-roll-period", (15 * 60 * 1000));
     
-    logger.info("reportPath = "          + trackingConfig.getReportPath());
+    logger.info("reportPath = "          + trackingConfig.getTrackingReportPath());
     logger.info("numOfReader = "         + numOfReader);
     logger.info("maxRuntime = "          + maxRuntime);
     logger.info("s3.bucket.name  = "     + s3BucketName);

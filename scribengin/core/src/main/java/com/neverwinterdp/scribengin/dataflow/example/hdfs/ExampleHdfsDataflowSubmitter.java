@@ -17,18 +17,17 @@ import com.neverwinterdp.util.JSONSerializer;
 
 public class ExampleHdfsDataflowSubmitter {
   private String dataflowID;
-  private int defaultReplication;
-  private int defaultParallelism;
-  
+  private int    defaultReplication;
+  private int    defaultParallelism;
+
   private int numOfWorker;
   private int numOfExecutorPerWorker;
-  
+
   private String inputTopic;
-  
-  private String HDFSRegistryPath;
-  private String HDFSLocation;
-  
-  private ScribenginShell shell;
+
+  private String hdfsLocation;
+
+  private ScribenginShell   shell;
   private DataflowSubmitter submitter;
   
   public ExampleHdfsDataflowSubmitter(ScribenginShell shell){
@@ -60,12 +59,8 @@ public class ExampleHdfsDataflowSubmitter {
     //The kafka input topic
     inputTopic = props.getProperty("dataflow.inputTopic", "input.topic");
     
-    //Where in the registry to store HDFS info (Not suggested to change this)
-    HDFSRegistryPath = props.getProperty("dataflow.hdfsRegistryPath", "/storage/hdfs/output");
-    
     //Where in HDFS to store our data
-    HDFSLocation = props.getProperty("dataflow.hdfsLocation", "build/working/storage/hdfs/output");
-    
+    hdfsLocation = props.getProperty("dataflow.hdfsLocation", "build/working/storage/hdfs/output");
   }
   
   /**
@@ -121,7 +116,7 @@ public class ExampleHdfsDataflowSubmitter {
     //"output" - the dataset's name
     //HDFSRegistryPath - where in the registry to HDFS config
     //HDFSLocation - the path in HDFS to put our data
-    DataSet<Message> outputDs = dfl.createOutput(new HDFSStorageConfig("output", HDFSRegistryPath, HDFSLocation));
+    DataSet<Message> outputDs = dfl.createOutput(new HDFSStorageConfig("output", hdfsLocation));
     
     //Define which operator to use.  
     //This will be the logic that ties the input to the output
@@ -201,20 +196,12 @@ public class ExampleHdfsDataflowSubmitter {
     this.submitter = submitter;
   }
   
-  public String getHDFSRegistryPath() {
-    return HDFSRegistryPath;
-  }
-
-  public void setHDFSRegistryPath(String hDFSRegistryPath) {
-    HDFSRegistryPath = hDFSRegistryPath;
-  }
-
   public String getHDFSLocation() {
-    return HDFSLocation;
+    return hdfsLocation;
   }
 
   public void setHDFSLocation(String hDFSLocation) {
-    HDFSLocation = hDFSLocation;
+    hdfsLocation = hDFSLocation;
   }
 
 }

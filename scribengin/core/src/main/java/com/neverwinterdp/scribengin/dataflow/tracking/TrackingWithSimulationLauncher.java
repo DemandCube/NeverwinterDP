@@ -213,7 +213,7 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     shell.execute(
         "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
         "  --dataflow-id " + dflBuilder.getDataflowId()  +  
-        " --report-path " + dflBuilder.getTrackingConfig().getReportPath() //+ " --show-history-vm "
+        " --report-path " + dflBuilder.getTrackingConfig().getTrackingReportPath() //+ " --show-history-vm "
     );
     shell.console().println(SimulationLog.toFormattedText(simulationLogs));
   }

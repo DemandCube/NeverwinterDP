@@ -20,7 +20,7 @@ public class TrackingValidatorService {
   private UpdateReportThread updateReportThread;
   
   public TrackingValidatorService(Registry registry, TrackingConfig trackingConfig) throws RegistryException {
-    trackingRegistry = new TrackingRegistry(registry, trackingConfig.getReportPath(), true);
+    trackingRegistry = new TrackingRegistry(registry, trackingConfig.getTrackingReportPath(), true);
     expectNumOfMessagePerChunk = trackingConfig.getNumOfMessagePerChunk();
   }
   
