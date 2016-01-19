@@ -22,7 +22,7 @@ import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.zookeeper.tool.server.EmbededZKServerSet;
 
-public class HDFSStorageUnitTest {
+public class HDFSStorageTaggingUnitTest {
   final static public String WORKING_DIR  = "build/working";
   final static public String HDFS_DIR     = WORKING_DIR + "/hdfs";
   

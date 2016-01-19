@@ -11,6 +11,8 @@ import com.neverwinterdp.storage.hdfs.sink.HDFSSink;
 import com.neverwinterdp.storage.hdfs.source.HDFSSource;
 
 public class HDFSStorage extends Storage {
+  final static public String HDFS_REGISTRY = "/storage/hdfs";
+  
   private HDFSStorageRegistry storageRegistry;
   private FileSystem          fs;
 

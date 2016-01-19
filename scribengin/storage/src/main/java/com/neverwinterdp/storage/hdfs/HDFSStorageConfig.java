@@ -17,11 +17,11 @@ public class HDFSStorageConfig extends StorageConfig {
     putAll(config);
   }
   
-  public HDFSStorageConfig(String name, String registryPath, String location) { 
+  public HDFSStorageConfig(String name, String storageDir) { 
     setType("hdfs");
     setName(name);
-    setRegistryPath(registryPath);
-    setLocation(location);
+    setRegistryPath(HDFSStorage.HDFS_REGISTRY + "/" + name);
+    setLocation(storageDir + "/" + name);
   }
   
   public String getName() { return attribute(NAME); }

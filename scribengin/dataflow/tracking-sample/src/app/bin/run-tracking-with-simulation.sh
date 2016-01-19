@@ -14,7 +14,6 @@ JAVACMD=$JAVA_HOME/bin/java
 SHELL=$NEVERWINTERDP_BUILD_DIR/scribengin/bin/shell.sh
 
 DFS_APP_HOME="/applications/tracking-sample"
-TRACKING_REPORT_PATH="/applications/tracking-sample/reports"
 
 $SHELL plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingWithSimulationLauncher \
-  --dfs-app-home $DFS_APP_HOME --local-app-home $APP_DIR --tracking-report-path $TRACKING_REPORT_PATH --dataflow-id tracking $@ 
+  --dfs-app-home $DFS_APP_HOME --local-app-home $APP_DIR --dataflow-id tracking $@ 
