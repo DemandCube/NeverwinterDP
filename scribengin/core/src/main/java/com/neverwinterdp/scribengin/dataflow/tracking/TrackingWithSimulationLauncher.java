@@ -145,15 +145,13 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
   public void killLeaderMaster(DataflowClient dflClient, String dataflowId) throws Exception {
     System.err.println("Kill Leader Master");
     SimulationLog log = new SimulationLog("kill-dataflow-master");
-    
+    VMDescriptor masterVMDescriptor = dflClient.getDataflowRegistry().getMasterRegistry().getLeaderVMDescriptor();
     if(simulateKill) {
-      TXEvent killEvent = new TXEvent("SimulateKillMaster", DataflowEvent.SimulateKillMaster);
-      dflClient.getDataflowRegistry().getMasterRegistry().getMasterEventBroadcaster().broadcast(killEvent);
+      dflClient.getScribenginClient().getVMClient().simulateKill(masterVMDescriptor);
     } else {
-      VMDescriptor masterVMDescriptor = dflClient.getDataflowRegistry().getMasterRegistry().getLeaderVMDescriptor();
-      log.setDescription("Kill the leader master " + masterVMDescriptor.getVmId());
       dflClient.getScribenginClient().getVMClient().kill(masterVMDescriptor, 90000);
     }
+    log.setDescription("Kill the leader master " + masterVMDescriptor.getVmId());
     log.setFinishedTime(System.currentTimeMillis());
     simulationLogs.add(log);
   }
@@ -174,8 +172,7 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     //randomize the vm list
     Collections.shuffle(allVMs, new Random());
     if(simulateKill) {
-      TXEvent killMasterEvent = new TXEvent("SimulateKillMaster", DataflowEvent.SimulateKillMaster);
-      dflClient.getDataflowRegistry().getMasterRegistry().getMasterEventBroadcaster().broadcast(killMasterEvent);
+
       for(VMDescriptor sel : allVMs) {
         vmClient.simulateKill(sel);
       }

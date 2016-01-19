@@ -14,7 +14,7 @@ import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.client.VMSubmitter;
 
-public class HDFSTrackingExperimentTest  {
+public class HDFSTrackingUnitTest  {
   LocalScribenginCluster localScribenginCluster ;
   ScribenginShell shell;
   

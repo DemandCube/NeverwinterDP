@@ -161,9 +161,6 @@ public class MasterService {
       if(taskEvent == DataflowEvent.Stop) {
         stop();
         logger.info("Dataflow Master detect the stop event!");
-      } else if(taskEvent == DataflowEvent.SimulateKillMaster) {
-        simulateKill();
-        logger.info("Dataflow Master detect the stop event!");
       }
       notify(txEvent, TXEventNotification.Status.Complete);
     }

@@ -21,7 +21,7 @@ public class VMMasterApp extends VMApp {
   private Logger              logger;
   private String              dataflowRegistryPath;
   private LeaderElection      election;
-  private MasterService       dataflowService;
+  private MasterService       masterService;
   private ServiceRunnerThread serviceRunnerThread;
 
   @Override
@@ -71,8 +71,27 @@ public class VMMasterApp extends VMApp {
 
         RefNode leaderRefNode = new RefNode(getVM().getDescriptor().getRegistryPath());
         registry.setData(dataflowRegistryPath + "/master/leader", leaderRefNode);
-        dataflowService = dataflowServiceModuleContainer.getInstance(MasterService.class);
-        serviceRunnerThread = new ServiceRunnerThread(dataflowService);
+        masterService = dataflowServiceModuleContainer.getInstance(MasterService.class);
+        
+        addListener(new VMApp.VMAppTerminateEventListener() {
+          @Override
+          public void onEvent(VMApp vmApp, TerminateEvent terminateEvent) {
+            try {
+              if(terminateEvent == TerminateEvent.SimulateKill) {
+                logger.info("Execute the simulate kill event");
+                masterService.simulateKill();
+              } else if(terminateEvent == TerminateEvent.Kill) {
+                logger.info("Execute the kill event with Runtime.getRuntime().halt(0)");
+                Runtime.getRuntime().halt(0);
+              }
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          }
+        });
+        
+        
+        serviceRunnerThread = new ServiceRunnerThread(masterService);
         serviceRunnerThread.start();
       } catch(Exception e) {
         e.printStackTrace();
