@@ -109,8 +109,8 @@ public class VMTMValidatorHDFSApp extends VMApp {
       
       validatorService.shutdown();
       while(!validatorService.awaitTermination(3, TimeUnit.MINUTES)) {
-        partition.doManagement();
-        partition.deleteReadDataByActiveReader();
+        storage.doManagement();
+        storage.cleanReadDataByActiveReader();
       }
     }
   }

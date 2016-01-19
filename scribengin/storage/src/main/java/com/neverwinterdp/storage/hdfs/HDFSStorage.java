@@ -1,10 +1,14 @@
 package com.neverwinterdp.storage.hdfs;
 
+import java.io.IOException;
+
 import org.apache.hadoop.fs.FileSystem;
 
 import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.ssm.SSMRegistry;
+import com.neverwinterdp.ssm.hdfs.HdfsSSM;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.hdfs.sink.HDFSSink;
@@ -54,5 +58,31 @@ public class HDFSStorage extends Storage {
   @Override
   public HDFSSource getSource() throws Exception {
     return new HDFSSource(storageRegistry, fs);
+  }
+  
+  public HdfsSSM[] getPartitions() throws RegistryException, IOException {
+    StorageConfig sConfig = getStorageConfig();
+    int numOfPartitionStream = sConfig.getPartitionStream();
+    HdfsSSM[] partitions = new HdfsSSM[numOfPartitionStream];
+    for(int i = 0; i < numOfPartitionStream; i++) {
+      String pLocation = sConfig.getLocation() + "/partition-" + i;
+      SSMRegistry pRegistry = storageRegistry.getPartitionRegistry(i);
+      partitions[i] = new HdfsSSM(fs, pLocation, pRegistry);
+    }
+    return partitions;
+  }
+  
+  public void cleanReadDataByActiveReader() throws Exception {
+    HdfsSSM[] streams = getPartitions() ;
+    for(HdfsSSM sel : streams) {
+      sel.cleanReadSegmentByActiveReader();
+    }
+  }
+  
+  public void doManagement() throws RegistryException, IOException {
+    HdfsSSM[] streams = getPartitions() ;
+    for(HdfsSSM sel : streams) {
+      sel.doManagement();
+    }
   }
 }

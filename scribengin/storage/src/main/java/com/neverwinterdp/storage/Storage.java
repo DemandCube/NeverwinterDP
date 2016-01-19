@@ -10,7 +10,7 @@ abstract public class Storage {
     this.storageConfig = storageDescriptor ;
   }
   
-  public StorageConfig getStorageConfig() { return this.storageConfig; }
+  public StorageConfig getStorageConfig() { return storageConfig; }
   
   abstract public void refresh() throws Exception ; 
   

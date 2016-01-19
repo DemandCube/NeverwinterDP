@@ -85,6 +85,7 @@ public class HDFSStorageTaggingUnitTest {
     
     HDFSStorageRegistry hdfsStorageRegistry = storage.getHDFSStorageRegistry();
     hdfsStorageRegistry.doManagement();
+    
     HDFSStorageTag tag100 = hdfsStorageRegistry.createTagByPosition("tag-100", "Tag at pos 100", 100);
     System.err.println(JSONSerializer.INSTANCE.toString(tag100));
   }
