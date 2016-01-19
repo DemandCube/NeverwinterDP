@@ -53,7 +53,7 @@ public class Segment<T> {
     return object ;
   }
   
-  public void append(byte[] data) throws Exception {
+  synchronized public void append(byte[] data) throws Exception {
     appender.startExcerpt();
     appender.writeInt(data.length);
     appender.write(data);
@@ -70,14 +70,14 @@ public class Segment<T> {
     ChronicleTools.deleteOnExit(storeDir + "/segment-" + segmentIndex);
   }
   
-  public void open() throws Exception {
+  synchronized public void open() throws Exception {
     if(chronicle != null) return ;
     chronicle = new IndexedChronicle(storeDir + "/segment-" + segmentIndex, SMALL) ;
     appender = chronicle.createAppender();
     reader = chronicle.createTailer() ;
   }
   
-  public void close() throws IOException {
+  synchronized public void close() throws IOException {
     if(chronicle != null) {
       appender.close();
       reader.close();
