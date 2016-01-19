@@ -1,6 +1,7 @@
 package com.neverwinterdp.scribengin.dataflow.tracking;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -166,24 +167,22 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
     String dataflowId = dflBuilder.getDataflowId();
     DataflowClient dflClient = shell.getScribenginClient().getDataflowClient(dataflowId);
     VMClient vmClient = dflClient.getScribenginClient().getVMClient();
-    List<VMDescriptor> masterVMDescriptors = dflClient.getDataflowRegistry().getMasterRegistry().getMasterVMDescriptors();
+    
+    List<VMDescriptor> allVMs = new ArrayList<>();
+    allVMs.addAll(dflClient.getDataflowRegistry().getMasterRegistry().getMasterVMDescriptors());
+    allVMs.addAll(dflClient.getActiveDataflowWorkers());
+    //randomize the vm list
+    Collections.shuffle(allVMs, new Random());
     if(simulateKill) {
       TXEvent killMasterEvent = new TXEvent("SimulateKillMaster", DataflowEvent.SimulateKillMaster);
       dflClient.getDataflowRegistry().getMasterRegistry().getMasterEventBroadcaster().broadcast(killMasterEvent);
-    } else {
-      for(VMDescriptor sel : masterVMDescriptors) {
-        boolean killed = vmClient.kill(sel, 90000);
-        System.err.println("Killed master " + sel.getVmId() + " = " + killed);
-      }
-    }
-    
-    List<VMDescriptor> activeWorkers = dflClient.getActiveDataflowWorkers();
-    for(VMDescriptor sel : activeWorkers) {
-      if(simulateKill) {
+      for(VMDescriptor sel : allVMs) {
         vmClient.simulateKill(sel);
-      } else {
+      }
+    } else {
+      for(VMDescriptor sel : allVMs) {
         boolean killed = vmClient.kill(sel, 90000);
-        System.err.println("Killed worker " + sel.getVmId() + " = " + killed);
+        System.err.println("Killed vm " + sel.getVmId() + " = " + killed);
       }
     }
     
@@ -192,25 +191,14 @@ public class TrackingWithSimulationLauncher extends TrackingLauncher {
       Thread.sleep(3000);
       allTerminated = true;
       StringBuilder b = new StringBuilder();
-      for(VMDescriptor sel : masterVMDescriptors) {
+      for(VMDescriptor sel : allVMs) {
         VMStatus vmStatus = vmClient.getVMStatus(sel.getVmId()) ;
         b.append(sel.getVmId() + "=" + vmStatus).append(", ");
         if(vmStatus.equalOrLessThan(VMStatus.RUNNING)) {
           allTerminated = false;
         }
       }
-      System.err.println("Master status: " + b.toString());
-      
-      if(!allTerminated) continue;
-      b = new StringBuilder();
-      for(VMDescriptor sel : activeWorkers) {
-        VMStatus vmStatus = dflClient.getScribenginClient().getVMClient().getVMStatus(sel.getVmId()) ;
-        b.append(sel.getVmId() + "=" + vmStatus).append(", ");
-        if(vmStatus.equalOrLessThan(VMStatus.RUNNING)) {
-          allTerminated = false;
-        }
-      }
-      System.err.println("Worker status: " + b.toString());
+      System.err.println("VM status: " + b.toString());
     }
     
     System.err.println("--------------------------------------------------------------------------------------");
