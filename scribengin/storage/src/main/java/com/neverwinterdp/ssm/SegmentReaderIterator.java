@@ -10,24 +10,11 @@ import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.ssm.SegmentReader.DataAvailability;
 
 public class SegmentReaderIterator {
-  private List<SegmentReader> allSegmentReaders;
-  private List<SegmentReader> activeSegmentReaders;
+  private List<SegmentReader> allSegmentReaders = new ArrayList<>();
+  private List<SegmentReader> activeSegmentReaders = new ArrayList<>();
   private int                 lastReadSegmentIdx = 0;
   private int                 lastAddedSegmentId = -1;
   private SegmentReader       currentReader;
-  
-  public SegmentReaderIterator() {
-    allSegmentReaders    = new ArrayList<>();
-    activeSegmentReaders = new ArrayList<>();
-  }
-  
-  public int countActiveSegmentReader() { return activeSegmentReaders.size(); }
-  
-  public SegmentDescriptor getLastSegmentDescriptor() {
-    if(allSegmentReaders.size() == 0) return null;
-    SegmentReader lastReader = allSegmentReaders.get(allSegmentReaders.size() - 1);
-    return lastReader.getSegmentDescriptor();
-  }
   
   public void add(SegmentReader segmentReader) throws IOException, RegistryException {
     int segId     = segmentReader.getSegmentDescriptor().getId();

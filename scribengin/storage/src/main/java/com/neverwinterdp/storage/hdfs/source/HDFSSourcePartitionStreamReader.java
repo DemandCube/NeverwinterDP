@@ -4,10 +4,8 @@ import java.io.IOException;
 
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.RegistryException;
-import com.neverwinterdp.ssm.SSMReader;
-import com.neverwinterdp.ssm.hdfs.HdfsSSM;
+import com.neverwinterdp.ssm.hdfs.HdfsSSMReader;
 import com.neverwinterdp.storage.PartitionStreamConfig;
-import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.source.CommitPoint;
 import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
 import com.neverwinterdp.util.JSONSerializer;
@@ -16,18 +14,14 @@ import com.neverwinterdp.util.JSONSerializer;
  * @author Tuan Nguyen
  */
 public class HDFSSourcePartitionStreamReader implements SourcePartitionStreamReader {
-  private String                       name;
-  private HdfsSSM                      partitionStorage;
-  private StorageConfig                storageConfig;
-  private PartitionStreamConfig        partitionConfig;
-  private SSMReader                    partitionReader;
+  private String                name;
+  private PartitionStreamConfig partitionConfig;
+  private HdfsSSMReader         partitionReader;
 
-  public HDFSSourcePartitionStreamReader(String name, HdfsSSM pStorage, StorageConfig sConfig, PartitionStreamConfig pConfig) throws RegistryException, IOException {
+  public HDFSSourcePartitionStreamReader(String name, HdfsSSMReader partitionReader, PartitionStreamConfig pConfig) throws RegistryException, IOException {
     this.name             = name;
-    this.partitionStorage = pStorage;
-    this.storageConfig    = sConfig;
     this.partitionConfig  = pConfig ;
-    partitionReader = pStorage.getReader(name);
+    this.partitionReader  = partitionReader;
   }
   
   @Override

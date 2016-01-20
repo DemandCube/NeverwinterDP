@@ -1,10 +1,12 @@
 package com.neverwinterdp.storage.hdfs.sink;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.fs.FileSystem;
 
+import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.ssm.SSMRegistry;
 import com.neverwinterdp.ssm.hdfs.HdfsSSM;
 import com.neverwinterdp.storage.PartitionStreamConfig;
@@ -37,7 +39,7 @@ public class HDFSSink implements Sink {
   }
 
   @Override
-  public HDFSSinkPartitionStream getPartitionStream(PartitionStreamConfig pConfig) throws Exception {
+  public HDFSSinkPartitionStream getPartitionStream(PartitionStreamConfig pConfig) throws RegistryException, IOException {
     StorageConfig sConfig = getStorageConfig();
     String pLocation = sConfig.getLocation() + "/partition-" + pConfig.getPartitionStreamId();
     SSMRegistry pRegistry = storageRegistry.getPartitionRegistry(pConfig.getPartitionStreamId());
@@ -46,13 +48,13 @@ public class HDFSSink implements Sink {
   }
 
   @Override
-  public HDFSSinkPartitionStream getPartitionStream(int partitionId) throws Exception {
+  public HDFSSinkPartitionStream getPartitionStream(int partitionId) throws RegistryException, IOException {
     PartitionStreamConfig config = new PartitionStreamConfig(partitionId, null);
     return getPartitionStream(config) ;
   }
 
   @Override
-  public HDFSSinkPartitionStream[] getPartitionStreams() throws Exception {
+  public HDFSSinkPartitionStream[] getPartitionStreams() throws RegistryException, IOException {
     StorageConfig sConfig = getStorageConfig();
     int numOfPartitionStream = sConfig.getPartitionStream();
     HDFSSinkPartitionStream[] stream = new HDFSSinkPartitionStream[numOfPartitionStream];
@@ -63,6 +65,6 @@ public class HDFSSink implements Sink {
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() throws RegistryException, IOException {
   }
 }

@@ -3,9 +3,12 @@ package com.neverwinterdp.storage.hdfs.source;
 import java.io.IOException;
 
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.ssm.SSMTagDescriptor;
 import com.neverwinterdp.ssm.hdfs.HdfsSSM;
+import com.neverwinterdp.ssm.hdfs.HdfsSSMReader;
 import com.neverwinterdp.storage.PartitionStreamConfig;
 import com.neverwinterdp.storage.StorageConfig;
+import com.neverwinterdp.storage.hdfs.HDFSStorageTag;
 import com.neverwinterdp.storage.source.SourcePartitionStream;
 
 public class HDFSSourcePartitionStream implements SourcePartitionStream {
@@ -19,18 +22,20 @@ public class HDFSSourcePartitionStream implements SourcePartitionStream {
     this.partitionConfig   = pConfig;
   }
   
+  public StorageConfig getStorageConfig() { return storageConfig; }
+  
   public PartitionStreamConfig getPartitionStreamConfig() { return partitionConfig ; }
   
   @Override
   public  HDFSSourcePartitionStreamReader getReader(String name) throws RegistryException, IOException {
-    return new HDFSSourcePartitionStreamReader(name, partitionStorage, storageConfig, partitionConfig) ;
-  }
-
-  public void doManagement() throws RegistryException, IOException {
-    partitionStorage.doManagement();
+    HdfsSSMReader hdfsSSMReader = (HdfsSSMReader) partitionStorage.getReader(name);
+    return new HDFSSourcePartitionStreamReader(name, hdfsSSMReader, partitionConfig) ;
   }
   
-  public void cleanReadDataByActiveReader() throws RegistryException, IOException {
-    partitionStorage.cleanReadSegmentByActiveReader();
+  public  HDFSSourcePartitionStreamReader getReader(String name, HDFSStorageTag tag) throws RegistryException, IOException {
+    SSMTagDescriptor pTag = tag.getPartitionTagDescriptors().get(partitionConfig.getPartitionStreamId());
+    HdfsSSMReader hdfsSSMReader = 
+        (HdfsSSMReader) partitionStorage.getReader(name, pTag.getSegmentId(), pTag.getSegmentRecordPosition());
+    return new HDFSSourcePartitionStreamReader(name, hdfsSSMReader, partitionConfig) ;
   }
 }

@@ -50,8 +50,13 @@ public class HdfsSSM extends SSM {
   }
 
   @Override
-  protected SSMReader createReader(String clientId, SSMRegistry registry) throws RegistryException, IOException {
+  protected HdfsSSMReader createReader(String clientId, SSMRegistry registry) throws RegistryException, IOException {
     return new HdfsSSMReader(clientId, registry, fs, storageLocation);
+  }
+  
+  @Override
+  protected HdfsSSMReader createReader(String clientId, SSMRegistry registry, int startFromSegmentId, long recordPos) throws RegistryException, IOException {
+    return new HdfsSSMReader(clientId, registry, fs, storageLocation, startFromSegmentId, recordPos);
   }
 
   @Override

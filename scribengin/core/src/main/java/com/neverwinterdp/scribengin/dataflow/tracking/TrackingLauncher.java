@@ -122,7 +122,6 @@ public class TrackingLauncher  extends SubCommand {
     
     if("hdfs".equalsIgnoreCase(dataflowStorage)) {
       dflBuilder.setHDFSAggregateOutput();
-      dflBuilder.getTrackingConfig().setHDFSStorageDir("/storage/hdfs/tracking-aggregate");
     }
     
     dflBuilder.getTrackingConfig().setGeneratorNumOfWriter(generatorNumOfWriter);

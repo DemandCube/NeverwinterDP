@@ -24,8 +24,15 @@ abstract public class SSM {
     return createReader(readerId, registry);
   }
   
+  public SSMReader getReader(String readerId, int startFromSegmentId, long recordPos) throws RegistryException, IOException {
+    return createReader(readerId, registry, startFromSegmentId, recordPos);
+  }
+  
   abstract protected SSMReader createReader(String clientId, SSMRegistry registry) throws RegistryException, IOException;
 
+  abstract protected SSMReader createReader(String clientId, SSMRegistry registry, int segmentId, long recordPos) throws RegistryException, IOException;
+
+  
   public void doManagement() throws RegistryException, IOException {
     registry.doManagement();
   }

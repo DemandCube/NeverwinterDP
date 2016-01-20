@@ -15,12 +15,21 @@ public class HdfsSSMReader extends SSMReader {
   private String     storageLocation;
   
   public HdfsSSMReader(String clientId, SSMRegistry registry, 
-                            FileSystem fs, String storageLoc) throws RegistryException, IOException {
+                       FileSystem fs, String storageLoc) throws RegistryException, IOException {
     this.fs              = fs;
     this.storageLocation = storageLoc;
     init(clientId, registry);
   }
+  
+  public HdfsSSMReader(String clientId, SSMRegistry registry, 
+                       FileSystem fs, String storageLoc, 
+                       int startFromSegmentId, long recordPos) throws RegistryException, IOException {
+    this.fs              = fs;
+    this.storageLocation = storageLoc;
+    init(clientId, registry, startFromSegmentId, recordPos);
+  }
 
+  
   @Override
   protected HdfsSegmentReader createSegmentReader(SegmentDescriptor segment, SegmentReadDescriptor segRead) throws RegistryException, IOException {
     return new HdfsSegmentReader(registry, readerDescriptor, segment, segRead, fs, storageLocation);

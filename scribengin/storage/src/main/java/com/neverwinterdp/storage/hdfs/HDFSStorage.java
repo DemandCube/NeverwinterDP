@@ -27,7 +27,7 @@ public class HDFSStorage extends Storage {
     setStorageConfig(storageRegistry.getStorageConfig());
   }
 
-  public HDFSStorageRegistry getHDFSStorageRegistry() { return storageRegistry; }
+  public HDFSStorageRegistry getRegistry() { return storageRegistry; }
   
   @Override
   public void refresh() throws Exception {
@@ -52,14 +52,10 @@ public class HDFSStorage extends Storage {
   }
 
   @Override
-  public HDFSSink getSink() throws Exception {
-    return new HDFSSink(storageRegistry, fs);
-  }
+  public HDFSSink getSink() throws Exception { return new HDFSSink(storageRegistry, fs); }
 
   @Override
-  public HDFSSource getSource() throws Exception {
-    return new HDFSSource(storageRegistry, fs);
-  }
+  public HDFSSource getSource() throws Exception { return new HDFSSource(storageRegistry, fs); }
   
   public HdfsSSM[] getPartitions() throws RegistryException, IOException {
     StorageConfig sConfig = getStorageConfig();

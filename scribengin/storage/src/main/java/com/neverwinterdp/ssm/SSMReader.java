@@ -3,6 +3,7 @@ package com.neverwinterdp.ssm;
 import java.io.IOException;
 import java.util.List;
 
+import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
 
@@ -31,6 +32,25 @@ abstract public class SSMReader {
         SegmentReadDescriptor segRead = registry.createSegmentReadDescriptor(readerDescriptor, segment);
         segmentReaderIterator.add(createSegmentReader(segment, segRead));
       }
+    }
+  }
+  
+  protected void init(String clientId, SSMRegistry registry, int segId, long recordPos) throws RegistryException, IOException {
+    this.registry    = registry;
+    readerDescriptor = registry.getOrCreateReader(clientId);
+    segmentReaderIterator = new SegmentReaderIterator();
+    if(readerDescriptor.getLastReadSegmentId() != null) {
+      throw new RegistryException(ErrorCode.Unknown, "Can seek to a segment position only for a new reader");
+    } else {
+      String segmentIdName = SegmentDescriptor.toSegmentId(segId);
+      SegmentDescriptor segment = registry.getSegmentBySegmentId(segmentIdName);
+      SegmentReadDescriptor segRead = registry.createSegmentReadDescriptor(readerDescriptor, segment);
+      SegmentReader segmentReader = createSegmentReader(segment, segRead);
+      int idx = 0;
+      while(idx < recordPos && segmentReader.nextRecord() != null) {
+        idx++;
+      }
+      segmentReaderIterator.add(segmentReader);
     }
   }
   
