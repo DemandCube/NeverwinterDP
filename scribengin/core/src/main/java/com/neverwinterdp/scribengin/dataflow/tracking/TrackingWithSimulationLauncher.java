@@ -22,7 +22,7 @@ import com.neverwinterdp.vm.VMDescriptor;
 import com.neverwinterdp.vm.VMStatus;
 import com.neverwinterdp.vm.client.VMClient;
 
-public class TrackingWithSimulationLauncher extends TrackingLauncher {
+public class TrackingWithSimulationLauncher extends TrackingTestLauncher {
   @Parameter(names = "--simulation-report-period", description = "")
   long simulationReportPeriod = 5000;
   

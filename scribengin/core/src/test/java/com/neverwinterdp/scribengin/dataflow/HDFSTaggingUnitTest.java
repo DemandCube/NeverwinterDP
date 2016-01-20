@@ -6,13 +6,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
+import com.neverwinterdp.scribengin.dataflow.tracking.HDFSTaggingTestLauncher;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingDataflowBuilder;
-import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessage;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
-import com.neverwinterdp.util.JSONSerializer;
-import com.neverwinterdp.vm.VMConfig;
-import com.neverwinterdp.vm.client.VMClient;
-import com.neverwinterdp.vm.client.VMSubmitter;
 
 public class HDFSTaggingUnitTest  {
   final static String BASE_DIR = "build/working";
@@ -40,25 +36,13 @@ public class HDFSTaggingUnitTest  {
   }
   @Test
   public void testTracking() throws Exception {
-    VMClient vmClient = shell.getVMClient();
-    String dfsAppHome = "";
-    
     TrackingDataflowBuilder dflBuilder = new TrackingDataflowBuilder("tracking");
     dflBuilder.getTrackingConfig().setHDFSStorageDir(BASE_DIR + "/storage/hdfs"); 
     dflBuilder.setHDFSAggregateOutput();
+    dflBuilder.setDefaultReplication(1);
     
-    VMConfig vmGeneratorConfig = dflBuilder.buildVMTMGeneratorKafka();
-    new VMSubmitter(vmClient, dfsAppHome, vmGeneratorConfig).submit().waitForRunning(30000);
-    
-    Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
-    dfl.setDefaultReplication(1);
-    DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
-    System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
-    
-    new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForDataflowRunning(60000);
-    
-    VMConfig vmValidatorConfig = dflBuilder.buildHDFSVMTMValidator();
-    new VMSubmitter(vmClient, dfsAppHome, vmValidatorConfig).submit().waitForRunning(30000);
+    HDFSTaggingTestLauncher launcher = new HDFSTaggingTestLauncher();
+    launcher.execute(shell, dflBuilder);
     
     dflBuilder.runMonitor(shell);
   }

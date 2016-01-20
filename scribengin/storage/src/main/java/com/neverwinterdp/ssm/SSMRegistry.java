@@ -337,6 +337,31 @@ public class SSMRegistry {
     return tag;
   }
   
+  public SSMTagDescriptor findTagByRecordLastPosition() throws RegistryException {
+    BatchOperations<SSMTagDescriptor> op = new BatchOperations<SSMTagDescriptor>() {
+      @Override
+      public SSMTagDescriptor execute(Registry registry) throws RegistryException {
+        List<String> segments = getSegments() ;
+        SegmentDescriptor lastCompleteSegDescriptor = null;
+        for(int i = segments.size() - 1; i >= 0; i--) {
+          String segmentIdName = segments.get(i);
+          lastCompleteSegDescriptor = segmentsNode.getChild(segmentIdName).getDataAs(SegmentDescriptor.class);
+          if(lastCompleteSegDescriptor.getStatus() == SegmentDescriptor.Status.Complete) {
+            break;
+          }
+        }
+        if(lastCompleteSegDescriptor != null) {
+          SSMTagDescriptor tag = new SSMTagDescriptor();
+          tag.setSegmentId(lastCompleteSegDescriptor.getId());
+          tag.setSegmentRecordPosition(lastCompleteSegDescriptor.getRecordTo() - lastCompleteSegDescriptor.getRecordFrom());
+          return tag;
+        }
+        return null;
+      }
+    };
+    return registry.executeBatch(op, 3, 3000);
+  }
+  
   public SSMTagDescriptor findTagByRecordPosition(final long pos) throws RegistryException {
     BatchOperations<SSMTagDescriptor> op = new BatchOperations<SSMTagDescriptor>() {
       @Override
@@ -346,10 +371,11 @@ public class SSMRegistry {
           String segmentIdName = segments.get(i);
           SegmentDescriptor segDescriptor = segmentsNode.getChild(segmentIdName).getDataAs(SegmentDescriptor.class);
           if(segDescriptor.getStatus() != SegmentDescriptor.Status.Complete) return null;
+          
           if(pos >= segDescriptor.getRecordFrom() && pos <= segDescriptor.getRecordTo()) {
             SSMTagDescriptor tag = new SSMTagDescriptor();
             tag.setSegmentId(segDescriptor.getId());
-            tag.setSegmentRecordPosition(pos);
+            tag.setSegmentRecordPosition(pos - segDescriptor.getRecordFrom());
             return tag;
           }
         }

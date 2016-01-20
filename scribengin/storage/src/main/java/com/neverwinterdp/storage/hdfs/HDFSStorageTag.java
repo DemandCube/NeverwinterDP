@@ -9,6 +9,13 @@ public class HDFSStorageTag {
   private TagDescription                 tagDescription = new TagDescription();
   private Map<Integer, SSMTagDescriptor> partitionTagDescriptors;
   
+  public HDFSStorageTag() { }
+  
+  public HDFSStorageTag(String name, String desc) {
+    tagDescription.setName(name);
+    tagDescription.setDescription(desc);
+  }
+  
   public TagDescription getTagDescription() { return tagDescription; }
   public void setTagDescription(TagDescription tagDescription) { this.tagDescription = tagDescription; }
   

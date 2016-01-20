@@ -2,6 +2,7 @@ package com.neverwinterdp.storage.hdfs;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.Node;
@@ -120,8 +121,7 @@ public class HDFSStorageRegistry {
     return tag;
   }
   
-  public HDFSStorageTag createTagByDateTime(String name, String desc, Date datetime) throws RegistryException {
-    Transaction transaction = registry.getTransaction();
+  public HDFSStorageTag findTagByDateTime(String name, String desc, Date datetime) throws RegistryException {
     HDFSStorageTag tag = new HDFSStorageTag();
     tag.getTagDescription().setName(name);
     tag.getTagDescription().setDescription(desc);
@@ -132,18 +132,38 @@ public class HDFSStorageRegistry {
       partitionTag.setName(name);
       partitionTag.setDescription(desc);
       tag.add(i, partitionTag);
+    }
+    return tag;
+  }
+  
+  public void createTag(HDFSStorageTag tag) throws RegistryException {
+    Transaction transaction = registry.getTransaction();
+    Map<Integer, SSMTagDescriptor> ssmTags = tag.getPartitionTagDescriptors();
+    for(Map.Entry<Integer, SSMTagDescriptor>  entry : ssmTags.entrySet()) {
+      int partitionId = entry.getKey();
+      SSMTagDescriptor partitionTag = entry.getValue();
+      SSMRegistry ssmRegistry = getPartitionRegistry(partitionId);
       ssmRegistry.createTag(transaction, partitionTag);
     }
     transaction.createChild(tagsNode, tag.getTagDescription().getName(), tag.getTagDescription(), NodeCreateMode.PERSISTENT);
     transaction.commit();
+  }
+  
+  public HDFSStorageTag getTagByRecordLastPosition(String name, String desc) throws RegistryException {
+    HDFSStorageTag tag = new HDFSStorageTag(name, desc);
+    int numOfPartitions = storageConfig.getPartitionStream();
+    for(int i = 0; i < numOfPartitions; i++) {
+      SSMRegistry ssmRegistry = getPartitionRegistry(i);
+      SSMTagDescriptor partitionTag = ssmRegistry.findTagByRecordLastPosition();
+      partitionTag.setName(name);
+      partitionTag.setDescription(desc);
+      tag.add(i, partitionTag);
+    }
     return tag;
   }
   
-  public HDFSStorageTag createTagByPosition(String name, String desc, long pos) throws RegistryException {
-    Transaction transaction = registry.getTransaction();
-    HDFSStorageTag tag = new HDFSStorageTag();
-    tag.getTagDescription().setName(name);
-    tag.getTagDescription().setDescription(desc);
+  public HDFSStorageTag findTagByPosition(String name, String desc, long pos) throws RegistryException {
+    HDFSStorageTag tag = new HDFSStorageTag(name, desc);
     int numOfPartitions = storageConfig.getPartitionStream();
     for(int i = 0; i < numOfPartitions; i++) {
       SSMRegistry ssmRegistry = getPartitionRegistry(i);
@@ -151,10 +171,7 @@ public class HDFSStorageRegistry {
       partitionTag.setName(name);
       partitionTag.setDescription(desc);
       tag.add(i, partitionTag);
-      ssmRegistry.createTag(transaction, partitionTag);
     }
-    transaction.createChild(tagsNode, tag.getTagDescription().getName(), tag.getTagDescription(), NodeCreateMode.PERSISTENT);
-    transaction.commit();
     return tag;
   }
   

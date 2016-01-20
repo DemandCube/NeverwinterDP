@@ -29,13 +29,18 @@ public class VMTMValidatorKafkaApp extends VMApp {
   @Override
   public void run() throws Exception {
     logger =  getVM().getLoggerFactory().getLogger(VMTMValidatorKafkaApp.class) ;
-    logger.info("Start run()");
+    
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
+
     TrackingConfig trackingConfig = vmConfig.getVMAppConfigAs(TrackingConfig.class);
     Registry registry = getVM().getVMRegistry().getRegistry();
     registry.setRetryable(true);
-    
+    runValidate(registry, trackingConfig);
+  }
+
+  public void runValidate(Registry registry, TrackingConfig trackingConfig) throws Exception {
+    logger.info("Start runValidate(...)");
     kafkaClient = new KafkaClient("KafkaClient", trackingConfig.getKafkaZKConnects());
     TrackingValidatorService validatorService = new TrackingValidatorService(registry, trackingConfig);
     validatorService.addReader(new KafkaTrackingMessageReader(trackingConfig));
@@ -50,9 +55,14 @@ public class VMTMValidatorKafkaApp extends VMApp {
     kafkaClient.close();
     long waitTime = System.currentTimeMillis() - startWait;
     System.err.println("VMTMValidatorKafkaApp: Finish run(), waitTime = " + waitTime);
-    logger.info("Finish run()");
+    logger.info("Finish runValidate(...)");
   }
-
+  
+  void info(String message) {
+    if(logger != null) logger.info(message);
+    else System.out.println("VMTMValidatorKafkaApp: " + message);
+  }
+  
   public class KafkaTrackingMessageReader extends TrackingMessageReader {
     private BlockingQueue<TrackingMessage> queue = new LinkedBlockingQueue<>(5000);
     

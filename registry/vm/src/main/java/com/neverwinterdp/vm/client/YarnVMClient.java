@@ -36,6 +36,8 @@ public class YarnVMClient extends VMClient {
     this.conf = conf ;
   }
   
+  public Configuration getConfiguration() { return conf; }
+  
   @Override
   public void createVMMaster(String localAppHome, String name) throws Exception {
     VMConfig vmConfig = new VMConfig() ;

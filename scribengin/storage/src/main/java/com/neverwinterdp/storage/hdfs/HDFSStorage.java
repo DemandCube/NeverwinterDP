@@ -1,6 +1,7 @@
 package com.neverwinterdp.storage.hdfs;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.apache.hadoop.fs.FileSystem;
 
@@ -69,7 +70,7 @@ public class HDFSStorage extends Storage {
     return partitions;
   }
   
-  public void cleanReadDataByActiveReader() throws Exception {
+  public void cleanReadDataByActiveReader() throws RegistryException, IOException {
     HdfsSSM[] streams = getPartitions() ;
     for(HdfsSSM sel : streams) {
       sel.cleanReadSegmentByActiveReader();
@@ -81,5 +82,21 @@ public class HDFSStorage extends Storage {
     for(HdfsSSM sel : streams) {
       sel.doManagement();
     }
+  }
+  
+  public HDFSStorageTag findTagByRecordLastPosition(String name, String desc) throws RegistryException {
+    return storageRegistry.getTagByRecordLastPosition(name, desc);
+  }
+  
+  public HDFSStorageTag findTagByPosition(String name, String desc, long pos) throws RegistryException {
+    return storageRegistry.findTagByPosition(name, desc, pos);
+  }
+  
+  public HDFSStorageTag findTagByDateTime(String name, String desc, Date datetime) throws RegistryException {
+    return storageRegistry.findTagByDateTime(name, desc, datetime);
+  }
+  
+  public void createTag(HDFSStorageTag tag) throws RegistryException {
+    storageRegistry.createTag(tag);
   }
 }

@@ -1,5 +1,6 @@
 package com.neverwinterdp.scribengin.dataflow.tracking;
 
+import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.Registry;
+import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.storage.hdfs.HDFSStorage;
 import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.hdfs.source.HDFSSource;
@@ -24,27 +26,70 @@ import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
 
 public class VMTMValidatorHDFSApp extends VMApp {
-  private Logger logger;
+  private Logger  logger;
+  
+  private Configuration conf;
+  private HDFSStorage storage;
+  
+  public HDFSStorage getHDFSStorage() { return this.storage ; }
   
   @Override
   public void run() throws Exception {
     logger =  getVM().getLoggerFactory().getLogger(VMTMValidatorHDFSApp.class) ;
-    logger.info("Start run()");
     VMDescriptor vmDescriptor = getVM().getDescriptor();
     VMConfig vmConfig = vmDescriptor.getVmConfig();
+    
     TrackingConfig trackingConfig = vmConfig.getVMAppConfigAs(TrackingConfig.class);
     Registry registry = getVM().getVMRegistry().getRegistry();
     registry.setRetryable(true);
     
-    logger.info("reportPath = "            + trackingConfig.getTrackingReportPath());
-    logger.info("maxRuntime = "            + trackingConfig.getValidatorMaxRuntime());
+    conf = new Configuration();
+    VMConfig.overrideHadoopConfiguration(getVM().getDescriptor().getVmConfig().getHadoopProperties(), conf);
     
-    TrackingValidatorService validatorService = new TrackingValidatorService(registry, trackingConfig);
-    validatorService.addReader(new HDFSTrackingMessageReader(registry));
-    validatorService.start();
-    validatorService.awaitForTermination(trackingConfig.getValidatorMaxRuntime(), TimeUnit.MILLISECONDS);
+    runValidate(registry, trackingConfig);
   }
 
+  public void runValidate(Registry registry, TrackingConfig trackingConfig) {
+    try {
+      info("Start runValidate(...)");
+      info("reportPath = "            + trackingConfig.getTrackingReportPath());
+      info("maxRuntime = "            + trackingConfig.getValidatorMaxRuntime());
+      HDFSStorageConfig storageConfig = new HDFSStorageConfig("aggregate", null);
+      FileSystem fs = null;
+      if(conf != null) fs = FileSystem.get(conf);
+      else fs = FileSystem.getLocal(new Configuration()).getRaw();
+      storage = new HDFSStorage(registry,fs, storageConfig);
+      
+      TrackingValidatorService validatorService = new TrackingValidatorService(registry, trackingConfig);
+      validatorService.addReader(new HDFSTrackingMessageReader(registry));
+      validatorService.start();
+      validatorService.awaitForTermination(trackingConfig.getValidatorMaxRuntime(), TimeUnit.MILLISECONDS);
+      info("Finish runValidate(...)");
+    } catch(Throwable error) {
+      error("Error:", error);
+    }
+  }
+  
+  protected void runManagement(HDFSStorage storage) throws RegistryException, IOException {
+    storage.doManagement();
+    storage.cleanReadDataByActiveReader();
+  }
+  
+  void info(String message) {
+    if(logger != null) logger.info(message);
+    else System.out.println("VMTMValidatorKafkaApp: " + message);
+  }
+  
+  void error(String message, Throwable error) {
+    if(logger != null) {
+      logger.error(message, error);
+    } else {
+      System.out.println("VMTMValidatorKafkaApp: " + message);
+      error.printStackTrace();
+    }
+  }
+  
+  
   public class HDFSTrackingMessageReader extends TrackingMessageReader {
     private BlockingQueue<TrackingMessage> tmQueue = new LinkedBlockingQueue<>(10000);
     private HDFSSourceReader hdfsSourceReader ;
@@ -69,12 +114,10 @@ public class VMTMValidatorHDFSApp extends VMApp {
   
   public class HDFSSourceReader extends Thread {
     private Registry                       registry;
-    private HDFSStorageConfig              storageConfig;
     private BlockingQueue<TrackingMessage> tmQueue;
 
     HDFSSourceReader(Registry registry, BlockingQueue<TrackingMessage> tmQueue) {
       this.registry = registry;
-      storageConfig = new HDFSStorageConfig("aggregate", null);
       this.tmQueue = tmQueue;
     }
     
@@ -82,16 +125,11 @@ public class VMTMValidatorHDFSApp extends VMApp {
       try {
         doRun();
       } catch (Exception e) {
-        logger.error("Error:", e);
+        error("Error:", e);
       }
     }
     
     void doRun() throws Exception {
-      Configuration conf = new Configuration();
-      VMConfig.overrideHadoopConfiguration(getVM().getDescriptor().getVmConfig().getHadoopProperties(), conf);
-      FileSystem fs = FileSystem.get(conf);
-      HDFSStorage storage = new HDFSStorage(registry,fs, storageConfig);
-
       HDFSSource hdfsSource = storage.getSource();
       HDFSSourcePartition partition = hdfsSource.getLatestSourcePartition();
 
@@ -109,8 +147,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
       
       validatorService.shutdown();
       while(!validatorService.awaitTermination(3, TimeUnit.MINUTES)) {
-        storage.doManagement();
-        storage.cleanReadDataByActiveReader();
+        runManagement(storage);
       }
     }
   }
@@ -129,7 +166,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
       try {
         doRun();
       } catch (Exception e) {
-        e.printStackTrace();
+        error("Error:", e);
       }
     }
     
@@ -159,7 +196,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
           return streamReader.next(maxWait);
         } catch(Exception ex) {
           error = ex;
-          logger.warn("Error when try to read from the HDFSSourcePartitionStreamReader. Rollback and retry. try = " + i, ex);
+          info("Error when try to read from the HDFSSourcePartitionStreamReader. Rollback and retry. try = " + i + ", " + ex.getMessage());
           streamReader.rollback();
         }
       }

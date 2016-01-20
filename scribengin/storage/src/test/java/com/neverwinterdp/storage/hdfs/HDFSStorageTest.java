@@ -76,7 +76,7 @@ abstract public class HDFSStorageTest {
       else reader = sourceStream[i].getReader("reader-for-stream-" + i, fromTag);
       Message message = null;
       int count = 0;
-      while((message = reader.next(3000)) != null) {
+      while((message = reader.next(1000)) != null) {
         count++;
       }
       totalCount += count;

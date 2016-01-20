@@ -13,7 +13,7 @@ import com.neverwinterdp.vm.client.shell.CommandInput;
 import com.neverwinterdp.vm.client.shell.Shell;
 import com.neverwinterdp.vm.client.shell.SubCommand;
 
-public class TrackingLauncher  extends SubCommand {
+public class TrackingTestLauncher  extends SubCommand {
   @Parameter(names = "--local-app-home", required = true, description = "Generator num of chunk")
   String localAppHome        = null;
   

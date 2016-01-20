@@ -26,23 +26,46 @@ public class VMTMGeneratorKafkaApp extends VMApp {
    
     Registry registry = getVM().getVMRegistry().getRegistry();
     registry.setRetryable(true);
-    service = new TrackingGeneratorService(registry, trackingConfig);
-    service.withLogger(logger);
-    
-    kafkaClient = new KafkaClient("KafkaClient", trackingConfig.getKafkaZKConnects());
-    
-    for(int i = 0; i < trackingConfig.getGeneratorNumOfWriter(); i++) {
-      service.addWriter(new KafkaTrackingMessageWriter(trackingConfig.getKafkaInputTopic()));
-    }
-    
-    if(!kafkaClient.getKafkaTool().topicExits(trackingConfig.getKafkaInputTopic())) {
-      kafkaClient.
+    runGenerator(registry, trackingConfig);
+  }
+  
+  public void runGenerator(Registry registry, TrackingConfig trackingConfig) {
+    try {
+      service = new TrackingGeneratorService(registry, trackingConfig);
+      service.withLogger(logger);
+
+      kafkaClient = new KafkaClient("KafkaClient", trackingConfig.getKafkaZKConnects());
+
+      for(int i = 0; i < trackingConfig.getGeneratorNumOfWriter(); i++) {
+        service.addWriter(new KafkaTrackingMessageWriter(trackingConfig.getKafkaInputTopic()));
+      }
+
+      if(!kafkaClient.getKafkaTool().topicExits(trackingConfig.getKafkaInputTopic())) {
+        kafkaClient.
         getKafkaTool().
         createTopic(trackingConfig.getKafkaInputTopic(), trackingConfig.getKafkaNumOfReplication(), trackingConfig.getKafkaNumOfPartition());
+      }
+      service.start();
+      service.awaitForTermination(7, TimeUnit.DAYS);
+    } catch(Throwable t) {
+      error("Error: ", t);
     }
-    service.start();
-    service.awaitForTermination(7, TimeUnit.DAYS);
   }
+  
+  void info(String message) {
+    if(logger != null) logger.info(message);
+    else System.out.println("VMTMValidatorKafkaApp: " + message);
+  }
+  
+  void error(String message, Throwable error) {
+    if(logger != null) {
+      logger.error(message, error);
+    } else {
+      System.out.println("VMTMValidatorKafkaApp: " + message);
+      error.printStackTrace();
+    }
+  }
+  
   
   public class KafkaTrackingMessageWriter extends TrackingMessageWriter {
     private String            topic;
