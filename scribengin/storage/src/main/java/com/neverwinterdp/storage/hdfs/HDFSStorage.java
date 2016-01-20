@@ -24,6 +24,7 @@ public class HDFSStorage extends Storage {
     super(storageConfig);
     this.fs = fs ;
     storageRegistry = new HDFSStorageRegistry(registry, storageConfig);
+    setStorageConfig(storageRegistry.getStorageConfig());
   }
 
   public HDFSStorageRegistry getHDFSStorageRegistry() { return storageRegistry; }
