@@ -12,6 +12,8 @@ abstract public class Storage {
   
   public StorageConfig getStorageConfig() { return storageConfig; }
   
+  public void setStorageConfig(StorageConfig config) { storageConfig = config; }
+  
   abstract public void refresh() throws Exception ; 
   
   abstract public boolean exists() throws Exception ;

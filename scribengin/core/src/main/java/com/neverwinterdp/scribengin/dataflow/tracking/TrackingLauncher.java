@@ -18,7 +18,7 @@ public class TrackingLauncher  extends SubCommand {
   String localAppHome        = null;
   
   @Parameter(names = "--dfs-app-home", description = "Generator num of chunk")
-  String dfsAppHome        = "/applications/tracking-sample";
+  String dfsAppHome  = "/applications/tracking-sample";
   
   @Parameter(names = "--generator-num-of-chunk", description = "Generator num of chunk")
   private int generatorNumOfChunks          = 10;

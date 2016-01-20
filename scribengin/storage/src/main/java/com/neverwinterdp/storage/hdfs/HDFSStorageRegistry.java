@@ -36,7 +36,7 @@ public class HDFSStorageRegistry {
     tagsNode       = rootNode.getChild("tags");
     
     if(exists()) {
-      this.storageConfig = rootNode.getDataAs(HDFSStorageConfig.class) ;
+      storageConfig = rootNode.getDataAs(HDFSStorageConfig.class) ;
     }
   }
   
@@ -44,7 +44,7 @@ public class HDFSStorageRegistry {
   
   public String getRegistryPath() { return registryPath; }
 
-  public StorageConfig getStorageConfig() { return this.storageConfig; }
+  public StorageConfig getStorageConfig() { return storageConfig; }
   
   public boolean exists() throws RegistryException {
     return rootNode.exists();
