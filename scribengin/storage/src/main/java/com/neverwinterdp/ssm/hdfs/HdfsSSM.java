@@ -8,7 +8,6 @@ import org.apache.hadoop.fs.Path;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.ssm.SSM;
-import com.neverwinterdp.ssm.SSMReader;
 import com.neverwinterdp.ssm.SSMRegistry;
 import com.neverwinterdp.ssm.SSMRegistryPrinter;
 import com.neverwinterdp.ssm.SSMWriter;

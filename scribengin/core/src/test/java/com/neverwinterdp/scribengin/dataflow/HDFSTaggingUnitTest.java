@@ -45,5 +45,7 @@ public class HDFSTaggingUnitTest  {
     launcher.execute(shell, dflBuilder);
     
     dflBuilder.runMonitor(shell);
+    
+    launcher.onDestroy();
   }
 }

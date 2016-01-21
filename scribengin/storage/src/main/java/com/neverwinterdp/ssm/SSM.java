@@ -37,6 +37,20 @@ abstract public class SSM {
     registry.doManagement();
   }
   
+  public void dropSegmentByTag(SSMTagDescriptor tag) throws RegistryException, IOException {
+    List<String> segments = registry.getSegments();
+    for(int i = 0; i < segments.size(); i++) {
+      String segmentIdName = segments.get(i);
+      int segmentId = SegmentDescriptor.extractId(segmentIdName);
+      if(segmentId < tag.getSegmentId()) {
+        registry.deleteSegment(segmentIdName);
+        doDeleteSegment(segmentIdName);
+      } else {
+        break;
+      }
+    }
+  }
+  
   public void cleanReadSegmentByActiveReader() throws RegistryException, IOException {
     List<String> cleanSegments = registry.cleanReadSegmentByActiveReader();
     for(int i = 0; i < cleanSegments.size(); i++) {

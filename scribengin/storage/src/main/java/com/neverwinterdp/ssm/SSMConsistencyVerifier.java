@@ -78,8 +78,7 @@ abstract public class SSMConsistencyVerifier {
   
   public String getSegmentDescriptorTextReport() throws RegistryException, IOException {
     String[] header = {
-      "Segment Id", "Creator", "C Time", "F Time", "Status", "From", "To", 
-      "Num Rec", "Commit Pos", "Commit Count"
+      "Segment Id", "Creator", "C Time", "F Time", "Status", "From", "To", "Num Rec", "Commit Pos", "Commit Count"
     };
     TabularFormater ft = new TabularFormater(header);
     ft.setTitle("Segment Descriptor");

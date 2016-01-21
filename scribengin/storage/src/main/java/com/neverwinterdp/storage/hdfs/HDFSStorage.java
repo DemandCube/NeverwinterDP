@@ -2,6 +2,7 @@ package com.neverwinterdp.storage.hdfs;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 
 import org.apache.hadoop.fs.FileSystem;
 
@@ -9,7 +10,9 @@ import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.ssm.SSMRegistry;
+import com.neverwinterdp.ssm.SSMTagDescriptor;
 import com.neverwinterdp.ssm.hdfs.HdfsSSM;
+import com.neverwinterdp.ssm.hdfs.HdfsSSMConsistencyVerifier;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.hdfs.sink.HDFSSink;
@@ -58,6 +61,13 @@ public class HDFSStorage extends Storage {
   @Override
   public HDFSSource getSource() throws Exception { return new HDFSSource(storageRegistry, fs); }
   
+  public HdfsSSM getPartition(int partitionId) throws RegistryException, IOException {
+    StorageConfig sConfig = getStorageConfig();
+    String pLocation = sConfig.getLocation() + "/partition-" + partitionId;
+    SSMRegistry pRegistry = storageRegistry.getPartitionRegistry(partitionId);
+    return new HdfsSSM(fs, pLocation, pRegistry);
+  }
+  
   public HdfsSSM[] getPartitions() throws RegistryException, IOException {
     StorageConfig sConfig = getStorageConfig();
     int numOfPartitionStream = sConfig.getPartitionStream();
@@ -68,6 +78,15 @@ public class HDFSStorage extends Storage {
       partitions[i] = new HdfsSSM(fs, pLocation, pRegistry);
     }
     return partitions;
+  }
+  
+  public void cleanDataByTag(HDFSStorageTag tag) throws RegistryException, IOException {
+    Map<Integer, SSMTagDescriptor> partitionTags = tag.getPartitionTagDescriptors();
+    for(Map.Entry<Integer, SSMTagDescriptor> entry : partitionTags.entrySet()) {
+      int partitionId = entry.getKey();
+      HdfsSSM partition = getPartition(partitionId);
+      partition.dropSegmentByTag(entry.getValue());
+    }
   }
   
   public void cleanReadDataByActiveReader() throws RegistryException, IOException {
@@ -98,5 +117,16 @@ public class HDFSStorage extends Storage {
   
   public void createTag(HDFSStorageTag tag) throws RegistryException {
     storageRegistry.createTag(tag);
+  }
+  
+  public void report(Appendable out) throws RegistryException, IOException {
+    HdfsSSM[] streams = getPartitions() ;
+    for(int i = 0; i < streams.length; i++) {
+      HdfsSSM sel = streams[i];
+      HdfsSSMConsistencyVerifier verifier = sel.getSegmentConsistencyVerifier();
+      out.append("Partition: " + i);
+      out.append("----------------------------------------------------------------------\n");
+      out.append(verifier.getSegmentConsistencyTextReport()).append("\n");
+    }
   }
 }

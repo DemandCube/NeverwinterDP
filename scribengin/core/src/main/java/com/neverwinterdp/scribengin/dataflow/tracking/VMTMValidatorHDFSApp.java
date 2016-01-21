@@ -50,6 +50,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
   }
 
   public void runValidate(Registry registry, TrackingConfig trackingConfig) {
+    TrackingValidatorService validatorService = null;
     try {
       info("Start runValidate(...)");
       info("reportPath = "            + trackingConfig.getTrackingReportPath());
@@ -60,13 +61,19 @@ public class VMTMValidatorHDFSApp extends VMApp {
       else fs = FileSystem.getLocal(new Configuration()).getRaw();
       storage = new HDFSStorage(registry,fs, storageConfig);
       
-      TrackingValidatorService validatorService = new TrackingValidatorService(registry, trackingConfig);
+      validatorService = new TrackingValidatorService(registry, trackingConfig);
       validatorService.addReader(new HDFSTrackingMessageReader(registry));
       validatorService.start();
       validatorService.awaitForTermination(trackingConfig.getValidatorMaxRuntime(), TimeUnit.MILLISECONDS);
       info("Finish runValidate(...)");
     } catch(Throwable error) {
       error("Error:", error);
+    } finally {
+      try {
+        validatorService.shutdown();
+      } catch (Exception e) {
+        error("Error:", e);
+      }
     }
   }
   

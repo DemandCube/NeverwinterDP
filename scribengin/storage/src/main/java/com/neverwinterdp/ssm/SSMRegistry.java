@@ -195,6 +195,12 @@ public class SSMRegistry {
     transaction.setData(segNode.getPath(), segment);
   }
   
+  public void deleteSegment(String segmentIdName) throws RegistryException {
+    Transaction transaction = registry.getTransaction();
+    transaction.deleteChild(segmentsNode, segmentIdName);
+    transaction.commit();
+  }
+  
   public List<String> cleanReadSegmentByActiveReader() throws RegistryException {
     CleanReadSegmentByReaderOperation op = new CleanReadSegmentByReaderOperation() ;
     Lock lock = lockNode.getLock("write", "Lock to remove the segments that are already read by the active reader") ;
