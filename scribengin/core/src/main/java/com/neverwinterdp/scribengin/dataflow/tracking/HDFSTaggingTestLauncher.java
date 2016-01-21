@@ -35,7 +35,7 @@ public class HDFSTaggingTestLauncher extends TrackingTestLauncher {
         "  --dataflow-id " + dflBuilder.getDataflowId()  +  
         " --report-path "  + dflBuilder.getTrackingConfig().getTrackingReportPath() //+ " --show-history-vm "
     );
-    Thread.sleep(30000);
+    Thread.sleep(60000);
     shell.execute(
         "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
         "  --dataflow-id " + dflBuilder.getDataflowId()  +  
