@@ -12,8 +12,14 @@ import com.neverwinterdp.storage.hdfs.HDFSStorageTag;
 import com.neverwinterdp.vm.client.VMClient;
 
 public class HDFSTaggingTestLauncher extends TrackingTestLauncher {
+  private boolean waitForValidator = true;
+  
   private GeneratorThread generatorThread;
   private ValidatorThread validatorThread;
+  
+  public void setWaitForValidator(boolean b) { 
+    waitForValidator = b;
+  }
   
   public void execute(ScribenginShell shell, TrackingDataflowBuilder dflBuilder) throws Exception {
     VMClient vmClient= shell.getVMClient();
@@ -24,8 +30,12 @@ public class HDFSTaggingTestLauncher extends TrackingTestLauncher {
     
     submitDataflow(shell, dflBuilder.buildDataflow());
     
-    validatorThread = new ValidatorThread(registry, dflBuilder.getTrackingConfig());
+    validatorThread = new ValidatorThread(shell, dflBuilder);
     validatorThread.start();
+    
+    while(validatorThread.isAlive()) {
+      Thread.sleep(1000);
+    }
   }
   
   public void onDestroy() throws InterruptedException {
@@ -53,24 +63,32 @@ public class HDFSTaggingTestLauncher extends TrackingTestLauncher {
   }
   
   static public class ValidatorThread extends Thread {
+    ScribenginShell         shell;
     Registry                registry;
-    TrackingConfig          trackingConfig;
+    TrackingDataflowBuilder dflBuilder;
     ExtVMTMValidatorHDFSApp validatorApp;
 
-    public ValidatorThread(Registry registry, TrackingConfig tConfig) {
-      this.registry       = registry;
-      this.trackingConfig = tConfig;
+    public ValidatorThread(ScribenginShell shell, TrackingDataflowBuilder dflBuilder) {
+      this.shell          = shell ;
+      this.dflBuilder = dflBuilder;
     }
     
     public void run() {
-      validatorApp = new ExtVMTMValidatorHDFSApp();
-      validatorApp.runValidate(registry, trackingConfig);
+      validatorApp = new ExtVMTMValidatorHDFSApp(shell, dflBuilder);
+      validatorApp.runValidate(registry, dflBuilder.getTrackingConfig());
     }
   }
   
   static public class ExtVMTMValidatorHDFSApp extends VMTMValidatorHDFSApp {
-    private AtomicInteger counter = new AtomicInteger();
-    private HDFSStorageTag previousTag;
+    private ScribenginShell shell;
+    private TrackingDataflowBuilder dflBuilder;
+    private AtomicInteger   counter = new AtomicInteger();
+    private HDFSStorageTag  previousTag;
+    
+    ExtVMTMValidatorHDFSApp(ScribenginShell shell, TrackingDataflowBuilder dflBuilder) {
+      this.shell = shell;
+      this.dflBuilder = dflBuilder;
+    }
     
     protected void runManagement(HDFSStorage storage) throws RegistryException, IOException {
       System.out.println("ExtVMTMValidatorHDFSApp: Start runManagement(...)");
@@ -88,9 +106,17 @@ public class HDFSTaggingTestLauncher extends TrackingTestLauncher {
       if(previousTag != null) {
         storage.cleanDataByTag(previousTag);
       }
-      storage.report(System.out);
       previousTag = tag;
-      System.out.println("ExtVMTMValidatorHDFSApp: Finish runManagement(...)");
+      try {
+        shell.execute(
+            "plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor" +
+            "  --dataflow-id " + dflBuilder.getDataflowId()  +  
+            " --report-path "  + dflBuilder.getTrackingConfig().getTrackingReportPath() //+ " --show-history-vm "
+        );
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      storage.report(System.out);
     }
   }
 }
