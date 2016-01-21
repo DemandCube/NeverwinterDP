@@ -10,6 +10,7 @@ import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.storage.hdfs.HDFSStorage;
 import com.neverwinterdp.storage.hdfs.HDFSStorageTag;
 import com.neverwinterdp.vm.client.VMClient;
+import com.neverwinterdp.vm.client.YarnVMClient;
 
 public class HDFSTaggingTestLauncher extends TrackingTestLauncher {
   private boolean waitForValidator = true;
@@ -87,6 +88,10 @@ public class HDFSTaggingTestLauncher extends TrackingTestLauncher {
     
     public void run() {
       validatorApp = new ExtVMTMValidatorHDFSApp(shell, dflBuilder);
+      VMClient vmClient = shell.getVMClient();
+      if(vmClient instanceof YarnVMClient) {
+        validatorApp.setConfiguration(((YarnVMClient)vmClient).getConfiguration());
+      }
       validatorApp.runValidate(registry, dflBuilder.getTrackingConfig());
     }
   }

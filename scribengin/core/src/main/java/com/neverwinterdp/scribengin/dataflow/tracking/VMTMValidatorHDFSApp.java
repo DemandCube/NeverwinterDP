@@ -32,6 +32,10 @@ public class VMTMValidatorHDFSApp extends VMApp {
   private HDFSStorage storage;
   
   public HDFSStorage getHDFSStorage() { return this.storage ; }
+
+  public void setConfiguration(Configuration conf) {
+    this.conf = conf;
+  }
   
   @Override
   public void run() throws Exception {
@@ -48,15 +52,19 @@ public class VMTMValidatorHDFSApp extends VMApp {
     
     runValidate(registry, trackingConfig);
   }
-
+  
   public void runValidate(Registry registry, TrackingConfig trackingConfig) {
     TrackingValidatorService validatorService = null;
     try {
       info("Start runValidate(...)");
       info("reportPath = "            + trackingConfig.getTrackingReportPath());
       info("maxRuntime = "            + trackingConfig.getValidatorMaxRuntime());
+      
+      FileSystem fs = null;
+      if(conf != null) fs = FileSystem.get(conf);
+      else fs = FileSystem.getLocal(new Configuration()).getRaw();
+      
       HDFSStorageConfig storageConfig = new HDFSStorageConfig("aggregate", null);
-      FileSystem fs = FileSystem.get(conf);
       storage = new HDFSStorage(registry,fs, storageConfig);
       
       validatorService = new TrackingValidatorService(registry, trackingConfig);
