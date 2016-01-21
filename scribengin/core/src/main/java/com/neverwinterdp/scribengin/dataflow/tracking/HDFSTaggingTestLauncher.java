@@ -116,7 +116,7 @@ public class HDFSTaggingTestLauncher extends TrackingTestLauncher {
       if(tagId % 2 ==  1) {
         tag = storage.findTagByDateTime("tag-by-time-" + tagId, "Tag by the current time", new Date()) ;
       } else {
-        tag = storage.findTagByRecordLastPosition("tag-by-latest-position", "Tag by the latest position");
+        tag = storage.findTagByRecordLastPosition("tag-by-latest-position-" + tagId, "Tag by the latest position");
       }
       storage.createTag(tag);
       
