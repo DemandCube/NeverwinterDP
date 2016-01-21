@@ -30,6 +30,8 @@ public class HDFSTaggingTestLauncher extends TrackingTestLauncher {
     
     submitDataflow(shell, dflBuilder.buildDataflow());
     
+    Thread.sleep(90000);
+    
     validatorThread = new ValidatorThread(shell, dflBuilder);
     validatorThread.start();
     
