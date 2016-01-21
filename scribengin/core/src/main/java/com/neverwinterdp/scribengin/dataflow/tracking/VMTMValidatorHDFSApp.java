@@ -56,9 +56,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
       info("reportPath = "            + trackingConfig.getTrackingReportPath());
       info("maxRuntime = "            + trackingConfig.getValidatorMaxRuntime());
       HDFSStorageConfig storageConfig = new HDFSStorageConfig("aggregate", null);
-      FileSystem fs = null;
-      if(conf != null) fs = FileSystem.get(conf);
-      else fs = FileSystem.getLocal(new Configuration()).getRaw();
+      FileSystem fs = FileSystem.get(conf);
       storage = new HDFSStorage(registry,fs, storageConfig);
       
       validatorService = new TrackingValidatorService(registry, trackingConfig);
