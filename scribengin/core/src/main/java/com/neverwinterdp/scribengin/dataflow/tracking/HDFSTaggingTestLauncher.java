@@ -70,7 +70,8 @@ public class HDFSTaggingTestLauncher extends TrackingTestLauncher {
 
     public ValidatorThread(ScribenginShell shell, TrackingDataflowBuilder dflBuilder) {
       this.shell          = shell ;
-      this.dflBuilder = dflBuilder;
+      this.registry       = shell.getVMClient().getRegistry();
+      this.dflBuilder     = dflBuilder;
     }
     
     public void run() {
