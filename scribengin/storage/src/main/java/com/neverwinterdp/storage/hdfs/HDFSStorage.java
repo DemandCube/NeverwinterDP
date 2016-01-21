@@ -124,6 +124,7 @@ public class HDFSStorage extends Storage {
     for(int i = 0; i < streams.length; i++) {
       HdfsSSM sel = streams[i];
       HdfsSSMConsistencyVerifier verifier = sel.getSegmentConsistencyVerifier();
+      verifier.verify();
       out.append("Partition: " + i);
       out.append("----------------------------------------------------------------------\n");
       out.append(verifier.getSegmentConsistencyTextReport()).append("\n");
