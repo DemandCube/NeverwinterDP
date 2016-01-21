@@ -108,7 +108,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
     
     @Override
     public TrackingMessage next() throws Exception {
-      return tmQueue.poll(5, TimeUnit.MINUTES);
+      return tmQueue.poll(10, TimeUnit.MINUTES);
     }
   }
   
@@ -179,7 +179,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
           byte[] data = message.getData();
           TrackingMessage tMesg = JSONSerializer.INSTANCE.fromBytes(data, TrackingMessage.class);
           if(!tmQueue.offer(tMesg, 90000, TimeUnit.MILLISECONDS)) {
-            throw new Exception("Cannot queue the messages after 5s, increase the buffer");
+            throw new Exception("Cannot queue the messages after 90s, increase the buffer");
           }
           count++;
           //if(count > 10000) break;
