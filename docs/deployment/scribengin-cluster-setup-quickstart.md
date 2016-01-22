@@ -7,7 +7,7 @@ Scribengin Quickstart
 3. [Automation Prerequisites](#automation-prerequisites)
 3. [Setup a cluster automatically in Docker](#docker-setup) 
 4. [Setup a cluster automatically in Digital Ocean](#digital-ocean-setup)
-5. [Setup a cluster manually in AWS](#AWS-setup) 
+5. [Setup a cluster manually in AWS](#aws-setup) 
 6. [Setup a cluster automatically somewhere else](#arbitrary-cluster-setup) 
 7. [Launching Scribengin manually in an already setup YARN cluster ](#manually-launching)
 8. [Launching a Datafow from a preconfigured test](#launching-a-dataflow-from-a-preconfigured-test)
