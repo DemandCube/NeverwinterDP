@@ -159,24 +159,24 @@ The following steps will deploy all the necessary components to run Scribengin i
 
 #AWS-setup
 
-1. Login in to amazon console
+1.  Login in to amazon console
 
-2. Select region 
+2.  Select region 
 
 ![Select Region](images/aws-region.png)
 	
-3. Click on 'Launch Instance' button in the scree
-4. Click on 'AWS Marketplace' to select the software from AWS Marketplace
+3.  Click on 'Launch Instance' button in the scree
+4.  Click on 'AWS Marketplace' to select the software from AWS Marketplace
 
 ![Select Centos](images/aws-awsmarketplace.png)
  
-5. Click/Select on 'CentOS 7 (x86_64) with Updates HVM'
+5.  Click/Select on 'CentOS 7 (x86_64) with Updates HVM'
 
-6. Select Instance Type
+6.  Select Instance Type
 
 ![Select Centos](images/aws-instance.png)
 
-7. Configure Instance.
+7.  Configure Instance.
 
 ![Select Centos](images/aws-configure.png)
 
@@ -184,7 +184,7 @@ The following steps will deploy all the necessary components to run Scribengin i
 - Select 'Shutdown behavior' field option to 'Terminate' so that OS level shutdown behaviour is performed.
 
 
-8. Add Storage
+8.  Add Storage
 
 ![Select Centos](images/aws-storage.png)
 
@@ -196,31 +196,32 @@ The following steps will deploy all the necessary components to run Scribengin i
 - Make sure that 'Delete on Termision' field is checked (Recomonded for testing not for production). Because EBS volumes persist independently from the running life of EC2 instances. By choosing this option to checked, EBS volume associted too the EC2 instance will be deleted when its terminated.
 
 
-9. Tag Instance (Optional). you can skip this for now.
-10. Configure Secuirity Group
+9.  Tag Instance (Optional). you can skip this for now.
+
+10.  Configure Secuirity Group
 
 ![Select Centos](images/aws-security.png)
 
 
 For now select an existing security group. Which is already created for testing purposes. Select two security group as seen in the above picture.
 
-11. Click 'Review and Launch'. On the next screen review all the configurations that you set. And then click 'Launch' button to launch the instances.
+11.  Click 'Review and Launch'. On the next screen review all the configurations that you set. And then click 'Launch' button to launch the instances.
 
-12. When Launching instances, it will prompt to select 'Key Pair', which is used to communicate with ec2 instances securely. You can create new key pair or select an existing key pair. Make sure you have keypair file with an extention *.pem if you select an existing keypair. And the click Launch Instances.
+12.  When Launching instances, it will prompt to select 'Key Pair', which is used to communicate with ec2 instances securely. You can create new key pair or select an existing key pair. Make sure you have keypair file with an extention *.pem if you select an existing keypair. And the click Launch Instances.
 
 ![Select Centos](images/aws-keypair.png)
 
-13. You can see all the instances in the Instance table.
+13.  You can see all the instances in the Instance table.
 
 ![Select Centos](images/aws-instance-list.png)
 
 You can name the instances as you want for identification purpose.
 
-14. You can get Public IP and Private IP by selecting any one instance from the instance list, and you can see the private and public IP on the 'Description' tab below the table.
+14.  You can get Public IP and Private IP by selecting any one instance from the instance list, and you can see the private and public IP on the 'Description' tab below the table.
 
 ![Select Centos](images/aws-ip.png)
 
-15. Edit the /etc/hosts of your local machine with instances public IPs.
+15.  Edit the /etc/hosts of your local machine with instances public IPs.
 
 Example:
 
@@ -243,11 +244,11 @@ Example:
 Now you can able to communicate with ec2 instances with hostname.
 
 
-16. SSH into instance. Initially you can able to login to the instance with the user 'centos'. To ssh login you need to use keypair pem file that you have.
+16.  SSH into instance. Initially you can able to login to the instance with the user 'centos'. To ssh login you need to use keypair pem file that you have.
 
 ```ssh -i /path/to/test.pem centos@monitoring-1```
 
-17. Yes you logged into ec2 instance. Initially EBS volume is not mounted to the ec2 instance. Make EBS volume available. For that we need to format the volume with appropriate file system and then mount it. run the below command for ec2 centos instance.
+17.  Yes you logged into ec2 instance. Initially EBS volume is not mounted to the ec2 instance. Make EBS volume available. For that we need to format the volume with appropriate file system and then mount it. run the below command for ec2 centos instance.
 
 ```
 sudo mkfs -t xfs /dev/xvdb
@@ -256,7 +257,7 @@ sudo mount /dev/xvdb /opt
 
 If the above is not working or to know more about making EBS available, please read [Making an Amazon EBS Volume Available for Use](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-using-volumes.html) from amazon user guide website.
  
-18. Add neverwinterdp user. To add user and edit /etc/sudoers you need to login as root user. To do so after login as 'centos' user type ```sudo -i``` and press enter to login as root user. And run the below commands
+18.  Add neverwinterdp user. To add user and edit /etc/sudoers you need to login as root user. To do so after login as 'centos' user type ```sudo -i``` and press enter to login as root user. And run the below commands
  
 ```
 useradd -m -d /home/neverwinterdp -s /bin/bash -c "neverwinterdp user" -p $(openssl passwd -1 neverwinterdp)  neverwinterdp
@@ -268,7 +269,7 @@ chown -R neverwinterdp:neverwinterdp /home/neverwinterdp/.ssh
 echo "REPLACE HERE WITH YOUR PUBLIC KEY" >> /home/neverwinterdp/.ssh/authorized_keys
 ```
 
-20. Update /etc/hosts file in all instances with private and public IPs of all instances. See [Machine Naming Conventions Below](#machine-naming-conventions)
+19.  Update /etc/hosts file in all instances with private and public IPs of all instances. See [Machine Naming Conventions Below](#machine-naming-conventions)
 
 Example
 
@@ -301,10 +302,9 @@ Example
 ##SCRIBENGIN CLUSTER END##
 ```
 
-21. Repeat 16,17,18 on all instances.
+20.  Repeat 16,17,18,19 on all instances.
 
-
-22. Install Scribengin and necessary cluster services
+21. Install Scribengin and necessary cluster services
 
 ```
 ./serviceCommander/serviceCommander.py --cluster --install --configure --profile-type stability
