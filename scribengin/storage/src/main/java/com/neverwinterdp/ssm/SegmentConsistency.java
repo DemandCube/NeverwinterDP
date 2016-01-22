@@ -22,6 +22,7 @@ public class SegmentConsistency {
   private long        dataLength;
   private long        lastCommitPosition;
   private int         commitCount;
+  private long        timeToWrite = -1l;
   private Consistency statusConsistency;
   private Consistency timeConsistency;
   private Consistency commitConsistency;
@@ -46,6 +47,9 @@ public class SegmentConsistency {
 
   public int getCommitCount() { return commitCount; }
   public void setCommitCount(int count) { this.commitCount = count; }
+
+  public long getTimeToWrite() { return timeToWrite; }
+  public void setTimeToWrite(long timeToWrite) { this.timeToWrite = timeToWrite; }
 
   public Consistency getStatusConsistency() { return statusConsistency; }
   public void setStatusConsistency(Consistency status) { this.statusConsistency = status;}

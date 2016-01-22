@@ -40,6 +40,7 @@ abstract public class SSMConsistencyVerifier {
     sc.setCommitCount(segment.getDataSegmentCommitCount());
     Status segStatus = segment.getStatus();
     if(segStatus == SegmentDescriptor.Status.WritingComplete || segStatus == Status.Complete) {
+      sc.setTimeToWrite(segment.getFinishedTime() - segment.getCreatedTime());
       sc.setStatusConsistency(Consistency.GOOD);
       if(segment.getFinishedTime() >= segment.getCreatedTime()) sc.setTimeConsistency(Consistency.GOOD);
       else sc.setTimeConsistency(Consistency.ERROR);
@@ -74,7 +75,9 @@ abstract public class SSMConsistencyVerifier {
   
   public String getSegmentConsistencyTextReport() throws RegistryException, IOException {
     String[] header = {
-      "Segment Id", "Status", "Data Length", "Last Commit Pos", "Commit Count", "*Status", "*Time", "*Commit"
+      "Segment Id", 
+      "Status", "Data Length", "Last Commit Pos", "Commit Count", "Writting Time", 
+      "Status*", "Time*", "Commit*"
     };
     
     TabularFormater ft = new TabularFormater(header);
@@ -83,7 +86,7 @@ abstract public class SSMConsistencyVerifier {
       SegmentConsistency sc = segementConsistencies.get(i);
       ft.addRow(
         sc.getSegmentId(),
-        sc.getStatus(), sc.getDataLength(), sc.getLastCommitPosition(), sc.getCommitCount(),
+        sc.getStatus(), sc.getDataLength(), sc.getLastCommitPosition(), sc.getCommitCount(), sc.getTimeToWrite(),
         sc.getStatusConsistency(), sc.getTimeConsistency(), sc.getCommitConsistency()
       );
     }
