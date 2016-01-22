@@ -129,7 +129,10 @@ public class HDFSStorageRegistry {
     for(int i = 0; i < numOfPartitions; i++) {
       SSMRegistry ssmRegistry = getPartitionRegistry(i);
       SSMTagDescriptor partitionTag = ssmRegistry.findTagByTime(datetime);
-      if(partitionTag == null) continue;
+      if(partitionTag == null) {
+        partitionTag = new SSMTagDescriptor();
+        partitionTag.setSegmentId(-1);
+      }
       partitionTag.setName(name);
       partitionTag.setDescription(desc);
       tag.add(i, partitionTag);
@@ -156,6 +159,10 @@ public class HDFSStorageRegistry {
     for(int i = 0; i < numOfPartitions; i++) {
       SSMRegistry ssmRegistry = getPartitionRegistry(i);
       SSMTagDescriptor partitionTag = ssmRegistry.findTagByRecordLastPosition();
+      if(partitionTag == null) {
+        partitionTag = new SSMTagDescriptor();
+        partitionTag.setSegmentId(-1);
+      }
       partitionTag.setName(name);
       partitionTag.setDescription(desc);
       tag.add(i, partitionTag);
@@ -169,6 +176,10 @@ public class HDFSStorageRegistry {
     for(int i = 0; i < numOfPartitions; i++) {
       SSMRegistry ssmRegistry = getPartitionRegistry(i);
       SSMTagDescriptor partitionTag = ssmRegistry.findTagByRecordPosition(pos);
+      if(partitionTag == null) {
+        partitionTag = new SSMTagDescriptor();
+        partitionTag.setSegmentId(-1);
+      }
       partitionTag.setName(name);
       partitionTag.setDescription(desc);
       tag.add(i, partitionTag);
