@@ -129,6 +129,7 @@ public class HDFSStorageRegistry {
     for(int i = 0; i < numOfPartitions; i++) {
       SSMRegistry ssmRegistry = getPartitionRegistry(i);
       SSMTagDescriptor partitionTag = ssmRegistry.findTagByTime(datetime);
+      if(partitionTag == null) continue;
       partitionTag.setName(name);
       partitionTag.setDescription(desc);
       tag.add(i, partitionTag);
