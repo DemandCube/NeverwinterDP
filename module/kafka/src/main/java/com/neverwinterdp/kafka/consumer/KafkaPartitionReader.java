@@ -88,7 +88,7 @@ public class KafkaPartitionReader {
   
   public void commit() throws Exception {
     CommitOperation commitOp = new CommitOperation(currentOffset, (short) 0) ;
-    execute(commitOp, 3, 5000);
+    execute(commitOp, 5, 5000);
   }
   
   public void rollback() throws Exception  {
@@ -133,7 +133,7 @@ public class KafkaPartitionReader {
   }
 
   public List<Message> fetch(int fetchSize, int maxRead, long maxWait) throws Exception {
-    return fetch(fetchSize, maxRead, maxWait, 3) ;
+    return fetch(fetchSize, maxRead, maxWait, 5) ;
   }
   
   public List<Message> fetch(int fetchSize, int maxRead, long maxWait, int numRetries) throws Exception {
@@ -153,7 +153,7 @@ public class KafkaPartitionReader {
   }
  
   void nextMessageSet(long maxWait) throws Exception {
-    currentMessageSet = fetchMessageAndOffset(fetchSize, 1000, maxWait, 3);
+    currentMessageSet = fetchMessageAndOffset(fetchSize, 1000, maxWait, 5);
     currentMessageSetIterator = currentMessageSet.iterator();
   }
   
