@@ -149,7 +149,7 @@ public class KafkaPartitionReader {
   
   List<MessageAndOffset> fetchMessageAndOffset(int fetchSize, int maxRead, long maxWait, int numRetries) throws Exception {
     FetchMessageOperation fetchOperation = new FetchMessageOperation(fetchSize, maxRead, (int)maxWait);
-    return execute(fetchOperation, numRetries, 1500);
+    return execute(fetchOperation, numRetries, 5000);
   }
  
   void nextMessageSet(long maxWait) throws Exception {
@@ -180,7 +180,7 @@ public class KafkaPartitionReader {
         error = ex;
       }
     }
-    throw error;
+    throw new Exception("Cannot fetch the data after retry =" + retry + ", retry delay = " + retryDelay, error);
   }
   
   static public interface Operation<T> {

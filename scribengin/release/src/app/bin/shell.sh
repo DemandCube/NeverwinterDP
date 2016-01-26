@@ -37,7 +37,7 @@ if $cygwin; then
   APP_DIR=`cygpath --absolute --windows "$APP_DIR"`
 fi
 
-JAVA_OPTS="-Xshare:auto -Xms128m -Xmx1536m -XX:-UseSplitVerifier" 
+JAVA_OPTS="-Xshare:auto -Xms128m -Xmx1024m -XX:-UseSplitVerifier" 
 APP_OPT="-Dapp.dir=$APP_DIR -Duser.dir=$APP_DIR"
 APP_OPT="$APP_OPT -Dshell.zk-connect=zookeeper-1:2181 -Dshell.hadoop-master=hadoop-master"
 
