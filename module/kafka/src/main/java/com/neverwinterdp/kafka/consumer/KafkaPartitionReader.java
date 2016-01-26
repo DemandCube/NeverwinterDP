@@ -88,7 +88,7 @@ public class KafkaPartitionReader {
   
   public void commit() throws Exception {
     CommitOperation commitOp = new CommitOperation(currentOffset, (short) 0) ;
-    execute(commitOp, 3, 1500);
+    execute(commitOp, 3, 5000);
   }
   
   public void rollback() throws Exception  {
