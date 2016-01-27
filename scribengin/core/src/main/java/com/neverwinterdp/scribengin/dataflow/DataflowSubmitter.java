@@ -31,24 +31,7 @@ public class DataflowSubmitter {
   public VMDescriptor getVMDataflowMasterDescriptor() { return vmDataflowMasterDescriptor; }
   
   public DataflowSubmitter submit() throws Exception {
-    VMClient vmClient = scribenginClient.getVMClient();
-    Registry registry = scribenginClient.getRegistry();
-    DataflowRegistry dflRegistry = new DataflowRegistry(registry, dflDescriptor);
-    String dataflowPath = dflRegistry.getDataflowPath();
-    
-    VMConfig vmConfig = new VMConfig() ;
-    String masterId = dflDescriptor.getId() + "-master-" + dflRegistry.getMasterIdTracker().nextSeqId();
-    vmConfig.
-      setVmId(masterId).
-      addRoles("dataflow-master").
-      setRegistryConfig(vmClient.getRegistry().getRegistryConfig()).
-      setVmApplication(VMMasterApp.class.getName()).
-      setRequestCpuCores(dflDescriptor.getMaster().getCpuCores()).
-      setRequestMemory(dflDescriptor.getMaster().getMemory()).
-      setLog4jConfigUrl(dflDescriptor.getMaster().getLog4jConfigUrl()).
-      addProperty("dataflow.registry.path", dataflowPath);
-    vmClient.configureEnvironment(vmConfig);
-    vmDataflowMasterDescriptor = vmClient.allocate(vmConfig);
+    vmDataflowMasterDescriptor = scribenginClient.submit(dflDescriptor);
     return this ;
   }
   

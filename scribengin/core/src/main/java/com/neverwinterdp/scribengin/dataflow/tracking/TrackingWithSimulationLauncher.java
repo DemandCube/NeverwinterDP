@@ -107,10 +107,12 @@ public class TrackingWithSimulationLauncher extends TrackingTestLauncher {
     report(shell, dflBuilder);
     
     System.err.println("--------------------------------------------------------------------------------------");
-    System.err.println("Start Dataflow");
+    System.err.println("Resume Dataflow");
     System.err.println("--------------------------------------------------------------------------------------");
-    Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
-    submitDataflow(shell, dfl);
+    shell.execute("dataflow resume --dataflow-id " + dflBuilder.getDataflowId() + "  --timeout 90000");
+    
+    //Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
+    //submitDataflow(shell, dfl);
     log.setFinishedTime(System.currentTimeMillis());
     log.setDescription("Stop then start the dataflow again");
     simulationLogs.add(log);
@@ -199,10 +201,11 @@ public class TrackingWithSimulationLauncher extends TrackingTestLauncher {
     }
     
     System.err.println("--------------------------------------------------------------------------------------");
-    System.err.println("Start Dataflow");
+    System.err.println("Resume Dataflow");
     System.err.println("--------------------------------------------------------------------------------------");
-    Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
-    submitDataflow(shell, dfl);
+    shell.execute("dataflow resume --dataflow-id " + dflBuilder.getDataflowId() + "  --timeout 90000");
+    //Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
+    //submitDataflow(shell, dfl);
     
     log.setFinishedTime(System.currentTimeMillis());
     log.setDescription("Kill all the workers and masters, then restart");

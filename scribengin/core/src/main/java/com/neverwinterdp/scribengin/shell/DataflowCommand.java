@@ -27,6 +27,7 @@ public class DataflowCommand extends Command {
     add("list",               ListDataflow.class) ;
     add("submit",             Submit.class) ;
     add("stop",               Stop.class) ;
+    add("resume",             Resume.class) ;
     add("info",               Info.class) ;
     add("monitor",            Monitor.class) ;
     add("wait-for-status",    WaitForStatus.class) ;
@@ -239,6 +240,27 @@ public class DataflowCommand extends Command {
     @Override
     public String getDescription() {
       return "Stop Command";
+    }
+  }
+  
+  static public class Resume extends SubCommand {
+    @Parameter(names = "--dataflow-id", required=true, description = "The dataflow id")
+    String dataflowId ;
+    
+    @Parameter(names = "--timeout" , description = "Dump the information period")
+    private long timeout = 90 * 1000;
+    
+    @Override
+    public void execute(Shell shell, CommandInput cmdInput) throws Exception {
+      ScribenginShell scribenginShell = (ScribenginShell) shell;
+      ScribenginClient scribenginClient = scribenginShell.getScribenginClient();
+      DataflowClient dflClient = scribenginClient.resume(dataflowId, timeout);
+      shell.execute("dataflow info" + "  --dataflow-id " + dataflowId + " --show-history-workers");
+    }
+    
+    @Override
+    public String getDescription() {
+      return "Resume Command";
     }
   }
   
