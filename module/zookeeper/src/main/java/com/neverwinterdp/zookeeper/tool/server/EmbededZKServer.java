@@ -31,6 +31,9 @@ public class EmbededZKServer implements Server {
 
   public EmbededZKServer(String dataDir, int port) {
     Map<String, String> props = new HashMap<String, String>();
+    props.put("tickTime", "2000");
+    props.put("initLimit","5");
+    props.put("syncLimit","5");
     props.put("dataDir", dataDir);
     this.port = port;
     props.put("clientPort", Integer.toString(port));
@@ -54,6 +57,10 @@ public class EmbededZKServer implements Server {
   
   public void setMaxClientCnxns(int num) {
     zkProperties.put("maxClientCnxns", Integer.toString(num));
+  }
+  
+  public void addEnsemble(int serverId, String leaderConnects) {
+    zkProperties.put("server." + serverId, leaderConnects);
   }
   
   public void clean() throws Exception {

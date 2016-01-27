@@ -14,6 +14,7 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs.Perms;
 import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.ZooKeeper.States;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.data.Stat;
@@ -51,8 +52,8 @@ public class RegistryImpl implements Registry {
   
   private ZooKeeper zkClient ;
   
-  private boolean retryable = false ;
-  private boolean closed = false;
+  private boolean retryable = true ;
+  private boolean closed    = false;
   private int     reconnectCount = 0;
   
   public RegistryImpl(RegistryConfig config) {
@@ -585,24 +586,6 @@ public class RegistryImpl implements Registry {
     return result;
   }
   
-  public <T> T executeBatchWithRetry(BatchOperations<T> ops, int retry, long timeoutThreshold) throws RegistryException {
-    RegistryException error = null;
-    for(int i = 0;i < retry; i++) {
-      try {
-        T result = ops.execute(this);
-        return result;
-      } catch (RegistryException e) {
-        if(e.getErrorCode().isConnectionProblem()) {
-          reconnect(15000);
-          error = e;
-        } else {
-          throw e;
-        }
-      }
-    }
-    throw error;
-  }
-  
   @Override
   public Registry newRegistry() throws RegistryException {
     return new RegistryImpl(config);
@@ -701,7 +684,13 @@ public class RegistryImpl implements Registry {
           String message = kEx.getMessage() + "\n" + "  path = " + nodeExistsEx.getPath();
           throw new RegistryException(ErrorCode.NodeExists, message, kEx) ;
         } else if(kEx.code() ==  KeeperException.Code.CONNECTIONLOSS) {
-          reconnect(15000);
+          if(zkClient.getState() == States.CONNECTING) {
+            try {
+              Thread.sleep(3000);
+            } catch (InterruptedException e) {
+              throw new RegistryException(ErrorCode.Timeout, "Cannot wait for retry due to the interrupt ", kEx) ;
+            }
+          }
           error = new RegistryException(ErrorCode.ConnectionLoss, kEx.getMessage(), kEx) ;
         }
       } catch(RegistryException ex) {
