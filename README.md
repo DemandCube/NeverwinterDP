@@ -34,6 +34,10 @@ A distributed, highly reliable ETL system that can handle multiple sources and s
 
 - [A high level overview of what Scribengin can do](docs/features.md)
 
+###Performance results
+
+- [AWS Performance Testing](docs/performanceResults/perfJan2016.md)
+
 ####Terminology Guide
 Learn the Scribengin terminology, and get acquainted with Scribengin at a high level.
 
