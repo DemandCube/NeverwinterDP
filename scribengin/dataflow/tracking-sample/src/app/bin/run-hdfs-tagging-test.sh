@@ -15,5 +15,5 @@ SHELL=$NEVERWINTERDP_BUILD_DIR/scribengin/bin/shell.sh
 
 DFS_APP_HOME="/applications/tracking-sample"
 
-$SHELL plugin com.neverwinterdp.scribengin.dataflow.tracking.HDFSTaggingTestLauncher \
+$SHELL plugin com.neverwinterdp.scribengin.dataflow.tracking.TestHDFSTaggingLauncher \
   --dfs-app-home $DFS_APP_HOME --local-app-home $APP_DIR --dataflow-id tracking $@ 

@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
-import com.neverwinterdp.scribengin.dataflow.tracking.HDFSTaggingTestLauncher;
+import com.neverwinterdp.scribengin.dataflow.tracking.TestHDFSTaggingLauncher;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingDataflowBuilder;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 
@@ -41,7 +41,7 @@ public class HDFSTaggingUnitTest  {
     dflBuilder.setHDFSAggregateOutput();
     dflBuilder.setDefaultReplication(1);
     
-    HDFSTaggingTestLauncher launcher = new HDFSTaggingTestLauncher();
+    TestHDFSTaggingLauncher launcher = new TestHDFSTaggingLauncher();
     launcher.execute(shell, dflBuilder);
     
     dflBuilder.runMonitor(shell);

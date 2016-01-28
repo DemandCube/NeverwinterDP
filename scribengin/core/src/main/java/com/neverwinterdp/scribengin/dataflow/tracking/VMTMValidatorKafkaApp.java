@@ -36,31 +36,45 @@ public class VMTMValidatorKafkaApp extends VMApp {
     TrackingConfig trackingConfig = vmConfig.getVMAppConfigAs(TrackingConfig.class);
     Registry registry = getVM().getVMRegistry().getRegistry();
     registry.setRetryable(true);
+    
     runValidate(registry, trackingConfig);
   }
 
-  public void runValidate(Registry registry, TrackingConfig trackingConfig) throws Exception {
-    logger.info("Start runValidate(...)");
-    kafkaClient = new KafkaClient("KafkaClient", trackingConfig.getKafkaZKConnects());
-    TrackingValidatorService validatorService = new TrackingValidatorService(registry, trackingConfig);
-    validatorService.addReader(new KafkaTrackingMessageReader(trackingConfig));
-    validatorService.start();
-    
-    logger.info("reportPath         = " + trackingConfig.getTrackingReportPath());
-    logger.info("maxRuntime         = " + trackingConfig.getValidatorMaxRuntime());
-    logger.info("maxMessageWaitTime = " + trackingConfig.getKafkaMessageWaitTimeout());
-    logger.info("validate topic     = " + trackingConfig.getKafkaValidateTopic());
-    long startWait = System.currentTimeMillis();
-    validatorService.awaitForTermination(trackingConfig.getValidatorMaxRuntime(), TimeUnit.MILLISECONDS);
-    kafkaClient.close();
-    long waitTime = System.currentTimeMillis() - startWait;
-    System.err.println("VMTMValidatorKafkaApp: Finish run(), waitTime = " + waitTime);
-    logger.info("Finish runValidate(...)");
+  public void runValidate(Registry registry, TrackingConfig trackingConfig) {
+    try {
+      info("Start runValidate(...)");
+      kafkaClient = new KafkaClient("KafkaClient", trackingConfig.getKafkaZKConnects());
+      TrackingValidatorService validatorService = new TrackingValidatorService(registry, trackingConfig);
+      validatorService.addReader(new KafkaTrackingMessageReader(trackingConfig));
+      validatorService.start();
+
+      info("reportPath         = " + trackingConfig.getTrackingReportPath());
+      info("maxRuntime         = " + trackingConfig.getValidatorMaxRuntime());
+      info("maxMessageWaitTime = " + trackingConfig.getKafkaMessageWaitTimeout());
+      info("validate topic     = " + trackingConfig.getKafkaValidateTopic());
+      long startWait = System.currentTimeMillis();
+      validatorService.awaitForTermination(trackingConfig.getValidatorMaxRuntime(), TimeUnit.MILLISECONDS);
+      kafkaClient.close();
+      long waitTime = System.currentTimeMillis() - startWait;
+      info("Finish run(), waitTime = " + waitTime);
+      info("Finish runValidate(...)");
+    } catch(Throwable error) {
+      error("Error:", error);
+    }
   }
   
   void info(String message) {
     if(logger != null) logger.info(message);
     else System.out.println("VMTMValidatorKafkaApp: " + message);
+  }
+  
+  void error(String message, Throwable error) {
+    if(logger != null) {
+      logger.error(message, error);
+    } else {
+      System.out.println("VMTMValidatorKafkaApp: " + message);
+      error.printStackTrace();
+    }
   }
   
   public class KafkaTrackingMessageReader extends TrackingMessageReader {
@@ -137,15 +151,15 @@ public class VMTMValidatorKafkaApp extends VMApp {
                 readerQueue.offer(pReader);
               }
             } catch (InterruptedException e) {
-              logger.error("Interrupted", e);
+              error("Interrupted", e);
               System.err.println("VMTMValidatorKafkaApp:  KafkaPartitionReader is interruptted" );
             } catch (Throwable e) {
-              logger.error("Fail to load the data from kafka", e);
+              error("Fail to load the data from kafka", e);
             } finally {
               try {
                 shutdown();
               } catch (Exception e) {
-                logger.error("Fail to shutdown kafka connector", e);
+                error("Fail to shutdown kafka connector", e);
               }
             }
           }

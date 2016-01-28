@@ -1,6 +1,7 @@
 package com.neverwinterdp.scribengin.dataflow.tracking;
 
 import com.beust.jcommander.Parameter;
+import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
@@ -13,7 +14,7 @@ import com.neverwinterdp.vm.client.shell.CommandInput;
 import com.neverwinterdp.vm.client.shell.Shell;
 import com.neverwinterdp.vm.client.shell.SubCommand;
 
-public class TrackingTestLauncher  extends SubCommand {
+public class TestTrackingLauncher  extends SubCommand {
   @Parameter(names = "--local-app-home", required = true, description = "Generator num of chunk")
   String localAppHome        = null;
   
@@ -144,4 +145,20 @@ public class TrackingTestLauncher  extends SubCommand {
   
   @Override
   public String getDescription() { return "Tracking app launcher"; }
+  
+  static public class GeneratorThread extends Thread {
+    private Registry       registry;
+    private TrackingConfig trackingConfig;
+    private VMTMGeneratorKafkaApp generatorApp;
+    
+    public GeneratorThread(Registry registry, TrackingConfig tConfig) {
+      this.registry       = registry;
+      this.trackingConfig = tConfig;
+    }
+    
+    public void run() {
+      generatorApp = new VMTMGeneratorKafkaApp();
+      generatorApp.runGenerator(registry, trackingConfig);
+    }
+  }
 }

@@ -12,7 +12,7 @@ import com.neverwinterdp.storage.hdfs.HDFSStorageTag;
 import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.client.YarnVMClient;
 
-public class HDFSTaggingTestLauncher extends TrackingTestLauncher {
+public class TestHDFSTaggingLauncher extends TestTrackingLauncher {
   private boolean waitForValidator = true;
   
   private GeneratorThread generatorThread;
@@ -55,22 +55,6 @@ public class HDFSTaggingTestLauncher extends TrackingTestLauncher {
     if(validatorThread.isAlive()) validatorThread.interrupt();
     while(generatorThread.isAlive() || validatorThread.isAlive()) {
       Thread.sleep(250);
-    }
-  }
-  
-  static public class GeneratorThread extends Thread {
-    private Registry       registry;
-    private TrackingConfig trackingConfig;
-    private VMTMGeneratorKafkaApp generatorApp;
-    
-    public GeneratorThread(Registry registry, TrackingConfig tConfig) {
-      this.registry       = registry;
-      this.trackingConfig = tConfig;
-    }
-    
-    public void run() {
-      generatorApp = new VMTMGeneratorKafkaApp();
-      generatorApp.runGenerator(registry, trackingConfig);
     }
   }
   

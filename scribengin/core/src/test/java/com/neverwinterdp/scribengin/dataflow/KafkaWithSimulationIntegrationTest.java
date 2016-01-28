@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingDataflowBuilder;
-import com.neverwinterdp.scribengin.dataflow.tracking.TrackingWithSimulationLauncher;
+import com.neverwinterdp.scribengin.dataflow.tracking.TestTrackingWithSimulationLauncher;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 
 public class KafkaWithSimulationIntegrationTest  {
@@ -42,7 +42,7 @@ public class KafkaWithSimulationIntegrationTest  {
     dflBuilder.setTrackingWindowSize(5000);
     dflBuilder.setSlidingWindowSize(300);
     
-    TrackingWithSimulationLauncher launcher = new TrackingWithSimulationLauncher();
+    TestTrackingWithSimulationLauncher launcher = new TestTrackingWithSimulationLauncher();
     launcher.setSimulateKill();
     launcher.execute(shell, dflBuilder);
     
