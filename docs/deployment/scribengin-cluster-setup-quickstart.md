@@ -448,7 +448,9 @@ ssh neverwinterdp@[node-name]
 ```
 
 
+###Using the Scribengin Shell
 
+Refer to our [Scribengin Shell Commands](scribenginCommands.md) Guide for how to interface with the Scribengin shell
 
 
 

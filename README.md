@@ -9,6 +9,7 @@ Scribengin
 4. [Feature List](#feature-list)
 5. [Terminology Guide](#terminology-guide)
 6. [Quickstart Guide](#quickstart-guide)
+7. [Using the Scribengin Shell](#using-the-scribengin-shell)
 7. [How to launch Scribengin in any cluster](#how-to-launch-a-cluster-in-an-arbitrary-environment-ie-in-house-cluster-aws-etc)
 5. [Developer Info](#developer-info)
 6. [Developer Guidelines](#developer-guidelines)
@@ -47,6 +48,11 @@ Learn the Scribengin terminology, and get acquainted with Scribengin at a high l
 Get Scribengin launched quickly!  This will walk you how to start a Scribengin instance in YARN.
 
 - [QuickStart Guide](docs/deployment/scribengin-cluster-setup-quickstart.md)
+
+####Using the Scribengin Shell
+
+
+- [Scribengin Shell Commands](docs/deployment/scribenginCommands.md)
 
 
 ####How to launch a cluster in an arbitrary environment (i.e. in-house cluster, AWS, etc)
