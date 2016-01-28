@@ -32,6 +32,9 @@ NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh
 #Dataflow Commands
 
 ##Stop your dataflow
+
+Stopped dataflows can be resumed.
+
 ```
 ./shell.sh dataflow stop --dataflow-id [dataflowID]
 ```
@@ -49,9 +52,11 @@ NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh
 ./shell.sh dataflow monitor --dataflow-id [dataflowID] --dump-period 5000
 ```
 
-##To wait until your dataflow is a certain status
+##To wait until your dataflow is at a certain status
 ```
 ./shell.sh dataflow wait-for-status --dataflow-id [dataflowID] --status TERMINATED  --timeout 60000 
+
+./shell.sh dataflow wait-for-status --dataflow-id [dataflowID] --status RUNNING --timeout 60000 
 ```
 
 #Registry Commands
@@ -69,6 +74,9 @@ NeverwinterDP/release/build/release/neverwinterdp/scribengin/bin/shell.sh
 #VM Commands
 
 ##Start the VMMaster
+
+Refer to the [Quickstart guide](scribengin-cluster-setup-quickstart.md) for full instructions on how to start the VM Master (Scribengin's YARN Application Master)
+
 ```
 ./shell.sh vm start
 ```
