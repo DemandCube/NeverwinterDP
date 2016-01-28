@@ -582,8 +582,22 @@ public class RegistryImpl implements Registry {
   }
   
   public <T> T executeBatch(BatchOperations<T> ops, int retry, long timeoutThreshold) throws RegistryException {
-    T result = ops.execute(this);
-    return result;
+    RegistryException error = null;
+    for(int i = 0; i < retry; i++) {
+      try { 
+        return ops.execute(this);
+      } catch(RegistryException ex) {
+        if(zkClient.getState() == States.CONNECTING) {
+          try {
+            Thread.sleep(timeoutThreshold);
+          } catch (InterruptedException e) {
+            throw new RegistryException(ErrorCode.Timeout, "Cannot wait to retry", ex);
+          }
+        }
+        error = ex;
+      }
+    }
+    throw error;
   }
   
   @Override
