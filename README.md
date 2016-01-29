@@ -17,11 +17,11 @@ Scribengin
 ####Overview
 Pronounced "Scribe Engine" 
 
-Scribengin is a highly reliable, highly available, and performant event/logging transport that registers data under defined schemas in a variety of end systems.  Scribengin enables you to have multiple flows of data from a data source to a data sink. Scribengin will tolerate system failures of individual nodes and will do a complete recovery in the case of system failure.
+Scribengin is a highly reliable, highly available, and performant event/logging transport that registers data under defined schemas in a variety of end systems.  Scribengin enables users to have multiple flows of data from a data source to a data sink. Scribengin will tolerate system failures of individual nodes and will do a complete recovery in the case of system failure.
 
 
 ####The Problem
-The core problem is how to reliably and scalably have a distributed application write data to multiple destination data systems.  This requires the ability to todo data mapping, partitioning, data enhancement, data transformation, and optional filtering to the destination system.
+The core problem is how to reliably and scalably have a distributed application write data to multiple destination data systems.  This requires the ability to do data mapping, partitioning, data enhancement, data transformation, and optional filtering to the destination system.
 
 ####The Scribengin Solution:
 A distributed, highly reliable ETL system that can handle multiple sources and sinks
@@ -30,21 +30,17 @@ A distributed, highly reliable ETL system that can handle multiple sources and s
 
 
 
-###Feature List
+###Get to know Scribengin!
 
-- [A high level overview of what Scribengin can do](docs/features.md)
+- [High Level Scribengin Features](docs/features.md)
+- [Learn the Scribengin terminology, and get acquainted with Scribengin at a high level.](docs/terminology.md)
 
 ###Performance results
 
 - [AWS Performance Testing](docs/performanceResults/perfJan2016.md)
 
-####Terminology Guide
-Learn the Scribengin terminology, and get acquainted with Scribengin at a high level.
-
-- [Terminology Guide](docs/terminology.md)
-
 ####Quickstart Guide
-Get Scribengin launched quickly!  This will walk you how to start a Scribengin instance in YARN.
+Get Scribengin launched quickly!  This will walk users how to start a Scribengin instance in YARN.
 
 - [QuickStart Guide](docs/deployment/scribengin-cluster-setup-quickstart.md)
 
@@ -55,7 +51,7 @@ Get Scribengin launched quickly!  This will walk you how to start a Scribengin i
 
 
 ####Developer Info
-- [Get your dev environment setup, learn to write a dataflow](docs/dataflowDevelopment/dataflowDevTableOfContents.md)
+- [Dev environment setup, learn to write a dataflow](docs/dataflowDevelopment/dataflowDevTableOfContents.md)
 - [Operator Development Guide](docs/dataflowDevelopment/operator-dev-guide.md)
 
 ####Developer Guidelines
