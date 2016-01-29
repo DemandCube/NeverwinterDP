@@ -8,6 +8,8 @@ Scribengin Shell Commands
 
 #Intro
 
+The Scribengin Shell allows you to interface with Scribengin.  You can issue commands and get information about running Dataflows and VMs running in your cluster.
+
 ##Configure your Zookeeper connection
 Configure this environment variable to point to your Zookeeper node(s)
 ```
@@ -68,6 +70,9 @@ Stopped dataflows can be resumed.
 
 ##Get info about a specific registry node
 ```
+./shell.sh registry info --path [registry path]
+
+#Example
 ./shell.sh registry info --path /scribengin/dataflows
 ```
 
@@ -78,6 +83,7 @@ Stopped dataflows can be resumed.
 Refer to the [Quickstart guide](scribengin-cluster-setup-quickstart.md) for full instructions on how to start the VM Master (Scribengin's YARN Application Master)
 
 ```
+#YARN must be up and running
 ./shell.sh vm start
 ```
 

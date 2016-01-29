@@ -135,3 +135,4 @@ The following steps will deploy all the necessary components to run Scribengin t
 
 4. Now you're ready to launch your dataflow!  Check the [quickstart guide](scribengin-cluster-setup-quickstart.md#launching-scribengin) for instructions on that
 
+5. You can also issue commands/get info with the Scribengin Shell.  Please refer to the [Scribengin Shell Guide](scribenginCommands.md) for more info.

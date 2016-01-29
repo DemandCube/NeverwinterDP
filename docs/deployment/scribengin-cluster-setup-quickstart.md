@@ -12,6 +12,7 @@ Scribengin Quickstart
 7. [Launching Scribengin manually in an already setup YARN cluster ](#manually-launching)
 8. [Launching a Datafow from a preconfigured test](#launching-a-dataflow-from-a-preconfigured-test)
 9. [Monitoring Scribengin](#monitoring-scribengin)
+10. [Using the Scribengin Shell](#using-the-scribengin-shell)
 
 ---
 
@@ -450,7 +451,7 @@ ssh neverwinterdp@[node-name]
 
 ###Using the Scribengin Shell
 
-Refer to our [Scribengin Shell Commands](scribenginCommands.md) Guide for how to interface with the Scribengin shell
+Refer to our [Scribengin Shell Commands](scribenginCommands.md) Guide for how to interface with the Scribengin shell.  The Scribengin shell allows you to issue commands to Scribengin and get info on running dataflows and VMs.
 
 
 
