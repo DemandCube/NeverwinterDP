@@ -6,10 +6,9 @@ Scribengin
 1. [Overview](#overview)
 2. [The Problem](#the-problem)
 3. [The Scribengin Solution](#the-scribengin-solution)
-4. [Feature List](#feature-list)
-5. [Terminology Guide](#terminology-guide)
-6. [Quickstart Guide](#quickstart-guide)
-7. [How to launch Scribengin in any cluster](#how-to-launch-a-cluster-in-an-arbitrary-environment-ie-in-house-cluster-aws-etc)
+4. [Read this to get Started](#read-this-to-get-started)
+5. [Performance Results](#performance-results)
+6. [Quickstart Guides](#quickstart-guides)
 5. [Developer Info](#developer-info)
 6. [Developer Guidelines](#developer-guidelines)
 6. [Releasing Code](#release)
@@ -30,7 +29,7 @@ A distributed, highly reliable ETL system that can handle multiple sources and s
 
 
 
-###Get to know Scribengin!
+###Read this to get started!
 
 - [High Level Scribengin Features](docs/features.md)
 - [Learn the Scribengin terminology, and get acquainted with Scribengin at a high level.](docs/terminology.md)
@@ -39,15 +38,11 @@ A distributed, highly reliable ETL system that can handle multiple sources and s
 
 - [AWS Performance Testing](docs/performanceResults/perfJan2016.md)
 
-####Quickstart Guide
+####Quickstart Guides
 Get Scribengin launched quickly!  This will walk users how to start a Scribengin instance in YARN.
 
 - [QuickStart Guide](docs/deployment/scribengin-cluster-setup-quickstart.md)
-
-
-####How to launch a cluster in an arbitrary environment (i.e. in-house cluster, AWS, etc)
-
-- [Arbitrary Cluster Guide](docs/deployment/arbitrary-cluster-guide.md)
+- [How to launch a cluster in an arbitrary environment (i.e. in-house cluster, AWS, etc]](docs/deployment/arbitrary-cluster-guide.md)
 
 
 ####Developer Info
