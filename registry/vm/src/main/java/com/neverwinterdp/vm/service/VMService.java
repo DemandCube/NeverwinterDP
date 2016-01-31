@@ -12,6 +12,7 @@ import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
+import com.neverwinterdp.registry.SequenceIdTracker;
 import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.event.NodeEvent;
 import com.neverwinterdp.registry.event.RegistryListener;
@@ -28,8 +29,10 @@ public class VMService {
   final static public String ACTIVE_PATH    = "/vm/instances/active";
   final static public String HISTORY_PATH   = "/vm/instances/history";
   
-  final static public String MASTER_PATH    = "/vm/master";
-  final static public String LEADER_PATH    = MASTER_PATH + "/leader";
+  final static public String MASTER_PATH            = "/vm/master";
+  final static public String MASTER_ID_TRACKER_PATH = MASTER_PATH + "/id-tracker";
+  final static public String MASTER_LEADER_PATH     = MASTER_PATH + "/leader";
+
   final static public String EVENTS_PATH    = "/vm/events";
   final static public String SHUTDOWN_EVENT_PATH = EVENTS_PATH + "/shutdown";
   
@@ -46,14 +49,13 @@ public class VMService {
   @PostConstruct
   public void onInit() throws Exception {
     registry.createIfNotExist(MASTER_PATH + "/status") ;
-    registry.createIfNotExist(LEADER_PATH) ;
+    registry.createIfNotExist(MASTER_LEADER_PATH) ;
     registry.createIfNotExist(EVENTS_PATH) ;
     
     registry.createIfNotExist(ALL_PATH) ;
     registry.createIfNotExist(ACTIVE_PATH) ;
     registry.createIfNotExist(HISTORY_PATH) ;
     registry.setData(MASTER_PATH + "/status", Status.INIT);
-    
     registryListener = new RegistryListener(registry);
   
   }
@@ -187,7 +189,7 @@ public class VMService {
     registry.createIfNotExist(ALL_PATH) ;
     registry.createIfNotExist(ACTIVE_PATH) ;
     registry.createIfNotExist(HISTORY_PATH) ;
-    registry.createIfNotExist(LEADER_PATH) ;
+    registry.createIfNotExist(MASTER_LEADER_PATH) ;
     
     String vmPath  = ALL_PATH + "/" + descriptor.getVmId();
     descriptor.setRegistryPath(vmPath);

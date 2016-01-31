@@ -581,11 +581,11 @@ public class RegistryImpl implements Registry {
     return new TransactionImpl(this, zkClient.transaction());
   }
   
-  public <T> T executeBatch(BatchOperations<T> ops, int retry, long timeoutThreshold) throws RegistryException {
+  public <T> T executeBatch(BatchOperations<T> op, int retry, long timeoutThreshold) throws RegistryException {
     RegistryException error = null;
     for(int i = 0; i < retry; i++) {
       try { 
-        return ops.execute(this);
+        return op.execute(this);
       } catch(RegistryException ex) {
         if(zkClient.getState() == States.CONNECTING) {
           try {

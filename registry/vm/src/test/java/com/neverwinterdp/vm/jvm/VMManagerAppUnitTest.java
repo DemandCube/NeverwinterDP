@@ -49,13 +49,13 @@ public class VMManagerAppUnitTest  {
   @Test
   public void testMaster() throws Exception {
     try {
-      WaitingNodeEventListener master1waitingListener = vmCluster.getVMClusterBuilder().createVMMaster(null, "vm-master-1");
+      WaitingNodeEventListener master1waitingListener = vmCluster.getVMClusterBuilder().createVMMaster(null);
       master1waitingListener.waitForEvents(5000);
       TabularFormater info = master1waitingListener.getTabularFormaterEventLogInfo();
       info.setTitle("Waiting for vm-master events to make sure it is launched properly");
       System.out.println(info.getFormatText()); 
       
-      vmCluster.getVMClusterBuilder().createVMMaster(null, "vm-master-2");
+      vmCluster.getVMClusterBuilder().createVMMaster(null);
       Thread.sleep(2000);
       
       vmClient = vmCluster.getVMClient();

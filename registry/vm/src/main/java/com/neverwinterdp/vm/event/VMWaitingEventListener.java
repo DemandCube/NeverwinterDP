@@ -38,7 +38,7 @@ public class VMWaitingEventListener {
   }
   
   public void waitVMMaster(String desc, final String vmName) throws Exception {
-    waitingEventListeners.add(VMService.LEADER_PATH, new VMLeaderNodeEventMatcher(vmName), desc);
+    waitingEventListeners.add(VMService.MASTER_LEADER_PATH, new VMLeaderNodeEventMatcher(vmName), desc);
   }
   
   public void waitForEvents(long timeout) throws Exception {

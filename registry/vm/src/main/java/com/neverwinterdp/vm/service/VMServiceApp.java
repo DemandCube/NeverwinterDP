@@ -30,7 +30,7 @@ public class VMServiceApp extends VMApp {
  
   @Override
   public void run() throws Exception {
-    election = new LeaderElection(getVM().getVMRegistry().getRegistry(), VMService.LEADER_PATH) ;
+    election = new LeaderElection(getVM().getVMRegistry().getRegistry(), VMService.MASTER_LEADER_PATH) ;
     election.setListener(new VMServiceLeaderElectionListener());
     election.start();
     
@@ -67,7 +67,7 @@ public class VMServiceApp extends VMApp {
       final Registry registry = getVM().getVMRegistry().getRegistry();
       RefNode refNode = new RefNode();
       refNode.setPath(getVM().getDescriptor().getRegistryPath());
-      registry.setData(VMService.LEADER_PATH, refNode);
+      registry.setData(VMService.MASTER_LEADER_PATH, refNode);
       AppContainer appContainer = getVM().getAppContainer();
       Map<String, String> moduleProps = new HashMap<>() ;
       if(vmConfig.getClusterEnvironment() ==  ClusterEnvironment.JVM) {

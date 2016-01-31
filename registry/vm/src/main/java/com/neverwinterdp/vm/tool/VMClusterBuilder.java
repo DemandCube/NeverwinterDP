@@ -2,6 +2,7 @@ package com.neverwinterdp.vm.tool;
 
 import java.util.List;
 
+import com.neverwinterdp.registry.SequenceIdTracker;
 import com.neverwinterdp.registry.event.WaitingNodeEventListener;
 import com.neverwinterdp.registry.event.WaitingRandomNodeEventListener;
 import com.neverwinterdp.util.text.TabularFormater;
@@ -33,7 +34,8 @@ public class VMClusterBuilder {
     if(!vmClient.getRegistry().isConnect()) {
       vmClient.getRegistry().connect() ;
     }
-    WaitingNodeEventListener waitingListener = createVMMaster(localAppHome, "vm-master-1");
+    
+    WaitingNodeEventListener waitingListener = createVMMaster(localAppHome);
     waitingListener.waitForEvents(30000);
     TabularFormater info = waitingListener.getTabularFormaterEventLogInfo();
     info.setTitle("Waiting for vm-master events to make sure it is launched properly");
@@ -47,10 +49,13 @@ public class VMClusterBuilder {
     }
   }
   
-  public WaitingNodeEventListener createVMMaster(String localAppHome, String vmId) throws Exception {
+  public WaitingNodeEventListener createVMMaster(String localAppHome) throws Exception {
     if(!vmClient.getRegistry().isConnect()) {
       vmClient.getRegistry().connect() ;
     }
+    
+    SequenceIdTracker masterIdTracker= new SequenceIdTracker(vmClient.getRegistry(), VMService.MASTER_ID_TRACKER_PATH, true);
+    String vmId = "vm-master-" + masterIdTracker.nextInt();
     
     WaitingNodeEventListener waitingListener = new WaitingRandomNodeEventListener(vmClient.getRegistry()) ;
     String vmStatusPath = VMService.getVMStatusPath(vmId);
