@@ -2,8 +2,11 @@ Scribengin Performance January 2016
 ===================================
 #Contents#
 1. [Methodology](#methodology)
-2. [Results](#results)
-3. [Conclusions](#conclusions)
+2. [Kafka Results](#kafka-results)
+3. [Kakfa to Kafka Conclusions](#kafka-to-kafka-conclusions)
+4. [HDFS Results](#hdfs-results)
+5. [Kafka to HDFS Conclusions](#kafka-to-hdfs-conclusions)
+
 
 #Methodology#
 
@@ -12,7 +15,9 @@ The dataflow we'll be using to test Scribengin will be our splitter dataflow tha
 
 This dataflow will simulate a real case scenario for Scribengin - parsing logs.  Every record passed through contains data as well as a log level.  The log levels are INFO, WARNING, and ERROR.  The logs are split up by level by Scribengin, then each log level is processed individually to move into final storage.
 
-In this test, we'll be moving data from Kafka, into intermediary Kafka topics, and finally moving the data into a single aggregate Kafka topic.  Scribengin will need to manage moving data between 5 topics with 8 partitions each.
+In this test, we'll be moving data from Kafka, into intermediary Kafka topics, and finally moving the data into a final sink.  The final sinks tested are Kafka and HDFS.  
+
+Scribengin will need to manage moving data between 5 topics with 8 partitions each.
 
 All tests are run in AWS.
 
@@ -46,13 +51,18 @@ Finally, the **Data Validator** reads the data in from the **Aggregate** Kafka t
 | default.replication.factor  | 2         |
 | log.segment.bytes           | 400000000 |
 
+##HDFS Configuration
+| Config                      | Value     |
+| --------------------------- | --------  |
+| dfs.replication             | 2         |
+
 ##AWS Configuration
 
 All AWS containers are configured to use EBS provisioned IOP (SSD) volumes.
 
 Specifics to number of instances and instance types will be listed below.
 
-#Results
+#KAFKA Results
 
 ##Small
 
@@ -132,8 +142,8 @@ Performance
 
 |   Stat     |   Units        |
 | ---------  | -------------- |
-|     20,000 | records/second |
-| 17,500,000 |   bytes/second | 
+|     26,200 | records/second |
+| 23,000,000 |   bytes/second | 
 </pre></td><td valign="top"><pre>
 AWS Configuration
 
@@ -146,31 +156,10 @@ AWS Configuration
 | Elasticsearch | t2.small  |  1                   |
 </pre></td></tr></table>
 
-##XLarge
-
-<table>
-<tr>
-<td valign="top"><pre>
-Performance
-
-|   Stat     |   Units        |
-| ---------  | -------------- |
-|     23,500 | records/second |
-| 20,500,000 |   bytes/second | 
-</pre></td><td valign="top"><pre>
-AWS Configuration
-
-| Role          | Type       | Num Of Instances     |
-| ------------- | ---------- | -------------------- | 
-| Hadoop-Worker | m4.xlarge  |  4                   |
-| Kafka         | m4.large   |  5                   |
-| Hadoop-Master | t2.medium  |  1                   |
-| Zookeeper     | t2.small   |  1                   |
-| Elasticsearch | t2.small   |  1                   |
-</pre></td></tr></table>
 
 
-#Conclusions
+
+#Kafka to Kafka Conclusions
 
 Scribengin is limited by CPU, network speed, and disk speed.
 
@@ -182,10 +171,85 @@ Finally, disk speed is also crucial.  When the point of an operation is to read 
 
 As demonstrated by the difference between **Large 4 Workers** and **Large 5 Workers**, throwing more machines at the problem won't necessarily increase performance.  To properly make the most of your cluster, you must ensure your data is able to run in parallel, that data is correctly partitioned, and that your CPU can handle the amount of parallelism configured.  m4.large EC2 instances are limited in that they are 2 vCPU's each, which limits the available resources to handle that many simultaneous tasks.
 
-On the same token, if you have faster machines, as demonstrated by the **Xlarge** cluster, your dataflow will benefit from having higher network throughput, but the m4.xlarge instances's vCPU's were largely under-utilized.
+
+
+#HDFS Results
+##Large 3 Workers
+<table>
+<tr>
+<td valign="top"><pre>
+Performance
+
+|   Stat     |   Units        |
+| ---------  | -------------- |
+|     17,600 | records/second |
+| 15,300,000 |   bytes/second | 
+</pre></td><td valign="top"><pre>
+AWS Configuration
+
+| Role          | Type      | Num Of Instances     |
+| ------------- | --------- | -------------------- | 
+| Hadoop-Worker | m4.large  |  3                   |
+| Kafka         | m4.large  |  5                   |
+| Hadoop-Master | t2.medium |  1                   |
+| Zookeeper     | t2.small  |  1                   |
+| Elasticsearch | t2.small  |  1                   |
+</pre></td></tr></table>
+
+##Large 4 Workers
+<table>
+<tr>
+<td valign="top"><pre>
+Performance
+
+|   Stat     |   Units        |
+| ---------  | -------------- |
+|     17,500 | records/second |
+| 15,100,000 |   bytes/second | 
+</pre></td><td valign="top"><pre>
+AWS Configuration
+
+| Role          | Type      | Num Of Instances     |
+| ------------- | --------- | -------------------- | 
+| Hadoop-Worker | m4.large  |  4                   |
+| Kafka         | m4.large  |  5                   |
+| Hadoop-Master | t2.medium |  1                   |
+| Zookeeper     | t2.small  |  1                   |
+| Elasticsearch | t2.small  |  1                   |
+</pre></td></tr></table>
+
+
+##Large 5 Workers
+
+<table>
+<tr>
+<td valign="top"><pre>
+Performance
+
+|   Stat     |   Units        |
+| ---------  | -------------- |
+|     24,600 | records/second |
+| 21,200,000 |   bytes/second | 
+</pre></td><td valign="top"><pre>
+AWS Configuration
+
+| Role          | Type      | Num Of Instances     |
+| ------------- | --------- | -------------------- | 
+| Hadoop-Worker | m4.large  |  5                   |
+| Kafka         | m4.large  |  5                   |
+| Hadoop-Master | t2.medium |  1                   |
+| Zookeeper     | t2.small  |  1                   |
+| Elasticsearch | t2.small  |  1                   |
+</pre></td></tr></table>
 
 
 
+
+
+#Kafka to HDFS Conclusions
+For 3 and 4 workers, all Hadoop workers are largely limited by their CPU's.  Because m4.large's are dual cores, tests often reported machines being pinned at 100% cpu for the whole test.
+
+For 5 workers, the extra cores give the workers some breathing room.  Instead, at this point - the cluster is limited by the amount of network throughput.  Cloudwatch reported the machines at close to 800 mbps consistently while doing the test, which is expected to be close to maximum for m4.large's from doing net testing using iperf.  With replication for HDFS and Kafka each set to 2, the system is under a heavy network load for this test.  
 
 
 
