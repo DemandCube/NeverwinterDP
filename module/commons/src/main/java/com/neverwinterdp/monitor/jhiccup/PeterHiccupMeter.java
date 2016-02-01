@@ -133,9 +133,7 @@ public class PeterHiccupMeter extends Thread {
       hiccuoInfo.setP99(accumulatedHistogram.getValueAtPercentile(99.0) / outputValueUnitRatio);
       hiccuoInfo.setP9990(accumulatedHistogram.getValueAtPercentile(99.90) / outputValueUnitRatio);
       hiccuoInfo.setP9999(accumulatedHistogram.getValueAtPercentile(99.99) / outputValueUnitRatio);
-
     }
-
     return hiccuoInfo;
   }
 }

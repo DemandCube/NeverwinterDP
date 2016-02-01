@@ -13,8 +13,7 @@ include 'registry/vm-sample'
 
 include 'scribengin/storage'
 include 'scribengin/core'
-include 'scribengin/experiment'
-include 'scribengin/dataflow/tracking-sample'
+include 'scribengin/dataflow/example'
 include 'scribengin/release'
 
 include 'jvmagent/bootstrap'

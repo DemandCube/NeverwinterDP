@@ -1,8 +1,8 @@
-archivesBaseName = 'scribengin.dataflow.tracking-sample'
+archivesBaseName = 'scribengin.dataflow.example'
 
 eclipse {
   project {
-    name = 'scribengin.dataflow.tracking-sample'
+    name = 'scribengin.dataflow.example'
   }
 }
 
