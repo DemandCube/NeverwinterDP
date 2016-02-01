@@ -204,8 +204,8 @@ Performance
 
 |   Stat     |   Units        |
 | ---------  | -------------- |
-|     17,500 | records/second |
-| 15,100,000 |   bytes/second | 
+|     23,000 | records/second |
+| 20,000,000 |   bytes/second | 
 </pre></td><td valign="top"><pre>
 AWS Configuration
 
