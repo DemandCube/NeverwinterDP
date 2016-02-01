@@ -28,7 +28,6 @@ import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class ExampleSimpleDataflowSubmitterTest {
-  
   LocalScribenginCluster localScribenginCluster ;
   ScribenginShell shell;
   int numMessages = 10000;
@@ -70,7 +69,7 @@ public class ExampleSimpleDataflowSubmitterTest {
    * @throws Exception
    */
   @Test
-  public void TestExampleSimpleDataflowSubmitterTest() throws Exception{
+  public void testExampleSimpleDataflowSubmitterTest() throws Exception{
     //Create a new DataflowSubmitter with default properties
     ExampleSimpleDataflowSubmitter eds = new ExampleSimpleDataflowSubmitter(shell);
     
@@ -111,7 +110,7 @@ public class ExampleSimpleDataflowSubmitterTest {
     }
     
     //Get basic info on the dataflow
-    shell.execute("dataflow info --dataflow-id "+eds.getDataflowID());
+    shell.execute("dataflow info --dataflow-id " + eds.getDataflowID());
   }
   
   /**
@@ -148,8 +147,4 @@ public class ExampleSimpleDataflowSubmitterTest {
     KafkaStream<byte[], byte[]> stream =  consumerMap.get(topic).get(0);
     return stream.iterator();
   }
-  
 }
-
-
-
