@@ -26,12 +26,12 @@ task release(dependsOn: 'build') << {
 
   copy {
     from "${buildDir}/libs"
-    into "${releaseDir}/dataflow/tracking-sample/libs"
+    into "${releaseDir}/dataflow/example/libs"
   }
 
   def appHome = "src/app";
   copy {
     from appHome
-      into "${releaseDir}/dataflow/tracking-sample"
+      into "${releaseDir}/dataflow/example"
   }
 }
