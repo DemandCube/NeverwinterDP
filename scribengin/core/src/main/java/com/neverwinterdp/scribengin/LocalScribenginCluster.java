@@ -59,6 +59,7 @@ public class LocalScribenginCluster {
     VMClusterBuilder.h1("Start kafka cluster");
     kafkaCluster.start();
     Thread.sleep(1000);
+    
     VMClusterBuilder.h1("Start vm-master");
     scribenginClusterBuilder = new ScribenginClusterBuilder(new VMClusterBuilder(null, new LocalVMClient()));
     scribenginClusterBuilder.start();
