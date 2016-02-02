@@ -279,8 +279,7 @@ public class SimpleDataflowExample {
     simpleDataflowExample.validate();
     
     //Get some info on the running dataflow
-    shell.execute("dataflow info --dataflow-id " + config.dataflowId+" --show-all");
-    
+    shell.execute("dataflow info --dataflow-id " + config.dataflowId);
     
     //Close connection with Scribengin
     shell.close();
