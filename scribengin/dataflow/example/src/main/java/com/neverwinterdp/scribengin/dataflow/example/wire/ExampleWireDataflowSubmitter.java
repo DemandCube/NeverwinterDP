@@ -13,6 +13,7 @@ import com.neverwinterdp.scribengin.dataflow.Operator;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.vm.client.VMClient;
 
 public class ExampleWireDataflowSubmitter {
   private String dataflowID;
@@ -27,6 +28,9 @@ public class ExampleWireDataflowSubmitter {
   
   private ScribenginShell shell;
   private DataflowSubmitter submitter;
+  
+  private String localAppHome;
+  private String dfsAppHome;
   
   public ExampleWireDataflowSubmitter(ScribenginShell shell){
     this(shell, new Properties());
@@ -59,6 +63,11 @@ public class ExampleWireDataflowSubmitter {
     //The kafka output topic
     outputTopic = props.getProperty("dataflow.outputTopic", "output.topic");
     
+    //The example hdfs dataflow local location
+    localAppHome = props.getProperty("dataflow.localapphome", "N/A");
+    
+    //DFS location to upload the example dataflow
+    dfsAppHome = props.getProperty("dataflow.dfsAppHome", "/applications/dataflow/splitterexample");
   }
   
   /**
@@ -67,6 +76,10 @@ public class ExampleWireDataflowSubmitter {
    * @throws Exception
    */
   public void submitDataflow(String kafkaZkConnect) throws Exception{
+    //Upload the dataflow to HDFS
+    VMClient vmClient = shell.getScribenginClient().getVMClient();
+    vmClient.uploadApp(localAppHome, dfsAppHome);
+    
     Dataflow<Message, Message> dfl = buildDataflow(kafkaZkConnect);
     //Get the dataflow's descriptor
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
@@ -147,72 +160,13 @@ public class ExampleWireDataflowSubmitter {
     return dataflowID;
   }
 
-  public void setDataflowID(String dataflowID) {
-    this.dataflowID = dataflowID;
-  }
-
-  public int getDefaultReplication() {
-    return defaultReplication;
-  }
-
-  public void setDefaultReplication(int defaultReplication) {
-    this.defaultReplication = defaultReplication;
-  }
-
-  public int getDefaultParallelism() {
-    return defaultParallelism;
-  }
-
-  public void setDefaultParallelism(int defaultParallelism) {
-    this.defaultParallelism = defaultParallelism;
-  }
-
-
-  public int getNumOfWorker() {
-    return numOfWorker;
-  }
-
-  public void setNumOfWorker(int numOfWorker) {
-    this.numOfWorker = numOfWorker;
-  }
-
-  public int getNumOfExecutorPerWorker() {
-    return numOfExecutorPerWorker;
-  }
-
-  public void setNumOfExecutorPerWorker(int numOfExecutorPerWorker) {
-    this.numOfExecutorPerWorker = numOfExecutorPerWorker;
-  }
-
   public String getInputTopic() {
     return inputTopic;
   }
 
-  public void setInputTopic(String inputTopic) {
-    this.inputTopic = inputTopic;
-  }
 
   public String getOutputTopic() {
     return outputTopic;
   }
 
-  public void setOutputTopic(String outputTopic) {
-    this.outputTopic = outputTopic;
-  }
-
-  public ScribenginShell getShell() {
-    return shell;
-  }
-
-  public void setShell(ScribenginShell shell) {
-    this.shell = shell;
-  }
-
-  public DataflowSubmitter getSubmitter() {
-    return submitter;
-  }
-
-  public void setSubmitter(DataflowSubmitter submitter) {
-    this.submitter = submitter;
-  }
 }

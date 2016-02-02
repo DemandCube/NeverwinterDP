@@ -55,6 +55,8 @@ dfl.setDefaultParallelism(defaultParallelism).
 The full code looks like this:
 
 ```java
+package com.neverwinterdp.scribengin.dataflow.example.wire;
+
 import java.util.Properties;
 
 import com.neverwinterdp.message.Message;
@@ -68,6 +70,7 @@ import com.neverwinterdp.scribengin.dataflow.Operator;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.vm.client.VMClient;
 
 public class ExampleWireDataflowSubmitter {
   private String dataflowID;
@@ -82,6 +85,9 @@ public class ExampleWireDataflowSubmitter {
   
   private ScribenginShell shell;
   private DataflowSubmitter submitter;
+  
+  private String localAppHome;
+  private String dfsAppHome;
   
   public ExampleWireDataflowSubmitter(ScribenginShell shell){
     this(shell, new Properties());
@@ -114,6 +120,11 @@ public class ExampleWireDataflowSubmitter {
     //The kafka output topic
     outputTopic = props.getProperty("dataflow.outputTopic", "output.topic");
     
+    //The example hdfs dataflow local location
+    localAppHome = props.getProperty("dataflow.localapphome", "N/A");
+    
+    //DFS location to upload the example dataflow
+    dfsAppHome = props.getProperty("dataflow.dfsAppHome", "/applications/dataflow/splitterexample");
   }
   
   /**
@@ -122,6 +133,10 @@ public class ExampleWireDataflowSubmitter {
    * @throws Exception
    */
   public void submitDataflow(String kafkaZkConnect) throws Exception{
+    //Upload the dataflow to HDFS
+    VMClient vmClient = shell.getScribenginClient().getVMClient();
+    vmClient.uploadApp(localAppHome, dfsAppHome);
+    
     Dataflow<Message, Message> dfl = buildDataflow(kafkaZkConnect);
     //Get the dataflow's descriptor
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
@@ -131,7 +146,7 @@ public class ExampleWireDataflowSubmitter {
     //Ensure all your sources and sinks are up and running first, then...
 
     //Submit the dataflow and wait until it starts running
-    submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForRunning(60000);
+    submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForDataflowRunning(60000);
     
   }
   
@@ -141,7 +156,7 @@ public class ExampleWireDataflowSubmitter {
    * @throws Exception
    */
   public void waitForDataflowCompletion(int timeout) throws Exception{
-    this.submitter.waitForFinish(timeout);
+    submitter.waitForDataflowStop(timeout);
   }
   
   /**
@@ -196,6 +211,22 @@ public class ExampleWireDataflowSubmitter {
     
     return dfl;
   }
+  
+  
+  public String getDataflowID() {
+    return dataflowID;
+  }
+
+  public String getInputTopic() {
+    return inputTopic;
+  }
+
+
+  public String getOutputTopic() {
+    return outputTopic;
+  }
+
+}
 
 ```
 
