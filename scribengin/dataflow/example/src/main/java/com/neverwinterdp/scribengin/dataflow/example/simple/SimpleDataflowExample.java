@@ -221,7 +221,7 @@ public class SimpleDataflowExample {
     return stream.iterator();
   }
   
-  public static void main(String args[]) throws Exception {
+  static public void main(String args[]) throws Exception {
     //Use JCommander to parse command line args
     Config config = new Config();
     JCommander jCommander = new JCommander(config, args);
