@@ -187,12 +187,12 @@ public class SimpleDataflowExample {
     producer.close();
   }
   
-  public boolean validate() {
+  public boolean validate() throws Exception {
     ConsumerIterator<byte[], byte[]> it = getConsumerIterator(config.zkConnect, config.outputTopic);
     int[] output = new int[config.inputNumOfMessages];
     Arrays.fill(output, -1);
+    int count = 0;
     try {
-      int count = 0;
       while(it.hasNext()) {
         Message message = JSONSerializer.INSTANCE.fromBytes(it.next().message(), Message.class);
         String data = new String(message.getData());
@@ -204,7 +204,11 @@ public class SimpleDataflowExample {
         }
       }
     } catch (ConsumerTimeoutException e) { 
-      e.printStackTrace();
+     //e.printStackTrace();
+    }
+    
+    if(count != config.inputNumOfMessages) {
+      throw new Exception("Input " + config.inputNumOfMessages + ", but can read only " + config.inputNumOfMessages + " messages");
     }
     
     boolean validated = true;
@@ -270,10 +274,12 @@ public class SimpleDataflowExample {
     simpleDataflowExample.createInputMessages();
     simpleDataflowExample.submitDataflow();
     
+    //Wait to make sure that dataflow is running and produce some messages to the output topic
+    Thread.sleep(1500);
     simpleDataflowExample.validate();
     
     //Get some info on the running dataflow
-    shell.execute("dataflow info --dataflow-id "+config.dataflowId+" --show-all");
+    shell.execute("dataflow info --dataflow-id " + config.dataflowId+" --show-all");
     
     
     //Close connection with Scribengin
