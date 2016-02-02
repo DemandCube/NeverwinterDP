@@ -18,6 +18,6 @@ JAVA_OPTS="-Xshare:auto -Xms128m -Xmx512m -XX:-UseSplitVerifier"
 
 MAIN_CLASS="com.neverwinterdp.scribengin.dataflow.example.simple.SimpleDataflowExample"
 
-echo "Command: $JAVACMD -Djava.ext.dirs=$APP_DIR/libs:$JAVA_HOME/jre/lib/ext $JAVA_OPTS $MAIN_CLASS $@"
+echo "Command: $JAVACMD -Djava.ext.dirs=$SCRIBENGIN_APP_DIR/libs:$APP_DIR/libs:$JAVA_HOME/jre/lib/ext $JAVA_OPTS $MAIN_CLASS $@"
 
 $JAVACMD -Djava.ext.dirs=$SCRIBENGIN_APP_DIR/libs:$APP_DIR/libs:$JAVA_HOME/jre/lib/ext $JAVA_OPTS $MAIN_CLASS "$@"
