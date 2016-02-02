@@ -52,7 +52,10 @@ public class SimpleDataflowExampleUnitTest {
   @Test
   public void testExampleSimpleDataflow() throws Exception{
     //Create a new DataflowSubmitter with default properties
-    String[] args = {"--zk-connect", localScribenginCluster.getKafkaCluster().getZKConnect()};
+    String[] args = {
+        "--local-app-home", "N/A", 
+        "--zk-connect", localScribenginCluster.getKafkaCluster().getZKConnect()
+     };
     Config config = new Config();
     new JCommander(config, args);
     SimpleDataflowExample simpleDataflowExample = new SimpleDataflowExample(shell, config);
