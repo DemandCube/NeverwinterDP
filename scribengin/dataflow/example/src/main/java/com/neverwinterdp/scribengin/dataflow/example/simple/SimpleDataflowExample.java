@@ -283,5 +283,7 @@ public class SimpleDataflowExample {
     
     //Close connection with Scribengin
     shell.close();
+    shell.console().println("Simple Example Datafow is done!!!");
+    System.exit(0);
   }
 }
