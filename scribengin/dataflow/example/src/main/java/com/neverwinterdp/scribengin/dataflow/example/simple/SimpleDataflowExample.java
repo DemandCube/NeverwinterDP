@@ -103,7 +103,8 @@ public class SimpleDataflowExample {
     //Ensure all your sources and sinks are up and running first, then...
 
     //Submit the dataflow and wait until it starts running
-    DataflowSubmitter submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForDataflowRunning(60000);
+    DataflowSubmitter submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl);
+    submitter.submit().waitForDataflowRunning(60000);
 
     /** Wait for the dataflow to complete within the given timeout */
     //submitter.waitForDataflowStop(60000);
@@ -252,6 +253,8 @@ public class SimpleDataflowExample {
     YarnVMClient vmClient = new YarnVMClient(registry, VMConfig.ClusterEnvironment.YARN, hadoopProps) ;
     ScribenginShell shell = new ScribenginShell(vmClient) ;
     shell.attribute(HadoopProperties.class, hadoopProps);
+    
+    vmClient.uploadApp("", "");
     
     //Launch our configured dataflow
     SimpleDataflowExample simpleDataflowExample = new SimpleDataflowExample(shell, config);
