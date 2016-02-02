@@ -80,13 +80,13 @@ public class ExampleHdfsDataflowSubmitterTest {
     //Submit the dataflow and wait for it to start running
     eds.submitDataflow(localScribenginCluster.getKafkaCluster().getZKConnect());
     //Output the registry for debugging purposes
-    shell.execute("registry dump");
-    
-    //Get basic info on the dataflow
-    shell.execute("dataflow info --dataflow-id "+eds.getDataflowID());
+    //shell.execute("registry dump");
     
     //Give the dataflow a second to get going
-    Thread.sleep(1000);
+    Thread.sleep(10000);
+    
+  //Get basic info on the dataflow
+    shell.execute("dataflow info --dataflow-id " + eds.getDataflowID());
     
     //Do some very simple verification to ensure our data has been moved correctly
     //We'll use some basic HDFS classes to do the reading, so we'll configure our local HDFS FS here
@@ -99,7 +99,7 @@ public class ExampleHdfsDataflowSubmitterTest {
     assertEquals(numEntries, numMessages);
     
     //Get basic info on the dataflow
-    shell.execute("dataflow info --dataflow-id "+eds.getDataflowID());
+    shell.execute("dataflow info --dataflow-id " + eds.getDataflowID());
   }
   
   /**
@@ -114,7 +114,7 @@ public class ExampleHdfsDataflowSubmitterTest {
     int count = 0;
     
     //Configure our HDFS storage object
-    HDFSStorageConfig storageConfig = new HDFSStorageConfig("test", hdfsPath);
+    HDFSStorageConfig storageConfig = new HDFSStorageConfig("output", hdfsPath);
     HDFSStorage storage = new HDFSStorage(registry, fs, storageConfig);
     
     //Get our source object from the storage object
@@ -146,11 +146,17 @@ public class ExampleHdfsDataflowSubmitterTest {
     props.put("serializer.class", "kafka.serializer.StringEncoder");
     props.put("partitioner.class", "kafka.producer.DefaultPartitioner");
     props.put("request.required.acks", "1");
+    props.put("retry.backoff.ms", "1000");
     ProducerConfig config = new ProducerConfig(props);
     
     Producer<String, String> producer = new Producer<String, String>(config);
-    for(int i = 0; i < numMessages; i++){
-      producer.send(new KeyedMessage<String, String>(inputTopic, "test", Integer.toString(i)));
+    for(int i = 0; i < numMessages; i++) {
+      String messageKey = "key-" + i;
+      String message    = Integer.toString(i);
+      producer.send(new KeyedMessage<String, String>(inputTopic, messageKey, message));
+      if((i + 1) % 500 == 0) {
+        System.out.println("Send " + (i + 1) + " messages");
+      }
     }
     producer.close();
   }
