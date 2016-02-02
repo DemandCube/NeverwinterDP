@@ -7,7 +7,7 @@ fi
 bin=`dirname "$0"`
 bin=`cd "$bin"; pwd`
 APP_DIR=`cd $bin/..; pwd; cd $bin`
-SCRIBENGIN_APP_DIR="$APP_DIR/../../../scribengin"
+SCRIBENGIN_APP_DIR="$APP_DIR/../../scribengin"
 
 export HADOOP_USER_NAME="neverwinterdp"
 
