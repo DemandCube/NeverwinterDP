@@ -4,7 +4,10 @@ if [ "x$JAVA_HOME" == "x" ] ; then
   echo "WARNING JAVA_HOME is not set"
 fi
 
+bin=`dirname "$0"`
+bin=`cd "$bin"; pwd`
 APP_DIR=`cd $bin/..; pwd; cd $bin`
+
 export HADOOP_USER_NAME="neverwinterdp"
 
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
