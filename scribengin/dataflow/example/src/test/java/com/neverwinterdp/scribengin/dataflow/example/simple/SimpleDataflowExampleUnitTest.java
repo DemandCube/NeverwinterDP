@@ -10,14 +10,13 @@ import com.neverwinterdp.scribengin.LocalScribenginCluster;
 import com.neverwinterdp.scribengin.dataflow.example.simple.SimpleDataflowExample.Config;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 
-public class ExampleSimpleDataflowSubmitterTest {
+public class SimpleDataflowExampleUnitTest {
   LocalScribenginCluster localScribenginCluster ;
   ScribenginShell shell;
   int numMessages = 10000;
   
   /**
-   * Setup a local Scribengin cluster
-   * This sets up kafka, zk, and vm-master
+   * Setup a local Scribengin cluster. This sets up kafka, zk, and vm-master
    * @throws Exception
    */
   @Before
@@ -62,8 +61,7 @@ public class ExampleSimpleDataflowSubmitterTest {
     //Submit the dataflow and wait for it to start running
     simpleDataflowExample.submitDataflow();
     Thread.sleep(60000);
-    //Output the registry for debugging purposes
-    //shell.execute("registry dump");
+    //Output the registry for debugging purposes, shell.execute("registry dump");
     
     //Get basic info on the dataflow
     shell.execute("dataflow info --dataflow-id " + config.dataflowId);

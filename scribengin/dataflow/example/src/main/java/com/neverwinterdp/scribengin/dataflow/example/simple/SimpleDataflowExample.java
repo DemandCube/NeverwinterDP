@@ -78,7 +78,6 @@ public class SimpleDataflowExample {
   private Config config = new Config();
   
   private ScribenginShell shell;
-  private DataflowSubmitter submitter;
   
   /**
    * Constructor - sets shell to access Scribengin and configuration properties 
@@ -104,7 +103,7 @@ public class SimpleDataflowExample {
     //Ensure all your sources and sinks are up and running first, then...
 
     //Submit the dataflow and wait until it starts running
-    submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForDataflowRunning(60000);
+    DataflowSubmitter submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForDataflowRunning(60000);
 
     /** Wait for the dataflow to complete within the given timeout */
     //submitter.waitForDataflowStop(60000);
@@ -161,6 +160,7 @@ public class SimpleDataflowExample {
     props.put("serializer.class", "kafka.serializer.StringEncoder");
     props.put("partitioner.class", "kafka.producer.DefaultPartitioner");
     props.put("request.required.acks", "1");
+    props.put("retry.backoff.ms", "1000");
     ProducerConfig producerConfig = new ProducerConfig(props);
     
     Producer<String, String> producer = new Producer<String, String>(producerConfig);
@@ -173,11 +173,12 @@ public class SimpleDataflowExample {
   }
   
   public boolean validateOutput(int expectNumOfMessages, boolean verbose) {
+    System.err.println("zk connect  = " + config.zkConnect + ", output topic = " + config.outputTopic);
     ConsumerIterator<byte[], byte[]> it = getConsumerIterator(config.zkConnect, config.outputTopic);
     int[] output = new int[expectNumOfMessages];
-    Arrays.fill(output, 0);
-    try{
-      while(it.hasNext()){
+    Arrays.fill(output, -1);
+    try {
+      while(it.hasNext()) {
         Message message = JSONSerializer.INSTANCE.fromBytes(it.next().message(), Message.class);
         String data = new String(message.getData());
         int value = Integer.parseInt(data);
@@ -205,6 +206,7 @@ public class SimpleDataflowExample {
     props.put("zookeeper.connect", zkConnect);
     props.put("group.id", "default");
     props.put("consumer.timeout.ms", "5000");
+    props.put("auto.offset.reset", "smallest");
     
     ConsumerConfig consumerConfig = new ConsumerConfig(props);
     ConsumerConnector consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
