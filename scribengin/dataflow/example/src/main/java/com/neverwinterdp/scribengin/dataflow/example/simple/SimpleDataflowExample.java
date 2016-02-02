@@ -1,7 +1,5 @@
 package com.neverwinterdp.scribengin.dataflow.example.simple;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +9,6 @@ import java.util.Properties;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.neverwinterdp.kafka.KafkaClient;
-import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
@@ -70,6 +67,9 @@ public class SimpleDataflowExample {
     
     @Parameter(names = "--input-topic", description = "Name of input Kafka Topic")
     String inputTopic = "input.topic";
+    
+    @Parameter(names = "--input-num-of-messages", description = "Name of input Kafka Topic")
+    int inputNumOfMessages = 10000;
     
     @Parameter(names = "--output-topic", description = "Name of output Kafka topic")
     String outputTopic ="output.topic";
@@ -152,7 +152,7 @@ public class SimpleDataflowExample {
    * @param inputTopic Topic to write to
    * @throws Exception 
    */
-  public void createInputMessages(int numOfMessages) throws Exception {
+  public void createInputMessages() throws Exception {
     KafkaClient kafkaTool = new KafkaClient("KafkaTool", config.zkConnect);
     String kafkaBrokerConnects = kafkaTool.getKafkaBrokerList();
     Properties props = new Properties();
@@ -164,25 +164,32 @@ public class SimpleDataflowExample {
     ProducerConfig producerConfig = new ProducerConfig(props);
     
     Producer<String, String> producer = new Producer<String, String>(producerConfig);
-    for(int i = 0; i < numOfMessages; i++){
+    for(int i = 0; i < config.inputNumOfMessages; i++){
       String messageKey = "key-" + i;
       String message    = Integer.toString(i);
       producer.send(new KeyedMessage<String, String>(config.inputTopic, messageKey, message));
+      if((i + 1) % 500 == 0) {
+        System.out.println("Send " + (i + 1) + " messages");
+      }
     }
     producer.close();
   }
   
-  public boolean validateOutput(int expectNumOfMessages, boolean verbose) {
-    System.err.println("zk connect  = " + config.zkConnect + ", output topic = " + config.outputTopic);
+  public boolean validate() {
     ConsumerIterator<byte[], byte[]> it = getConsumerIterator(config.zkConnect, config.outputTopic);
-    int[] output = new int[expectNumOfMessages];
+    int[] output = new int[config.inputNumOfMessages];
     Arrays.fill(output, -1);
     try {
+      int count = 0;
       while(it.hasNext()) {
         Message message = JSONSerializer.INSTANCE.fromBytes(it.next().message(), Message.class);
         String data = new String(message.getData());
         int value = Integer.parseInt(data);
         output[value] = value;
+        count++ ;
+        if(count % 500 == 0) {
+          System.out.println("Read " + count + " messages");
+        }
       }
     } catch (ConsumerTimeoutException e) { 
       e.printStackTrace();
@@ -192,9 +199,6 @@ public class SimpleDataflowExample {
     for(int i = 0; i < output.length; i++) {
       if(i != output[i]) {
         validated = false;
-        if(verbose) {
-          System.err.println("record " + i + " is not valid, value = " + output[i]);
-        }
       }
     }
     return validated;
@@ -250,11 +254,15 @@ public class SimpleDataflowExample {
     shell.attribute(HadoopProperties.class, hadoopProps);
     
     //Launch our configured dataflow
-    SimpleDataflowExample esds = new SimpleDataflowExample(shell, config);
-    esds.submitDataflow();
+    SimpleDataflowExample simpleDataflowExample = new SimpleDataflowExample(shell, config);
+    simpleDataflowExample.createInputMessages();
+    simpleDataflowExample.submitDataflow();
+    
+    simpleDataflowExample.validate();
     
     //Get some info on the running dataflow
     shell.execute("dataflow info --dataflow-id "+config.dataflowId+" --show-all");
+    
     
     //Close connection with Scribengin
     shell.close();

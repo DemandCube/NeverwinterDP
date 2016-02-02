@@ -50,22 +50,22 @@ public class SimpleDataflowExampleUnitTest {
    * @throws Exception
    */
   @Test
-  public void testExampleSimpleDataflowSubmitterTest() throws Exception{
+  public void testExampleSimpleDataflow() throws Exception{
     //Create a new DataflowSubmitter with default properties
     String[] args = {"--zk-connect", localScribenginCluster.getKafkaCluster().getZKConnect()};
     Config config = new Config();
     new JCommander(config, args);
     SimpleDataflowExample simpleDataflowExample = new SimpleDataflowExample(shell, config);
-    simpleDataflowExample.createInputMessages(10000);
+    simpleDataflowExample.createInputMessages();
     
     //Submit the dataflow and wait for it to start running
     simpleDataflowExample.submitDataflow();
-    Thread.sleep(60000);
+    Thread.sleep(15000);
     //Output the registry for debugging purposes, shell.execute("registry dump");
     
     //Get basic info on the dataflow
     shell.execute("dataflow info --dataflow-id " + config.dataflowId);
     
-    Assert.assertTrue(simpleDataflowExample.validateOutput(10000, false));
+    Assert.assertTrue(simpleDataflowExample.validate());
   }
 }
