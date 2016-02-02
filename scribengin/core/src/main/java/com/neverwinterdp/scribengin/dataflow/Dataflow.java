@@ -24,6 +24,11 @@ public class Dataflow<IN, OUT> {
   
   public WorkerDescriptor getWorkerDescriptor() { return dataflowDescriptor.getWorker(); }
   
+  public Dataflow<IN, OUT> setDFSAppHome(String dfsAppHome) {
+    dataflowDescriptor.setDataflowAppHome(dfsAppHome);
+    return this;
+  }
+  
   public Dataflow<IN, OUT> useWireDataSetFactory(WireDataSetFactory factory) {
     wireDataStreamFactory = factory;
     return this;
