@@ -56,6 +56,18 @@ Finally, the **Data Validator** reads the data in from the **Aggregate** Kafka t
 | --------------------------- | --------  |
 | dfs.replication             | 2         |
 
+##YARN Configuration
+| Config                                   | Value | 
+| ---------------------------------------- | ----- |
+| yarn.nodemanager.resource.cpu_vcores     | 3     | 
+| yarn.nodemanager.resource.memory_mb      | 3072  |
+| yarn.nodemanager.vmem-pmem-ratio         | 3     |
+| yarn.nodemanager.vmem-check-enabled      | true  |
+| yarn.scheduler.minimum-allocation-mb     | 614   |
+| yarn.scheduler.maximum-allocation-mb     | 614   |
+| yarn.scheduler.minimum-allocation-vcores | 1     |
+| yarn.scheduler.maximum-allocation-vcores | 1     |
+
 ##AWS Configuration
 
 All AWS containers are configured to use EBS provisioned IOP (SSD) volumes.
@@ -118,8 +130,8 @@ Performance
 
 |   Stat     |   Units        |
 | ---------  | -------------- |
-|     20,000 | records/second |
-| 17,500,000 |   bytes/second | 
+|     21,000 | records/second |
+| 21,800,000 |   bytes/second | 
 </pre></td><td valign="top"><pre>
 AWS Configuration
 
