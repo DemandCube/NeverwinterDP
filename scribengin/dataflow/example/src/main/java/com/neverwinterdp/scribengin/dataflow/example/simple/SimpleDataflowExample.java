@@ -24,6 +24,7 @@ import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.HadoopProperties;
 import com.neverwinterdp.vm.VMConfig;
+import com.neverwinterdp.vm.client.VMClient;
 import com.neverwinterdp.vm.client.YarnVMClient;
 
 import kafka.consumer.Consumer;
@@ -43,6 +44,12 @@ public class SimpleDataflowExample {
   static public class Config {
     @Parameter(names = {"--help", "-h"}, help = true, description = "Output this help message")
     private boolean help;
+
+    @Parameter(names = "--local-app-home", required=true, description="The example dataflow local location")
+    String localAppHome ;
+    
+    @Parameter(names = "--dfs-app-home", description="DFS location to upload the example dataflow")
+    String dfsAppHome = "/applications/dataflow/example";
     
     @Parameter(names = "--zk-connect", description="[host]:[port] of Zookeeper server")
     String zkConnect = "zookeeper-1:2181";
@@ -93,7 +100,10 @@ public class SimpleDataflowExample {
    * The logic to submit the dataflow
    * @throws Exception
    */
-  public void submitDataflow() throws Exception{
+  public void submitDataflow() throws Exception {
+    VMClient vmClient = shell.getScribenginClient().getVMClient();
+    vmClient.uploadApp(config.localAppHome, config.dfsAppHome);
+    
     Dataflow<Message, Message> dfl = buildDataflow();
     //Get the dataflow's descriptor
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
@@ -120,6 +130,7 @@ public class SimpleDataflowExample {
     // <Message,Message> pertains to the <input,output> object for the data
     Dataflow<Message,Message> dfl = new Dataflow<Message,Message>(config.dataflowId);
     dfl.
+      setDFSAppHome(config.dfsAppHome).
       setDefaultParallelism(config.dataflowDefaultParallelism).
       setDefaultReplication(config.dataflowDefaultReplication);
     
@@ -253,8 +264,6 @@ public class SimpleDataflowExample {
     YarnVMClient vmClient = new YarnVMClient(registry, VMConfig.ClusterEnvironment.YARN, hadoopProps) ;
     ScribenginShell shell = new ScribenginShell(vmClient) ;
     shell.attribute(HadoopProperties.class, hadoopProps);
-    
-    vmClient.uploadApp("", "");
     
     //Launch our configured dataflow
     SimpleDataflowExample simpleDataflowExample = new SimpleDataflowExample(shell, config);
