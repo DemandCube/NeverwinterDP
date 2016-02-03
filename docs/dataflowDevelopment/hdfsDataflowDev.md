@@ -75,7 +75,7 @@ We'll use these properties to define our HDFS output DataSet.
     //"output" - the dataset's name
     //HDFSRegistryPath - where in the registry to HDFS config
     //HDFSLocation - the path in HDFS to put our data
-    DataSet<Message> outputDs = dfl.createOutput(new HDFSStorageConfig("output", HDFSRegistryPath, HDFSLocation));
+    DataSet<Message> outputDs = dfl.createOutput(new HDFSStorageConfig("output", hdfsLocation));
 
 ```
 
