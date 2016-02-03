@@ -105,7 +105,6 @@ public class ExampleHdfsDataflowSubmitterTest {
   /**
    * Use our HDFSSource to read our data through all partitions
    * @param fs HDFS File system
-   * @param registryPath Path to HDFS info in the registry
    * @param hdfsPath Path our data is saved to
    * @return count of records in HDFS
    * @throws Exception

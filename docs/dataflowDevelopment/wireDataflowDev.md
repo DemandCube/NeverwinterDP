@@ -18,7 +18,7 @@ A Wired Dataflow Development
 This howto will show you how to develop your own wired dataflow and operators.  A wired dataflow will wire multiple operators together for better reliability and flexability by leveraging Kafka.
 
 #Sample code#
-You can find sample code in the Scribengin package com.neverwinterdp.scribengin.example.*. The code comes complete with unit tests and full comments.
+You can find sample code in the Scribengin package com.neverwinterdp.scribengin.dataflow.example.*. The code comes complete with unit tests and full comments.
 
 #A Wired Dataflow
 
