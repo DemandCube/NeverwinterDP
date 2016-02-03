@@ -29,3 +29,10 @@ Same as the devlelopment, make sure one like  Badrish can read, understand, foll
 #Terminology 
 
 I think you can find a better name to merge the features and terminology file. Need more introduction, description...
+
+
+#Common rule for the document
+
+For the concept, design and architecture document. You will need to give a lot of words, description , diagram, exampple.
+
+For the developments, give as litle as possible. Provide a workable example that is easy to setup and run. Better have an automation script. You can document directly into the code. The same rule, the example code should have a litle number of line as possible. Avoid the unnecessary dependencies.
