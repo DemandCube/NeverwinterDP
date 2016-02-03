@@ -101,6 +101,7 @@ public class SimpleDataflowExample {
    * @throws Exception
    */
   public void submitDataflow() throws Exception {
+    //Upload our app to HDFS
     VMClient vmClient = shell.getScribenginClient().getVMClient();
     vmClient.uploadApp(config.localAppHome, config.dfsAppHome);
     
@@ -187,6 +188,11 @@ public class SimpleDataflowExample {
     producer.close();
   }
   
+  /**
+   * Reads in from a Kafka topic and ensures all messages have been consumed
+   * @return True if test passes, False otherwise
+   * @throws Exception
+   */
   public boolean validate() throws Exception {
     ConsumerIterator<byte[], byte[]> it = getConsumerIterator(config.zkConnect, config.outputTopic);
     int[] output = new int[config.inputNumOfMessages];
@@ -211,16 +217,20 @@ public class SimpleDataflowExample {
       throw new Exception("Input " + config.inputNumOfMessages + ", but can read only " + config.inputNumOfMessages + " messages");
     }
     
-    boolean validated = true;
     for(int i = 0; i < output.length; i++) {
       if(i != output[i]) {
-        validated = false;
+        return false;
       }
     }
-    return validated;
+    return true;
   }
   
-  
+  /**
+   * Get Kafka Consumer for topic
+   * @param zkConnect Zookeeper [host]:[port]
+   * @param topic Topic to read from
+   * @return
+   */
   private ConsumerIterator<byte[], byte[]> getConsumerIterator(String zkConnect, String topic){
     Properties props = new Properties();
     props.put("zookeeper.connect", zkConnect);
@@ -269,13 +279,15 @@ public class SimpleDataflowExample {
     ScribenginShell shell = new ScribenginShell(vmClient) ;
     shell.attribute(HadoopProperties.class, hadoopProps);
     
-    //Launch our configured dataflow
     SimpleDataflowExample simpleDataflowExample = new SimpleDataflowExample(shell, config);
+    //Create input data for our dataflow to consume
     simpleDataflowExample.createInputMessages();
+    //Launch our configured dataflow
     simpleDataflowExample.submitDataflow();
     
     //Wait to make sure that dataflow is running and produce some messages to the output topic
     Thread.sleep(1500);
+    //Validate all messages have been consumed
     simpleDataflowExample.validate();
     
     //Get some info on the running dataflow

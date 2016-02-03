@@ -14,6 +14,7 @@ import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.vm.client.VMClient;
 
 public class ExampleHdfsDataflowSubmitter {
   private String dataflowID;
@@ -29,6 +30,9 @@ public class ExampleHdfsDataflowSubmitter {
 
   private ScribenginShell   shell;
   private DataflowSubmitter submitter;
+  
+  String localAppHome;
+  String dfsAppHome;
   
   public ExampleHdfsDataflowSubmitter(ScribenginShell shell){
     this(shell, new Properties());
@@ -61,6 +65,13 @@ public class ExampleHdfsDataflowSubmitter {
     
     //Where in HDFS to store our data
     hdfsLocation = props.getProperty("dataflow.hdfsLocation", "build/working/storage/hdfs/output");
+    
+    
+    //The example hdfs dataflow local location
+    localAppHome = props.getProperty("dataflow.localapphome", "N/A");
+    
+    //DFS location to upload the example dataflow
+    dfsAppHome = props.getProperty("dataflow.dfsAppHome", "/applications/dataflow/hdfsexample");
   }
   
   /**
@@ -69,6 +80,10 @@ public class ExampleHdfsDataflowSubmitter {
    * @throws Exception
    */
   public void submitDataflow(String kafkaZkConnect) throws Exception{
+    //Upload the dataflow to HDFS
+    VMClient vmClient = shell.getScribenginClient().getVMClient();
+    vmClient.uploadApp(localAppHome, dfsAppHome);
+    
     Dataflow<Message, Message> dfl = buildDataflow(kafkaZkConnect);
     //Get the dataflow's descriptor
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
@@ -135,73 +150,12 @@ public class ExampleHdfsDataflowSubmitter {
     return dataflowID;
   }
 
-  public void setDataflowID(String dataflowID) {
-    this.dataflowID = dataflowID;
-  }
-
-  public int getDefaultReplication() {
-    return defaultReplication;
-  }
-
-  public void setDefaultReplication(int defaultReplication) {
-    this.defaultReplication = defaultReplication;
-  }
-
-  public int getDefaultParallelism() {
-    return defaultParallelism;
-  }
-
-  public void setDefaultParallelism(int defaultParallelism) {
-    this.defaultParallelism = defaultParallelism;
-  }
-
-
-  public int getNumOfWorker() {
-    return numOfWorker;
-  }
-
-  public void setNumOfWorker(int numOfWorker) {
-    this.numOfWorker = numOfWorker;
-  }
-
-  public int getNumOfExecutorPerWorker() {
-    return numOfExecutorPerWorker;
-  }
-
-  public void setNumOfExecutorPerWorker(int numOfExecutorPerWorker) {
-    this.numOfExecutorPerWorker = numOfExecutorPerWorker;
-  }
-
   public String getInputTopic() {
     return inputTopic;
   }
-
-  public void setInputTopic(String inputTopic) {
-    this.inputTopic = inputTopic;
-  }
-
-  public ScribenginShell getShell() {
-    return shell;
-  }
-
-  public void setShell(ScribenginShell shell) {
-    this.shell = shell;
-  }
-
-  public DataflowSubmitter getSubmitter() {
-    return submitter;
-  }
-
-  public void setSubmitter(DataflowSubmitter submitter) {
-    this.submitter = submitter;
-  }
-  
   public String getHDFSLocation() {
     return hdfsLocation;
   }
 
-  public void setHDFSLocation(String hDFSLocation) {
-    hdfsLocation = hDFSLocation;
-  }
 
 }

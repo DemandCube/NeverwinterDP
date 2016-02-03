@@ -72,12 +72,30 @@ public class SimpleDataStreamOperator extends DataStreamOperator{
 
 Our DataflowSubmitter is where we configure out Dataflow.  We need configure things like how many workers Scribengin will allocate, where our sources and sinks are, and which DataStreamOperator to use.
 
+Our simple dataflow will do some extra things that are only for the sake of an example.  This program's main, when launched, will:
+- Configure the dataflow
+- Fill a Kafka Topic with data
+- Launch our dataflow
+- Then validate all the data made it through successfully
+
+A real dataflow won't be producing its own data for it to consume, but for the sake of succinctness, we've included it here.
+
 ```java
 package com.neverwinterdp.scribengin.dataflow.example.simple;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.message.Message;
+import com.neverwinterdp.registry.Registry;
+import com.neverwinterdp.registry.RegistryConfig;
+import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
@@ -87,61 +105,90 @@ import com.neverwinterdp.scribengin.dataflow.Operator;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.vm.HadoopProperties;
+import com.neverwinterdp.vm.VMConfig;
+import com.neverwinterdp.vm.client.VMClient;
+import com.neverwinterdp.vm.client.YarnVMClient;
 
-public class ExampleSimpleDataflowSubmitter {
-  private String dataflowID;
-  private int defaultReplication;
-  private int defaultParallelism;
+import kafka.consumer.Consumer;
+import kafka.consumer.ConsumerConfig;
+import kafka.consumer.ConsumerIterator;
+import kafka.consumer.ConsumerTimeoutException;
+import kafka.consumer.KafkaStream;
+import kafka.javaapi.consumer.ConsumerConnector;
+import kafka.javaapi.producer.Producer;
+import kafka.producer.KeyedMessage;
+import kafka.producer.ProducerConfig;
+
+public class SimpleDataflowExample {
+  /**
+   * Simple class to house our configuration options for JCommander 
+   */
+  static public class Config {
+    @Parameter(names = {"--help", "-h"}, help = true, description = "Output this help message")
+    private boolean help;
+
+    @Parameter(names = "--local-app-home", required=true, description="The example dataflow local location")
+    String localAppHome ;
+    
+    @Parameter(names = "--dfs-app-home", description="DFS location to upload the example dataflow")
+    String dfsAppHome = "/applications/dataflow/example";
+    
+    @Parameter(names = "--zk-connect", description="[host]:[port] of Zookeeper server")
+    String zkConnect = "zookeeper-1:2181";
+    
+    @Parameter(names = "--hadoop-master-connect", description="Hostname of HadoopMaster")
+    String hadoopMasterConnect = "hadoop-master";
+
+    @Parameter(names = "--dataflow-id", description = "Unique ID for the dataflow")
+    String dataflowId        = "ExampleDataflow";
+    
+    @Parameter(names = "--dataflow-default-replication", description = "Dataflow default replication")
+    int dataflowDefaultReplication = 1;
+    
+    @Parameter(names = "--dataflow-default-parallelism", description = "The dataflow default parallelism")
+    int dataflowDefaultParallelism = 8;
+    
+    @Parameter(names = "--dataflow-num-of-worker", description = "Number of workers to request")
+    int dataflowNumOfWorker = 2;
+    
+    @Parameter(names = "--dataflow-num-of-executor-per-worker", description = "Number of Executors per worker to request")
+    int dataflowNumOfExecutorPerWorker = 2;
+    
+    @Parameter(names = "--input-topic", description = "Name of input Kafka Topic")
+    String inputTopic = "input.topic";
+    
+    @Parameter(names = "--input-num-of-messages", description = "Name of input Kafka Topic")
+    int inputNumOfMessages = 10000;
+    
+    @Parameter(names = "--output-topic", description = "Name of output Kafka topic")
+    String outputTopic ="output.topic";
+  }
   
-  private int numOfWorker;
-  private int numOfExecutorPerWorker;
-  
-  private String inputTopic;
-  private String outputTopic;
+  private Config config = new Config();
   
   private ScribenginShell shell;
-  private DataflowSubmitter submitter;
-  
-  public ExampleSimpleDataflowSubmitter(ScribenginShell shell){
-    this(shell, new Properties());
-  }
   
   /**
    * Constructor - sets shell to access Scribengin and configuration properties 
    * @param shell ScribenginShell to connect to Scribengin with
    * @param props Properties to configure the dataflow
    */
-  public ExampleSimpleDataflowSubmitter(ScribenginShell shell, Properties props){
-    //This it the shell to communicate with Scribengin with
+  public SimpleDataflowExample(ScribenginShell shell, Config config){
     this.shell = shell;
-    
-    //The dataflow's ID.  All dataflows require a unique ID when running
-    dataflowID = props.getProperty("dataflow.id", "ExampleDataflow");
-    
-    //The default replication factor for Kafka
-    defaultReplication = Integer.parseInt(props.getProperty("dataflow.replication", "1"));
-    //The number of DataStreams to deploy 
-    defaultParallelism = Integer.parseInt(props.getProperty("dataflow.parallelism", "8"));
-    
-    //The number of workers to deploy (i.e. YARN containers)
-    numOfWorker                = Integer.parseInt(props.getProperty("dataflow.numWorker", "2"));
-    //The number of executors per worker (i.e. threads per YARN container)
-    numOfExecutorPerWorker     = Integer.parseInt(props.getProperty("dataflow.numExecutorPerWorker", "2"));
-    
-    //The kafka input topic
-    inputTopic = props.getProperty("dataflow.inputTopic", "input.topic");
-    //The kafka output topic
-    outputTopic = props.getProperty("dataflow.outputTopic", "output.topic");
-    
+    this.config = config;
   }
   
   /**
    * The logic to submit the dataflow
-   * @param kafkaZkConnect [host]:[port] of Kafka's Zookeeper conenction 
    * @throws Exception
    */
-  public void submitDataflow(String kafkaZkConnect) throws Exception{
-    Dataflow<Message, Message> dfl = buildDataflow(kafkaZkConnect);
+  public void submitDataflow() throws Exception {
+    //Upload our app to HDFS
+    VMClient vmClient = shell.getScribenginClient().getVMClient();
+    vmClient.uploadApp(config.localAppHome, config.dfsAppHome);
+    
+    Dataflow<Message, Message> dfl = buildDataflow();
     //Get the dataflow's descriptor
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     //Output the descriptor in human-readable JSON
@@ -150,17 +197,11 @@ public class ExampleSimpleDataflowSubmitter {
     //Ensure all your sources and sinks are up and running first, then...
 
     //Submit the dataflow and wait until it starts running
-    submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForRunning(60000);
-    
-  }
-  
-  /**
-   * Wait for the dataflow to complete within the given timeout
-   * @param timeout Timeout in ms
-   * @throws Exception
-   */
-  public void waitForDataflowCompletion(int timeout) throws Exception{
-    this.submitter.waitForFinish(timeout);
+    DataflowSubmitter submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl);
+    submitter.submit().waitForDataflowRunning(60000);
+
+    /** Wait for the dataflow to complete within the given timeout */
+    //submitter.waitForDataflowStop(60000);
   }
   
   /**
@@ -168,25 +209,26 @@ public class ExampleSimpleDataflowSubmitter {
    * @param kafkaZkConnect [host]:[port] of Kafka's Zookeeper conenction 
    * @return
    */
-  public Dataflow<Message,Message> buildDataflow(String kafkaZkConnect){
+  public Dataflow<Message,Message> buildDataflow(){
     //Create the new Dataflow object
     // <Message,Message> pertains to the <input,output> object for the data
-    Dataflow<Message,Message> dfl = new Dataflow<Message,Message>(dataflowID);
+    Dataflow<Message,Message> dfl = new Dataflow<Message,Message>(config.dataflowId);
     dfl.
-      setDefaultParallelism(defaultParallelism).
-      setDefaultReplication(defaultReplication);
+      setDFSAppHome(config.dfsAppHome).
+      setDefaultParallelism(config.dataflowDefaultParallelism).
+      setDefaultReplication(config.dataflowDefaultReplication);
     
-    dfl.getWorkerDescriptor().setNumOfInstances(numOfWorker);
-    dfl.getWorkerDescriptor().setNumOfExecutor(numOfExecutorPerWorker);
+    dfl.getWorkerDescriptor().setNumOfInstances(config.dataflowNumOfWorker);
+    dfl.getWorkerDescriptor().setNumOfExecutor(config.dataflowNumOfExecutorPerWorker);
     
     
     //Define our input source - set name, ZK host:port, and input topic name
     KafkaDataSet<Message> inputDs = 
-        dfl.createInput(new KafkaStorageConfig("input", kafkaZkConnect, inputTopic));
+        dfl.createInput(new KafkaStorageConfig("input", config.zkConnect, config.inputTopic));
     
     //Define our output sink - set name, ZK host:port, and output topic name
     DataSet<Message> outputDs = 
-        dfl.createOutput(new KafkaStorageConfig("output", kafkaZkConnect, outputTopic));
+        dfl.createOutput(new KafkaStorageConfig("output", config.zkConnect, config.outputTopic));
     
     //Define which operator to use.  
     //This will be the logic that ties the input to the output
@@ -200,7 +242,147 @@ public class ExampleSimpleDataflowSubmitter {
     return dfl;
   }
   
+  /**
+   * Push data to Kafka
+   * @param kafkaConnect Kafka's [host]:[port]
+   * @param inputTopic Topic to write to
+   * @throws Exception 
+   */
+  public void createInputMessages() throws Exception {
+    KafkaClient kafkaTool = new KafkaClient("KafkaTool", config.zkConnect);
+    String kafkaBrokerConnects = kafkaTool.getKafkaBrokerList();
+    Properties props = new Properties();
+    props.put("metadata.broker.list", kafkaBrokerConnects);
+    props.put("serializer.class", "kafka.serializer.StringEncoder");
+    props.put("partitioner.class", "kafka.producer.DefaultPartitioner");
+    props.put("request.required.acks", "1");
+    props.put("retry.backoff.ms", "1000");
+    ProducerConfig producerConfig = new ProducerConfig(props);
+    
+    Producer<String, String> producer = new Producer<String, String>(producerConfig);
+    for(int i = 0; i < config.inputNumOfMessages; i++){
+      String messageKey = "key-" + i;
+      String message    = Integer.toString(i);
+      producer.send(new KeyedMessage<String, String>(config.inputTopic, messageKey, message));
+      if((i + 1) % 500 == 0) {
+        System.out.println("Send " + (i + 1) + " messages");
+      }
+    }
+    producer.close();
+  }
+  
+  /**
+   * Reads in from a Kafka topic and ensures all messages have been consumed
+   * @return True if test passes, False otherwise
+   * @throws Exception
+   */
+  public boolean validate() throws Exception {
+    ConsumerIterator<byte[], byte[]> it = getConsumerIterator(config.zkConnect, config.outputTopic);
+    int[] output = new int[config.inputNumOfMessages];
+    Arrays.fill(output, -1);
+    int count = 0;
+    try {
+      while(it.hasNext()) {
+        Message message = JSONSerializer.INSTANCE.fromBytes(it.next().message(), Message.class);
+        String data = new String(message.getData());
+        int value = Integer.parseInt(data);
+        output[value] = value;
+        count++ ;
+        if(count % 500 == 0) {
+          System.out.println("Read " + count + " messages");
+        }
+      }
+    } catch (ConsumerTimeoutException e) { 
+     //e.printStackTrace();
+    }
+    
+    if(count != config.inputNumOfMessages) {
+      throw new Exception("Input " + config.inputNumOfMessages + ", but can read only " + config.inputNumOfMessages + " messages");
+    }
+    
+    for(int i = 0; i < output.length; i++) {
+      if(i != output[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  /**
+   * Get Kafka Consumer for topic
+   * @param zkConnect Zookeeper [host]:[port]
+   * @param topic Topic to read from
+   * @return
+   */
+  private ConsumerIterator<byte[], byte[]> getConsumerIterator(String zkConnect, String topic){
+    Properties props = new Properties();
+    props.put("zookeeper.connect", zkConnect);
+    props.put("group.id", "default");
+    props.put("consumer.timeout.ms", "5000");
+    props.put("auto.offset.reset", "smallest");
+    
+    ConsumerConfig consumerConfig = new ConsumerConfig(props);
+    ConsumerConnector consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
+    Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
+    topicCountMap.put(topic, new Integer(1));
+    Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumerConnector.createMessageStreams(topicCountMap);
+    KafkaStream<byte[], byte[]> stream =  consumerMap.get(topic).get(0);
+    return stream.iterator();
+  }
+  
+  static public void main(String args[]) throws Exception {
+    //Use JCommander to parse command line args
+    Config config = new Config();
+    JCommander jCommander = new JCommander(config, args);
+    
+    if (config.help) {
+      jCommander.usage();
+      return;
+    }
+    
+    //Create a registry configuration and point it to our running Registry (Zookeeper)
+    RegistryConfig registryConfig = RegistryConfig.getDefault();
+    registryConfig.setConnect(config.zkConnect);
+    Registry registry = null;
+    try{
+      registry = new RegistryImpl(registryConfig).connect();
+    } catch(Exception e){
+      System.err.println("Could not connect to the registry at: "+ registryConfig.getConnect()+"\n"+e.getMessage());
+      return;
+    }
+    
+    //Configure where our hadoop master lives
+    String hadoopMaster = config.hadoopMasterConnect;
+    HadoopProperties hadoopProps = new HadoopProperties() ;
+    hadoopProps.put("yarn.resourcemanager.address", hadoopMaster + ":8032");
+    hadoopProps.put("fs.defaultFS", "hdfs://" + hadoopMaster +":9000");
+    
+    //Set up our connection to Scribengin
+    YarnVMClient vmClient = new YarnVMClient(registry, VMConfig.ClusterEnvironment.YARN, hadoopProps) ;
+    ScribenginShell shell = new ScribenginShell(vmClient) ;
+    shell.attribute(HadoopProperties.class, hadoopProps);
+    
+    SimpleDataflowExample simpleDataflowExample = new SimpleDataflowExample(shell, config);
+    //Create input data for our dataflow to consume
+    simpleDataflowExample.createInputMessages();
+    //Launch our configured dataflow
+    simpleDataflowExample.submitDataflow();
+    
+    //Wait to make sure that dataflow is running and produce some messages to the output topic
+    Thread.sleep(1500);
+    //Validate all messages have been consumed
+    simpleDataflowExample.validate();
+    
+    //Get some info on the running dataflow
+    shell.execute("dataflow info --dataflow-id " + config.dataflowId);
+    
+    //Close connection with Scribengin
+    shell.close();
+    shell.console().println("Simple Example Datafow is done!!!");
+    System.exit(0);
+  }
 }
+
 
 ```
 
@@ -219,42 +401,23 @@ Our basic methodolgy for testing will be:
 ```java
 package com.neverwinterdp.scribengin.dataflow.example.simple;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import kafka.consumer.Consumer;
-import kafka.consumer.ConsumerConfig;
-import kafka.consumer.ConsumerIterator;
-import kafka.consumer.KafkaStream;
-import kafka.javaapi.consumer.ConsumerConnector;
-import kafka.javaapi.producer.Producer;
-import kafka.producer.KeyedMessage;
-import kafka.producer.ProducerConfig;
-
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.message.Message;
+import com.beust.jcommander.JCommander;
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
-import com.neverwinterdp.scribengin.dataflow.example.simple.ExampleSimpleDataflowSubmitter;
+import com.neverwinterdp.scribengin.dataflow.example.simple.SimpleDataflowExample.Config;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
-import com.neverwinterdp.util.JSONSerializer;
 
-public class ExampleSimpleDataflowSubmitterTest {
-  
+public class SimpleDataflowExampleUnitTest {
   LocalScribenginCluster localScribenginCluster ;
   ScribenginShell shell;
   int numMessages = 10000;
   
   /**
-   * Setup a local Scribengin cluster
-   * This sets up kafka, zk, and vm-master
+   * Setup a local Scribengin cluster. This sets up kafka, zk, and vm-master
    * @throws Exception
    */
   @Before
@@ -267,9 +430,8 @@ public class ExampleSimpleDataflowSubmitterTest {
     localScribenginCluster.clean(); 
     localScribenginCluster.useLog4jConfig("classpath:scribengin/log4j/vm-log4j.properties");  
     localScribenginCluster.start();
-    
+    Thread.sleep(5000);
     shell = localScribenginCluster.getShell();
-    
   }
   
   /**
@@ -289,76 +451,28 @@ public class ExampleSimpleDataflowSubmitterTest {
    * @throws Exception
    */
   @Test
-  public void TestExampleSimpleDataflowSubmitterTest() throws Exception{
+  public void testExampleSimpleDataflow() throws Exception{
     //Create a new DataflowSubmitter with default properties
-    ExampleSimpleDataflowSubmitter eds = new ExampleSimpleDataflowSubmitter(shell);
-    
-    //Populate kafka input topic with data
-    sendKafkaData(localScribenginCluster.getKafkaCluster().getKafkaConnect(), eds.getInputTopic());
+    String[] args = {
+        //Since we're testing locally, we don't need to upload our app to DFS
+        "--local-app-home", "N/A", 
+        "--zk-connect", localScribenginCluster.getKafkaCluster().getZKConnect()
+     };
+    Config config = new Config();
+    new JCommander(config, args);
+    SimpleDataflowExample simpleDataflowExample = new SimpleDataflowExample(shell, config);
+    simpleDataflowExample.createInputMessages();
     
     //Submit the dataflow and wait for it to start running
-    eds.submitDataflow(localScribenginCluster.getKafkaCluster().getZKConnect());
-    //Output the registry for debugging purposes
-    shell.execute("registry dump");
+    simpleDataflowExample.submitDataflow();
+    Thread.sleep(15000);
+    //Output the registry for debugging purposes, shell.execute("registry dump");
     
     //Get basic info on the dataflow
-    shell.execute("dataflow info --dataflow-id ExampleDataflow");
+    shell.execute("dataflow info --dataflow-id " + config.dataflowId);
     
-    //Get the kafka output topic iterator
-    ConsumerIterator<byte[], byte[]> it = 
-        getConsumerIterator(localScribenginCluster.getKafkaCluster().getZKConnect(), eds.getOutputTopic());
-    
-    //Do some very simple verification to ensure our data has been moved correctly
-    int numReceived = 0;
-    boolean[] assertionArray = new boolean[numMessages];
-    
-    
-    for(int i = 0; i < numMessages; i++){
-      //This is how we serialize our data back into our Messsage object
-      Message message = JSONSerializer.INSTANCE.fromBytes(it.next().message(), Message.class);
-      String data = new String(message.getData());
-      assertionArray[Integer.parseInt(data)] = true;
-      //System.err.println(data);
-      numReceived++;
-    }
-    
-    assertEquals(numReceived, numMessages);
-    for(boolean b: assertionArray){
-      assertTrue(b);
-    }
-    
+    Assert.assertTrue(simpleDataflowExample.validate());
   }
-  
-  
-  private void sendKafkaData(String kafkaConnect, String inputTopic){
-    Properties props = new Properties();
-    props.put("metadata.broker.list", kafkaConnect);
-    props.put("serializer.class", "kafka.serializer.StringEncoder");
-    props.put("partitioner.class", "kafka.producer.DefaultPartitioner");
-    props.put("request.required.acks", "1");
-    ProducerConfig config = new ProducerConfig(props);
-    
-    Producer<String, String> producer = new Producer<String, String>(config);
-    for(int i = 0; i < numMessages; i++){
-      producer.send(new KeyedMessage<String, String>(inputTopic, "test", Integer.toString(i)));
-    }
-    producer.close();
-  }
-  
-  private ConsumerIterator<byte[], byte[]> getConsumerIterator(String zkConnect, String outputTopic){
-    Properties props = new Properties();
-    props.put("zookeeper.connect", zkConnect);
-    props.put("group.id", "default");
-    
-    ConsumerConfig consumerConfig = new ConsumerConfig(props);
-    ConsumerConnector consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
-    Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
-    topicCountMap.put(outputTopic, new Integer(1));
-    Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumerConnector.createMessageStreams(topicCountMap);
-    KafkaStream<byte[], byte[]> stream =  consumerMap.get(outputTopic).get(0);
-    return stream.iterator();
-  }
-  
 }
 
 ```
@@ -369,126 +483,6 @@ Launching in a real cluster will take one last step.  Below, we'll see the code 
 
 ![Scribengin Dataflow Submission Design](../images/dataflowsubmission.png "Scribengin Dataflow Submission Design")
 
-###The Code
-```java
-package com.neverwinterdp.scribengin.dataflow.example.simple;
-
-import java.util.Properties;
-
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
-import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.registry.RegistryConfig;
-import com.neverwinterdp.registry.zk.RegistryImpl;
-import com.neverwinterdp.scribengin.shell.ScribenginShell;
-import com.neverwinterdp.vm.HadoopProperties;
-import com.neverwinterdp.vm.VMConfig;
-import com.neverwinterdp.vm.client.YarnVMClient;
-
-/**
- * Example class of how to launch your dataflow on a real instance of Scribengin running in YARN
- *
- */
-public class ExampleSimpleDataflowSubmitterYARN {
-  
-  /**
-   * Simple class to house our configuration options for JCommander 
-   * 
-   */
-  static class Settings {
-
-    @Parameter(names = {"--help", "-h"}, help = true, description = "Output this help message")
-    private boolean help;
-    
-    @Parameter(names = "--dataflow-id", description = "Unique ID for the dataflow")
-    private String dataflowId        = "ExampleDataflow";
-    
-    @Parameter(names = "--zkConnect", description="[host]:[port] of Zookeeper server")
-    private String zkConnect = "zookeeper-1:2181";
-    
-    @Parameter(names = "--hadoopMasterConnect", description="hostname of HadoopMaster")
-    private String hadoopMasterConnect = "hadoop-master";
-    
-    @Parameter(names = "--kafkaConnect", description="[host]:[port] of kafka broker")
-    private String kafkaConnect = "kafka-1:9092";
-    
-    @Parameter(names = "--kafkaReplication", description = "Kafka replication")
-    private String kafkaReplication = "1";
-    
-    @Parameter(names = "--streamParallelism", description = "Number of Streams for Scribengin to deploy")
-    private String streamParallelism = "8";
-    
-    @Parameter(names = "--numOfWorker", description = "Number of workers to request")
-    private String numOfWorker = "2";
-    
-    @Parameter(names = "--numOfExecutorPerWorker", description = "Number of Executors per worker to request")
-    private String numOfExecutorPerWorker     = "2";
-    
-    @Parameter(names = "--inputTopic", description = "Name of input Kafka Topic")
-    private String inputTopic = "input.topic";
-    
-    @Parameter(names = "--outputTopic", description = "Name of output Kafka topic")
-    private String outputTopic ="output.topic";
-
-  }
-  
-  
-  public static void main(String args[]) throws Exception {
-    //Use JCommander to parse command line args
-    Settings settings = new Settings();
-    JCommander j = new JCommander(settings, args);
-    
-    if (settings.help) {
-      j.usage();
-      return;
-    }
-    
-    //Create a registry configuration and point it to our running Registry (Zookeeper)
-    RegistryConfig registryConfig = RegistryConfig.getDefault();
-    registryConfig.setConnect(settings.zkConnect);
-    Registry registry = null;
-    try{
-      registry = new RegistryImpl(registryConfig).connect();
-    } catch(Exception e){
-      System.err.println("Could not connect to the registry at: "+ registryConfig.getConnect()+"\n"+e.getMessage());
-      return;
-    }
-    
-    //Configure where our hadoop master lives
-    String hadoopMaster = settings.hadoopMasterConnect;
-    HadoopProperties hadoopProps = new HadoopProperties() ;
-    hadoopProps.put("yarn.resourcemanager.address", hadoopMaster + ":8032");
-    hadoopProps.put("fs.defaultFS", "hdfs://" + hadoopMaster +":9000");
-    
-    //Set up our connection to Scribengin
-    YarnVMClient vmClient = new YarnVMClient(registry, VMConfig.ClusterEnvironment.YARN, hadoopProps) ;
-    ScribenginShell shell = new ScribenginShell(vmClient) ;
-    shell.attribute(HadoopProperties.class, hadoopProps);
-    
-    //Configure our dataflow
-    Properties props = new Properties();
-    props.put("dataflow.id", settings.dataflowId);
-    props.put("dataflow.replication", settings.kafkaReplication); 
-    props.put("dataflow.parallelism", settings.streamParallelism); 
-    props.put("dataflow.numWorker", settings.numOfWorker);
-    props.put("dataflow.numExecutorPerWorker", settings.numOfExecutorPerWorker);
-    props.put("dataflow.inputTopic", settings.inputTopic);
-    props.put("dataflow.outputTopic", settings.outputTopic);
-    
-    //Launch our configured dataflow
-    ExampleSimpleDataflowSubmitter esds = new ExampleSimpleDataflowSubmitter(shell, new Properties());
-    esds.submitDataflow(settings.kafkaConnect);
-    
-    //Get some info on the running dataflow
-    shell.execute("dataflow info --dataflow-id "+settings.dataflowId+" --show-all");
-    
-    //Close connection with Scribengin
-    shell.close();
-  }
-
-}
-
-```
 
 
 ###Building
@@ -498,6 +492,9 @@ We'll build our dataflow and Scribengin
 ```
 cd NeverwinterDP
 ./gradlew clean build install release -x test
+
+#A script will be output to 
+NeverwinterDP/release/build/release/dataflow/example/bin/run-simple.sh
 ```
 
 
@@ -507,15 +504,40 @@ cd NeverwinterDP
 
 ###Running
 
-Once Scribengin is up and running in YARN, we'll use this to execute.  If you push data into the Kafka Input Topic, you should be able to watch the configured Kafka Output Topic get filled with the same data
+Once Scribengin is up and running in YARN, we'll use the script created during the build to execute.  The script looks like this:
 
 ```
-export LIB_DIR=/full/path/to/NeverwinterDP/release/build/release/neverwinterdp/scribengin/libs
+#!/bin/bash
 
-#Other options can be seen by running with --help option
-java -Djava.ext.dirs=$LIB_DIR:/jre/lib/ext -Xshare:auto -Xms128m -Xmx1536m -XX:-UseSplitVerifier \
-com.neverwinterdp.scribengin.dataflow.example.simple.ExampleSimpleDataflowSubmitterYARN \
---dataflow-id dataflowName --zkConnect 1.1.1.1:2181 --hadoopMasterConnect 2.2.2.2 --kafkaConnect 3.3.3.3:9092
+if [ "x$JAVA_HOME" == "x" ] ; then 
+  echo "WARNING JAVA_HOME is not set"
+fi
+
+#Get all our info about Java and our environment
+bin=`dirname "$0"`
+bin=`cd "$bin"; pwd`
+APP_DIR=`cd $bin/..; pwd; cd $bin`
+SCRIBENGIN_APP_DIR="$APP_DIR/../../scribengin"
+
+#Set Hadoop user name
+export HADOOP_USER_NAME="neverwinterdp"
+
+#This is our script's directory
+SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+#Get Java executable info and Java_Opts
+JAVACMD=$JAVA_HOME/bin/java
+JAVA_OPTS="-Xshare:auto -Xms128m -Xmx512m -XX:-UseSplitVerifier" 
+
+#This is the class we wrote
+MAIN_CLASS="com.neverwinterdp.scribengin.dataflow.example.simple.SimpleDataflowExample"
+
+#Spit out what we're about to run
+echo "Command: $JAVACMD -Djava.ext.dirs=$SCRIBENGIN_APP_DIR/libs:$APP_DIR/libs:$JAVA_HOME/jre/lib/ext $JAVA_OPTS $MAIN_CLASS --local-app-home $APP_DIR $@"
+
+#Run!
+$JAVACMD -Djava.ext.dirs=$SCRIBENGIN_APP_DIR/libs:$APP_DIR/libs:$JAVA_HOME/jre/lib/ext $JAVA_OPTS $MAIN_CLASS --local-app-home $APP_DIR "$@"
+
 ```
 
 

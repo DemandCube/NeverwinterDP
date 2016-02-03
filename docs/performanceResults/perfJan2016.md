@@ -56,6 +56,18 @@ Finally, the **Data Validator** reads the data in from the **Aggregate** Kafka t
 | --------------------------- | --------  |
 | dfs.replication             | 2         |
 
+##YARN Configuration
+| Config                                   | Value | 
+| ---------------------------------------- | ----- |
+| yarn.nodemanager.resource.cpu_vcores     | 3     | 
+| yarn.nodemanager.resource.memory_mb      | 3072  |
+| yarn.nodemanager.vmem-pmem-ratio         | 3     |
+| yarn.nodemanager.vmem-check-enabled      | true  |
+| yarn.scheduler.minimum-allocation-mb     | 614   |
+| yarn.scheduler.maximum-allocation-mb     | 614   |
+| yarn.scheduler.minimum-allocation-vcores | 1     |
+| yarn.scheduler.maximum-allocation-vcores | 1     |
+
 ##AWS Configuration
 
 All AWS containers are configured to use EBS provisioned IOP (SSD) volumes.
@@ -118,8 +130,8 @@ Performance
 
 |   Stat     |   Units        |
 | ---------  | -------------- |
-|     20,000 | records/second |
-| 17,500,000 |   bytes/second | 
+|     21,000 | records/second |
+| 21,800,000 |   bytes/second | 
 </pre></td><td valign="top"><pre>
 AWS Configuration
 
@@ -168,8 +180,6 @@ A high level of parallelism (i.e. a large number of Kafka partitions) coupled wi
 Network speed is crucial for a cluster to work effectively together.  An operator can only receive data as quickly as the network will transfer it.
 
 Finally, disk speed is also crucial.  When the point of an operation is to read and write data, disk speed can be a limiting factor.  SSD's are highly recommended to get the most out of your Scribengin cluster.
-
-As demonstrated by the difference between **Large 4 Workers** and **Large 5 Workers**, throwing more machines at the problem won't necessarily increase performance.  To properly make the most of your cluster, you must ensure your data is able to run in parallel, that data is correctly partitioned, and that your CPU can handle the amount of parallelism configured.  m4.large EC2 instances are limited in that they are 2 vCPU's each, which limits the available resources to handle that many simultaneous tasks.
 
 
 
@@ -245,13 +255,10 @@ AWS Configuration
 
 
 
-
 #Kafka to HDFS Conclusions
-For 3 and 4 workers, all Hadoop workers are largely limited by their CPU's.  Because m4.large's are dual cores, tests often reported machines being pinned at 100% cpu for the whole test.
+The cluster is partially limited by the amount of network throughput.  Cloudwatch reported the machines at close to 800 mbps consistently while doing the test, which is expected to be close to maximum for m4.large's from doing net testing using iperf.  With replication for HDFS and Kafka each set to 2, the system is under a heavy network load for this test.  
 
-For 5 workers, the extra cores give the workers some breathing room.  Instead, at this point - the cluster is limited by the amount of network throughput.  Cloudwatch reported the machines at close to 800 mbps consistently while doing the test, which is expected to be close to maximum for m4.large's from doing net testing using iperf.  With replication for HDFS and Kafka each set to 2, the system is under a heavy network load for this test.  
-
-
+We also can see some possible disk writing issues when dealing with writing high volumes of data to HDFS.  The iostat tool reported that average disk wait times between 200-300 milliseconds on EBS volumes.
 
 
 
