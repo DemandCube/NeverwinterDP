@@ -14,7 +14,7 @@
 This howto will show you how to develop your own dataflow and operator.  You will then learn how to submit your dataflow to Scribengin to be run.  
 
 #Sample code#
-You can find sample code in the Scribengin package com.neverwinterdp.scribengin.example.*. The code comes complete with unit tests and full comments.
+You can find sample code in the Scribengin package com.neverwinterdp.scribengin.dataflow.example.*. The code comes complete with unit tests and full comments.
 
 #A Simple Dataflow
 
