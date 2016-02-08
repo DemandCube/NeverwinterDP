@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.neverwinterdp.storage.StorageConfig;
+import com.neverwinterdp.storage.es.ESStorageConfig;
 import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 
@@ -73,6 +74,12 @@ public class Dataflow<IN, OUT> {
   
   public HDFSDataSet<OUT> createOutput(HDFSStorageConfig config) {
     HDFSDataSet<OUT> ds = new HDFSDataSet<OUT>(DataStreamType.Output, config);
+    dataSets.put(ds.getName(), ds);
+    return ds;
+  }
+  
+  public ESDataSet<OUT> createOutput(ESStorageConfig config){
+    ESDataSet<OUT> ds = new ESDataSet<OUT>(DataStreamType.Output, config);
     dataSets.put(ds.getName(), ds);
     return ds;
   }

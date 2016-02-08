@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.message.Message;
+import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.es.sink.ESSink;
 import com.neverwinterdp.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
@@ -38,7 +39,7 @@ public class ESSinkUnitTest {
 
   @Test
   public void testSource() throws Exception {
-    ESSink sink = new ESSink(new String[] {"127.0.0.1:9300"}, "log4j", Log4jRecord.class) ;
+    ESSink sink = new ESSink("test", new String[] {"127.0.0.1:9300"}, "log4j", Log4jRecord.class, new StorageConfig()) ;
     SinkPartitionStream stream = sink.getPartitionStream(0);
     SinkPartitionStreamWriter writer = stream.getWriter();
     for(int i = 0; i < 10; i++) {

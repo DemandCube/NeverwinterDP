@@ -13,12 +13,12 @@ import com.neverwinterdp.storage.sink.SinkPartitionStream;
 public class ESSink implements Sink {
   private ESStorage storage ;
   
-  public ESSink(StorageConfig descriptor) throws Exception {
-    init(new ESStorage(descriptor)) ;
-  }
+  //public ESSink(StorageConfig descriptor) throws Exception {
+  //  init(new ESStorage(descriptor)) ;
+  //}
   
-  public ESSink(String[] address, String indexName, Class<?> mappingType) throws Exception {
-    init(new ESStorage(address, indexName, mappingType));
+  public ESSink(String name, String[] address, String indexName, Class<?> mappingType, StorageConfig storageConfig) throws Exception {
+    init(new ESStorage(name, address, indexName, mappingType.getCanonicalName(), storageConfig));
   }
   
   private void init(ESStorage storage) throws Exception {

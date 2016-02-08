@@ -1,8 +1,10 @@
-package com.neverwinterdp.storage.kafka.sink;
+  package com.neverwinterdp.storage.kafka.sink;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
+
+import kafka.javaapi.PartitionMetadata;
+import kafka.javaapi.TopicMetadata;
 
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.storage.PartitionStreamConfig;
@@ -10,9 +12,6 @@ import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorage;
 import com.neverwinterdp.storage.sink.Sink;
 import com.neverwinterdp.storage.sink.SinkPartitionStream;
-
-import kafka.javaapi.PartitionMetadata;
-import kafka.javaapi.TopicMetadata;
 
 public class KafkaSink implements Sink {
   private StorageConfig storageConfig;

@@ -21,7 +21,7 @@ public class ESStreamWriter implements SinkPartitionStreamWriter {
   
   @Override
   public void append(Message dataflowMessage) throws Exception {
-    Object obj = JSONSerializer.INSTANCE.fromBytes(dataflowMessage.getData(), storage.getMappingType());
+    Object obj = JSONSerializer.INSTANCE.fromBytes(dataflowMessage.getData(), storage.getMappingClass());
     esObjClient.put(obj, dataflowMessage.getKey());
   }
 
