@@ -15,7 +15,8 @@ task release(dependsOn: 'build') << {
   def projects = [
     ':registry/vm-sample',
     ':scribengin/release',
-    ':scribengin/dataflow/example'
+    ':scribengin/dataflow/example',
+    ':scribengin/dataflow/demo'
   ] ;
 
   projects.each { sel ->
