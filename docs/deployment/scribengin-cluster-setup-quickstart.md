@@ -384,7 +384,7 @@ Yes... AWS instance is ready now run scribengin.
 ./tools/serviceCommander/serviceCommander.py -e "storm_code" --install --configure --start
  ```
  
- 9. Optional step- To make the things simple to skip steps 5 to 8, run the below command
+ 9.Optional step- To make the things simple to skip steps 5 to 8, run the below command
  
  ```
  ./tests/demo_deployments_script/deploy_odyssey_scribengin_demo.sh 
