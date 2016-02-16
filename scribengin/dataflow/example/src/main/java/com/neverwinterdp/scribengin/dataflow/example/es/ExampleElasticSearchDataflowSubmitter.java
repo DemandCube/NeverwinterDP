@@ -21,7 +21,7 @@ import com.neverwinterdp.scribengin.dataflow.KafkaDataSet;
 import com.neverwinterdp.scribengin.dataflow.Operator;
 import com.neverwinterdp.scribengin.dataflow.example.simple.SimpleDataStreamOperator;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
-import com.neverwinterdp.storage.es.ESStorage;
+import com.neverwinterdp.storage.es.ESStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.HadoopProperties;
@@ -153,20 +153,15 @@ public class ExampleElasticSearchDataflowSubmitter {
     
     //Define our input source - set name, ZK host:port, and input topic name
     KafkaDataSet<Message> inputDs = 
-        dfl.createInput(new KafkaStorageConfig("input", config.zkConnect, config.inputTopic));
+      dfl.createInput(new KafkaStorageConfig("input", config.zkConnect, config.inputTopic));
     
     
-    ESStorage es = new ESStorage("output", config.elasticSearchHost.split(","), config.index, config.mapper  );
-    
-    //Define our output sink - set name, ZK host:port, and output topic name
-    DataSet<Message> outputDs = 
-        dfl.createOutput(es.getStorageConfig());
-    
-    
+    ESStorageConfig esStorageConfig = new ESStorageConfig("output", config.elasticSearchHost, config.index, config.mapper);
+    DataSet<Message> outputDs = dfl.createOutput(esStorageConfig);
     
     //Define which operator to use.  
     //This will be the logic that ties the input to the output
-    Operator<Message, Message> operator     = dfl.createOperator("simpleOperator", SimpleDataStreamOperator.class);
+    Operator<Message, Message> operator = dfl.createOperator("simpleOperator", SimpleDataStreamOperator.class);
     
     //Connect your input to the operator
     inputDs.useRawReader().connect(operator);

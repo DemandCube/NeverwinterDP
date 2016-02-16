@@ -1,14 +1,14 @@
 package com.neverwinterdp.storage.es;
 
 import com.neverwinterdp.storage.StorageConfig;
+import com.neverwinterdp.util.text.StringUtil;
 
 @SuppressWarnings("serial")
 public class ESStorageConfig extends StorageConfig {
-  final static public String NAME        = "name";
-  final static public String INDEX       = "indexName";
-  final static public String MAPPING     = "mappingType";
-  final static public String HOST        = "host";
-  
+  final static public String NAME         = "name";
+  final static public String INDEX        = "indexName";
+  final static public String MAPPING_TYPE = "mappingType";
+  final static public String ADDRESSES    = "addresses";
   
   public ESStorageConfig() { 
     setType("es");
@@ -18,12 +18,20 @@ public class ESStorageConfig extends StorageConfig {
     putAll(config);
   }
   
-  public ESStorageConfig(String name, String index, String host, String mapping) { 
+  public ESStorageConfig(String name, String index, String addresses, Class<?> mappingType) { 
+    this(name, index, addresses, mappingType.getName());
+  }
+
+  public ESStorageConfig(String name, String index, String[] address, Class<?> mappingType) { 
+    this(name, index, StringUtil.joinStringArray(address), mappingType.getName());
+  }
+  
+  public ESStorageConfig(String name, String index, String addresses, String mappingType) { 
     setType("es");
     setName(name);
     setIndex(index);
-    setHost(host);
-    setMapping(mapping);
+    setAddresses(addresses);
+    setMappingType(mappingType);
   }
   
   public String getName() { return attribute(NAME); }
@@ -32,10 +40,12 @@ public class ESStorageConfig extends StorageConfig {
   public String getIndex() { return attribute(INDEX); }
   public void   setIndex(String index) { attribute(INDEX, index); }
   
-  public String getHost() { return attribute(HOST); }
-  public void   setHost(String host) { attribute(HOST, host); }
+  public String getAddresses() { return attribute(ADDRESSES); }
+  public void   setAddresses(String host) { attribute(ADDRESSES, host); }
   
-  public String getMapping() { return attribute(MAPPING); }
-  public void   setMapping(String mapping) { attribute(MAPPING, mapping); }
+  public String[] stringArrayAddress() { return this.stringArrayAttribute(ADDRESSES, null); }
+  
+  public String getMappingType() { return attribute(MAPPING_TYPE); }
+  public void   setMappingType(String mappingType) { attribute(MAPPING_TYPE, mappingType); }
   
 }

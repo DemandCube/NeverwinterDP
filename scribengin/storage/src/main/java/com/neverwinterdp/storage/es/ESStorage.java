@@ -6,124 +6,67 @@ import com.neverwinterdp.storage.PartitionStreamConfig;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.es.sink.ESSink;
-import com.neverwinterdp.storage.sink.Sink;
 import com.neverwinterdp.storage.source.Source;
-import com.neverwinterdp.util.text.StringUtil;
 
-public class ESStorage extends Storage{
-  private StorageConfig sConfig;
-  private String name;
-  private String[] address ;
-  private String   indexName ;
-  //private Class<?> mappingType ;
-  private String mappingType;
-
-  public ESStorage(String name, String[] address, String indexName, String mapping) {
-    this(name, address, indexName, mapping, new StorageConfig());
+public class ESStorage extends Storage {
+  private Class<?> mappingTypeClass;
+  
+  public ESStorage(String name, String[] address, String indexName, String mapping) throws Exception {
+    this(new ESStorageConfig());
   }
   
-  public ESStorage(String name, String[] address, String indexName, String mapping, StorageConfig storageConfig) {
-    super(storageConfig);
-    this.sConfig = storageConfig;
-    this.name = name;
-    this.address = address ;
-    this.indexName = indexName; 
-    this.mappingType = mapping;
-    //try {
-    //  this.mappingType = Class.forName(mapping);
-    //} catch (ClassNotFoundException e) {
-    //  e.printStackTrace();
-    //}
+  public ESStorage(String name, String[] address, String indexName, String mapping, StorageConfig storageConfig) throws Exception {
+    this(new ESStorageConfig());
   }
   
-  public ESStorage(StorageConfig descriptor) {
-    super(descriptor);
-    fromStorageDescriptor(descriptor);
+  public ESStorage(ESStorageConfig esStorageConfig) throws Exception {
+    super(esStorageConfig);
+    mappingTypeClass = Class.forName(esStorageConfig.getMappingType());
   }
   
-  public String[] getAddress() { return address ; }
-  
-  public String getIndexName() { return indexName; }
-  
-  public String getMappingType() { return mappingType; }
-  public Class<?> getMappingClass() { 
-    try {
-      return Class.forName(mappingType);
-    } catch (ClassNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } 
-    return null;
+  public ESStorage(StorageConfig config) {
+    super(config);
   }
   
-  public ESStorageConfig getStorageConfig() { return new ESStorageConfig(toStorageConfig());  }
+  public Class<?> getMappingClass() { return mappingTypeClass; }
+  
+  public ESStorageConfig getESStorageConfig() { return new ESStorageConfig(getStorageConfig());  }
   
   public PartitionStreamConfig newStreamDescriptor() {
     PartitionStreamConfig descriptor = new PartitionStreamConfig(getStorageConfig()) ;
     return descriptor;
   }
   
-  public ESObjectClient<Object> getESObjectClient() {
-    ESObjectClient<Object> esObjClient = null;
-    try {
-      esObjClient = new ESObjectClient<Object>(new ESClient(address), indexName, Class.forName(mappingType));
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
-    }
-    return esObjClient;
-  }
-
-  StorageConfig toStorageConfig() {
-    StorageConfig descriptor = new StorageConfig("elasticsearch") ;
-    descriptor.attribute("name", name);
-    descriptor.attribute("address", StringUtil.joinStringArray(address)) ;
-    descriptor.attribute("indexName", indexName) ;
-    descriptor.attribute("mappingType", mappingType) ;
-    return descriptor ;
- }
-  
-  void fromStorageDescriptor(StorageConfig descriptor) {
-    address = StringUtil.toStringArray(descriptor.attribute("address"));
-    indexName = descriptor.attribute("indexName");
-    mappingType = descriptor.attribute("mappingType");
+  public ESObjectClient<Object> getESObjectClient() throws Exception {
+    ESStorageConfig esStorageConfig = getESStorageConfig();
+    ESClient esClient = new ESClient(esStorageConfig.stringArrayAddress());
+    return new ESObjectClient<Object>(esClient, esStorageConfig.getIndex(), mappingTypeClass);
   }
 
   @Override
   public void refresh() throws Exception {
-    // TODO Auto-generated method stub
-    System.err.println("REFRESH!!!!");
   }
 
   @Override
   public boolean exists() throws Exception {
-    System.err.println("EXISTS!!!!");
-    return false;
+    ESStorageConfig esStorageConfig = getESStorageConfig();
+    ESClient esClient = new ESClient(esStorageConfig.stringArrayAddress());
+    return esClient.hasIndex(esStorageConfig.getIndex());
   }
 
   @Override
   public void drop() throws Exception {
-    System.err.println("DROP!!!!");
-    // TODO Auto-generated method stub
-    
   }
 
   @Override
   public void create() throws Exception {
-    System.err.println("CREATE!!!!");
-    // TODO Auto-generated method stub
-    
   }
 
   @Override
-  public Sink getSink() throws Exception {
-    System.err.println("GET SINK!!!!");
-    return new ESSink(this.name, this.address, this.indexName, Class.forName(this.mappingType), this.sConfig);
-  }
+  public ESSink getSink() { return new ESSink(this); }
 
   @Override
-  public Source getSource() throws Exception {
-    System.err.println("GET SOURCE!!!!");
-    // TODO Auto-generated method stub
-    return null;
+  public Source getSource() { 
+    throw new RuntimeException("Not Supported!!!"); 
   }
 }

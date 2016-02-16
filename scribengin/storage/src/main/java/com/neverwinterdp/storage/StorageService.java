@@ -9,13 +9,15 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.registry.Registry;
+import com.neverwinterdp.storage.es.ESStorage;
+import com.neverwinterdp.storage.es.ESStorageConfig;
 import com.neverwinterdp.storage.hdfs.HDFSStorage;
 import com.neverwinterdp.storage.kafka.KafkaStorage;
+import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.storage.nulldev.NullDevStorage;
 import com.neverwinterdp.storage.s3.S3Client;
 import com.neverwinterdp.storage.s3.S3Storage;
 import com.neverwinterdp.storage.simplehdfs.SimpleHDFSStorage;
-import com.neverwinterdp.util.JSONSerializer;
 
 @Singleton
 public class StorageService {
@@ -43,8 +45,9 @@ public class StorageService {
 
   synchronized public Storage getStorage(StorageConfig storageConfig) throws Exception {
     if("kafka".equalsIgnoreCase(storageConfig.getType())) {
-      String zkConnect = storageConfig.attribute(KafkaStorage.ZK_CONNECT);
-      String topic     = storageConfig.attribute(KafkaStorage.TOPIC);
+      KafkaStorageConfig kStorageConfig = new KafkaStorageConfig(storageConfig);
+      String zkConnect = kStorageConfig.getZKConnect();
+      String topic     = kStorageConfig.getTopic();
       String key = "kafka:" + zkConnect + "/" + topic;
       KafkaStorage storage = cacheKafkaStorage.get(key);
       if(storage == null) {
@@ -80,6 +83,9 @@ public class StorageService {
         cacheS3Storage.put(key, storage);
       }
       return storage;
+    } else if("es".equalsIgnoreCase(storageConfig.getType())) {
+      ESStorageConfig esStorageConfig = new ESStorageConfig(storageConfig);
+      return new ESStorage(esStorageConfig);
     } else if("nulldev".equalsIgnoreCase(storageConfig.getType())) {
       return new NullDevStorage(storageConfig);
     }

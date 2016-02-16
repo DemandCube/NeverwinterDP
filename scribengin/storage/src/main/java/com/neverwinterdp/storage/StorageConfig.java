@@ -3,6 +3,7 @@ package com.neverwinterdp.storage;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.neverwinterdp.util.text.StringUtil;
 
 @SuppressWarnings("serial")
 public class StorageConfig extends HashMap<String, String> {
@@ -72,5 +73,16 @@ public class StorageConfig extends HashMap<String, String> {
     String value = get(name);
     if(value == null) return defaultValue;
     return Boolean.parseBoolean(value);
+  }
+  
+  public void attribute(String name, String[] array) {
+    if(array == null || array.length == 0) return;
+    put(name, StringUtil.joinStringArray(array));
+  }
+  
+  public String[] stringArrayAttribute(String name, String[] defaultArray) {
+    String values = get(name);
+    if(values != null) return StringUtil.toStringArray(values);
+    return defaultArray;
   }
 }

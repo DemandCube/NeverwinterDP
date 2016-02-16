@@ -17,6 +17,7 @@ import org.elasticsearch.search.SearchHit;
 
 import com.neverwinterdp.util.JSONSerializer;
 
+//TODO: reimplement with retry mechanism
 public class ESObjectClient<T> {
   private ESClient esclient;
   private String   index;

@@ -3,26 +3,25 @@ package com.neverwinterdp.storage.es.sink;
 import com.neverwinterdp.es.ESObjectClient;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.PartitionStreamConfig;
-import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.es.ESStorage;
 import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class ESStreamWriter implements SinkPartitionStreamWriter {
-  ESStorage        storage ;
-  PartitionStreamConfig  partitionConfig;
-  ESObjectClient<Object> esObjClient;
-  
-  public ESStreamWriter(StorageConfig sConfig, PartitionStreamConfig pConfig) throws Exception {
-    this.storage = new ESStorage(sConfig);
+  private ESStorage              storage;
+  private PartitionStreamConfig  partitionConfig;
+  private ESObjectClient<Object> esObjClient;
+
+  public ESStreamWriter(ESStorage esStorage, PartitionStreamConfig pConfig) throws Exception {
+    this.storage = esStorage;
     this.partitionConfig = pConfig;
     esObjClient = storage.getESObjectClient();
   }
   
   @Override
-  public void append(Message dataflowMessage) throws Exception {
-    Object obj = JSONSerializer.INSTANCE.fromBytes(dataflowMessage.getData(), storage.getMappingClass());
-    esObjClient.put(obj, dataflowMessage.getKey());
+  public void append(Message message) throws Exception {
+    Object obj = JSONSerializer.INSTANCE.fromBytes(message.getData(), storage.getMappingClass());
+    esObjClient.put(obj, message.getKey());
   }
 
 

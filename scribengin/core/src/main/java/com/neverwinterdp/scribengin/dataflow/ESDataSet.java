@@ -4,8 +4,6 @@ import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.es.ESStorageConfig;
 
 public class ESDataSet<T> extends DataSet<T> {
-
-  
   private ESStorageConfig esStorageConfig;
 
   public ESDataSet(DataStreamType type, ESStorageConfig esStorageConfig) {
@@ -14,8 +12,6 @@ public class ESDataSet<T> extends DataSet<T> {
   }
 
   @Override
-  protected StorageConfig createStorageConfig() {
-    return new ESStorageConfig(esStorageConfig);
-  }
+  protected StorageConfig createStorageConfig() { return new ESStorageConfig(esStorageConfig); }
 
 }
