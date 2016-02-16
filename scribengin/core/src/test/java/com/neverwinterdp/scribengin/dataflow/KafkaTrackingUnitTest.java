@@ -21,7 +21,7 @@ public class KafkaTrackingUnitTest  {
   @Before
   public void setup() throws Exception {
     String BASE_DIR = "build/working";
-    System.setProperty("app.home", BASE_DIR + "/scribengin");
+    System.setProperty("app.home",   BASE_DIR + "/scribengin");
     System.setProperty("vm.app.dir", BASE_DIR + "/scribengin");
     
     localScribenginCluster = new LocalScribenginCluster(BASE_DIR) ;

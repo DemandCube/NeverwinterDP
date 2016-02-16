@@ -1,0 +1,10 @@
+<html>
+  <head>
+    <title>Hello</title>
+  </head>
+  <body>
+   <div id="nav">
+     {{&navigation}}
+   </div>
+  </body>
+</html>

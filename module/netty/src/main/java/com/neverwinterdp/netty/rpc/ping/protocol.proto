@@ -1,0 +1,24 @@
+// How to generate
+// ===============
+// $ cd example
+// $ protoc src/main/java/com/neverwinterdp/netty/rpc/ping/protocol.proto --java_out=src/main/java
+
+option java_generic_services = true;
+option java_package = "com.neverwinterdp.netty.rpc.ping";
+option java_outer_classname = "protocol";
+
+message Ping {
+  required string message = 1; 
+}
+
+message Ping1 {
+  required string message = 1; 
+}
+
+message Pong {
+  required string message = 1; 
+}
+
+service PingService {
+  rpc ping(Ping) returns (Pong);
+}

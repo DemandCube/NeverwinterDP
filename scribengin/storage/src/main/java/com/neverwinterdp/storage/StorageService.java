@@ -11,9 +11,11 @@ import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.storage.hdfs.HDFSStorage;
 import com.neverwinterdp.storage.kafka.KafkaStorage;
+import com.neverwinterdp.storage.nulldev.NullDevStorage;
 import com.neverwinterdp.storage.s3.S3Client;
 import com.neverwinterdp.storage.s3.S3Storage;
 import com.neverwinterdp.storage.simplehdfs.SimpleHDFSStorage;
+import com.neverwinterdp.util.JSONSerializer;
 
 @Singleton
 public class StorageService {
@@ -78,6 +80,8 @@ public class StorageService {
         cacheS3Storage.put(key, storage);
       }
       return storage;
+    } else if("nulldev".equalsIgnoreCase(storageConfig.getType())) {
+      return new NullDevStorage(storageConfig);
     }
     throw new Exception("Unknown sink type " + storageConfig.getType());
   }

@@ -1,0 +1,32 @@
+// How to generate
+// ===============
+// $ protoc src/main/java/com/neverwinterdp/netty/rpc/protocol.proto --java_out=src/main/java
+
+package com.neverwinterdp.netty.rpc;
+option optimize_for = SPEED;
+option java_generic_services = false;
+option java_package = "com.neverwinterdp.netty.rpc";
+option java_outer_classname = "protocol";
+
+message Request {
+  required string serviceId = 1;
+  required string methodId  = 2;
+  required bytes  params    = 3;
+}
+
+message Response {
+  optional bytes result = 1 ;
+  optional Error error  = 2 ;
+}
+
+message Error {
+  required int32  errorCode    = 1 [default = 0];
+  required string message      = 2;
+  required string stacktrace   = 3;
+}
+
+message WirePayload {
+  required int64    correlationId   = 1 ;
+  optional Request  request         = 2;
+  optional Response response        = 3;
+}

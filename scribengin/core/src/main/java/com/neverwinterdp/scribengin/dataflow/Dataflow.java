@@ -7,6 +7,7 @@ import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.es.ESStorageConfig;
 import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
+import com.neverwinterdp.storage.nulldev.NullDevStorageConfig;
 
 public class Dataflow<IN, OUT> {
   
@@ -68,6 +69,12 @@ public class Dataflow<IN, OUT> {
 
   public KafkaDataSet<OUT> createOutput(KafkaStorageConfig config) {
     KafkaDataSet<OUT> ds = new KafkaDataSet<OUT>(DataStreamType.Output, config);
+    dataSets.put(ds.getName(), ds);
+    return ds;
+  }
+  
+  public NullDevDataSet<OUT> createOutput(NullDevStorageConfig config) {
+    NullDevDataSet<OUT> ds = new NullDevDataSet<OUT>(DataStreamType.Output, config);
     dataSets.put(ds.getName(), ds);
     return ds;
   }
