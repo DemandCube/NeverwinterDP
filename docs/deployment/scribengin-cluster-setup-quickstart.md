@@ -313,6 +313,86 @@ Example
 
 Yes... AWS instance is ready now run scribengin.
 
+#Launching Demo (odyssey-scribengin) Cluster Setup in AWS
+1.Follow [AWS instance launching steps as before](#aws-setup)
+2.It is importnant to add tags while launching aws instances. There are 3 mandotary key-values should be added while setting up aws instances. They are
+  
+  - Name
+    - Follow [Machine Naming Conventions](#machine-naming-conventions) for scribengin clsuter, and there is no naming conventions for odyssey cluster
+  - Groups
+    - Only the groups mentioned below are allowed. 
+    - You can add multiple groups by comma seperated value
+    - Available groups for scribengin are
+        - hadoop-worker
+    	- hadoop-master
+    	- elasticsearch
+		- monitoring
+		- zookeeper
+		- kafka
+    - Available groups for odyssey are
+    	- kafka-zookeeper
+		- storm-zookeeper
+		- storm-nimbus
+		- storm-supervisor
+		- odyssey-monitoring
+		- kafka-broker
+		- load-balancer
+  - Identifier
+  	- There are only two identifier values are available, they are
+  		- odyssey
+  		- scribengin
+ 
+ ![Tags](images/tags.png)
+ 
+ 
+ 3.Deploy neverwinterdp-deployments in scribengin monitoring instance. 
+ 4.Run the below command with required arguments. This will update host machine with required keys and credentials for passwordless access with other instances in the cluster.
+ 
+ ```
+ ./tests/demo_deployments_script/update_ssh_config.sh --local-aws-pem=/path/to/aws.pem
+ ```
+ 
+ 5.Login in to host machine (usually its monitoring machine) as neverwinterdp user. And cd to neverwinterdp-deployemnts path. Make sure that neverwinterdp-deployments is latest from master branch, if not pull the latest from master.
+ 
+ ```
+ cd ./neverwinterdp-deployments 
+ ```
+ 
+ 6.Run the below command from neverwinterdp-deployemnts to create ansible inventory file
+ 
+ ```
+ ./tools/awsHelper/awsHelper.py ansibleinventory --identifier odyssey,neverwinterdp
+ ```
+ 
+ 7.Update hosts file on all instances
+ 
+ ```
+ ./tools/awsHelper/awsHelper.py updateremotehostfile -i odyssey,neverwinterdp -k /home/neverwinterdp/test.pem 
+ ```
+ 
+ 8.Run below commands to install and start neccessory services in the cluster.
+ 
+ ```
+ ./tools/serviceCommander/serviceCommander.py -e "kafka,zookeeper" --configure --start --clean
+./tools/serviceCommander/serviceCommander.py -e "gripper" --install --configure —start 
+./tools/serviceCommander/serviceCommander.py -e "load_balancer" --install --configure --start 
+./tools/serviceCommander/serviceCommander.py -e "odyssey_elasticsearch" --install --configure --start
+
+./tools/serviceCommander/serviceCommander.py -e "storm_zookeeper" --install --configure --start
+./tools/serviceCommander/serviceCommander.py -e "storm_nimbus" --install --configure --start
+./tools/serviceCommander/serviceCommander.py -e "storm_supervisor" --install --configure --start
+./tools/serviceCommander/serviceCommander.py -e "storm_code" --install --configure --start
+ ```
+ 
+ 9.Optional step- To make the things simple to skip steps 5 to 8, run the below command
+ 
+ ```
+ ./tests/demo_deployments_script/deploy_odyssey_scribengin_demo.sh 
+ ```
+ 
+ Note: The above steps will launch cluster with scribengin's kafka,zookeeper and other odyssey services that communicate with scribengins kafka,zookeeper.
+	
+
 #Arbitrary Cluster Setup
 [Follow the steps in this guide for information on how to use Nvent's private automation to launch in any arbitrary cluster](arbitrary-cluster-guide.md).  These steps require access to Nvent's private repos.  
 
