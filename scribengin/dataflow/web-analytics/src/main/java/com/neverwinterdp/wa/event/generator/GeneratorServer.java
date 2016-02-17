@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.ResponseHandler;
 import com.neverwinterdp.util.JSONSerializer;
@@ -14,6 +15,7 @@ import com.neverwinterdp.wa.event.BrowserInfo;
 import com.neverwinterdp.wa.event.WebEvent;
 import com.neverwinterdp.wa.gripper.GripperAck;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -27,18 +29,20 @@ public class GeneratorServer {
   @Parameter(names = "--gripper-server-host", description = "The http port")
   private String gripperServerHost = "127.0.0.1";
   
+  @ParametersDelegate
+  private BrowserSessionGenerator browserSessionGenerator = new BrowserSessionGenerator();
+  
   private int numOfThreads = 1;
-  
-  private int numOfMessages = 10000;
-  
+
   private ExecutorService executorService;
   
-  public GeneratorServer setNumOfMessages(int num) {
-    numOfMessages = num;
+  public GeneratorServer setNumOfVisitPages(int num) {
+    browserSessionGenerator.setNumOfPages(num);
     return this;
   }
   
   public void start() throws Exception {
+    browserSessionGenerator.start();
     executorService = Executors.newFixedThreadPool(numOfThreads);
     for(int i = 0; i < numOfThreads; i++) {
       executorService.submit(new GeneratorWorker());
@@ -62,17 +66,14 @@ public class GeneratorServer {
     public void doRun() throws Exception {
       GripperResponseHandler handler = new GripperResponseHandler() ;
       AsyncHttpClient client = new AsyncHttpClient (gripperServerHost, gripperServerPort, handler) ;
-      WebEventGenerator webEventGenerator = new WebEventGenerator();
-      BrowserInfo browser = Browsers.createMacbookAirBrowser();
-      for(int i = 0; i < numOfMessages; i++) {
-        WebEvent wEvent = webEventGenerator.next(browser, "user.click", "GET", "http://google.com");
-        client.post("/webevent/user.click", wEvent);
+      BrowserSession session = null;
+      int visitPageCount = 0 ;
+      while((session = browserSessionGenerator.nextBrowserSession()) != null) {
+        visitPageCount += session.visit(client);
+        client.flush();
       }
+      client.close();
     }
-  }
-  
-  public class BrowserSession {
-    private BrowserInfo browserInfo;
   }
   
   public class GripperResponseHandler implements ResponseHandler {
@@ -86,7 +87,10 @@ public class GeneratorServer {
       
       if(response instanceof HttpContent) {
         HttpContent content = (HttpContent) response;
-        GripperAck ack = JSONSerializer.INSTANCE.fromBytes(content.content().array(), GripperAck.class);
+        ByteBuf bBuf = content.content();
+        byte[] bytes = new byte[bBuf.readableBytes()];
+        bBuf.readBytes(bytes);
+        GripperAck ack = JSONSerializer.INSTANCE.fromBytes(bytes, GripperAck.class);
         if(!ack.isSuccess()) {
           logger.error("Get a failed ack from gripper server!");
           logger.error(ack.getErrorMessage());

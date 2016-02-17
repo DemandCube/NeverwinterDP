@@ -8,7 +8,9 @@ import java.util.Set;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorInterceptor;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorReport;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.WorkerService;
 import com.neverwinterdp.storage.Storage;
@@ -114,6 +116,13 @@ public class DataStreamOperatorRuntimeContext implements DataStreamOperatorConte
         workerService.getMetricRegistry().getMeter("dataflow.sink." + name + ".throughput.record", "record") ;
     recordMetter.mark(1);
   }
+  
+  public void write(Message message) throws Exception {
+    for(String name : outputContexts.keySet()) {
+      write(name, message);
+    }
+  }
+  
   
   private void prepareCommit() throws Exception {
     Iterator<OutputDataStreamContext> i = outputContexts.values().iterator();

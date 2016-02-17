@@ -1,5 +1,7 @@
 package com.neverwinterdp.wa.event.generator;
 
+import java.net.ConnectException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,24 +13,34 @@ import com.neverwinterdp.wa.event.BrowserInfo;
 import com.neverwinterdp.wa.event.WebEvent;
 
 public class BrowserSession {
+  private String        username;
   private String        sessionId;
   private AtomicInteger idTracker = new AtomicInteger();
   
   private BrowserInfo     browserInfo;
   private List<SiteVisit> siteToVisits ;
   
-  public BrowserSession(BrowserInfo bInfo) {
-    browserInfo  = bInfo;
-    siteToVisits = new ArrayList<>();
+  public BrowserSession(String username, String sessionId, BrowserInfo bInfo) {
+    this.username     = username;
+    this.sessionId    = sessionId;
+    this.browserInfo  = bInfo;
+    this.siteToVisits = new ArrayList<>();
   }
   
   public void addSiteVisit(String site, int numOfPages) {
     siteToVisits.add(new SiteVisit(site, numOfPages));
   }
   
-  public void visit(AsyncHttpClient client) {
-    long seed = System.nanoTime();
-    Collections.shuffle(siteToVisits, new Random(seed));
+  public int countNumPages() {
+    int total = 0;
+    for(int i = 0; i < siteToVisits.size(); i++) {
+      total = siteToVisits.size();
+    }
+    return total;
+  }
+  
+  public int visit(AsyncHttpClient client) throws ConnectException, URISyntaxException, InterruptedException {
+    Collections.shuffle(siteToVisits, new Random(System.nanoTime()));
     List<String> pages = new ArrayList<>();
     for(int i = 0; i < siteToVisits.size(); i++) {
       SiteVisit sel = siteToVisits.get(i);
@@ -36,13 +48,18 @@ public class BrowserSession {
     }
     
     for(int i = 0; i < pages.size(); i++) {
-      WebEvent event = new WebEvent();
-      event.setId(Integer.toString(idTracker.incrementAndGet()));
-      event.setTimestamp(System.currentTimeMillis());
-      event.setName("user-click");
-      event.setMethod("GET");
-      event.setUrl(pages.get(i));
-      event.setBrowserInfo(browserInfo);
+      WebEvent wEvent = new WebEvent();
+      wEvent.setUsername(username);
+      wEvent.setSessionId(sessionId);
+      wEvent.setEventId(sessionId + "-" + idTracker.incrementAndGet());
+      wEvent.setTimestamp(System.currentTimeMillis());
+      wEvent.setName("user-click");
+      wEvent.setMethod("GET");
+      wEvent.setUrl(pages.get(i));
+      wEvent.setBrowserInfo(browserInfo);
+      
+      client.post("/webevent/user.click", wEvent);
     }
+    return pages.size();
   }
 }

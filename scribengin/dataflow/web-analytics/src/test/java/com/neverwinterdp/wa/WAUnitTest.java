@@ -1,25 +1,15 @@
 package com.neverwinterdp.wa;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.netty.http.client.AsyncHttpClient;
-import com.neverwinterdp.netty.http.client.DumpResponseHandler;
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
 import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
-import com.neverwinterdp.vm.VMConfig;
-import com.neverwinterdp.vm.client.VMClient;
-import com.neverwinterdp.vm.client.VMSubmitter;
 import com.neverwinterdp.wa.dataflow.WADataflowBuilder;
-import com.neverwinterdp.wa.event.BrowserInfo;
 import com.neverwinterdp.wa.event.WebEvent;
-import com.neverwinterdp.wa.event.generator.Browsers;
-import com.neverwinterdp.wa.event.generator.WebEventGenerator;
 import com.neverwinterdp.wa.event.generator.GeneratorServer;
 import com.neverwinterdp.wa.gripper.GripperServer;
 /**
@@ -46,6 +36,7 @@ public class WAUnitTest {
     
     server = new GripperServer();
     server.start();
+    
   }
   
   @After
@@ -56,9 +47,9 @@ public class WAUnitTest {
   
   @Test
   public void test() throws Exception {
-    int NUM_OF_MESSAGES = 10000;
+    int NUM_OF_VISIT_PAGES = 100000;
     GeneratorServer generatorServer = new GeneratorServer();
-    generatorServer.setNumOfMessages(NUM_OF_MESSAGES);
+    generatorServer.setNumOfVisitPages(NUM_OF_VISIT_PAGES);
     generatorServer.start();
     
     WADataflowBuilder dflBuilder = new WADataflowBuilder() ;
@@ -71,6 +62,6 @@ public class WAUnitTest {
       throw ex;
     }
     
-    dflBuilder.runMonitor(shell, NUM_OF_MESSAGES);
+    dflBuilder.runMonitor(shell, NUM_OF_VISIT_PAGES);
   }
 }

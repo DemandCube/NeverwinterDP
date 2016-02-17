@@ -12,9 +12,9 @@ import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.task.TaskStatus;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskRegistry;
-import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
-import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReport;
-import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReportWithStatus;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorReport;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorReportWithStatus;
 
 public class DataflowTaskRegistry extends DedicatedTaskRegistry<DataStreamOperatorDescriptor> {
   private String dataflowPath ;

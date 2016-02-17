@@ -1,7 +1,10 @@
 package com.neverwinterdp.wa.event;
 
 public class WebEvent {
-  private String id;
+  private String username;
+  private String sessionId;
+  
+  private String eventId;
   private long   timestamp;
   private String name;
 
@@ -12,12 +15,16 @@ public class WebEvent {
   
   public WebEvent() { }
 
-  public String getId() { return id; }
+  public String getUsername() { return username; }
+  public void setUsername(String username) { this.username = username; }
 
-  public void setId(String id) { this.id = id; }
+  public String getSessionId() { return sessionId; }
+  public void setSessionId(String sessionId) { this.sessionId = sessionId; }
+
+  public String getEventId() { return eventId; }
+  public void setEventId(String id) { this.eventId = id; }
 
   public long getTimestamp() { return timestamp; }
-
   public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 
   public String getName() { return name; }

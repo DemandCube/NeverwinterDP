@@ -5,11 +5,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -18,9 +16,7 @@ import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpVersion;
 
 import java.net.ConnectException;
@@ -37,18 +33,19 @@ public class AsyncHttpClient {
   private int    port ;
   private Channel channel ;
   private EventLoopGroup group ;
-  private ResponseHandler handler ;
+  private ResponseHandler responseHandler ;
   private boolean connected = false ;
   private JSONSerializer jsonSerializer = JSONSerializer.INSTANCE ;
+  private HttpClientHandler httpClientHandler;
   
   public AsyncHttpClient(String host, int port, ResponseHandler handler) throws Exception {
     this(host, port, handler, true) ;
   }
   
-  public AsyncHttpClient(String host, int port, ResponseHandler handler, boolean connect) throws Exception {
+  public AsyncHttpClient(String host, int port, ResponseHandler respHandler, boolean connect) throws Exception {
     this.host = host ;
     this.port = port ;
-    this.handler = handler ;
+    this.responseHandler = respHandler ;
     if(connect) connect() ;
   }
   
@@ -58,6 +55,7 @@ public class AsyncHttpClient {
   
   public boolean connect() throws Exception {
     try {
+      httpClientHandler = new HttpClientHandler(responseHandler);
       ChannelInitializer<SocketChannel> initializer = new ChannelInitializer<SocketChannel>() {
         public void initChannel(SocketChannel ch) throws Exception {
           ChannelPipeline p = ch.pipeline();
@@ -71,7 +69,7 @@ public class AsyncHttpClient {
 
           //handle HttpChunks.
           p.addLast("aggregator", new HttpObjectAggregator(3 * 1024 * 1024));
-          p.addLast("handler", new HttpClientHandler(handler));
+          p.addLast("handler", httpClientHandler);
         }
       };
 
@@ -110,8 +108,13 @@ public class AsyncHttpClient {
   
   public void setNotConnected() { connected = false ; }
   
-  public void close() {
+  public void close() throws InterruptedException {
+    close(60000);
+  }
+  
+  public void close(long maxWaitTime) throws InterruptedException {
     //Shut down executor threads to exit.
+    httpClientHandler.waitForAllResonse(maxWaitTime);
     if(channel != null) channel.close();
     if(group != null) group.shutdownGracefully();
   }
@@ -121,34 +124,36 @@ public class AsyncHttpClient {
     channel.closeFuture().await() ;
   }
   
-  public ChannelFuture get(String uriString) throws URISyntaxException, ConnectException {
+  public ChannelFuture get(String uriString) throws URISyntaxException, ConnectException, InterruptedException {
+    httpClientHandler.waitForAvailableBuffer();
     if(!connected) throw new ConnectException("Not Connected") ;
     URI uri = new URI(uriString);
     DefaultFullHttpRequest request = createRequest(uri, HttpMethod.GET, null) ;
     return channel.writeAndFlush(request) ;
   }
   
-  public ChannelFuture post(String uriString, String data) throws ConnectException, URISyntaxException {
+  public ChannelFuture post(String uriString, String data) throws ConnectException, URISyntaxException, InterruptedException {
     ByteBuf content = Unpooled.wrappedBuffer(data.getBytes()) ;
     return post(uriString, content) ;
     //content.release() ;
   }
   
-  public ChannelFuture post(String uriString, byte[] data) throws ConnectException, URISyntaxException {
+  public ChannelFuture post(String uriString, byte[] data) throws ConnectException, URISyntaxException, InterruptedException {
     ByteBuf content = Unpooled.wrappedBuffer(data) ;
     return post(uriString, content) ;
     //content.release() ;
   }
   
-  public <T> ChannelFuture post(String uriString, T object) throws ConnectException, URISyntaxException {
+  public <T> ChannelFuture post(String uriString, T object) throws ConnectException, URISyntaxException, InterruptedException {
     byte[] data = jsonSerializer.toBytes(object) ;
     ByteBuf content = Unpooled.wrappedBuffer(data) ;
     return post(uriString, content) ;
     //content.release() ;
   }
   
-  public ChannelFuture post(String uriString, ByteBuf content) throws ConnectException, URISyntaxException {
+  public ChannelFuture post(String uriString, ByteBuf content) throws ConnectException, URISyntaxException, InterruptedException {
     if(!connected) throw new ConnectException("Not Connected") ;
+    httpClientHandler.waitForAvailableBuffer();
     URI uri = new URI(uriString);
     DefaultFullHttpRequest request = createRequest(uri, HttpMethod.POST, content.retain()) ;
     return channel.writeAndFlush(request) ;
@@ -188,20 +193,5 @@ public class AsyncHttpClient {
     //    )
     //);
     return request ;
-  }
-  
-  
-  static public class HttpClientHandler extends SimpleChannelInboundHandler<HttpObject> {
-    private ResponseHandler responseHandler ;
-    
-    public HttpClientHandler(ResponseHandler handler) {
-      this.responseHandler = handler ;
-    }
-    
-    @Override
-    public void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
-      if (!(msg instanceof HttpResponse)) return ;
-      responseHandler.onResponse((HttpResponse) msg) ;
-    }
   }
 }

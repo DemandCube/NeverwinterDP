@@ -1,4 +1,4 @@
-package com.neverwinterdp.scribengin.dataflow.runtime;
+package com.neverwinterdp.scribengin.dataflow;
 
 import java.util.Comparator;
 import java.util.Set;
@@ -18,7 +18,8 @@ public class DataStreamOperatorDescriptor {
   private Set<String> outputs;
   private String      operator;
   private Set<String> interceptors;
-
+  
+  
   public DataStreamOperatorDescriptor() {
   }
 

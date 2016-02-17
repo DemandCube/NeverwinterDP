@@ -14,7 +14,6 @@ import com.neverwinterdp.wa.event.BrowserInfo;
 import com.neverwinterdp.wa.event.WebEvent;
 import com.neverwinterdp.wa.event.generator.Browsers;
 import com.neverwinterdp.wa.event.generator.WebEventGenerator;
-import com.neverwinterdp.wa.event.generator.GeneratorServer;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com

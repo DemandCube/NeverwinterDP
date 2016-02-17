@@ -1,5 +1,7 @@
 package com.neverwinterdp.wa.gripper;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.netty.http.rest.RestRouteHandler;
@@ -12,6 +14,8 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
 public class WebEventTopicHandler extends RestRouteHandler {
+  static AtomicInteger counter = new AtomicInteger();
+  
   private AckKafkaWriter kafkaWriter;
   
   public WebEventTopicHandler(String zkConnects) throws Exception {
@@ -33,9 +37,9 @@ public class WebEventTopicHandler extends RestRouteHandler {
     WebEvent webEvent = JSONSerializer.INSTANCE.fromBytes(getBodyData(request), WebEvent.class);
     try {
       kafkaWriter.send(topic, webEvent, 60000);
-      return new GripperAck(webEvent.getId()) ;
+      return new GripperAck(webEvent.getEventId()) ;
     } catch (Exception e) {
-      return new GripperAck(webEvent.getId(), ExceptionUtil.getStackTrace(e)) ;
+      return new GripperAck(webEvent.getEventId(), ExceptionUtil.getStackTrace(e)) ;
     }
   }
   

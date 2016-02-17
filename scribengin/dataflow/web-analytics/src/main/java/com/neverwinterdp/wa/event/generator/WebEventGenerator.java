@@ -6,12 +6,11 @@ import com.neverwinterdp.wa.event.BrowserInfo;
 import com.neverwinterdp.wa.event.WebEvent;
 
 public class WebEventGenerator {
-  private String        generatorId;
   private AtomicInteger idTracker = new AtomicInteger();
   
   public WebEvent next(BrowserInfo bInfo, String name, String method, String url) {
     WebEvent event = new WebEvent();
-    event.setId(Integer.toString(idTracker.incrementAndGet()));
+    event.setEventId(Integer.toString(idTracker.incrementAndGet()));
     event.setTimestamp(System.currentTimeMillis());
     event.setName(name);
     event.setMethod(method);
