@@ -98,7 +98,7 @@ public class TrackingDataflowBuilder {
   public Dataflow<TrackingMessage, TrackingMessage> buildDataflow() {
     Dataflow<TrackingMessage, TrackingMessage> dfl = new Dataflow<>(dataflowId);
     dfl.
-      useWireDataSetFactory(new KafkaWireDataSetFactory("127.0.0.1:2181")).
+      useWireDataSetFactory(new KafkaWireDataSetFactory(trackingConfig.getKafkaZKConnects())).
       setDefaultParallelism(defaultParallelism).
       setDefaultReplication(defaultReplication).
       setMaxRuntime(trackingConfig.getValidatorMaxRuntime()).

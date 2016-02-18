@@ -83,6 +83,7 @@ public class ScribenginClient {
     VMConfig vmConfig = new VMConfig() ;
     String masterId = dflDescriptor.getId() + "-master-" + dflRegistry.getMasterIdTracker().nextSeqId();
     vmConfig.
+      setDfsAppHome(dflDescriptor.getDataflowAppHome()).
       setVmId(masterId).
       addRoles("dataflow-master").
       setRegistryConfig(vmClient.getRegistry().getRegistryConfig()).
@@ -90,7 +91,8 @@ public class ScribenginClient {
       setRequestCpuCores(dflDescriptor.getMaster().getCpuCores()).
       setRequestMemory(dflDescriptor.getMaster().getMemory()).
       setLog4jConfigUrl(dflDescriptor.getMaster().getLog4jConfigUrl()).
-      addProperty("dataflow.registry.path", dataflowPath);
+      addProperty("dataflow.registry.path", dataflowPath).
+      addVMResource("dataflow.libs", dflDescriptor.getDataflowAppHome() + "/libs");;
     vmClient.configureEnvironment(vmConfig);
     VMDescriptor vmDataflowMasterDescriptor = vmClient.allocate(vmConfig);
     return vmDataflowMasterDescriptor ;
