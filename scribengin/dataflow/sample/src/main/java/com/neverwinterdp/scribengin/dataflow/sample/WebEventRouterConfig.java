@@ -13,7 +13,7 @@ public class WebEventRouterConfig {
   String localAppHome ;
   
   @Parameter(names = "--dfs-app-home", description="DFS location to upload the example dataflow")
-  String dfsAppHome = "/applications/dataflow/web-event";
+  String dfsAppHome = "/applications/dataflow/sample";
   
   @Parameter(names = "--zk-connect", description="[host]:[port] of Zookeeper server")
   String zkConnect = "zookeeper-1:2181";
