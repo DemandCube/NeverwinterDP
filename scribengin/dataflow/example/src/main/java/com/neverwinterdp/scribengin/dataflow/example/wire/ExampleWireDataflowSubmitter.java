@@ -125,7 +125,6 @@ public class ExampleWireDataflowSubmitter {
     dfl.getWorkerDescriptor().setNumOfInstances(numOfWorker);
     dfl.getWorkerDescriptor().setNumOfExecutor(numOfExecutorPerWorker);
     
-    
     //Define our input source - set name, ZK host:port, and input topic name
     KafkaDataSet<Message> inputDs = 
         dfl.createInput(new KafkaStorageConfig("input", kafkaZkConnect, inputTopic));

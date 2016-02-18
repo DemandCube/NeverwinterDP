@@ -7,6 +7,7 @@ import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.es.sink.ESSink;
 import com.neverwinterdp.storage.source.Source;
+import com.neverwinterdp.util.text.StringUtil;
 
 public class ESStorage extends Storage {
   private Class<?> mappingTypeClass;
@@ -28,7 +29,7 @@ public class ESStorage extends Storage {
     super(config);
   }
   
-  public Class<?> getMappingClass() { return mappingTypeClass; }
+  public Class<?> getMappingTypeClass() { return mappingTypeClass; }
   
   public ESStorageConfig getESStorageConfig() { return new ESStorageConfig(getStorageConfig());  }
   
@@ -60,6 +61,9 @@ public class ESStorage extends Storage {
 
   @Override
   public void create() throws Exception {
+    ESObjectClient<Object> client  = getESObjectClient();
+    client.createIndex();
+    client.close();
   }
 
   @Override

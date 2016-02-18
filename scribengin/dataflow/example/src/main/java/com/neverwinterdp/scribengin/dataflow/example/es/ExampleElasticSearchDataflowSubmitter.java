@@ -319,5 +319,4 @@ public class ExampleElasticSearchDataflowSubmitter {
   public String getInputTopic() {
     return config.inputTopic;
   }
-  
 }

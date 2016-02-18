@@ -43,7 +43,7 @@ public class ESStorageConfig extends StorageConfig {
   public String getAddresses() { return attribute(ADDRESSES); }
   public void   setAddresses(String host) { attribute(ADDRESSES, host); }
   
-  public String[] stringArrayAddress() { return this.stringArrayAttribute(ADDRESSES, null); }
+  public String[] stringArrayAddress() { return stringArrayAttribute(ADDRESSES, null); }
   
   public String getMappingType() { return attribute(MAPPING_TYPE); }
   public void   setMappingType(String mappingType) { attribute(MAPPING_TYPE, mappingType); }

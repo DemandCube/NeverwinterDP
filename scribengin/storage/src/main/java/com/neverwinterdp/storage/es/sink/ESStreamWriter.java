@@ -11,16 +11,18 @@ public class ESStreamWriter implements SinkPartitionStreamWriter {
   private ESStorage              storage;
   private PartitionStreamConfig  partitionConfig;
   private ESObjectClient<Object> esObjClient;
-
+  private Class<?>               mappingTypeClass ;
+  
   public ESStreamWriter(ESStorage esStorage, PartitionStreamConfig pConfig) throws Exception {
     this.storage = esStorage;
     this.partitionConfig = pConfig;
+    mappingTypeClass = esStorage.getMappingTypeClass();
     esObjClient = storage.getESObjectClient();
   }
   
   @Override
   public void append(Message message) throws Exception {
-    Object obj = JSONSerializer.INSTANCE.fromBytes(message.getData(), storage.getMappingClass());
+    Object obj = JSONSerializer.INSTANCE.fromBytes(message.getData(), mappingTypeClass);
     esObjClient.put(obj, message.getKey());
   }
 
