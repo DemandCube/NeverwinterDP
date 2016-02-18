@@ -36,7 +36,6 @@ public class WAUnitTest {
     
     server = new GripperServer();
     server.start();
-    
   }
   
   @After

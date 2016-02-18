@@ -57,7 +57,6 @@ public class BrowserSession {
       wEvent.setMethod("GET");
       wEvent.setUrl(pages.get(i));
       wEvent.setBrowserInfo(browserInfo);
-      
       client.post("/webevent/user.click", wEvent);
     }
     return pages.size();

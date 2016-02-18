@@ -1,6 +1,5 @@
 package com.neverwinterdp.scribengin.dataflow.registry;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 

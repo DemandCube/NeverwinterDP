@@ -16,6 +16,7 @@ import org.elasticsearch.index.query.BaseQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.util.io.IOUtil;
 
 //TODO: reimplement with retry mechanism
 public class ESObjectClient<T> {
@@ -37,6 +38,14 @@ public class ESObjectClient<T> {
   
   public boolean isCreated() { return esclient.hasIndex(index) ; }
 
+  public void createIndex() throws Exception {
+    String settingUrl  = mappingType.getName().replace('.', '/') + ".setting.json";
+    String mappingUrl  = mappingType.getName().replace('.', '/') + ".mapping.json";
+    String settingJson = IOUtil.getResourceAsString(settingUrl, "UTF-8");
+    String mappingJson = IOUtil.getResourceAsString(mappingUrl, "UTF-8");
+    createIndexWith(settingJson, mappingJson);
+  }
+  
   public void createIndexWith(String settings, String mapping) throws Exception {
     CreateIndexRequestBuilder req = esclient.client.admin().indices().prepareCreate(index);
     if (settings != null) {

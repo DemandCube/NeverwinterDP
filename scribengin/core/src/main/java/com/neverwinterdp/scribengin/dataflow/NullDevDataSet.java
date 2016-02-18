@@ -12,5 +12,7 @@ public class NullDevDataSet<T> extends DataSet<T> {
   }
   
   @Override
-  protected StorageConfig createStorageConfig() { return new NullDevStorageConfig(nullDevStorageConfig); }
+  protected StorageConfig createStorageConfig() { 
+    return new NullDevStorageConfig(nullDevStorageConfig); 
+  }
 }
