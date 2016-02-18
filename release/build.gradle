@@ -17,6 +17,7 @@ task release(dependsOn: 'build') << {
     ':scribengin/release',
     ':scribengin/dataflow/example',
     ':scribengin/dataflow/demo'
+    ':scribengin/dataflow/sample'
   ] ;
 
   projects.each { sel ->
