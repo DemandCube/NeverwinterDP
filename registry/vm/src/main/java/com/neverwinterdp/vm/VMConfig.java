@@ -118,7 +118,10 @@ public class VMConfig {
   }
   
   public String getDfsAppHome() { return dfsAppHome; }
-  public void setDfsAppHome(String dfsAppHome) { this.dfsAppHome = dfsAppHome; }
+  public VMConfig setDfsAppHome(String dfsAppHome) { 
+    this.dfsAppHome = dfsAppHome;
+    return this;
+  }
   
   public String getLocalAppHome() { return localAppHome; }
   public VMConfig   setLocalAppHome(String localAppHome) { 
