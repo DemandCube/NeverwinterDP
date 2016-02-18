@@ -16,7 +16,7 @@ task release(dependsOn: 'build') << {
     ':registry/vm-sample',
     ':scribengin/release',
     ':scribengin/dataflow/example',
-    ':scribengin/dataflow/demo'
+    ':scribengin/dataflow/demo',
     ':scribengin/dataflow/sample'
   ] ;
 
