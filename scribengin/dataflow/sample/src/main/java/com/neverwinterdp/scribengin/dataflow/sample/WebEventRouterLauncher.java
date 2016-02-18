@@ -1,8 +1,10 @@
 package com.neverwinterdp.scribengin.dataflow.sample;
 
 import com.beust.jcommander.JCommander;
-import com.neverwinterdp.message.Message;
 import com.neverwinterdp.message.TrackingWindowReport;
+import com.neverwinterdp.registry.Registry;
+import com.neverwinterdp.registry.RegistryConfig;
+import com.neverwinterdp.registry.zk.RegistryImpl;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
@@ -19,13 +21,20 @@ import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.storage.nulldev.NullDevStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.vm.HadoopProperties;
+import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.client.VMClient;
+import com.neverwinterdp.vm.client.YarnVMClient;
 
 public class WebEventRouterLauncher {
   WebEventRouterConfig config = new WebEventRouterConfig();
   
   public WebEventRouterLauncher(String[] args) {
     new JCommander(config, args);
+  }
+  
+  public WebEventRouterLauncher(WebEventRouterConfig config) {
+    this.config = config;
   }
   
   public void runWebEventGenerator() throws Exception {
@@ -127,5 +136,33 @@ public class WebEventRouterLauncher {
     System.err.println("Monitor: Detect all the input messages are processed, call stop dataflow");
     shell.execute("dataflow stop --dataflow-id " + config.dataflowId);
     shell.execute("dataflow info --dataflow-id " + config.dataflowId + " --show-tasks --show-history-workers");
+  }
+  
+  static public void main(String args[]) throws Exception {
+    WebEventRouterConfig config = new WebEventRouterConfig();
+    new JCommander(config, args);
+    
+    //Create a registry configuration and point it to our running Registry (Zookeeper)
+    RegistryConfig registryConfig = RegistryConfig.getDefault();
+    registryConfig.setConnect(config.zkConnect);
+    Registry registry = new RegistryImpl(registryConfig).connect();
+    
+    //Configure where our hadoop master lives
+    String hadoopMaster = config.hadoopMasterConnect;
+    HadoopProperties hadoopProps = new HadoopProperties() ;
+    hadoopProps.put("yarn.resourcemanager.address", hadoopMaster + ":8032");
+    hadoopProps.put("fs.defaultFS", "hdfs://" + hadoopMaster +":9000");
+    
+    //Set up our connection to Scribengin
+    YarnVMClient vmClient = new YarnVMClient(registry, VMConfig.ClusterEnvironment.YARN, hadoopProps) ;
+    ScribenginShell shell = new ScribenginShell(vmClient) ;
+    shell.attribute(HadoopProperties.class, hadoopProps);
+
+    WebEventRouterLauncher launcher = new WebEventRouterLauncher(config);
+    launcher.runWebEventGenerator();
+    launcher.submitDataflow(shell);
+    launcher.runMonitor(shell);
+
+    System.exit(0);
   }
 }

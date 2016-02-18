@@ -28,7 +28,6 @@ public class WebEventRouterLauncherUnitTest {
     localScribenginCluster.useLog4jConfig("classpath:scribengin/log4j/vm-log4j.properties");  
     localScribenginCluster.start();
     shell = localScribenginCluster.getShell();
-    
   }
   
   /**
