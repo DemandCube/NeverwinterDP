@@ -43,7 +43,7 @@ public class WebEventRouterLauncher {
         config.zkConnect, 
         config.dataflowInputTopic, 
         config.dataflowInputTopicReplication, 
-        config.dataflowInputTopicReplication, 
+        config.dataflowInputTopicPartition, 
         config.generatorNumOfWebEvents
     );
   }
