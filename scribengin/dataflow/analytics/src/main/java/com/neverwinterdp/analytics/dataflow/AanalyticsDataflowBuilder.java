@@ -1,5 +1,6 @@
 package com.neverwinterdp.analytics.dataflow;
 
+import com.neverwinterdp.analytics.AnalyticsConfig;
 import com.neverwinterdp.analytics.odyssey.OdysseyEventStatisticOperator;
 import com.neverwinterdp.analytics.web.WebEvent;
 import com.neverwinterdp.analytics.web.WebEventJunkOperator;

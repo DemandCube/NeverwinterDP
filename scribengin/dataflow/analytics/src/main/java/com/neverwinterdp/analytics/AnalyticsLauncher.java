@@ -1,6 +1,7 @@
-package com.neverwinterdp.analytics.dataflow;
+package com.neverwinterdp.analytics;
 
 import com.beust.jcommander.JCommander;
+import com.neverwinterdp.analytics.dataflow.AanalyticsDataflowBuilder;
 import com.neverwinterdp.analytics.odyssey.generator.OdysseyEventGeneratorServer;
 import com.neverwinterdp.analytics.web.generator.WebEventGeneratorServer;
 import com.neverwinterdp.analytics.web.gripper.GripperServer;
