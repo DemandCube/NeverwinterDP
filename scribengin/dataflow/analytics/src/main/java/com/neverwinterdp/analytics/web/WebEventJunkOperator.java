@@ -1,12 +1,11 @@
-package com.neverwinterdp.analytics.dataflow;
+package com.neverwinterdp.analytics.web;
 
-import com.neverwinterdp.analytics.web.WebEvent;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperator;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
 import com.neverwinterdp.util.JSONSerializer;
 
-public class JunkOperator extends DataStreamOperator {
+public class WebEventJunkOperator extends DataStreamOperator {
   
   @Override
   public void process(DataStreamOperatorContext ctx, Message record) throws Exception {

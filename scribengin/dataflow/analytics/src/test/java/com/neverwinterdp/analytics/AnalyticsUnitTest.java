@@ -4,9 +4,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.analytics.dataflow.WADataflowBuilder;
+import com.neverwinterdp.analytics.dataflow.AanalyticsDataflowBuilder;
+import com.neverwinterdp.analytics.odyssey.generator.OdysseyEventGeneratorServer;
 import com.neverwinterdp.analytics.web.WebEvent;
-import com.neverwinterdp.analytics.web.generator.GeneratorServer;
+import com.neverwinterdp.analytics.web.generator.WebEventGeneratorServer;
 import com.neverwinterdp.analytics.web.gripper.GripperServer;
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
@@ -46,12 +47,24 @@ public class AnalyticsUnitTest {
   
   @Test
   public void test() throws Exception {
-    int NUM_OF_VISIT_PAGES = 100000;
-    GeneratorServer generatorServer = new GeneratorServer();
-    generatorServer.setNumOfVisitPages(NUM_OF_VISIT_PAGES);
-    generatorServer.start();
+    int NUM_OF_ODYSSEY_EVENTS = 10000;
+    int NUM_OF_WEB_EVENTS     = 20000;
+    int ALL_EVENTS = NUM_OF_ODYSSEY_EVENTS + NUM_OF_WEB_EVENTS ;
     
-    WADataflowBuilder dflBuilder = new WADataflowBuilder() ;
+    String[] odysseyGeneratorConfig = {
+      "--num-of-workers", "1", "--zk-connects", "127.0.0.1:2181", 
+      "--topic", "odyssey.input", "--num-of-events", Integer.toString(NUM_OF_ODYSSEY_EVENTS)
+    };
+    OdysseyEventGeneratorServer odysseyEventGeneratorServer = new OdysseyEventGeneratorServer(odysseyGeneratorConfig); 
+    odysseyEventGeneratorServer.start();
+    
+    String[] webEventGeneratorConfig = {
+      "--num-of-pages", Integer.toString(NUM_OF_WEB_EVENTS)
+    };
+    WebEventGeneratorServer wGeneratorServer = new WebEventGeneratorServer(webEventGeneratorConfig);
+    wGeneratorServer.start();
+    
+    AanalyticsDataflowBuilder dflBuilder = new AanalyticsDataflowBuilder() ;
     Dataflow<WebEvent, WebEvent> dfl = dflBuilder.buildDataflow();
     
     try {
@@ -61,6 +74,6 @@ public class AnalyticsUnitTest {
       throw ex;
     }
     
-    dflBuilder.runMonitor(shell, NUM_OF_VISIT_PAGES);
+    dflBuilder.runMonitor(shell, ALL_EVENTS);
   }
 }

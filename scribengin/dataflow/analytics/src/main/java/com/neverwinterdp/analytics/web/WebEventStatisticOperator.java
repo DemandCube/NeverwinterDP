@@ -1,9 +1,8 @@
-package com.neverwinterdp.analytics.dataflow;
+package com.neverwinterdp.analytics.web;
 
 import java.util.Calendar;
 import java.util.List;
 
-import com.neverwinterdp.analytics.web.WebEvent;
 import com.neverwinterdp.analytics.web.stat.WebPageStat;
 import com.neverwinterdp.analytics.web.stat.WebPageStatCollector;
 import com.neverwinterdp.analytics.web.stat.WebSiteStat;
@@ -17,7 +16,7 @@ import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorDescriptor;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.UrlParser;
 
-public class StatisticOperator extends DataStreamOperator {
+public class WebEventStatisticOperator extends DataStreamOperator {
   private String[]           connect = { "elasticsearch-1" };
   private ESObjectClient<WebPageStat> esWebPageStatClient;
   private ESObjectClient<WebSiteStat> esWebSiteStatClient;

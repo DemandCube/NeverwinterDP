@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.analytics.web.gripper.GripperAck;
@@ -18,8 +19,8 @@ import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
-public class GeneratorServer {
-  private Logger logger = LoggerFactory.getLogger(GeneratorServer.class.getSimpleName());
+public class WebEventGeneratorServer {
+  private Logger logger = LoggerFactory.getLogger(WebEventGeneratorServer.class.getSimpleName());
   
   @Parameter(names = "--gripper-server-port", description = "The gripper port")
   private int    gripperServerPort = 8080;
@@ -34,9 +35,10 @@ public class GeneratorServer {
 
   private ExecutorService executorService;
   
-  public GeneratorServer setNumOfVisitPages(int num) {
-    browserSessionGenerator.setNumOfPages(num);
-    return this;
+  public WebEventGeneratorServer() { }
+  
+  public WebEventGeneratorServer(String[] args) { 
+    new JCommander(this, args);
   }
   
   public void start() throws Exception {

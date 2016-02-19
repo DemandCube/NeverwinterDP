@@ -7,6 +7,8 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
 import com.neverwinterdp.analytics.odyssey.Event;
 import com.neverwinterdp.kafka.KafkaAdminTool;
 import com.neverwinterdp.kafka.KafkaTool;
@@ -16,17 +18,34 @@ import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 
-public class GeneratorServer {
-  private Logger logger = LoggerFactory.getLogger(GeneratorServer.class.getSimpleName());
+public class OdysseyEventGeneratorServer {
+  private Logger logger = LoggerFactory.getLogger(OdysseyEventGeneratorServer.class.getSimpleName());
   
+  @Parameter(names = "--num-of-workers", description = "The number of the threads")
   private int    numOfThreads = 1;
-  private String zkConnects;
-  private String topic;
-  private int    topicReplication;
-  private int    topicPartition;
-  private int    numOfWebEvents;
+  
+  @Parameter(names = "--zk-connects", description = "The number of the threads")
+  private String zkConnects = "127.0.0.1:2181";
+  
+  @Parameter(names = "--topic", description = "The kafka topic name")
+  private String topic = "odyssey.input";
+  
+  @Parameter(names = "--replication", description = "The number of replication")
+  private int    replication = 1;
+  
+  @Parameter(names = "--partition", description = "The number of partition")
+  private int    partition   = 5;
+  
+  @Parameter(names = "--num-of-events", description = "The number of events")
+  private int    numOfWebEvents   = 10000;
 
   private ExecutorService executorService;
+  
+  public OdysseyEventGeneratorServer() { }
+  
+  public OdysseyEventGeneratorServer(String[] args) { 
+    new JCommander(this, args);
+  }
   
   public void start() throws Exception {
     executorService = Executors.newFixedThreadPool(numOfThreads);
@@ -40,7 +59,6 @@ public class GeneratorServer {
     executorService.shutdownNow();
   }
   
-  
   public class GeneratorWorker implements Runnable {
     public void run() {
       try {
@@ -53,7 +71,7 @@ public class GeneratorServer {
     public void doRun() throws Exception {
       KafkaAdminTool adminTool = new KafkaAdminTool("admin", zkConnects);
       if(!adminTool.topicExits(topic)) {
-        adminTool.createTopic(topic, topicReplication, topicPartition);
+        adminTool.createTopic(topic, replication, partition);
       }
       
       KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
@@ -66,12 +84,11 @@ public class GeneratorServer {
       props.put("retry.backoff.ms", "1000");
       ProducerConfig producerConfig = new ProducerConfig(props);
       Producer<String, String> producer = new Producer<String, String>(producerConfig);
+      EventGenerator eventGenerator = new EventGenerator();
       for(int i = 0; i < numOfWebEvents; i++) {
-        String key = "odyssey-event-" + (i + 1);
-        Event event = new Event();
-        event.setEventId(key);
+        Event event = eventGenerator.nextEvent();
         String message = JSONSerializer.INSTANCE.toString(event);
-        producer.send(new KeyedMessage<String, String>(topic, key, message));
+        producer.send(new KeyedMessage<String, String>(topic, event.getEventId(), message));
       }
       producer.close();
     }
