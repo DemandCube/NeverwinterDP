@@ -6,7 +6,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.neverwinterdp.kafka.KafkaAdminTool;
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.util.JSONSerializer;
 
 import kafka.javaapi.producer.Producer;
@@ -19,6 +19,7 @@ public class WebEventGenerator {
   
   private AtomicLong idTracker = new AtomicLong();
   private Random random = new Random(System.nanoTime());
+  private Thread deamonThread;
   
   public void runWebEventGenerator(String zkConnects, String topic, int topicReplication, int topicPartition, int numOfWebEvents) throws Exception {
     KafkaAdminTool adminTool = new KafkaAdminTool("admin", zkConnects);
@@ -26,7 +27,7 @@ public class WebEventGenerator {
       adminTool.createTopic(topic, topicReplication, topicPartition);
     }
     
-    KafkaClient kafkaTool = new KafkaClient("KafkaTool", zkConnects);
+    KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnects);
     String kafkaBrokerConnects = kafkaTool.getKafkaBrokerList();
     Properties props = new Properties();
     props.put("metadata.broker.list", kafkaBrokerConnects);
@@ -43,6 +44,20 @@ public class WebEventGenerator {
       producer.send(new KeyedMessage<String, String>(topic, webEvent.getWebEventId(), message));
     }
     producer.close();
+  }
+  
+  public void runWebEventGeneratorAsDeamon(final String zkConnects, final  String topic, final int topicReplication, 
+                                           final int topicPartition, final int numOfWebEvents) throws Exception {
+    deamonThread = new Thread() {
+      public void run() {
+        try {
+          runWebEventGenerator(zkConnects, topic, topicReplication, topicPartition, numOfWebEvents);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    };
+    deamonThread.start();
   }
   
   public WebEvent nextRandomWebEvent() {

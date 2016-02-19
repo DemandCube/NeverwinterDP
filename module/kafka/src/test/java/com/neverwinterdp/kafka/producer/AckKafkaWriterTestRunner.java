@@ -6,7 +6,7 @@ import kafka.cluster.Broker;
 import kafka.javaapi.PartitionMetadata;
 import kafka.javaapi.TopicMetadata;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.tool.KafkaTopicCheckTool;
 import com.neverwinterdp.kafka.tool.KafkaTopicConfig;
 import com.neverwinterdp.kafka.tool.KafkaTopicReport;
@@ -96,7 +96,7 @@ public class AckKafkaWriterTestRunner {
     public void run() {
       try {
         while (!exit) {
-          KafkaClient kafkaTool = new KafkaClient(topic, cluster.getZKConnect());
+          KafkaTool kafkaTool = new KafkaTool(topic, cluster.getZKConnect());
           TopicMetadata topicMeta = kafkaTool.findTopicMetadata(topic);
           PartitionMetadata partitionMeta = findPartition(topicMeta, partition);
           Broker partitionLeader = partitionMeta.leader();

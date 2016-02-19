@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.util.JSONSerializer;
@@ -15,7 +15,7 @@ import com.neverwinterdp.vm.VMDescriptor;
 public class VMTMGeneratorKafkaApp extends VMApp {
   private Logger logger ;
   private TrackingGeneratorService service ;
-  private KafkaClient kafkaClient;
+  private KafkaTool kafkaTool;
   
   @Override
   public void run() throws Exception {
@@ -34,14 +34,14 @@ public class VMTMGeneratorKafkaApp extends VMApp {
       service = new TrackingGeneratorService(registry, trackingConfig);
       service.withLogger(logger);
 
-      kafkaClient = new KafkaClient("KafkaClient", trackingConfig.getKafkaZKConnects());
+      kafkaTool = new KafkaTool("KafkaTool", trackingConfig.getKafkaZKConnects());
 
       for(int i = 0; i < trackingConfig.getGeneratorNumOfWriter(); i++) {
         service.addWriter(new KafkaTrackingMessageWriter(trackingConfig.getKafkaInputTopic()));
       }
 
-      if(!kafkaClient.getKafkaTool().topicExits(trackingConfig.getKafkaInputTopic())) {
-        kafkaClient.
+      if(!kafkaTool.getKafkaTool().topicExits(trackingConfig.getKafkaInputTopic())) {
+        kafkaTool.
         getKafkaTool().
         createTopic(trackingConfig.getKafkaInputTopic(), trackingConfig.getKafkaNumOfReplication(), trackingConfig.getKafkaNumOfPartition());
       }
@@ -76,7 +76,7 @@ public class VMTMGeneratorKafkaApp extends VMApp {
     }
     
     public void onInit(TrackingRegistry registry) throws Exception {
-      String kafkaConnects = kafkaClient.getKafkaBrokerList();
+      String kafkaConnects = kafkaTool.getKafkaBrokerList();
       kafkaWriter = new AckKafkaWriter("KafkaLogWriter", kafkaConnects) ;
     }
    

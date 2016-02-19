@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.kafka.KafkaStorage;
@@ -40,8 +40,8 @@ public class SinkSourceUnitTest {
     String zkConnect = cluster.getZKConnect();
     System.out.println("zkConnect = " + zkConnect);
     String TOPIC = "hello.topic" ;
-    KafkaClient kafkaClient = new KafkaClient("KafkaClient", zkConnect);
-    KafkaStorage storage = new KafkaStorage(kafkaClient, "hello", TOPIC);
+    KafkaTool kafkaTool = new KafkaTool("KafkaTool", zkConnect);
+    KafkaStorage storage = new KafkaStorage(kafkaTool, "hello", TOPIC);
     KafkaSink sink = (KafkaSink) storage.getSink();
     
     SinkPartitionStream stream = sink.getPartitionStream(0);
@@ -53,7 +53,7 @@ public class SinkSourceUnitTest {
     }
     writer.close();
     
-    KafkaSource source = new KafkaSource(kafkaClient, "hello", TOPIC);
+    KafkaSource source = new KafkaSource(kafkaTool, "hello", TOPIC);
     KafkaSourcePartition partition = (KafkaSourcePartition) source.getLatestSourcePartition();
     SourcePartitionStream[] streams = partition.getPartitionStreams();
     Assert.assertEquals(5, streams.length);

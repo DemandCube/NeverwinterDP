@@ -8,7 +8,7 @@ import java.util.Properties;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
@@ -166,7 +166,7 @@ public class SimpleDataflowExample {
    * @throws Exception 
    */
   public void createInputMessages() throws Exception {
-    KafkaClient kafkaTool = new KafkaClient("KafkaTool", config.zkConnect);
+    KafkaTool kafkaTool = new KafkaTool("KafkaTool", config.zkConnect);
     String kafkaBrokerConnects = kafkaTool.getKafkaBrokerList();
     Properties props = new Properties();
     props.put("metadata.broker.list", kafkaBrokerConnects);

@@ -7,7 +7,7 @@ import org.apache.hadoop.fs.FileSystem;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.storage.es.ESStorage;
 import com.neverwinterdp.storage.es.ESStorageConfig;
@@ -28,7 +28,7 @@ public class StorageService {
   private FileSystem fs;
   
   @Inject
-  private KafkaClient kafkaClient;
+  private KafkaTool kafkaTool;
   
   @Inject
   private S3Client s3Client;
@@ -51,7 +51,7 @@ public class StorageService {
       String key = "kafka:" + zkConnect + "/" + topic;
       KafkaStorage storage = cacheKafkaStorage.get(key);
       if(storage == null) {
-        storage = new KafkaStorage(kafkaClient, storageConfig);
+        storage = new KafkaStorage(kafkaTool, storageConfig);
         cacheKafkaStorage.put(key, storage);
       }
       return storage;

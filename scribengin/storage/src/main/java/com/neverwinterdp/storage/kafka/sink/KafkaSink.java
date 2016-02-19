@@ -3,33 +3,32 @@
 import java.util.ArrayList;
 import java.util.List;
 
-import kafka.javaapi.PartitionMetadata;
-import kafka.javaapi.TopicMetadata;
-
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.storage.PartitionStreamConfig;
 import com.neverwinterdp.storage.StorageConfig;
-import com.neverwinterdp.storage.kafka.KafkaStorage;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.storage.sink.Sink;
 import com.neverwinterdp.storage.sink.SinkPartitionStream;
 
+import kafka.javaapi.PartitionMetadata;
+import kafka.javaapi.TopicMetadata;
+
 public class KafkaSink implements Sink {
   private StorageConfig storageConfig;
-  private KafkaClient   kafkaClient;
+  private KafkaTool     kafkaTool;
   
-  public KafkaSink(KafkaClient kafkaClient, String name, String topic) throws Exception {
-    this.kafkaClient = kafkaClient;
+  public KafkaSink(KafkaTool kafkaClient, String name, String topic) throws Exception {
+    this.kafkaTool = kafkaClient;
     init(new  KafkaStorageConfig(name, kafkaClient.getZkConnects(), topic)) ;
   }
   
-  public KafkaSink(KafkaClient kafkaClient, StorageConfig descriptor) throws Exception {
-    this.kafkaClient = kafkaClient;
+  public KafkaSink(KafkaTool kafkaClient, StorageConfig descriptor) throws Exception {
+    this.kafkaTool = kafkaClient;
     init(descriptor) ;
   }
   
   private void init(StorageConfig descriptor) throws Exception {
-    descriptor.attribute("broker.list", kafkaClient.getKafkaBrokerList());
+    descriptor.attribute("broker.list", kafkaTool.getKafkaBrokerList());
     this.storageConfig  = descriptor ;
   }
   
@@ -38,7 +37,7 @@ public class KafkaSink implements Sink {
 
   public List<PartitionStreamConfig> getPartitionStreamConfigs() throws Exception {
     String topic = storageConfig.attribute(KafkaStorageConfig.TOPIC);
-    TopicMetadata tMetadata = kafkaClient.findTopicMetadata(topic);
+    TopicMetadata tMetadata = kafkaTool.findTopicMetadata(topic);
     List<PartitionStreamConfig> pConfigs = new ArrayList<>();
     List<PartitionMetadata> partitions = tMetadata.partitionsMetadata();
     for(int i = 0; i < partitions.size(); i++) {

@@ -7,7 +7,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
 
 import com.google.inject.name.Names;
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.storage.s3.S3Client;
 import com.neverwinterdp.vm.VMConfig;
 
@@ -31,8 +31,8 @@ public class DataflowWorkerModule extends ServiceModule {
       bindInstance(FileSystem.class, fs);
       
       String kafkaZkConnects = props.get("kafka.zk.connects");
-      KafkaClient kafkaClient = new KafkaClient("KafkaClient", kafkaZkConnects);
-      bindInstance(KafkaClient.class, kafkaClient);
+      KafkaTool kafkaTool = new KafkaTool("KafkaTool", kafkaZkConnects);
+      bindInstance(KafkaTool.class, kafkaTool);
       
       S3Client s3Client = new S3Client();
       bindInstance(S3Client.class, s3Client);

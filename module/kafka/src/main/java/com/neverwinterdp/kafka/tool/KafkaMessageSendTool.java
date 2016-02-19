@@ -19,7 +19,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.common.base.Stopwatch;
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.kafka.producer.DefaultKafkaWriter;
 import com.neverwinterdp.kafka.producer.KafkaWriter;
@@ -102,7 +102,7 @@ public class KafkaMessageSendTool implements Runnable {
       System.out.println("Partition " + entry.getKey() + " count " + entry.getValue().get());
     }
     
-    KafkaClient kafkaTool = new KafkaClient("KafkaTool", topicConfig.zkConnect);
+    KafkaTool kafkaTool = new KafkaTool("KafkaTool", topicConfig.zkConnect);
     String kafkaConnects = kafkaTool.getKafkaBrokerList();
     
     String[] args2 = {
@@ -150,7 +150,7 @@ public class KafkaMessageSendTool implements Runnable {
     System.out.println("KafkaMessageSendTool: Start sending the message to kafka");
     runDuration.start();
     ExecutorService writerService = Executors.newFixedThreadPool(topicConfig.numberOfPartition);
-    KafkaClient kafkaClient = new KafkaClient("KafkaTool", topicConfig.zkConnect);
+    KafkaTool kafkaClient = new KafkaTool("KafkaTool", topicConfig.zkConnect);
     String kafkaConnects = kafkaClient.getKafkaBrokerList();
     //TODO: add option to delete topic if it exists
     //kafkaTool.deleteTopic(topicConfig.topic);

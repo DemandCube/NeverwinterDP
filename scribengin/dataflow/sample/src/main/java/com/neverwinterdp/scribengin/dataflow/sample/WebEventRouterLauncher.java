@@ -39,7 +39,7 @@ public class WebEventRouterLauncher {
   
   public void runWebEventGenerator() throws Exception {
     WebEventGenerator generator = new WebEventGenerator();
-    generator.runWebEventGenerator(
+    generator.runWebEventGeneratorAsDeamon(
         config.zkConnect, 
         config.dataflowInputTopic, 
         config.dataflowInputTopicReplication, 
