@@ -10,6 +10,12 @@ project.ext {
   releaseDir = "${buildDir}/release"
 }
 
+configurations {
+  analyticsDeployJars {
+    transitive = false
+  }
+}
+
 dependencies {
   compile project(':registry/core')
   compile project(':registry/vm')
@@ -17,6 +23,17 @@ dependencies {
   compile project(':module/elasticsearch')
   compile project(':module/kafka')
   compile project(':module/netty')
+
+  analyticsDeployJars project(':module/netty')
+  analyticsDeployJars group: 'io.netty', name: 'netty-all', version: '4.0.23.Final'
+  analyticsDeployJars group: 'com.google.protobuf', name: 'protobuf-java', version: '2.6.0'
+  analyticsDeployJars group: 'com.hubspot.jackson', name: 'jackson-datatype-protobuf', version: '0.4.0'
+
+  analyticsDeployJars group: 'com.facebook.nifty', name: 'nifty-core', version: '0.13.1'
+  analyticsDeployJars group: 'com.facebook.nifty', name: 'nifty-client', version: '0.13.1'
+  analyticsDeployJars group: 'org.apache.thrift',  name: 'libthrift', version: '0.9.1'
+
+  analyticsDeployJars group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.16'
 }
 
 task release(dependsOn: 'build') << {
@@ -24,6 +41,14 @@ task release(dependsOn: 'build') << {
   println "*************************************************"
   println "Build release for ${name} and deploy to ${releaseDir}"
   println "*************************************************"
+
+  println "Copy the dependency library"
+  configurations.analyticsDeployJars.each { File file ->
+    copy {
+      from file
+      into "${releaseDir}/dataflow/analytics/libs"
+    }
+  }
 
   copy {
     from "${buildDir}/libs"
