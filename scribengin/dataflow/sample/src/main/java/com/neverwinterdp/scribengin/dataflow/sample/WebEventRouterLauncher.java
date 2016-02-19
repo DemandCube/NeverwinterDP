@@ -39,7 +39,13 @@ public class WebEventRouterLauncher {
   
   public void runWebEventGenerator() throws Exception {
     WebEventGenerator generator = new WebEventGenerator();
-    generator.runWebEventGenerator(config.zkConnect, config.dataflowInputTopic, config.generatorNumOfWebEvents);
+    generator.runWebEventGenerator(
+        config.zkConnect, 
+        config.dataflowInputTopic, 
+        config.dataflowInputTopicReplication, 
+        config.dataflowInputTopicReplication, 
+        config.generatorNumOfWebEvents
+    );
   }
   
   public Dataflow<WebEvent, WebEvent> buildDataflow() {

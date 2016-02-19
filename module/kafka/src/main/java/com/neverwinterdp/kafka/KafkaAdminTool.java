@@ -24,11 +24,11 @@ import scala.collection.Seq;
 import scala.collection.mutable.Buffer;
 import scala.collection.mutable.Set;
 
-public class KafkaTool  {
+public class KafkaAdminTool  {
   private String name;
   private String zkConnects;
   
-  public KafkaTool(String name, String zkConnects) {
+  public KafkaAdminTool(String name, String zkConnects) {
     this.name = name;
     this.zkConnects = zkConnects;
   }

@@ -30,6 +30,12 @@ public class WebEventRouterConfig {
   @Parameter(names = "--dataflow-input-topic", description = "")
   String dataflowInputTopic  = "webevent";
   
+  @Parameter(names = "--dataflow-input-topic-replication", description = "")
+  int dataflowInputTopicReplication  = 2;
+  
+  @Parameter(names = "--dataflow-input-topic-partition", description = "")
+  int dataflowInputTopicPartition  = 5;
+  
   @Parameter(names = "--dataflow-default-replication", description = "Dataflow default replication")
   int dataflowDefaultReplication = 1;
   

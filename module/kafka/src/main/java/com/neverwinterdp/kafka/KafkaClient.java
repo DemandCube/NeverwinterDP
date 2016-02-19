@@ -43,7 +43,7 @@ public class KafkaClient  {
 
   public String getZkConnects() { return this.zkConnects ; }
   
-  public KafkaTool getKafkaTool() { return new KafkaTool(name, zkConnects); }
+  public KafkaAdminTool getKafkaTool() { return new KafkaAdminTool(name, zkConnects); }
 
   public String getKafkaBrokerList() throws Exception {
     StringBuilder b = new StringBuilder();

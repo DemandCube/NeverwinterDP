@@ -5,6 +5,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.neverwinterdp.kafka.KafkaAdminTool;
 import com.neverwinterdp.kafka.KafkaClient;
 import com.neverwinterdp.util.JSONSerializer;
 
@@ -19,7 +20,12 @@ public class WebEventGenerator {
   private AtomicLong idTracker = new AtomicLong();
   private Random random = new Random(System.nanoTime());
   
-  public void runWebEventGenerator(String zkConnects, String kafkaTopic, int numOfWebEvents) throws Exception {
+  public void runWebEventGenerator(String zkConnects, String topic, int topicReplication, int topicPartition, int numOfWebEvents) throws Exception {
+    KafkaAdminTool adminTool = new KafkaAdminTool("admin", zkConnects);
+    if(!adminTool.topicExits(topic)) {
+      adminTool.createTopic(topic, topicReplication, topicPartition);
+    }
+    
     KafkaClient kafkaTool = new KafkaClient("KafkaTool", zkConnects);
     String kafkaBrokerConnects = kafkaTool.getKafkaBrokerList();
     Properties props = new Properties();
@@ -34,7 +40,7 @@ public class WebEventGenerator {
     for(int i = 0; i < numOfWebEvents; i++) {
       WebEvent webEvent = webEventGenerator.nextRandomWebEvent();
       String message    = JSONSerializer.INSTANCE.toString(webEvent);
-      producer.send(new KeyedMessage<String, String>(kafkaTopic, webEvent.getWebEventId(), message));
+      producer.send(new KeyedMessage<String, String>(topic, webEvent.getWebEventId(), message));
     }
     producer.close();
   }
