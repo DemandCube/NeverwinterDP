@@ -28,6 +28,9 @@ public class WebEventGeneratorServer {
   @Parameter(names = "--gripper-server-host", description = "The http port")
   private String gripperServerHost = "127.0.0.1";
   
+  @Parameter(names = "--destination-topic", description = "")
+  private String destinationTopic = "web.input";
+  
   @ParametersDelegate
   private BrowserSessionGenerator browserSessionGenerator = new BrowserSessionGenerator();
   
@@ -69,7 +72,7 @@ public class WebEventGeneratorServer {
       BrowserSession session = null;
       int visitPageCount = 0 ;
       while((session = browserSessionGenerator.nextBrowserSession()) != null) {
-        visitPageCount += session.visit(client);
+        visitPageCount += session.sendWebEvent(client, destinationTopic);
         client.flush();
       }
       client.close();

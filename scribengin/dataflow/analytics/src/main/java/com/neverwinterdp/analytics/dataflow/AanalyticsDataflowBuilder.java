@@ -9,6 +9,8 @@ import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
+import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
 import com.neverwinterdp.scribengin.dataflow.KafkaDataSet;
 import com.neverwinterdp.scribengin.dataflow.KafkaWireDataSetFactory;
 import com.neverwinterdp.scribengin.dataflow.Operator;
@@ -16,34 +18,35 @@ import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.storage.nulldev.NullDevStorageConfig;
+import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.vm.client.VMClient;
 
 public class AanalyticsDataflowBuilder {
-  private String dataflowId         = "web-analytics";
+  AnalyticsConfig config = new AnalyticsConfig();
   
-  private int    defaultParallelism = 5;
-  private int    defaultReplication = 1;
-
-  private int    trackingWindowSize     = 1000;
-  private int    slidingWindowSize      = 15;
+  public AanalyticsDataflowBuilder() {
+    
+  }
   
-  private int    numOfWorker            = 2;
-  private int    numOfExecutorPerWorker = 7;
+  public AanalyticsDataflowBuilder(AnalyticsConfig config) {
+    this.config = config;
+  }
   
   public Dataflow<WebEvent, WebEvent> buildDataflow() {
-    Dataflow<WebEvent, WebEvent> dfl = new Dataflow<>(dataflowId);
+    Dataflow<WebEvent, WebEvent> dfl = new Dataflow<>(config.dataflowId);
     dfl.
       useWireDataSetFactory(new KafkaWireDataSetFactory("127.0.0.1:2181")).
-      setDefaultParallelism(defaultParallelism).
-      setDefaultReplication(defaultReplication).
-      setTrackingWindowSize(trackingWindowSize).
-      setSlidingWindowSize(slidingWindowSize);
-    dfl.getWorkerDescriptor().setNumOfInstances(numOfWorker);
-    dfl.getWorkerDescriptor().setNumOfExecutor(numOfExecutorPerWorker);
+      setDefaultParallelism(config.dataflowDefaultParallelism).
+      setDefaultReplication(config.dataflowDefaultReplication).
+      setTrackingWindowSize(config.dataflowTrackingWindowSize).
+      setSlidingWindowSize(config.dataflowSlidingWindowSize);
+    dfl.getWorkerDescriptor().setNumOfInstances(config.dataflowNumOfWorker);
+    dfl.getWorkerDescriptor().setNumOfExecutor(config.dataflowNumOfExecutorPerWorker);
     
     KafkaDataSet<WebEvent> odysseyEventInputDs = 
-      dfl.createInput(new KafkaStorageConfig("odyssey.input", "127.0.0.1:2181", "odyssey.input"));
+      dfl.createInput(new KafkaStorageConfig("odyssey.input", config.zkConnect, config.generatorOdysseyInputTopic));
     KafkaDataSet<WebEvent> webEventInputDs = 
-      dfl.createInput(new KafkaStorageConfig("web.input", "127.0.0.1:2181", "user.click"));
+      dfl.createInput(new KafkaStorageConfig("web.input", config.zkConnect, config.generatorWebInputTopic));
     
     DataSet<WebEvent> nullDevDs = dfl.createOutput(new NullDevStorageConfig());
     
@@ -68,14 +71,36 @@ public class AanalyticsDataflowBuilder {
     return dfl;
   }
   
+  /**
+   * The logic to submit the dataflow
+   * @throws Exception
+   */
+  public void submitDataflow(ScribenginShell shell) throws Exception {
+    //Upload our app to HDFS
+    VMClient vmClient = shell.getScribenginClient().getVMClient();
+    vmClient.uploadApp(config.localAppHome, config.dfsAppHome);
+    
+    Dataflow<WebEvent, WebEvent> dfl = buildDataflow();
+    //Get the dataflow's descriptor
+    DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
+    //Output the descriptor in human-readable JSON
+    System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
+
+    //Ensure all your sources and sinks are up and running first, then...
+
+    //Submit the dataflow and wait until it starts running
+    DataflowSubmitter submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl);
+    submitter.submit().waitForDataflowRunning(60000);
+  }
+  
   public void runMonitor(ScribenginShell shell, long numOfInputMessages) throws Exception {
     ScribenginClient sclient = shell.getScribenginClient();
-    DataflowClient dflClient = sclient.getDataflowClient(dataflowId);
+    DataflowClient dflClient = sclient.getDataflowClient(config.dataflowId);
     DataflowRegistry dflRegistry = dflClient.getDataflowRegistry();
     
     while(true) {
       TrackingWindowReport report = dflRegistry.getMessageTrackingRegistry().getReport();
-      shell.execute("dataflow info --dataflow-id " + dataflowId + " --show-tasks --show-history-workers ");
+      shell.execute("dataflow info --dataflow-id " + config.dataflowId + " --show-tasks --show-history-workers ");
       
       System.err.println(
           "numOfInputMessages = " + numOfInputMessages + 
@@ -89,9 +114,9 @@ public class AanalyticsDataflowBuilder {
     }
     
     System.err.println("Should call stop the dataflow here!!!!!!!!!!!");
-    shell.execute("dataflow stop --dataflow-id " + dataflowId);
+    shell.execute("dataflow stop --dataflow-id " + config.dataflowId);
 
     Thread.sleep(10000);
-    shell.execute("dataflow info --dataflow-id " + dataflowId + " --show-tasks --show-history-workers");
+    shell.execute("dataflow info --dataflow-id " + config.dataflowId + " --show-tasks --show-history-workers");
   }
 }

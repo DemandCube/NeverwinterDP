@@ -39,7 +39,7 @@ public class BrowserSession {
     return total;
   }
   
-  public int visit(AsyncHttpClient client) throws ConnectException, URISyntaxException, InterruptedException {
+  public int sendWebEvent(AsyncHttpClient client, String dest) throws ConnectException, URISyntaxException, InterruptedException {
     Collections.shuffle(siteToVisits, new Random(System.nanoTime()));
     List<String> pages = new ArrayList<>();
     for(int i = 0; i < siteToVisits.size(); i++) {
@@ -57,7 +57,7 @@ public class BrowserSession {
       wEvent.setMethod("GET");
       wEvent.setUrl(pages.get(i));
       wEvent.setBrowserInfo(browserInfo);
-      client.post("/webevent/user.click", wEvent);
+      client.post("/webevent/" + dest, wEvent);
     }
     return pages.size();
   }
