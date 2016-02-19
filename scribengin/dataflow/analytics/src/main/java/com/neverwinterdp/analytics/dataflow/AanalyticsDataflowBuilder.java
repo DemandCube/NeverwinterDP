@@ -36,6 +36,7 @@ public class AanalyticsDataflowBuilder {
   public Dataflow<WebEvent, WebEvent> buildDataflow() {
     Dataflow<WebEvent, WebEvent> dfl = new Dataflow<>(config.dataflowId);
     dfl.
+      setDFSAppHome(config.dfsAppHome).
       useWireDataSetFactory(new KafkaWireDataSetFactory("127.0.0.1:2181")).
       setDefaultParallelism(config.dataflowDefaultParallelism).
       setDefaultReplication(config.dataflowDefaultReplication).

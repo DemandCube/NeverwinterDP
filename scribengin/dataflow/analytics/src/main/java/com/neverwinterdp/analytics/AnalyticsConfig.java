@@ -10,7 +10,7 @@ public class AnalyticsConfig {
   public String localAppHome ;
   
   @Parameter(names = "--dfs-app-home", description="DFS location to upload the example dataflow")
-  public String dfsAppHome = "/applications/dataflow/sample";
+  public String dfsAppHome = "/applications/dataflow/analytics";
   
   @Parameter(names = "--zk-connect", description="[host]:[port] of Zookeeper server")
   public String zkConnect = "zookeeper-1:2181";

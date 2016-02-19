@@ -13,13 +13,13 @@ import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorDescriptor;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class OdysseyEventStatisticOperator extends DataStreamOperator {
-  private String[]           addresses = { "elasticsearch-1:9300" };
+  private String[]  esAddresses = { "elasticsearch-1:9300" };
   private ESObjectClient<WebPageStat> esWebPageStatClient;
   private ESObjectClient<WebSiteStat> esWebSiteStatClient;
   
   public void onInit(DataStreamOperatorContext ctx) throws Exception {
     DataStreamOperatorDescriptor descriptor = ctx.getDescriptor() ;
-    ESClient esClient = new ESClient(addresses);
+    ESClient esClient = new ESClient(esAddresses);
     synchronized(getClass()) {
       esWebPageStatClient = new ESObjectClient<WebPageStat>(esClient, "webpage-stat", WebPageStat.class) ;
       esWebPageStatClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
