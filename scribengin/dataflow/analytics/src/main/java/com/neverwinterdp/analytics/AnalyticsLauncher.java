@@ -5,6 +5,7 @@ import com.neverwinterdp.analytics.dataflow.AanalyticsDataflowBuilder;
 import com.neverwinterdp.analytics.odyssey.generator.OdysseyEventGeneratorServer;
 import com.neverwinterdp.analytics.web.generator.WebEventGeneratorServer;
 import com.neverwinterdp.analytics.web.gripper.GripperServer;
+import com.neverwinterdp.kafka.KafkaAdminTool;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.registry.zk.RegistryImpl;
@@ -47,12 +48,15 @@ public class AnalyticsLauncher {
     };
     OdysseyEventGeneratorServer odysseyEventGeneratorServer = new OdysseyEventGeneratorServer(odysseyGeneratorConfig); 
     odysseyEventGeneratorServer.start();
-    
+
+    KafkaAdminTool adminTool = new KafkaAdminTool("admin", config.zkConnect);
+    if(!adminTool.topicExits(config.generatorWebInputTopic)) {
+      adminTool.createTopic(config.generatorWebInputTopic, 2, 5);
+    }
     String[] webEventGeneratorConfig = {
       "--gripper-server-host", "127.0.0.1", "--gripper-server-port", "7171",
       "--num-of-pages", Integer.toString(config.generatorWebNumOfEvents), "--destination-topic", config.generatorWebInputTopic
     };
-    
     WebEventGeneratorServer wGeneratorServer = new WebEventGeneratorServer(webEventGeneratorConfig);
     wGeneratorServer.start();
       

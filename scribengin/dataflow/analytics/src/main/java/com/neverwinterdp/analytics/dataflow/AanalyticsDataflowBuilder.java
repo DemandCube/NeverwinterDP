@@ -46,6 +46,7 @@ public class AanalyticsDataflowBuilder {
     
     KafkaDataSet<WebEvent> odysseyEventInputDs = 
       dfl.createInput(new KafkaStorageConfig("odyssey.input", config.zkConnect, config.generatorOdysseyInputTopic));
+    
     KafkaDataSet<WebEvent> webEventInputDs = 
       dfl.createInput(new KafkaStorageConfig("web.input", config.zkConnect, config.generatorWebInputTopic));
     
