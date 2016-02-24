@@ -154,6 +154,11 @@ public class Node {
     return registry.getDataAs(paths, type) ;
   }
   
+  public <T> T getRefChildAs(String name, Class<T> type) throws RegistryException {
+     String childPath = path + "/" + name;
+    return registry.getRefAs(childPath, type) ;
+  }
+  
   public <T> List<T> getSelectRefChildrenAs(List<String> names, Class<T> type) throws RegistryException {
     List<String> paths = new ArrayList<String>() ;
     for(int i = 0; i < names.size(); i++) {

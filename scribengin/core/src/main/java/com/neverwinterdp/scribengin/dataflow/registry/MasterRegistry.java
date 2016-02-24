@@ -10,12 +10,14 @@ import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
+import com.neverwinterdp.scribengin.dataflow.runtime.master.DataflowMasterRuntimeReport;
 import com.neverwinterdp.vm.VMDescriptor;
 
 public class MasterRegistry {
   final static public String MASTER_EVENT_PATH  = "master/events" ;
   
   private Registry registry ;
+  private String   dataflowPath;
   
   private Node     masterNode ;
   private Node     masterLeaderNode ;
@@ -24,7 +26,8 @@ public class MasterRegistry {
   private TXEventBroadcaster masterEventBroadcaster;
   
   public MasterRegistry(Registry registry, String dataflowPath) throws RegistryException {
-    this.registry         = registry;
+    this.registry    = registry;
+    this.dataflowPath = dataflowPath;
     masterNode       = registry.get(dataflowPath + "/master");
     masterLeaderNode = registry.get(dataflowPath + "/master/leader");
     activitiesNode   = registry.get(dataflowPath + "/master/activities");
@@ -61,6 +64,38 @@ public class MasterRegistry {
       RefNode refNode = refChildren.get(i);
       VMDescriptor vmDescriptor = registry.getDataAs(refNode.getPath(), VMDescriptor.class);
       holder.add(vmDescriptor);
+    }
+    return holder;
+  }
+  
+  public VMDescriptor findActiveMaster(String vmId) throws RegistryException {
+    for(VMDescriptor sel : getMasterVMDescriptors()) {
+      if(vmId.equals(sel.getVmId())) return sel;
+    }
+    return null;
+  }
+  
+  
+  public List<DataflowMasterRuntimeReport> getDataflowMasterRuntimeReports() throws RegistryException {
+    return getDataflowMasterRuntimeReports(registry, dataflowPath);
+  }
+  
+  static public List<DataflowMasterRuntimeReport> getDataflowMasterRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
+    Node masterLeaderNode = registry.get(dataflowPath + "/master/leader");
+    RefNode vmLeaderRef = masterLeaderNode.getDataAs(RefNode.class);
+    VMDescriptor vmLeader = registry.getDataAs(vmLeaderRef.getPath(), VMDescriptor.class);
+    
+    List<RefNode> refChildren = masterLeaderNode.getChildrenAs(RefNode.class);
+    List<DataflowMasterRuntimeReport> holder = new ArrayList<>();
+    for(int i = 0; i < refChildren.size(); i++) {
+      RefNode refNode = refChildren.get(i);
+      VMDescriptor vmDescriptor = registry.getDataAs(refNode.getPath(), VMDescriptor.class);
+      boolean leader = false;
+      if(vmLeader != null) leader = vmLeader.getVmId().equals(vmDescriptor.getVmId());
+      DataflowMasterRuntimeReport report = new DataflowMasterRuntimeReport();
+      report.setVmId(vmDescriptor.getVmId());
+      report.setLeader(leader);
+      holder.add(report);
     }
     return holder;
   }

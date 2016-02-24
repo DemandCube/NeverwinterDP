@@ -1,0 +1,24 @@
+archivesBaseName = 'scribengin.client.webui'
+
+eclipse {
+  project {
+    name = 'scribengin.client.webui'
+  }
+}
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+test {
+  exclude '**'
+}
+
+dependencies {
+  compile project(':module/elasticsearch')
+  compile project(':module/kafka')
+  compile project(':module/netty')
+  compile project(':scribengin/core')
+  compile project(':scribengin/dataflow/analytics')
+}

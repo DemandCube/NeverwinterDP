@@ -26,7 +26,6 @@ public class AanalyticsDataflowBuilder {
   AnalyticsConfig config = new AnalyticsConfig();
   
   public AanalyticsDataflowBuilder() {
-    
   }
   
   public AanalyticsDataflowBuilder(AnalyticsConfig config) {
@@ -37,7 +36,7 @@ public class AanalyticsDataflowBuilder {
     Dataflow<WebEvent, WebEvent> dfl = new Dataflow<>(config.dataflowId);
     dfl.
       setDFSAppHome(config.dfsAppHome).
-      useWireDataSetFactory(new KafkaWireDataSetFactory("127.0.0.1:2181")).
+      useWireDataSetFactory(new KafkaWireDataSetFactory(config.zkConnect)).
       setDefaultParallelism(config.dataflowDefaultParallelism).
       setDefaultReplication(config.dataflowDefaultReplication).
       setTrackingWindowSize(config.dataflowTrackingWindowSize).
@@ -96,7 +95,7 @@ public class AanalyticsDataflowBuilder {
     submitter.submit().waitForDataflowRunning(60000);
   }
   
-  public void runMonitor(ScribenginShell shell, long numOfInputMessages) throws Exception {
+  public void runMonitor(ScribenginShell shell, long numOfInputMessages, boolean shutdownDataflow) throws Exception {
     ScribenginClient sclient = shell.getScribenginClient();
     DataflowClient dflClient = sclient.getDataflowClient(config.dataflowId);
     DataflowRegistry dflRegistry = dflClient.getDataflowRegistry();
@@ -115,11 +114,15 @@ public class AanalyticsDataflowBuilder {
       
       Thread.sleep(10000);
     }
-    
+    if(shutdownDataflow) {
+      shutdownDataflow(shell);
+    }
+    shell.execute("dataflow info --dataflow-id " + config.dataflowId + " --show-tasks --show-history-workers");
+  }
+  
+  public void shutdownDataflow(ScribenginShell shell) throws Exception {
     System.err.println("Should call stop the dataflow here!!!!!!!!!!!");
     shell.execute("dataflow stop --dataflow-id " + config.dataflowId);
-
     Thread.sleep(10000);
-    shell.execute("dataflow info --dataflow-id " + config.dataflowId + " --show-tasks --show-history-workers");
   }
 }

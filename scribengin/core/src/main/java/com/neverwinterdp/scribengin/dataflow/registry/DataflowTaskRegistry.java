@@ -2,6 +2,7 @@ package com.neverwinterdp.scribengin.dataflow.registry;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.neverwinterdp.registry.Node;
@@ -93,6 +94,35 @@ public class DataflowTaskRegistry extends DedicatedTaskRegistry<DataStreamOperat
   public List<DataStreamOperatorReportWithStatus> getDataflowTaskRuntimeReports() throws RegistryException {
     List<String> taskIds = getTasksListNode().getChildren() ;
     return getDataflowTaskRuntimeReports(taskIds);
+  }
+  
+  public LinkedHashMap<String, List<DataStreamOperatorReportWithStatus>> getDataStreamOperatorReportGroupByExecutor() throws RegistryException {
+    LinkedHashMap<String, List<DataStreamOperatorReportWithStatus>> groupByExecutorReports = new LinkedHashMap<>();
+    for(String executorId : getActiveExecutorIds()) {
+      List<DataStreamOperatorReportWithStatus> reports =  getDataflowTaskRuntimeReportsByExecutorId(executorId);
+      groupByExecutorReports.put(executorId, reports);
+    }
+    for(String executorId : getIdleExecutorIds()) {
+      List<DataStreamOperatorReportWithStatus> reports =  getDataflowTaskRuntimeReportsByExecutorId(executorId);
+      groupByExecutorReports.put(executorId, reports);
+    }
+    return groupByExecutorReports ;
+  }
+  
+  public LinkedHashMap<String, List<DataStreamOperatorReportWithStatus>> getDataStreamOperatorReportGroupByOperator() throws RegistryException {
+    List<DataStreamOperatorReportWithStatus> reports =  getDataflowTaskRuntimeReports();
+    LinkedHashMap<String, List<DataStreamOperatorReportWithStatus>> groupByOperatorReports = new LinkedHashMap<>();
+    for(int i = 0; i < reports.size(); i++) {
+      DataStreamOperatorReportWithStatus rtReport = reports.get(i);
+      String operator = rtReport.getReport().getOperatorName();
+      List<DataStreamOperatorReportWithStatus> holder = groupByOperatorReports.get(operator);
+      if(holder == null) {
+        holder = new ArrayList<>();
+        groupByOperatorReports.put(operator, holder);
+      }
+      holder.add(rtReport);
+    }
+    return groupByOperatorReports;
   }
 
   List<DataStreamOperatorReportWithStatus> getDataflowTaskRuntimeReports(List<String> taskIds) throws RegistryException {

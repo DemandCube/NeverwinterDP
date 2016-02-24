@@ -1,5 +1,6 @@
 package com.neverwinterdp.scribengin;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.neverwinterdp.registry.Registry;
@@ -29,11 +30,32 @@ public class ScribenginClient {
   public VMClient getVMClient() { return this.vmClient; }
   
   public List<String> getActiveDataflowIds() throws RegistryException {
-    return vmClient.getRegistry().getChildren(DataflowRegistry.DATAFLOW_ACTIVE_PATH) ;
+    Registry registry = vmClient.getRegistry();
+    return registry.getChildren(DataflowRegistry.DATAFLOW_ACTIVE_PATH) ;
+  }
+  
+  public List<DataflowDescriptor> getActiveDataflowDescriptors() throws RegistryException {
+    Registry registry = vmClient.getRegistry();
+    List<String> dataflowIds = registry.getChildren(DataflowRegistry.DATAFLOW_ACTIVE_PATH) ;
+    List<String> paths = new ArrayList<String>() ;
+    for(int i = 0; i < dataflowIds.size(); i++) {
+      paths.add(DataflowRegistry.DATAFLOW_ALL_PATH + "/" + dataflowIds.get(i) + "/config") ;
+    }
+    return registry.getDataAs(paths, DataflowDescriptor.class);
   }
   
   public List<String> getHistoryDataflowIds() throws RegistryException {
     return vmClient.getRegistry().getChildren(DataflowRegistry.DATAFLOW_HISTORY_PATH) ;
+  }
+  
+  public List<DataflowDescriptor> getHistoryDataflowDescriptors() throws RegistryException {
+    Registry registry = vmClient.getRegistry();
+    List<String> dataflowIds = registry.getChildren(DataflowRegistry.DATAFLOW_HISTORY_PATH) ;
+    List<String> paths = new ArrayList<String>() ;
+    for(int i = 0; i < dataflowIds.size(); i++) {
+      paths.add(DataflowRegistry.DATAFLOW_ALL_PATH + "/" + dataflowIds.get(i) + "/config") ;
+    }
+    return registry.getDataAs(paths, DataflowDescriptor.class);
   }
   
   public DataflowClient getDataflowClient(String dataflowId) throws Exception {

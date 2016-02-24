@@ -46,6 +46,10 @@ public class VMClient {
     this.waitForResultTimeout = waitForResultTimeout;
   }
 
+  public List<String> getActiveVMs() throws RegistryException {
+    return VMService.getActiveVMs(registry) ;
+  }
+  
   public List<VMDescriptor> getActiveVMDescriptors() throws RegistryException {
     return VMService.getActiveVMDescriptors(registry) ;
   }

@@ -6,7 +6,7 @@ import com.neverwinterdp.netty.http.HttpServer;
 
 public class GripperServer {
   @Parameter(names = "--port", description = "The http port")
-  private int port         = 8080;
+  private int port         = 7081;
   
   @Parameter(names = "--num-of-workers", description = "The number of the handler thread")
   private int numOfWorkers = 3;

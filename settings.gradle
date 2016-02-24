@@ -18,7 +18,9 @@ include 'scribengin/dataflow/example'
 include 'scribengin/dataflow/sample'
 include 'scribengin/dataflow/demo'
 include 'scribengin/dataflow/analytics'
+include 'scribengin/client/webui'
 include 'scribengin/release'
+
 
 include 'jvmagent/bootstrap'
 include 'jvmagent/registry'

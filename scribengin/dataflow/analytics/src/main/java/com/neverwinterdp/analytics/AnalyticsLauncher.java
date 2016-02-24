@@ -62,7 +62,7 @@ public class AnalyticsLauncher {
       
     AanalyticsDataflowBuilder dflBuilder = new AanalyticsDataflowBuilder(config);
     dflBuilder.submitDataflow(shell);
-    dflBuilder.runMonitor(shell, config.generatorOdysseyNumOfEvents + config.generatorWebNumOfEvents);
+    dflBuilder.runMonitor(shell, config.generatorOdysseyNumOfEvents + config.generatorWebNumOfEvents, true);
     System.exit(0);
   }
 }

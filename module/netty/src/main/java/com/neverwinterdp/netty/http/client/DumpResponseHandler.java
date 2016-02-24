@@ -1,8 +1,5 @@
 package com.neverwinterdp.netty.http.client;
 
-import java.nio.ByteBuffer;
-
-import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.LastHttpContent;

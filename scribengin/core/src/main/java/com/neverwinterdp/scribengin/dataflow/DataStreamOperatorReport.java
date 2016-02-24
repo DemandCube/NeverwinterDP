@@ -101,10 +101,12 @@ public class DataStreamOperatorReport {
     accRuntime += amount;
   }
 
-  public long durationTime() {
+  public long getDurationTime() {
     if(finishTime > 0) return finishTime - startTime;
     return System.currentTimeMillis() - startTime;
   }
+  
+  public void setDurationTime(long time) {}
   
   public void updateCommit() { 
     commitCount++ ;

@@ -23,7 +23,7 @@ public class WebEventGeneratorServer {
   private Logger logger = LoggerFactory.getLogger(WebEventGeneratorServer.class.getSimpleName());
   
   @Parameter(names = "--gripper-server-port", description = "The gripper port")
-  private int    gripperServerPort = 8080;
+  private int    gripperServerPort = 7081;
   
   @Parameter(names = "--gripper-server-host", description = "The http port")
   private String gripperServerHost = "127.0.0.1";

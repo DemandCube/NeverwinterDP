@@ -6,6 +6,7 @@ public class NullDevStorageConfig extends StorageConfig {
   
   public NullDevStorageConfig() { 
     setType("nulldev");
+    attribute("name", "nulldev");
   }
   
   public NullDevStorageConfig(StorageConfig config) { 

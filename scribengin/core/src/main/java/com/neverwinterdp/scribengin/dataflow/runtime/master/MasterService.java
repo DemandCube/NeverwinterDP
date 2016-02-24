@@ -102,7 +102,8 @@ public class MasterService {
     
     activityExecutor.add(new DataflowAllocateMasterActivity(this));
     activityExecutor.add(new DataflowRunActivity(this));
-  
+    dflRegistry.setActive();
+    
     mtMergerService.start();
     logger.info("Finish run()");
   }

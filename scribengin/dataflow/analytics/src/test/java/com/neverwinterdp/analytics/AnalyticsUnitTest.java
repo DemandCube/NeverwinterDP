@@ -74,6 +74,6 @@ public class AnalyticsUnitTest {
       throw ex;
     }
     
-    dflBuilder.runMonitor(shell, ALL_EVENTS);
+    dflBuilder.runMonitor(shell, ALL_EVENTS, true);
   }
 }
