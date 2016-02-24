@@ -340,7 +340,7 @@ Yes... AWS instance is ready now run scribengin.
   - Identifier
   	- There are only two identifier values are available, they are
   		- odyssey
-  		- scribengin
+  		- neverwinterdp
  
  ![Tags](images/tags.png)
  
