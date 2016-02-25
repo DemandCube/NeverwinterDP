@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.LocalFileSystem;
 import com.google.inject.name.Names;
 import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.storage.s3.S3Client;
+import com.neverwinterdp.vm.HadoopConfigurationUtil;
 import com.neverwinterdp.vm.VMConfig;
 
 
@@ -22,7 +23,7 @@ public class DataflowWorkerModule extends ServiceModule {
     Names.bindProperties(binder(), props) ;
     try {
       Configuration conf = new Configuration();
-      VMConfig.overrideHadoopConfiguration(props, conf);
+      HadoopConfigurationUtil.overrideConfiguration(props, conf);
       
       FileSystem fs = FileSystem.get(conf);
       if(fs instanceof LocalFileSystem) {

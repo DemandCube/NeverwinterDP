@@ -7,8 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hadoop.conf.Configuration;
-
 import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -257,10 +255,6 @@ public class VMConfig {
   }
   
   
-  public void overrideHadoopConfiguration(Configuration aconf) {
-    hadoopProperties.overrideConfiguration(aconf);
-  }
-  
   public String getDescription() { return description; }
   public VMConfig setDescription(String description) { 
     this.description = description; 
@@ -349,11 +343,5 @@ public class VMConfig {
     for(Map.Entry<String, String> entry : hadoopProperties.entrySet()) {
       b.append(" --hadoop:").append(entry.getKey()).append("=").append(entry.getValue()) ;
     }
-  }
-  
-  static public void overrideHadoopConfiguration(Map<String, String> props, Configuration aconf) {
-    HadoopProperties hprops = new HadoopProperties() ;
-    hprops.putAll(props);
-    hprops.overrideConfiguration(aconf);
   }
 }
