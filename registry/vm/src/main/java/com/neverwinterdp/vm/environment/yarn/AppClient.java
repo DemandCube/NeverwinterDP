@@ -94,7 +94,7 @@ public class AppClient {
   public void uploadApp(String localAppHome, String dfsAppHome) throws Exception {
     if(dfsAppHome == null || localAppHome == null) return; 
     HdfsConfiguration hdfsConf = new HdfsConfiguration() ;
-    hadoopProperties.overrideConfiguration(hdfsConf);
+    HadoopConfigurationUtil.overrideConfiguration(hadoopProperties, hdfsConf);
     FileSystem fs = FileSystem.get(hdfsConf);
     DistributedFileSystem dfs = (DistributedFileSystem)fs;
     Path appHomePath = new Path(new File(localAppHome).getAbsolutePath()) ;
