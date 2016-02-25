@@ -47,13 +47,6 @@ define([
             thisUI.add(new UIListDataflowWorkerReport({ dataflowDescriptor: thisUI.dataflowDescriptor, filterBy: "history" })) ;
             thisUI.render();
           } 
-        },
-        { 
-          action: "back", label: "Back", 
-          onClick: function(thisUI) { 
-            var uiBreadcumbs = thisUI.getAncestorOfType('UIBreadcumbs') ;
-            uiBreadcumbs.back() ;
-          } 
         }
       ]
     },

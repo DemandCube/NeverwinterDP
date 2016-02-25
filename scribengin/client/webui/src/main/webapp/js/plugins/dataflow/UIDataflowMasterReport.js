@@ -46,13 +46,6 @@ define([
             thisUI.add(new UIListDataflowMasterReport({ dataflowDescriptor: thisUI.dataflowDescriptor })) ;
             thisUI.render();
           } 
-        },
-        { 
-          action: "back", label: "Back", 
-          onClick: function(thisUI) { 
-            var uiBreadcumbs = thisUI.getAncestorOfType('UIBreadcumbs') ;
-            uiBreadcumbs.back() ;
-          } 
         }
       ]
     },
