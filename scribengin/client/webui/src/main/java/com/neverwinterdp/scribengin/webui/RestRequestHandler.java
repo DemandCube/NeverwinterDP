@@ -15,6 +15,7 @@ public class RestRequestHandler extends RestRouteHandler {
   private ScribenginClient scribenginClient;
   protected CommandMapping commandMapping = new CommandMapping();
   
+  
   protected RestRequestHandler(ScribenginClient scribenginClient) {
     this.scribenginClient = scribenginClient;
   }

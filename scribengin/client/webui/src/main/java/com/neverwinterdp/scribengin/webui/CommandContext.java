@@ -8,6 +8,6 @@ public class CommandContext {
   public CommandContext(ScribenginClient client) {
     scribenginClient = client;
   }
-
+  
   public ScribenginClient getScribenginClient() { return scribenginClient; }
 }

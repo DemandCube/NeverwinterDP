@@ -46,6 +46,8 @@ public class VMClient {
     this.waitForResultTimeout = waitForResultTimeout;
   }
 
+  public boolean isLocalVMClient() { return this instanceof LocalVMClient; }
+  
   public List<String> getActiveVMs() throws RegistryException {
     return VMService.getActiveVMs(registry) ;
   }

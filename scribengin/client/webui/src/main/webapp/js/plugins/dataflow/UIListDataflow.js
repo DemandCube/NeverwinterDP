@@ -48,6 +48,14 @@ define([
         ],
         actions:[
           {
+            icon: "config", label: "Config",
+            onClick: function(thisTable, row) { 
+              var dataflowDescriptor = thisTable.getItemOnCurrentPage(row) ;
+              var uiBreadcumbs = thisTable.getAncestorOfType('UIBreadcumbs') ;
+              uiBreadcumbs.push(new UIDataflowConfig({ dataflowDescriptor: dataflowDescriptor})) ;
+            }
+          },
+          {
             icon: "stop", label: "Stop",
             onClick: function(thisTable, row) { 
               var dataflowDescriptor = thisTable.getItemOnCurrentPage(row) ;
@@ -60,22 +68,23 @@ define([
               var dataflowDescriptor = thisTable.getItemOnCurrentPage(row) ;
               Rest.dataflow.resume(dataflowDescriptor.id);
             }
-          },
-          {
-            icon: "config", label: "Config",
-            onClick: function(thisTable, row) { 
-              var dataflowDescriptor = thisTable.getItemOnCurrentPage(row) ;
-              var uiBreadcumbs = thisTable.getAncestorOfType('UIBreadcumbs') ;
-              uiBreadcumbs.push(new UIDataflowConfig({ dataflowDescriptor: dataflowDescriptor})) ;
-            }
           }
         ]
       }
     },
-    
-    setDataflows: function(dataflowList) {
+
+    initActive: function() {
+      this.label = "List Active Dataflow";
+      var dataflowList = Rest.dataflow.getActiveDataflows();
+      this.setBeans(dataflowList) ;
+    },
+
+    initHistory: function() {
+      this.label = "List History Dataflow";
+      var dataflowList = Rest.dataflow.getHistoryDataflows();
       this.setBeans(dataflowList) ;
     }
+    
   });
   
   return UIListDataflow ;

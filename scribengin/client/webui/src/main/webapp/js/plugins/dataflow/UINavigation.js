@@ -28,18 +28,14 @@ define([
     },
     
     onSelectUIActiveDataflow: function(evt) {
-      var dataflows = Rest.dataflow.getActiveDataflows();
       var uiListDataflow = new UIListDataflow();
-      uiListDataflow.label = "List Active Dataflow";
-      uiListDataflow.setDataflows(dataflows);
+      uiListDataflow.initActive();
       this._workspace(uiListDataflow);
     },
 
     onSelectUIHistoryDataflow: function(evt) {
-      var dataflows = Rest.dataflow.getHistoryDataflows();
       var uiListDataflow = new UIListDataflow();
-      uiListDataflow.label = "List History Dataflow";
-      uiListDataflow.setDataflows(dataflows);
+      uiListDataflow.initHistory();
       this._workspace(uiListDataflow);
     },
 

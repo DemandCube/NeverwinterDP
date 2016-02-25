@@ -29,7 +29,6 @@ public class WebuiServer {
   @Parameter(names = "--hadoop-master", description = "Hadoop Master")
   private String hadoopMaster;
 
-  
   private HttpServer server ;
   
   public WebuiServer(String[] args) {

@@ -113,9 +113,9 @@ public class WebuiIntegrationTest {
     assertValidRest(client, handler, "/rest/dataflow/worker.report?dataflowId=analytics&groupBy=active");
     assertValidRest(client, handler, "/rest/dataflow/worker.report?dataflowId=analytics&groupBy=history");
     
-    assertValidRest(client, handler, "/rest/dataflow/master.kill?dataflowId=analytics&vmId=analytics-master-0000000001&simulateKill=true");
+    assertValidRest(client, handler, "/rest/dataflow/master.kill?dataflowId=analytics&vmId=analytics-master-0000000001");
     Thread.sleep(10000);
-    assertValidRest(client, handler, "/rest/dataflow/worker.kill?dataflowId=analytics&vmId=analytics-worker-0000000001&simulateKill=true");
+    assertValidRest(client, handler, "/rest/dataflow/worker.kill?dataflowId=analytics&vmId=analytics-worker-0000000001");
     Thread.sleep(100000000);
   }
   

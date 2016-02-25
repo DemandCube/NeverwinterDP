@@ -49,12 +49,12 @@ define([
 
 
     this.killMaster = function(dataflowId, vmId) {
-      var params = { dataflowId: dataflowId, vmId: vmId, simulateKill: true } ;
+      var params = { dataflowId: dataflowId, vmId: vmId } ;
       return Server.cmdRestGET("/rest/dataflow/master.kill", params);
     },
 
     this.killWorker = function(dataflowId, vmId) {
-      var params = { dataflowId: dataflowId, vmId: vmId, simulateKill: true } ;
+      var params = { dataflowId: dataflowId, vmId: vmId } ;
       return Server.cmdRestGET("/rest/dataflow/worker.kill", params);
     }
   };

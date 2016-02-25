@@ -119,19 +119,14 @@ public class DataflowCommand {
     @Parameter(names = "--vmId", required=true, description="")
     private String vmId;
     
-    @Parameter(names = "--simulateKill", arity = 1, description="")
-    private boolean simulateKill = false;
-    
     @Override
     public Boolean execute(CommandContext ctx) throws Exception {
-      System.err.println("MasterKill: execute()");
       ScribenginClient scribenginClient = ctx.getScribenginClient();
       DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId);
       VMDescriptor vmDescriptor = dflClient.findActiveDataflowMaster(vmId);
-      System.err.println("MasterKill: vmDescriptor = " + vmDescriptor + ", simulateKill = " + simulateKill);
       if(vmDescriptor != null) {
         VMClient vmClient = scribenginClient.getVMClient();
-        if(simulateKill) {
+        if(vmClient.isLocalVMClient()) {
           return vmClient.simulateKill(vmDescriptor);
         } else {
           return vmClient.kill(vmDescriptor);
@@ -169,9 +164,6 @@ public class DataflowCommand {
     @Parameter(names = "--vmId", required=true, description="")
     private String vmId;
     
-    @Parameter(names = "--simulateKill", arity = 1, description="")
-    private boolean simulateKill = false;
-    
     @Override
     public Boolean execute(CommandContext ctx) throws Exception {
       ScribenginClient scribenginClient = ctx.getScribenginClient();
@@ -179,7 +171,7 @@ public class DataflowCommand {
       VMDescriptor vmDescriptor = dflClient.findActiveDataflowWorker(vmId);
       if(vmDescriptor != null) {
         VMClient vmClient = scribenginClient.getVMClient();
-        if(simulateKill) {
+        if(vmClient.isLocalVMClient()) {
           return vmClient.simulateKill(vmDescriptor);
         } else {
           return vmClient.kill(vmDescriptor);
