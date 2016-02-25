@@ -29,6 +29,7 @@ th, td {
 .ui-error-text {
   color:#8a1f11;
 }
+
 a.ui-disabled {
   pointer-events: none;
   cursor: default;

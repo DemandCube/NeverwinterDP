@@ -58,23 +58,18 @@ public class DataflowCommand {
     @Parameter(names = "--dataflowId", required=true, description="")
     String dataflowId;
     
-    @Override
-    public LinkedHashMap<String, List<DataStreamOperatorReportWithStatus>> execute(CommandContext ctx) throws Exception {
-      ScribenginClient scribenginClient = ctx.getScribenginClient();
-      DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId);
-      return dflClient.getDataflowRegistry().getTaskRegistry().getDataStreamOperatorReportGroupByOperator();
-    }
-  }
-  
-  static public class ExecutorReport extends Command {
-    @Parameter(names = "--dataflowId", required=true, description="")
-    String dataflowId;
+    @Parameter(names = "--groupBy", description="")
+    String groupBy = "operator";
     
     @Override
     public LinkedHashMap<String, List<DataStreamOperatorReportWithStatus>> execute(CommandContext ctx) throws Exception {
       ScribenginClient scribenginClient = ctx.getScribenginClient();
       DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId);
-      return dflClient.getDataflowRegistry().getTaskRegistry().getDataStreamOperatorReportGroupByExecutor();
+      if("executor".equals(groupBy)) {
+        return dflClient.getDataflowRegistry().getTaskRegistry().getDataStreamOperatorReportGroupByExecutor();
+      } else {
+        return dflClient.getDataflowRegistry().getTaskRegistry().getDataStreamOperatorReportGroupByOperator();
+      }
     }
   }
   

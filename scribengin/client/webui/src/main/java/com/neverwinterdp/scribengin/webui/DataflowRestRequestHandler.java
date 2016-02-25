@@ -9,7 +9,6 @@ public class DataflowRestRequestHandler extends RestRequestHandler  {
     addCommand("history",DataflowCommand.ListHistory.class);
     addCommand("info",DataflowCommand.Info.class);
     addCommand("operator.report",DataflowCommand.OperatorReport.class);
-    addCommand("executor.report",DataflowCommand.ExecutorReport.class);
     addCommand("master.report",  DataflowCommand.MasterReport.class);
     addCommand("master.kill",    DataflowCommand.MasterKill.class);
     addCommand("worker.report",  DataflowCommand.WorkerReport.class);

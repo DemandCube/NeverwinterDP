@@ -22,8 +22,8 @@ define([
       return Server.cmdRestGET("/rest/dataflow/history", {});
     },
 
-    this.getDataflowOperatorReports = function(dataflowId) {
-      var params = { dataflowId: dataflowId } ;
+    this.getDataflowOperatorReports = function(dataflowId, groupBy) {
+      var params = { dataflowId: dataflowId, groupBy: groupBy } ;
       return Server.cmdRestGET("/rest/dataflow/operator.report", params);
     },
 

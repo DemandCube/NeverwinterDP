@@ -1,45 +1,46 @@
 define([
-  'ui/UICollapsible',
+  'ui/UITabbedPane',
   'plugins/dataflow/UIDataflowOperatorReport',
   'plugins/dataflow/UIDataflowMasterReport',
   'plugins/dataflow/UIDataflowWorkerReport'
-], function(UICollapsible, UIDataflowOperatorReport, UIDataflowMasterReport, UIDataflowWorkerReport) {
-
-  var UIDataflowReport = UICollapsible.extend({
+], function(UITabbedPane, UIDataflowOperatorReport, UIDataflowMasterReport, UIDataflowWorkerReport) {
+  var UIDataflowReport = UITabbedPane.extend({
     label: "Dataflow Report", 
+
     config: {
-      actions: [
+      tabs: [
         { 
-          action: "refresh", label: "Reload", 
-          onClick: function(thisUI) { 
-            thisUI.reload(); 
-          } 
+          name: "operator", label: "Operator",
+          onSelect: function(thisUI, tabConfig) {
+            thisUI.setSelectedTab(tabConfig.name, new UIDataflowOperatorReport({ dataflowDescriptor: thisUI.dataflowDescriptor, groupBy: "operator" })) ;
+          }
         },
-        { action: "back", label: "Back", onClick: function(thisUI) { thisUI.back(); } }
+        { 
+          name: "executor", label: "Executors",
+          onSelect: function(thisUI, tabConfig) {
+            thisUI.setSelectedTab(tabConfig.name, new UIDataflowOperatorReport({ dataflowDescriptor: thisUI.dataflowDescriptor, groupBy: "executor" })) ;
+          }
+        },
+        { 
+          name: "master", label: "Master",
+          onSelect: function(thisUI, tabConfig) {
+            thisUI.setSelectedTab(tabConfig.name, new UIDataflowMasterReport({ dataflowDescriptor: thisUI.dataflowDescriptor })) ;
+          }
+        },
+        { 
+          name: "worker", label: "Worker",
+          onSelect: function(thisUI, tabConfig) {
+            thisUI.setSelectedTab(tabConfig.name, new UIDataflowWorkerReport({ dataflowDescriptor: thisUI.dataflowDescriptor })) ;
+          }
+        }
       ]
     },
-
+    
     onInit: function(options) {
       this.dataflowDescriptor = options.dataflowDescriptor;
       this.label = "Dataflow Report - " + options.dataflowDescriptor.id;
-      this.add(new UIDataflowOperatorReport({ dataflowDescriptor: this.dataflowDescriptor })) ;
-      this.add(new UIDataflowMasterReport({ dataflowDescriptor: this.dataflowDescriptor })) ;
-      this.add(new UIDataflowWorkerReport({ dataflowDescriptor: this.dataflowDescriptor })) ;
-    },
-
-    back: function() {
-      var uiBreadcumbs = this.getAncestorOfType('UIBreadcumbs') ;
-      uiBreadcumbs.back() ;
-    },
-
-    reload: function() {
-      this.clear();
-      this.add(new UIDataflowOperatorReport({ dataflowDescriptor: this.dataflowDescriptor })) ;
-      this.add(new UIDataflowMasterReport({ dataflowDescriptor: this.dataflowDescriptor })) ;
-      this.add(new UIDataflowWorkerReport({ dataflowDescriptor: this.dataflowDescriptor })) ;
-      this.render();
     }
-  }) ;
+  });
   
   return UIDataflowReport ;
 });

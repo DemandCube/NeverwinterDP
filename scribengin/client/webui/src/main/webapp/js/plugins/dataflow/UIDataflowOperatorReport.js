@@ -29,7 +29,7 @@ define([
 
     onInit: function(options) {
       var dataflowDescriptor = options.dataflowDescriptor;
-      var reports = Rest.dataflow.getDataflowOperatorReports(dataflowDescriptor.id);
+      var reports = Rest.dataflow.getDataflowOperatorReports(dataflowDescriptor.id, options.groupBy);
       //console.printJSON(reports);
       for(key in reports) {
         if(!reports.hasOwnProperty(key)) {
