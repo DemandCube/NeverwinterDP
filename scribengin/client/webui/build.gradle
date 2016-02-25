@@ -34,6 +34,7 @@ dependencies {
   webuiDeployJars project(':module/zookeeper')
   webuiDeployJars project(':registry/core')
   webuiDeployJars project(':registry/vm')
+  webuiDeployJars project(':scribengin/storage')
   webuiDeployJars project(':scribengin/core')
   webuiDeployJars project(':module/netty')
 
