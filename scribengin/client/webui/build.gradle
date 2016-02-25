@@ -58,6 +58,16 @@ dependencies {
   webuiDeployJars group: 'org.apache.zookeeper', name: 'zookeeper', version: '3.4.6'
   webuiDeployJars group: 'com.101tec', name: 'zkclient', version: '0.3'
 
+  webuiDeployJars group: 'com.google.guava', name: 'guava', version: '18.0'
+
+  webuiDeployJars group: 'org.apache.hadoop', name: 'hadoop-common', version: '2.4.0'
+  webuiDeployJars group: 'org.apache.hadoop', name: 'hadoop-yarn-api', version: '2.4.0'
+  webuiDeployJars group: 'org.apache.hadoop', name: 'hadoop-yarn-client', version: '2.4.0'
+  webuiDeployJars group: 'org.apache.hadoop', name: 'hadoop-yarn-common', version: '2.4.0'
+
+  webuiDeployJars group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
+  webuiDeployJars group: 'commons-logging', name: 'commons-logging', version: '1.1.3'
+
   webuiDeployJars group: 'org.slf4j', name: 'slf4j-api', version: '1.7.6'
   webuiDeployJars group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.5'
   webuiDeployJars group: 'log4j', name: 'log4j', version: '1.2.17'
