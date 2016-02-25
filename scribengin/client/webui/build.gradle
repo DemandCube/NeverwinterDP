@@ -89,7 +89,7 @@ task release(dependsOn: 'build') << {
 
   def webappHome = "src/main/webapp";
   copy {
-    from appHome
-      into "${releaseDir}/client/webui"
+    from webappHome
+      into "${releaseDir}/client/webui/webapp"
   }
 }
