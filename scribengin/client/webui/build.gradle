@@ -26,6 +26,7 @@ dependencies {
   compile project(':module/kafka')
   compile project(':module/netty')
   compile project(':scribengin/core')
+  compile project(':dataflow/analytics')
 
   webuiDeployJars project(':lib/utils')
   webuiDeployJars project(':lib/yara')
