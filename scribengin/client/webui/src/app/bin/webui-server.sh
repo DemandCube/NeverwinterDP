@@ -46,4 +46,4 @@ echo "  APP_OPT                     = $APP_OPT"
 echo "***********************************************************************************************************"
 
 MAIN_CLASS="com.neverwinterdp.scribengin.webui.WebuiServer"
-$JAVACMD -Djava.ext.dirs=$APP_DIR/libs:$JAVA_HOME/jre/lib/ext $JAVA_OPTS $APP_OPT $MAIN_CLASS  --www-dir $APP_DIR/webapp --zk-connects 127.0.0.1;2181 "$@"
+$JAVACMD -Djava.ext.dirs=$APP_DIR/libs:$JAVA_HOME/jre/lib/ext $JAVA_OPTS $APP_OPT $MAIN_CLASS  --www-dir $APP_DIR/webapp --zk-connects zookeeper-1:2181 --hadoop-master hadoop-master "$@"
