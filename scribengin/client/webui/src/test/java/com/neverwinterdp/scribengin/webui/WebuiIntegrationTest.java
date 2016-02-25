@@ -108,7 +108,6 @@ public class WebuiIntegrationTest {
     assertValidRest(client, handler, "/rest/dataflow/info?dataflowId=analytics");
     
     assertValidRest(client, handler, "/rest/dataflow/operator.report?dataflowId=analytics");
-    assertValidRest(client, handler, "/rest/dataflow/executor.report?dataflowId=analytics");
     assertValidRest(client, handler, "/rest/dataflow/master.report?dataflowId=analytics");
     assertValidRest(client, handler, "/rest/dataflow/worker.report?dataflowId=analytics&groupBy=all");
     assertValidRest(client, handler, "/rest/dataflow/worker.report?dataflowId=analytics&groupBy=active");

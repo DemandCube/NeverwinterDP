@@ -116,8 +116,13 @@ public class DataflowRegistry {
     try {
       RegistryStatus registryStatus = getRegistryStatus();
       if(registryStatus != RegistryStatus.Create) {
+        //resume mode
         taskRegistry.cleanDisconnectedExecutors();
         workerRegistry.cleanDisconnectedWorkers();
+        String historyPath = DATAFLOW_HISTORY_PATH + "/" + extractDataflowId(dataflowPath);
+        if(registry.exists(historyPath)) {
+          registry.delete(historyPath);
+        }
         return;
       }
       
@@ -170,7 +175,7 @@ public class DataflowRegistry {
   
   public void setHistory() throws RegistryException {
     registry.delete(DATAFLOW_ACTIVE_PATH + "/" + configRegistry.getDataflowDescriptor().getId());
-    registry.createIfNotExist(DATAFLOW_ACTIVE_PATH + "/" + configRegistry.getDataflowDescriptor().getId());
+    registry.createIfNotExist(DATAFLOW_HISTORY_PATH + "/" + configRegistry.getDataflowDescriptor().getId());
   }
   
   public ConfigRegistry getConfigRegistry() { return configRegistry; }
@@ -203,5 +208,10 @@ public class DataflowRegistry {
   
   static public ActivityRegistry getMasterActivityRegistry(Registry registry, String dataflowPath) throws RegistryException {
     return new ActivityRegistry(registry, dataflowPath + "/master/activities") ;
+  }
+  
+  public String extractDataflowId(String dataflowPath) {
+    int idx = dataflowPath.lastIndexOf('/');
+    return dataflowPath.substring(idx + 1);
   }
 }

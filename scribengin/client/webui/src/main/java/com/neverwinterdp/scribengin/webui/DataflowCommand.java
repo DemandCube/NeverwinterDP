@@ -4,10 +4,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
+import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorReportWithStatus;
 import com.neverwinterdp.scribengin.dataflow.DataflowClient;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.runtime.master.DataflowMasterRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerRuntimeReport;
 import com.neverwinterdp.vm.VMDescriptor;
@@ -39,6 +41,31 @@ public class DataflowCommand {
       ScribenginClient scribenginClient = ctx.getScribenginClient();
       DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId);
       return dflClient.getDataflowRegistry().getConfigRegistry().getDataflowDescriptor();
+    }
+  }
+  
+  static public class Resume extends Command {
+    @Parameter(names = "--dataflowId", required=true, description="")
+    String dataflowId;
+    
+    @Override
+    public Boolean execute(CommandContext ctx) throws Exception {
+      ScribenginClient scribenginClient = ctx.getScribenginClient();
+      return scribenginClient.resume(dataflowId);
+    }
+  }
+  
+  static public class Stop extends Command {
+    @Parameter(names = "--dataflowId", required=true, description="")
+    String dataflowId;
+    
+    @Override
+    public Boolean execute(CommandContext ctx) throws Exception {
+      ScribenginClient scribenginClient = ctx.getScribenginClient();
+      DataflowClient dflClient = scribenginClient.getDataflowClient(dataflowId);
+      TXEvent stopEvent = new TXEvent("stop", DataflowEvent.Stop);
+      dflClient.getDataflowRegistry().getMasterRegistry().getMasterEventBroadcaster().broadcast(stopEvent);
+      return true;
     }
   }
   

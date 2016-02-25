@@ -1,9 +1,10 @@
 define([
+  'service/Rest',
   'ui/UIBean',
   'ui/UITable',
   'plugins/dataflow/UIDataflowConfig',
   'plugins/dataflow/UIDataflowReport',
-], function(UIBean, UITable, UIDataflowConfig, UIDataflowReport) {
+], function(Rest, UIBean, UITable, UIDataflowConfig, UIDataflowReport) {
   var UIListDataflow = UITable.extend({
     label: "List Dataflow",
 
@@ -49,15 +50,15 @@ define([
           {
             icon: "stop", label: "Stop",
             onClick: function(thisTable, row) { 
-              thisTable.markDeletedItemOnCurrentPage(row) ;
-              console.log('Kill VM on row ' + row);
+              var dataflowDescriptor = thisTable.getItemOnCurrentPage(row) ;
+              Rest.dataflow.stop(dataflowDescriptor.id);
             }
           },
           {
-            icon: "start", label: "Start",
+            icon: "resume", label: "Resume",
             onClick: function(thisTable, row) { 
-              thisTable.markDeletedItemOnCurrentPage(row) ;
-              console.log('Kill VM on row ' + row);
+              var dataflowDescriptor = thisTable.getItemOnCurrentPage(row) ;
+              Rest.dataflow.resume(dataflowDescriptor.id);
             }
           },
           {

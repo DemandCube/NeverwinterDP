@@ -7,6 +7,11 @@ import com.neverwinterdp.netty.http.StaticFileHandler;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
 import com.neverwinterdp.scribengin.ScribenginClient;
+import com.neverwinterdp.vm.HadoopProperties;
+import com.neverwinterdp.vm.VMConfig;
+import com.neverwinterdp.vm.client.LocalVMClient;
+import com.neverwinterdp.vm.client.VMClient;
+import com.neverwinterdp.vm.client.YarnVMClient;
 
 public class WebuiServer {
   @Parameter(names = "--port", description = "The http port")
@@ -20,7 +25,11 @@ public class WebuiServer {
  
   @Parameter(names = "--zk-connects", required=true, description = "The zookeeper connect string")
   private String zkConnects;
- 
+
+  @Parameter(names = "--hadoop-master", description = "Hadoop Master")
+  private String hadoopMaster;
+
+  
   private HttpServer server ;
   
   public WebuiServer(String[] args) {
@@ -48,7 +57,17 @@ public class WebuiServer {
     registryConfig.setConnect(zkConnects);
     Registry registry = registryConfig.newInstance();
     registry.connect();
-    ScribenginClient scribenginClient =  new ScribenginClient(registry);
+    VMClient vmClient = null;
+    if(hadoopMaster != null) {
+      HadoopProperties hadoopProps = new HadoopProperties() ;
+      hadoopProps.put("yarn.resourcemanager.address", hadoopMaster + ":8032");
+      hadoopProps.put("fs.defaultFS", "hdfs://" + hadoopMaster +":9000");
+      //Set up our connection to Scribengin
+      vmClient = new YarnVMClient(registry, VMConfig.ClusterEnvironment.YARN, hadoopProps) ;
+    } else {
+      vmClient = new LocalVMClient(registry);
+    }
+    ScribenginClient scribenginClient =  new ScribenginClient(vmClient);
     server.add("/rest/vm/:path",         new VMRestRequestHandler(scribenginClient));
     server.add("/rest/dataflow/:path",   new DataflowRestRequestHandler(scribenginClient));
     

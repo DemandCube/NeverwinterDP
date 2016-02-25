@@ -22,6 +22,16 @@ define([
       return Server.cmdRestGET("/rest/dataflow/history", {});
     },
 
+    this.stop = function(dataflowId) {
+      var params = { dataflowId: dataflowId } ;
+      return Server.cmdRestGET("/rest/dataflow/stop", params);
+    },
+
+    this.resume = function(dataflowId) {
+      var params = { dataflowId: dataflowId } ;
+      return Server.cmdRestGET("/rest/dataflow/resume", params);
+    },
+
     this.getDataflowOperatorReports = function(dataflowId, groupBy) {
       var params = { dataflowId: dataflowId, groupBy: groupBy } ;
       return Server.cmdRestGET("/rest/dataflow/operator.report", params);

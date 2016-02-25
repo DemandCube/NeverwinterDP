@@ -77,8 +77,8 @@ public class MasterService {
     dflRegistry.setDataflowStatus(DataflowLifecycleStatus.INIT);
     dflRegistry.initRegistry();
     
-    taskService = new DedicatedTaskService<>(dflRegistry.getTaskRegistry(), null);
-    taskMonitor = new DataflowTaskMonitor();
+    taskService        = new DedicatedTaskService<>(dflRegistry.getTaskRegistry(), null);
+    taskMonitor        = new DataflowTaskMonitor();
     taskWatcherService = new DedicatedTaskWatcherService<>(dflRegistry.getTaskRegistry());
     taskWatcherService.addTaskMonitor(taskMonitor);
 
@@ -88,7 +88,7 @@ public class MasterService {
     
     mtMergerService  = new MTMergerService(dflRegistry);
     activityExecutor = new DataflowActivityExecutor();
-    workerMonitor = new DataflowWorkerMonitor(this);
+    workerMonitor    = new DataflowWorkerMonitor(this);
     logger.info("Finish init()");
   }
   
@@ -149,6 +149,7 @@ public class MasterService {
     mtMergerService.onDestroy();
     //finish
     dflRegistry.setDataflowStatus(DataflowLifecycleStatus.STOP);
+    dflRegistry.setHistory();
     System.out.println("MasterService: waitForTermination(), done!!!");
   }
   

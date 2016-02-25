@@ -90,6 +90,18 @@ public class ScribenginClient {
     return submit(dflRegistry, dflDescriptor);
   }
 
+  public boolean resume(String dataflowId) throws Exception {
+    String dataflowPath = DataflowRegistry.DATAFLOW_ALL_PATH + "/" + dataflowId;
+    DataflowRegistry dflRegistry = new DataflowRegistry(getRegistry(), dataflowPath) ;
+    DataflowLifecycleStatus status = dflRegistry.getDataflowStatus();
+    if(status.equalOrGreaterThan(DataflowLifecycleStatus.STOP)) {
+      DataflowDescriptor dflDescriptor = dflRegistry.getConfigRegistry().getDataflowDescriptor();
+      submit(dflRegistry, dflDescriptor);
+      return true;
+    }
+    return false;
+  }
+  
   public DataflowClient resume(String dataflowId, long timeout) throws Exception {
     String dataflowPath = DataflowRegistry.DATAFLOW_ALL_PATH + "/" + dataflowId;
     DataflowRegistry dflRegistry = new DataflowRegistry(getRegistry(), dataflowPath) ;
