@@ -47,8 +47,8 @@ public class AnalyticsUnitTest {
   
   @Test
   public void test() throws Exception {
-    int NUM_OF_ODYSSEY_EVENTS = 10000;
-    int NUM_OF_WEB_EVENTS     = 20000;
+    int NUM_OF_ODYSSEY_EVENTS = 1000;
+    int NUM_OF_WEB_EVENTS     = 5000;
     int ALL_EVENTS = NUM_OF_ODYSSEY_EVENTS + NUM_OF_WEB_EVENTS ;
     
     String[] odysseyGeneratorConfig = {

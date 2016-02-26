@@ -15,6 +15,9 @@ public class AnalyticsConfig {
   @Parameter(names = "--zk-connect", description="[host]:[port] of Zookeeper server")
   public String zkConnect = "zookeeper-1:2181";
   
+  @Parameter(names = "--es-addresses", description="Elasticsearch addresses, ex: elasticsearch-1:9300,elasticsearch-2:9300")
+  public String esAddresses = "elasticsearch-1:9300";
+  
   @Parameter(names = "--hadoop-master-connect", description="Hostname of HadoopMaster")
   public String hadoopMasterConnect = "hadoop-master";
 
@@ -50,4 +53,8 @@ public class AnalyticsConfig {
   
   @Parameter(names = "--dataflow-num-of-executor-per-worker", description="")
   public int    dataflowNumOfExecutorPerWorker = 7;
+  
+  @Parameter(names = "--dataflow-odyssey-output-index", description="")
+  public String dataflowOdysseyOutputIndex = "odyssey-event";
+  
 }

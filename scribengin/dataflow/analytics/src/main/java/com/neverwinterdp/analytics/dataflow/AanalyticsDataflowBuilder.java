@@ -1,6 +1,7 @@
 package com.neverwinterdp.analytics.dataflow;
 
 import com.neverwinterdp.analytics.AnalyticsConfig;
+import com.neverwinterdp.analytics.odyssey.Event;
 import com.neverwinterdp.analytics.odyssey.OdysseyEventStatisticOperator;
 import com.neverwinterdp.analytics.web.WebEvent;
 import com.neverwinterdp.analytics.web.WebEventJunkOperator;
@@ -17,6 +18,7 @@ import com.neverwinterdp.scribengin.dataflow.KafkaWireDataSetFactory;
 import com.neverwinterdp.scribengin.dataflow.Operator;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
+import com.neverwinterdp.storage.es.ESStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.storage.nulldev.NullDevStorageConfig;
 import com.neverwinterdp.util.JSONSerializer;
@@ -52,6 +54,10 @@ public class AanalyticsDataflowBuilder {
     
     DataSet<WebEvent> nullDevDs = dfl.createOutput(new NullDevStorageConfig());
     
+    ESStorageConfig esStorageConfig = 
+        new ESStorageConfig("odyssey.output", config.dataflowOdysseyOutputIndex, config.esAddresses, Event.class);
+    DataSet<WebEvent> esOdysseyOutputDs    = dfl.createOutput(esStorageConfig);
+    
     Operator<WebEvent, WebEvent> routerOp   = dfl.createOperator("router", RouterOperator.class);
     Operator<WebEvent, WebEvent> wStatisticOp  = dfl.createOperator("web.statistic", WebEventStatisticOperator.class);
     Operator<WebEvent, WebEvent> wJunkOp       = dfl.createOperator("web.junk", WebEventJunkOperator.class);
@@ -69,7 +75,7 @@ public class AanalyticsDataflowBuilder {
     wJunkOp.connect(nullDevDs);
     wStatisticOp.connect(nullDevDs);
     
-    odysseyStatisticOp.connect(nullDevDs);
+    odysseyStatisticOp.connect(esOdysseyOutputDs);
     return dfl;
   }
   
