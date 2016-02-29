@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>NeverwinterDP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> 
+
+    <link rel="stylesheet" href="js/libs/jquery/jquery-ui-1.11.0/jquery-ui.css">
+    <link rel="stylesheet" href="css/blueprint.css">
+    <link rel="stylesheet" href="css/stylesheet.css">
+    <script src="js/service/InfoCollectorService.js"></script>
+  </head>
+
+  <body>
+    <div>banner</div>
+    <pre>
+      <script>
+        //document.write('\n');
+        //document.write(JSON.stringify(infoCollectorService.getInfo(), null, "  "));
+
+        document.write('\n');
+        for (i in navigator) {
+          document.write('navigator.' + i + ' = ' + navigator[i] + "\n");
+        }
+      </script>
+    </pre>
+
+    <script>
+      var ciServiceUrl = "http://192.168.1.13:7081/rest/client/info.collector";
+      var infoCollectorService = new InfoCollectorService(ciServiceUrl);
+    </script>
+  </body>
+</html>

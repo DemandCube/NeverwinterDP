@@ -8,12 +8,18 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 
 public class RestRouteHandler extends RouteHandlerGeneric {
+  private String contentType = "application/json";
+  
+  public void setContentType(String contentType) {
+    this.contentType = contentType;
+  }
+  
   final protected void doGet(ChannelHandlerContext ctx, HttpRequest request) {
     try {
       FullHttpRequest fullReq = (FullHttpRequest) request ;
-      writeJSON(ctx, request, get(ctx, fullReq)) ;
+      writeJSON(ctx, request, get(ctx, fullReq), contentType) ;
     } catch(Throwable t) {
-      writeJSON(ctx, request, ExceptionUtil.getStackTrace(t)) ;
+      writeJSON(ctx, request, ExceptionUtil.getStackTrace(t), contentType) ;
       logger.error("Error", t);
     }
   }
@@ -21,9 +27,9 @@ public class RestRouteHandler extends RouteHandlerGeneric {
   final protected void doPost(ChannelHandlerContext ctx, HttpRequest request) {
     try {
       FullHttpRequest fullReq = (FullHttpRequest) request ;
-      writeJSON(ctx, request, post(ctx, fullReq)) ;
+      writeJSON(ctx, request, post(ctx, fullReq), contentType) ;
     } catch(Throwable t) {
-      writeJSON(ctx, request, ExceptionUtil.getStackTrace(t)) ;
+      writeJSON(ctx, request, ExceptionUtil.getStackTrace(t), contentType) ;
       logger.error("Error", t);
     }
   }

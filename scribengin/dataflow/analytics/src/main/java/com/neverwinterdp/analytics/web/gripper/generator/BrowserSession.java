@@ -1,4 +1,4 @@
-package com.neverwinterdp.analytics.web.generator;
+package com.neverwinterdp.analytics.web.gripper.generator;
 
 import java.net.ConnectException;
 import java.net.URISyntaxException;
@@ -8,22 +8,22 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.neverwinterdp.analytics.web.BrowserInfo;
 import com.neverwinterdp.analytics.web.WebEvent;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
+import com.neverwinterdp.netty.http.client.ClientInfo;
 
 public class BrowserSession {
   private String        username;
   private String        sessionId;
   private AtomicInteger idTracker = new AtomicInteger();
   
-  private BrowserInfo     browserInfo;
+  private ClientInfo      clientInfo;
   private List<SiteVisit> siteToVisits ;
   
-  public BrowserSession(String username, String sessionId, BrowserInfo bInfo) {
+  public BrowserSession(String username, String sessionId, ClientInfo cInfo) {
     this.username     = username;
     this.sessionId    = sessionId;
-    this.browserInfo  = bInfo;
+    this.clientInfo   = cInfo;
     this.siteToVisits = new ArrayList<>();
   }
   
@@ -49,15 +49,13 @@ public class BrowserSession {
     
     for(int i = 0; i < pages.size(); i++) {
       WebEvent wEvent = new WebEvent();
-      wEvent.setUsername(username);
-      wEvent.setSessionId(sessionId);
       wEvent.setEventId(sessionId + "-" + idTracker.incrementAndGet());
       wEvent.setTimestamp(System.currentTimeMillis());
       wEvent.setName("user-click");
       wEvent.setMethod("GET");
       wEvent.setUrl(pages.get(i));
-      wEvent.setBrowserInfo(browserInfo);
-      client.post("/webevent/" + dest, wEvent);
+      wEvent.setClientInfo(clientInfo);
+      client.post("/rest/webevent/" + dest, wEvent);
     }
     return pages.size();
   }

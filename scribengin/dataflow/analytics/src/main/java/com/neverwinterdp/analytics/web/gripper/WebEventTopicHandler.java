@@ -1,7 +1,5 @@
 package com.neverwinterdp.analytics.web.gripper;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.neverwinterdp.analytics.web.WebEvent;
 import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
@@ -14,13 +12,11 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
 public class WebEventTopicHandler extends RestRouteHandler {
-  static AtomicInteger counter = new AtomicInteger();
-  
   private AckKafkaWriter kafkaWriter;
   
   public WebEventTopicHandler(String zkConnects) throws Exception {
-    KafkaTool kafkaClient = new KafkaTool("KafkaClient", zkConnects);
-    String kafkaConnects = kafkaClient.getKafkaBrokerList();
+    KafkaTool kafkaTool = new KafkaTool("KafkaClient", zkConnects);
+    String kafkaConnects = kafkaTool.getKafkaBrokerList();
     kafkaWriter = new AckKafkaWriter("KafkaLogWriter", kafkaConnects) ;
   }
   

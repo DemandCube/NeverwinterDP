@@ -14,6 +14,9 @@ public class GripperServer {
   @Parameter(names = "--kafka-zk-connects", description = "Kafka zookeeper connects")
   private String kafkaZKConnects = "127.0.0.1:2181";
   
+  @Parameter(names = "--kafka-topic", description = "Kafka zookeeper connects")
+  private String kafkaTopic = "web.input";
+  
   private HttpServer server ;
   
   public GripperServer() { }
@@ -40,7 +43,8 @@ public class GripperServer {
   public void start() throws Exception {
     server = new HttpServer();
     server.setPort(port).setNumberOfWorkers(numOfWorkers);
-    server.add("/webevent/:topic", new WebEventTopicHandler(kafkaZKConnects));
+    server.add("/rest/webevent/:topic", new WebEventTopicHandler(kafkaZKConnects));
+    server.add("/rest/client/info.collector", new ClientInfoCollectorHandlerExt(kafkaZKConnects, kafkaTopic));
     server.startAsDeamon();
   }
   

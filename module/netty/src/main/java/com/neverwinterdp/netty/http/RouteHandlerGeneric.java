@@ -79,9 +79,13 @@ public class RouteHandlerGeneric implements RouteHandler {
   }
   
   protected <T> void writeJSON(ChannelHandlerContext ctx, HttpRequest req, T obj) {
+    writeJSON(ctx, req, obj, "application/json");
+  }
+  
+  protected <T> void writeJSON(ChannelHandlerContext ctx, HttpRequest req, T obj, String contentType) {
     byte[] data = jsonSerializer.toBytes(obj) ;
     ByteBuf content = Unpooled.wrappedBuffer(data) ;
-    writeContent(ctx, req, content, "application/json") ;
+    writeContent(ctx, req, content, contentType) ;
   }
   
   protected <T> void writeBytes(ChannelHandlerContext ctx, HttpRequest req, byte[] bytes) {

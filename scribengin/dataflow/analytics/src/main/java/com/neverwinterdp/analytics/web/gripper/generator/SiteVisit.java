@@ -1,4 +1,4 @@
-package com.neverwinterdp.analytics.web.generator;
+package com.neverwinterdp.analytics.web.gripper.generator;
 
 import java.util.ArrayList;
 import java.util.Collections;

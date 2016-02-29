@@ -1,10 +1,10 @@
-package com.neverwinterdp.analytics.web.generator;
+package com.neverwinterdp.analytics.web.gripper.generator;
 
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.beust.jcommander.Parameter;
-import com.neverwinterdp.analytics.web.BrowserInfo;
+import com.neverwinterdp.netty.http.client.ClientInfo;
 
 public class BrowserSessionGenerator {
   @Parameter(names = "--num-of-users", description = "num of users")
@@ -23,7 +23,6 @@ public class BrowserSessionGenerator {
   private int numOfPages = 10000;
   
   private String[]      availUsers;
-  private BrowserInfo[] availBrowsers;
   private String[]      availSites;
   private AtomicInteger sessionIdTracker = new AtomicInteger();
   private Random        random = new Random(System.nanoTime());
@@ -59,16 +58,17 @@ public class BrowserSessionGenerator {
       availSites[i] = "www.website-" + (i + 1) + ".com";
     }
     
-    availBrowsers = Browsers.getAll();
     numOfAssignedPages = 0;
   }
   
   synchronized public BrowserSession nextBrowserSession() {
     if(numOfAssignedPages >= numOfPages) return null;
     String user =  nextRandomUser();
-    String sessionId = user + "-session-" + sessionIdTracker.incrementAndGet(); 
-    BrowserInfo browser = nextRandomBrowser();
-    BrowserSession session = new BrowserSession(user, sessionId, browser);
+    String sessionId = "generated-" + user + "-session-" + sessionIdTracker.incrementAndGet(); 
+    ClientInfo clientInfo = ClientInfos.nextRandomClientInfo();
+    clientInfo.user.userId = user;
+    clientInfo.user.visitorId = sessionId;
+    BrowserSession session = new BrowserSession(user, sessionId, clientInfo);
     int numOfSitePerSession = random.nextInt(numOfSites) + 1;
     for(int i = 0; i < numOfSitePerSession; i++) {
       String selSite = nextRandomSite();
@@ -98,10 +98,5 @@ public class BrowserSessionGenerator {
   String nextRandomSite() {
     int sel = random.nextInt(availSites.length);
     return availSites[sel];
-  }
-  
-  BrowserInfo nextRandomBrowser() {
-    int sel = random.nextInt(availBrowsers.length);
-    return availBrowsers[sel];
   }
 }
