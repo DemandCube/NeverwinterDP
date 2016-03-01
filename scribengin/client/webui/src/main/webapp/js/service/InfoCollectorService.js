@@ -104,7 +104,7 @@ function InfoCollectorService(serviceUrl) {
     document.getElementsByTagName('body')[0].appendChild(ele);
   };
 
-  var options = { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 };
+  var options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
 
   function onGeoUpdateSuccess(pos) {
     var crd = pos.coords;
