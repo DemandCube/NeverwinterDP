@@ -1,6 +1,7 @@
 package com.neverwinterdp.analytics.web.stat;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -13,11 +14,11 @@ public class WebPageStat {
   @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp;
   
-  private String host;
-  private String pagePath;
-  
-  private int    hitCount;
-  
+  private String          host;
+  private String          pagePath;
+  private int             hitCount;
+  private HashSet<String> tags = new HashSet<String>();
+
   public WebPageStat() { }
   
   public WebPageStat(Date timestamp, UrlParser urlParser) {
@@ -42,8 +43,23 @@ public class WebPageStat {
   public int getHitCount() { return hitCount; }
   public void setHitCount(int hitCount) { this.hitCount = hitCount; }
 
+  public String[] getTags() { return tags.toArray(new String[tags.size()]); }
+
+  public void setTags(String[] tags) {
+    for(String sel : tags) this.tags.add(sel);
+  }
+
   public void log(long periodTimestamp, UrlParser urlParser, WebEvent webEvent) {
     hitCount++;
+    if(urlParser.getHost().startsWith("www.website-")) {
+      addTag("source:generator");
+    } else {
+      addTag("source:user");
+    }
+  }
+  
+  public void addTag(String tag) {
+    tags.add(tag);
   }
   
   static public String getFormattedText(List<WebPageStat> holder) {
