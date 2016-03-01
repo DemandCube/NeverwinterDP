@@ -19,8 +19,14 @@ public class BrowserSessionGenerator {
   @Parameter(names = "--max-page-visit-per-site", description = "num of users")
   private int maxPageVisitPerSite = 30;
   
-  @Parameter(names = "--num-of-pages", description = "num of users")
+  @Parameter(names = "--num-of-pages", description = "num of pages")
   private int numOfPages = 10000;
+  
+  @Parameter(names = "--max-visit-time", description = "max visit time")
+  private int maxVisitTime = 0;
+  
+  @Parameter(names = "--min-visit-time", description = "min visit time")
+  private int minVisitTime = 0;
   
   private String[]      availUsers;
   private String[]      availSites;
@@ -68,7 +74,7 @@ public class BrowserSessionGenerator {
     ClientInfo clientInfo = ClientInfos.nextRandomClientInfo();
     clientInfo.user.userId = user;
     clientInfo.user.visitorId = sessionId;
-    BrowserSession session = new BrowserSession(user, sessionId, clientInfo);
+    BrowserSession session = new BrowserSession(user, sessionId, clientInfo, maxVisitTime, minVisitTime);
     int numOfSitePerSession = random.nextInt(numOfSites) + 1;
     for(int i = 0; i < numOfSitePerSession; i++) {
       String selSite = nextRandomSite();

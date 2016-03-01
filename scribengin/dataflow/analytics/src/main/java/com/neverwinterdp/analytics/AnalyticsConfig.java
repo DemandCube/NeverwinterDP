@@ -30,8 +30,18 @@ public class AnalyticsConfig {
   @Parameter(names = "--generator-web-input-topic", description="")
   public String generatorWebInputTopic = "web.input";
   
+  @Parameter(names = "--generator-web-num-of-threads", description="")
+  public int generatorWebNumOfThreads = 1;
+  
   @Parameter(names = "--generator-web-num-of-events", description="")
   public int generatorWebNumOfEvents = 100000;
+  
+  @Parameter(names = "--generator-web-max-visit-time", description="Max Visit Time")
+  public int generatorWebMaxVisitTime = 0;
+  
+  @Parameter(names = "--generator-web-min-visit-time", description="Max Visit Time")
+  public int generatorWebMinVisitTime = 0;
+  
   
   @Parameter(names = "--dataflow-id", description="")
   public String dataflowId         = "analytics";

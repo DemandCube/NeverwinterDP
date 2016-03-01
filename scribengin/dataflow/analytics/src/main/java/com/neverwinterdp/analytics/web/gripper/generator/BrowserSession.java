@@ -17,13 +17,19 @@ public class BrowserSession {
   private String        sessionId;
   private AtomicInteger idTracker = new AtomicInteger();
   
+  
   private ClientInfo      clientInfo;
   private List<SiteVisit> siteToVisits ;
-  
-  public BrowserSession(String username, String sessionId, ClientInfo cInfo) {
+  private int maxVisitTime = 0;
+  private int minVisitTime = 0;
+  private Random rand      = new Random();
+
+  public BrowserSession(String username, String sessionId, ClientInfo cInfo, int maxVisitTime, int minVisitTime) {
     this.username     = username;
     this.sessionId    = sessionId;
     this.clientInfo   = cInfo;
+    this.maxVisitTime = maxVisitTime;
+    this.minVisitTime = minVisitTime;
     this.siteToVisits = new ArrayList<>();
   }
   
@@ -55,6 +61,11 @@ public class BrowserSession {
       clientInfo.webpage.url = pages.get(i);
       wEvent.setClientInfo(clientInfo);
       client.post("/rest/webevent/" + dest, wEvent);
+      if(maxVisitTime > 0) {
+        int visitTime = rand.nextInt(maxVisitTime);
+        if(visitTime < minVisitTime) visitTime = minVisitTime;
+        Thread.sleep(visitTime);
+      }
     }
     return pages.size();
   }

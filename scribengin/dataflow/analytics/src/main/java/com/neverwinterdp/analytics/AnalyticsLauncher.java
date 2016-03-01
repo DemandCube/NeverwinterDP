@@ -55,7 +55,11 @@ public class AnalyticsLauncher {
     }
     String[] webEventGeneratorConfig = {
       "--gripper-server-host", "127.0.0.1", "--gripper-server-port", "7081",
-      "--num-of-pages", Integer.toString(config.generatorWebNumOfEvents), "--destination-topic", config.generatorWebInputTopic
+      "--num-of-threads", Integer.toString(config.generatorWebNumOfThreads), 
+      "--num-of-pages", Integer.toString(config.generatorWebNumOfEvents), 
+      "--max-visit-time", Integer.toString(config.generatorWebMaxVisitTime),
+      "--min-visit-time", Integer.toString(config.generatorWebMinVisitTime),
+      "--destination-topic", config.generatorWebInputTopic
     };
     WebEventGeneratorServer wGeneratorServer = new WebEventGeneratorServer(webEventGeneratorConfig);
     wGeneratorServer.start();

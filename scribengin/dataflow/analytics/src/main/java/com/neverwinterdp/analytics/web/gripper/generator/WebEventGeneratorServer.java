@@ -34,6 +34,7 @@ public class WebEventGeneratorServer {
   @ParametersDelegate
   private BrowserSessionGenerator browserSessionGenerator = new BrowserSessionGenerator();
   
+  @Parameter(names = "--num-of-threads", description = "")
   private int numOfThreads = 1;
 
   private ExecutorService executorService;
