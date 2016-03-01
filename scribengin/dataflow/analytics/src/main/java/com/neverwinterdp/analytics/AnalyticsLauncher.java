@@ -62,13 +62,6 @@ public class AnalyticsLauncher {
       
     AanalyticsDataflowBuilder dflBuilder = new AanalyticsDataflowBuilder(config);
     dflBuilder.submitDataflow(shell);
-    dflBuilder.runMonitor(shell, config.generatorOdysseyNumOfEvents + config.generatorWebNumOfEvents, true);
-    
-    if(!config.waitForInput) {
-      System.exit(0);
-    } else {
-      System.out.println("Wait for more input. Press Ctl + C to terminate");
-      Thread.currentThread().join();
-    }
+    dflBuilder.runMonitor(shell, config.generatorOdysseyNumOfEvents + config.generatorWebNumOfEvents, !config.waitForInput);
   }
 }
