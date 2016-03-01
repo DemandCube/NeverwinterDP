@@ -48,7 +48,11 @@ public class WebPageStat {
   public void setTags(String[] tags) {
     for(String sel : tags) this.tags.add(sel);
   }
-
+  
+  public void addTag(String tag) {
+    tags.add(tag);
+  }
+  
   public void log(long periodTimestamp, UrlParser urlParser, WebEvent webEvent) {
     hitCount++;
     if(urlParser.getHost().startsWith("www.website-")) {
@@ -56,10 +60,6 @@ public class WebPageStat {
     } else {
       addTag("source:user");
     }
-  }
-  
-  public void addTag(String tag) {
-    tags.add(tag);
   }
   
   static public String getFormattedText(List<WebPageStat> holder) {
