@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.neverwinterdp.analytics.web.stat.WebPageStat;
 import com.neverwinterdp.analytics.web.stat.WebPageStatCollector;
+import com.neverwinterdp.analytics.web.stat.VisitorStat;
+import com.neverwinterdp.analytics.web.stat.VisitorStatCollector;
 import com.neverwinterdp.es.ESClient;
 import com.neverwinterdp.es.ESObjectClient;
 import com.neverwinterdp.message.Message;
@@ -16,13 +18,21 @@ import com.neverwinterdp.util.UrlParser;
 public class WebEventStatisticOperator extends DataStreamOperator {
   private String[]           connect = { "elasticsearch-1" };
   private ESObjectClient<WebPageStat> esWebPageStatClient;
+  private ESObjectClient<VisitorStat> esVisitorStatClient;
   
-  private WebPageStatCollector webPageCollector = new WebPageStatCollector();
+  private WebPageStatCollector webPageCollector     = new WebPageStatCollector();
+  private VisitorStatCollector visitorStatCollector = new VisitorStatCollector();
   
   public void onInit(DataStreamOperatorContext ctx) throws Exception {
     ESClient esClient = new ESClient(connect);
     synchronized(getClass()) {
       esWebPageStatClient = new ESObjectClient<WebPageStat>(esClient, "webpage-stat", WebPageStat.class) ;
+      esWebPageStatClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
+      if(!esWebPageStatClient.isCreated()) {
+        esWebPageStatClient.createIndex();
+      }
+      
+      esVisitorStatClient = new ESObjectClient<VisitorStat>(esClient, "visitor-stat", VisitorStat.class) ;
       esWebPageStatClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
       if(!esWebPageStatClient.isCreated()) {
         esWebPageStatClient.createIndex();
@@ -35,7 +45,12 @@ public class WebEventStatisticOperator extends DataStreamOperator {
     for(int i = 0; i < webPageStats.size(); i++) {
       WebPageStat wpStat = webPageStats.get(i);
       esWebPageStatClient.put(wpStat, wpStat.uniqueId());
-      //System.err.println("commit WerbPageStat " + wpStat.uniqueId());
+    }
+    
+    List<VisitorStat> visitorStats = visitorStatCollector.takeVisitorStats();
+    for(int i = 0; i < visitorStats.size(); i++) {
+      VisitorStat visitorStat = visitorStats.get(i);
+      esVisitorStatClient.put(visitorStat, visitorStat.uniqueId());
     }
   }
   
@@ -52,7 +67,7 @@ public class WebEventStatisticOperator extends DataStreamOperator {
     UrlParser urlParser = new UrlParser(webEvent.getClientInfo().webpage.url);
     //System.err.println("host = " + urlParser.getHost() + ", page = " + urlParser.getPath());
     webPageCollector.log(periodTimestamp, urlParser, webEvent);
-    
+    visitorStatCollector.log(periodTimestamp, urlParser.getHost(), webEvent);
     ctx.write(record);
   }
   

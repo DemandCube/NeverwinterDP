@@ -42,7 +42,6 @@ public class AnalyticsConfig {
   @Parameter(names = "--generator-web-min-visit-time", description="Max Visit Time")
   public int generatorWebMinVisitTime = 0;
   
-  
   @Parameter(names = "--dataflow-id", description="")
   public String dataflowId         = "analytics";
   
