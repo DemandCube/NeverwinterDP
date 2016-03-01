@@ -65,8 +65,8 @@ public class WebuiIntegrationTest {
   
   @Test
   public void test() throws Exception {
-    int NUM_OF_ODYSSEY_EVENTS = 1000;
-    int NUM_OF_WEB_EVENTS     = 5000;
+    int NUM_OF_ODYSSEY_EVENTS = 100;
+    int NUM_OF_WEB_EVENTS     = 200;
     int ALL_EVENTS = NUM_OF_ODYSSEY_EVENTS + NUM_OF_WEB_EVENTS ;
     
     String[] odysseyGeneratorConfig = {

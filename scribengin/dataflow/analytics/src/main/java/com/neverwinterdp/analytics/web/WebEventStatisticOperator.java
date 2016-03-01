@@ -47,12 +47,14 @@ public class WebEventStatisticOperator extends DataStreamOperator {
     for(int i = 0; i < webPageStats.size(); i++) {
       WebPageStat wpStat = webPageStats.get(i);
       esWebPageStatClient.put(wpStat, wpStat.uniqueId());
+      //System.err.println("commit WerbPageStat " + wpStat.uniqueId());
     }
     
     List<WebSiteStat> webSiteStats = webSiteCollector.takeWebSiteStat();
     for(int i = 0; i < webSiteStats.size(); i++) {
       WebSiteStat wsStat = webSiteStats.get(i);
       esWebSiteStatClient.put(wsStat, wsStat.uniqueId());
+      //System.err.println("commit WerbSiteStat " + wsStat.uniqueId());
     }
   }
   
@@ -67,6 +69,7 @@ public class WebEventStatisticOperator extends DataStreamOperator {
     
     long periodTimestamp = cal.getTimeInMillis();
     UrlParser urlParser = new UrlParser(webEvent.getClientInfo().webpage.url);
+    //System.err.println("host = " + urlParser.getHost() + ", page = " + urlParser.getPath());
     webPageCollector.log(periodTimestamp, urlParser, webEvent);
     webSiteCollector.log(periodTimestamp, urlParser, webEvent);
     

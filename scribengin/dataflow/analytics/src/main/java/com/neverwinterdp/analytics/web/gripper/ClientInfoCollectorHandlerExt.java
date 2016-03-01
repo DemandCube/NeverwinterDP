@@ -1,5 +1,8 @@
 package com.neverwinterdp.analytics.web.gripper;
 
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.neverwinterdp.analytics.web.WebEvent;
 import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
@@ -9,6 +12,9 @@ import com.neverwinterdp.util.ExceptionUtil;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class ClientInfoCollectorHandlerExt extends ClientInfoCollectorHandler {
+  private String     serverId = UUID.randomUUID().toString();
+  private AtomicLong idTracker = new AtomicLong();
+  
   private String kafkaTopic;
   private AckKafkaWriter kafkaWriter;
   
@@ -23,6 +29,8 @@ public class ClientInfoCollectorHandlerExt extends ClientInfoCollectorHandler {
   protected GripperAck onClientInfo(ClientInfo clientInfo) {
     System.err.println("data: " + JSONSerializer.INSTANCE.toString(clientInfo));
     WebEvent webEvent = new WebEvent();
+    webEvent.setTimestamp(System.currentTimeMillis());
+    webEvent.setEventId(serverId + "-" + idTracker.incrementAndGet());
     webEvent.setClientInfo(clientInfo);
     try {
       kafkaWriter.send(kafkaTopic, webEvent, 60000);

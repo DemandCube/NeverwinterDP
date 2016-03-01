@@ -3,6 +3,8 @@ package com.neverwinterdp.analytics.web.stat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neverwinterdp.analytics.web.WebEvent;
@@ -11,6 +13,9 @@ import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
 public class WebSiteStat {
+  static public String     SEED_ID = UUID.randomUUID().toString();
+  static public AtomicLong ID_TRACKER = new AtomicLong();
+  
   @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp;
   
@@ -25,9 +30,7 @@ public class WebSiteStat {
     this.host      = urlParser.getHost();
   }
   
-  public String uniqueId() {
-    return host + "#" + DateUtil.asCompactDateTime(timestamp);
-  }
+  public String uniqueId() { return SEED_ID + "-" +ID_TRACKER.incrementAndGet(); }
   
   public Date getTimestamp() { return timestamp; }
   public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
