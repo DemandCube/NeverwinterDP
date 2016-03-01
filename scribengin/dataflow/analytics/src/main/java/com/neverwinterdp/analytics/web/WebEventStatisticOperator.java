@@ -33,9 +33,9 @@ public class WebEventStatisticOperator extends DataStreamOperator {
       }
       
       esVisitorStatClient = new ESObjectClient<VisitorStat>(esClient, "visitor-stat", VisitorStat.class) ;
-      esWebPageStatClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
-      if(!esWebPageStatClient.isCreated()) {
-        esWebPageStatClient.createIndex();
+      esVisitorStatClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
+      if(!esVisitorStatClient.isCreated()) {
+        esVisitorStatClient.createIndex();
       }
     }
   }
