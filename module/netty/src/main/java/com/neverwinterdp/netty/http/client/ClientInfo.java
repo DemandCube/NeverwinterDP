@@ -2,6 +2,7 @@ package com.neverwinterdp.netty.http.client;
 
 public class ClientInfo {
   public User        user;
+  public WebPage     webpage;
   public Navigator   navigator;
   public Screen      screen;
   public Window      window;
@@ -11,6 +12,7 @@ public class ClientInfo {
   
   public ClientInfo(boolean init) {
     user        = new User();
+    webpage     = new WebPage();
     navigator   = new Navigator();
     screen      = new Screen();
     window      = new Window();
@@ -21,6 +23,11 @@ public class ClientInfo {
     public String userId;
     public String visitorId;
     public String ipAddress;
+  }
+  
+  static public class WebPage {
+    public String url;
+    public String referralUrl;
   }
   
   static public class Navigator {

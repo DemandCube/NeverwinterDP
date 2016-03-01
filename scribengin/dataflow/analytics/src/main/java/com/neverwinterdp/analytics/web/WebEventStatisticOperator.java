@@ -66,7 +66,7 @@ public class WebEventStatisticOperator extends DataStreamOperator {
     cal.set(Calendar.MILLISECOND, 0);
     
     long periodTimestamp = cal.getTimeInMillis();
-    UrlParser urlParser = new UrlParser(webEvent.getUrl());
+    UrlParser urlParser = new UrlParser(webEvent.getClientInfo().webpage.url);
     webPageCollector.log(periodTimestamp, urlParser, webEvent);
     webSiteCollector.log(periodTimestamp, urlParser, webEvent);
     

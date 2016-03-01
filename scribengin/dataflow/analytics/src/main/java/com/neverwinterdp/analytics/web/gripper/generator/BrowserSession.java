@@ -52,8 +52,7 @@ public class BrowserSession {
       wEvent.setEventId(sessionId + "-" + idTracker.incrementAndGet());
       wEvent.setTimestamp(System.currentTimeMillis());
       wEvent.setName("user-click");
-      wEvent.setMethod("GET");
-      wEvent.setUrl(pages.get(i));
+      wEvent.getClientInfo().webpage.url = pages.get(i);
       wEvent.setClientInfo(clientInfo);
       client.post("/rest/webevent/" + dest, wEvent);
     }

@@ -8,9 +8,6 @@ public class WebEvent {
   private String name;
 
   private ClientInfo  clientInfo;
-  private String      method;
-  private String      url ;
-  private String      referralUrl;
   
   public WebEvent() { }
 
@@ -25,13 +22,4 @@ public class WebEvent {
 
   public ClientInfo getClientInfo() { return clientInfo; }
   public void setClientInfo(ClientInfo info) { this.clientInfo = info; }
-
-  public String getMethod() { return method; }
-  public void setMethod(String method) { this.method = method; }
-
-  public String getUrl() { return url; }
-  public void setUrl(String url) { this.url = url; }
-
-  public String getReferralUrl() { return referralUrl; }
-  public void setReferralUrl(String referralUrl) { this.referralUrl = referralUrl; }
 }

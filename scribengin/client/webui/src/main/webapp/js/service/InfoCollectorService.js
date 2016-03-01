@@ -63,6 +63,10 @@ function InfoCollectorService(serviceUrl) {
 
   var info = {
     user: visitCookie.getUserInfo(),
+    
+    webpage: {
+      url: window.location.href 
+    },
 
     navigator: {
       platform:      navigator.platform,
