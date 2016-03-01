@@ -36,7 +36,7 @@ public class AnalyticsLauncher {
     shell.attribute(HadoopProperties.class, hadoopProps);
 
     String[] gripperServerConfig = {
-      "--port", "7171", "--num-of-workers", "3", "--kafka-zk-connects", config.zkConnect
+      "--num-of-workers", "3", "--kafka-zk-connects", config.zkConnect
     };
     GripperServer  server = new GripperServer(gripperServerConfig);
     server.start();
