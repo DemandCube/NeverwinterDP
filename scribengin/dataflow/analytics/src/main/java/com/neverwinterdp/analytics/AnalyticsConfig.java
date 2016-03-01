@@ -57,4 +57,6 @@ public class AnalyticsConfig {
   @Parameter(names = "--dataflow-odyssey-output-index", description="")
   public String dataflowOdysseyOutputIndex = "odyssey-event";
   
+  @Parameter(names = "--wait-for-input", description="")
+  public boolean waitForInput = false;
 }
