@@ -25,10 +25,11 @@ public class WebPageStatCollector {
   }
   
   public void log(long periodTimestamp, UrlParser urlParser, WebEvent webEvent) {
-    PeriodWebPageStatCollector select = holder.get(urlParser.getUrl());
+    String url = urlParser.getUrl();
+    PeriodWebPageStatCollector select = holder.get(url);
     if(select == null) {
-      select = new PeriodWebPageStatCollector(urlParser.getUrl());
-      holder.put(select.pageUrl, select);
+      select = new PeriodWebPageStatCollector(url);
+      holder.put(url, select);
     }
     select.log(periodTimestamp, urlParser, webEvent);
   }
@@ -51,10 +52,11 @@ public class WebPageStatCollector {
     }
     
     public void log(long periodTimestamp, UrlParser urlParser, WebEvent webEvent) {
-      WebPageStat wpStat = holder.get(periodTimestamp);
+      Long key = new Long(periodTimestamp);
+      WebPageStat wpStat = holder.get(key);
       if(wpStat == null) {
         wpStat = new WebPageStat(new Date(periodTimestamp), urlParser);
-        holder.put(periodTimestamp, wpStat);
+        holder.put(key, wpStat);
       }
       wpStat.log(periodTimestamp, urlParser, webEvent);
     }

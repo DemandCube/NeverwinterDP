@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.neverwinterdp.analytics.web.stat.WebPageStat;
 import com.neverwinterdp.analytics.web.stat.WebPageStatCollector;
+import com.neverwinterdp.analytics.web.stat.SpentTimeStat;
+import com.neverwinterdp.analytics.web.stat.SpentTimeStatCollector;
 import com.neverwinterdp.analytics.web.stat.VisitorStat;
 import com.neverwinterdp.analytics.web.stat.VisitorStatCollector;
 import com.neverwinterdp.es.ESClient;
@@ -17,12 +19,15 @@ import com.neverwinterdp.util.UrlParser;
 
 public class WebEventStatisticOperator extends DataStreamOperator {
   private String[]           connect = { "elasticsearch-1" };
-  private ESObjectClient<WebPageStat> esWebPageStatClient;
-  private ESObjectClient<VisitorStat> esVisitorStatClient;
   
-  private WebPageStatCollector webPageCollector     = new WebPageStatCollector();
-  private VisitorStatCollector visitorStatCollector = new VisitorStatCollector();
-  
+  private ESObjectClient<WebPageStat>   esWebPageStatClient;
+  private ESObjectClient<VisitorStat>   esVisitorStatClient;
+  private ESObjectClient<SpentTimeStat> esSpentTimeStatClient;
+
+  private WebPageStatCollector   webPageCollector       = new WebPageStatCollector();
+  private VisitorStatCollector   visitorStatCollector   = new VisitorStatCollector();
+  private SpentTimeStatCollector spentTimeStatCollector = new SpentTimeStatCollector();
+
   public void onInit(DataStreamOperatorContext ctx) throws Exception {
     ESClient esClient = new ESClient(connect);
     synchronized(getClass()) {
@@ -32,10 +37,16 @@ public class WebEventStatisticOperator extends DataStreamOperator {
         esWebPageStatClient.createIndex();
       }
       
-      esVisitorStatClient = new ESObjectClient<VisitorStat>(esClient, "visitor-stat", VisitorStat.class) ;
+      esVisitorStatClient = new ESObjectClient<VisitorStat>(esClient, "webpage-visitor-stat", VisitorStat.class) ;
       esVisitorStatClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
       if(!esVisitorStatClient.isCreated()) {
         esVisitorStatClient.createIndex();
+      }
+      
+      esSpentTimeStatClient = new ESObjectClient<SpentTimeStat>(esClient, "webpage-spent-time-stat", SpentTimeStat.class) ;
+      esSpentTimeStatClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
+      if(!esSpentTimeStatClient.isCreated()) {
+        esSpentTimeStatClient.createIndex();
       }
     }
   }
@@ -51,6 +62,12 @@ public class WebEventStatisticOperator extends DataStreamOperator {
     for(int i = 0; i < visitorStats.size(); i++) {
       VisitorStat visitorStat = visitorStats.get(i);
       esVisitorStatClient.put(visitorStat, visitorStat.uniqueId());
+    }
+    
+    List<SpentTimeStat> spentTimeStats = spentTimeStatCollector.takeSpentTimeStats();
+    for(int i = 0; i < spentTimeStats.size(); i++) {
+      SpentTimeStat spentTimeStat = spentTimeStats.get(i);
+      esSpentTimeStatClient.put(spentTimeStat, spentTimeStat.uniqueId());
     }
   }
   
@@ -68,8 +85,7 @@ public class WebEventStatisticOperator extends DataStreamOperator {
     //System.err.println("host = " + urlParser.getHost() + ", page = " + urlParser.getPath());
     webPageCollector.log(periodTimestamp, urlParser, webEvent);
     visitorStatCollector.log(periodTimestamp, urlParser.getHost(), webEvent);
+    spentTimeStatCollector.log(periodTimestamp, urlParser.getHost(), webEvent);
     ctx.write(record);
   }
-  
-  
 }

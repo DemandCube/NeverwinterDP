@@ -23,6 +23,7 @@ public class ClientInfo {
     public String userId;
     public String visitorId;
     public String ipAddress;
+    public long   spentTime;
   }
   
   static public class WebPage {

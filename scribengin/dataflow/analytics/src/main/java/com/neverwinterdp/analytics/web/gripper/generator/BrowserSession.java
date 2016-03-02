@@ -54,13 +54,8 @@ public class BrowserSession {
     }
     
     for(int i = 0; i < pages.size(); i++) {
-      WebEvent wEvent = new WebEvent();
-      wEvent.setEventId(sessionId + "-" + idTracker.incrementAndGet());
-      wEvent.setTimestamp(System.currentTimeMillis());
-      wEvent.setName("user-click");
       clientInfo.webpage.url = pages.get(i);
-      wEvent.setClientInfo(clientInfo);
-      client.post("/rest/webevent/" + dest, wEvent);
+      client.post(dest, clientInfo);
       if(maxVisitTime > 0) {
         int visitTime = rand.nextInt(maxVisitTime);
         if(visitTime < minVisitTime) visitTime = minVisitTime;

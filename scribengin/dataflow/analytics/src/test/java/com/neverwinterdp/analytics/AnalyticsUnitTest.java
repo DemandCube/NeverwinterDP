@@ -48,7 +48,7 @@ public class AnalyticsUnitTest {
   @Test
   public void test() throws Exception {
     int NUM_OF_ODYSSEY_EVENTS = 1000;
-    int NUM_OF_WEB_EVENTS     = 5000;
+    int NUM_OF_WEB_EVENTS     = 1000;
     int ALL_EVENTS = NUM_OF_ODYSSEY_EVENTS + NUM_OF_WEB_EVENTS ;
     
     String[] odysseyGeneratorConfig = {
@@ -59,7 +59,8 @@ public class AnalyticsUnitTest {
     odysseyEventGeneratorServer.start();
     
     String[] webEventGeneratorConfig = {
-      "--num-of-pages", Integer.toString(NUM_OF_WEB_EVENTS)
+      "--num-of-pages", Integer.toString(NUM_OF_WEB_EVENTS),
+      "--num-of-threads", "5", "--max-visit-time", "50", "--min-visit-time", "0"
     };
     WebEventGeneratorServer wGeneratorServer = new WebEventGeneratorServer(webEventGeneratorConfig);
     wGeneratorServer.start();

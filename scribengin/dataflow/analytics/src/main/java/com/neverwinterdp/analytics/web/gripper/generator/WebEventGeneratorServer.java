@@ -73,7 +73,7 @@ public class WebEventGeneratorServer {
       BrowserSession session = null;
       int visitPageCount = 0 ;
       while((session = browserSessionGenerator.nextBrowserSession()) != null) {
-        visitPageCount += session.sendWebEvent(client, destinationTopic);
+        visitPageCount += session.sendWebEvent(client, "/rest/client/info.collector");
         client.flush();
       }
       client.close();

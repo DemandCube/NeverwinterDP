@@ -43,7 +43,7 @@ public class GripperServer {
   public void start() throws Exception {
     server = new HttpServer();
     server.setPort(port).setNumberOfWorkers(numOfWorkers);
-    server.add("/rest/webevent/:topic", new WebEventTopicHandler(kafkaZKConnects));
+    //server.add("/rest/webevent/:topic", new WebEventTopicHandler(kafkaZKConnects));
     server.add("/rest/client/info.collector", new ClientInfoCollectorHandlerExt(kafkaZKConnects, kafkaTopic));
     server.startAsDeamon();
   }
