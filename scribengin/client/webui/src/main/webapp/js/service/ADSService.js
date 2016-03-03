@@ -64,8 +64,9 @@ function ADSService(serviceUrl) {
 
   this.onClickADS = function(adUrl) {
     var adsEvent = {
-      visitorId: this.visitorId,
-      adUrl: adUrl
+      visitorId:  this.visitorId,
+      adUrl:      adUrl,
+      webpageUrl: window.location.href 
     };
 
     var url = serviceUrl + "?jsonp=" + encodeURIComponent(JSON.stringify(adsEvent));

@@ -20,12 +20,6 @@ public class Message {
     this.type = MessageType.DATA;
   }
   
-  public Message(StorageInstruction ins) {
-    this.key = "instruction" ;
-    this.data = JSONSerializer.INSTANCE.toBytes(ins);
-    this.type = MessageType.INSTRUCTION;
-  }
-  
   public String getKey() { return key; }
   public void setKey(String key) { this.key = key; }
   
