@@ -35,7 +35,7 @@ public class ClientInfoCollectorHandlerExt extends ClientInfoCollectorHandler {
   }
   
   protected GripperAck onClientInfo(ClientInfo clientInfo) {
-    System.err.println("Client Info: " + JSONSerializer.INSTANCE.toString(clientInfo));
+    //System.err.println("Client Info: " + JSONSerializer.INSTANCE.toString(clientInfo));
     WebEvent webEvent = new WebEvent();
     webEvent.setTimestamp(System.currentTimeMillis());
     webEvent.setEventId(seedId + "-" + idTracker.incrementAndGet());
