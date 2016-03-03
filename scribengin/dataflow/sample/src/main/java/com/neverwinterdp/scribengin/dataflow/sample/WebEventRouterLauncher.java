@@ -48,8 +48,8 @@ public class WebEventRouterLauncher {
     );
   }
   
-  public Dataflow<WebEvent, WebEvent> buildDataflow() {
-    Dataflow<WebEvent, WebEvent> dfl = new Dataflow<>(config.dataflowId);
+  public Dataflow buildDataflow() {
+    Dataflow dfl = new Dataflow(config.dataflowId);
     dfl.
       setDFSAppHome(config.dfsAppHome).
       useWireDataSetFactory(new KafkaWireDataSetFactory(config.zkConnect)).
@@ -106,7 +106,7 @@ public class WebEventRouterLauncher {
     VMClient vmClient = shell.getScribenginClient().getVMClient();
     vmClient.uploadApp(config.localAppHome, config.dfsAppHome);
     
-    Dataflow<WebEvent, WebEvent> dfl = buildDataflow();
+    Dataflow dfl = buildDataflow();
     //Get the dataflow's descriptor
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     //Output the descriptor in human-readable JSON

@@ -9,7 +9,7 @@ import com.neverwinterdp.storage.hdfs.HDFSStorageConfig;
 import com.neverwinterdp.storage.kafka.KafkaStorageConfig;
 import com.neverwinterdp.storage.nulldev.NullDevStorageConfig;
 
-public class Dataflow<IN, OUT> {
+public class Dataflow {
   
   private Map<String, DataSet<?>>     dataSets           = new LinkedHashMap<>();
   private Map<String, Operator<?, ?>> operators          = new LinkedHashMap<>();
@@ -26,66 +26,66 @@ public class Dataflow<IN, OUT> {
   
   public WorkerDescriptor getWorkerDescriptor() { return dataflowDescriptor.getWorker(); }
   
-  public Dataflow<IN, OUT> setDFSAppHome(String dfsAppHome) {
+  public Dataflow setDFSAppHome(String dfsAppHome) {
     dataflowDescriptor.setDataflowAppHome(dfsAppHome);
     return this;
   }
   
-  public Dataflow<IN, OUT> useWireDataSetFactory(WireDataSetFactory factory) {
+  public Dataflow useWireDataSetFactory(WireDataSetFactory factory) {
     wireDataStreamFactory = factory;
     return this;
   }
   
-  public Dataflow<IN, OUT> setMaxRuntime(long maxRuntime) {
+  public Dataflow setMaxRuntime(long maxRuntime) {
     dataflowDescriptor.setMaxRunTime(maxRuntime);;
     return this;
   }
   
-  public Dataflow<IN, OUT> setTrackingWindowSize(int size) {
+  public Dataflow setTrackingWindowSize(int size) {
     dataflowDescriptor.setTrackingWindowSize(size);;
     return this;
   }
   
-  public Dataflow<IN, OUT> setSlidingWindowSize(int size) {
+  public Dataflow setSlidingWindowSize(int size) {
     dataflowDescriptor.setSlidingWindowSize(size);;
     return this;
   }
   
-  public Dataflow<IN, OUT> setDefaultParallelism(int parallelism) {
+  public Dataflow setDefaultParallelism(int parallelism) {
     dataflowDescriptor.getStreamConfig().setParallelism(parallelism);
     return this;
   }
   
-  public Dataflow<IN, OUT> setDefaultReplication(int replication) {
+  public Dataflow setDefaultReplication(int replication) {
     dataflowDescriptor.getStreamConfig().setReplication(replication);
     return this;
   }
   
-  public KafkaDataSet<IN> createInput(KafkaStorageConfig config) {
+  public <IN> KafkaDataSet<IN> createInput(KafkaStorageConfig config) {
     KafkaDataSet<IN> ds = new KafkaDataSet<IN>(DataStreamType.Input, config);
     dataSets.put(ds.getName(), ds);
     return ds;
   }
 
-  public KafkaDataSet<OUT> createOutput(KafkaStorageConfig config) {
+  public <OUT> KafkaDataSet<OUT> createOutput(KafkaStorageConfig config) {
     KafkaDataSet<OUT> ds = new KafkaDataSet<OUT>(DataStreamType.Output, config);
     dataSets.put(ds.getName(), ds);
     return ds;
   }
   
-  public NullDevDataSet<OUT> createOutput(NullDevStorageConfig config) {
+  public <OUT> NullDevDataSet<OUT> createOutput(NullDevStorageConfig config) {
     NullDevDataSet<OUT> ds = new NullDevDataSet<OUT>(DataStreamType.Output, config);
     dataSets.put(ds.getName(), ds);
     return ds;
   }
   
-  public HDFSDataSet<OUT> createOutput(HDFSStorageConfig config) {
+  public <OUT> HDFSDataSet<OUT> createOutput(HDFSStorageConfig config) {
     HDFSDataSet<OUT> ds = new HDFSDataSet<OUT>(DataStreamType.Output, config);
     dataSets.put(ds.getName(), ds);
     return ds;
   }
   
-  public ESDataSet<OUT> createOutput(ESStorageConfig config){
+  public <OUT> ESDataSet<OUT> createOutput(ESStorageConfig config){
     ESDataSet<OUT> ds = new ESDataSet<OUT>(DataStreamType.Output, config);
     dataSets.put(ds.getName(), ds);
     return ds;

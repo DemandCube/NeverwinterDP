@@ -116,7 +116,7 @@ public class ExampleElasticSearchDataflowSubmitter {
     VMClient vmClient = shell.getScribenginClient().getVMClient();
     vmClient.uploadApp(config.localAppHome, config.dfsAppHome);
     
-    Dataflow<Message, Message> dfl = buildDataflow();
+    Dataflow dfl = buildDataflow();
     //Get the dataflow's descriptor
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     //Output the descriptor in human-readable JSON
@@ -138,10 +138,10 @@ public class ExampleElasticSearchDataflowSubmitter {
    * @return
    * @throws ClassNotFoundException 
    */
-  public Dataflow<Message,Message> buildDataflow() throws ClassNotFoundException{
+  public Dataflow buildDataflow() throws ClassNotFoundException{
     //Create the new Dataflow object
     // <Message,Message> pertains to the <input,output> object for the data
-    Dataflow<Message,Message> dfl = new Dataflow<Message,Message>(config.dataflowId);
+    Dataflow dfl = new Dataflow(config.dataflowId);
     dfl.
       setDFSAppHome(config.dfsAppHome).
       setDefaultParallelism(config.dataflowDefaultParallelism).

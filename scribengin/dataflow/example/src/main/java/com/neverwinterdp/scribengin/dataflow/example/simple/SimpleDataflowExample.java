@@ -105,7 +105,7 @@ public class SimpleDataflowExample {
     VMClient vmClient = shell.getScribenginClient().getVMClient();
     vmClient.uploadApp(config.localAppHome, config.dfsAppHome);
     
-    Dataflow<Message, Message> dfl = buildDataflow();
+    Dataflow dfl = buildDataflow();
     //Get the dataflow's descriptor
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     //Output the descriptor in human-readable JSON
@@ -126,10 +126,10 @@ public class SimpleDataflowExample {
    * @param kafkaZkConnect [host]:[port] of Kafka's Zookeeper conenction 
    * @return
    */
-  public Dataflow<Message,Message> buildDataflow(){
+  public Dataflow buildDataflow(){
     //Create the new Dataflow object
     // <Message,Message> pertains to the <input,output> object for the data
-    Dataflow<Message,Message> dfl = new Dataflow<Message,Message>(config.dataflowId);
+    Dataflow dfl = new Dataflow(config.dataflowId);
     dfl.
       setDFSAppHome(config.dfsAppHome).
       setDefaultParallelism(config.dataflowDefaultParallelism).

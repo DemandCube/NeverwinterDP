@@ -5,13 +5,13 @@ import java.util.Set;
 
 public class Operator<I, O> {
   private String                              name;
-  private Dataflow<?, ?>                      dataflow;
+  private Dataflow                            dataflow;
   private Class<? extends DataStreamOperator> dataStreamOperator;
   private Set<String>                         interceptors = new HashSet<>();
   private Set<String>                         inputs       = new HashSet<>();
   private Set<String>                         outputs      = new HashSet<>();
 
-  Operator(Dataflow<?, ?> dataflow, String name, Class<? extends DataStreamOperator> dataStreamOperator) {
+  Operator(Dataflow dataflow, String name, Class<? extends DataStreamOperator> dataStreamOperator) {
     this.dataflow           = dataflow;
     this.name               = name;
     this.dataStreamOperator = dataStreamOperator;

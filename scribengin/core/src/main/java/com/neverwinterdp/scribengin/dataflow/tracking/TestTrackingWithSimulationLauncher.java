@@ -46,7 +46,7 @@ public class TestTrackingWithSimulationLauncher extends TestTrackingLauncher {
     VMClient vmClient = shell.getVMClient();
     submitVMGenerator(vmClient, dflBuilder);
     
-    Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
+    Dataflow dfl = dflBuilder.buildDataflow();
     DataflowSubmitter submitter = submitDataflow(shell, dfl);
     DataflowClient dflClient = submitter.getDataflowClient(60000);
     

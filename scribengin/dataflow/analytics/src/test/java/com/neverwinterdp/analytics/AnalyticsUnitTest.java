@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import com.neverwinterdp.analytics.dataflow.AanalyticsDataflowBuilder;
 import com.neverwinterdp.analytics.odyssey.generator.OdysseyEventGeneratorServer;
-import com.neverwinterdp.analytics.web.WebEvent;
 import com.neverwinterdp.analytics.web.gripper.GripperServer;
 import com.neverwinterdp.analytics.web.gripper.generator.WebEventGeneratorServer;
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
@@ -66,7 +65,7 @@ public class AnalyticsUnitTest {
     wGeneratorServer.start();
     
     AanalyticsDataflowBuilder dflBuilder = new AanalyticsDataflowBuilder() ;
-    Dataflow<WebEvent, WebEvent> dfl = dflBuilder.buildDataflow();
+    Dataflow dfl = dflBuilder.buildDataflow();
     
     try {
       new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForDataflowRunning(60000);

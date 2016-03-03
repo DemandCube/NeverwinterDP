@@ -95,8 +95,8 @@ public class TrackingDataflowBuilder {
     return this;
   }
   
-  public Dataflow<TrackingMessage, TrackingMessage> buildDataflow() {
-    Dataflow<TrackingMessage, TrackingMessage> dfl = new Dataflow<>(dataflowId);
+  public Dataflow buildDataflow() {
+    Dataflow dfl = new Dataflow(dataflowId);
     dfl.
       useWireDataSetFactory(new KafkaWireDataSetFactory(trackingConfig.getKafkaZKConnects())).
       setDefaultParallelism(defaultParallelism).

@@ -92,7 +92,7 @@ public class DemoDataflowLauncher {
     VMClient vmClient = shell.getScribenginClient().getVMClient();
     vmClient.uploadApp(config.localAppHome, config.dfsAppHome);
     
-    Dataflow<Message, Message> dfl = buildDataflow();
+    Dataflow dfl = buildDataflow();
     //Get the dataflow's descriptor
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     //Output the descriptor in human-readable JSON
@@ -108,8 +108,8 @@ public class DemoDataflowLauncher {
     //submitter.waitForDataflowStop(60000);
   }
   
-  public Dataflow<Message,Message> buildDataflow(){
-    Dataflow<Message,Message> dfl = new Dataflow<Message,Message>(config.dataflowId);
+  public Dataflow buildDataflow(){
+    Dataflow dfl = new Dataflow(config.dataflowId);
     dfl.
       setDFSAppHome(config.dfsAppHome).
       setDefaultParallelism(config.dataflowDefaultParallelism).
@@ -163,10 +163,8 @@ public class DemoDataflowLauncher {
     //Configure where our hadoop master lives
     String hadoopMaster = config.hadoopMasterConnect;
     HadoopProperties hadoopProps = new HadoopProperties() ;
-    hadoopProps.put("yarn.resourcemanager.address", 
-        hadoopMaster + ":"+Integer.toString(config.resourceManagerPort));
-    hadoopProps.put("fs.defaultFS", 
-        "hdfs://" + hadoopMaster +":"+Integer.toString(config.hdfsPort));
+    hadoopProps.put("yarn.resourcemanager.address", hadoopMaster + ":"+Integer.toString(config.resourceManagerPort));
+    hadoopProps.put("fs.defaultFS", "hdfs://" + hadoopMaster +":"+Integer.toString(config.hdfsPort));
     
     //Set up our connection to Scribengin
     YarnVMClient vmClient = new YarnVMClient(registry, VMConfig.ClusterEnvironment.YARN, hadoopProps) ;

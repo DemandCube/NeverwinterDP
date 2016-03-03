@@ -17,7 +17,7 @@ public class DataflowSubmitter {
     this.dflDescriptor    = dflDescriptor;
   }
   
-  public DataflowSubmitter(ScribenginClient scribenginClient, Dataflow<?, ?> dataflow) {
+  public DataflowSubmitter(ScribenginClient scribenginClient, Dataflow dataflow) {
     this(scribenginClient, dataflow.buildDataflowDescriptor());
   }
   

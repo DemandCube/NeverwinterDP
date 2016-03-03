@@ -1,6 +1,7 @@
 package com.neverwinterdp.analytics.dataflow;
 
 import com.neverwinterdp.analytics.AnalyticsConfig;
+import com.neverwinterdp.analytics.ads.ADSEventStatisticOperator;
 import com.neverwinterdp.analytics.odyssey.Event;
 import com.neverwinterdp.analytics.odyssey.OdysseyEventStatisticOperator;
 import com.neverwinterdp.analytics.web.WebEvent;
@@ -34,8 +35,8 @@ public class AanalyticsDataflowBuilder {
     this.config = config;
   }
   
-  public Dataflow<WebEvent, WebEvent> buildDataflow() {
-    Dataflow<WebEvent, WebEvent> dfl = new Dataflow<>(config.dataflowId);
+  public Dataflow buildDataflow() {
+    Dataflow dfl = new Dataflow(config.dataflowId);
     dfl.
       setDFSAppHome(config.dfsAppHome).
       useWireDataSetFactory(new KafkaWireDataSetFactory(config.zkConnect)).
@@ -52,6 +53,9 @@ public class AanalyticsDataflowBuilder {
     KafkaDataSet<WebEvent> webEventInputDs = 
       dfl.createInput(new KafkaStorageConfig("web.input", config.zkConnect, config.generatorWebInputTopic));
     
+    KafkaDataSet<WebEvent> adsEventInputDs = 
+        dfl.createInput(new KafkaStorageConfig("ads.input", config.zkConnect, config.dataflowADSInputTopic));
+    
     DataSet<WebEvent> nullDevDs = dfl.createOutput(new NullDevStorageConfig());
     
     ESStorageConfig esStorageConfig = 
@@ -59,21 +63,24 @@ public class AanalyticsDataflowBuilder {
     DataSet<WebEvent> esOdysseyOutputDs    = dfl.createOutput(esStorageConfig);
     
     Operator<WebEvent, WebEvent> routerOp   = dfl.createOperator("router", RouterOperator.class);
-    Operator<WebEvent, WebEvent> wStatisticOp  = dfl.createOperator("web.statistic", WebEventStatisticOperator.class);
-    Operator<WebEvent, WebEvent> wJunkOp       = dfl.createOperator("web.junk", WebEventJunkOperator.class);
+    Operator<WebEvent, WebEvent> webStatisticOp  = dfl.createOperator("web.statistic", WebEventStatisticOperator.class);
+    Operator<WebEvent, WebEvent> adsStatisticOp  = dfl.createOperator("ads.statistic", ADSEventStatisticOperator.class);
     Operator<WebEvent, WebEvent> odysseyStatisticOp = dfl.createOperator("odyssey.statistic", OdysseyEventStatisticOperator.class);
+    Operator<WebEvent, WebEvent> webJunkOp       = dfl.createOperator("web.junk", WebEventJunkOperator.class);
     
     odysseyEventInputDs.useRawReader().connect(routerOp);
-    
     webEventInputDs.useRawReader().connect(routerOp);
+    adsEventInputDs.useRawReader().connect(routerOp);
     
     routerOp.
-      connect(wJunkOp).
-      connect(wStatisticOp).
+      connect(webJunkOp).
+      connect(webStatisticOp).
+      connect(adsStatisticOp).
       connect(odysseyStatisticOp);
     
-    wJunkOp.connect(nullDevDs);
-    wStatisticOp.connect(nullDevDs);
+    webJunkOp.connect(nullDevDs);
+    webStatisticOp.connect(nullDevDs);
+    adsStatisticOp.connect(nullDevDs);
     
     odysseyStatisticOp.connect(esOdysseyOutputDs);
     return dfl;
@@ -88,7 +95,7 @@ public class AanalyticsDataflowBuilder {
     VMClient vmClient = shell.getScribenginClient().getVMClient();
     vmClient.uploadApp(config.localAppHome, config.dfsAppHome);
     
-    Dataflow<WebEvent, WebEvent> dfl = buildDataflow();
+    Dataflow dfl = buildDataflow();
     //Get the dataflow's descriptor
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     //Output the descriptor in human-readable JSON

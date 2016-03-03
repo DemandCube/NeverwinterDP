@@ -80,7 +80,7 @@ public class ExampleWireDataflowSubmitter {
     VMClient vmClient = shell.getScribenginClient().getVMClient();
     vmClient.uploadApp(localAppHome, dfsAppHome);
     
-    Dataflow<Message, Message> dfl = buildDataflow(kafkaZkConnect);
+    Dataflow dfl = buildDataflow(kafkaZkConnect);
     //Get the dataflow's descriptor
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     //Output the descriptor in human-readable JSON
@@ -111,10 +111,10 @@ public class ExampleWireDataflowSubmitter {
    * @param kafkaZkConnect [host]:[port] of Kafka's Zookeeper conenction 
    * @return
    */
-  public Dataflow<Message,Message> buildDataflow(String kafkaZkConnect){
+  public Dataflow buildDataflow(String kafkaZkConnect){
     //Create the new Dataflow object
     // <Message,Message> pertains to the <input,output> object for the data
-    Dataflow<Message,Message> dfl = new Dataflow<Message,Message>(dataflowID);
+    Dataflow dfl = new Dataflow(dataflowID);
     
     //Example of how to set the KafkaWireDataSetFactory
     dfl.
@@ -155,17 +155,9 @@ public class ExampleWireDataflowSubmitter {
   }
   
   
-  public String getDataflowID() {
-    return dataflowID;
-  }
+  public String getDataflowID() { return dataflowID; }
 
-  public String getInputTopic() {
-    return inputTopic;
-  }
+  public String getInputTopic() { return inputTopic; }
 
-
-  public String getOutputTopic() {
-    return outputTopic;
-  }
-
+  public String getOutputTopic() { return outputTopic; }
 }

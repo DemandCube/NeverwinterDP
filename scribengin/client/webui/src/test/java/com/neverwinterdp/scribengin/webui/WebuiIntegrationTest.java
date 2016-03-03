@@ -83,7 +83,7 @@ public class WebuiIntegrationTest {
     wGeneratorServer.start();
     
     AanalyticsDataflowBuilder dflBuilder = new AanalyticsDataflowBuilder() ;
-    Dataflow<WebEvent, WebEvent> dfl = dflBuilder.buildDataflow();
+    Dataflow dfl = dflBuilder.buildDataflow();
     
     try {
       new DataflowSubmitter(shell.getScribenginClient(), dfl).submit().waitForDataflowRunning(60000);

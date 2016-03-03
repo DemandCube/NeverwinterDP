@@ -14,7 +14,7 @@ public class APIUnitTest {
   
   @Test
   public void testApi() throws Exception {
-    Dataflow<Message, Message> dfl = new Dataflow<Message, Message>("dataflow");
+    Dataflow dfl = new Dataflow("dataflow");
     dfl.useWireDataSetFactory(new KafkaWireDataSetFactory("127.0.0.1:2181"));
     KafkaDataSet<Message> inputDs = 
         dfl.createInput(new KafkaStorageConfig("input", "127.0.0.1:2181", "input"));

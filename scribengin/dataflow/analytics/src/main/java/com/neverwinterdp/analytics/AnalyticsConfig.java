@@ -58,13 +58,19 @@ public class AnalyticsConfig {
   public int    dataflowSlidingWindowSize      = 15;
   
   @Parameter(names = "--dataflow-num-of-workers", description="")
-  public int    dataflowNumOfWorker            = 2;
+  public int    dataflowNumOfWorker            = 3;
   
   @Parameter(names = "--dataflow-num-of-executor-per-worker", description="")
-  public int    dataflowNumOfExecutorPerWorker = 7;
+  public int    dataflowNumOfExecutorPerWorker = 6;
   
   @Parameter(names = "--dataflow-odyssey-output-index", description="")
   public String dataflowOdysseyOutputIndex = "odyssey-event";
+ 
+  @Parameter(names = "--dataflow-ads-input-topic", description="")
+  public String dataflowADSInputTopic = "ads.input";
+  
+  @Parameter(names = "--dataflow-ads-output-index", description="")
+  public String dataflowADSOutputIndex = "ads-event";
   
   @Parameter(names = "--wait-for-input", description="")
   public boolean waitForInput = false;
