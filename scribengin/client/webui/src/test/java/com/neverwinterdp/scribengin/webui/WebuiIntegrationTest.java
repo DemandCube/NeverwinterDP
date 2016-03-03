@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import com.neverwinterdp.analytics.dataflow.AanalyticsDataflowBuilder;
 import com.neverwinterdp.analytics.odyssey.generator.OdysseyEventGeneratorServer;
-import com.neverwinterdp.analytics.web.WebEvent;
 import com.neverwinterdp.analytics.web.gripper.GripperServer;
 import com.neverwinterdp.analytics.web.gripper.generator.WebEventGeneratorServer;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;

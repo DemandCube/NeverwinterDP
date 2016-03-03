@@ -6,15 +6,6 @@ function VisitCookie() {
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
   };
 
-  var  deleteAllCookies = function() {
-    var cookies = document.cookie.split(";");
-    for (var i = 0; i < cookies.length; i++) {
-      var cookie = cookies[i];
-      var eqPos = cookie.indexOf("=");
-      var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    }
-  }
 
   
   var parseCookie = function() {
@@ -49,13 +40,48 @@ function VisitCookie() {
         console.log("add " + document.cookie) ;
       }
     }
-    //document.cookie = string + "expires="+ expires + "; path=/";
   };
 
-  deleteAllCookies();
+  this.deleteAllCookies = function() {
+    var cookies = document.cookie.split(";");
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i];
+      var eqPos = cookie.indexOf("=");
+      var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+      if(this.userInfo[name]) {
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      }
+    }
+  }
+
+  this.deleteAllCookies();
   this.update();
 
-  this.getUserInfo = function(token) { return this.userInfo; };
+  this.getUserInfo = function() { 
+    return this.userInfo; 
+  };
+}
+
+
+function GeoLocation() {
+  var options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
+  
+  var info = {} ;
+
+  function onGeoUpdateSuccess(pos) {
+    var crd = pos.coords;
+    info.latitude  = crd.latitude ;
+    info.longitude = crd.longitude ;
+    info.accuracy  = crd.accuracy ;
+  };
+
+  function onGeoUpdateError(err) {
+    console.warn('ERROR(' + err.code + '): ' + err.message);
+  };
+
+  navigator.geolocation.getCurrentPosition(onGeoUpdateSuccess, onGeoUpdateError, options);
+
+  this.info = info ;
 }
 
 function InfoCollectorService(serviceUrl) {
@@ -104,24 +130,9 @@ function InfoCollectorService(serviceUrl) {
     document.getElementsByTagName('body')[0].appendChild(ele);
   };
 
-  var options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
-
-  function onGeoUpdateSuccess(pos) {
-    var crd = pos.coords;
-    info.geoLocation.latitude  = crd.latitude ;
-    info.geoLocation.longitude = crd.longitude ;
-    info.geoLocation.accuracy  = crd.accuracy ;
-    pushClientInfo(info);
-  };
-
-  function onGeoUpdateError(err) {
-    //console.warn('ERROR(' + err.code + '): ' + err.message);
-    pushClientInfo(info);
-  };
-
-  navigator.geolocation.getCurrentPosition(onGeoUpdateSuccess, onGeoUpdateError, options);
-   
   this.info = info;
 
   this.getInfo = function() { return this.info ; }
+
+  pushClientInfo(info);
 }

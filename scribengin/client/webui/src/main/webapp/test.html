@@ -2,31 +2,47 @@
 <html>
   <head>
     <title>NeverwinterDP</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> 
-
     <link rel="stylesheet" href="js/libs/jquery/jquery-ui-1.11.0/jquery-ui.css">
     <link rel="stylesheet" href="css/blueprint.css">
     <link rel="stylesheet" href="css/stylesheet.css">
+
     <script src="js/service/InfoCollectorService.js"></script>
+    <script src="js/service/ADSService.js"></script>
+    <script>
+      var adsServiceUrl = "http://192.168.1.13:7081/rest/client/ads-event.collector";
+      var adsService = new ADSService(adsServiceUrl);
+    </script>
   </head>
 
   <body>
-    <div>banner</div>
-    <pre>
+    <div>
+      <div style="float: left" class="logo-text">
+        Logo
+      </div>
+      <div style="float: right; width: 350px; background: cyan">
+        <a href="javascript:adsService.onClickADS('http://nventdata.com')">Nventdata</a>
+      </div>
+    </div>
+
+    <hr style="clear: both"/>
+
+    <div>
+      <pre>
+        <script>
+          //document.write('\n');
+          //document.write(JSON.stringify(infoCollectorService.getInfo(), null, "  "));
+
+          document.write('\n');
+          for (i in navigator) {
+            document.write('navigator.' + i + ' = ' + navigator[i] + "\n");
+          }
+        </script>
+      </pre>
+
       <script>
-        //document.write('\n');
-        //document.write(JSON.stringify(infoCollectorService.getInfo(), null, "  "));
-
-        document.write('\n');
-        for (i in navigator) {
-          document.write('navigator.' + i + ' = ' + navigator[i] + "\n");
-        }
+        var ciServiceUrl = "http://192.168.1.13:7081/rest/client/info.collector";
+        var infoCollectorService = new InfoCollectorService(ciServiceUrl);
       </script>
-    </pre>
-
-    <script>
-      var ciServiceUrl = "http://192.168.1.13:7081/rest/client/info.collector";
-      var infoCollectorService = new InfoCollectorService(ciServiceUrl);
-    </script>
+    <div>
   </body>
 </html>

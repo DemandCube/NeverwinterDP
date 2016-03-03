@@ -13,6 +13,8 @@ public class RouterOperator extends DataStreamOperator {
     String key = mesg.getKey();
     if(key.indexOf("odyssey") >= 0) {
       routeOdysseyEvent(ctx, mesg);
+    } else  if(key.startsWith("ads-event")) {
+      routeADSEvent(ctx, mesg);
     } else {
       routeWebEvent(ctx, mesg);
     }
@@ -20,6 +22,10 @@ public class RouterOperator extends DataStreamOperator {
   
   void routeOdysseyEvent(DataStreamOperatorContext ctx, Message mesg) throws Exception {
     ctx.write("router-to-odyssey.statistic", mesg);
+  }
+  
+  void routeADSEvent(DataStreamOperatorContext ctx, Message mesg) throws Exception {
+    ctx.write("router-to-ads.statistic", mesg);
   }
   
   void routeWebEvent(DataStreamOperatorContext ctx, Message mesg) throws Exception {

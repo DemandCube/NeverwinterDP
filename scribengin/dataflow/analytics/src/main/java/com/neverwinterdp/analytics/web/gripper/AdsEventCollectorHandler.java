@@ -11,7 +11,6 @@ import com.neverwinterdp.analytics.ads.ADSEvent;
 import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.netty.http.rest.RestRouteHandler;
-import com.neverwinterdp.util.ExceptionUtil;
 import com.neverwinterdp.util.JSONSerializer;
 
 import io.netty.buffer.ByteBuf;
@@ -53,14 +52,15 @@ public class AdsEventCollectorHandler extends RestRouteHandler {
   }
 
   protected Object onADSEvent(ADSEvent event) {
+    System.err.println("ADSEvent: " + JSONSerializer.INSTANCE.toString(event));
     try {
-      event.setEventId(seedId + "-" + idTracker.incrementAndGet());
+      event.setEventId("ads-event-" + seedId + "-" + idTracker.incrementAndGet());
       event.setTimestamp(new Date());
-      kafkaWriter.send(kafkaTopic, event, 60000);
-      return true;
+      kafkaWriter.send(kafkaTopic, event.getEventId(), event, 60000);
+      return "{success: true}";
     } catch (Exception e) {
       logger.error("Error:", e);
-      return false;
+      return "{success: false} ";
     }
   }
   
