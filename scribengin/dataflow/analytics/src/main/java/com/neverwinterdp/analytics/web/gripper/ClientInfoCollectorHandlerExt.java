@@ -12,7 +12,6 @@ import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.netty.http.client.ClientInfo;
 import com.neverwinterdp.netty.http.client.ClientInfoCollectorHandler;
 import com.neverwinterdp.util.ExceptionUtil;
-import com.neverwinterdp.util.JSONSerializer;
 
 public class ClientInfoCollectorHandlerExt extends ClientInfoCollectorHandler {
   private String     seedId = UUID.randomUUID().toString();
