@@ -14,14 +14,14 @@ import com.neverwinterdp.netty.http.client.ClientInfoCollectorHandler;
 import com.neverwinterdp.util.ExceptionUtil;
 
 public class ClientInfoCollectorHandlerExt extends ClientInfoCollectorHandler {
-  private String     seedId = UUID.randomUUID().toString();
+  private String     seedId    = UUID.randomUUID().toString();
   private AtomicLong idTracker = new AtomicLong();
   
   private Map<String, WebEvent> webEventBuffer = new ConcurrentHashMap<String, WebEvent>();
   
-  private String kafkaTopic;
+  private String         kafkaTopic;
   private AckKafkaWriter kafkaWriter;
-  private FlushThread flushThread ;
+  private FlushThread    flushThread ;
   
   public ClientInfoCollectorHandlerExt(String zkConnects, String kafkaTopic) throws Exception {
     this.kafkaTopic = kafkaTopic;

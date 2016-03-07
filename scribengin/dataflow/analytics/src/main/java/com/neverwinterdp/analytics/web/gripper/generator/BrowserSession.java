@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.neverwinterdp.analytics.web.WebEvent;
+import com.neverwinterdp.analytics.ads.ADSEvent;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.ClientInfo;
 
@@ -16,7 +16,6 @@ public class BrowserSession {
   private String        username;
   private String        sessionId;
   private AtomicInteger idTracker = new AtomicInteger();
-  
   
   private ClientInfo      clientInfo;
   private List<SiteVisit> siteToVisits ;
@@ -32,6 +31,8 @@ public class BrowserSession {
     this.minVisitTime = minVisitTime;
     this.siteToVisits = new ArrayList<>();
   }
+  
+  public String getSessionId() { return this.sessionId ; }
   
   public void addSiteVisit(String site, int numOfPages) {
     siteToVisits.add(new SiteVisit(site, numOfPages));
@@ -63,5 +64,13 @@ public class BrowserSession {
       }
     }
     return pages.size();
+  }
+  
+  public void sendADSEvent(AsyncHttpClient client, String dest) throws ConnectException, URISyntaxException, InterruptedException {
+    ADSEvent event = new ADSEvent();
+    event.setVisitorId(clientInfo.user.visitorId);
+    event.setAdUrl("http://nventdata.com");
+    event.setWebpageUrl(clientInfo.webpage.url);
+    client.post(dest, event);
   }
 }

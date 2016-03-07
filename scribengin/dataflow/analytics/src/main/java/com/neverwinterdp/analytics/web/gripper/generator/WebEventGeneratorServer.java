@@ -1,5 +1,6 @@
 package com.neverwinterdp.analytics.web.gripper.generator;
 
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -72,8 +73,12 @@ public class WebEventGeneratorServer {
       AsyncHttpClient client = new AsyncHttpClient (gripperServerHost, gripperServerPort, handler) ;
       BrowserSession session = null;
       int visitPageCount = 0 ;
+      Random rand = new Random(System.nanoTime());
       while((session = browserSessionGenerator.nextBrowserSession()) != null) {
         visitPageCount += session.sendWebEvent(client, "/rest/client/info.collector");
+        if(rand.nextDouble() < 0.1) {
+          session.sendADSEvent(client, "/rest/client/ads-event.collector");
+        }
         client.flush();
       }
       client.close();
