@@ -13,24 +13,35 @@ import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.ClientInfo;
 import com.neverwinterdp.util.JSONSerializer;
 
-public class BrowserSession {
+public class ClientSession {
   private String        username;
   private String        sessionId;
   private AtomicInteger idTracker = new AtomicInteger();
-  
-  private ClientInfo      clientInfo;
-  private List<SiteVisit> siteToVisits ;
-  private int maxVisitTime = 0;
-  private int minVisitTime = 0;
-  private Random rand      = new Random();
 
-  public BrowserSession(String username, String sessionId, ClientInfo cInfo, int maxVisitTime, int minVisitTime) {
+  private ClientInfo      clientInfo;
+  private List<SiteVisit> siteToVisits;
+  private List<String>    pagesToVisit;
+  private int             currentVisitPage = 0;
+  private int             maxVisitTime = 0;
+  private int             minVisitTime = 0;
+  private Random          rand         = new Random();
+
+  public ClientSession(String username, String sessionId, ClientInfo cInfo, int maxVisitTime, int minVisitTime) {
     this.username     = username;
     this.sessionId    = sessionId;
     this.clientInfo   = cInfo;
     this.maxVisitTime = maxVisitTime;
     this.minVisitTime = minVisitTime;
     this.siteToVisits = new ArrayList<>();
+  }
+  
+  public void init() {
+    Collections.shuffle(siteToVisits, new Random(System.nanoTime()));
+    pagesToVisit = new ArrayList<>();
+    for(int i = 0; i < siteToVisits.size(); i++) {
+      SiteVisit sel = siteToVisits.get(i);
+      pagesToVisit.addAll(sel.getPages());
+    }
   }
   
   public String getSessionId() { return this.sessionId ; }
@@ -47,16 +58,16 @@ public class BrowserSession {
     return total;
   }
   
-  public int sendWebEvent(AsyncHttpClient client, String dest) throws ConnectException, URISyntaxException, InterruptedException {
-    Collections.shuffle(siteToVisits, new Random(System.nanoTime()));
-    List<String> pages = new ArrayList<>();
-    for(int i = 0; i < siteToVisits.size(); i++) {
-      SiteVisit sel = siteToVisits.get(i);
-      pages.addAll(sel.getPages());
-    }
-    
-    for(int i = 0; i < pages.size(); i++) {
-      clientInfo.webpage.url = pages.get(i);
+  public boolean hasNextWebEvent() { return currentVisitPage < pagesToVisit.size(); }
+  
+  public void sendWebEvent(AsyncHttpClient client, String dest) throws ConnectException, URISyntaxException, InterruptedException {
+    clientInfo.webpage.url = pagesToVisit.get(currentVisitPage++);
+    client.post(dest, clientInfo);
+  }
+  
+  public int sendAllWebEvent(AsyncHttpClient client, String dest) throws ConnectException, URISyntaxException, InterruptedException {
+    for(int i = 0; i < pagesToVisit.size(); i++) {
+      clientInfo.webpage.url = pagesToVisit.get(i);
       client.post(dest, clientInfo);
       if(maxVisitTime > 0) {
         int visitTime = rand.nextInt(maxVisitTime);
@@ -64,7 +75,7 @@ public class BrowserSession {
         Thread.sleep(visitTime);
       }
     }
-    return pages.size();
+    return pagesToVisit.size();
   }
   
   public void sendADSEvent(AsyncHttpClient client, String dest) throws ConnectException, URISyntaxException, InterruptedException {
@@ -73,6 +84,6 @@ public class BrowserSession {
     event.setAdUrl("http://nventdata.com");
     event.setWebpageUrl(clientInfo.webpage.url);
     client.post(dest, event);
-    System.out.println("Generate ADSEvent: " + JSONSerializer.INSTANCE.toString(event));
+    //System.out.println("Generate ADSEvent: " + JSONSerializer.INSTANCE.toString(event));
   }
 }

@@ -1,12 +1,14 @@
 package com.neverwinterdp.analytics.web.gripper.generator;
 
 import java.util.Random;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.beust.jcommander.Parameter;
 import com.neverwinterdp.netty.http.client.ClientInfo;
 
-public class BrowserSessionGenerator {
+public class ClientSessionManager {
   @Parameter(names = "--num-of-users", description = "num of users")
   private int numOfUsers = 5;
   
@@ -28,11 +30,14 @@ public class BrowserSessionGenerator {
   @Parameter(names = "--min-visit-time", description = "min visit time")
   private int minVisitTime = 0;
   
-  private String[]      availUsers;
-  private String[]      availSites;
-  private AtomicInteger sessionIdTracker = new AtomicInteger();
-  private Random        random = new Random(System.nanoTime());
-  private int           numOfAssignedPages ;
+  private String[]             availUsers;
+  private String[]             availSites;
+  private AtomicInteger        sessionIdTracker = new AtomicInteger();
+  private Random               random           = new Random(System.nanoTime());
+  private int                  numOfAssignedPages;
+  
+  private LinkedBlockingQueue<ClientSession> queue = new LinkedBlockingQueue<>();
+  private int  maxConcurrentClientSession = 1000;
   
   public int getNumOfUsers() { return numOfUsers; }
   public void setNumOfUsers(int numOfUsers) { this.numOfUsers = numOfUsers; }
@@ -67,14 +72,26 @@ public class BrowserSessionGenerator {
     numOfAssignedPages = 0;
   }
   
-  synchronized public BrowserSession nextBrowserSession() {
+  public ClientSession pollClientSession() throws InterruptedException {
+    if(queue.size() < maxConcurrentClientSession) {
+      ClientSession session = createClientSession();
+      if(session != null) queue.offer(session);
+    }
+    return queue.poll(1000, TimeUnit.MILLISECONDS);
+  }
+  
+  public void offerClientSession(ClientSession session) throws InterruptedException {
+    queue.offer(session);
+  }
+  
+  ClientSession createClientSession() {
     if(numOfAssignedPages >= numOfPages) return null;
     String user =  nextRandomUser();
     String sessionId = "generated-" + user + "-session-" + sessionIdTracker.incrementAndGet(); 
     ClientInfo clientInfo = ClientInfos.nextRandomClientInfo();
     clientInfo.user.userId = user;
     clientInfo.user.visitorId = sessionId;
-    BrowserSession session = new BrowserSession(user, sessionId, clientInfo, maxVisitTime, minVisitTime);
+    ClientSession session = new ClientSession(user, sessionId, clientInfo, maxVisitTime, minVisitTime);
     int numOfSitePerSession = random.nextInt(numOfSites) + 1;
     for(int i = 0; i < numOfSitePerSession; i++) {
       String selSite = nextRandomSite();
@@ -93,6 +110,7 @@ public class BrowserSessionGenerator {
         throw new RuntimeException("This should not happen");
       }
     }
+    session.init();
     return session;
   }
   

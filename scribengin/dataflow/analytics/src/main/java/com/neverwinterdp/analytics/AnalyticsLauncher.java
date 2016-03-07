@@ -4,7 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.neverwinterdp.analytics.dataflow.AanalyticsDataflowBuilder;
 import com.neverwinterdp.analytics.odyssey.generator.OdysseyEventGeneratorServer;
 import com.neverwinterdp.analytics.web.gripper.GripperServer;
-import com.neverwinterdp.analytics.web.gripper.generator.WebEventGeneratorServer;
+import com.neverwinterdp.analytics.web.gripper.generator.EventGeneratorServer;
 import com.neverwinterdp.kafka.KafkaAdminTool;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
@@ -61,7 +61,7 @@ public class AnalyticsLauncher {
       "--min-visit-time", Integer.toString(config.generatorWebMinVisitTime),
       "--destination-topic", config.generatorWebInputTopic
     };
-    WebEventGeneratorServer wGeneratorServer = new WebEventGeneratorServer(webEventGeneratorConfig);
+    EventGeneratorServer wGeneratorServer = new EventGeneratorServer(webEventGeneratorConfig);
     wGeneratorServer.start();
       
     AanalyticsDataflowBuilder dflBuilder = new AanalyticsDataflowBuilder(config);

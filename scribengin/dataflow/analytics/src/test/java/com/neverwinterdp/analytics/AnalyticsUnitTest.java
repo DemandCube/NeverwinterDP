@@ -7,7 +7,7 @@ import org.junit.Test;
 import com.neverwinterdp.analytics.dataflow.AanalyticsDataflowBuilder;
 import com.neverwinterdp.analytics.odyssey.generator.OdysseyEventGeneratorServer;
 import com.neverwinterdp.analytics.web.gripper.GripperServer;
-import com.neverwinterdp.analytics.web.gripper.generator.WebEventGeneratorServer;
+import com.neverwinterdp.analytics.web.gripper.generator.EventGeneratorServer;
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
 import com.neverwinterdp.scribengin.dataflow.Dataflow;
 import com.neverwinterdp.scribengin.dataflow.DataflowSubmitter;
@@ -47,7 +47,7 @@ public class AnalyticsUnitTest {
   @Test
   public void test() throws Exception {
     int NUM_OF_ODYSSEY_EVENTS = 1000;
-    int NUM_OF_WEB_EVENTS     = 1000;
+    int NUM_OF_WEB_EVENTS     = 3000;
     int ALL_EVENTS = NUM_OF_ODYSSEY_EVENTS + NUM_OF_WEB_EVENTS ;
     
     String[] odysseyGeneratorConfig = {
@@ -59,9 +59,9 @@ public class AnalyticsUnitTest {
     
     String[] webEventGeneratorConfig = {
       "--num-of-pages", Integer.toString(NUM_OF_WEB_EVENTS),
-      "--num-of-threads", "5", "--max-visit-time", "50", "--min-visit-time", "0"
+      "--num-of-threads", "3", "--max-visit-time", "50", "--min-visit-time", "0"
     };
-    WebEventGeneratorServer wGeneratorServer = new WebEventGeneratorServer(webEventGeneratorConfig);
+    EventGeneratorServer wGeneratorServer = new EventGeneratorServer(webEventGeneratorConfig);
     wGeneratorServer.start();
     
     AanalyticsDataflowBuilder dflBuilder = new AanalyticsDataflowBuilder() ;

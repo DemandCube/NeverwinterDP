@@ -8,7 +8,7 @@ import org.junit.Test;
 import com.neverwinterdp.analytics.dataflow.AanalyticsDataflowBuilder;
 import com.neverwinterdp.analytics.odyssey.generator.OdysseyEventGeneratorServer;
 import com.neverwinterdp.analytics.web.gripper.GripperServer;
-import com.neverwinterdp.analytics.web.gripper.generator.WebEventGeneratorServer;
+import com.neverwinterdp.analytics.web.gripper.generator.EventGeneratorServer;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.ResponseHandler;
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
@@ -78,7 +78,7 @@ public class WebuiIntegrationTest {
     String[] webEventGeneratorConfig = {
       "--num-of-pages", Integer.toString(NUM_OF_WEB_EVENTS)
     };
-    WebEventGeneratorServer wGeneratorServer = new WebEventGeneratorServer(webEventGeneratorConfig);
+    EventGeneratorServer wGeneratorServer = new EventGeneratorServer(webEventGeneratorConfig);
     wGeneratorServer.start();
     
     AanalyticsDataflowBuilder dflBuilder = new AanalyticsDataflowBuilder() ;

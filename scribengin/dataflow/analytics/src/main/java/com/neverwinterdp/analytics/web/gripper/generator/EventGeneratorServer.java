@@ -19,8 +19,8 @@ import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
-public class WebEventGeneratorServer {
-  private Logger logger = LoggerFactory.getLogger(WebEventGeneratorServer.class.getSimpleName());
+public class EventGeneratorServer {
+  private Logger logger = LoggerFactory.getLogger(EventGeneratorServer.class.getSimpleName());
   
   @Parameter(names = "--gripper-server-port", description = "The gripper port")
   private int    gripperServerPort = 7081;
@@ -32,21 +32,21 @@ public class WebEventGeneratorServer {
   private String destinationTopic = "web.input";
   
   @ParametersDelegate
-  private BrowserSessionGenerator browserSessionGenerator = new BrowserSessionGenerator();
+  private ClientSessionManager clientSessionManager = new ClientSessionManager();
   
   @Parameter(names = "--num-of-threads", description = "")
   private int numOfThreads = 1;
 
   private ExecutorService executorService;
   
-  public WebEventGeneratorServer() { }
+  public EventGeneratorServer() { }
   
-  public WebEventGeneratorServer(String[] args) { 
+  public EventGeneratorServer(String[] args) { 
     new JCommander(this, args);
   }
   
   public void start() throws Exception {
-    browserSessionGenerator.start();
+    clientSessionManager.start();
     executorService = Executors.newFixedThreadPool(numOfThreads);
     for(int i = 0; i < numOfThreads; i++) {
       executorService.submit(new GeneratorWorker());
@@ -70,13 +70,20 @@ public class WebEventGeneratorServer {
     public void doRun() throws Exception {
       GripperResponseHandler handler = new GripperResponseHandler() ;
       AsyncHttpClient client = new AsyncHttpClient (gripperServerHost, gripperServerPort, handler) ;
-      BrowserSession session = null;
-      while((session = browserSessionGenerator.nextBrowserSession()) != null) {
-        System.out.println("Generate for the session: " + session.getSessionId());
+      ClientSession session = null;
+      int count = 0;
+      while((session = clientSessionManager.pollClientSession()) != null) {
         session.sendWebEvent(client, "/rest/client/info.collector");
-        session.sendADSEvent(client, "/rest/client/ads-event.collector");
-        client.flush();
+        count++ ;
+        if(count % 311 == 0) {
+          session.sendADSEvent(client, "/rest/client/ads-event.collector");
+          client.flush();
+        }
+        if(session.hasNextWebEvent()) {
+          clientSessionManager.offerClientSession(session);
+        }
       }
+      client.flush();
       client.close();
     }
   }
