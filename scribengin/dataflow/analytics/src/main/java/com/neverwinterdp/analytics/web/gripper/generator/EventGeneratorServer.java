@@ -1,5 +1,6 @@
 package com.neverwinterdp.analytics.web.gripper.generator;
 
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -72,6 +73,7 @@ public class EventGeneratorServer {
       AsyncHttpClient client = new AsyncHttpClient (gripperServerHost, gripperServerPort, handler) ;
       ClientSession session = null;
       int count = 0;
+      Random rand = new Random();
       while((session = clientSessionManager.pollClientSession()) != null) {
         session.sendWebEvent(client, "/rest/client/info.collector");
         count++ ;
@@ -82,6 +84,7 @@ public class EventGeneratorServer {
         if(session.hasNextWebEvent()) {
           clientSessionManager.offerClientSession(session);
         }
+        Thread.sleep(rand.nextInt(3) + 1);
       }
       client.flush();
       client.close();

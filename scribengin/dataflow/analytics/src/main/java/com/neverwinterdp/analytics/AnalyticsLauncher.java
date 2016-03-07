@@ -50,8 +50,11 @@ public class AnalyticsLauncher {
     odysseyEventGeneratorServer.start();
 
     KafkaAdminTool adminTool = new KafkaAdminTool("admin", config.zkConnect);
-    if(!adminTool.topicExits(config.generatorWebInputTopic)) {
-      adminTool.createTopic(config.generatorWebInputTopic, 2, 5);
+    if(!adminTool.topicExits(config.dataflowWebInputTopic)) {
+      adminTool.createTopic(config.dataflowWebInputTopic, 2, 5);
+    }
+    if(!adminTool.topicExits(config.dataflowADSInputTopic)) {
+      adminTool.createTopic(config.dataflowADSInputTopic, 2, 5);
     }
     String[] webEventGeneratorConfig = {
       "--gripper-server-host", "127.0.0.1", "--gripper-server-port", "7081",
@@ -59,7 +62,7 @@ public class AnalyticsLauncher {
       "--num-of-pages",   Integer.toString(config.generatorWebNumOfEvents), 
       "--max-visit-time", Integer.toString(config.generatorWebMaxVisitTime),
       "--min-visit-time", Integer.toString(config.generatorWebMinVisitTime),
-      "--destination-topic", config.generatorWebInputTopic
+      "--destination-topic", config.dataflowWebInputTopic
     };
     EventGeneratorServer wGeneratorServer = new EventGeneratorServer(webEventGeneratorConfig);
     wGeneratorServer.start();

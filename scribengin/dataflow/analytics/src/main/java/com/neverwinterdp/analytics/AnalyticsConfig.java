@@ -28,7 +28,7 @@ public class AnalyticsConfig {
   public int generatorOdysseyNumOfEvents = 100000;
   
   @Parameter(names = "--generator-web-input-topic", description="")
-  public String generatorWebInputTopic = "web.input";
+  public String dataflowWebInputTopic = "web.input";
   
   @Parameter(names = "--generator-web-num-of-threads", description="")
   public int generatorWebNumOfThreads = 1;
