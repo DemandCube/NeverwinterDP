@@ -82,7 +82,7 @@ public class EventGeneratorServer {
           client.flush();
         }
         if(session.hasNextWebEvent()) {
-          //clientSessionManager.offerClientSession(session);
+          clientSessionManager.offerClientSession(session);
         }
         Thread.sleep(rand.nextInt(10) + 1);
       }
