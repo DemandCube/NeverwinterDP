@@ -72,10 +72,8 @@ public class WebEventGeneratorServer {
       AsyncHttpClient client = new AsyncHttpClient (gripperServerHost, gripperServerPort, handler) ;
       BrowserSession session = null;
       while((session = browserSessionGenerator.nextBrowserSession()) != null) {
+        System.out.println("Generate for the session: " + session.getSessionId());
         session.sendWebEvent(client, "/rest/client/info.collector");
-//        if(rand.nextDouble() < 0.5) {
-//          session.sendADSEvent(client, "/rest/client/ads-event.collector");
-//        }
         session.sendADSEvent(client, "/rest/client/ads-event.collector");
         client.flush();
       }
