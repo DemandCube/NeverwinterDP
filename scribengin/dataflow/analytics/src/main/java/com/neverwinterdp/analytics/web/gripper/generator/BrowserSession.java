@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.neverwinterdp.analytics.ads.ADSEvent;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.ClientInfo;
+import com.neverwinterdp.util.JSONSerializer;
 
 public class BrowserSession {
   private String        username;
@@ -72,5 +73,6 @@ public class BrowserSession {
     event.setAdUrl("http://nventdata.com");
     event.setWebpageUrl(clientInfo.webpage.url);
     client.post(dest, event);
+    System.err.println("Generate ADSEvent: " + JSONSerializer.INSTANCE.toString(event));
   }
 }
