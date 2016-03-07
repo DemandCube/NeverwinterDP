@@ -76,9 +76,10 @@ public class WebEventGeneratorServer {
       Random rand = new Random(System.nanoTime());
       while((session = browserSessionGenerator.nextBrowserSession()) != null) {
         visitPageCount += session.sendWebEvent(client, "/rest/client/info.collector");
-        if(rand.nextDouble() < 0.5) {
-          session.sendADSEvent(client, "/rest/client/ads-event.collector");
-        }
+//        if(rand.nextDouble() < 0.5) {
+//          session.sendADSEvent(client, "/rest/client/ads-event.collector");
+//        }
+        session.sendADSEvent(client, "/rest/client/ads-event.collector");
         client.flush();
       }
       client.close();
