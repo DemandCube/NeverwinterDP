@@ -73,6 +73,6 @@ public class BrowserSession {
     event.setAdUrl("http://nventdata.com");
     event.setWebpageUrl(clientInfo.webpage.url);
     client.post(dest, event);
-    System.err.println("Generate ADSEvent: " + JSONSerializer.INSTANCE.toString(event));
+    System.out.println("Generate ADSEvent: " + JSONSerializer.INSTANCE.toString(event));
   }
 }
