@@ -25,6 +25,4 @@ public class OdysseyEventStatisticOperator extends DataStreamOperator {
     
     ctx.write(record);
   }
-  
-  
 }

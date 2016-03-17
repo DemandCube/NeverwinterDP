@@ -1,10 +1,8 @@
 package com.neverwinterdp.os;
 
 import java.io.Serializable;
-import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryUsage;
 import java.util.Date;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neverwinterdp.util.text.ByteUtil;

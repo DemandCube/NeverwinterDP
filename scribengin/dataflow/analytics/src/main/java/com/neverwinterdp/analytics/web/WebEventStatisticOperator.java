@@ -31,19 +31,19 @@ public class WebEventStatisticOperator extends DataStreamOperator {
   public void onInit(DataStreamOperatorContext ctx) throws Exception {
     ESClient esClient = new ESClient(connect);
     synchronized(getClass()) {
-      esWebPageStatClient = new ESObjectClient<WebPageStat>(esClient, "webpage-stat", WebPageStat.class) ;
+      esWebPageStatClient = new ESObjectClient<WebPageStat>(esClient, "analytics-webpage-stat", WebPageStat.class) ;
       esWebPageStatClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
       if(!esWebPageStatClient.isCreated()) {
         esWebPageStatClient.createIndex();
       }
       
-      esVisitorStatClient = new ESObjectClient<VisitorStat>(esClient, "webpage-visitor-stat", VisitorStat.class) ;
+      esVisitorStatClient = new ESObjectClient<VisitorStat>(esClient, "analytics-webpage-visitor-stat", VisitorStat.class) ;
       esVisitorStatClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
       if(!esVisitorStatClient.isCreated()) {
         esVisitorStatClient.createIndex();
       }
       
-      esSpentTimeStatClient = new ESObjectClient<SpentTimeStat>(esClient, "webpage-spent-time-stat", SpentTimeStat.class) ;
+      esSpentTimeStatClient = new ESObjectClient<SpentTimeStat>(esClient, "analytics-webpage-spent-time-stat", SpentTimeStat.class) ;
       esSpentTimeStatClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
       if(!esSpentTimeStatClient.isCreated()) {
         esSpentTimeStatClient.createIndex();

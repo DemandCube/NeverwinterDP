@@ -1,6 +1,7 @@
 package com.neverwinterdp.os;
 
 import java.io.IOException;
+
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -19,8 +20,8 @@ import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.sun.management.OperatingSystemMXBean;
 
+@SuppressWarnings({"restriction"})
 @Singleton
 public class OSManagement {
   private String vmName = "localhost";
@@ -129,7 +130,7 @@ public class OSManagement {
   
   public OSInfo getOSInfo() {
     
-    OSInfo osInfo = new OSInfo(ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class));
+    OSInfo osInfo = new OSInfo(ManagementFactory.getPlatformMXBean(com.sun.management.OperatingSystemMXBean.class));
     
     osInfo.setHost(vmName);
     return osInfo;
