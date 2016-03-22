@@ -118,6 +118,7 @@ public class RouteHandlerGeneric implements RouteHandler {
   }
   
   protected void write(ChannelHandlerContext ctx, HttpRequest request, FullHttpResponse response) {
+    response.headers().add("Access-Control-Allow-Origin", "*");
     boolean keepAlive = isKeepAlive(request);
     if (!keepAlive) {
       ctx.write(response).addListener(ChannelFutureListener.CLOSE);

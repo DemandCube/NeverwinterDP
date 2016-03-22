@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.neverwinterdp.analytics.odyssey.Event;
+import com.neverwinterdp.analytics.odyssey.ActionEvent;
 import com.neverwinterdp.kafka.KafkaAdminTool;
 import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.util.JSONSerializer;
@@ -84,9 +84,9 @@ public class OdysseyEventGeneratorServer {
       props.put("retry.backoff.ms", "1000");
       ProducerConfig producerConfig = new ProducerConfig(props);
       Producer<String, String> producer = new Producer<String, String>(producerConfig);
-      EventGenerator eventGenerator = new EventGenerator();
+      ActionEventGenerator eventGenerator = new ActionEventGenerator();
       for(int i = 0; i < numOfWebEvents; i++) {
-        Event event = eventGenerator.nextEvent();
+        ActionEvent event = eventGenerator.nextEvent();
         String message = JSONSerializer.INSTANCE.toString(event);
         producer.send(new KeyedMessage<String, String>(topic, event.getEventId(), message));
       }

@@ -3,14 +3,12 @@ define([
   'util/console',
   'site/UIBanner',
   'site/UIFooter',
-  'site/UINavigation',
-  'site/UIWorkspace',
-], function($, console, UIBanner, UIFooter, UINavigation, UIWorkspace) {
+  'site/UIBody'
+], function($, console, UIBanner, UIFooter, UIBody) {
   var app = {
     view : {
       UIBanner: new UIBanner(),
-      UINavigation: new UINavigation(),
-      UIWorkspace: UIWorkspace,
+      UIBody: UIBody,
       UIFooter: new UIFooter(),
     },
 
@@ -22,8 +20,7 @@ define([
 
     render: function() {
       this.view.UIBanner.render() ;
-      this.view.UINavigation.render() ;
-      this.view.UIWorkspace.render() ;
+      this.view.UIBody.render() ;
       this.view.UIFooter.render() ;
     },
 

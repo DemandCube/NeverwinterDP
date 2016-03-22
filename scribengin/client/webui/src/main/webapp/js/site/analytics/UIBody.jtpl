@@ -1,0 +1,19 @@
+<div>
+  <div id="UINavigation" class="colborder">
+    <div style="padding: 10px">
+      <div>
+        <h3 style="margin: 3px 0px">Analytics</h3>
+        <hr/>
+        <div style="margin: 10px">
+           <div><a class="ui-action onMonitor">Monitor</a></div>
+           <div><a class="ui-action onMouseReplay">Mouse Replay</a></div>
+           <div><a class="ui-action onAction">Action</a></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="UIWorkspace">workspace</div>
+  <div class="clearfix"><span/></div>
+</div>

@@ -89,6 +89,11 @@ define([
     getBeanState: function(name) {
       return this.beanStates[name] ;
     },
+
+    setBean: function(name, record) {
+      this.getBeanState(name).bean = record ;
+      this.render();
+    },
     
     setReadOnly: function(readOnly) {
       for(var name in this.beanStates) {

@@ -1,0 +1,12 @@
+{
+  "ActionEvent": {
+    "properties" : {
+      "timestamp" : { 
+        "type" : "date", "format" : "dd/MM/yyyy HH:mm:ss" 
+      },
+      "eventId" : {
+        "type" : "string", "index":"not_analyzed"
+      }
+    }
+  }
+}

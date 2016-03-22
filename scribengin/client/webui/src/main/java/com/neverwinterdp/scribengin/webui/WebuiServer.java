@@ -68,8 +68,8 @@ public class WebuiServer {
       vmClient = new LocalVMClient(registry);
     }
     ScribenginClient scribenginClient =  new ScribenginClient(vmClient);
-    server.add("/rest/vm/:path",              new VMRestRequestHandler(scribenginClient));
-    server.add("/rest/dataflow/:path",        new DataflowRestRequestHandler(scribenginClient));
+    server.add("/rest/vm/:path", new VMRestRequestHandler(scribenginClient));
+    server.add("/rest/dataflow/:path", new DataflowRestRequestHandler(scribenginClient));
     server.startAsDeamon();
   }
   

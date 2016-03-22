@@ -2,8 +2,9 @@ define([
   'jquery',
   'underscore', 
   'backbone',
+  'site/UIBody',
   'text!site/UIBanner.jtpl'
-], function($, _, Backbone, BannerTmpl) {
+], function($, _, Backbone, UIBody, BannerTmpl) {
   var UIBanner = Backbone.View.extend({
     el: $("#UIBanner"),
     
@@ -17,6 +18,17 @@ define([
       var params = { 
       } ;
       $(this.el).html(this._template(params));
+    },
+
+    events: {
+      'click .onSelectPlugin': 'onSelectPlugin'
+    },
+    
+    onSelectPlugin: function(evt) {
+      var name = $(evt.target).attr('plugin') ;
+      require(['site/' + name + '/UIBody'], function(UIBodyComponent) { 
+        UIBody.setUIBody(UIBodyComponent);
+      }) ;
     }
   });
   

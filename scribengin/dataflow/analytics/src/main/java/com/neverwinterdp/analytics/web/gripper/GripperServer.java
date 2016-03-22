@@ -20,6 +20,9 @@ public class GripperServer {
   @Parameter(names = "--ads-event-topic", description = "")
   private String adsEventTopic = "ads.input";
   
+  @Parameter(names = "--odyssey-event-topic", description = "")
+  private String odysseyEventTopic = "odyssey.input";
+  
   private HttpServer server ;
   
   public GripperServer() { }
@@ -46,8 +49,14 @@ public class GripperServer {
   public void start() throws Exception {
     server = new HttpServer();
     server.setPort(port).setNumberOfWorkers(numOfWorkers);
-    server.add("/rest/client/info.collector", new ClientInfoCollectorHandlerExt(kafkaZKConnects, webEventTopic));
-    server.add("/rest/client/ads-event.collector", new AdsEventCollectorHandler(kafkaZKConnects, adsEventTopic));
+    server.add("/rest/client/info.collector",        new ClientInfoCollectorHandlerExt(kafkaZKConnects, webEventTopic));
+    server.add("/rest/client/ads-event.collector",   new AdsEventCollectorHandler(kafkaZKConnects, adsEventTopic));
+    
+    server.add("/rest/odyssey/mouse-move.collector", new OdysseyMouseMoveEventCollectorHandler(kafkaZKConnects, odysseyEventTopic));
+    server.add("/rest/odyssey/action.collector", new OdysseyActionEventCollectorHandler(kafkaZKConnects, odysseyEventTopic));
+    
+    server.add("/rest/odyssey/action.list", new OdysseyActionEventListHandler(new String[] {"localhost:9300"}));
+    server.add("/rest/odyssey/mouse-move.list", new OdysseyMouseMoveEventListHandler(new String[] {"localhost:9300"}));
     server.startAsDeamon();
   }
   

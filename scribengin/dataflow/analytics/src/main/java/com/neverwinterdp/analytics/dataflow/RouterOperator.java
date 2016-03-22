@@ -21,7 +21,7 @@ public class RouterOperator extends DataStreamOperator {
   }
   
   void routeOdysseyEvent(DataStreamOperatorContext ctx, Message mesg) throws Exception {
-    ctx.write("router-to-odyssey.statistic", mesg);
+    ctx.write("router-to-odyssey.event", mesg);
   }
   
   void routeADSEvent(DataStreamOperatorContext ctx, Message mesg) throws Exception {

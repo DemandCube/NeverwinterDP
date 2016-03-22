@@ -1,9 +1,0 @@
-<div>
-  <h3 style="margin: 3px 0px">Dataflow</h3>
-  <hr/>
-
-  <div style="margin: 10px">
-    <div><span class="ui-action onSelectUIActiveDataflow">Active Dataflow</span></div>
-    <div><span class="ui-action onSelectUIHistoryDataflow">History Dataflow</span></div>
-  </div>
-<div>

@@ -1,5 +1,7 @@
 package com.neverwinterdp.es;
 
+import static org.elasticsearch.index.query.QueryBuilders.*;
+
 import java.util.Map;
 
 import org.elasticsearch.ElasticsearchException;
@@ -110,6 +112,14 @@ public class ESObjectClient<T> {
 
   public SearchResponse search(BaseQueryBuilder xqb, int from, int to) throws ElasticsearchException {
     return search(xqb, false, from, to);
+  }
+
+  public SearchResponse searchTerm(String field, String exp, int from, int to) throws ElasticsearchException {
+    return search(termQuery(field, exp), false, from, to);
+  }
+  
+  public SearchResponse searchTermByRegex(String field, String exp, int from, int to) throws ElasticsearchException {
+    return search(regexpQuery(field, exp), false, from, to);
   }
 
   public T getIDocument(SearchHit hit) throws ElasticsearchException {

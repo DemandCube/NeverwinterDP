@@ -4,12 +4,14 @@
   </div>
 
   <div style="float: right; padding-top: 3px">
-    <a class="ui-action" href="/sample/index.html">Home</a> |
-    <a class="ui-action" href="/sample/index.html">Kibana</a>
+    <a class="ui-action onSelectPlugin" plugin="Home">Home</a> |
+    <a class="ui-action onSelectPlugin" plugin="vm">VM</a> |
+    <a class="ui-action onSelectPlugin" plugin="scribengin">Scribengin</a> |
+    <a class="ui-action onSelectPlugin" plugin="analytics">Analytics</a> |
+    <a class="ui-action onSelectPlugin" plugin="uidemo">UI Demo</a>
   </div>
 
   <div class="clearfix"><span/></div>
-
   <hr/>
 <div>
 

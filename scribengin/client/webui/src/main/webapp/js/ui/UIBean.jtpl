@@ -101,11 +101,11 @@
         </div>
 
         <div style="float: right">
-          <a class="ui-action onRestoreBean">Restore</a>
+          <a class="ui-action onRestoreBean">Reset</a>
           <%if(deletable) {%>
             <a class="ui-action onDeleteBean">Delete</a>
           <%}%>
-          <a class="ui-action onViewMode">OK</a>
+          <a class="ui-action onViewMode">View</a>
           
           <%if(beanConfig.edit != null && !beanConfig.edit.disable) {%>
             <%for(var i = 0; i < beanConfig.edit.actions.length; i++) {%>

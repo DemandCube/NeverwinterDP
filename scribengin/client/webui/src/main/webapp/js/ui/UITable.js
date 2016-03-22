@@ -333,7 +333,7 @@ define([
             fieldVal = bean[filterField] ;
           }
 
-          if(fieldVal.indexOf(filterVal) >= 0) {
+          if(fieldVal != null && fieldVal.indexOf(filterVal) >= 0) {
             holder.push(beanState) ;
           }
         }

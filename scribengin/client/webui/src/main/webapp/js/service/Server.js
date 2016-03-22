@@ -1,6 +1,7 @@
 define([
   'jquery'
 ], function($) {
+
   /**@type service.Server */
   Server = {
     /**@memberOf service.Server */
@@ -62,8 +63,27 @@ define([
       $.ajax({ 
         type: "GET",
         dataType: "json",
-        url: restPath,
+        url: restPathWithParams,
         data: params ,
+        async: false ,
+        error: function(data) {  
+          console.log("Error:") ; 
+          console.log(data) ; 
+        },
+        success: function(data) {  returnData = data ; }
+      });
+      return returnData ;
+    },
+
+    /**@memberOf service.Server */
+    restGETJsonpPush : function(restPath, obj) {
+      var restPathWithJsonp = restPath + "?jsonp=" + encodeURIComponent(JSON.stringify(obj));
+      var returnData = null ;
+      $.ajax({ 
+        type: "GET",
+        dataType: "json",
+        url: restPathWithJsonp,
+        data: {} ,
         async: false ,
         error: function(data) {  
           console.log("Error:") ; 
@@ -75,15 +95,17 @@ define([
     },
     
     /**@memberOf service.Server */
-    restPOST : function(path, params) {
+    restPOST : function(path, params, crossDomain) {
       var returnData = null ;
       $.ajax({ 
         async: false ,
         type: "POST",
+        crossDomain: crossDomain,
         dataType: "json",
-        contentType: "application/json; charset=utf-8",
+        //contentType: "application/json; charset=utf-8",
         url: path,
         data:  JSON.stringify(params) ,
+
         error: function(data) {  
           console.debug("Error: \n" + JSON.stringify(data)) ; 
         },

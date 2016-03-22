@@ -3,8 +3,9 @@ package com.neverwinterdp.analytics.dataflow;
 import com.neverwinterdp.analytics.AnalyticsConfig;
 import com.neverwinterdp.analytics.ads.ADSEvent;
 import com.neverwinterdp.analytics.ads.ADSEventStatisticOperator;
-import com.neverwinterdp.analytics.odyssey.Event;
-import com.neverwinterdp.analytics.odyssey.OdysseyEventStatisticOperator;
+import com.neverwinterdp.analytics.odyssey.ActionEvent;
+import com.neverwinterdp.analytics.odyssey.MouseMoveEvent;
+import com.neverwinterdp.analytics.odyssey.OdysseyOperator;
 import com.neverwinterdp.analytics.web.WebEvent;
 import com.neverwinterdp.analytics.web.WebEventJunkOperator;
 import com.neverwinterdp.analytics.web.WebEventStatisticOperator;
@@ -59,9 +60,13 @@ public class AanalyticsDataflowBuilder {
     
     DataSet<WebEvent> nullDevDs = dfl.createOutput(new NullDevStorageConfig());
     
-    ESStorageConfig esOdysseyOutputStorageConfig = 
-        new ESStorageConfig("odyssey.output", config.dataflowOdysseyOutputIndex, config.esAddresses, Event.class);
-    DataSet<WebEvent> esOdysseyOutputDs = dfl.createOutput(esOdysseyOutputStorageConfig);
+    ESStorageConfig esOdysseyActionEventOutputStorageConfig = 
+        new ESStorageConfig("odyssey.action-event", "odyssey-action-event", config.esAddresses, ActionEvent.class);
+    DataSet<WebEvent> esActionEventOutputDs = dfl.createOutput(esOdysseyActionEventOutputStorageConfig);
+   
+    ESStorageConfig esOdysseyMouseMoveEventOutputStorageConfig = 
+        new ESStorageConfig("odyssey.mouse-move", "odyssey-mouse-move", config.esAddresses, MouseMoveEvent.class);
+    DataSet<WebEvent> esMouseMoveEventOutputDs = dfl.createOutput(esOdysseyMouseMoveEventOutputStorageConfig);
     
     ESStorageConfig esADSOutputStorageConfig = 
         new ESStorageConfig("ads.output", "ads-unique-visitor", config.esAddresses, ADSEvent.class);
@@ -70,7 +75,7 @@ public class AanalyticsDataflowBuilder {
     Operator<WebEvent, WebEvent> routerOp   = dfl.createOperator("router", RouterOperator.class);
     Operator<WebEvent, WebEvent> webStatisticOp  = dfl.createOperator("web.statistic", WebEventStatisticOperator.class);
     Operator<WebEvent, WebEvent> adsStatisticOp  = dfl.createOperator("ads.statistic", ADSEventStatisticOperator.class);
-    Operator<WebEvent, WebEvent> odysseyStatisticOp = dfl.createOperator("odyssey.statistic", OdysseyEventStatisticOperator.class);
+    Operator<WebEvent, WebEvent> odysseyEventOp = dfl.createOperator("odyssey.event", OdysseyOperator.class);
     Operator<WebEvent, WebEvent> webJunkOp       = dfl.createOperator("web.junk", WebEventJunkOperator.class);
     
     odysseyEventInputDs.useRawReader().connect(routerOp);
@@ -81,14 +86,15 @@ public class AanalyticsDataflowBuilder {
       connect(webJunkOp).
       connect(webStatisticOp).
       connect(adsStatisticOp).
-      connect(odysseyStatisticOp);
+      connect(odysseyEventOp);
     
     webJunkOp.connect(nullDevDs);
     webStatisticOp.connect(nullDevDs);
     
     adsStatisticOp.connect(esADSOutputDs);
     
-    odysseyStatisticOp.connect(esOdysseyOutputDs);
+    odysseyEventOp.connect(esActionEventOutputDs);
+    odysseyEventOp.connect(esMouseMoveEventOutputDs);
     return dfl;
   }
   

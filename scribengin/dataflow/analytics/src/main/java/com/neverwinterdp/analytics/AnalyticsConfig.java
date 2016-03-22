@@ -63,9 +63,6 @@ public class AnalyticsConfig {
   @Parameter(names = "--dataflow-num-of-executor-per-worker", description="")
   public int    dataflowNumOfExecutorPerWorker = 6;
   
-  @Parameter(names = "--dataflow-odyssey-output-index", description="")
-  public String dataflowOdysseyOutputIndex = "odyssey-event";
- 
   @Parameter(names = "--dataflow-ads-input-topic", description="")
   public String dataflowADSInputTopic = "ads.input";
   

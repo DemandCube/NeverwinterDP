@@ -1,0 +1,28 @@
+<div>
+  <div id="UINavigation" class="colborder">
+    <div style="padding: 10px">
+      <div>
+        <h3 style="margin: 3px 0px">Dataflows</h3>
+        <hr/>
+        <div style="margin: 10px">
+           <div><a class="ui-action onSelectUIActiveDataflow" plugin="onSelectUIActiveDataflow">Active Dataflows</a></div>
+           <div><a class="ui-action onSelectUIHistoryDataflow" plugin="onSelectUIHistoryDataflow">History Dataflows</a></div>
+           <div><a class="ui-action onSelectUIHistoryDataflow" plugin="onSelectUIHistoryDataflow">Kibana Report</a></div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="margin: 3px 0px">Analytics</h3>
+        <hr/>
+        <div style="margin: 10px">
+           <div><a class="ui-action onSelectUIActiveDataflow" plugin="ActiveVMs">Action</a></div>
+           <div><a class="ui-action onSelectUIActiveDataflow" plugin="ActiveVMs">Mouse Replay</a></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="UIWorkspace">scribengin workspace </div>
+  <div class="clearfix"><span/></div>
+</div>
