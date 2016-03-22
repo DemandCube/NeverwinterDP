@@ -25,6 +25,7 @@ define([
     },
 
     reload: function() {
+      var ROOT_CONTEXT = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/"));
       window.location = ROOT_CONTEXT + "/index.html" ;
     }
   } ;

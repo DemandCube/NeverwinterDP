@@ -1,5 +1,3 @@
-var ROOT_CONTEXT = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/"));
-
 var JSLIBS = "libs" ;
 
 require.config({
