@@ -40,8 +40,8 @@ define([
       'click .onEditVisualization': 'onEditVisualization'
     },
 
-    onSelectTimeLast15min: function(evt) { this.setTimeParam("time:(from:now-15min,mode:quick,to:now)"); },
-    onSelectTimeLast30min: function(evt) { this.setTimeParam("time:(from:now-30min,mode:quick,to:now)"); },
+    onSelectTimeLast15min: function(evt) { this.setTimeParam("time:(from:now-15m,mode:quick,to:now)"); },
+    onSelectTimeLast30min: function(evt) { this.setTimeParam("time:(from:now-30m,mode:quick,to:now)"); },
 
     onSelectTimeLast1hour: function(evt) { this.setTimeParam("time:(from:now-1h,mode:quick,to:now)"); },
     onSelectTimeLast4hour: function(evt) { this.setTimeParam("time:(from:now-4h,mode:quick,to:now)"); },
