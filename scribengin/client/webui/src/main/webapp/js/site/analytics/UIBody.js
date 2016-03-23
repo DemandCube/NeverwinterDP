@@ -5,8 +5,9 @@ define([
   'ui/UIBreadcumbs',
   'site/analytics/UIMousePlayback',
   'site/analytics/UIAction',
+  'site/analytics/UIUserInfo',
   'text!site/analytics/UIBody.jtpl'
-], function($, _, Backbone, UIBreadcumbs, UIMousePlayback, UIAction, Template) {
+], function($, _, Backbone, UIBreadcumbs, UIMousePlayback, UIAction, UIUserInfo, Template) {
   var UIBody = Backbone.View.extend({
     el: $("#UIBody"),
     
@@ -22,8 +23,20 @@ define([
     },
 
     events: {
+      'click .onSelectDiagram':  'onSelectDiagram',
+
+      'click .onSelectUserInfoInput':  'onSelectUserInfoInput',
       'click .onMouseReplay':  'onMouseReplay',
       'click .onAction': 'onAction'
+    },
+
+    onSelectDiagram: function(evt) {
+      this.render();
+    },
+
+    onSelectUserInfoInput: function(evt) {
+      var uiUserInfo = new UIUserInfo();
+      this._workspace(uiUserInfo);
     },
     
     onMouseReplay: function(evt) {
@@ -45,5 +58,5 @@ define([
     }
   });
   
-  return new UIBody() ;
+  return new UIBody();
 });

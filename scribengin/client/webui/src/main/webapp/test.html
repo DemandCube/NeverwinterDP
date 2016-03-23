@@ -9,7 +9,8 @@
     <script src="js/service/InfoCollectorService.js"></script>
     <script src="js/service/ADSService.js"></script>
     <script>
-      var adsServiceUrl = "http://192.168.1.13:7081/rest/client/ads-event.collector";
+      GRIPPER_REST_SERVER =  "http://localhost:7081";
+      var adsServiceUrl = GRIPPER_REST_SERVER + "/rest/client/ads-event.collector";
       var adsService = new ADSService(adsServiceUrl);
     </script>
   </head>
@@ -40,7 +41,7 @@
       </pre>
 
       <script>
-        var ciServiceUrl = "http://192.168.1.13:7081/rest/client/info.collector";
+        var ciServiceUrl = GRIPPER_REST_SERVER + "/rest/client/info.collector";
         var infoCollectorService = new InfoCollectorService(ciServiceUrl);
       </script>
     <div>

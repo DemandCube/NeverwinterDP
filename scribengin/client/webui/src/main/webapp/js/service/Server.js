@@ -44,6 +44,7 @@ define([
     
     /**@memberOf service.Server */
     restGET : function(restPath, params) {
+      /*
       var restPathWithParams = restPath;
       var firstParam = true;
       for (prop in params) {
@@ -58,12 +59,13 @@ define([
           restPathWithParams += '&amp;' + prop + '=' + params[prop];
         }
       }
+      */
 
       var returnData = null ;
       $.ajax({ 
         type: "GET",
         dataType: "json",
-        url: restPathWithParams,
+        url: restPath,
         data: params ,
         async: false ,
         error: function(data) {  

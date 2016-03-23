@@ -13,16 +13,12 @@ require.config({
   },
   
   shim: {
-    jquery: {
-      exports: '$'
-    },
+    jquery: { exports: '$' },
     jqueryui: {
       deps: ["jquery"],
       exports: "jqueryui"
     },
-    underscore: {
-      exports: '_'
-    },
+    underscore: { exports: '_' },
     backbone: {
       deps: ["underscore", "jquery"],
       exports: "Backbone"

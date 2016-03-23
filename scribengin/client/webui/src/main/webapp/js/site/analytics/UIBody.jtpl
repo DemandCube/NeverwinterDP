@@ -1,19 +1,41 @@
 <div>
   <div id="UINavigation" class="colborder">
     <div style="padding: 10px">
-      <div>
-        <h3 style="margin: 3px 0px">Analytics</h3>
-        <hr/>
-        <div style="margin: 10px">
-           <div><a class="ui-action onMonitor">Monitor</a></div>
-           <div><a class="ui-action onMouseReplay">Mouse Replay</a></div>
-           <div><a class="ui-action onAction">Action</a></div>
-        </div>
+      <h3 style="margin: 3px 0px">Introduction</h3>
+      <hr/>
+      <div style="margin: 10px">
+        <div><a class="ui-action onSelectDiagram">Introduction To Analytics</a></div>
       </div>
 
+      <h3 style="margin: 3px 0px">Reports</h3>
+      <hr/>
+      <div style="margin: 10px">
+         <div><a class="ui-action onAction">Web Events</a></div>
+         <div><a class="ui-action onMouseReplay">Mouse Replay</a></div>
+         <div><a class="ui-action onAction">Advertising</a></div>
+      </div>
+
+      <h3 style="margin: 3px 0px">Input</h3>
+      <hr/>
+      <div style="margin: 10px">
+         <div><a class="ui-action onSelectUserInfoInput">User Info</a></div>
+         <div><a class="ui-action onSelectWebEventInput">Web Event</a></div>
+         <div><a class="ui-action onAction">User Action</a></div>
+         <div><a class="ui-action onMouseReplay">Mouse Replay</a></div>
+         <div><a class="ui-action onAction">Advertising</a></div>
+      </div>
     </div>
   </div>
 
-  <div id="UIWorkspace">workspace</div>
+  <div id="UIWorkspace">
+    <pre>
+      
+
+      -------------
+      |           |
+      -------------
+
+    </pre>
+  </div>
   <div class="clearfix"><span/></div>
 </div>
