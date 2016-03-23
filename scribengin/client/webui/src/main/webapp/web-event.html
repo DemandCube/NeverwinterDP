@@ -4,12 +4,7 @@
     <title>NeverwinterDP</title>
     <link rel="stylesheet" href="css/blueprint.css">
 
-    <script src="js/service/ADSService.js"></script>
-    <script>
-      GRIPPER_REST_SERVER =  "http://localhost:7081";
-      var adsServiceUrl = GRIPPER_REST_SERVER + "/rest/client/ads-event.collector";
-      var adsService = new ADSService(adsServiceUrl);
-    </script>
+    <script src="js/EnvConfig.js"></script>
   </head>
 
   <body style="padding: 15px">
@@ -21,6 +16,11 @@
     <div style="margin: 10px 0px; height: 400px">
       <div style="float: right; width: 250px; height: 100%;  border: 3px dashed lightgray; cursor: pointer" onclick="javascript:adsService.onClickADS('http://nventdata.com')">
         <div style="font-size: 20px; text-align:center; vertical-align: middle; line-height: 50px">
+          <script src="js/service/ADSService.js"></script>
+          <script>
+            var adsServiceUrl = Env.gripper.server + "/rest/client/ads-event.collector";
+            var adsService = new ADSService(adsServiceUrl);
+          </script>
           Advertising
         </div>
         <div style="padding: 10px; text-align: justify">
@@ -36,7 +36,7 @@
         <div style="text-align: justify; padding: 10px 50px">
           <script src="js/service/InfoCollectorService.js"></script>
           <script>
-            var ciServiceUrl = GRIPPER_REST_SERVER + "/rest/client/info.collector";
+            var ciServiceUrl = Env.gripper.server + "/rest/client/info.collector";
             var infoCollectorService = new InfoCollectorService(ciServiceUrl);
 
             function showInfo() {
