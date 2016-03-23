@@ -31,7 +31,7 @@ public class VisitorStat {
     this.visitorId  = visitorId;
   }
   
-  public String uniqueId() { return SEED_ID + "-" +ID_TRACKER.incrementAndGet(); }
+  public String uniqueId() { return SEED_ID + "-" + ID_TRACKER.incrementAndGet(); }
   
   public String hostVistorId() { return host + ":" + visitorId; }
   

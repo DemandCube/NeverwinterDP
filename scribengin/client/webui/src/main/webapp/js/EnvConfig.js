@@ -1,4 +1,10 @@
 Env = {
+  user: {
+    userId:    "neverwinterdp",
+    visitorId: "",
+    sessionId: "",
+  },
+
   gripper: {
     server: "http://localhost:7081"
   },

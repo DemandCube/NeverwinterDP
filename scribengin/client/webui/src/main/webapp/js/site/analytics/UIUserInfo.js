@@ -2,8 +2,9 @@ define([
   'jquery', 
   'underscore', 
   'backbone',
+  'Env',
   'ui/UIBean',
-], function($, _, Backbone, UIBean) {
+], function($, _, Backbone, Env, UIBean) {
   
   var UIUserInfo = UIBean.extend({
     label: "User Info",
@@ -12,12 +13,9 @@ define([
         record: {
           name: 'record', label: 'User Info',
           fields: [
-            { 
-              field: "userId",   label: "User Id", disable: true
-            },
-            { 
-              field: "sessionId",   label: "Session Id", required: true
-            }
+            { field: "userId",   label: "User Id", required: "true" },
+            { field: "visistorId",   label: "Visitor Id", required: "true" },
+            { field: "sessionId",   label: "Session Id", required: true }
           ],
           
           edit: {
@@ -34,13 +32,8 @@ define([
       }
     },
 
-
     onInit: function(options) {
-      var user = {
-        userId: "user",
-        sessionId: "session-1"
-      };
-      this.bind('record', {}, true) ;
+      this.bind('record', Env.user, true) ;
     }
   });
   

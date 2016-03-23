@@ -69,7 +69,7 @@ public class AanalyticsDataflowBuilder {
     DataSet<WebEvent> esMouseMoveEventOutputDs = dfl.createOutput(esOdysseyMouseMoveEventOutputStorageConfig);
     
     ESStorageConfig esADSOutputStorageConfig = 
-        new ESStorageConfig("ads.output", "ads-unique-visitor", config.esAddresses, ADSEvent.class);
+        new ESStorageConfig("ads.output", "analytics-ads-unique-visitor", config.esAddresses, ADSEvent.class);
     DataSet<WebEvent> esADSOutputDs = dfl.createOutput(esADSOutputStorageConfig);
     
     Operator<WebEvent, WebEvent> routerOp   = dfl.createOperator("router", RouterOperator.class);
