@@ -10,9 +10,10 @@
       <h3 style="margin: 3px 0px">Reports</h3>
       <hr/>
       <div style="margin: 10px">
-         <div><a class="ui-action onAction">Web Events</a></div>
-         <div><a class="ui-action onMouseReplay">Mouse Replay</a></div>
+         <div><a class="ui-action onAction">Web Event</a></div>
          <div><a class="ui-action onAction">Advertising</a></div>
+         <div><a class="ui-action onMouseReplay">Mouse Replay</a></div>
+         <div><a class="ui-action onAction">User Action</a></div>
       </div>
 
       <h3 style="margin: 3px 0px">Input</h3>
@@ -22,7 +23,6 @@
          <div><a class="ui-action onSelectWebEventInput">Web Event</a></div>
          <div><a class="ui-action onAction">User Action</a></div>
          <div><a class="ui-action onMouseReplay">Mouse Replay</a></div>
-         <div><a class="ui-action onAction">Advertising</a></div>
       </div>
     </div>
   </div>

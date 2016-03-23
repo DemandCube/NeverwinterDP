@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>NeverwinterDP</title>
+    <link rel="stylesheet" href="css/blueprint.css">
+
+    <script src="js/service/ADSService.js"></script>
+    <script>
+      GRIPPER_REST_SERVER =  "http://localhost:7081";
+      var adsServiceUrl = GRIPPER_REST_SERVER + "/rest/client/ads-event.collector";
+      var adsService = new ADSService(adsServiceUrl);
+    </script>
+  </head>
+
+  <body style="padding: 15px">
+
+    <div style="border: 3px dashed lightgray; font-size: 20px; text-align:center; vertical-align: middle; line-height: 50px;">
+      Banner
+    </div>
+
+    <div style="margin: 10px 0px; height: 400px">
+      <div style="float: right; width: 250px; height: 100%;  border: 3px dashed lightgray; cursor: pointer" onclick="javascript:adsService.onClickADS('http://nventdata.com')">
+        <div style="font-size: 20px; text-align:center; vertical-align: middle; line-height: 50px">
+          Advertising
+        </div>
+        <div style="padding: 10px; text-align: justify">
+          When the user click on this advertising, the user information will be captured and send back to the gripper
+        </div>
+      </div>
+
+      <div style="margin-right: 265px; border: 3px dashed lightgray; height: 100%">
+        <div style="font-size: 20px; text-align:center; vertical-align: middle; line-height: 50px">
+          Webpage Body
+        </div>
+
+        <div style="text-align: justify; padding: 10px 50px">
+          <script src="js/service/InfoCollectorService.js"></script>
+          <script>
+            var ciServiceUrl = GRIPPER_REST_SERVER + "/rest/client/info.collector";
+            var infoCollectorService = new InfoCollectorService(ciServiceUrl);
+
+            function showInfo() {
+              alert(JSON.stringify(infoCollectorService.getInfo(), null, '  '));
+            }
+          </script>
+          When this page is loaded, the web event collector service will collect the user information, browser information and send back to gripper.
+          Click here to view the information <a href="javascript:showInfo()">Click</a>
+
+        </div>
+      </div>
+      <div style="clear both"><span/></div>
+    </div>
+
+    <div style="border: 3px dashed lightgray; font-size: 20px; text-align:center; vertical-align: middle; line-height: 50px;">
+      Footer
+    </div>
+  </body>
+</html>
