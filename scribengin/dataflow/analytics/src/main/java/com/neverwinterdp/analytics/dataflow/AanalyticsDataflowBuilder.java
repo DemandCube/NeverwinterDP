@@ -61,11 +61,11 @@ public class AanalyticsDataflowBuilder {
     DataSet<WebEvent> nullDevDs = dfl.createOutput(new NullDevStorageConfig());
     
     ESStorageConfig esOdysseyActionEventOutputStorageConfig = 
-        new ESStorageConfig("odyssey.action-event", "odyssey-action-event", config.esAddresses, ActionEvent.class);
+        new ESStorageConfig("odyssey.action-event", "analytics-odyssey-action-event", config.esAddresses, ActionEvent.class);
     DataSet<WebEvent> esActionEventOutputDs = dfl.createOutput(esOdysseyActionEventOutputStorageConfig);
    
     ESStorageConfig esOdysseyMouseMoveEventOutputStorageConfig = 
-        new ESStorageConfig("odyssey.mouse-move", "odyssey-mouse-move", config.esAddresses, MouseMoveEvent.class);
+        new ESStorageConfig("odyssey.mouse-move", "analytics-odyssey-mouse-move", config.esAddresses, MouseMoveEvent.class);
     DataSet<WebEvent> esMouseMoveEventOutputDs = dfl.createOutput(esOdysseyMouseMoveEventOutputStorageConfig);
     
     ESStorageConfig esADSOutputStorageConfig = 
