@@ -35,6 +35,15 @@ public class AnalyticsLauncher {
     ScribenginShell shell = new ScribenginShell(vmClient) ;
     shell.attribute(HadoopProperties.class, hadoopProps);
 
+    KafkaAdminTool adminTool = new KafkaAdminTool("admin", config.zkConnect);
+    if(!adminTool.topicExits(config.dataflowWebInputTopic)) {
+      adminTool.createTopic(config.dataflowWebInputTopic, 2, 5);
+    }
+    
+    if(!adminTool.topicExits(config.dataflowADSInputTopic)) {
+      adminTool.createTopic(config.dataflowADSInputTopic, 2, 5);
+    }
+    
     String[] gripperServerConfig = {
       "--num-of-workers", "3", "--kafka-zk-connects", config.zkConnect
     };
@@ -49,13 +58,6 @@ public class AnalyticsLauncher {
     OdysseyEventGeneratorServer odysseyEventGeneratorServer = new OdysseyEventGeneratorServer(odysseyGeneratorConfig); 
     odysseyEventGeneratorServer.start();
 
-    KafkaAdminTool adminTool = new KafkaAdminTool("admin", config.zkConnect);
-    if(!adminTool.topicExits(config.dataflowWebInputTopic)) {
-      adminTool.createTopic(config.dataflowWebInputTopic, 2, 5);
-    }
-    if(!adminTool.topicExits(config.dataflowADSInputTopic)) {
-      adminTool.createTopic(config.dataflowADSInputTopic, 2, 5);
-    }
     String[] webEventGeneratorConfig = {
       "--gripper-server-host", "127.0.0.1", "--gripper-server-port", "7081",
       "--num-of-threads", Integer.toString(config.generatorWebNumOfThreads), 

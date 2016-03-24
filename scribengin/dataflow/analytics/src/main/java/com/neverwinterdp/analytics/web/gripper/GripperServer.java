@@ -50,6 +50,7 @@ public class GripperServer {
     server = new HttpServer();
     server.setPort(port).setNumberOfWorkers(numOfWorkers);
     server.add("/rest/client/info.collector",        new ClientInfoCollectorHandlerExt(kafkaZKConnects, webEventTopic));
+    
     server.add("/rest/client/ads-event.collector",   new AdsEventCollectorHandler(kafkaZKConnects, adsEventTopic));
     
     server.add("/rest/odyssey/mouse-move.collector", new OdysseyMouseMoveEventCollectorHandler(kafkaZKConnects, odysseyEventTopic));
