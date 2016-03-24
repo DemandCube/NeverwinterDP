@@ -16,11 +16,11 @@
       <h3 style="margin: 3px 0px">Mover Reports</h3>
       <hr/>
       <div style="margin: 10px">
-         <div><a class="ui-action onSelectWebEventStatReport">Webpage Stat</a></div>
-         <div><a class="ui-action onSelectWebEventStatReport">Webpage Visitor Stat</a></div>
-         <div><a class="ui-action onSelectWebEventStatReport">Webpage Time Spent Stat</a></div>
+         <div><a class="ui-action onSelectWebpageStatReport">Webpage Stat</a></div>
+         <div><a class="ui-action onSelectWebpageVisitorStatReport">Webpage Visitor Stat</a></div>
+         <div><a class="ui-action onSelectWebpageStatReport">Webpage Time Spent Stat</a></div>
 
-         <div><a class="ui-action onSelectAdvertisingReport">Advertising</a></div>
+         <div><a class="ui-action onSelectAdsStatReport">Advertising Stat</a></div>
          <div><a class="ui-action onSelectMouseReplayReport">Mouse Replay</a></div>
          <div><a class="ui-action onSelectActionReport">User Action</a></div>
       </div>

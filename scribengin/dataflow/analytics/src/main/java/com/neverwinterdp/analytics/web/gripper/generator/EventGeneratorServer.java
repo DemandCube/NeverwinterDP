@@ -78,7 +78,9 @@ public class EventGeneratorServer {
         session.sendWebEvent(client, "/rest/client/info.collector");
         count++ ;
         if(count % 311 == 0) {
-          session.sendADSEvent(client, "/rest/client/ads-event.collector");
+          for(int i = 0; i < rand.nextInt(5); i++) {
+            session.sendADSEvent(client, "/rest/client/ads-event.collector");
+          }
           client.flush();
         }
         if(session.hasNextWebEvent()) {
