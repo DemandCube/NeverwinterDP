@@ -36,12 +36,16 @@ public class AnalyticsLauncher {
     shell.attribute(HadoopProperties.class, hadoopProps);
 
     KafkaAdminTool adminTool = new KafkaAdminTool("admin", config.zkConnect);
+    System.out.println("BEFORE CREATE " + config.dataflowWebInputTopic);
     if(!adminTool.topicExits(config.dataflowWebInputTopic)) {
       adminTool.createTopic(config.dataflowWebInputTopic, 2, 5);
+      System.out.println(" CREATED " + config.dataflowWebInputTopic);
     }
     
+    System.out.println("BEFORE CREATE " + config.dataflowADSInputTopic);
     if(!adminTool.topicExits(config.dataflowADSInputTopic)) {
       adminTool.createTopic(config.dataflowADSInputTopic, 2, 5);
+      System.out.println(" CREATED " + config.dataflowADSInputTopic);
     }
     
     String[] gripperServerConfig = {
