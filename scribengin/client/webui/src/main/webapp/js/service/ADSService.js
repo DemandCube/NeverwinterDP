@@ -62,8 +62,9 @@ function ADSService(serviceUrl) {
 
   this.visitorId = visitCookie.getInfo().adsVisitorId
 
-  this.onClickADS = function(adUrl) {
+  this.onClickADS = function(name, adUrl) {
     var adsEvent = {
+      name: name,
       visitorId:  this.visitorId,
       adUrl:      adUrl,
       webpageUrl: window.location.href 

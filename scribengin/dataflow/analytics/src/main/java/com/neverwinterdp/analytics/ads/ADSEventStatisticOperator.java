@@ -13,8 +13,8 @@ public class ADSEventStatisticOperator extends DataStreamOperator {
     UrlParser urlParser = new UrlParser(event.getWebpageUrl());
     event.setHost(urlParser.getHost());
     event.setWebpageUrl(urlParser.getUrl());
-    String key = event.getWebpageUrl() + "#" + event.getAdUrl() + "#" + event.getVisitorId();
-    record.setKey(key);
+    String visitId = event.getWebpageUrl() + "#" + event.getAdUrl() + "#" + event.getVisitorId();
+    event.setVisitId(visitId);
     record.setData(JSONSerializer.INSTANCE.toBytes(event));
     ctx.write(record);
   }
