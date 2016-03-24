@@ -32,7 +32,7 @@ public class MetricSampler {
     service.add(OSInfo.class,          "neverwinterdp-monitor-os");
     service.add(ThreadCountInfo.class, "neverwinterdp-monitor-thread");
     service.add(ClassLoadedInfo.class, "neverwinterdp-monitor-classloader");
-    service.add(JHiccupInfo.class, "neverwinterdp-monitor-hiccup");
+    service.add(JHiccupInfo.class,     "neverwinterdp-monitor-hiccup");
     
     Random r = new Random();
     while (true) {

@@ -66,9 +66,6 @@ public class AnalyticsConfig {
   @Parameter(names = "--dataflow-ads-input-topic", description="")
   public String dataflowADSInputTopic = "ads.input";
   
-  @Parameter(names = "--dataflow-ads-output-index", description="")
-  public String dataflowADSOutputIndex = "ads-event";
-  
   @Parameter(names = "--wait-for-input", description="")
   public boolean waitForInput = false;
 }
