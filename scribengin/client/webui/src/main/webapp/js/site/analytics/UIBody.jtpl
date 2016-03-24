@@ -29,7 +29,7 @@
       <hr/>
       <div style="margin: 10px">
          <div><a class="ui-action onSelectUserInfoInput">User Info</a></div>
-         <div><a class="ui-action onSelectWebEventInput">Web Event</a></div>
+         <div><a class="ui-action onSelectWebEventInput">Webpage Event</a></div>
          <div><a class="ui-action onAction">User Action</a></div>
          <div><a class="ui-action onMouseReplay">Mouse Replay</a></div>
       </div>

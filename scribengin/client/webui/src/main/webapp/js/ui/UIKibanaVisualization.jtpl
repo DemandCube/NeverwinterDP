@@ -1,6 +1,7 @@
 <div>
   <div style="margin: 5px 0px">
     <div style="float: left">
+      <strong>Time:</strong>
       <a class="ui-action onSelectTimeLast15min">15 Min</a> -
       <a class="ui-action onSelectTimeLast30min">30 Min</a> -
       <a class="ui-action onSelectTimeLast1hour">1 Hour</a> -
