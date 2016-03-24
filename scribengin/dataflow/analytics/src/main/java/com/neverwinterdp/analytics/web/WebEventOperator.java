@@ -3,6 +3,8 @@ package com.neverwinterdp.analytics.web;
 import java.security.MessageDigest;
 import java.util.Date;
 
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperator;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
@@ -11,7 +13,7 @@ import com.neverwinterdp.util.UrlParser;
 
 public class WebEventOperator extends DataStreamOperator {
   private MessageDigest md5Digest ;
-  
+  private HexBinaryAdapter hexBinaryAdapter = new HexBinaryAdapter();
   public void onInit(DataStreamOperatorContext ctx) throws Exception {
     md5Digest = MessageDigest.getInstance("MD5");
   }
@@ -30,7 +32,11 @@ public class WebEventOperator extends DataStreamOperator {
     wVisit.setHost(urlParser.getHost());
     wVisit.setPath(urlParser.getPath());
     wVisit.setClientIpAddress(webEvent.getClientInfo().user.visitorId);
-    wVisit.setVisitId(new String(md5Digest.digest((urlParser.getUrl() + wVisit.getVisitorId()).getBytes())));
+    byte[] bytes = md5Digest.digest((urlParser.getUrl() + wVisit.getVisitorId()).getBytes());
+    String visitId = hexBinaryAdapter.marshal(bytes);
+
+    wVisit.setVisitId(visitId);
+    
     wVisit.setSpentTime(webEvent.getClientInfo().user.spentTime);
     mesg.setData(JSONSerializer.INSTANCE.toBytes(wVisit));
     ctx.write(mesg);
