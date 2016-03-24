@@ -74,7 +74,7 @@ public class EventGeneratorServer {
       ClientSession session = null;
       int count = 0;
       Random rand = new Random();
-      while((session = clientSessionManager.pollClientSession()) != null) {
+      while((session = clientSessionManager.takeClientSession()) != null) {
         session.sendWebEvent(client, "/rest/client/info.collector");
         count++ ;
         if(count % 311 == 0) {
@@ -84,7 +84,7 @@ public class EventGeneratorServer {
           client.flush();
         }
         if(session.hasNextWebEvent()) {
-          clientSessionManager.offerClientSession(session);
+          clientSessionManager.releaseClientSession(session);
         }
         Thread.sleep(rand.nextInt(10) + 1);
       }
