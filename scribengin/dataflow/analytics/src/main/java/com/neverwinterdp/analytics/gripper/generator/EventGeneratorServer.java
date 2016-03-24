@@ -1,4 +1,4 @@
-package com.neverwinterdp.analytics.web.gripper.generator;
+package com.neverwinterdp.analytics.gripper.generator;
 
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
-import com.neverwinterdp.analytics.web.gripper.GripperAck;
+import com.neverwinterdp.analytics.gripper.GripperAck;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.ResponseHandler;
 import com.neverwinterdp.util.JSONSerializer;
@@ -78,7 +78,7 @@ public class EventGeneratorServer {
         session.sendWebEvent(client, "/rest/client/info.collector");
         count++ ;
         if(count % 311 == 0) {
-          for(int i = 0; i < rand.nextInt(5); i++) {
+          for(int i = 0; i < rand.nextInt(10); i++) {
             session.sendADSEvent(client, "/rest/client/ads-event.collector");
           }
           client.flush();

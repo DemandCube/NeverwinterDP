@@ -8,7 +8,8 @@ import com.neverwinterdp.analytics.odyssey.MouseMoveEvent;
 import com.neverwinterdp.analytics.odyssey.OdysseyOperator;
 import com.neverwinterdp.analytics.web.WebEvent;
 import com.neverwinterdp.analytics.web.WebEventJunkOperator;
-import com.neverwinterdp.analytics.web.WebEventStatisticOperator;
+import com.neverwinterdp.analytics.web.WebEventOperator;
+import com.neverwinterdp.analytics.web.WebpageVisit;
 import com.neverwinterdp.message.TrackingWindowReport;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.DataSet;
@@ -68,28 +69,31 @@ public class AanalyticsDataflowBuilder {
         new ESStorageConfig("odyssey.mouse-move", "analytics-odyssey-mouse-move", config.esAddresses, MouseMoveEvent.class);
     DataSet<WebEvent> esMouseMoveEventOutputDs = dfl.createOutput(esOdysseyMouseMoveEventOutputStorageConfig);
     
+    DataSet<WebEvent> esWebVisitDS = 
+      dfl.createOutput(new ESStorageConfig("web.visit", "analytics-webpage-visit", config.esAddresses, WebpageVisit.class));
+    
     ESStorageConfig esADSOutputStorageConfig = 
         new ESStorageConfig("ads.output", "analytics-ads-unique-visitor", config.esAddresses, ADSEvent.class);
     DataSet<WebEvent> esADSOutputDs = dfl.createOutput(esADSOutputStorageConfig);
     
     Operator<WebEvent, WebEvent> routerOp   = dfl.createOperator("router", RouterOperator.class);
-    Operator<WebEvent, WebEvent> webStatisticOp  = dfl.createOperator("web.statistic", WebEventStatisticOperator.class);
+    Operator<WebEvent, WebEvent> webEventOp  = dfl.createOperator("web.statistic", WebEventOperator.class);
     Operator<WebEvent, WebEvent> adsStatisticOp  = dfl.createOperator("ads.statistic", ADSEventStatisticOperator.class);
     Operator<WebEvent, WebEvent> odysseyEventOp = dfl.createOperator("odyssey.event", OdysseyOperator.class);
-    Operator<WebEvent, WebEvent> webJunkOp       = dfl.createOperator("web.junk", WebEventJunkOperator.class);
+    Operator<WebEvent, WebEvent> webEventJunkOp = dfl.createOperator("web.junk", WebEventJunkOperator.class);
     
     odysseyEventInputDs.useRawReader().connect(routerOp);
     webEventInputDs.useRawReader().connect(routerOp);
     adsEventInputDs.useRawReader().connect(routerOp);
     
     routerOp.
-      connect(webJunkOp).
-      connect(webStatisticOp).
+      connect(webEventJunkOp).
+      connect(webEventOp).
       connect(adsStatisticOp).
       connect(odysseyEventOp);
     
-    webJunkOp.connect(nullDevDs);
-    webStatisticOp.connect(nullDevDs);
+    webEventJunkOp.connect(nullDevDs);
+    webEventOp.connect(esWebVisitDS);
     
     adsStatisticOp.connect(esADSOutputDs);
     

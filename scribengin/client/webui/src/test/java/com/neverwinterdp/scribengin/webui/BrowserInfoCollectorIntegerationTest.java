@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.analytics.web.gripper.GripperServer;
+import com.neverwinterdp.analytics.gripper.GripperServer;
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 /**

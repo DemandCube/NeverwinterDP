@@ -6,9 +6,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.analytics.dataflow.AanalyticsDataflowBuilder;
+import com.neverwinterdp.analytics.gripper.GripperServer;
+import com.neverwinterdp.analytics.gripper.generator.EventGeneratorServer;
 import com.neverwinterdp.analytics.odyssey.generator.OdysseyEventGeneratorServer;
-import com.neverwinterdp.analytics.web.gripper.GripperServer;
-import com.neverwinterdp.analytics.web.gripper.generator.EventGeneratorServer;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.ResponseHandler;
 import com.neverwinterdp.scribengin.LocalScribenginCluster;

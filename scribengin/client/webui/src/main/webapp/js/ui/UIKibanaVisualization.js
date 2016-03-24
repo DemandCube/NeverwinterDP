@@ -37,6 +37,8 @@ define([
       'click .onSelectTimeLast90day': 'onSelectTimeLast90day',
 
       'click .onSelectTimeAll': 'onSelectTimeAll',
+
+      'click .onRefresh': 'onRefresh',
       'click .onEditVisualization': 'onEditVisualization'
     },
 
@@ -59,6 +61,10 @@ define([
     onEditVisualization: function(evt) { 
       var newUrl = this.url.replace(/embed&/, '');
       window.open(newUrl,'_blank');
+    },
+
+    onRefresh: function(timeParam) { 
+      this.render();
     },
 
 

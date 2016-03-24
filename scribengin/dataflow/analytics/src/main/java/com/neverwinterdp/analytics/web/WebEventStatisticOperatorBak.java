@@ -1,6 +1,8 @@
 package com.neverwinterdp.analytics.web;
 
+import java.security.MessageDigest;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import com.neverwinterdp.analytics.web.stat.WebPageStat;
@@ -17,7 +19,9 @@ import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.UrlParser;
 
-public class WebEventStatisticOperator extends DataStreamOperator {
+public class WebEventStatisticOperatorBak extends DataStreamOperator {
+  private MessageDigest md5Digest ;
+  
   private String[]           connect = { "elasticsearch-1" };
   
   private ESObjectClient<WebPageStat>   esWebPageStatClient;
@@ -29,6 +33,7 @@ public class WebEventStatisticOperator extends DataStreamOperator {
   private SpentTimeStatCollector spentTimeStatCollector = new SpentTimeStatCollector();
 
   public void onInit(DataStreamOperatorContext ctx) throws Exception {
+    md5Digest = MessageDigest.getInstance("MD5");
     ESClient esClient = new ESClient(connect);
     synchronized(getClass()) {
       esWebPageStatClient = new ESObjectClient<WebPageStat>(esClient, "analytics-webpage-stat", WebPageStat.class) ;
@@ -72,20 +77,21 @@ public class WebEventStatisticOperator extends DataStreamOperator {
   }
   
   @Override
-  public void process(DataStreamOperatorContext ctx, Message record) throws Exception {
-    WebEvent webEvent = JSONSerializer.INSTANCE.fromBytes(record.getData(), WebEvent.class) ;
-
+  public void process(DataStreamOperatorContext ctx, Message mesg) throws Exception {
+    WebEvent webEvent = JSONSerializer.INSTANCE.fromBytes(mesg.getData(), WebEvent.class) ;
+    UrlParser urlParser = new UrlParser(webEvent.getClientInfo().webpage.url);
+    
     Calendar cal = Calendar.getInstance();
     cal.setTimeInMillis(webEvent.getTimestamp());
     cal.set(Calendar.SECOND, 0);
     cal.set(Calendar.MILLISECOND, 0);
     
     long periodTimestamp = cal.getTimeInMillis();
-    UrlParser urlParser = new UrlParser(webEvent.getClientInfo().webpage.url);
+    
     //System.err.println("host = " + urlParser.getHost() + ", page = " + urlParser.getPath());
     webPageCollector.log(periodTimestamp, urlParser, webEvent);
     visitorStatCollector.log(periodTimestamp, urlParser.getHost(), webEvent);
     spentTimeStatCollector.log(periodTimestamp, urlParser.getHost(), webEvent);
-    ctx.write(record);
+    ctx.write(mesg);
   }
 }

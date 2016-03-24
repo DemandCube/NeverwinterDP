@@ -1,4 +1,4 @@
-package com.neverwinterdp.analytics.web.gripper;
+package com.neverwinterdp.analytics.gripper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
 import com.neverwinterdp.analytics.odyssey.ActionEvent;
+import com.neverwinterdp.analytics.odyssey.MouseMoveEvent;
 import com.neverwinterdp.es.ESClient;
 import com.neverwinterdp.es.ESObjectClient;
 import com.neverwinterdp.netty.http.rest.RestRouteHandler;
@@ -17,12 +18,12 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
-public class OdysseyActionEventListHandler extends RestRouteHandler {
+public class OdysseyMouseMoveEventListHandler extends RestRouteHandler {
   private ESObjectClient<ActionEvent>   esActionEventClient;
 
-  public OdysseyActionEventListHandler(String[] esConnects) throws Exception {
+  public OdysseyMouseMoveEventListHandler(String[] esConnects) throws Exception {
     ESClient esClient = new ESClient(esConnects);
-    esActionEventClient = new ESObjectClient<ActionEvent>(esClient, "odyssey-action-event", ActionEvent.class) ;
+    esActionEventClient = new ESObjectClient<ActionEvent>(esClient, "odyssey-mouse-move", MouseMoveEvent.class) ;
     esActionEventClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
   }
 
@@ -37,12 +38,13 @@ public class OdysseyActionEventListHandler extends RestRouteHandler {
     } else {
       searchResp  = esActionEventClient.searchTermByRegex("eventId", ".*", 0, 1000);
     }
+    
     SearchHits hits = searchResp.getHits();
-    List<ActionEvent> events = new ArrayList<>();
+    List<MouseMoveEvent> events = new ArrayList<>();
     for(int i = 0; i < hits.getTotalHits(); i++) {
       SearchHit hit = hits.getAt(i);
       String json = hit.getSourceAsString();
-      ActionEvent event = JSONSerializer.INSTANCE.fromString(json, ActionEvent.class);
+      MouseMoveEvent event = JSONSerializer.INSTANCE.fromString(json, MouseMoveEvent.class);
       events.add(event);
     }
     return events;

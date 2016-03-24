@@ -2,9 +2,9 @@ package com.neverwinterdp.analytics;
 
 import com.beust.jcommander.JCommander;
 import com.neverwinterdp.analytics.dataflow.AanalyticsDataflowBuilder;
+import com.neverwinterdp.analytics.gripper.GripperServer;
+import com.neverwinterdp.analytics.gripper.generator.EventGeneratorServer;
 import com.neverwinterdp.analytics.odyssey.generator.OdysseyEventGeneratorServer;
-import com.neverwinterdp.analytics.web.gripper.GripperServer;
-import com.neverwinterdp.analytics.web.gripper.generator.EventGeneratorServer;
 import com.neverwinterdp.kafka.KafkaAdminTool;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
@@ -36,16 +36,12 @@ public class AnalyticsLauncher {
     shell.attribute(HadoopProperties.class, hadoopProps);
 
     KafkaAdminTool adminTool = new KafkaAdminTool("admin", config.zkConnect);
-    System.out.println("BEFORE CREATE " + config.dataflowWebInputTopic);
     if(!adminTool.topicExits(config.dataflowWebInputTopic)) {
       adminTool.createTopic(config.dataflowWebInputTopic, 2, 5);
-      System.out.println(" CREATED " + config.dataflowWebInputTopic);
     }
     
-    System.out.println("BEFORE CREATE " + config.dataflowADSInputTopic);
     if(!adminTool.topicExits(config.dataflowADSInputTopic)) {
       adminTool.createTopic(config.dataflowADSInputTopic, 2, 5);
-      System.out.println(" CREATED " + config.dataflowADSInputTopic);
     }
     
     String[] gripperServerConfig = {

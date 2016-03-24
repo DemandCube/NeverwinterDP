@@ -1,4 +1,4 @@
-package com.neverwinterdp.analytics.web.gripper;
+package com.neverwinterdp.analytics.gripper;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -82,8 +82,8 @@ public class ClientInfoCollectorHandlerExt extends ClientInfoCollectorHandler {
       Iterator<WebEvent> i = webEventBuffer.values().iterator();
       while(i.hasNext()) {
         WebEvent webEvent = i.next();
-        if(currentTime - webEvent.getTimestamp() > 30000) {
-          webEvent.getClientInfo().user.spentTime = 30000;
+        if(currentTime - webEvent.getTimestamp() > 60000) {
+          webEvent.getClientInfo().user.spentTime = currentTime - webEvent.getTimestamp();
           kafkaWriter.send(kafkaTopic, webEvent, 60000);
           i.remove();
         }

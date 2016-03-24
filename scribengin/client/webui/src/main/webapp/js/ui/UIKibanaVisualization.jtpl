@@ -17,6 +17,7 @@
     </div>
 
     <div style="float: right">
+      <a class="ui-action onRefresh">Reload</a>
       <a class="ui-action onEditVisualization">Edit</a>
     </div>
 

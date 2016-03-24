@@ -1,4 +1,4 @@
-package com.neverwinterdp.analytics.web.gripper.generator;
+package com.neverwinterdp.analytics.gripper.generator;
 
 import java.util.Random;
 

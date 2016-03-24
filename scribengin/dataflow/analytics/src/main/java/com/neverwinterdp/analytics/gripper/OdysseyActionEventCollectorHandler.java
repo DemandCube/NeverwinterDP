@@ -1,4 +1,4 @@
-package com.neverwinterdp.analytics.web.gripper;
+package com.neverwinterdp.analytics.gripper;
 
 import java.util.Date;
 import java.util.List;

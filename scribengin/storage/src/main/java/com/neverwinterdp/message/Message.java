@@ -1,8 +1,5 @@
 package com.neverwinterdp.message;
 
-import com.neverwinterdp.storage.StorageInstruction;
-import com.neverwinterdp.util.JSONSerializer;
-
 /**
  * @author Tuan Nguyen
  */

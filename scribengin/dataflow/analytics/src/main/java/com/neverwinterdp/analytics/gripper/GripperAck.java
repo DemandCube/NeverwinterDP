@@ -1,4 +1,4 @@
-package com.neverwinterdp.analytics.web.gripper;
+package com.neverwinterdp.analytics.gripper;
 
 public class GripperAck {
   private String  objectId;

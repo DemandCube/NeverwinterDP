@@ -1,4 +1,4 @@
-package com.neverwinterdp.analytics.web.gripper;
+package com.neverwinterdp.analytics.gripper;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
