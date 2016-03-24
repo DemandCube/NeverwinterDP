@@ -52,7 +52,7 @@ public class AdsEventCollectorHandler extends RestRouteHandler {
   }
 
   protected Object onADSEvent(ADSEvent event) {
-    System.out.println("Receive ADSEvent: " + JSONSerializer.INSTANCE.toString(event));
+    //System.out.println("Receive ADSEvent: " + JSONSerializer.INSTANCE.toString(event));
     try {
       event.setEventId("ads-event-" + seedId + "-" + idTracker.incrementAndGet());
       event.setTimestamp(new Date());
