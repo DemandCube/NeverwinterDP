@@ -72,7 +72,7 @@ public class ClientSessionManager {
     numOfAssignedPages = 0;
   }
   
-  public ClientSession takeClientSession() throws InterruptedException {
+  synchronized public ClientSession takeClientSession() throws InterruptedException {
     if(queue.size() < maxConcurrentClientSession) {
       ClientSession session = createClientSession();
       if(session != null) queue.offer(session);
@@ -80,8 +80,8 @@ public class ClientSessionManager {
     return queue.poll(1000, TimeUnit.MILLISECONDS);
   }
   
-  public void releaseClientSession(ClientSession session) throws InterruptedException {
-    if(random.nextDouble() < 0.2) {
+  synchronized public void releaseClientSession(ClientSession session) throws InterruptedException {
+    if(random.nextDouble() < 0.66) {
       queue.offer(session);
     }
   }
