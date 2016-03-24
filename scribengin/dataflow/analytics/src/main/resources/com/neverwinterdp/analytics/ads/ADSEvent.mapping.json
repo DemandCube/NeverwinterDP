@@ -7,6 +7,12 @@
       "timestamp" : { 
         "type" : "date", "format" : "dd/MM/yyyy HH:mm:ss" 
       },
+      "name" : {
+        "type" : "string", "index":"not_analyzed"
+      },
+      "visitId" : {
+        "type" : "string", "index":"not_analyzed"
+      },
       "host" : {
         "type" : "string", "index":"not_analyzed"
       },
