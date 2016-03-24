@@ -81,9 +81,7 @@ public class ClientSessionManager {
   }
   
   synchronized public void releaseClientSession(ClientSession session) throws InterruptedException {
-    if(random.nextDouble() < 0.66) {
-      queue.offer(session);
-    }
+    queue.offer(session);
   }
   
   ClientSession createClientSession() {

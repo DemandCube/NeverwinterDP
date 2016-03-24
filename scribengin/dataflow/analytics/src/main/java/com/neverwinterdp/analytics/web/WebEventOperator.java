@@ -31,7 +31,8 @@ public class WebEventOperator extends DataStreamOperator {
     wVisit.setTimestamp(new Date(webEvent.getTimestamp()));
     wVisit.setHost(urlParser.getHost());
     wVisit.setPath(urlParser.getPath());
-    wVisit.setClientIpAddress(webEvent.getClientInfo().user.visitorId);
+    wVisit.setVisitorId(webEvent.getClientInfo().user.visitorId);
+    wVisit.setClientIpAddress(webEvent.getClientInfo().user.ipAddress);
     byte[] bytes = md5Digest.digest((urlParser.getUrl() + wVisit.getVisitorId()).getBytes());
     String visitId = hexBinaryAdapter.marshal(bytes);
 

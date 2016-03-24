@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.neverwinterdp.analytics.ads.ADSEvent;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.ClientInfo;
-import com.neverwinterdp.util.JSONSerializer;
 
 public class ClientSession {
   private String        username;
