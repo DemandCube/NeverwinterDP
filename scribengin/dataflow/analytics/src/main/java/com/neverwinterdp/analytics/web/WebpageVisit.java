@@ -17,6 +17,7 @@ public class WebpageVisit {
   private String visitorId;
   private String clientIpAddress;
   private long   spentTime;
+  private String spentTimeRange ;
 
   public WebpageVisit() {} 
   
@@ -43,4 +44,20 @@ public class WebpageVisit {
 
   public long getSpentTime() { return spentTime; }
   public void setSpentTime(long spentTime) { this.spentTime = spentTime; }
+
+  public String getSpentTimeRange() { return spentTimeRange; }
+  public void setSpentTimeRange(String spentTimeRange) { this.spentTimeRange = spentTimeRange; }
+
+  public void logSpentTime(long spentTime) {
+    this.spentTime = spentTime;
+    if(spentTime <         1000) spentTimeRange = "1s";
+    else if(spentTime <    2000) spentTimeRange = "2s";
+    else if(spentTime <    3000) spentTimeRange = "3s";
+    else if(spentTime <    5000) spentTimeRange = "5s";
+    else if(spentTime <   10000) spentTimeRange = "10s";
+    else if(spentTime <   30000) spentTimeRange = "30s";
+    else if(spentTime <   60000) spentTimeRange = "60s";
+    else if(spentTime <  180000) spentTimeRange = "180s";
+    else                         spentTimeRange = "300s";
+  }
 }
