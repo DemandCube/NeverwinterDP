@@ -37,14 +37,7 @@
   </div>
 
   <div id="UIWorkspace">
-    <pre>
-      
-
-      -------------
-      |           |
-      -------------
-
-    </pre>
+     <img src="/js/site/analytics/analytics_diagram.png" />
   </div>
   <div class="clearfix"><span/></div>
 </div>
