@@ -53,6 +53,7 @@ public class ClientInfo {
   }
   
   static public class GeoLocation {
+    public String region ;
     public double latitude;
     public double longitude;
     public double accuracy;

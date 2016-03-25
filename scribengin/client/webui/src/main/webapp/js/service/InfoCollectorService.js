@@ -112,17 +112,16 @@ function InfoCollectorService(serviceUrl) {
      height:  window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
     },
 
-    geoLocation: { latitude: 0, longitude: 0, accuracy:  0 }
+    geoLocation: { 
+      region:    geoplugin_region(),
+      latitude:  geoplugin_latitude() , 
+      longitude: geoplugin_longitude(), 
+      accuracy:  0 
+    }
   };
 
   var pushClientInfo = function(info) {
     var url = serviceUrl + "?jsonp=" + encodeURIComponent(JSON.stringify(info));
-    /*
-    var ele = document.createElement("script");
-    ele.src = url;
-    ele.type = "text/javascript";
-    document.getElementsByTagName('head')[0].appendChild(ele);
-    */
     var ele = document.createElement("iframe");
     ele.src = url;
     ele.width  = 0;

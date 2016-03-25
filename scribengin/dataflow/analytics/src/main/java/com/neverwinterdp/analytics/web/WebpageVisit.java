@@ -14,7 +14,12 @@ public class WebpageVisit {
   
   private String host;
   private String path;
+  
   private String visitorId;
+  private String visitorRegion;
+  private double visitorLatitude;
+  private double visitorLongitude;
+  
   private String clientIpAddress;
   private long   spentTime;
   private String spentTimeRange ;
@@ -39,6 +44,15 @@ public class WebpageVisit {
   public String getVisitorId() { return visitorId; }
   public void setVisitorId(String visitorId) { this.visitorId = visitorId; }
   
+  public String getVisitorRegion() { return visitorRegion; }
+  public void setVisitorRegion(String visitorRegion) { this.visitorRegion = visitorRegion; }
+
+  public double getVisitorLatitude() { return visitorLatitude; }
+  public void setVisitorLatitude(double visitorLatitude) { this.visitorLatitude = visitorLatitude; }
+  
+  public double getVisitorLongitude() { return visitorLongitude; }
+  public void setVisitorLongitude(double visitorLongitude) { this.visitorLongitude = visitorLongitude; }
+
   public String getClientIpAddress() { return clientIpAddress; }
   public void setClientIpAddress(String clientIpAddress) { this.clientIpAddress = clientIpAddress; }
 

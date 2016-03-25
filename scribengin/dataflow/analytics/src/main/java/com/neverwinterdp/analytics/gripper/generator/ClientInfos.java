@@ -5,6 +5,10 @@ import java.util.Random;
 import com.neverwinterdp.netty.http.client.ClientInfo;
 
 public class ClientInfos {
+  static String[] regions = {
+    "Ha Noi", "Paris", "London", "San Francisco", "San Jose", "San Diego", "Dallas", "New York"
+  };
+  
   static public ClientInfo nextRandomClientInfo() {
     ClientInfo[] all = {
       createMacbookAirClientInfo(), createIphone6SClientInfo(), createRedmiNoteClientInfo(), createXRobotClientInfo()
@@ -27,6 +31,7 @@ public class ClientInfos {
     clientInfo.screen.height = 900;
     clientInfo.window.width  = 900;
     clientInfo.window.height = 750;
+    clientInfo.geoLocation.region = getRandomRegion();
     return clientInfo;
   }
   
@@ -43,6 +48,7 @@ public class ClientInfos {
     clientInfo.screen.height = 900;
     clientInfo.window.width  = 900;
     clientInfo.window.height = 750;
+    clientInfo.geoLocation.region = getRandomRegion();
     return clientInfo;
   }
   
@@ -59,6 +65,7 @@ public class ClientInfos {
     clientInfo.screen.height = 900;
     clientInfo.window.width  = 900;
     clientInfo.window.height = 750;
+    clientInfo.geoLocation.region = getRandomRegion();
     return clientInfo;
   }
   
@@ -71,6 +78,12 @@ public class ClientInfos {
     clientInfo.navigator.cookieEnabled = true;
     clientInfo.navigator.userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36";
     clientInfo.navigator.language = "en-US";
+    clientInfo.geoLocation.region = getRandomRegion();
     return clientInfo;
+  }
+  
+  static String getRandomRegion() { 
+    int idx = (int)System.currentTimeMillis() % regions.length;
+    return regions[idx]; 
   }
 }
