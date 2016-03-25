@@ -82,8 +82,9 @@ public class ClientInfos {
     return clientInfo;
   }
   
+  static Random rand = new Random();
+
   static String getRandomRegion() { 
-    int idx = (int)System.currentTimeMillis() % regions.length;
-    return regions[idx]; 
+    return regions[rand.nextInt(regions.length)]; 
   }
 }
