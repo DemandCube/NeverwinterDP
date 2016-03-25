@@ -1,6 +1,5 @@
 {
   "WebpageVisit": {
-    "_source": {"enabled":false},
 
     "properties" : {
       "eventId" : {
