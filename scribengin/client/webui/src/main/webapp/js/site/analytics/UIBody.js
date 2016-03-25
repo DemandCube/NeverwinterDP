@@ -29,6 +29,7 @@ define([
       'click .onSelectDiagram':  'onSelectDiagram',
 
       'click .onSelectWebpageStatReport': 'onSelectWebpageStatReport',
+      'click .onSelectWebpageSpentTimeStatReport': 'onSelectWebpageSpentTimeStatReport',
       'click .onSelectAdsStatReport':     'onSelectAdsStatReport',
 
       'click .onSelectUserInfoInput':  'onSelectUserInfoInput',
@@ -44,6 +45,12 @@ define([
     onSelectWebpageStatReport: function(evt) {
       var kibanaSharedUrl = "http://tuandev:5601/#/visualize/edit/Analytics-Webpage-Stat?embed&_a=(filters:!(),linked:!f,panels:!((col:1,id:Scribengin-Navigation,row:1,size_x:2,size_y:5,type:visualization),(col:3,id:Scribengin-Log4j-Detail,row:1,size_x:10,size_y:5,type:visualization)),query:(query_string:(analyze_wildcard:!t,query:'*')),title:'Scribengin%20Log4j%20Detail',vis:(aggs:!((id:'1',params:(),schema:metric,type:count),(id:'2',params:(field:visitId),schema:metric,type:cardinality),(id:'3',params:(customInterval:'10m',extended_bounds:(),field:timestamp,interval:auto,min_doc_count:1),schema:segment,type:date_histogram),(id:'4',params:(field:host,order:desc,orderBy:'1',row:!t,size:50),schema:split,type:terms),(id:'5',params:(field:visitorId),schema:metric,type:cardinality)),listeners:(),params:(addLegend:!t,addTimeMarker:!f,addTooltip:!t,defaultYExtents:!f,drawLinesBetweenPoints:!t,interpolate:linear,radiusRatio:9,scale:linear,setYExtents:!f,shareYAxis:!t,showCircles:!t,smoothLines:!f,times:!(),yAxis:()),type:line))&_g=(refreshInterval:(display:Off,pause:!f,section:0,value:0),time:(from:now-30m,mode:quick,to:now))";
       var uiKibanaVisualization = new UIKibanaVisualization({ label: "Webpage Stat Report", server: Env.kibana.server, url: kibanaSharedUrl });
+      this._workspace(uiKibanaVisualization);
+    },
+
+    onSelectWebpageSpentTimeStatReport: function(evt) {
+      var kibanaSharedUrl = "http://tuandev:5601/#/visualize/edit/Analytics-Webpage-Spent-Time-Stat?embed&_g=(refreshInterval:(display:Off,pause:!f,section:0,value:0),time:(from:now-30m,mode:quick,to:now))&_a=(filters:!(),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'*')),vis:(aggs:!((id:'1',params:(),schema:metric,type:count),(id:'2',params:(field:host,order:desc,orderBy:'1',row:!t,size:25),schema:split,type:terms),(id:'3',params:(customInterval:'2h',extended_bounds:(),field:timestamp,interval:auto,min_doc_count:1),schema:segment,type:date_histogram),(id:'4',params:(field:spentTimeRange,order:desc,orderBy:'1',size:10),schema:group,type:terms)),listeners:(),params:(addLegend:!t,addTimeMarker:!f,addTooltip:!t,defaultYExtents:!f,mode:stacked,scale:linear,setYExtents:!f,shareYAxis:!t,times:!(),yAxis:()),type:histogram))";
+      var uiKibanaVisualization = new UIKibanaVisualization({ label: "Webpage Spent Time Stat Report", server: Env.kibana.server, url: kibanaSharedUrl });
       this._workspace(uiKibanaVisualization);
     },
 

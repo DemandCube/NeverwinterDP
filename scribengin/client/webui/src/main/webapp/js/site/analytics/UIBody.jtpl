@@ -17,7 +17,7 @@
       <hr/>
       <div style="margin: 10px">
          <div><a class="ui-action onSelectWebpageStatReport">Webpage Stat</a></div>
-         <div><a class="ui-action onSelectWebpageStatReport">Webpage Time Spent Stat</a></div>
+         <div><a class="ui-action onSelectWebpageSpentTimeStatReport">Webpage Time Spent Stat</a></div>
 
          <div><a class="ui-action onSelectAdsStatReport">Advertising Stat</a></div>
          <div><a class="ui-action onSelectMouseReplayReport">Mouse Replay</a></div>
