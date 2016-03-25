@@ -20,6 +20,10 @@ define([
       var params = { } ;
       $(this.el).html(this._template(params));
     },
+  
+    onActivate: function(evt) {
+      this.onSelectUIActiveVM();
+    },
 
     events: {
       'click .onSelectUIActiveVM':  'onSelectUIActiveVM',

@@ -25,6 +25,10 @@ define([
       $(this.el).html(this._template(params));
     },
 
+    onActivate: function(evt) {
+      this.onSelectDiagram();
+    },
+
     events: {
       'click .onSelectDiagram':  'onSelectDiagram',
 

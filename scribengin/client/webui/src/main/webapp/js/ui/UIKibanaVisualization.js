@@ -26,6 +26,7 @@ define([
       'click .onSelectTimeLast30min': 'onSelectTimeLast30min',
 
       'click .onSelectTimeLast1hour':  'onSelectTimeLast1hour',
+      'click .onSelectTimeLast2hour':  'onSelectTimeLast2hour',
       'click .onSelectTimeLast4hour':  'onSelectTimeLast4hour',
       'click .onSelectTimeLast12hour': 'onSelectTimeLast12hour',
       'click .onSelectTimeLast24hour': 'onSelectTimeLast24hour',
@@ -46,6 +47,7 @@ define([
     onSelectTimeLast30min: function(evt) { this.setTimeParam("time:(from:now-30m,mode:quick,to:now)"); },
 
     onSelectTimeLast1hour: function(evt) { this.setTimeParam("time:(from:now-1h,mode:quick,to:now)"); },
+    onSelectTimeLast2hour: function(evt) { this.setTimeParam("time:(from:now-2h,mode:quick,to:now)"); },
     onSelectTimeLast4hour: function(evt) { this.setTimeParam("time:(from:now-4h,mode:quick,to:now)"); },
     onSelectTimeLast12hour: function(evt) { this.setTimeParam("time:(from:now-12h,mode:quick,to:now)"); },
     onSelectTimeLast24hour: function(evt) { this.setTimeParam("time:(from:now-24h,mode:quick,to:now)"); },

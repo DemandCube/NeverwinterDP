@@ -22,6 +22,10 @@ define([
       $(this.el).html(this._template(params));
     },
 
+    onActivate: function(evt) {
+      this.onSelectUIActiveDataflow();
+    },
+
     events: {
       'click .onSelectUIActiveDataflow':  'onSelectUIActiveDataflow',
       'click .onSelectUIHistoryDataflow': 'onSelectUIHistoryDataflow',

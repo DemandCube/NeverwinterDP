@@ -16,14 +16,24 @@ define([
       var params = { 
       } ;
       $(this.el).html(this._template(params));
+      this.selectPlugin("scribengin");
     },
     
+    selectPlugin: function(name) {
+      var UIBody = this;
+      require(['site/' + name + '/UIBody'], function(UIBodyComponent) { 
+        UIBody.setUIBody(UIBodyComponent);
+      }) ;
+    },
 
     setUIBody: function(uicomp) {
       this.uicomponent  = uicomp ;
       $(this.el).empty();
       $(this.el).unbind();
       uicomp.setElement($('#UIBody')).render();
+      if(uicomp.onActivate != undefined) {
+        uicomp.onActivate();
+      }
     }
   });
   

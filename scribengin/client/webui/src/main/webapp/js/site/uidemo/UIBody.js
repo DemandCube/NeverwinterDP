@@ -18,6 +18,14 @@ define([
       $(this.el).html(this._template(params));
     },
 
+    onActivate: function(evt) {
+      require(['site/uidemo/UITableDemo'], function(UIDemoComponent) { 
+        $('#UIWorkspace').empty();
+        $('#UIWorkspace').unbind();
+        UIDemoComponent.setElement($('#UIWorkspace')).render();
+      }) ;
+    },
+
     events: {
       'click .onSelectUIComponent': 'onSelectUIComponent'
     },

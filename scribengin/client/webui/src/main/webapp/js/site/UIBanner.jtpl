@@ -4,11 +4,11 @@
   </div>
 
   <div style="float: right; padding-top: 3px">
-    <a class="ui-action onSelectPlugin" plugin="Home">Home</a> |
-    <a class="ui-action onSelectPlugin" plugin="vm">VM</a> |
     <a class="ui-action onSelectPlugin" plugin="scribengin">Scribengin</a> |
     <a class="ui-action onSelectPlugin" plugin="analytics">Analytics</a> |
-    <a class="ui-action onSelectPlugin" plugin="uidemo">UI Demo</a>
+    <a class="ui-action onSelectPlugin" plugin="vm">VM</a> |
+    <a class="ui-action onSelectPlugin" plugin="uidemo">UI Demo</a> |
+    <a class="ui-action onSelectPlugin" plugin="uidemo">About</a>
   </div>
 
   <div class="clearfix"><span/></div>

@@ -26,9 +26,7 @@ define([
     
     onSelectPlugin: function(evt) {
       var name = $(evt.target).attr('plugin') ;
-      require(['site/' + name + '/UIBody'], function(UIBodyComponent) { 
-        UIBody.setUIBody(UIBodyComponent);
-      }) ;
+      UIBody.selectPlugin(name);
     }
   });
   
