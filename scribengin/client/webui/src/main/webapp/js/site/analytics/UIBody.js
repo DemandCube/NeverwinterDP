@@ -32,6 +32,9 @@ define([
     events: {
       'click .onSelectDiagram':  'onSelectDiagram',
 
+      'click .onSelectGripperRecordReport': 'onSelectGripperRecordReport',
+      'click .onSelectGripperByteReport':   'onSelectGripperByteReport',
+
       'click .onSelectWebpageStatReport': 'onSelectWebpageStatReport',
       'click .onSelectWebpageSpentTimeStatReport': 'onSelectWebpageSpentTimeStatReport',
       'click .onSelectWebpageGeoStatReport': 'onSelectWebpageGeoStatReport',
@@ -45,6 +48,18 @@ define([
 
     onSelectDiagram: function(evt) {
       this.render();
+    },
+
+    onSelectGripperRecordReport: function(evt) {
+      var kibanaSharedUrl = "http://tuandev:5601/#/visualize/edit/Analytics-Gripper-Record-Throughput?embed&_g=()&_a=(filters:!(),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'name:*gripper*record')),vis:(aggs:!((id:'1',params:(field:m1Rate),schema:metric,type:avg),(id:'2',params:(customInterval:'30s',extended_bounds:(),field:timestamp,interval:custom,min_doc_count:1),schema:segment,type:date_histogram),(id:'3',params:(field:name,order:desc,orderBy:'1',size:50),schema:group,type:terms)),listeners:(),params:(addLegend:!t,addTimeMarker:!f,addTooltip:!t,defaultYExtents:!f,drawLinesBetweenPoints:!t,interpolate:linear,radiusRatio:9,scale:linear,setYExtents:!f,shareYAxis:!t,showCircles:!t,smoothLines:!f,times:!(),yAxis:()),type:line))";
+      var uiKibanaVisualization = new UIKibanaVisualization({ label: "Gripper Record Report", server: Env.kibana.server, url: kibanaSharedUrl });
+      this._workspace(uiKibanaVisualization);
+    },
+    
+    onSelectGripperByteReport: function(evt) {
+      var kibanaSharedUrl = "http://tuandev:5601/#/visualize/edit/Analytics-Gripper-Byte-Throughput?embed&_g=()&_a=(filters:!(),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'name:*gripper*byte')),vis:(aggs:!((id:'1',params:(field:m1Rate),schema:metric,type:avg),(id:'2',params:(customInterval:'30s',extended_bounds:(),field:timestamp,interval:custom,min_doc_count:1),schema:segment,type:date_histogram),(id:'3',params:(field:name,order:desc,orderBy:'1',size:50),schema:group,type:terms)),listeners:(),params:(addLegend:!t,addTimeMarker:!f,addTooltip:!t,defaultYExtents:!f,drawLinesBetweenPoints:!t,interpolate:linear,radiusRatio:9,scale:linear,setYExtents:!f,shareYAxis:!t,showCircles:!t,smoothLines:!f,times:!(),yAxis:()),type:line))";
+      var uiKibanaVisualization = new UIKibanaVisualization({ label: "Gripper Byte Report", server: Env.kibana.server, url: kibanaSharedUrl });
+      this._workspace(uiKibanaVisualization);
     },
 
     onSelectWebpageStatReport: function(evt) {

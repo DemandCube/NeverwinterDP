@@ -10,7 +10,8 @@
       <h3 style="margin: 3px 0px">Gripper Reports</h3>
       <hr/>
       <div style="margin: 10px">
-         <div><a class="ui-action onSelectGripperReport">Gripper</a></div>
+         <div><a class="ui-action onSelectGripperRecordReport">Gripper Record Throughput</a></div>
+         <div><a class="ui-action onSelectGripperByteReport">Gripper Byte Throughput</a></div>
       </div>
 
       <h3 style="margin: 3px 0px">Mover Reports</h3>
