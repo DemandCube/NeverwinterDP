@@ -31,8 +31,8 @@ public class OdysseyMouseMoveEventCollectorHandler extends RestRouteHandler {
 
   public OdysseyMouseMoveEventCollectorHandler(MetricRegistry metricRegistry, String zkConnects, String kafkaTopic) throws Exception {
     this.metricRegistry = metricRegistry;
-    recordMeter = metricRegistry.meter("gripper.ads.record");
-    byteMeter   = metricRegistry.meter("gripper.ads.byte");
+    recordMeter = metricRegistry.meter("gripper.mouse.event.record");
+    byteMeter   = metricRegistry.meter("gripper.mouse.event.byte");
     
     this.kafkaTopic = kafkaTopic;
     KafkaTool kafkaTool = new KafkaTool("KafkaClient", zkConnects);
