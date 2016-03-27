@@ -58,9 +58,9 @@ public class VM {
   
   public Logger getLogger() { return logger; }
   
-  public AppContainer getAppContainer() { return this.appContainer ; }
+  public AppContainer getAppContainer() { return appContainer ; }
   
-  public ServiceModuleContainer getVMModuleServiceContainer() { return this.vmModuleContainer ; }
+  public ServiceModuleContainer getVMModuleServiceContainer() { return vmModuleContainer ; }
   
   public LoggerFactory getLoggerFactory() { return appContainer.getLoggerFactory(); }
   

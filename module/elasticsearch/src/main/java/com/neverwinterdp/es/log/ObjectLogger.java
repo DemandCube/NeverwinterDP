@@ -15,7 +15,7 @@ import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.util.text.StringUtil;
 
 public class ObjectLogger<T> {
-  private String[] connect ;
+  private String[] esConnect ;
   private String   indexName ;
   private Class<T> objectType ;
   
@@ -23,15 +23,15 @@ public class ObjectLogger<T> {
   private boolean  queueError = false ;
   private ESObjectClient<T> esObjectClient ;
   
-  public ObjectLogger(String[] connect, Class<T> objectType, String indexName, String queueBufferDir, int queueMaxSizePerSegment) throws Exception {
-    this.connect    = connect;
+  public ObjectLogger(String[] esConnect, Class<T> objectType, String indexName, String queueBufferDir, int queueMaxSizePerSegment) throws Exception {
+    this.esConnect    = esConnect;
     this.indexName  =  indexName;
     this.objectType = objectType;
     this.queue      = new MultiSegmentQueue<LogWithId<T>>(queueBufferDir, queueMaxSizePerSegment) ;
   }
   
   public ObjectLogger<T> setConnects(String connects) { 
-    this.connect = StringUtil.toStringArray(connects) ; 
+    this.esConnect = StringUtil.toStringArray(connects) ; 
     return this;
   }
   
@@ -61,7 +61,7 @@ public class ObjectLogger<T> {
   synchronized public int flush() throws InterruptedException {
     if(esObjectClient == null) {
       try {
-        esObjectClient = new ESObjectClient<T>(new ESClient(connect), indexName, objectType) ;
+        esObjectClient = new ESObjectClient<T>(new ESClient(esConnect), indexName, objectType) ;
         esObjectClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
         if(!esObjectClient.isCreated()) {
           String settingUrl = objectType.getName().replace('.', '/') + ".setting.json";

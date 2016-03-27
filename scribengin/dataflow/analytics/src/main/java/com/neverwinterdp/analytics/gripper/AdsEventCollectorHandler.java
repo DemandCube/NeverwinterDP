@@ -12,6 +12,8 @@ import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.netty.http.rest.RestRouteHandler;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.yara.Meter;
+import com.neverwinterdp.yara.MetricRegistry;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -22,10 +24,18 @@ public class AdsEventCollectorHandler extends RestRouteHandler {
   private String         seedId  = UUID.randomUUID().toString();
   private AtomicLong     idTracker = new AtomicLong();
   
+  private MetricRegistry metricRegistry;
+  private Meter          recordMeter;
+  private Meter          byteMeter;
+  
   private String         kafkaTopic;
   private AckKafkaWriter kafkaWriter;
 
-  public AdsEventCollectorHandler(String zkConnects, String kafkaTopic) throws Exception {
+  public AdsEventCollectorHandler(MetricRegistry metricRegistry, String zkConnects, String kafkaTopic) throws Exception {
+    this.metricRegistry = metricRegistry;
+    recordMeter = metricRegistry.meter("gripper.ads.record");
+    byteMeter   = metricRegistry.meter("gripper.ads.byte");
+    
     this.kafkaTopic = kafkaTopic;
     KafkaTool kafkaTool = new KafkaTool("KafkaClient", zkConnects);
     String kafkaConnects = kafkaTool.getKafkaBrokerList();
@@ -39,7 +49,7 @@ public class AdsEventCollectorHandler extends RestRouteHandler {
     String jsonp = values.get(0);
     ADSEvent event = JSONSerializer.INSTANCE.fromString(jsonp, ADSEvent.class);
     event.setClientIpAddress(getIpAddress(ctx));
-    return onADSEvent(event);
+    return onADSEvent(event, jsonp.length());
   }
 
   protected Object post(ChannelHandlerContext ctx, FullHttpRequest request) {
@@ -48,15 +58,17 @@ public class AdsEventCollectorHandler extends RestRouteHandler {
     bBuf.readBytes(bytes);
     ADSEvent event = JSONSerializer.INSTANCE.fromBytes(bytes, ADSEvent.class);
     event.setClientIpAddress(getIpAddress(ctx));
-    return onADSEvent(event);
+    return onADSEvent(event, bytes.length);
   }
 
-  protected Object onADSEvent(ADSEvent event) {
+  protected Object onADSEvent(ADSEvent event, int dataSize) {
     //System.out.println("Receive ADSEvent: " + JSONSerializer.INSTANCE.toString(event));
     try {
       event.setEventId("ads-event-" + seedId + "-" + idTracker.incrementAndGet());
       event.setTimestamp(new Date());
       kafkaWriter.send(kafkaTopic, event.getEventId(), event, 60000);
+      recordMeter.mark(1);
+      byteMeter.mark(dataSize);
       return "{success: true}";
     } catch (Exception e) {
       logger.error("Error:", e);

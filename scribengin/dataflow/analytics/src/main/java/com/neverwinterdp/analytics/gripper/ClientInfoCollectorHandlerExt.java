@@ -12,6 +12,8 @@ import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.netty.http.client.ClientInfo;
 import com.neverwinterdp.netty.http.client.ClientInfoCollectorHandler;
 import com.neverwinterdp.util.ExceptionUtil;
+import com.neverwinterdp.yara.Meter;
+import com.neverwinterdp.yara.MetricRegistry;
 
 public class ClientInfoCollectorHandlerExt extends ClientInfoCollectorHandler {
   private String     seedId    = UUID.randomUUID().toString();
@@ -19,11 +21,19 @@ public class ClientInfoCollectorHandlerExt extends ClientInfoCollectorHandler {
   
   private Map<String, WebEvent> webEventBuffer = new ConcurrentHashMap<String, WebEvent>();
   
+  private MetricRegistry metricRegistry;
+  private Meter          recordMeter;
+  private Meter          byteMeter;
+  
   private String         kafkaTopic;
   private AckKafkaWriter kafkaWriter;
   private FlushThread    flushThread ;
   
-  public ClientInfoCollectorHandlerExt(String zkConnects, String kafkaTopic) throws Exception {
+  public ClientInfoCollectorHandlerExt(MetricRegistry metricRegistry, String zkConnects, String kafkaTopic) throws Exception {
+    this.metricRegistry = metricRegistry;
+    recordMeter = metricRegistry.meter("gripper.webpage.event.record");
+    byteMeter   = metricRegistry.meter("gripper.webpage.event.byte");
+   
     this.kafkaTopic = kafkaTopic;
     KafkaTool kafkaTool = new KafkaTool("KafkaClient", zkConnects);
     String kafkaConnects = kafkaTool.getKafkaBrokerList();
@@ -33,7 +43,8 @@ public class ClientInfoCollectorHandlerExt extends ClientInfoCollectorHandler {
     flushThread.start();
   }
   
-  protected GripperAck onClientInfo(ClientInfo clientInfo) {
+  @Override
+  protected GripperAck onClientInfo(ClientInfo clientInfo, int dataSize) {
     //System.err.println("Client Info: " + JSONSerializer.INSTANCE.toString(clientInfo));
     WebEvent webEvent = new WebEvent();
     webEvent.setTimestamp(System.currentTimeMillis());
@@ -46,7 +57,8 @@ public class ClientInfoCollectorHandlerExt extends ClientInfoCollectorHandler {
         kafkaWriter.send(kafkaTopic, prevWebEvent, 60000);
       } 
       webEventBuffer.put(clientInfo.user.visitorId, webEvent);
-      
+      recordMeter.mark(1);
+      byteMeter.mark(dataSize);
       return new GripperAck(webEvent.getEventId()) ;
     } catch (Exception e) {
       logger.error("Error: ", e);

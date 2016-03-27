@@ -24,7 +24,7 @@ public class ClientInfoCollectorHandler extends RestRouteHandler {
     String jsonp = values.get(0);
     ClientInfo clientInfo = JSONSerializer.INSTANCE.fromString(jsonp, ClientInfo.class);
     clientInfo.user.ipAddress = getIpAddress(ctx);
-    return onClientInfo(clientInfo);
+    return onClientInfo(clientInfo, jsonp.length());
   }
   
   protected Object post(ChannelHandlerContext ctx, FullHttpRequest request) {
@@ -34,13 +34,13 @@ public class ClientInfoCollectorHandler extends RestRouteHandler {
       bBuf.readBytes(bytes);
       ClientInfo clientInfo = JSONSerializer.INSTANCE.fromBytes(bytes, ClientInfo.class);
       clientInfo.user.ipAddress = getIpAddress(ctx);
-      return onClientInfo(clientInfo);
+      return onClientInfo(clientInfo, bytes.length);
     } catch(Throwable t) {
       return ExceptionUtil.getStackTrace(t);
     }
   }
   
-  protected Object onClientInfo(ClientInfo clientInfo) {
+  protected Object onClientInfo(ClientInfo clientInfo, int dataSize) {
     return "{}";
   }
   

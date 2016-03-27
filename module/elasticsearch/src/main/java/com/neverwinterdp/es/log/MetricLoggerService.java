@@ -15,18 +15,29 @@ import com.neverwinterdp.yara.snapshot.MetterSnapshot;
 import com.neverwinterdp.yara.snapshot.TimerSnapshot;
 
 public class MetricLoggerService  extends ObjectLoggerService {
+  
   @Inject
   private MetricRegistry metricRegistry ;
   private String serverName;
   private MetricInfoCollectorThread metricCollectorThread;
-
+  
+  public MetricLoggerService() {}
+  
+  public MetricLoggerService(MetricRegistry metricRegistry, String serverName, String bufferBaseDir, String[] esConnect) throws Exception {
+    this.metricRegistry = metricRegistry;
+    init(serverName, bufferBaseDir, esConnect);
+  }
+  
   @Inject
   public void onInit(RuntimeEnv runtimeEnv, OSManagement osManagement) throws Exception {
     serverName = runtimeEnv.getVMName();
     String bufferBaseDir = runtimeEnv.getDataDir() + "/buffer/metric-log" ;
     String[] esConnect = { "elasticsearch-1:9300" };
+    init(serverName, bufferBaseDir, esConnect);
+  }
+  
+  private void init(String serverName, String bufferBaseDir, String[] esConnect) throws Exception {
     init(esConnect, bufferBaseDir, 25000);
-   
     add(CounterSnapshot.class, "neverwinterdp-metric-counter");
     add(TimerSnapshot.class,   "neverwinterdp-metric-timer");
     add(MetterSnapshot.class,  "neverwinterdp-metric-metter");
@@ -35,6 +46,8 @@ public class MetricLoggerService  extends ObjectLoggerService {
     metricCollectorThread.start();
   }
 
+  
+  
   public class MetricInfoCollectorThread extends Thread {
     public void run() {
       try {

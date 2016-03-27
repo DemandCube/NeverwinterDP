@@ -18,9 +18,11 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
 public class OdysseyActionEventListHandler extends RestRouteHandler {
+  
   private ESObjectClient<ActionEvent>   esActionEventClient;
 
   public OdysseyActionEventListHandler(String[] esConnects) throws Exception {
+    
     ESClient esClient = new ESClient(esConnects);
     esActionEventClient = new ESObjectClient<ActionEvent>(esClient, "analytics-odyssey-action-event", ActionEvent.class) ;
     esActionEventClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;

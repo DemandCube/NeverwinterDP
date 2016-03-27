@@ -10,6 +10,8 @@ import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.netty.http.rest.RestRouteHandler;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.yara.Meter;
+import com.neverwinterdp.yara.MetricRegistry;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -20,10 +22,18 @@ public class OdysseyMouseMoveEventCollectorHandler extends RestRouteHandler {
   private String         seedId  = UUID.randomUUID().toString();
   private AtomicLong     idTracker = new AtomicLong();
   
+  private MetricRegistry metricRegistry;
+  private Meter          recordMeter;
+  private Meter          byteMeter;
+  
   private String         kafkaTopic;
   private AckKafkaWriter kafkaWriter;
 
-  public OdysseyMouseMoveEventCollectorHandler(String zkConnects, String kafkaTopic) throws Exception {
+  public OdysseyMouseMoveEventCollectorHandler(MetricRegistry metricRegistry, String zkConnects, String kafkaTopic) throws Exception {
+    this.metricRegistry = metricRegistry;
+    recordMeter = metricRegistry.meter("gripper.ads.record");
+    byteMeter   = metricRegistry.meter("gripper.ads.byte");
+    
     this.kafkaTopic = kafkaTopic;
     KafkaTool kafkaTool = new KafkaTool("KafkaClient", zkConnects);
     String kafkaConnects = kafkaTool.getKafkaBrokerList();
@@ -37,7 +47,7 @@ public class OdysseyMouseMoveEventCollectorHandler extends RestRouteHandler {
     String jsonp = values.get(0);
     System.err.println("[OdysseyMouseMoveEventCollectorHandler]: jsonp length = " + jsonp.length());
     MouseMoveEvent event = JSONSerializer.INSTANCE.fromString(jsonp, MouseMoveEvent.class);
-    return onOdysseyMouseMoveEvent(event);
+    return onOdysseyMouseMoveEvent(event, jsonp.length());
   }
 
   protected Object post(ChannelHandlerContext ctx, FullHttpRequest request) {
@@ -46,14 +56,16 @@ public class OdysseyMouseMoveEventCollectorHandler extends RestRouteHandler {
     bBuf.readBytes(bytes);
     System.err.println("[OdysseyMouseMoveEventCollectorHandler]: bytes length = " + bytes.length);
     MouseMoveEvent event = JSONSerializer.INSTANCE.fromBytes(bytes, MouseMoveEvent.class);
-    return onOdysseyMouseMoveEvent(event);
+    return onOdysseyMouseMoveEvent(event, bytes.length);
   }
 
-  protected Object onOdysseyMouseMoveEvent(MouseMoveEvent event) {
+  protected Object onOdysseyMouseMoveEvent(MouseMoveEvent event, int dataSize) {
     try {
       event.setEventId("odyssey-mouse-move-" + seedId + "-" + idTracker.incrementAndGet());
       event.setTimestamp(new Date());
       kafkaWriter.send(kafkaTopic, event.getEventId(), event, 60000);
+      recordMeter.mark(1);
+      byteMeter.mark(dataSize);
       return "{ success: true }";
     } catch (Exception e) {
       logger.error("Error:", e);

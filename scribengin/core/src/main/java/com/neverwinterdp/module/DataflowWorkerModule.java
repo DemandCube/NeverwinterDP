@@ -10,7 +10,6 @@ import com.google.inject.name.Names;
 import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.storage.s3.S3Client;
 import com.neverwinterdp.vm.HadoopConfigurationUtil;
-import com.neverwinterdp.vm.VMConfig;
 
 
 
