@@ -22,11 +22,12 @@ public class OdysseyActionEventListHandler extends RestRouteHandler {
 
   public OdysseyActionEventListHandler(String[] esConnects) throws Exception {
     ESClient esClient = new ESClient(esConnects);
-    esActionEventClient = new ESObjectClient<ActionEvent>(esClient, "odyssey-action-event", ActionEvent.class) ;
+    esActionEventClient = new ESObjectClient<ActionEvent>(esClient, "analytics-odyssey-action-event", ActionEvent.class) ;
     esActionEventClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
   }
 
   protected Object get(ChannelHandlerContext ctx, FullHttpRequest request) {
+    //System.err.println("[OdysseyActionEventListHandler] uri = " + request.getUri());
     QueryStringDecoder reqDecoder = new QueryStringDecoder(request.getUri()) ;
     List<String> values = reqDecoder.parameters().get("source");
     String source = "all";
@@ -42,6 +43,7 @@ public class OdysseyActionEventListHandler extends RestRouteHandler {
     for(int i = 0; i < hits.getTotalHits(); i++) {
       SearchHit hit = hits.getAt(i);
       String json = hit.getSourceAsString();
+      System.err.println("[OdysseyActionEventListHandler] " + json);
       ActionEvent event = JSONSerializer.INSTANCE.fromString(json, ActionEvent.class);
       events.add(event);
     }

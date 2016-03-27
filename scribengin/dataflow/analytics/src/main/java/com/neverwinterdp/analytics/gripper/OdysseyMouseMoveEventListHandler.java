@@ -23,7 +23,7 @@ public class OdysseyMouseMoveEventListHandler extends RestRouteHandler {
 
   public OdysseyMouseMoveEventListHandler(String[] esConnects) throws Exception {
     ESClient esClient = new ESClient(esConnects);
-    esActionEventClient = new ESObjectClient<ActionEvent>(esClient, "odyssey-mouse-move", MouseMoveEvent.class) ;
+    esActionEventClient = new ESObjectClient<ActionEvent>(esClient, "analytics-odyssey-mouse-move", MouseMoveEvent.class) ;
     esActionEventClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
   }
 
