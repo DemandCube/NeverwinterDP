@@ -2,7 +2,6 @@ package com.neverwinterdp.scribengin.webui;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.neverwinterdp.analytics.gripper.ClientInfoCollectorHandlerExt;
 import com.neverwinterdp.netty.http.HttpServer;
 import com.neverwinterdp.netty.http.StaticFileHandler;
 import com.neverwinterdp.registry.Registry;
