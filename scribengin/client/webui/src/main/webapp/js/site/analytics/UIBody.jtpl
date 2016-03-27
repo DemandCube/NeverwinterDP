@@ -20,10 +20,7 @@
          <div><a class="ui-action onSelectWebpageStatReport">Webpage Stat</a></div>
          <div><a class="ui-action onSelectWebpageSpentTimeStatReport">Webpage Time Spent Stat</a></div>
          <div><a class="ui-action onSelectWebpageGeoStatReport">Webpage Geo Stat</a></div>
-
          <div><a class="ui-action onSelectAdsStatReport">Advertising Stat</a></div>
-         <div><a class="ui-action onSelectMouseReplayReport">Mouse Replay</a></div>
-         <div><a class="ui-action onSelectActionReport">User Action</a></div>
       </div>
 
       <h3 style="margin: 3px 0px">Input</h3>
