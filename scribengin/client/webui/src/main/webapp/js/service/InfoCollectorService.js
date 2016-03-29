@@ -19,7 +19,7 @@ function VisitCookie() {
       var value = pair[1];
       if('userId' == name) info.userId = value;
       else if('visitorId' == name) info.visitorId = value;
-      console.log("=> " + nameValue);
+      //console.log("=> " + nameValue);
     }
     if(!info.visitorId) info.visitorId = guid();
     return info;
@@ -37,7 +37,7 @@ function VisitCookie() {
       if(this.userInfo.hasOwnProperty(key)) {
         string += key + '=' + this.userInfo[key] + ";";
         document.cookie = key + '=' + this.userInfo[key] + "; expires="+ expires + "; path=/";
-        console.log("add " + document.cookie) ;
+        //console.log("add " + document.cookie) ;
       }
     }
   };
@@ -54,7 +54,7 @@ function VisitCookie() {
     }
   }
 
-  this.deleteAllCookies();
+  //this.deleteAllCookies();
   this.update();
 
   this.getUserInfo = function() { 
