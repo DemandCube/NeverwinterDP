@@ -91,7 +91,8 @@ function InfoCollectorService(serviceUrl) {
     user: visitCookie.getUserInfo(),
     
     webpage: {
-      url: window.location.href 
+      url: window.location.href ,
+      startVisitTime: new Date().getTime()
     },
 
     navigator: {
@@ -120,18 +121,15 @@ function InfoCollectorService(serviceUrl) {
     }
   };
 
-  var pushClientInfo = function(info) {
-    var url = serviceUrl + "?jsonp=" + encodeURIComponent(JSON.stringify(info));
-    var ele = document.createElement("iframe");
-    ele.src = url;
-    ele.width  = 0;
-    ele.height = 0;
-    document.getElementsByTagName('body')[0].appendChild(ele);
-  };
 
   this.info = info;
 
   this.getInfo = function() { return this.info ; }
 
-  pushClientInfo(info);
+  this.pushClientInfo = function() {
+    this.info.webpage.endVisitTime = new Date().getTime();
+    var url = serviceUrl + "?jsonp=" + encodeURIComponent(JSON.stringify(this.info));
+    var img = new Image(100,100);
+    img.src = url;
+  };
 }

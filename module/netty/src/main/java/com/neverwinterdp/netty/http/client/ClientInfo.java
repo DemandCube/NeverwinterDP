@@ -29,6 +29,8 @@ public class ClientInfo {
   static public class WebPage {
     public String url;
     public String referralUrl;
+    public long   startVisitTime;
+    public long   endVisitTime;
   }
   
   static public class Navigator {

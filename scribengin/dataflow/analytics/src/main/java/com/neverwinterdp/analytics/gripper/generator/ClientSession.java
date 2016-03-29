@@ -67,12 +67,8 @@ public class ClientSession {
   public int sendAllWebEvent(AsyncHttpClient client, String dest) throws ConnectException, URISyntaxException, InterruptedException {
     for(int i = 0; i < pagesToVisit.size(); i++) {
       clientInfo.webpage.url = pagesToVisit.get(i);
-      client.post(dest, clientInfo);
-      if(maxVisitTime > 0) {
-        int visitTime = rand.nextInt(maxVisitTime);
-        if(visitTime < minVisitTime) visitTime = minVisitTime;
-        Thread.sleep(visitTime);
-      }
+      clientInfo.webpage.startVisitTime = System.currentTimeMillis();
+      clientInfo.webpage.endVisitTime = clientInfo.webpage.startVisitTime + rand.nextInt(maxVisitTime);
     }
     return pagesToVisit.size();
   }

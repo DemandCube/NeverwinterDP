@@ -43,7 +43,7 @@ public class WebEventOperator extends DataStreamOperator {
     byte[] bytes = md5Digest.digest((urlParser.getUrl() + "#" + wVisit.getVisitorId()).getBytes());
     wVisit.setVisitId(hexBinaryAdapter.marshal(bytes));
 
-    wVisit.logSpentTime(webEvent.getClientInfo().user.spentTime);
+    wVisit.logSpentTime(webEvent.getClientInfo().webpage.endVisitTime - webEvent.getClientInfo().webpage.startVisitTime);
     mesg.setData(JSONSerializer.INSTANCE.toBytes(wVisit));
     ctx.write(mesg);
   }

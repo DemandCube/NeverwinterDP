@@ -6,6 +6,20 @@
 
     <script language="JavaScript" src="http://www.geoplugin.net/javascript.gp" type="text/javascript"></script>
     <script src="js/EnvConfig.js"></script>
+    <script src="js/service/InfoCollectorService.js"></script>
+    <script>
+      var ciServiceUrl         = Env.gripper.server + "/rest/client/info.collector";
+      infoCollectorService = new InfoCollectorService(ciServiceUrl);
+
+      window.onbeforeunload = function() {
+        infoCollectorService.pushClientInfo();
+        console.log("call unload");
+      };
+
+      function showInfo() {
+        alert(JSON.stringify(infoCollectorService.getInfo(), null, '  '));
+      }
+    </script>
   </head>
 
   <body style="padding: 15px">
@@ -48,15 +62,6 @@
         </div>
 
         <div style="text-align: justify; padding: 10px 50px">
-          <script src="js/service/InfoCollectorService.js"></script>
-          <script>
-            var ciServiceUrl = Env.gripper.server + "/rest/client/info.collector";
-            var infoCollectorService = new InfoCollectorService(ciServiceUrl);
-
-            function showInfo() {
-              alert(JSON.stringify(infoCollectorService.getInfo(), null, '  '));
-            }
-          </script>
           When this page is loaded, the web event collector service will collect the user information, browser information and send back to gripper.
           Click here to view the information <a href="javascript:showInfo()">Click</a>
 
