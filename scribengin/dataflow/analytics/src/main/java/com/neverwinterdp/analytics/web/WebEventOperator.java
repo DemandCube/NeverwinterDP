@@ -27,6 +27,9 @@ public class WebEventOperator extends DataStreamOperator {
     UrlParser urlParser = new UrlParser(webEvent.getClientInfo().webpage.url);
     
     WebpageVisit wVisit = new WebpageVisit();
+    if(urlParser.getHost().startsWith("host:www.website-")) {
+      wVisit.setSource("generator");
+    }
     wVisit.setEventId(webEvent.getEventId());
     wVisit.setTimestamp(new Date(webEvent.getTimestamp()));
     wVisit.setHost(urlParser.getHost());

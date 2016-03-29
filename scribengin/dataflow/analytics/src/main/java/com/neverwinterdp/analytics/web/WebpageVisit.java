@@ -5,6 +5,7 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class WebpageVisit {
+  private String source  = "user";
   private String eventId;
   
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss")
@@ -26,6 +27,9 @@ public class WebpageVisit {
 
   public WebpageVisit() {} 
   
+  public String getSource() { return source; }
+  public void setSource(String source) { this.source = source; }
+
   public String getEventId() { return eventId; }
   public void   setEventId(String eventId) { this.eventId = eventId; }
   
