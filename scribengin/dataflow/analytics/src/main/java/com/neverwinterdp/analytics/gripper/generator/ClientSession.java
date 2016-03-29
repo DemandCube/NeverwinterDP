@@ -75,6 +75,7 @@ public class ClientSession {
   
   public void sendADSEvent(AsyncHttpClient client, String dest) throws ConnectException, URISyntaxException, InterruptedException {
     ADSEvent event = new ADSEvent();
+    event.setSource("generator");
     event.setVisitorId(clientInfo.user.visitorId);
     event.setName("BotNventdata");
     event.setAdUrl("http://nventdata.com");

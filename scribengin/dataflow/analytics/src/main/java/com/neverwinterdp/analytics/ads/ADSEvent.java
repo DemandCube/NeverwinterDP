@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class ADSEvent {
   private String eventId;
+  private String source = "user";
   
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss")
   private Date timestamp;
@@ -22,6 +23,9 @@ public class ADSEvent {
   
   public String getEventId() { return eventId; }
   public void   setEventId(String eventId) { this.eventId = eventId; }
+  
+  public String getSource() { return source; }
+  public void setSource(String source) { this.source = source; }
   
   public Date getTimestamp() { return timestamp; }
   public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
