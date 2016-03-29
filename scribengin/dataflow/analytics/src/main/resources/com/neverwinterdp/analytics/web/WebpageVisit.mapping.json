@@ -2,6 +2,7 @@
   "WebpageVisit": {
 
     "properties" : {
+      "source" : { "type" : "string", "index":"not_analyzed" },
       "eventId" : { "type" : "string", "index":"not_analyzed" },
       "timestamp" : { "type" : "date", "format" : "dd/MM/yyyy HH:mm:ss" },
       "visitId" : { "type" : "string", "index":"not_analyzed" },
