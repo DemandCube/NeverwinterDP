@@ -11,9 +11,9 @@
       var ciServiceUrl         = Env.gripper.server + "/rest/client/info.collector";
       infoCollectorService = new InfoCollectorService(ciServiceUrl);
 
-      window.onbeforeunload = function() {
+      window.onload = function() {
         infoCollectorService.pushClientInfo();
-        console.log("call unload");
+        console.log("call onload");
       };
 
       function showInfo() {

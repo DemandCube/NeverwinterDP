@@ -85,6 +85,7 @@ function GeoLocation() {
 }
 
 function InfoCollectorService(serviceUrl) {
+  var startTime = new Date().getTime();
   var visitCookie = new VisitCookie();
 
   var info = {
@@ -92,7 +93,8 @@ function InfoCollectorService(serviceUrl) {
     
     webpage: {
       url: window.location.href ,
-      startVisitTime: new Date().getTime()
+      startVisitTime: startTime,
+      endVisitTime: startTime + Math.floor((Math.random() * 100000) + 1)
     },
 
     navigator: {
