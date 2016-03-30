@@ -76,9 +76,6 @@ public class EventGeneratorServer {
       Random rand = new Random();
       while((session = clientSessionManager.takeClientSession()) != null) {
         session.sendWebEvent(client, "/rest/client/info.collector");
-        if(rand.nextDouble() < 0.3) {
-          session.sendWebEvent(client, "/rest/client/info.collector");
-        }
         count++ ;
         if(count % 311 == 0) {
           for(int i = 0; i < rand.nextInt(10); i++) {

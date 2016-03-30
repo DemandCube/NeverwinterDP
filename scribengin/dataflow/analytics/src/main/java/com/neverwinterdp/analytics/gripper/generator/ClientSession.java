@@ -64,6 +64,9 @@ public class ClientSession {
     clientInfo.webpage.startVisitTime = System.currentTimeMillis();
     clientInfo.webpage.endVisitTime = clientInfo.webpage.startVisitTime + rand.nextInt(maxVisitTime);
     client.post(dest, clientInfo);
+    if(rand.nextDouble() < 0.3) {
+      client.post(dest, clientInfo);
+    }
   }
   
   public void sendADSEvent(AsyncHttpClient client, String dest) throws ConnectException, URISyntaxException, InterruptedException {
