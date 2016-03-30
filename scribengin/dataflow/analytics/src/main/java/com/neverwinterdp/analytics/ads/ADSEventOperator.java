@@ -6,7 +6,7 @@ import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorContext;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.UrlParser;
 
-public class ADSEventStatisticOperator extends DataStreamOperator {
+public class ADSEventOperator extends DataStreamOperator {
   @Override
   public void process(DataStreamOperatorContext ctx, Message record) throws Exception {
     ADSEvent event = JSONSerializer.INSTANCE.fromBytes(record.getData(), ADSEvent.class) ;

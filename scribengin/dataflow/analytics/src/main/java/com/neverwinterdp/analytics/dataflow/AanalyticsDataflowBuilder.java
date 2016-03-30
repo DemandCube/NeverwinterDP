@@ -2,7 +2,7 @@ package com.neverwinterdp.analytics.dataflow;
 
 import com.neverwinterdp.analytics.AnalyticsConfig;
 import com.neverwinterdp.analytics.ads.ADSEvent;
-import com.neverwinterdp.analytics.ads.ADSEventStatisticOperator;
+import com.neverwinterdp.analytics.ads.ADSEventOperator;
 import com.neverwinterdp.analytics.odyssey.ActionEvent;
 import com.neverwinterdp.analytics.odyssey.MouseMoveEvent;
 import com.neverwinterdp.analytics.odyssey.OdysseyOperator;
@@ -78,7 +78,7 @@ public class AanalyticsDataflowBuilder {
     
     Operator<WebEvent, WebEvent> routerOp   = dfl.createOperator("router", RouterOperator.class);
     Operator<WebEvent, WebEvent> webEventOp  = dfl.createOperator("web.statistic", WebEventOperator.class);
-    Operator<WebEvent, WebEvent> adsStatisticOp  = dfl.createOperator("ads.statistic", ADSEventStatisticOperator.class);
+    Operator<WebEvent, WebEvent> adsStatisticOp  = dfl.createOperator("ads.statistic", ADSEventOperator.class);
     Operator<WebEvent, WebEvent> odysseyEventOp = dfl.createOperator("odyssey.event", OdysseyOperator.class);
     Operator<WebEvent, WebEvent> webEventJunkOp = dfl.createOperator("web.junk", WebEventJunkOperator.class);
     
