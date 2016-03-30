@@ -9,7 +9,6 @@ import com.neverwinterdp.kafka.producer.AckKafkaWriter;
 import com.neverwinterdp.netty.http.client.ClientInfo;
 import com.neverwinterdp.netty.http.client.ClientInfoCollectorHandler;
 import com.neverwinterdp.util.ExceptionUtil;
-import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.yara.Meter;
 import com.neverwinterdp.yara.MetricRegistry;
 
@@ -39,8 +38,8 @@ public class ClientInfoCollectorHandlerExt extends ClientInfoCollectorHandler {
   protected GripperAck onClientInfo(ClientInfo clientInfo, int dataSize) {
     //System.err.println("Client Info: " + JSONSerializer.INSTANCE.toString(clientInfo));
     WebEvent webEvent = new WebEvent();
-    webEvent.setTimestamp(System.currentTimeMillis());
     webEvent.setEventId(seedId + "-" + idTracker.incrementAndGet());
+    webEvent.setTimestamp(System.currentTimeMillis());
     webEvent.setClientInfo(clientInfo);
     try {
       kafkaWriter.send(kafkaTopic, webEvent, 60000);

@@ -25,7 +25,7 @@ public class ClientSessionManager {
   private int numOfPages = 10000;
   
   @Parameter(names = "--max-visit-time", description = "max visit time")
-  private int maxVisitTime = 0;
+  private int maxVisitTime = 300000;
   
   @Parameter(names = "--min-visit-time", description = "min visit time")
   private int minVisitTime = 0;
