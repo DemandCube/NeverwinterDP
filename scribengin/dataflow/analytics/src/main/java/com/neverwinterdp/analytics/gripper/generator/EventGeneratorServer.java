@@ -38,6 +38,10 @@ public class EventGeneratorServer {
   @Parameter(names = "--num-of-threads", description = "")
   private int numOfThreads = 1;
 
+  @Parameter(names = "--thread-sleep", description = "")
+  private long threadSleep = 10;
+
+  
   private ExecutorService executorService;
   
   public EventGeneratorServer() { }
@@ -86,7 +90,7 @@ public class EventGeneratorServer {
         if(session.hasNextWebEvent()) {
           clientSessionManager.releaseClientSession(session);
         }
-        //Thread.sleep(rand.nextInt(10) + 1);
+        if(threadSleep > 0) Thread.sleep(threadSleep);
       }
       client.flush();
       client.close();

@@ -33,6 +33,9 @@ public class AnalyticsConfig {
   @Parameter(names = "--generator-web-num-of-threads", description="")
   public int generatorWebNumOfThreads = 1;
   
+  @Parameter(names = "--generator-web-thread-sleep", description="")
+  public long generatorWebThreadSleep = 1;
+  
   @Parameter(names = "--generator-web-num-of-events", description="")
   public int generatorWebNumOfEvents = 100000;
   

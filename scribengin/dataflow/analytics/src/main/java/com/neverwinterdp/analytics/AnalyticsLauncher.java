@@ -60,7 +60,8 @@ public class AnalyticsLauncher {
 
     String[] webEventGeneratorConfig = {
       "--gripper-server-host", "127.0.0.1", "--gripper-server-port", "7081",
-      "--num-of-threads", Integer.toString(config.generatorWebNumOfThreads), 
+      "--num-of-threads", Integer.toString(config.generatorWebNumOfThreads),
+      "--thread-sleep",   Long.toString(config.generatorWebThreadSleep),
       "--num-of-pages",   Integer.toString(config.generatorWebNumOfEvents), 
       "--max-visit-time", Integer.toString(config.generatorWebMaxVisitTime),
       "--min-visit-time", Integer.toString(config.generatorWebMinVisitTime),
