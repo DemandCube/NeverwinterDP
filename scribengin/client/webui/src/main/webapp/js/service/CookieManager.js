@@ -50,4 +50,6 @@ function CookieManager() {
   };
 
   this.parseCookie();
-}
+};
+
+var CookieManager = new CookieManager();

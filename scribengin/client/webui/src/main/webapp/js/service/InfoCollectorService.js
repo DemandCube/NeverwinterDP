@@ -1,13 +1,12 @@
 function VisitCookie() {
-  this.cookieManager = new CookieManager() ;
   this.info = { };
   
-  this.info.visitorId = this.cookieManager.getCookie('visitor.visitorId');
+  this.info.visitorId = CookieManager.getCookie('visitor.visitorId');
   if(!this.info.visitorId) {
-    this.info.visitorId = this.cookieManager.randomGUID();
+    this.info.visitorId = CookieManager.randomGUID();
     var expireDate = new Date();
     expireDate.setTime(expireDate.getTime() + (1* 24 * 60 * 60 * 1000));
-    this.cookieManager.setCookie('visitor.visitorId', this.info.visitorId, "/", expireDate);
+    CookieManager.setCookie('visitor.visitorId', this.info.visitorId, "/", expireDate);
   }
 
   this.getUserInfo = function() { return this.info; };

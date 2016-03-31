@@ -1,8 +1,7 @@
 function ADSService(serviceUrl) {
-  this.cookieManager = new CookieManager();
-  this.visitorId = this.cookieManager.getCookie('ads.visitorId');
+  this.visitorId = CookieManager.getCookie('ads.visitorId');
   if(!this.visitorId) {
-    this.visitorId = this.cookieManager.randomGUID();
+    this.visitorId = CookieManager.randomGUID();
   }
 
   this.onClickADS = function(name, adUrl) {
