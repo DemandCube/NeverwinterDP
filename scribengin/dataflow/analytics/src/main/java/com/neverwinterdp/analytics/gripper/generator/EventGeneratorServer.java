@@ -86,7 +86,7 @@ public class EventGeneratorServer {
         if(session.hasNextWebEvent()) {
           clientSessionManager.releaseClientSession(session);
         }
-        Thread.sleep(rand.nextInt(10) + 1);
+        //Thread.sleep(rand.nextInt(10) + 1);
       }
       client.flush();
       client.close();
