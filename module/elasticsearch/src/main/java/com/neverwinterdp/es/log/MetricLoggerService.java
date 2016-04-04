@@ -17,10 +17,10 @@ import com.neverwinterdp.yara.snapshot.TimerSnapshot;
 public class MetricLoggerService  extends ObjectLoggerService {
   
   @Inject
-  private MetricRegistry metricRegistry ;
-  private String serverName;
+  private MetricRegistry            metricRegistry;
+  private String                    serverName;
   private MetricInfoCollectorThread metricCollectorThread;
-  
+
   public MetricLoggerService() {}
   
   public MetricLoggerService(MetricRegistry metricRegistry, String serverName, String bufferBaseDir, String[] esConnect) throws Exception {
@@ -55,17 +55,17 @@ public class MetricLoggerService  extends ObjectLoggerService {
           Map<String, Counter> counters = metricRegistry.getCounters() ;
           for(Map.Entry<String, Counter> entry : counters.entrySet()) {
             CounterSnapshot counterSnapshot = new CounterSnapshot(serverName, entry.getValue());
-            log(counterSnapshot.uniqueId(), counterSnapshot);
+            addLog(counterSnapshot.uniqueId(), counterSnapshot);
           }
           Map<String, Timer>  timers = metricRegistry.getTimers();
           for(Map.Entry<String, Timer> entry : timers.entrySet()) {
             TimerSnapshot timerSnapshot = new TimerSnapshot(serverName, entry.getValue(), TimeUnit.MILLISECONDS);
-            log(timerSnapshot.uniqueId(), timerSnapshot);
+            addLog(timerSnapshot.uniqueId(), timerSnapshot);
           }
           Map<String, Meter>  meters = metricRegistry.getMeters();
           for(Map.Entry<String, Meter> entry : meters.entrySet()) {
             MetterSnapshot meterSnapshot = new MetterSnapshot(serverName, entry.getValue());
-            log(meterSnapshot.uniqueId(), meterSnapshot);
+            addLog(meterSnapshot.uniqueId(), meterSnapshot);
           }
           Thread.sleep(30000);
         }

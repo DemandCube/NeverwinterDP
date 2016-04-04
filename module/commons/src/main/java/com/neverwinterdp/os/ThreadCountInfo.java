@@ -11,12 +11,13 @@ import com.neverwinterdp.util.text.TabularFormater;
 @SuppressWarnings("serial")
 public class ThreadCountInfo implements Serializable {
   @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
-  private Date  timestamp ;
+  private Date   timestamp;
   private String host;
-  private long threadStartedCount;
-  private long peekThreadCount;
-  private long threadCount;
-  private long deamonThreadCount;
+  
+  private long   threadStartedCount;
+  private long   peekThreadCount;
+  private long   threadCount;
+  private long   deamonThreadCount;
 
   public ThreadCountInfo() { }
 

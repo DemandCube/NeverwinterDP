@@ -32,7 +32,7 @@ public class ObjectLoggerService {
     loggers.put(type.getName(), logger);
   }
   
-  public <T> void log(String id, T object) {
+  public <T> void addLog(String id, T object) {
     ObjectLogger<T> logger = (ObjectLogger<T>) loggers.get(object.getClass().getName());
     logger.log(id, object);
   }

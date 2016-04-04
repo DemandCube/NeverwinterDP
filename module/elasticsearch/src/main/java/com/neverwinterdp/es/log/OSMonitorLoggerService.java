@@ -57,25 +57,25 @@ public class OSMonitorLoggerService extends ObjectLoggerService {
       try {
         while(true) {
           for(FileStoreInfo sel : osManagement.getFileStoreInfo()) {
-            log(sel.uniqueId(), sel);
+            addLog(sel.uniqueId(), sel);
           }
 
           for(GCInfo sel : osManagement.getGCInfo()) {
-            log(sel.uniqueId(), sel);
+            addLog(sel.uniqueId(), sel);
           }
 
           for(MemoryInfo sel : osManagement.getMemoryInfo()) {
-            log(sel.uniqueId(), sel);
+            addLog(sel.uniqueId(), sel);
           }
 
           OSInfo osInfo = osManagement.getOSInfo();
-          log(osInfo.uniqueId(), osInfo);
+          addLog(osInfo.uniqueId(), osInfo);
 
           ThreadCountInfo threadCountInfo = osManagement.getThreadCountInfo();
-          log(threadCountInfo.uniqueId(), threadCountInfo);
+          addLog(threadCountInfo.uniqueId(), threadCountInfo);
           
           JHiccupInfo jhiccupInfo = jhiccupMetter.getHiccupInfo();
-          log(jhiccupInfo.uniqueId(), jhiccupInfo);
+          addLog(jhiccupInfo.uniqueId(), jhiccupInfo);
           
           Thread.sleep(15000);
         }

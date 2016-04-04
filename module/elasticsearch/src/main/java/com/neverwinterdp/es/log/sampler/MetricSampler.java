@@ -47,19 +47,19 @@ public class MetricSampler {
       OSInfo osInfo = osMan.getOSInfo();
       JHiccupInfo hiccupInfo = hiccupMeter.getHiccupInfo();
       
-      service.log(threadCountInfos.uniqueId(), threadCountInfos);
-      service.log(classLoadedInfo.uniqueId(), classLoadedInfo);
-      service.log(osInfo.uniqueId(), osInfo);
-      service.log(hiccupInfo.uniqueId(), hiccupInfo);
+      service.addLog(threadCountInfos.uniqueId(), threadCountInfos);
+      service.addLog(classLoadedInfo.uniqueId(), classLoadedInfo);
+      service.addLog(osInfo.uniqueId(), osInfo);
+      service.addLog(hiccupInfo.uniqueId(), hiccupInfo);
       
       for (GCInfo sel : gcinfos) {
         if (sel != null) {
-          service.log(sel.uniqueId(), sel);
+          service.addLog(sel.uniqueId(), sel);
         }
       }
 
       for (MemoryInfo sel : memoryInfos) {
-        service.log(sel.uniqueId(), sel);
+        service.addLog(sel.uniqueId(), sel);
       }
 
       System.out.println(OSInfo.getFormattedText(osInfo));

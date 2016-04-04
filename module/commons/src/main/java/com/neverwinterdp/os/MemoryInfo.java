@@ -50,7 +50,7 @@ public class MemoryInfo implements Serializable {
   public void setHost(String host) { this.host = host; }
 
   public String getName() { return name; }
-  public void setName(String name) { this.name = name; }
+  public void   setName(String name) { this.name = name; }
 
   public long getInit() { return init; }
   public void setInit(long init) { this.init = init; }

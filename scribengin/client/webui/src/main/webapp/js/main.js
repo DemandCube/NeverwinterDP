@@ -10,6 +10,9 @@ require.config({
     jqueryui:     JSLIBS + '/jquery/jquery-ui-1.11.0/jquery-ui',
     underscore:   JSLIBS + '/underscore/underscore-1.5.2',
     backbone:     JSLIBS + '/backbonejs/backbonejs-1.1.0',
+    d3:           JSLIBS + '/d3/d3.min',
+    nv:           JSLIBS + '/d3/nv/nv.d3.min',
+    plotly:       JSLIBS + '/plotly/plotly-latest.min'
   },
   
   shim: {
@@ -22,6 +25,21 @@ require.config({
     backbone: {
       deps: ["underscore", "jquery"],
       exports: "Backbone"
+    },
+
+    d3: {
+      deps: [],
+      exports: 'd3'
+    },
+
+    nv: {
+      deps: ['d3'],
+      exports: 'nv'
+    },
+
+    plotly: {
+      deps: ['jquery'],
+      exports: 'plotly'
     }
   }
 });

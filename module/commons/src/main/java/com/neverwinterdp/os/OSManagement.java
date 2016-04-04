@@ -38,6 +38,8 @@ public class OSManagement {
     vmName = runtimeEnv.getVMName();
   }
  
+  public String getVMName() { return this.vmName; }
+  
   public MemoryInfo[] getMemoryInfo() {
     MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
     MemoryInfo heapMemory = new MemoryInfo("Heap_Memory", mbean.getHeapMemoryUsage());
