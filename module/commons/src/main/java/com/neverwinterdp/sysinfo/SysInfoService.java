@@ -1,5 +1,6 @@
 package com.neverwinterdp.sysinfo;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.filechooser.FileSystemView;
 
 import com.google.inject.Singleton;
 
@@ -49,15 +52,28 @@ public class SysInfoService {
   public LoadedClass getLoadedClass() { return new LoadedClass(ManagementFactory.getClassLoadingMXBean()); }
   
   public FileStore[] getFileStore() {
-    FileSystem fs = FileSystems.getDefault();
+    FileSystemView fsv = FileSystemView.getFileSystemView();
+    File[] drives = File.listRoots();
     List<FileStore> fsStoreInfo = new ArrayList<>();
-    for (java.nio.file.FileStore store: fs.getFileStores()) {
-      try {
-        FileStore info = new FileStore(store);
+    if (drives != null && drives.length > 0) {
+      for (File aDrive : drives) {
+        FileStore info = new FileStore();
+        info.setName(aDrive.getAbsolutePath());
+        info.setType(fsv.getSystemTypeDescription(aDrive));
+        info.setTotal(aDrive.getTotalSpace());
+        info.setUsed(aDrive.getTotalSpace() - aDrive.getFreeSpace());
         fsStoreInfo.add(info);
-      } catch (IOException e) {
       }
     }
+
+//    FileSystem fs = FileSystems.getDefault();
+//    for (java.nio.file.FileStore store: fs.getFileStores()) {
+//      try {
+//        FileStore info = new FileStore(store);
+//        fsStoreInfo.add(info);
+//      } catch (IOException e) {
+//      }
+//    }
     return fsStoreInfo.toArray(new FileStore[fsStoreInfo.size()]);
   }
   

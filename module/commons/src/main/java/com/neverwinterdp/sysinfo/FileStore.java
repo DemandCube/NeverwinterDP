@@ -6,6 +6,7 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class FileStore implements Serializable {
   private String name ;
+  private String type;
   private long   total ;
   private long   used  ;
   private long   available;
@@ -22,6 +23,9 @@ public class FileStore implements Serializable {
   public String getName() { return name; }
   public void setName(String name) { this.name = name; }
   
+  public String getType() { return type; }
+  public void setType(String type) { this.type = type; }
+
   public long getTotal() { return total; }
   public void setTotal(long total) { this.total = total; }
   
