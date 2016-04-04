@@ -52,15 +52,15 @@ public class OSManagement {
       MemoryUsage usage= memoryPoolMXBean.getPeakUsage();
       if(memoryPoolMXBean.getName().equals("PS Eden Space")){
         heapMemory.setUsedPSEdenSPace(usage.getUsed());
-      }else if(memoryPoolMXBean.getName().equals("PS Survivor Space")){
+      } else if(memoryPoolMXBean.getName().equals("PS Survivor Space")){
         heapMemory.setUsedPSSurvivorSpace(usage.getUsed());
-      }else if(memoryPoolMXBean.getName().equals("PS Old Gen")){
+      } else if(memoryPoolMXBean.getName().equals("PS Old Gen")){
         heapMemory.setUsedPSOldGen(usage.getUsed());
-      }else if(memoryPoolMXBean.getName().equals("Code Cache")){
+      } else if(memoryPoolMXBean.getName().equals("Code Cache")){
         nonHeapMemory.setUsedCodeCashe(usage.getUsed());
-      }else if(memoryPoolMXBean.getName().equals("Metaspace")){
+      } else if(memoryPoolMXBean.getName().equals("Metaspace")){
         nonHeapMemory.setUsedMetaspace(usage.getUsed());
-      }else if(memoryPoolMXBean.getName().equals("Compressed Class Space")){
+      } else if(memoryPoolMXBean.getName().equals("Compressed Class Space")){
         nonHeapMemory.setUsedCompressedClassSpace(usage.getUsed());
       }
     }

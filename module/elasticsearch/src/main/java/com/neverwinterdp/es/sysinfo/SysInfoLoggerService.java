@@ -1,4 +1,4 @@
-package com.neverwinterdp.es.sys;
+package com.neverwinterdp.es.sysinfo;
 
 import java.io.IOException;
 import java.util.Date;
@@ -9,27 +9,28 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.neverwinterdp.es.log.ObjectLoggerService;
 import com.neverwinterdp.monitor.jhiccup.JHiccupMeter;
-import com.neverwinterdp.os.OSManagement;
 import com.neverwinterdp.os.RuntimeEnv;
+import com.neverwinterdp.sysinfo.SysInfoService;
 
 @Singleton
-public class SysMetricLoggerService extends ObjectLoggerService {
-  private OSManagement              osManagement;
+public class SysInfoLoggerService extends ObjectLoggerService {
+  private String                    serverName;
+  private SysInfoService            sysInfoService;
   private JHiccupMeter              jhiccupMetter;
   private MetricInfoCollectorThread metricCollectorThread;
   private long                      logPeriod         = 15000;
   
   @Inject
-  public void onInit(RuntimeEnv runtimeEnv, OSManagement osManagement) throws Exception {
-    this.osManagement = osManagement;
+  public void onInit(RuntimeEnv runtimeEnv) throws Exception {
+    this.serverName     = runtimeEnv.getVMName();
+    this.sysInfoService = new SysInfoService();
     //Detect only the hiccup that has more than 50ms to save the cpu cycle
     jhiccupMetter = new JHiccupMeter(runtimeEnv.getVMName(), 50L /*resolutionMs*/); 
-    String bufferBaseDir = runtimeEnv.getDataDir() + "/buffer/sys-metric-log" ;
+    String bufferBaseDir = runtimeEnv.getDataDir() + "/buffer/sys-info" ;
     String[] esConnect = { "elasticsearch-1:9300" };
     init(esConnect, bufferBaseDir, 25000);
    
-    //add(DetailThreadInfo.class);
-    add(SysMetric.class, "neverwinterdp-sys-metric");
+    add(SysInfo.class, "neverwinterdp-sys-info");
     
     metricCollectorThread = new MetricInfoCollectorThread();
     metricCollectorThread.start();
@@ -45,14 +46,14 @@ public class SysMetricLoggerService extends ObjectLoggerService {
   public void setLogPeriod(long period) { this.logPeriod = period; }
   
   public void log() {
-    SysMetric sysMetric = new SysMetric();
+    SysInfo sysMetric = new SysInfo();
     sysMetric.setTimestamp(new Date());
-    sysMetric.setHost(osManagement.getVMName());
-    sysMetric.add("storage", osManagement.getFileStoreInfo());
-    sysMetric.add("gc",      osManagement.getGCInfo());
-    sysMetric.add("mem",     osManagement.getMemoryInfo());
-    sysMetric.add("os",      osManagement.getOSInfo());
-    sysMetric.add("thread",  osManagement.getThreadCountInfo());
+    sysMetric.setHost(serverName);
+    sysMetric.add("storage", sysInfoService.getFileStore());
+    sysMetric.add("gc",      sysInfoService.getGC());
+    sysMetric.add("mem",     sysInfoService.getMemory());
+    sysMetric.add("os",      sysInfoService.getOS());
+    sysMetric.add("thread",  sysInfoService.getThreadCount());
     sysMetric.add("jhicup",  jhiccupMetter.getHiccupInfo());
     addLog(sysMetric.uniqueId(), sysMetric);
   }

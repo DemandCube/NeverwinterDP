@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.neverwinterdp.es.log.MetricLoggerService;
 import com.neverwinterdp.es.log.OSMonitorLoggerService;
-import com.neverwinterdp.es.sys.SysMetricLoggerService;
+import com.neverwinterdp.es.sysinfo.SysInfoLoggerService;
 
 @ModuleConfig(name = "ESOSMonitorLoggerModule", autoInstall = false, autostart = false) 
 public class ESOSMonitorLoggerModule extends ServiceModule {
@@ -13,7 +13,7 @@ public class ESOSMonitorLoggerModule extends ServiceModule {
   @Override
   protected void configure(Map<String, String> properties) {  
     bind(OSMonitorLoggerService.class).asEagerSingleton();
-    bind(SysMetricLoggerService.class).asEagerSingleton();
+    bind(SysInfoLoggerService.class).asEagerSingleton();
     bind(MetricLoggerService.class).asEagerSingleton();
   }
 }

@@ -1,4 +1,4 @@
-package com.neverwinterdp.es.sys;
+package com.neverwinterdp.es.sysinfo;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -8,7 +8,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.neverwinterdp.util.text.DateUtil;
 
-public class SysMetric implements Serializable {
+public class SysInfo implements Serializable {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss")
   private Date                timestamp;
   private String              host;
