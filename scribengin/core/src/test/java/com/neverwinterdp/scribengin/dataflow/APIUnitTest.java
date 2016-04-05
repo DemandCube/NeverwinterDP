@@ -17,9 +17,9 @@ public class APIUnitTest {
     Dataflow dfl = new Dataflow("dataflow");
     dfl.useWireDataSetFactory(new KafkaWireDataSetFactory("127.0.0.1:2181"));
     KafkaDataSet<Message> inputDs = 
-        dfl.createInput(new KafkaStorageConfig("input", "127.0.0.1:2181", "input"));
+      dfl.createInput(new KafkaStorageConfig("input", "127.0.0.1:2181", "input"));
     KafkaDataSet<Message> aggregateDs = 
-        dfl.createOutput(new KafkaStorageConfig("aggregate", "127.0.0.1:2181", "aggregate"));
+      dfl.createOutput(new KafkaStorageConfig("aggregate", "127.0.0.1:2181", "aggregate"));
    
     Operator<Message, Message> splitterOp = dfl.createOperator("splitter", TrackingMessageSplitter.class);
     Operator<Message, Message> infoOp     = dfl.createOperator("info",     TrackingMessagePersister.class);
