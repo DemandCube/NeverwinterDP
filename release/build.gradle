@@ -15,7 +15,7 @@ task release(dependsOn: 'build') << {
   def projects = [
     ':registry/vm-sample',
     ':scribengin/release',
-    ':scribengin/client/webui',
+    ':client/webui',
     ':scribengin/dataflow/analytics',
     ':scribengin/dataflow/example',
     ':scribengin/dataflow/demo',

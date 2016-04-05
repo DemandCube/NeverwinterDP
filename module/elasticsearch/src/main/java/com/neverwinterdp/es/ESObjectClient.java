@@ -12,10 +12,14 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.index.query.BaseQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.IOUtil;
@@ -105,12 +109,14 @@ public class ESObjectClient<T> {
         esclient.client.prepareDelete(index, mappingType.getSimpleName(), id).execute().actionGet();
     return response.isFound();
   }
+  
+  public ESQueryExecutor getQueryExecutor() { return new ESQueryExecutor(index, esclient); }
 
-  public SearchResponse search(BaseQueryBuilder xqb) throws ElasticsearchException {
+  public SearchResponse search(QueryBuilder xqb) throws ElasticsearchException {
     return search(xqb, false, 0, 100);
   }
 
-  public SearchResponse search(BaseQueryBuilder xqb, int from, int to) throws ElasticsearchException {
+  public SearchResponse search(QueryBuilder xqb, int from, int to) throws ElasticsearchException {
     return search(xqb, false, from, to);
   }
 
@@ -126,21 +132,27 @@ public class ESObjectClient<T> {
     return JSONSerializer.INSTANCE.fromBytes(hit.source(), mappingType);
   }
 
-  public SearchResponse search(BaseQueryBuilder xqb, boolean explain, int from, int to) throws ElasticsearchException {
-    SearchResponse response =
-        esclient.client.prepareSearch(index).setSearchType(SearchType.QUERY_THEN_FETCH).
-            setQuery(xqb).
-            setFrom(from).setSize(to).
-            setExplain(explain).
-            execute().actionGet();
+  public SearchResponse search(QueryBuilder xqb, boolean explain, int from, int to) throws ElasticsearchException {
+    return search(xqb, null, explain, from, to);
+  }
+  
+  public SearchResponse search(QueryBuilder xqb, AbstractAggregationBuilder[] aggB, boolean explain, int from, int to) throws ElasticsearchException {
+    SearchRequestBuilder searchReqBuilder = esclient.client.prepareSearch(index).setSearchType(SearchType.QUERY_THEN_FETCH);
+    if(xqb == null) searchReqBuilder.setQuery(QueryBuilders.matchAllQuery());
+    else searchReqBuilder.setQuery(xqb);
+    
+    if(aggB != null) {
+      for(AbstractAggregationBuilder sel : aggB) {
+        searchReqBuilder.addAggregation(sel);
+      }
+    }
+    searchReqBuilder.setFrom(from).setSize(to).setExplain(explain);
+    SearchResponse response = searchReqBuilder.execute().actionGet();
     return response;
   }
 
   public long count(BaseQueryBuilder xqb) throws Exception {
-    CountResponse response =
-        esclient.client.prepareCount(index).
-            setQuery(xqb).
-            execute().actionGet();
+    CountResponse response = esclient.client.prepareCount(index).setQuery(xqb).execute().actionGet();
     return response.getCount();
   }
   

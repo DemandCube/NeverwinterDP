@@ -63,12 +63,14 @@ public class ObjectLogger<T> {
       try {
         esObjectClient = new ESObjectClient<T>(new ESClient(esConnect), indexName, objectType) ;
         esObjectClient.getESClient().waitForConnected(24 * 60 * 60 * 1000) ;
-        if(!esObjectClient.isCreated()) {
-          String settingUrl = objectType.getName().replace('.', '/') + ".setting.json";
-          String mappingUrl = objectType.getName().replace('.', '/') + ".mapping.json";
-          String settingJson = IOUtil.getResourceAsString(settingUrl, "UTF-8");
-          String mappingJson = IOUtil.getResourceAsString(mappingUrl, "UTF-8");
-          esObjectClient.createIndexWith(settingJson, mappingJson);
+        synchronized(getClass()) {
+          if(!esObjectClient.isCreated()) {
+            String settingUrl = objectType.getName().replace('.', '/') + ".setting.json";
+            String mappingUrl = objectType.getName().replace('.', '/') + ".mapping.json";
+            String settingJson = IOUtil.getResourceAsString(settingUrl, "UTF-8");
+            String mappingJson = IOUtil.getResourceAsString(mappingUrl, "UTF-8");
+            esObjectClient.createIndexWith(settingJson, mappingJson);
+          }
         }
       } catch(Exception ex) {
         ex.printStackTrace();

@@ -1,8 +1,8 @@
-archivesBaseName = 'scribengin.client.webui'
+archivesBaseName = 'client.webui'
 
 eclipse {
   project {
-    name = 'scribengin.client.webui'
+    name = 'client.webui'
   }
 }
 

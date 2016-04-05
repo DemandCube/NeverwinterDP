@@ -65,15 +65,6 @@ public class SysInfoService {
         fsStoreInfo.add(info);
       }
     }
-
-//    FileSystem fs = FileSystems.getDefault();
-//    for (java.nio.file.FileStore store: fs.getFileStores()) {
-//      try {
-//        FileStore info = new FileStore(store);
-//        fsStoreInfo.add(info);
-//      } catch (IOException e) {
-//      }
-//    }
     return fsStoreInfo.toArray(new FileStore[fsStoreInfo.size()]);
   }
   

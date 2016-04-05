@@ -46,16 +46,16 @@ public class SysInfoLoggerService extends ObjectLoggerService {
   public void setLogPeriod(long period) { this.logPeriod = period; }
   
   public void log() {
-    SysInfo sysMetric = new SysInfo();
-    sysMetric.setTimestamp(new Date());
-    sysMetric.setHost(serverName);
-    sysMetric.add("storage", sysInfoService.getFileStore());
-    sysMetric.add("gc",      sysInfoService.getGC());
-    sysMetric.add("mem",     sysInfoService.getMemory());
-    sysMetric.add("os",      sysInfoService.getOS());
-    sysMetric.add("thread",  sysInfoService.getThreadCount());
-    sysMetric.add("jhicup",  jhiccupMetter.getHiccupInfo());
-    addLog(sysMetric.uniqueId(), sysMetric);
+    SysInfo info = new SysInfo();
+    info.setTimestamp(new Date());
+    info.setHost(serverName);
+    info.add("storage", sysInfoService.getFileStore());
+    info.add("gc",      sysInfoService.getGC());
+    info.add("mem",     sysInfoService.getMemory());
+    info.add("os",      sysInfoService.getOS());
+    info.add("thread",  sysInfoService.getThreadCount());
+    info.add("jhicup",  jhiccupMetter.getHiccupInfo());
+    addLog(info.uniqueId(), info);
   }
   
   public class MetricInfoCollectorThread extends Thread {
@@ -66,6 +66,7 @@ public class SysInfoLoggerService extends ObjectLoggerService {
           Thread.sleep(logPeriod);
         }
       } catch(InterruptedException e) {
+        
       } catch(Throwable t) {
         t.printStackTrace();
       }
