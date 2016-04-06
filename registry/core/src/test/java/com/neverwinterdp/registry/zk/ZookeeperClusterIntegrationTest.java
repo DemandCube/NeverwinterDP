@@ -19,8 +19,16 @@ import org.junit.Test;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.io.IOUtil;
 import com.neverwinterdp.zookeeper.tool.server.EmbededZKServer;
-
-public class ZookeeperClusterUnitTest {
+/**
+ * This test doesn't work with gradle, no idea why
+ */
+public class ZookeeperClusterIntegrationTest {
+  static {
+    System.setProperty("log4j.configuration", "file:src/test/resources/test-log4j.properties") ;
+  }
+  
+  final static String WORKING_DIR = "./build/working";
+  
   public final Id ANYONE_ID = new Id("world", "anyone");
   public final ArrayList<ACL> OPEN_ACL = new ArrayList<ACL>(Collections.singletonList(new ACL(Perms.ALL, ANYONE_ID)));
   
@@ -32,30 +40,31 @@ public class ZookeeperClusterUnitTest {
 
   @Before
   public void setup() throws Exception {
-    FileUtil.removeIfExist("./build/data", false);
+    FileUtil.removeIfExist(WORKING_DIR, false);
     
-    FileUtil.mkdirs("./build/data/zookeeper-1");
-    IOUtil.save("1", "UTF-8", "./build/data/zookeeper-1/myid");
-    zkServerLauncher1 = new EmbededZKServer("./build/data/zookeeper-1", 2181) ;
+    FileUtil.mkdirs(WORKING_DIR + "/zookeeper-1");
+    IOUtil.save("1", WORKING_DIR + "/zookeeper-1/myid");
+    zkServerLauncher1 = new EmbededZKServer(WORKING_DIR + "/zookeeper-1", 2181) ;
     zkServerLauncher1.addEnsemble(1, "127.0.0.1:2888:3888");
-    zkServerLauncher1.addEnsemble(2, "127.0.0.1:2999:3999");
-    zkServerLauncher1.addEnsemble(3, "127.0.0.1:3000:4000");
+    zkServerLauncher1.addEnsemble(2, "127.0.0.1:2889:3889");
+    zkServerLauncher1.addEnsemble(3, "127.0.0.1:2890:3890");
+    
     zkServerLauncher1.start();
     
-    FileUtil.mkdirs("./build/data/zookeeper-2");
-    IOUtil.save("2", "UTF-8", "./build/data/zookeeper-2/myid");
-    zkServerLauncher2 = new EmbededZKServer("./build/data/zookeeper-2", 2182) ;
+    FileUtil.mkdirs(WORKING_DIR + "/zookeeper-2");
+    IOUtil.save("2", WORKING_DIR + "/zookeeper-2/myid");
+    zkServerLauncher2 = new EmbededZKServer(WORKING_DIR + "/zookeeper-2", 2182) ;
     zkServerLauncher2.addEnsemble(1, "127.0.0.1:2888:3888");
-    zkServerLauncher2.addEnsemble(2, "127.0.0.1:2999:3999");
-    zkServerLauncher2.addEnsemble(3, "127.0.0.1:3000:4000");
+    zkServerLauncher2.addEnsemble(2, "127.0.0.1:2889:3889");
+    zkServerLauncher2.addEnsemble(3, "127.0.0.1:2890:3890");
     zkServerLauncher2.start();
     
-    FileUtil.mkdirs("./build/data/zookeeper-3");
-    IOUtil.save("3", "UTF-8", "./build/data/zookeeper-3/myid");
-    zkServerLauncher3 = new EmbededZKServer("./build/data/zookeeper-3", 2183) ;
+    FileUtil.mkdirs(WORKING_DIR + "/zookeeper-3");
+    IOUtil.save("3", WORKING_DIR + "/zookeeper-3/myid");
+    zkServerLauncher3 = new EmbededZKServer(WORKING_DIR + "/zookeeper-3", 2183) ;
     zkServerLauncher3.addEnsemble(1, "127.0.0.1:2888:3888");
-    zkServerLauncher3.addEnsemble(2, "127.0.0.1:2999:3999");
-    zkServerLauncher3.addEnsemble(3, "127.0.0.1:3000:4000");
+    zkServerLauncher3.addEnsemble(2, "127.0.0.1:2889:3889");
+    zkServerLauncher3.addEnsemble(3, "127.0.0.1:2890:3890");
     zkServerLauncher3.start();
     zkConnects = "127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183";
     
@@ -84,10 +93,9 @@ public class ZookeeperClusterUnitTest {
         break;
       } catch(Exception ex) {
         System.err.println(i + ". Cannot create due to " + ex.getMessage() + ", state = " + zkClient.getState());
-        Thread.sleep(1000);
+        Thread.sleep(250);
       }
     }
-    Thread.sleep(5000);
     byte[] path1Data = zkClient.getData("/path1", false, new Stat());
     System.err.println("path1Data = " + new String(path1Data));
     zkClient.close();

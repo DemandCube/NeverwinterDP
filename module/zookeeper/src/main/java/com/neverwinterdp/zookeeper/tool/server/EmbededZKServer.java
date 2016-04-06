@@ -52,7 +52,7 @@ public class EmbededZKServer implements Server {
       zkProperties.putAll(overrideProperties);
     }
     //disable the per-ip limit on the number of connections since this is a non-production config
-    zkProperties.put("maxClientCnxns", "0");
+    zkProperties.put("maxClientCnxns", "10");
   }
   
   public void setMaxClientCnxns(int num) {
