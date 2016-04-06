@@ -22,10 +22,6 @@ include 'scribengin/release'
 
 include 'client/webui'
 
-include 'jvmagent/bootstrap'
-include 'jvmagent/registry'
-include 'jvmagent/DemoApp'
-
 include 'release'
 
 
