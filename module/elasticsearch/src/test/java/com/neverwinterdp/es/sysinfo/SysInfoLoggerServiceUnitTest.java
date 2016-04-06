@@ -40,7 +40,7 @@ public class SysInfoLoggerServiceUnitTest {
     NodeBuilder nb = nodeBuilder();
     nb.getSettings().put("cluster.name",       "neverwinterdp");
     nb.getSettings().put("path.data",          WORKING_DIR + "/elasticsearch/data");
-    nb.getSettings().put("node.name",          "elasticsearch-1");
+    nb.getSettings().put("node.name",          "localhost");
     nb.getSettings().put("transport.tcp.port", "9300");
 
     node = nb.node();
