@@ -35,8 +35,9 @@ public class SinkSourceUnitTest {
     Segment.SMALL_DATASIZE_THRESHOLD =  8 *  1024 * 1024;
     Segment.MEDIUM_DATASIZE_THRESHOLD = 8 * Segment.SMALL_DATASIZE_THRESHOLD;
     Segment.LARGE_DATASIZE_THRESHOLD  = 8 * Segment.MEDIUM_DATASIZE_THRESHOLD;
+    
     FileUtil.removeIfExist(DATA_DIRECTORY, false);
-    fs = FileSystem.getLocal(new Configuration()) ;
+    fs = FileSystem.getLocal(new Configuration()).getRaw();
   }
   
   @After
