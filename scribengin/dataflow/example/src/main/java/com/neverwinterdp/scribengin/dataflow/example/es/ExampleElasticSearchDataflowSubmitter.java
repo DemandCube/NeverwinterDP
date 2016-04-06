@@ -311,12 +311,7 @@ public class ExampleElasticSearchDataflowSubmitter {
     System.exit(0);
   }
   
-  
-  public String getDataflowID() {
-    return config.dataflowId;
-  }
+  public String getDataflowID() { return config.dataflowId; }
 
-  public String getInputTopic() {
-    return config.inputTopic;
-  }
+  public String getInputTopic() { return config.inputTopic; }
 }
