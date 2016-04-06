@@ -27,7 +27,7 @@ public class SysInfoLoggerService extends ObjectLoggerService {
     //Detect only the hiccup that has more than 50ms to save the cpu cycle
     jhiccupMetter = new JHiccupMeter(runtimeEnv.getVMName(), 50L /*resolutionMs*/); 
     String bufferBaseDir = runtimeEnv.getDataDir() + "/buffer/sys-info" ;
-    String[] esConnect = { "elasticsearch-1:9300" };
+    String[] esConnect = runtimeEnv.getEsConnects();
     init(esConnect, bufferBaseDir, 25000);
    
     add(SysInfo.class, "neverwinterdp-sys-info");
