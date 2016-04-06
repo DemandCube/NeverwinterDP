@@ -2,7 +2,7 @@
   "SysInfo": {
     "_source": { 
       "enabled": true,
-      “index.codec”: “best_compression”,
+      "index.codec": "best_compression"
     },
 
     "properties" : {
