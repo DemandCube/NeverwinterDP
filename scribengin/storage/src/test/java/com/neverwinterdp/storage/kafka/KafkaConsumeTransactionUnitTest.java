@@ -5,16 +5,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
+import com.neverwinterdp.util.log.LoggerFactory;
 
 public class KafkaConsumeTransactionUnitTest {
-  static {
-    System.setProperty("log4j.configuration", "file:src/test/resources/test-log4j.properties");
-  }
 
   private KafkaCluster cluster;
 
   @Before
   public void setUp() throws Exception {
+    LoggerFactory.log4jUseConsoleOutputConfig("WARN");
     cluster = new KafkaCluster("./build/cluster", 1, 1);
     cluster.start();
     Thread.sleep(2000);

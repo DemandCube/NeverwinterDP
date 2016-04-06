@@ -23,6 +23,7 @@ import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.storage.source.SourcePartitionStream;
 import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
 import com.neverwinterdp.util.io.FileUtil;
+import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
 public class SinkSourceUnitTest {
@@ -32,6 +33,7 @@ public class SinkSourceUnitTest {
   
   @Before
   public void setup() throws Exception {
+    LoggerFactory.log4jUseConsoleOutputConfig("WARN");
     Segment.SMALL_DATASIZE_THRESHOLD =  8 *  1024 * 1024;
     Segment.MEDIUM_DATASIZE_THRESHOLD = 8 * Segment.SMALL_DATASIZE_THRESHOLD;
     Segment.LARGE_DATASIZE_THRESHOLD  = 8 * Segment.MEDIUM_DATASIZE_THRESHOLD;

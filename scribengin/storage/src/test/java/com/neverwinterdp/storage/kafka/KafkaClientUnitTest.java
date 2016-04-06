@@ -14,9 +14,6 @@ import com.neverwinterdp.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
 
 public class KafkaClientUnitTest {
-  static {
-    System.setProperty("log4j.configuration", "file:src/test/resources/test-log4j.properties");
-  }
 
   private KafkaCluster cluster;
 

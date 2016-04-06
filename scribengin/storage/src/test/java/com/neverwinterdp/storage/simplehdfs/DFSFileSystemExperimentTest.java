@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.util.io.IOUtil;
+import com.neverwinterdp.util.log.LoggerFactory;
 
 public class DFSFileSystemExperimentTest {
   static String TEST_DIR = "/tmp/dfs-test" ;
@@ -19,6 +20,7 @@ public class DFSFileSystemExperimentTest {
   
   @Before
   public void setup() throws Exception {
+    LoggerFactory.log4jUseConsoleOutputConfig("WARN");
     System.setProperty("HADOOP_USER_NAME", "neverwinterdp");
     
     Configuration conf = new Configuration();
