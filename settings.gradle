@@ -16,7 +16,6 @@ include 'scribengin/storage'
 include 'scribengin/core'
 include 'scribengin/dataflow/example'
 include 'scribengin/dataflow/sample'
-include 'scribengin/dataflow/demo'
 include 'scribengin/dataflow/analytics'
 include 'scribengin/release'
 

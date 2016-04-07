@@ -18,7 +18,6 @@ task release(dependsOn: 'build') << {
     ':client/webui',
     ':scribengin/dataflow/analytics',
     ':scribengin/dataflow/example',
-    ':scribengin/dataflow/demo',
     ':scribengin/dataflow/sample'
   ] ;
 
