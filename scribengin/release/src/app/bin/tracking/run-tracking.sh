@@ -21,7 +21,7 @@ $SHELL plugin com.neverwinterdp.scribengin.dataflow.tracking.TestTrackingLaunche
 # MONITOR                                                                                                               #
 #########################################################################################################################
 MONITOR_COMMAND="\
-$SHELL plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor --dataflow-id tracking --show-history-vm"
+$SHELL plugin com.neverwinterdp.scribengin.dataflow.tracking.TrackingMonitor --dataflow-id tracking --show-history-vm --max-runtime 180000"
 
 echo -e "\n\n"
 echo "##To Tracking The Dataflow Progress##"
