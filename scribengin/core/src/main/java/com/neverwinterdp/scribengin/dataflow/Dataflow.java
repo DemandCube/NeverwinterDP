@@ -11,11 +11,11 @@ import com.neverwinterdp.storage.nulldev.NullDevStorageConfig;
 
 public class Dataflow {
   
-  private Map<String, DataSet<?>>     dataSets           = new LinkedHashMap<>();
-  private Map<String, Operator<?, ?>> operators          = new LinkedHashMap<>();
-  private WireDataSetFactory          wireDataStreamFactory;
-  private DataflowDescriptor          dataflowDescriptor = new DataflowDescriptor();
-  
+  private Map<String, DataSet<?>> dataSets           = new LinkedHashMap<>();
+  private Map<String, Operator>   operators          = new LinkedHashMap<>();
+  private WireDataSetFactory      wireDataStreamFactory;
+  private DataflowDescriptor      dataflowDescriptor = new DataflowDescriptor();
+
   public Dataflow(String id) {
     dataflowDescriptor = new DataflowDescriptor(id, id);
   }
@@ -104,15 +104,15 @@ public class Dataflow {
     return dataSets.values().toArray(array);
   }
   
-  public <I, O> Operator<I, O> createOperator(String name, Class<? extends DataStreamOperator> dataStreamOperator) {
-    Operator<I, O> operator = new Operator<I, O>(this, name, dataStreamOperator);
+  public Operator createOperator(String name, Class<? extends DataStreamOperator> dataStreamOperator) {
+    Operator operator = new Operator(this, name, dataStreamOperator);
     operator.add(MTDataStreamOperatorInterceptor.class);
     operators.put(name, operator);
     return operator;
   }
   
   @SuppressWarnings("unchecked")
-  public <I, O> Operator<I, O>[] getOperators() {
+  public Operator[] getOperators() {
     return operators.values().toArray(new Operator[operators.size()]);
   }
   
@@ -139,7 +139,7 @@ public class Dataflow {
       }
       config.getStreamConfig().add(sel.getName(), storageConfig);
     }
-    Operator<?, ?>[] operators = getOperators();
+    Operator[] operators = getOperators();
     config.clearOperators();
     for(int i = 0; i < operators.length; i++) {
       config.addOperator(operators[i].getOperatorDescriptor());

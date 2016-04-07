@@ -21,10 +21,10 @@ public class APIUnitTest {
     KafkaDataSet<Message> aggregateDs = 
       dfl.createOutput(new KafkaStorageConfig("aggregate", "127.0.0.1:2181", "aggregate"));
    
-    Operator<Message, Message> splitterOp = dfl.createOperator("splitter", TrackingMessageSplitter.class);
-    Operator<Message, Message> infoOp     = dfl.createOperator("info",     TrackingMessagePersister.class);
-    Operator<Message, Message> warnOp     = dfl.createOperator("warn",     TrackingMessagePersister.class);
-    Operator<Message, Message> errorOp    = dfl.createOperator("error",    TrackingMessagePersister.class);
+    Operator splitterOp = dfl.createOperator("splitter", TrackingMessageSplitter.class);
+    Operator infoOp     = dfl.createOperator("info",     TrackingMessagePersister.class);
+    Operator warnOp     = dfl.createOperator("warn",     TrackingMessagePersister.class);
+    Operator errorOp    = dfl.createOperator("error",    TrackingMessagePersister.class);
 
     inputDs.
       connect(splitterOp);

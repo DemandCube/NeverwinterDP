@@ -135,7 +135,7 @@ public class ExampleHdfsDataflowSubmitter {
     
     //Define which operator to use.  
     //This will be the logic that ties the input to the output
-    Operator<Message, Message> operator     = dfl.createOperator("simpleOperator", SimpleDataStreamOperator.class);
+    Operator operator     = dfl.createOperator("simpleOperator", SimpleDataStreamOperator.class);
     
     //Connect your input to the operator
     inputDs.useRawReader().connect(operator);

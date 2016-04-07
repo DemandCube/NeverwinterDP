@@ -76,11 +76,11 @@ public class AanalyticsDataflowBuilder {
         new ESStorageConfig("ads.output", "analytics-ads-unique-visitor", config.esAddresses, ADSEvent.class);
     DataSet<WebEvent> esADSOutputDs = dfl.createOutput(esADSOutputStorageConfig);
     
-    Operator<WebEvent, WebEvent> routerOp   = dfl.createOperator("router", RouterOperator.class);
-    Operator<WebEvent, WebEvent> webEventOp  = dfl.createOperator("web.statistic", WebEventOperator.class);
-    Operator<WebEvent, WebEvent> adsStatisticOp  = dfl.createOperator("ads.statistic", ADSEventOperator.class);
-    Operator<WebEvent, WebEvent> odysseyEventOp = dfl.createOperator("odyssey.event", OdysseyOperator.class);
-    Operator<WebEvent, WebEvent> webEventJunkOp = dfl.createOperator("web.junk", WebEventJunkOperator.class);
+    Operator routerOp   = dfl.createOperator("router", RouterOperator.class);
+    Operator webEventOp  = dfl.createOperator("web.statistic", WebEventOperator.class);
+    Operator adsStatisticOp  = dfl.createOperator("ads.statistic", ADSEventOperator.class);
+    Operator odysseyEventOp = dfl.createOperator("odyssey.event", OdysseyOperator.class);
+    Operator webEventJunkOp = dfl.createOperator("web.junk", WebEventJunkOperator.class);
     
     odysseyEventInputDs.useRawReader().connect(routerOp);
     webEventInputDs.useRawReader().connect(routerOp);

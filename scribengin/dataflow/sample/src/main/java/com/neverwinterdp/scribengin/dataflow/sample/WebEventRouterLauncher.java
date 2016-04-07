@@ -76,9 +76,9 @@ public class WebEventRouterLauncher {
     
     DataSet<WebEvent> nullDevOutputDs = dfl.createOutput(new NullDevStorageConfig());
     
-    Operator<WebEvent, WebEvent> routerOp  = dfl.createOperator("router",  WebEventRouterOperator.class);
-    Operator<WebEvent, WebEvent> archiveOp = dfl.createOperator("archive", WebEventPersisterOperator.class);
-    Operator<WebEvent, WebEvent> junkOp    = dfl.createOperator("junk",    WebEventPersisterOperator.class);
+    Operator routerOp  = dfl.createOperator("router",  WebEventRouterOperator.class);
+    Operator archiveOp = dfl.createOperator("archive", WebEventPersisterOperator.class);
+    Operator junkOp    = dfl.createOperator("junk",    WebEventPersisterOperator.class);
 
     inputDs.
       useRawReader().

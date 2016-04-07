@@ -135,9 +135,9 @@ public class ExampleWireDataflowSubmitter {
     
     //Define which operators to use.  
     //This will be the logic that ties the datasets and operators together
-    Operator<Message, Message> splitter = dfl.createOperator("splitteroperator", SplitterDataStreamOperator.class);
-    Operator<Message, Message> odd      = dfl.createOperator("oddoperator", PersisterDataStreamOperator.class);
-    Operator<Message, Message> even     = dfl.createOperator("evenoperator", PersisterDataStreamOperator.class);
+    Operator splitter = dfl.createOperator("splitteroperator", SplitterDataStreamOperator.class);
+    Operator odd      = dfl.createOperator("oddoperator", PersisterDataStreamOperator.class);
+    Operator even     = dfl.createOperator("evenoperator", PersisterDataStreamOperator.class);
     
     //Send all input to the splitter operator
     inputDs.useRawReader().connect(splitter);

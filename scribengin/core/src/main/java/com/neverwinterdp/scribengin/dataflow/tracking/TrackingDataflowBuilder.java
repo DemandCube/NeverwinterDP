@@ -119,10 +119,10 @@ public class TrackingDataflowBuilder {
       aggregateDs = 
         dfl.createOutput(new KafkaStorageConfig("aggregate", trackingConfig.getKafkaZKConnects(), trackingConfig.getKafkaValidateTopic()));
     }
-    Operator<TrackingMessage, TrackingMessage> splitterOp = dfl.createOperator("splitter", TrackingMessageSplitter.class);
-    Operator<TrackingMessage, TrackingMessage> infoOp     = dfl.createOperator("info", TrackingMessagePersister.class);
-    Operator<TrackingMessage, TrackingMessage> warnOp     = dfl.createOperator("warn", TrackingMessagePersister.class);
-    Operator<TrackingMessage, TrackingMessage> errorOp    = dfl.createOperator("error", TrackingMessagePersister.class);
+    Operator splitterOp = dfl.createOperator("splitter", TrackingMessageSplitter.class);
+    Operator infoOp     = dfl.createOperator("info", TrackingMessagePersister.class);
+    Operator warnOp     = dfl.createOperator("warn", TrackingMessagePersister.class);
+    Operator errorOp    = dfl.createOperator("error", TrackingMessagePersister.class);
 
     inputDs.
       useRawReader().

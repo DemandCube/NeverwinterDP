@@ -27,7 +27,7 @@ abstract public class DataSet<T> {
   
   public DataStreamType getDataStreamType() { return this.type ;}
   
-  public <OUT> DataSet<T> connect(Operator<T, OUT> operator) {
+  public <OUT> DataSet<T> connect(Operator operator) {
     operator.in(this);
     return this;
   }
