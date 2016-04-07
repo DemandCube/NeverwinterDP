@@ -232,6 +232,7 @@ public class VM {
     String vmDir = vmConfig.getLocalAppHome() ;
     System.setProperty("vm.app.dir", vmDir);
     System.setProperty("app.home", vmDir);
+    System.setProperty("app.es.connects", "elasticsearch-1:9300");
     
     Properties log4jProps = new Properties();
     log4jProps.load(IOUtil.loadRes(vmConfig.getLog4jConfigUrl()));
