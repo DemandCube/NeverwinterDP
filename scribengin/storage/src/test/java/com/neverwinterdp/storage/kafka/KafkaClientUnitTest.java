@@ -12,6 +12,7 @@ import com.neverwinterdp.storage.kafka.KafkaStorage;
 import com.neverwinterdp.storage.kafka.sink.KafkaSink;
 import com.neverwinterdp.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
+import com.neverwinterdp.util.log.LoggerFactory;
 
 public class KafkaClientUnitTest {
 
@@ -19,6 +20,7 @@ public class KafkaClientUnitTest {
 
   @Before
   public void setUp() throws Exception {
+    LoggerFactory.log4jUseConsoleOutputConfig("WARN");
     cluster = new KafkaCluster("./build/cluster", 1, 1);
     cluster.start();
     Thread.sleep(2000);

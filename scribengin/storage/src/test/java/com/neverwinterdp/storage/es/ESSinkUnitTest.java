@@ -15,12 +15,14 @@ import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.log.Log4jRecord;
+import com.neverwinterdp.util.log.LoggerFactory;
 
 public class ESSinkUnitTest {
   Node node ;
 
   @Before
   public void setUp() throws Exception {
+    LoggerFactory.log4jUseConsoleOutputConfig("WARN");
     FileUtil.removeIfExist("build/elasticsearch", false);
     FileUtil.removeIfExist("build/buffer", false);
     NodeBuilder nb = nodeBuilder();
