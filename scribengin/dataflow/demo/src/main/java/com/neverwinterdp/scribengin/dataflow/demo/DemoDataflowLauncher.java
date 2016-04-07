@@ -74,9 +74,6 @@ public class DemoDataflowLauncher {
     Class<Mapper> defaultMapper = com.neverwinterdp.storage.es.Mapper.class;
     @Parameter(names = "--elasticsearch-mapper", description = "Name of mapper for elasticsearch")
     String esMapper = defaultMapper.getName();
-    
-    
-    
   }
   
   private Config config = new Config();
