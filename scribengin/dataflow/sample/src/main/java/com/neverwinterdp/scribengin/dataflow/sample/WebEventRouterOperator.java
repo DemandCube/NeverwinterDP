@@ -16,5 +16,4 @@ public class WebEventRouterOperator extends DataStreamOperator {
       ctx.write("router-to-archive", mesg);
     }
   }
-  
 }

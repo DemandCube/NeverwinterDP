@@ -16,7 +16,7 @@ public class WebEventRouterConfig {
   String dfsAppHome = "/applications/dataflow/sample";
   
   @Parameter(names = "--zk-connect", description="[host]:[port] of Zookeeper server")
-  String zkConnect = "zookeeper-1:2181";
+  String zkConnect = "localhost:2181";
   
   @Parameter(names = "--hadoop-master-connect", description="Hostname of HadoopMaster")
   String hadoopMasterConnect = "hadoop-master";
@@ -31,7 +31,7 @@ public class WebEventRouterConfig {
   String dataflowInputTopic  = "webevent";
   
   @Parameter(names = "--dataflow-input-topic-replication", description = "")
-  int dataflowInputTopicReplication  = 2;
+  int dataflowInputTopicReplication  = 1;
   
   @Parameter(names = "--dataflow-input-topic-partition", description = "")
   int dataflowInputTopicPartition  = 5;
@@ -61,7 +61,7 @@ public class WebEventRouterConfig {
   String dataflowOutputHdfsLocation  = "build/working/storage/hdfs";
   
   @Parameter(names = "--dataflow-output-es-addresses", description = "")
-  String dataflowOutputESAddresses  = "elasticsearch-1:9300";
+  String dataflowOutputESAddresses  = "localhost:9300";
   
   @Parameter(names = "--dataflow-output-es-index", description = "")
   String dataflowOutputESIndex  = "webevent";
