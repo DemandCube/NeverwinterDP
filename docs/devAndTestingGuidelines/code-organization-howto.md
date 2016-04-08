@@ -155,7 +155,7 @@ The core project(with the storage) is the main project of scribengin. It consist
     * Check the worker and executor configuration, request the vm manager to allocate a vm for each worker.
     * Listen to the worker heartbeat, detect the worker, task failure... request and allocate a new worker if a broken worker is detected.
 5. The worker runtime is a set of service such the worker service, metric service, task service... When the worker is launched, the worker services will be initialized, it take the worker configuration from the registry, create a task service with a number of executors according to the configuration and start the task service. The executor in the task service will take a task from the registry, create a heartbeat for that task so the master can track the task for the failure, run the task according to the task configuration. If the worker or the executor fail, the heartbeat for the task will be broken and the master will take the task and put it back to the task queue so another executor can pick the task and resume. 
-6. The tracking is a dataflow that design to test the stability and reliability of the scribengin. The tracking consists  of:
+6. The tracking is designed to test the stability and reliability of the scribengin. The tracking consists  of:
     * The TrackingMessage is a message that contains the chunk id and the tracking id
     * The tracking generator that generate the message forward the message to a kafka topic. Periodically, the generator will update the progress to the registry.
     * The tracking validator that retrieve the messages from the different dataflow output destination, read the chunk id, and tracking id, resort the chunk id and the tracking id to find the duplication or lost.
@@ -168,6 +168,18 @@ The core project(with the storage) is the main project of scribengin. It consist
 ###dataflow###
 
 ####analytics####
+
+The analytics is a sample dataflow that try to emulate the real use case of the scribengin. The analytics consist of:
+
+1. Analytics has 3 different type events
+    * The web event is the user click or load different web page event. When a webpage is loaded, a javascript in the webpage will capture the information about the browser, location, visitor... and send back to the gripper via gripper rest api.
+    * Ads event is an event when the user click on an advertising banner. A javascript will capture the user click event, collect the information about the visitor, ads, location and send back to the gripper via gripper rest api
+    * The odyssey event is other type of user event such the form submit, mouse move. The event will be collected by a javascript lib and send to the gripper.
+2. The generator is the event generator that generate and simulate different type of events and send the events to the gripper.
+3. The gripper is a http service that can receive different type of events, either from the generator or from the real user click on the web browser, via the rest api. The gripper will take the event and forward store in the different kafka topic according to the event type.
+4. Scribengin Mover
+
+See the diagram
 
 ![Diagram](images/analytics_diagram.png)
 
