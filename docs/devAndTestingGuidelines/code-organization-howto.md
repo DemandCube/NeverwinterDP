@@ -108,7 +108,7 @@ The core component contains:
 
 ###vm###
 
-The vm component is a sub project of the registry. The vm project allows to dynamically manage a group of vm (virtual machine). The vm can be allocated on request and returned to the vm pool when it terminates. The framework consist of a vm master and  1 or more master slave. The vm master is responsible to allocate the vm, register it with the registry and detect the broken or terminated vm, return them to the vm pool. 
+The vm component is a subproject of the registry. The vm project allows to dynamically manage a group of vm (virtual machine). The vm can be allocated on request and returned to the vm pool when it terminates. The framework consist of a vm master and  1 or more master slave. The vm master is responsible to allocate the vm, register it with the registry and detect the broken or terminated vm, return them to the vm pool. 
 
 The vm project has 2 implementations:
 
@@ -124,7 +124,31 @@ The project contains a single class VMSampleApp which prints out a sample hello 
 
 ###storage###
 
+The storage project is a subproject of the scribengin. It contains the api for the sink, source and various implementation such kafka, hdfs, S3, elasticsearch... 
+
+basically a storage has the following structure
+
+```
+storage
+  partitions
+    partition-name
+      partition-stream-0
+      partition-stream-1
+      ...
+      partition-stream-n
+```
+
+Where the sink api allow to write to the storage and the source api allow to read the data from the storage. Certain storage type such kafka, elasticsearch... cannot have multiple partition hierarchy, in this case, those storage will have only one single partition. The other type of storage such hdfs, s3... can have multiple partitions, the partitions can be splitted by the time, or size. 
+
 ###core###
+The core project(with the storage) is the main project of scribengin. It consist of some main components:
+
+1. DataSet api is a set of object that allow to capture the configuration of the storage, serialize to json, store on the registry, where the worker and executor can access to get the instruction how to process the data
+2. The dataflow api consists of:
+    * The Dataflow object which hold the information of the Dataset, operator. How the input DataSet are connected to the operator, how the operator connect to another operator or an output DataSet
+    * The Operator is the logic to process the data. It can take in 1 or several input DataSet process the data and output to 1 or several other operator or DataSet
+3. 
+
 
 ###dataflow###
 
