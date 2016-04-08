@@ -143,20 +143,29 @@ Where the sink api allow to write to the storage and the source api allow to rea
 ###core###
 The core project(with the storage) is the main project of scribengin. It consist of some main components:
 
-1. DataSet api is a set of object that allow to capture the configuration of the storage, serialize to json, store on the registry, where the worker and executor can access to get the instruction how to process the data
+1. DataSet api is a set of object that allow to capture the configuration of the storage, serialize to json, store on the registry, where the worker and executor can access to get the instruction how to read/write the data
 2. The dataflow api consists of:
     * The Dataflow object which hold the information of the Dataset, operator. How the input DataSet are connected to the operator, how the operator connect to another operator or an output DataSet
     * The Operator is the logic to process the data. It can take in 1 or several input DataSet process the data and output to 1 or several other operator or DataSet
-3. 
+3. The registry consist of
+4. The master runtime
+5. The worker runtime 
+6. The tracking 
+7. The shell
 
 
 ###dataflow###
 
 ####analytics####
 
+![Diagram](images/analytics_diagram.png)
+
 ####example####
 
+The example dataflow project consist of some basic dataflow example such copy, wire or pipe, transform the data
+
 ####sample####
+
 
 #Release#
 
