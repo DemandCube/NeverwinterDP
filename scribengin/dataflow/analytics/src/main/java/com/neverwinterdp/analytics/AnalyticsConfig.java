@@ -13,10 +13,10 @@ public class AnalyticsConfig {
   public String dfsAppHome = "/applications/dataflow/analytics";
   
   @Parameter(names = "--zk-connect", description="[host]:[port] of Zookeeper server")
-  public String zkConnect = "zookeeper-1:2181";
+  public String zkConnect = "localhost:2181";
   
   @Parameter(names = "--es-addresses", description="Elasticsearch addresses, ex: elasticsearch-1:9300,elasticsearch-2:9300")
-  public String esAddresses = "elasticsearch-1:9300";
+  public String esAddresses = "localhost:9300";
   
   @Parameter(names = "--hadoop-master-connect", description="Hostname of HadoopMaster")
   public String hadoopMasterConnect = "hadoop-master";
