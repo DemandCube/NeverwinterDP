@@ -127,3 +127,27 @@ The project contains a single class VMSampleApp which prints out a sample hello 
 ###core###
 
 ###dataflow###
+
+####analytics####
+
+####example####
+
+####sample####
+
+#Release#
+
+
+
+```
+release
+├── elasticsearch
+└── neverwinterdp
+    ├── client
+    │   └── webui
+    ├── dataflow
+    │   ├── analytics
+    │   ├── example
+    │   └── sample
+    ├── scribengin
+    └── vm-sample
+```
