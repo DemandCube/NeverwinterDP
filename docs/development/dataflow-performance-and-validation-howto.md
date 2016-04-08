@@ -28,14 +28,13 @@ Some rules to make a good configuration:
 #Message Generation And Validation#
 
 1. Technique to track the messages
-    * The message generator should include the vm id or host id and an unique sequence number into the message
-    * The message generator should save the information such as the host id, the number of messages it generates, and all the other necessary information in order for the validate tool to retrieve and assert
+    * The message generator should include the vm id or host id, chunk id and an unique sequence number into the message. The reason to include a chunk id is to deal with the very long test, which can generate billion of the messages which will be hard or not efficient to validate.
     * The design should allow more than one vm can run the message generator at the same time and store the information in a hierarchy that the validate tool can use to aggregate the information 
 
 2. Technique to validate the messages
-    * Create 1 vm or multiple vm, each vm should run one or more validate tool that validate 1 stream. The validate tool should parse the  message to extract the vm id and the sequence number. The final result should be stored into the registry.
-    * There should be a client that wait for all the validate tool vm terminate, compare the validate result with the generated information. Report the comparison result or all the error or unexpected result.
-    * Our current tracking framework can validate and detect the lost or duplicated message.
+    * Create 1 vm or multiple vm, each vm should run one or more validate tool that validate 1 stream. The validate tool should parse the  message to extract the vm id, chunk id and the sequence number. The final result should be stored into the registry.
+    * There should be a client that wait for all the validate tool vm terminate, compare the validate result with the generated information. Report the comparison result or report all the error or unexpected result.
+    * Our current tracking framework can validate and detect the lost or duplicated messages.
 
 
 #Performance And Validation Test Requirements#
