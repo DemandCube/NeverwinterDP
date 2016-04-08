@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingDataflowBuilder;
-import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessage;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMConfig;

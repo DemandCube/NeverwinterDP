@@ -18,7 +18,7 @@ import com.neverwinterdp.storage.source.SourcePartitionStream;
 import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
 import com.neverwinterdp.util.log.LoggerFactory;
 
-public class SinkSourceUnitTest {
+public class KafkaStorageUnitTest {
   private KafkaCluster cluster;
 
   @Before
