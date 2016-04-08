@@ -62,12 +62,12 @@ Here are the important Unit Test
 ###scribengin/dataflow/analytics###
 
 AnalyticsUnitTest, This test launch the the analytics dataflow that describe in 
-[Code Organization](code-organization-howto.md####analytics)
+[Analytics](code-organization-howto.md#analytics)
 
 
 ###client/webui###
 
-WebuiIntegrationTest
+WebuiIntegrationTest, this test basically launch the analytics test, launch the http service for the webui, run different rest api test such kill the worker, master.... wait for long time so the user can open a web browser and access localhost:8080/index.html to manually test the web ui. 
 
 #Run Integration Test#
 
