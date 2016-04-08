@@ -143,15 +143,26 @@ Where the sink api allow to write to the storage and the source api allow to rea
 ###core###
 The core project(with the storage) is the main project of scribengin. It consist of some main components:
 
-1. DataSet api is a set of object that allow to capture the configuration of the storage, serialize to json, store on the registry, where the worker and executor can access to get the instruction how to read/write the data
+1. DataSet api is a set of object that allow to capture the configuration of the storage, serialize to json, store on the registry, where the master, worker and executor can access to get the instruction how to read/write the data from/to storage
 2. The dataflow api consists of:
     * The Dataflow object which hold the information of the Dataset, operator. How the input DataSet are connected to the operator, how the operator connect to another operator or an output DataSet
     * The Operator is the logic to process the data. It can take in 1 or several input DataSet process the data and output to 1 or several other operator or DataSet
-3. The registry consist of
-4. The master runtime
-5. The worker runtime 
-6. The tracking 
-7. The shell
+3. The registry consist of few different registry classes such ConfigRegistry, DataflowRegistry, DataflowTaskRegistry, MasterRegistry, WorkerRegistry, OperatorRegistry... each class is a registry helper that allow the master, worker access the different part of the dataflow registry to read, modify registry and coordinate with the master or the other worker
+4. The master runtime is a set of service implementation that allow to control and coordinate the worker. The main role of the master are:
+    * Take the dataflow configuration from the registry, validate and initialize the resources such check existence of the dataset storage, create if missing.
+    * Create the the missing dataset that wire the operator together
+    * Compute and create the tasks base the dataset and the dataset stream. Basically, each dataset stream will have a task associated with it.
+    * Check the worker and executor configuration, request the vm manager to allocate a vm for each worker.
+    * Listen to the worker heartbeat, detect the worker, task failure... request and allocate a new worker if a broken worker is detected.
+5. The worker runtime is a set of service such the worker service, metric service, task service... When the worker is launched, the worker services will be initialized, it take the worker configuration from the registry, create a task service with a number of executors according to the configuration and start the task service. The executor in the task service will take a task from the registry, create a heartbeat for that task so the master can track the task for the failure, run the task according to the task configuration. If the worker or the executor fail, the heartbeat for the task will be broken and the master will take the task and put it back to the task queue so another executor can pick the task and resume. 
+6. The tracking is a dataflow that design to test the stability and reliability of the scribengin. The tracking consists  of:
+    * The TrackingMessage is a message that contains the chunk id and the tracking id
+    * The tracking generator that generate the message forward the message to a kafka topic. Periodically, the generator will update the progress to the registry.
+    * The tracking validator that retrieve the messages from the different dataflow output destination, read the chunk id, and tracking id, resort the chunk id and the tracking id to find the duplication or lost.
+    * The tracking also consist a tracking dataflow that take the generated message, process, and output to different destination.
+    * The tracking also consist of the other tool or logic to simulate different kind of failure such, worker failure, master failure, power failure(all master , worker are failed).
+7. The client api allow to assemble a dataflow and submit the dataflow to the registry and launch the dataflow by request the vm manager to allocate a dataflow master.
+8. The shell allow the user to stop, resume a dataflow as well as monitor the dataflow by accessing the dataflow information in the registry.  
 
 
 ###dataflow###
@@ -165,6 +176,8 @@ The core project(with the storage) is the main project of scribengin. It consist
 The example dataflow project consist of some basic dataflow example such copy, wire or pipe, transform the data
 
 ####sample####
+
+#client webui#
 
 
 #Release#
