@@ -479,7 +479,7 @@ These steps will be necessary if you do not have access to Nvent's private autom
         #To check the scribengin status
         ./shell.sh vm info
 
-4.  [Use the Scribengin API to upload your Dataflow.](../dataflowDevelopment/dataflowDevTableOfContents.md)
+4.  [Use the Scribengin API to upload your Dataflow.](../dataflow/dataflowDevTableOfContents.md)
 
 
 #Launching a dataflow from a preconfigured test#
