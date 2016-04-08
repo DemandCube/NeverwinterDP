@@ -53,6 +53,7 @@ Get Scribengin launched quickly!  This will walk users how to start a Scribengin
 - [Code Conventions](docs/development/code-convention-howto.md)
 - [Code Organization](docs/development/code-organization-howto.md)
 - [Dataflow Performance and Validation](docs/development/dataflow-performance-and-validation-howto.md)
+- [Run Test](docs/development/run-test-howto.md)
 
 ####Release
 ```
