@@ -61,7 +61,9 @@ Here are the important Unit Test
 
 ###scribengin/dataflow/analytics###
 
-AnalyticsUnitTest, 
+AnalyticsUnitTest, This test launch the the analytics dataflow that describe in 
+[Code Organization](code-organization-howto.md####analytics)
+
 
 ###client/webui###
 
