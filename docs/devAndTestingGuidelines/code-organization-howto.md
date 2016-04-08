@@ -9,8 +9,6 @@
   - [Release](#release)
 
 
-
-
 #Overview#
 
 The code is organized in the following hierachy
@@ -18,33 +16,34 @@ The first level is considered a project, and the second level consists of projec
 
 ```
 NeverwinterDP
-  ├── lib
-  │   ├── utils
-  │   ├── buffer
-  │   └── yara
-  ├── module
-  │   ├── commons
-  │   ├── elasticsearch
-  │   └── kafka
-  ├── registry
-  │   ├── core
-  │   ├── vm
-  │   └── vm-sample
-  └── scribengin
-  |   ├── core
-  |   ├── dataflow
-  |   │   └── log-sample
-  |   └── release
-  ├── client
-  │   └── swingui
-  ├── jvmagent
-  │   ├── DemoApp
-  │   ├── bootstrap
-  │   └── registry
-  ├── release
+├── client
+│   └── webui
+├── docs
+├── lib
+│   ├── buffer
+│   ├── utils
+│   └── yara
+├── module
+│   ├── commons
+│   ├── elasticsearch
+│   ├── kafka
+│   ├── netty
+│   └── zookeeper
+├── registry
+│   ├── core
+│   ├── vm
+│   └── vm-sample
+├── release
+├── scribengin
+    ├── core
+    ├── dataflow
+    │   ├── analytics
+    │   ├── example
+    │   └── sample
+    ├── release
+    └── storage
 ```
 
-<br><br>
 
 #Project Overview#
 
@@ -66,7 +65,6 @@ The buffer project is based the chronicle queue https://github.com/OpenHFT/Java-
 
 Yara project is a metric project base on the codahale or later drop wizard project concept. The main different between codahale and yara is yara uses the QDigest algorithm from https://github.com/addthis/stream-lib/tree/master/src/main/java/com/clearspring/analytics/stream/quantile. The main advantage from the qdigest algorithm is it uses less memory and allows us to merge data/metrics from multiple sources/servers. Check out AlgorithmComparatorUnitTest to see the different performance and accuracy of the codahale, QDigest and TDigest algorithm.
 
-<br><br>
 
 #Module#
 
@@ -90,7 +88,6 @@ The kafka module project contains:
 4. The KafkaPartitionReader - reads the message from a kafka partition, can commit or rollback to a previous commit already read.
 5. The Kafka send and check tool. The tool is used to send a set of message to a topic and the check tool will retrieve the messages and check to see if there is any lost or duplicated messages.
 
-<br><br>
 
 #Registry#
 
@@ -123,3 +120,10 @@ The vm project has 2 implementations:
 
 The project contains a single class VMSampleApp which prints out a sample hello message. You can run it with the unit vm unit test framework or in a vm yarn application framework.
 
+#Scribengin#
+
+###storage###
+
+###core###
+
+###dataflow###
