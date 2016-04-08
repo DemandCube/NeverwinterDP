@@ -41,8 +41,8 @@ A distributed, highly reliable ETL system that can handle multiple sources and s
 ####Quickstart Guides
 Get Scribengin launched quickly!  This will walk users how to start a Scribengin instance in YARN.
 
-- [QuickStart Guide](docs/deployment/scribengin-cluster-setup-quickstart.md)
-- [How to launch a cluster in any arbitrary environment i.e. in-house cluster, AWS, etc](docs/deployment/arbitrary-cluster-guide.md)
+- [QuickStart Guide](docs/development/deployment/scribengin-cluster-setup-quickstart.md)
+- [How to launch a cluster in any arbitrary environment i.e. in-house cluster, AWS, etc](docs/development/deployment/arbitrary-cluster-guide.md)
 
 
 ####Developer Info
