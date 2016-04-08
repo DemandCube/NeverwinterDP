@@ -46,13 +46,13 @@ Get Scribengin launched quickly!  This will walk users how to start a Scribengin
 
 
 ####Developer Info
-- [Dev environment setup, learn to write a dataflow](docs/dataflowDevelopment/dataflowDevTableOfContents.md)
-- [Operator Development Guide](docs/dataflowDevelopment/operator-dev-guide.md)
+- [Dev environment setup, learn to write a dataflow](docs/development/dataflow/dataflowDevTableOfContents.md)
+- [Operator Development Guide](docs/development/dataflow/operator-dev-guide.md)
 
 ####Developer Guidelines
-- [Code Conventions](docs/devAndTestingGuidelines/code-convention-howto.md)
-- [Code Organization](docs/devAndTestingGuidelines/code-organization-howto.md)
-- [Dataflow Performance and Validation](docs/devAndTestingGuidelines/dataflow-performance-and-validation-howto.md)
+- [Code Conventions](docs/development/code-convention-howto.md)
+- [Code Organization](docs/development/code-organization-howto.md)
+- [Dataflow Performance and Validation](docs/development/dataflow-performance-and-validation-howto.md)
 
 ####Release
 ```
