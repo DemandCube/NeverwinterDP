@@ -8,7 +8,7 @@ import java.util.Properties;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryConfig;
@@ -105,7 +105,7 @@ public class SimpleDataflowExample {
     VMClient vmClient = shell.getScribenginClient().getVMClient();
     vmClient.uploadApp(config.localAppHome, config.dfsAppHome);
     
-    Dataflow<Message, Message> dfl = buildDataflow();
+    Dataflow dfl = buildDataflow();
     //Get the dataflow's descriptor
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     //Output the descriptor in human-readable JSON
@@ -126,10 +126,10 @@ public class SimpleDataflowExample {
    * @param kafkaZkConnect [host]:[port] of Kafka's Zookeeper conenction 
    * @return
    */
-  public Dataflow<Message,Message> buildDataflow(){
+  public Dataflow buildDataflow(){
     //Create the new Dataflow object
     // <Message,Message> pertains to the <input,output> object for the data
-    Dataflow<Message,Message> dfl = new Dataflow<Message,Message>(config.dataflowId);
+    Dataflow dfl = new Dataflow(config.dataflowId);
     dfl.
       setDFSAppHome(config.dfsAppHome).
       setDefaultParallelism(config.dataflowDefaultParallelism).
@@ -149,7 +149,7 @@ public class SimpleDataflowExample {
     
     //Define which operator to use.  
     //This will be the logic that ties the input to the output
-    Operator<Message, Message> operator     = dfl.createOperator("simpleOperator", SimpleDataStreamOperator.class);
+    Operator operator = dfl.createOperator("simpleOperator", SimpleDataStreamOperator.class);
     
     //Connect your input to the operator
     inputDs.useRawReader().connect(operator);
@@ -166,7 +166,7 @@ public class SimpleDataflowExample {
    * @throws Exception 
    */
   public void createInputMessages() throws Exception {
-    KafkaClient kafkaTool = new KafkaClient("KafkaTool", config.zkConnect);
+    KafkaTool kafkaTool = new KafkaTool("KafkaTool", config.zkConnect);
     String kafkaBrokerConnects = kafkaTool.getKafkaBrokerList();
     Properties props = new Properties();
     props.put("metadata.broker.list", kafkaBrokerConnects);

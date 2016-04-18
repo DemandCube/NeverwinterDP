@@ -12,6 +12,7 @@ public class JHiccupInfo implements Serializable {
   @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp;
   private String host;
+  
   private double maxValue;
   private double p99;
   private double p9990;

@@ -21,8 +21,8 @@ public class TrackingMessagePersister extends DataStreamOperator {
     }
     
     count++;
-    if(count > 0 && count % 10000 == 0) {
-      ctx.commit();
-    }
+//    if(count > 0 && count % 10000 == 0) {
+//      ctx.commit();
+//    }
   }
 }

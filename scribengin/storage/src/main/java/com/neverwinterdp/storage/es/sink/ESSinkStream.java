@@ -1,16 +1,16 @@
 package com.neverwinterdp.storage.es.sink;
 
 import com.neverwinterdp.storage.PartitionStreamConfig;
-import com.neverwinterdp.storage.StorageConfig;
+import com.neverwinterdp.storage.es.ESStorage;
 import com.neverwinterdp.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
 
 public class ESSinkStream implements SinkPartitionStream {
-  private StorageConfig         storageConfig;
+  private ESStorage             esStorage;
   private PartitionStreamConfig partitionConfig;
 
-  public ESSinkStream(StorageConfig   sConfig, PartitionStreamConfig pConfig) {
-    this.storageConfig = sConfig;
+  public ESSinkStream(ESStorage esStorage, PartitionStreamConfig pConfig) {
+    this.esStorage       = esStorage;
     this.partitionConfig = pConfig;
   }
   
@@ -22,7 +22,7 @@ public class ESSinkStream implements SinkPartitionStream {
 
   @Override
   public SinkPartitionStreamWriter getWriter() throws Exception { 
-    return new ESStreamWriter(storageConfig, partitionConfig); 
+    return new ESStreamWriter(esStorage, partitionConfig); 
   }
 
   @Override

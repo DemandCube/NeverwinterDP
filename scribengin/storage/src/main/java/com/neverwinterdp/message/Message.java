@@ -1,8 +1,5 @@
 package com.neverwinterdp.message;
 
-import com.neverwinterdp.storage.StorageInstruction;
-import com.neverwinterdp.util.JSONSerializer;
-
 /**
  * @author Tuan Nguyen
  */
@@ -18,12 +15,6 @@ public class Message {
     this.key = key ;
     this.data = data ;
     this.type = MessageType.DATA;
-  }
-  
-  public Message(StorageInstruction ins) {
-    this.key = "instruction" ;
-    this.data = JSONSerializer.INSTANCE.toBytes(ins);
-    this.type = MessageType.INSTRUCTION;
   }
   
   public String getKey() { return key; }

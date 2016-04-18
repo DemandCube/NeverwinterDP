@@ -1,0 +1,69 @@
+{
+  "properties": {
+    "account_dev":        "dev",
+    "app_release_dir":    "/Users/Tuan/Projects/Nventdata/NeverwinterDP/release/build/release",
+    "app_repository_dir": "/Users/Tuan/Projects/AppRepo",
+    "zk_home_dir":        "/opt/zookeeper"
+  },
+
+  "images": {
+    "base": { "repository": "ubuntu" }
+  },
+
+  "servers": {
+    "zookeeper": { 
+      "useImage": "ubuntu:base", "instance": 1, "cpu": 1, "mem": "1GB", "services": [ "zookeeper" ]
+    },
+
+    "kafka": { 
+      "useImage": "ubuntu:base", "instance": 2, "cpu": 1, "mem": "1GB", "services": [ "kafka" ]
+    }
+  },
+
+  "services": {
+    "zookeeper": { 
+      "install": { 
+        "source": "${app_repository_dir}/zookeeper-3.4.8.tar.gz", "destination": "${zk_home_dir}", "type": "scptgz",
+        "postInstallCmd": [
+          "mv ${zk_home_dir}/conf/zoo_sample.cfg ${zk_home_dir}/conf/zoo.cfg",
+          "mkdir ${zk_home_dir}/data",
+          "echo '@context:getServerId()' > ${zk_home_dir}/data/myid"
+        ]
+      },
+
+      "configure": {
+        "patch": {
+          "resourceDir": "${base_dir}/config/zookeeper",
+          "resources":[
+            {
+              "file": "conf/zoo.cfg",
+              "append": [
+                "@context.getZookeeperClusterConfig()"
+              ]
+            }
+          ]
+        }
+      }
+    },
+
+    "kafka": { 
+      "install": { 
+        "source": "${app_repository_dir}/kafka_2.10-0.9.0.1.tgz", "destination": "/opt/kafka", "type": "scptgz"
+      },
+      "configure": {
+        "patch": {
+          "resourceDir": "${base_dir}/config/kafka",
+          "resources":[
+            {
+              "file": "config/server.properties",
+              "properties": {
+                "broker.id":         "@context:getServerId()",
+                "zookeeper.connect": "@context:getZookeepConnect()"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

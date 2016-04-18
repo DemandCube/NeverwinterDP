@@ -1,0 +1,31 @@
+{
+  "SysInfo": {
+    "_source": { 
+      "enabled": true,
+      "index.codec": "best_compression"
+    },
+
+    "properties" : {
+      "timestamp" : { 
+        "type" : "date", "format" : "dd/MM/yyyy HH:mm:ss" 
+      },
+      "host" : {
+      	"type" : "string", "index":"not_analyzed"
+      },
+      "metric": {
+        "properties": {
+          "mem": {
+            "properties": {
+              "name" : { "type" : "string", "index":"not_analyzed" } 
+            }
+          },
+          "gc": {
+            "properties": {
+              "name" : { "type" : "string", "index":"not_analyzed" } 
+            }
+          }
+        }
+      }
+    }
+  }
+}

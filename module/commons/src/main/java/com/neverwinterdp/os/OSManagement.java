@@ -1,6 +1,7 @@
 package com.neverwinterdp.os;
 
 import java.io.IOException;
+
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -19,8 +20,8 @@ import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.sun.management.OperatingSystemMXBean;
 
+@SuppressWarnings({"restriction"})
 @Singleton
 public class OSManagement {
   private String vmName = "localhost";
@@ -37,6 +38,8 @@ public class OSManagement {
     vmName = runtimeEnv.getVMName();
   }
  
+  public String getVMName() { return this.vmName; }
+  
   public MemoryInfo[] getMemoryInfo() {
     MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
     MemoryInfo heapMemory = new MemoryInfo("Heap_Memory", mbean.getHeapMemoryUsage());
@@ -49,15 +52,15 @@ public class OSManagement {
       MemoryUsage usage= memoryPoolMXBean.getPeakUsage();
       if(memoryPoolMXBean.getName().equals("PS Eden Space")){
         heapMemory.setUsedPSEdenSPace(usage.getUsed());
-      }else if(memoryPoolMXBean.getName().equals("PS Survivor Space")){
+      } else if(memoryPoolMXBean.getName().equals("PS Survivor Space")){
         heapMemory.setUsedPSSurvivorSpace(usage.getUsed());
-      }else if(memoryPoolMXBean.getName().equals("PS Old Gen")){
+      } else if(memoryPoolMXBean.getName().equals("PS Old Gen")){
         heapMemory.setUsedPSOldGen(usage.getUsed());
-      }else if(memoryPoolMXBean.getName().equals("Code Cache")){
+      } else if(memoryPoolMXBean.getName().equals("Code Cache")){
         nonHeapMemory.setUsedCodeCashe(usage.getUsed());
-      }else if(memoryPoolMXBean.getName().equals("Metaspace")){
+      } else if(memoryPoolMXBean.getName().equals("Metaspace")){
         nonHeapMemory.setUsedMetaspace(usage.getUsed());
-      }else if(memoryPoolMXBean.getName().equals("Compressed Class Space")){
+      } else if(memoryPoolMXBean.getName().equals("Compressed Class Space")){
         nonHeapMemory.setUsedCompressedClassSpace(usage.getUsed());
       }
     }
@@ -129,7 +132,7 @@ public class OSManagement {
   
   public OSInfo getOSInfo() {
     
-    OSInfo osInfo = new OSInfo(ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class));
+    OSInfo osInfo = new OSInfo(ManagementFactory.getPlatformMXBean(com.sun.management.OperatingSystemMXBean.class));
     
     osInfo.setHost(vmName);
     return osInfo;

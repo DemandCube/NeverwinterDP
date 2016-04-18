@@ -31,7 +31,7 @@ public class VMSampleAppUnitTest  {
     Shell shell = new Shell(vmClient) ;
     String command =
       "vm submit " +
-      "  --app-home /opt/scribengin/vm-sample" +
+      "  --dfs-app-home /opt/scribengin/vm-sample" +
       "  --name vm-dummy-1 --role vm-dummy" +
       "  --registry-connect 127.0.0.1:2181 --registry-db-domain /NeverwinterDP --registry-implementation " + RegistryImpl.class.getName() +
       "  --vm-application " + VMSampleApp.class.getName();

@@ -8,7 +8,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.producer.DefaultKafkaWriter;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 
@@ -36,7 +36,7 @@ public class KafkaToolUnitTest {
   @Test
   public void testDeleteTopic() throws Exception {
     String topic = "hello-" + UUID.randomUUID().toString();
-    KafkaClient kafkaClient = new KafkaClient(topic, cluster.getZKConnect());
+    KafkaTool kafkaClient = new KafkaTool(topic, cluster.getZKConnect());
     DefaultKafkaWriter writer = new DefaultKafkaWriter(topic, cluster.getKafkaConnect());
     String message = "sample message";
     for (int i = 0; i < 1000; i++) {
@@ -51,7 +51,7 @@ public class KafkaToolUnitTest {
   @Test
   public void testDeleteTopicWithData() throws Exception {
     String topic = "hello-" + UUID.randomUUID().toString();
-    KafkaClient kafkaClient = new KafkaClient(topic, cluster.getZKConnect());
+    KafkaTool kafkaClient = new KafkaTool(topic, cluster.getZKConnect());
     DefaultKafkaWriter writer = new DefaultKafkaWriter(topic, cluster.getKafkaConnect());
     byte[] data = new byte[1024];
     String message = new String(data);

@@ -1,0 +1,43 @@
+#colorsDiv .colorbox {
+  width:20px; 
+  height:20px;
+  margin: 0 auto;
+  margin-top:5px;
+}
+
+#colorsDiv .selectedColor {
+  border-style:solid;
+  border-width:2px;
+  border-color:#7c2aff;
+  border-radius:5px;
+}
+
+#colorsDiv .colorbox:not(.selectedColor) {
+  border-style:solid;
+  border-color:black;
+  border-width:1px;
+  width:15px;
+  height:15px;
+}
+
+#colorsDiv {
+  margin-left:5px;
+}
+
+#canvas1 {
+  border: 5px solid blue;
+}
+
+#canvas1 .stroke {
+  width:0px;
+  height:0px;
+  border-style: solid;
+  margin: 0 auto;
+  margin-top: 5px;
+  border-color: #cccccc;
+}
+
+#canvas1 .stroke_selected {
+  border-color: blue;
+}
+

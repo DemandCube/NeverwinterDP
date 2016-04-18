@@ -1,0 +1,46 @@
+<div>
+  <div id="UINavigation" class="colborder">
+    <div style="padding: 10px">
+      <div>
+        <h3 style="margin: 3px 0px">Dataflows</h3>
+        <hr/>
+        <div style="margin: 10px">
+           <div><a class="ui-action onSelectUIActiveDataflow">Active Dataflows</a></div>
+           <div><a class="ui-action onSelectUIHistoryDataflow">History Dataflows</a></div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="margin: 3px 0px">Log Reports</h3>
+        <hr/>
+        <div style="margin: 10px">
+           <div><a class="ui-action onLogDetail">Log Detail</a></div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="margin: 3px 0px">JVM Reports</h3>
+        <hr/>
+        <div style="margin: 10px">
+           <div><a class="ui-action onJVMCpu">CPU</a></div>
+           <div><a class="ui-action onJVMMemory">Memory</a></div>
+           <div><a class="ui-action onJVMGC">GC</a></div>
+           <div><a class="ui-action onJVMJHiccup">JHiccup</a></div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="margin: 3px 0px">Throughput Metrics</h3>
+        <hr/>
+        <div style="margin: 10px">
+           <div><a class="ui-action onRecordThroughput">Record Throughput</a></div>
+           <div><a class="ui-action onByteThroughput">Byte Throughput</a></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="UIWorkspace">scribengin workspace</div>
+  <div class="clearfix"><span/></div>
+</div>

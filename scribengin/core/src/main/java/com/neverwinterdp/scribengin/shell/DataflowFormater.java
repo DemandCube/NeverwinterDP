@@ -1,6 +1,5 @@
 package com.neverwinterdp.scribengin.shell;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,11 +12,13 @@ import com.neverwinterdp.registry.activity.ActivityFormatter;
 import com.neverwinterdp.registry.activity.ActivityRegistry;
 import com.neverwinterdp.registry.activity.ActivityStep;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorReport;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorReportWithStatus;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowTaskRegistry;
-import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReport;
-import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReportWithStatus;
+import com.neverwinterdp.scribengin.dataflow.registry.MasterRegistry;
+import com.neverwinterdp.scribengin.dataflow.registry.WorkerRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.master.DataflowMasterRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerRuntimeReport;
 import com.neverwinterdp.util.text.DateUtil;
@@ -59,33 +60,12 @@ public class DataflowFormater {
   
   public String getGroupByExecutorDataflowTaskInfo() throws RegistryException {
     DataflowTaskRegistry dtRegistry = new DataflowTaskRegistry(registry, dataflowPath) ;
-    LinkedHashMap<String, List<DataStreamOperatorReportWithStatus>> groupByExecutorReports = new LinkedHashMap<>();
-    for(String executorId : dtRegistry.getActiveExecutorIds()) {
-      List<DataStreamOperatorReportWithStatus> reports =  dtRegistry.getDataflowTaskRuntimeReportsByExecutorId(executorId);
-      groupByExecutorReports.put(executorId, reports);
-    }
-    for(String executorId : dtRegistry.getIdleExecutorIds()) {
-      List<DataStreamOperatorReportWithStatus> reports =  dtRegistry.getDataflowTaskRuntimeReportsByExecutorId(executorId);
-      groupByExecutorReports.put(executorId, reports);
-    }
-    return getDataflowTaskInfo(groupByExecutorReports) ;
+    return getDataflowTaskInfo(dtRegistry.getDataStreamOperatorReportGroupByExecutor()) ;
   }
   
   public String getGroupByOperatorDataflowTaskInfo() throws RegistryException {
     DataflowTaskRegistry dtRegistry = new DataflowTaskRegistry(registry, dataflowPath) ;
-    List<DataStreamOperatorReportWithStatus> reports =  dtRegistry.getDataflowTaskRuntimeReports();
-    LinkedHashMap<String, List<DataStreamOperatorReportWithStatus>> groupByOperatorReports = new LinkedHashMap<>();
-    for(int i = 0; i < reports.size(); i++) {
-      DataStreamOperatorReportWithStatus rtReport = reports.get(i);
-      String operator = rtReport.getReport().getOperatorName();
-      List<DataStreamOperatorReportWithStatus> holder = groupByOperatorReports.get(operator);
-      if(holder == null) {
-        holder = new ArrayList<>();
-        groupByOperatorReports.put(operator, holder);
-      }
-      holder.add(rtReport);
-    }
-    return getDataflowTaskInfo(groupByOperatorReports);
+    return getDataflowTaskInfo(dtRegistry.getDataStreamOperatorReportGroupByOperator());
   }
 
   String getDataflowTaskInfo(LinkedHashMap<String, List<DataStreamOperatorReportWithStatus>> groupByReports) throws RegistryException {
@@ -123,7 +103,7 @@ public class DataflowFormater {
             DateUtil.asCompactDateTime(report.getStartTime()),
             DateUtil.asCompactDateTime(report.getFinishTime()),
             report.getAccRuntime() + "ms",
-            report.durationTime() + "ms"
+            report.getDurationTime() + "ms"
         );
         accCommitProcessCount += report.getAccCommitProcessCount();
       }
@@ -156,20 +136,20 @@ public class DataflowFormater {
   }
   
   public String getDataflowActiveWorkerInfo() throws RegistryException {
-    List<DataflowWorkerRuntimeReport> reports =  DataflowRegistry.getActiveDataflowWorkerRuntimeReports(registry, dataflowPath);
+    List<DataflowWorkerRuntimeReport> reports =  WorkerRegistry.getActiveDataflowWorkerRuntimeReports(registry, dataflowPath);
     return createDataflowWorkerReport("Dataflow Active Workers", reports);
   }
   
   public String getDataflowHistoryWorkerInfo() throws RegistryException {
     List<DataflowWorkerRuntimeReport> reports =  
-        DataflowRegistry.getHistoryDataflowWorkerRuntimeReports(registry, dataflowPath);
+      WorkerRegistry.getHistoryDataflowWorkerRuntimeReports(registry, dataflowPath);
     return createDataflowWorkerReport("Dataflow History Workers", reports);
   }
   
   private String createDataflowWorkerReport(String title, List<DataflowWorkerRuntimeReport> reports) {
     String[] header = {
-        "Worker", "Status", "Executor", "Executor Status", "Executor Assigned Tasks"
-    } ;
+      "Worker", "Status", "Executor", "Executor Status", "Executor Assigned Tasks"
+    };
     TabularFormater taskFt = new TabularFormater(header);
     taskFt.setTitle(title);
     for(int i = 0; i < reports.size(); i++) {
@@ -190,7 +170,7 @@ public class DataflowFormater {
   }
   
   public String getActiveDataflowMasterInfo() throws RegistryException {
-    List<DataflowMasterRuntimeReport> reports = DataflowRegistry.getDataflowMasterRuntimeReports(registry, dataflowPath);
+    List<DataflowMasterRuntimeReport> reports = MasterRegistry.getDataflowMasterRuntimeReports(registry, dataflowPath);
     return createDataflowMasterReport("Dataflow Master", reports);
   }
   

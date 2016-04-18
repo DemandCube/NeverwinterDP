@@ -8,8 +8,7 @@ import com.neverwinterdp.util.text.ByteUtil;
 import com.neverwinterdp.util.text.DateUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
-
-@SuppressWarnings("serial")
+@SuppressWarnings({"restriction", "serial"})
 public class OSInfo implements Serializable {
   @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp;
@@ -24,17 +23,17 @@ public class OSInfo implements Serializable {
   private long   freePhysicalMemorySize;
   private long   freeSwapSpaceSize;
   
-  public OSInfo(com.sun.management.OperatingSystemMXBean osMBean) {
+  public OSInfo(com.sun.management.OperatingSystemMXBean operatingSystemMXBean) {
     timestamp              = new Date();
-    name                   = osMBean.getName();
-    arch                   = osMBean.getArch();
-    availableProcessor     = osMBean.getAvailableProcessors() ;
-    processCpuTime         = osMBean.getProcessCpuTime();
-    processCpuLoad         = osMBean.getProcessCpuLoad();
-    systemCpuLoad          = osMBean.getSystemCpuLoad();
-    systemCpuLoadAverage   = osMBean.getSystemLoadAverage();
-    freePhysicalMemorySize = osMBean.getFreePhysicalMemorySize() ;
-    freeSwapSpaceSize      = osMBean.getFreeSwapSpaceSize() ;
+    name                   = operatingSystemMXBean.getName();
+    arch                   = operatingSystemMXBean.getArch();
+    availableProcessor     = operatingSystemMXBean.getAvailableProcessors() ;
+    processCpuTime         = operatingSystemMXBean.getProcessCpuTime();
+    processCpuLoad         = operatingSystemMXBean.getProcessCpuLoad();
+    systemCpuLoad          = operatingSystemMXBean.getSystemCpuLoad();
+    systemCpuLoadAverage   = operatingSystemMXBean.getSystemLoadAverage();
+    freePhysicalMemorySize = operatingSystemMXBean.getFreePhysicalMemorySize() ;
+    freeSwapSpaceSize      = operatingSystemMXBean.getFreeSwapSpaceSize() ;
   }
   
   public String uniqueId() { 

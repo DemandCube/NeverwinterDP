@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.neverwinterdp.registry.ErrorCode;
 import com.neverwinterdp.registry.Node;
 import com.neverwinterdp.registry.NodeCreateMode;
 import com.neverwinterdp.registry.RefNode;
@@ -13,9 +14,9 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.Transaction;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
 import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
+import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerRuntimeReport;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.DataflowWorkerStatus;
 import com.neverwinterdp.vm.VMDescriptor;
-import com.neverwinterdp.vm.VMRegistry;
 import com.neverwinterdp.vm.service.VMService;
 import com.neverwinterdp.yara.MetricRegistry;
 import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
@@ -76,6 +77,13 @@ public class WorkerRegistry {
   public List<VMDescriptor> getActiveWorkers() throws RegistryException {
     List<String> activeWorkerIds = activeWorkers.getChildren();
     return allWorkers.getSelectRefChildrenAs(activeWorkerIds, VMDescriptor.class) ;
+  }
+  
+  public VMDescriptor findActiveWorker(String workerId) throws RegistryException {
+    if(activeWorkers.hasChild(workerId)) {
+      return allWorkers.getRefChildAs(workerId, VMDescriptor.class);
+    }
+    return null;
   }
   
   public List<String> getActiveWorkerIds() throws RegistryException {
@@ -197,5 +205,45 @@ public class WorkerRegistry {
       paths.add(allWorkers.getPath() + "/" + vmName + "/metrics");
     }
     return registry.getDataAs(paths, MetricRegistrySnapshot.class);
+  }
+  
+  public List<DataflowWorkerRuntimeReport> getAllDataflowWorkerRuntimeReports() throws RegistryException {
+    return getDataflowWorkerRuntimeReports(registry, dataflowPath, "all");
+  }
+  
+  public List<DataflowWorkerRuntimeReport> getActiveDataflowWorkerRuntimeReports() throws RegistryException {
+    return getDataflowWorkerRuntimeReports(registry, dataflowPath, "active");
+  }
+  
+  public List<DataflowWorkerRuntimeReport> getHistoryDataflowWorkerRuntimeReports() throws RegistryException {
+    return getDataflowWorkerRuntimeReports(registry, dataflowPath, "history");
+  }
+  
+  static public List<DataflowWorkerRuntimeReport> getAllDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
+    return getDataflowWorkerRuntimeReports(registry, dataflowPath, "all");
+  }
+  
+  static public List<DataflowWorkerRuntimeReport> getActiveDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
+    return getDataflowWorkerRuntimeReports(registry, dataflowPath, "active");
+  }
+  
+  static public List<DataflowWorkerRuntimeReport> getHistoryDataflowWorkerRuntimeReports(Registry registry, String dataflowPath) throws RegistryException {
+    return getDataflowWorkerRuntimeReports(registry, dataflowPath, "history");
+  }
+  
+  static public List<DataflowWorkerRuntimeReport> getDataflowWorkerRuntimeReports(Registry registry, String dataflowPath, String category) throws RegistryException {
+    try {
+      String workerAllPath  = dataflowPath + "/workers/all";
+      String workerListPath = dataflowPath + "/workers/" + category;
+      List<String> workerIds = registry.getChildren(workerListPath) ;
+      List<DataflowWorkerRuntimeReport> holder = new ArrayList<>();
+      for(String selWorkerId : workerIds) {
+        holder.add(new DataflowWorkerRuntimeReport(registry, workerAllPath + "/" + selWorkerId));
+      }
+      return holder;
+    } catch(RegistryException ex) {
+      if(ex.getErrorCode() == ErrorCode.NoNode) return new ArrayList<>();
+      throw ex;
+    }
   }
 }

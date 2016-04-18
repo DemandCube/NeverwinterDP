@@ -3,11 +3,12 @@ package com.neverwinterdp.scribengin.dataflow.runtime;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
-import com.neverwinterdp.registry.task.TaskStatus;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskContext;
 import com.neverwinterdp.registry.task.dedicated.TaskExecutorEvent;
 import com.neverwinterdp.registry.task.dedicated.TaskSlotExecutor;
 import com.neverwinterdp.scribengin.dataflow.DataStreamOperator;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorReport;
 import com.neverwinterdp.scribengin.dataflow.DataStreamType;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.runtime.worker.WorkerService;
@@ -29,9 +30,6 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
     this.taskContext   = taskContext;
     this.dsOperatorDescriptor = taskContext.getTaskDescriptor(false);
     
-    Class<DataStreamOperator> opType = (Class<DataStreamOperator>) Class.forName(dsOperatorDescriptor.getOperator());
-    operator = opType.newInstance();
-    
     startTime = System.currentTimeMillis();
     DataflowRegistry dRegistry = workerService.getDataflowRegistry();
     DataStreamOperatorReport report = dRegistry.getTaskRegistry().getTaskReport(dsOperatorDescriptor);
@@ -40,6 +38,10 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
     TaskExecutorDescriptor taskExecutorDescriptor = taskContext.getTaskExecutorDescriptor();
     context = new DataStreamOperatorRuntimeContext(workerService, taskExecutorDescriptor, dsOperatorDescriptor, report);
     dRegistry.getTaskRegistry().save(dsOperatorDescriptor, report);
+    
+    Class<DataStreamOperator> opType = (Class<DataStreamOperator>) Class.forName(dsOperatorDescriptor.getOperator());
+    operator = opType.newInstance();
+    operator.onInit(context);
   }
   
   public DedicatedTaskContext<DataStreamOperatorDescriptor> getTaskContext() { return taskContext; }
@@ -96,7 +98,11 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
       }
       long runtime = currentTime - startTime;
       report.addAccRuntime(currentTime - startTime);
-      if(recCount > 0) context.commit();
+      if(recCount > 0) {
+        operator.onPreCommit(context);
+        context.commit();
+        operator.onPostCommit(context);
+      }
       return runtime;
     } catch(InterruptedException ex) {
       System.err.println("DataStreamOperatorTaskSlotExecutor: Catched an interrupt exception");
@@ -120,14 +126,5 @@ public class DataStreamOperatorTaskSlotExecutor extends TaskSlotExecutor<DataStr
     DataStreamOperatorReport report = context.getReport();
     report.setAssignedHasErrorCount(report.getAssignedHasErrorCount() + 1);
     workerService.getLogger().error("DataflowTask Error", error);
-  }
-  
-  public void finish() throws Exception {
-    DataStreamOperatorReport report = context.getReport();
-    report.setFinishTime(System.currentTimeMillis());
-    context.commit();
-    context.close();
-    DataflowRegistry dflRegistry = workerService.getDataflowRegistry();
-    dflRegistry.getTaskRegistry().finish(taskContext, TaskStatus.TERMINATED);
   }
 }

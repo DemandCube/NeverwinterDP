@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import com.neverwinterdp.util.io.FileUtil;
 import com.neverwinterdp.util.io.IOUtil;
+import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.environment.yarn.HDFSUtil;
 
 public class HDFSFileSystemUnitTest {
@@ -23,6 +24,7 @@ public class HDFSFileSystemUnitTest {
   
   @Before
   public void setup() throws Exception {
+    LoggerFactory.log4jUseConsoleOutputConfig("WARN");
     FileUtil.removeIfExist(TEST_DIR, false);
     fs = FileSystem.getLocal(new Configuration()) ;
     //org.apache.hadoop.fs.FileUtil.copyMerge(fs, srcDir, dstFS, dstFile, deleteSource, conf, addString)

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>NeverwinterDP</title>
+    <link rel="stylesheet" href="css/blueprint.css">
+
+    <script language="JavaScript" src="http://www.geoplugin.net/javascript.gp" type="text/javascript"></script>
+    <script src="js/EnvConfig.js"></script>
+    <script src="js/service/CookieManager.js"></script>
+    <script src="js/service/InfoCollectorService.js"></script>
+    <script>
+      var ciServiceUrl         = Env.gripper.server + "/rest/client/info.collector";
+      infoCollectorService = new InfoCollectorService(ciServiceUrl);
+
+      window.onload = function() {
+        infoCollectorService.pushClientInfo();
+        console.log("call onload");
+      };
+
+      function showInfo() {
+        alert(JSON.stringify(infoCollectorService.getInfo(), null, '  '));
+      }
+    </script>
+  </head>
+
+  <body style="padding: 15px">
+
+    <div style="border: 3px dashed lightgray; font-size: 20px; text-align:center; vertical-align: middle; line-height: 50px;">
+      Banner
+    </div>
+
+    <div style="margin: 10px 0px; height: 400px">
+      <div style="float: right; width: 250px; height: 100%;  border: 3px dashed lightgray">
+        <script src="js/service/ADSService.js"></script>
+        <script>
+          var adsServiceUrl = Env.gripper.server + "/rest/client/ads-event.collector";
+          var adsService = new ADSService(adsServiceUrl);
+        </script>
+
+        <div style="font-size: 20px; vertical-align: middle; line-height: 90px; cursor: pointer; margin: 10px; border-bottom: 2px solid lightgray"
+             onclick="javascript:adsService.onClickADS('Nventdata', 'http://nventdata.com')">
+          Nventdata Ads
+        </div>
+
+        <div style="font-size: 20px; vertical-align: middle; line-height: 90px; cursor: pointer; margin: 10px; border-bottom: 2px solid lightgray"
+             onclick="javascript:adsService.onClickADS('Nventdata Jobs', 'http://nventdata.com/hire-us')">
+          Nventdata Jobs
+        </div>
+
+        <div style="font-size: 20px; vertical-align: middle; line-height: 90px; cursor: pointer; margin: 10px; border-bottom: 2px solid lightgray"
+             onclick="javascript:adsService.onClickADS('NeverwinterDP', 'http://github.com/Nventdata/NeverwinterDP')">
+          NeverwinterDP Ads
+        </div>
+
+        <div style="padding: 10px; text-align: justify">
+          When the user click on this advertising, the user information will be captured and send back to the gripper
+        </div>
+      </div>
+
+      <div style="margin-right: 265px; border: 3px dashed lightgray; height: 100%">
+        <div style="font-size: 20px; text-align:center; vertical-align: middle; line-height: 50px">
+          Webpage Body
+        </div>
+
+        <div style="text-align: justify; padding: 10px 50px">
+          <div>
+            When this page is loaded, the web event collector service will collect the user information, browser information and send back to gripper.
+            Click here to view the information <a href="javascript:showInfo()">Click</a>
+          </div>
+          <div>
+            Click to reset the visitor id<a href="javascript:CookieManager.deleteAllCookies()">Click</a>
+          </div>
+        </div>
+      </div>
+      <div style="clear both"><span/></div>
+    </div>
+
+    <div style="border: 3px dashed lightgray; font-size: 20px; text-align:center; vertical-align: middle; line-height: 50px;">Footer</div>
+  </body>
+</html>

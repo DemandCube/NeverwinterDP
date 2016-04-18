@@ -3,15 +3,15 @@ package com.neverwinterdp.scribengin.dataflow;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Operator<I, O> {
+public class Operator {
   private String                              name;
-  private Dataflow<?, ?>                      dataflow;
+  private Dataflow                            dataflow;
   private Class<? extends DataStreamOperator> dataStreamOperator;
   private Set<String>                         interceptors = new HashSet<>();
   private Set<String>                         inputs       = new HashSet<>();
   private Set<String>                         outputs      = new HashSet<>();
 
-  Operator(Dataflow<?, ?> dataflow, String name, Class<? extends DataStreamOperator> dataStreamOperator) {
+  Operator(Dataflow dataflow, String name, Class<? extends DataStreamOperator> dataStreamOperator) {
     this.dataflow           = dataflow;
     this.name               = name;
     this.dataStreamOperator = dataStreamOperator;
@@ -20,24 +20,24 @@ public class Operator<I, O> {
   public String getName() { return name; }
   public void setName(String name) { this.name = name; }
   
-  public Operator<I, O> add(Class<? extends DataStreamOperatorInterceptor> type) {
+  public Operator add(Class<? extends DataStreamOperatorInterceptor> type) {
     interceptors.add(type.getName());
     return this;
   }
   
-  public Operator<I, O> connect(DataSet<O> out) {
+  public Operator connect(DataSet<?> out) {
     out(out);
     return this;
   }
   
-  public <T> Operator<I, O> connect(Operator<O, T> nextOp) {
-    DataSet<O> ds  = dataflow.getOrCreateWireDataSet(name + "-to-" + nextOp.getName());
+  public Operator connect(Operator nextOp) {
+    DataSet<?> ds  = dataflow.getOrCreateWireDataSet(name + "-to-" + nextOp.getName());
     out(ds);
     nextOp.in(ds);
     return this;
   }
   
-  Operator<I, O> in(DataSet<I> in) {
+  Operator in(DataSet<?> in) {
     dataflow.checkValidDataStream(in);
     if(inputs.contains(in.getName())) {
       throw new RuntimeException("The operator " + name + " is already connected to the input stream " + in.getName());
@@ -46,7 +46,7 @@ public class Operator<I, O> {
     return this;
   }
 
-  Operator<I, O> out(DataSet<O> out) {
+  Operator out(DataSet<?> out) {
     dataflow.checkValidDataStream(out);
     if(outputs.contains(out.getName())) {
       throw new RuntimeException("The operator " + name + " is already connected to the output stream " + out.getName());

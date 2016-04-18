@@ -1,0 +1,15 @@
+<div class="UITabbedPane">
+  <div>
+    <%for(var i = 0; i < config.tabs.length; i++) { %>
+    <%  var tab  = config.tabs[i]; %>
+    <%  var disable = tab.name == state.tabConfig.name ? ' ui-disabled' : '' ; %>
+        <a class="onSelectTab<%=disable%>" tab="<%=tab.name%>">
+          <%=tab.label%>
+        </a>
+    <%}%>
+  </div>
+  
+  <hr/>
+  
+  <div class="UITab"> this is a test </div>
+</div>

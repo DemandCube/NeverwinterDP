@@ -13,6 +13,7 @@ public class GCInfo implements Serializable {
   @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp;
   private String host;
+  
   private String name;
   private long   collectionCount;
   private long   diffCollectionCount;

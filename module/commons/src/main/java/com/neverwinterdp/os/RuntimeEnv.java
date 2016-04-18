@@ -1,5 +1,6 @@
 package com.neverwinterdp.os;
 
+import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
 /**
@@ -15,6 +16,7 @@ public class RuntimeEnv {
   private String tmpDir;
   private String workingDir;
   private String dataDir;
+  private String[] esConnects;
 
   public RuntimeEnv(String serverName, String vmName, String defaultAppHome) {
     this.serverName = serverName;
@@ -26,6 +28,7 @@ public class RuntimeEnv {
     tmpDir     = getSystemProperty("app.tmp.dir", appDir + "/tmp/" + vmName) ;
     workingDir = getSystemProperty("app.working.dir", appDir + "/working/" + vmName) ;
     dataDir    = getSystemProperty("app.data.dir", appDir + "/data/" + vmName) ;
+    esConnects = StringUtil.toStringArray(getSystemProperty("app.es.connects", "127.0.0.1:9300"));
   }
   
   public String getServerName() { return this.serverName ; }
@@ -52,6 +55,9 @@ public class RuntimeEnv {
   public String getDataDir() { return dataDir; }
   public void setDataDir(String dataDir) { this.dataDir = dataDir; }
   
+  public String[] getEsConnects() { return esConnects; }
+  public void setEsConnects(String[] esConnects) { this.esConnects = esConnects; }
+
   String getSystemProperty(String name, String defaultValue) {
     String value = System.getProperty(name) ;
     if(value != null) return value ;

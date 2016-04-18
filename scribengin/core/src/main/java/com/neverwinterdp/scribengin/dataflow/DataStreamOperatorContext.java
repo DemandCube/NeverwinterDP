@@ -4,8 +4,6 @@ import java.util.Set;
 
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.registry.task.TaskExecutorDescriptor;
-import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
-import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorReport;
 import com.neverwinterdp.vm.VMDescriptor;
 
 public interface DataStreamOperatorContext {
@@ -28,6 +26,8 @@ public interface DataStreamOperatorContext {
   public Set<String> getAvailableOutputs() ;
   
   public void write(String name, Message record) throws Exception ;
+  
+  public void write(Message record) throws Exception ;
   
   public void commit() throws Exception ;
   

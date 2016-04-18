@@ -55,6 +55,12 @@ abstract public class AbstractKafkaWriter implements KafkaWriter {
     send(topic, -1, keyBytes, messageBytes, null, timeout);
   }
   
+  public <T> void send(String topic, String key, T obj, long timeout) throws Exception {
+    byte[] keyBytes     = key.getBytes(UTF8);
+    byte[] messageBytes = JSONSerializer.INSTANCE.toBytes(obj);
+    send(topic, -1, keyBytes, messageBytes, null, timeout);
+  }
+  
   public void send(String topic, int partition, String key, String data, Callback callback, long timeout) throws Exception {
     byte[] keyBytes = key.getBytes(UTF8);
     byte[] messageBytes = data.getBytes(UTF8);

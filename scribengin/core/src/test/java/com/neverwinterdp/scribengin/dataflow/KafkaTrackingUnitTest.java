@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingDataflowBuilder;
-import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessage;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMConfig;
@@ -21,7 +20,7 @@ public class KafkaTrackingUnitTest  {
   @Before
   public void setup() throws Exception {
     String BASE_DIR = "build/working";
-    System.setProperty("app.home", BASE_DIR + "/scribengin");
+    System.setProperty("app.home",   BASE_DIR + "/scribengin");
     System.setProperty("vm.app.dir", BASE_DIR + "/scribengin");
     
     localScribenginCluster = new LocalScribenginCluster(BASE_DIR) ;
@@ -49,7 +48,7 @@ public class KafkaTrackingUnitTest  {
     VMConfig vmGeneratorConfig = dflBuilder.buildVMTMGeneratorKafka();
     new VMSubmitter(vmClient, dfsAppHome, vmGeneratorConfig).submit().waitForRunning(30000);
     
-    Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
+    Dataflow dfl = dflBuilder.buildDataflow();
     dfl.setDefaultParallelism(5);
     dfl.setDefaultReplication(1);
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();

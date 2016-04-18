@@ -23,6 +23,7 @@ import com.neverwinterdp.storage.simplehdfs.source.HDFSSourcePartition;
 import com.neverwinterdp.storage.simplehdfs.source.HDFSSourcePartitionStream;
 import com.neverwinterdp.storage.simplehdfs.source.HDFSSourcePartitionStreamReader;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.vm.HadoopConfigurationUtil;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
@@ -104,7 +105,7 @@ public class VMTMValidatorSimpleHDFSApp extends VMApp {
     void doRun() throws Exception {
       StorageConfig storageConfig = new StorageConfig("HDFS", hdfsLocation);
       Configuration conf = new Configuration();
-      VMConfig.overrideHadoopConfiguration(getVM().getDescriptor().getVmConfig().getHadoopProperties(), conf);
+      HadoopConfigurationUtil.overrideConfiguration(getVM().getDescriptor().getVmConfig().getHadoopProperties(), conf);
       FileSystem fs = FileSystem.get(conf);
 
       SimpleHDFSStorage hdfsStorage = new SimpleHDFSStorage(fs, storageConfig);

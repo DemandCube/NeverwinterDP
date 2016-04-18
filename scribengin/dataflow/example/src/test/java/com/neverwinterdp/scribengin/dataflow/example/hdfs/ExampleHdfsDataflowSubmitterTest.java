@@ -85,7 +85,7 @@ public class ExampleHdfsDataflowSubmitterTest {
     //Give the dataflow a second to get going
     Thread.sleep(10000);
     
-  //Get basic info on the dataflow
+    //Get basic info on the dataflow
     shell.execute("dataflow info --dataflow-id " + eds.getDataflowID());
     
     //Do some very simple verification to ensure our data has been moved correctly
@@ -105,7 +105,6 @@ public class ExampleHdfsDataflowSubmitterTest {
   /**
    * Use our HDFSSource to read our data through all partitions
    * @param fs HDFS File system
-   * @param registryPath Path to HDFS info in the registry
    * @param hdfsPath Path our data is saved to
    * @return count of records in HDFS
    * @throws Exception

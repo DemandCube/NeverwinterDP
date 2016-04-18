@@ -21,6 +21,7 @@ import com.neverwinterdp.storage.hdfs.source.HDFSSourcePartition;
 import com.neverwinterdp.storage.hdfs.source.HDFSSourcePartitionStream;
 import com.neverwinterdp.storage.hdfs.source.HDFSSourcePartitionStreamReader;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.vm.HadoopConfigurationUtil;
 import com.neverwinterdp.vm.VMApp;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.VMDescriptor;
@@ -48,7 +49,7 @@ public class VMTMValidatorHDFSApp extends VMApp {
     registry.setRetryable(true);
     
     conf = new Configuration();
-    VMConfig.overrideHadoopConfiguration(getVM().getDescriptor().getVmConfig().getHadoopProperties(), conf);
+    HadoopConfigurationUtil.overrideConfiguration(getVM().getDescriptor().getVmConfig().getHadoopProperties(), conf);
     
     runValidate(registry, trackingConfig);
   }

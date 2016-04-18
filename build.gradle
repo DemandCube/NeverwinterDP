@@ -10,13 +10,7 @@ subprojects {
   apply plugin: 'eclipse'
   apply plugin: 'maven'
   apply plugin: 'maven-publish'
-  apply plugin: 'jacoco'
 
-  jacoco {
-    toolVersion = "0.7.0.201403182114"
-    reportsDir = file("$buildDir/JacocoReportDir")
-  }
-  
   eclipse {
     classpath {
       downloadSources=true

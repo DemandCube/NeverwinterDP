@@ -94,7 +94,7 @@ public class ESObjectClientUnitTest {
 
     Assert.assertEquals(20, esObjecclient.count(termQuery("createdBy", "system")));
     Assert.assertEquals(20, esObjecclient.count(termQuery("content", "data")));
-
+    Assert.assertEquals(20, esObjecclient.searchTermByRegex("createdBy", "syste.*", 0, 50).getHits().getTotalHits());
     SearchResponse sres = esObjecclient.search(termQuery("createdBy", "system"), 0, 10);
     Assert.assertEquals(20, sres.getHits().getTotalHits());
     Assert.assertEquals(10, sres.getHits().hits().length);

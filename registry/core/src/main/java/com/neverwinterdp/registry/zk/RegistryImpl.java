@@ -42,6 +42,8 @@ public class RegistryImpl implements Registry {
   static public final Id ANYONE_ID = new Id("world", "anyone");
   static public final ArrayList<ACL> DEFAULT_ACL = new ArrayList<ACL>(Collections.singletonList(new ACL(Perms.ALL, ANYONE_ID)));
   
+  static public long  DEFAULT_CONNECT_TIMEOUT = 10000;
+  
   static AtomicInteger idTracker = new AtomicInteger();
   
   private int clientId = idTracker.incrementAndGet();
@@ -75,7 +77,7 @@ public class RegistryImpl implements Registry {
   @Override
   public Registry connect() throws RegistryException {
     closed = false;
-    return reconnect(15000) ;
+    return reconnect(DEFAULT_CONNECT_TIMEOUT) ;
   }
   
   @Override

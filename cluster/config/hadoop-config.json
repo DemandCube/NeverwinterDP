@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "account_dev":        "dev",
+    "app_release_dir":    "/Users/Tuan/Projects/Nventdata/NeverwinterDP/release/build/release",
+    "app_repository_dir": "/Users/Tuan/Projects/AppRepo",
+    "hadoop_home":        "/opt/hadoop"
+  },
+
+  "images": {
+    "base": { "repository": "ubuntu" }
+  },
+
+  "servers": {
+    "hadoop_master": { 
+      "useImage": "ubuntu:base", "hostname": "hadoop-master",  "instance": 1, "cpu": 1, "mem": "1GB", "priority": 1,
+      "services": {
+        "hadoop": {
+          "configure" : {
+            "execute": [ "${hadoop_home}/bin/hdfs namenode -format" ]
+          },
+          "processes": [ "namenode", "secondarynamenode", "resourcemanager" ]
+        }
+      }
+    },
+
+    "hadoop_worker": { 
+      "useImage": "ubuntu:base", "hostname": "hadoop-worker", "instance": 2, "cpu": 1, "mem": "1GB", "priority": 2,
+      "services": {
+        "hadoop": {
+          "processes": ["datanode", "nodemanager"]
+        } 
+      }
+    }
+  },
+
+  "services": {
+    "hadoop": { 
+      "install": { 
+        "source": "${app_repository_dir}/hadoop-2.7.2.tar.gz", "destination": "${hadoop_home}", "type": "scptgz"
+      },
+      "configure": {
+        "patch": {
+          "resourceDir": "${base_dir}/config/hadoop",
+          "resources":[
+            {
+              "file": "etc/hadoop/masters",
+              "append": [ "@context.getHadoopMasterConfig()" ]
+            },
+            {
+              "file": "etc/hadoop/slaves",
+              "append": [ "@context.getHadoopSlaveConfig()" ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

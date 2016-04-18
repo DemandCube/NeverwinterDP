@@ -6,7 +6,7 @@ import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.registry.notification.Notifier;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskMonitor;
 import com.neverwinterdp.registry.task.dedicated.DedicatedTaskRegistry;
-import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorDescriptor;
 
 public class DataflowTaskMonitor implements DedicatedTaskMonitor<DataStreamOperatorDescriptor> {
   private boolean finished = false;

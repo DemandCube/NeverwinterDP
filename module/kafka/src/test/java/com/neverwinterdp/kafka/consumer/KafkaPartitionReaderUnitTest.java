@@ -13,7 +13,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.producer.DefaultKafkaWriter;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
 import com.neverwinterdp.util.io.FileUtil;
@@ -49,7 +49,7 @@ public class KafkaPartitionReaderUnitTest {
       writer.send("hello", 0, "key-" + i, hello, 5000);
     }
     writer.close();
-    KafkaClient kafkaClient = new KafkaClient(NAME, cluster.getZKConnect());
+    KafkaTool kafkaClient = new KafkaTool(NAME, cluster.getZKConnect());
     TopicMetadata topicMetadata = kafkaClient.findTopicMetadata("hello");
     PartitionMetadata partitionMetadata = findPartition(topicMetadata.partitionsMetadata(), 0);
     KafkaPartitionReader partitionReader = 
@@ -85,7 +85,7 @@ public class KafkaPartitionReaderUnitTest {
   
   private void readFromPartition(String consumerName, int partition, int maxRead, long maxWait) throws Exception {
     System.out.println("Read partition = " + partition + ", maxRead = " + maxRead + ", maxWait = " + maxWait);
-    KafkaClient kafkaClient = new KafkaClient(consumerName, cluster.getZKConnect());
+    KafkaTool kafkaClient = new KafkaTool(consumerName, cluster.getZKConnect());
     TopicMetadata topicMetadata = kafkaClient.findTopicMetadata("hello");
     PartitionMetadata partitionMetadata = findPartition(topicMetadata.partitionsMetadata(), partition);
     KafkaPartitionReader partitionReader = 

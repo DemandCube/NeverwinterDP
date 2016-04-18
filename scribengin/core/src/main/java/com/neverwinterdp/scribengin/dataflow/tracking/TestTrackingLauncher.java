@@ -93,7 +93,7 @@ public class TestTrackingLauncher  extends SubCommand {
     new VMSubmitter(vmClient, dfsAppHome, vmGeneratorConfig).submit().waitForRunning(30000);
   }
   
-  protected DataflowSubmitter submitDataflow(ScribenginShell shell, Dataflow<TrackingMessage, TrackingMessage> dfl) throws Exception {
+  protected DataflowSubmitter submitDataflow(ScribenginShell shell, Dataflow dfl) throws Exception {
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));
     DataflowSubmitter submitter = new DataflowSubmitter(shell.getScribenginClient(), dfl);

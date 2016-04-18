@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.tool.KafkaMessageCheckTool;
 import com.neverwinterdp.kafka.tool.KafkaMessageSendTool;
 import com.neverwinterdp.kafka.tool.server.KafkaCluster;
@@ -48,7 +48,7 @@ public class KafkaProducerPartitionLeaderChangeBugUnitTest  {
       "--create", "--topic", TOPIC, "--zookeeper", cluster.getZKConnect(), "--replica-assignment", "1:2,2:1"
       //"--partitions", "2", "--replication-factor", "2" parameters have no effect since --replica-assignment has higher priority 
     };
-    KafkaClient kafkaClient = new KafkaClient("KafkaTool", cluster.getZKConnect());
+    KafkaTool kafkaClient = new KafkaTool("KafkaTool", cluster.getZKConnect());
     kafkaClient.getKafkaTool().createTopic(args);
     info(kafkaClient.findTopicMetadata(TOPIC).partitionsMetadata());
 

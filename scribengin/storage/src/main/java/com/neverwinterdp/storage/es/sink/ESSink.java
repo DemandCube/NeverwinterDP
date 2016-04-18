@@ -3,7 +3,6 @@ package com.neverwinterdp.storage.es.sink;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.neverwinterdp.es.ESObjectClient;
 import com.neverwinterdp.storage.PartitionStreamConfig;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.es.ESStorage;
@@ -11,30 +10,17 @@ import com.neverwinterdp.storage.sink.Sink;
 import com.neverwinterdp.storage.sink.SinkPartitionStream;
 
 public class ESSink implements Sink {
-  private ESStorage storage ;
+  private ESStorage esStorage ;
   
-  public ESSink(StorageConfig descriptor) throws Exception {
-    init(new ESStorage(descriptor)) ;
-  }
-  
-  public ESSink(String[] address, String indexName, Class<?> mappingType) throws Exception {
-    init(new ESStorage(address, indexName, mappingType));
-  }
-  
-  private void init(ESStorage storage) throws Exception {
-    this.storage = storage;
-    ESObjectClient<Object> esObjClient = storage.getESObjectClient();
-    if(!esObjClient.isCreated()) {
-      esObjClient.createIndexWith(null, null);
-    }
-    esObjClient.close();
+  public ESSink(ESStorage esStorage) {
+    this.esStorage = esStorage;
   }
   
   @Override
-  public StorageConfig getStorageConfig() { return storage.getStorageConfig(); }
+  public StorageConfig getStorageConfig() { return esStorage.getStorageConfig(); }
 
   public List<PartitionStreamConfig> getPartitionStreamConfigs() throws Exception {
-    int numOfPartitionStream = storage.getStorageConfig().getPartitionStream();
+    int numOfPartitionStream = esStorage.getStorageConfig().getPartitionStream();
     List<PartitionStreamConfig> holder = new ArrayList<>();
     for(int i = 0; i < numOfPartitionStream; i++) {
       PartitionStreamConfig config = new PartitionStreamConfig(i, null);
@@ -45,23 +31,20 @@ public class ESSink implements Sink {
   
   @Override
   public SinkPartitionStream getPartitionStream(PartitionStreamConfig pConfig) throws Exception {
-    StorageConfig sConfig = storage.getStorageConfig();
-    ESSinkStream newStream= new ESSinkStream(sConfig, pConfig) ;
-    return newStream;
+    return new ESSinkStream(esStorage, pConfig) ;
   }
   
   @Override
   public SinkPartitionStream getPartitionStream(int partitionId) throws Exception {
-    StorageConfig sConfig = storage.getStorageConfig();
     PartitionStreamConfig pConfig = new PartitionStreamConfig(partitionId, null);
-    ESSinkStream newStream= new ESSinkStream(sConfig, pConfig) ;
+    ESSinkStream newStream= new ESSinkStream(esStorage, pConfig) ;
     return newStream;
 
   }
 
   @Override
   public SinkPartitionStream[] getPartitionStreams() throws Exception {
-    StorageConfig sConfig = storage.getStorageConfig();
+    StorageConfig sConfig = esStorage.getStorageConfig();
     int numOfStream = sConfig.getPartitionStream();
     SinkPartitionStream[] array = new SinkPartitionStream[numOfStream];
     for(int i = 0; i < array.length; i++) {
@@ -72,6 +55,5 @@ public class ESSink implements Sink {
 
   @Override
   public void close() throws Exception {
-    
   }
 }

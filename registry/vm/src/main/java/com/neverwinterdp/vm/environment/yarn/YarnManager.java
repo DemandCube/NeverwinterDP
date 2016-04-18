@@ -24,6 +24,7 @@ import org.apache.hadoop.yarn.util.Records;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.neverwinterdp.vm.HadoopConfigurationUtil;
 import com.neverwinterdp.vm.VMConfig;
 
 abstract public class YarnManager {
@@ -43,7 +44,7 @@ abstract public class YarnManager {
     this.vmConfig = vmConfig;
     this.yarnConfig = vmConfig.getHadoopProperties();
     conf = new YarnConfiguration() ;
-    vmConfig.overrideHadoopConfiguration(conf);
+    HadoopConfigurationUtil.overrideConfiguration(vmConfig.getHadoopProperties(), conf);
 
     nmClient = NMClient.createNMClient();
     nmClient.init(conf);

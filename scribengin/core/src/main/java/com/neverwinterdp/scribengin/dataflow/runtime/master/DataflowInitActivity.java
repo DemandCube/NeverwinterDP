@@ -6,13 +6,13 @@ import java.util.Map;
 
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.scribengin.dataflow.DataSetDescriptor;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowDescriptor;
 import com.neverwinterdp.scribengin.dataflow.OperatorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowTaskRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.OperatorRegistry;
 import com.neverwinterdp.scribengin.dataflow.registry.StreamRegistry;
-import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
 import com.neverwinterdp.storage.PartitionStreamConfig;
 import com.neverwinterdp.storage.Storage;
 import com.neverwinterdp.storage.StorageConfig;
