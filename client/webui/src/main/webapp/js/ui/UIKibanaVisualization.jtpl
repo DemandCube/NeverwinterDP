@@ -1,0 +1,30 @@
+<div>
+  <div style="margin: 5px 0px">
+    <div style="float: left">
+      <strong>Time:</strong>
+      <a class="ui-action onSelectTimeLast15min">15 Min</a> -
+      <a class="ui-action onSelectTimeLast30min">30 Min</a> -
+      <a class="ui-action onSelectTimeLast1hour">1 Hour</a> -
+      <a class="ui-action onSelectTimeLast2hour">2 Hour</a> -
+      <a class="ui-action onSelectTimeLast4hour">4 Hours</a> -
+      <a class="ui-action onSelectTimeLast12hour">12 Hours</a> -
+      <a class="ui-action onSelectTimeLast24hour">24 Hours</a> -
+      <a class="ui-action onSelectTimeLast3day">3 Days</a> -
+      <a class="ui-action onSelectTimeLast7day">7 Days</a> -
+      <a class="ui-action onSelectTimeLast30day">30 Days</a> -
+      <a class="ui-action onSelectTimeLast60day">60 Days</a> -
+      <a class="ui-action onSelectTimeLast90day">90 Days</a> -
+      <a class="ui-action onSelectTimeAll">All</a>
+    </div>
+
+    <div style="float: right">
+      <a class="ui-action onRefresh">Reload</a>
+      <a class="ui-action onEditVisualization">Edit</a>
+    </div>
+
+    <div style="clear: both"><span/></div>
+  </div>
+
+  <iframe height="600" width="100%" src="<%=url%>" style="border: 3px dashed lightgray">
+  </iframe>
+</div>

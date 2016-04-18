@@ -84,7 +84,7 @@ public class ExampleHdfsDataflowSubmitter {
     VMClient vmClient = shell.getScribenginClient().getVMClient();
     vmClient.uploadApp(localAppHome, dfsAppHome);
     
-    Dataflow<Message, Message> dfl = buildDataflow(kafkaZkConnect);
+    Dataflow dfl = buildDataflow(kafkaZkConnect);
     //Get the dataflow's descriptor
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     //Output the descriptor in human-readable JSON
@@ -111,10 +111,10 @@ public class ExampleHdfsDataflowSubmitter {
    * @param kafkaZkConnect [host]:[port] of Kafka's Zookeeper conenction 
    * @return
    */
-  public Dataflow<Message,Message> buildDataflow(String kafkaZkConnect){
+  public Dataflow buildDataflow(String kafkaZkConnect){
     //Create the new Dataflow object
     // <Message,Message> pertains to the <input,output> object for the data
-    Dataflow<Message,Message> dfl = new Dataflow<Message,Message>(dataflowID);
+    Dataflow dfl = new Dataflow(dataflowID);
     dfl.
       setDefaultParallelism(defaultParallelism).
       setDefaultReplication(defaultReplication);
@@ -135,7 +135,7 @@ public class ExampleHdfsDataflowSubmitter {
     
     //Define which operator to use.  
     //This will be the logic that ties the input to the output
-    Operator<Message, Message> operator     = dfl.createOperator("simpleOperator", SimpleDataStreamOperator.class);
+    Operator operator     = dfl.createOperator("simpleOperator", SimpleDataStreamOperator.class);
     
     //Connect your input to the operator
     inputDs.useRawReader().connect(operator);
@@ -146,16 +146,8 @@ public class ExampleHdfsDataflowSubmitter {
   }
   
   
-  public String getDataflowID() {
-    return dataflowID;
-  }
+  public String getDataflowID() { return dataflowID; }
 
-  public String getInputTopic() {
-    return inputTopic;
-  }
-  public String getHDFSLocation() {
-    return hdfsLocation;
-  }
-
-
+  public String getInputTopic() { return inputTopic; }
+  public String getHDFSLocation() { return hdfsLocation; }
 }

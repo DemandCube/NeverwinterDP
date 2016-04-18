@@ -1,6 +1,6 @@
 package com.neverwinterdp.storage.kafka.perftest;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 
 public class TopicPerfRunner implements Runnable {
   private TopicPerfConfig topicConfig ;
@@ -13,10 +13,10 @@ public class TopicPerfRunner implements Runnable {
 
   @Override
   public void run() {
-    KafkaClient kafkaClient = null;
+    KafkaTool kafkaClient = null;
     try {
       long startTime = System.currentTimeMillis();
-      kafkaClient = new KafkaClient("KafkaClient", topicConfig.zkConnect);
+      kafkaClient = new KafkaTool("KafkaClient", topicConfig.zkConnect);
       TopicWriter topicWriter = new TopicWriter(kafkaClient, topicConfig, reporter);
       topicWriter.start();
 

@@ -6,14 +6,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.kafka.sink.KafkaSink;
 import com.neverwinterdp.storage.sink.SinkPartitionStream;
 import com.neverwinterdp.storage.sink.SinkPartitionStreamWriter;
 
 public class TopicWriter {
-  private KafkaClient kafkaClient;
+  private KafkaTool kafkaClient;
   private TopicPerfConfig topicConfig;
   private TopicPerfReporter reporter;
   
@@ -21,8 +21,8 @@ public class TopicWriter {
   
   private AtomicLong idTracker = new AtomicLong();
 
-  public TopicWriter(KafkaClient kafkaClient, TopicPerfConfig topicConfig, TopicPerfReporter reporter) {
-    this.kafkaClient = kafkaClient;
+  public TopicWriter(KafkaTool kafkaTool, TopicPerfConfig topicConfig, TopicPerfReporter reporter) {
+    this.kafkaClient = kafkaTool;
     this.topicConfig = topicConfig;
     this.reporter = reporter;
   }

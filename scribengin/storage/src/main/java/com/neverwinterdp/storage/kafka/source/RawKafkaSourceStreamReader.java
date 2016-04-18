@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import kafka.javaapi.PartitionMetadata;
 import kafka.message.MessageAndOffset;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.PartitionStreamConfig;
@@ -17,9 +17,9 @@ public class RawKafkaSourceStreamReader implements SourcePartitionStreamReader {
   private KafkaPartitionReader partitionReader ;
   private CommitPoint lastCommitInfo ;
   
-  public RawKafkaSourceStreamReader(String readerName, KafkaClient kafkaClient, PartitionStreamConfig pConfig, PartitionMetadata pmd) throws Exception {
+  public RawKafkaSourceStreamReader(String readerName, KafkaTool kafkaTool, PartitionStreamConfig pConfig, PartitionMetadata pmd) throws Exception {
     partitionConfig = pConfig;
-    partitionReader = new KafkaPartitionReader(readerName, kafkaClient, pConfig.attribute("topic"), pmd);
+    partitionReader = new KafkaPartitionReader(readerName, kafkaTool, pConfig.attribute("topic"), pmd);
   }
   
   @Override

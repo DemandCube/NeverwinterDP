@@ -58,9 +58,9 @@ public class VM {
   
   public Logger getLogger() { return logger; }
   
-  public AppContainer getAppContainer() { return this.appContainer ; }
+  public AppContainer getAppContainer() { return appContainer ; }
   
-  public ServiceModuleContainer getVMModuleServiceContainer() { return this.vmModuleContainer ; }
+  public ServiceModuleContainer getVMModuleServiceContainer() { return vmModuleContainer ; }
   
   public LoggerFactory getLoggerFactory() { return appContainer.getLoggerFactory(); }
   
@@ -232,6 +232,7 @@ public class VM {
     String vmDir = vmConfig.getLocalAppHome() ;
     System.setProperty("vm.app.dir", vmDir);
     System.setProperty("app.home", vmDir);
+    System.setProperty("app.es.connects", "elasticsearch-1:9300");
     
     Properties log4jProps = new Properties();
     log4jProps.load(IOUtil.loadRes(vmConfig.getLog4jConfigUrl()));

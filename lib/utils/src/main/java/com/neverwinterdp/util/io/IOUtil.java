@@ -140,6 +140,13 @@ public class IOUtil {
     return data;
   }
 
+  static public void save(String data, String file) throws IOException {
+    FileOutputStream os = new FileOutputStream(file);
+    byte[] buf = data.getBytes();
+    os.write(buf);
+    os.close();
+  }
+  
   static public void save(String data, String encoding, String file) throws IOException {
     FileOutputStream os = new FileOutputStream(file);
     byte[] buf = data.getBytes(encoding);

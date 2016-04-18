@@ -1,11 +1,13 @@
 package com.neverwinterdp.scribengin.dataflow;
 
 import java.util.List;
+import java.util.Random;
 
 import com.neverwinterdp.registry.Registry;
 import com.neverwinterdp.registry.RegistryException;
 import com.neverwinterdp.scribengin.ScribenginClient;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
+import com.neverwinterdp.scribengin.dataflow.tracking.TestTrackingWithSimulationLauncher.SimulationLog;
 import com.neverwinterdp.vm.VMDescriptor;
 
 public class DataflowClient {
@@ -34,6 +36,14 @@ public class DataflowClient {
   
   public DataflowLifecycleStatus getStatus() throws RegistryException {
     return dflRegistry.getDataflowStatus() ;
+  }
+  
+  public VMDescriptor findActiveDataflowMaster(String vmId) throws RegistryException {
+    return dflRegistry.getMasterRegistry().findActiveMaster(vmId);
+  }
+  
+  public VMDescriptor findActiveDataflowWorker(String workerId) throws RegistryException {
+    return dflRegistry.getWorkerRegistry().findActiveWorker(workerId);
   }
   
   public void waitForEqualOrGreaterThanStatus(long checkPeriod, long timeout, DataflowLifecycleStatus status) throws Exception {

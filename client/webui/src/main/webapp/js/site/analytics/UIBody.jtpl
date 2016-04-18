@@ -1,0 +1,41 @@
+<div>
+  <div id="UINavigation" class="colborder">
+    <div style="padding: 10px">
+      <h3 style="margin: 3px 0px">Introduction</h3>
+      <hr/>
+      <div style="margin: 10px">
+        <div><a class="ui-action onSelectDiagram">Introduction To Analytics</a></div>
+      </div>
+
+      <h3 style="margin: 3px 0px">Gripper Reports</h3>
+      <hr/>
+      <div style="margin: 10px">
+         <div><a class="ui-action onSelectGripperRecordReport">Record Throughput</a></div>
+         <div><a class="ui-action onSelectGripperByteReport">Byte Throughput</a></div>
+      </div>
+
+      <h3 style="margin: 3px 0px">Mover Reports</h3>
+      <hr/>
+      <div style="margin: 10px">
+         <div><a class="ui-action onSelectWebpageStatReport">Webpage Stat</a></div>
+         <div><a class="ui-action onSelectWebpageSpentTimeStatReport">Webpage Time Spent Stat</a></div>
+         <div><a class="ui-action onSelectWebpageGeoStatReport">Webpage Geo Stat</a></div>
+         <div><a class="ui-action onSelectAdsStatReport">Advertising Stat</a></div>
+      </div>
+
+      <h3 style="margin: 3px 0px">Input</h3>
+      <hr/>
+      <div style="margin: 10px">
+         <div><a class="ui-action onSelectUserInfoInput">User Info</a></div>
+         <div><a class="ui-action onSelectWebEventInput">Webpage Event</a></div>
+         <div><a class="ui-action onAction">User Action</a></div>
+         <div><a class="ui-action onMouseReplay">Mouse Replay</a></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="UIWorkspace">
+     <img src="/js/site/analytics/analytics_diagram.png" />
+  </div>
+  <div class="clearfix"><span/></div>
+</div>

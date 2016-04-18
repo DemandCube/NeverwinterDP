@@ -24,7 +24,7 @@ public class LocalScribenginCluster {
   
   public LocalScribenginCluster(String baseDir) throws Exception {
     this.baseDir = baseDir;
-    kafkaCluster = new KafkaCluster(baseDir, 1, 1);
+    kafkaCluster = new KafkaCluster(baseDir, 1/*numOfZkInstances*/, 1/*numOfKafkaInstances*/);
     kafkaCluster.setNumOfPartition(5);
   }
   

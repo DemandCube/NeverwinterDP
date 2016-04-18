@@ -1,0 +1,20 @@
+<div>
+  <div style="float: left">
+    <canvas id="canvas1" width="500" height="250" style="border: 3px dashed lightgray"></canvas>
+    <div style="margin: 10px">
+      <a class="ui-action onStartRecording" id="onStartRecordingBtn">Record</a>
+      <a class="ui-action onStopRecording" id="onStopRecordingBtn">Stop</a>
+      <a class="ui-action onClearRecording" id="onClearRecordingBtn">Clear</a>
+      <a class="ui-action onStartPlayback" id="onStartPlaybackBtn">Play</a>
+      <a class="ui-action onSave" id="onSaveBtn">Save</a>
+    </div>
+  </div>
+
+  <div style="margin-left: 600px">
+    <canvas id="canvas2" width="500" height="250" style="border: 3px dashed lightgray"></canvas>
+    <div style="margin: 10px">
+      <a class="ui-action onSerializeDrawing">Test Serialize</a>
+    </div>
+  </div>
+  <div style="clear: both"><span/></div>
+</div>

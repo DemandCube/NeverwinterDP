@@ -17,7 +17,7 @@ import kafka.message.Message;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.common.base.Stopwatch;
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.kafka.tool.KafkaTopicReport.ConsumerReport;
 import com.neverwinterdp.tool.message.MessageExtractor;
@@ -98,7 +98,7 @@ public class KafkaMessageCheckTool implements Runnable {
   public void check() throws Exception {
     System.out.println("KafkaMessageCheckTool: Start running kafka message check tool.");
     readDuration.start();
-    KafkaClient kafkaClient = new KafkaClient(NAME, topicConfig.zkConnect);
+    KafkaTool kafkaClient = new KafkaTool(NAME, topicConfig.zkConnect);
     
     TopicMetadata topicMeta = kafkaClient.findTopicMetadata(topicConfig.topic, 3);
     List<PartitionMetadata> partitionMetas = topicMeta.partitionsMetadata();

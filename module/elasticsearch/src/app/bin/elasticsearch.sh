@@ -24,13 +24,13 @@ shift
 
 if [ "$COMMAND" = "run" ] ; then
   MAIN_CLASS=com.neverwinterdp.es.Main
-  $JAVACMD -Djava.ext.dirs=$ES_HOME/libs:/usr/java/jdk1.7.0_45/jre/lib/ext $JAVA_OPTS $ES_OPT $MAIN_CLASS \
+  $JAVACMD -Djava.ext.dirs=$ES_HOME/libs:$JAVA_HOME/jre/lib/ext $JAVA_OPTS $ES_OPT $MAIN_CLASS \
      --es:cluster.name=neverwinterdp \
      --es:server.name=$HOSTNAME \
      --es:path.data=$ES_HOME/data 
 else
   MAIN_CLASS=com.neverwinterdp.es.Main
-  nohup $JAVACMD -Djava.ext.dirs=$ES_HOME/libs:/usr/java/jdk1.7.0_45/jre/lib/ext $JAVA_OPTS $ES_OPT $LOG_OPT $MAIN_CLASS \
+  nohup $JAVACMD -Djava.ext.dirs=$ES_HOME/libs:$JAVA_HOME/jre/lib/ext $JAVA_OPTS $ES_OPT $LOG_OPT $MAIN_CLASS \
      --es:cluster.name=neverwinterdp \
      --es:server.name=$HOSTNAME \
      --es:path.data=$ES_HOME/data  "$@" <&- &>/dev/null &

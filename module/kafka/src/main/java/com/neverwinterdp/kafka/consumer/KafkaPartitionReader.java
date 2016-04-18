@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.util.JSONSerializer;
 
 import kafka.api.FetchRequest;
@@ -31,7 +31,7 @@ import kafka.message.MessageAndOffset;
 public class KafkaPartitionReader {
   final static public int DEFAULT_FETCH_SIZE = 512 * 1024;
   private String   name;
-  private KafkaClient kafkaClient ;
+  private KafkaTool kafkaClient ;
   private String topic ;
   private PartitionMetadata partitionMetadata;
   private int fetchSize = DEFAULT_FETCH_SIZE;
@@ -41,7 +41,7 @@ public class KafkaPartitionReader {
   private List<MessageAndOffset>     currentMessageSet;
   private Iterator<MessageAndOffset> currentMessageSetIterator;
   
-  public KafkaPartitionReader(String name, KafkaClient kafkaClient, String topic, PartitionMetadata pMetadata) throws Exception {
+  public KafkaPartitionReader(String name, KafkaTool kafkaClient, String topic, PartitionMetadata pMetadata) throws Exception {
     this.name = name;
     this.kafkaClient = kafkaClient;
     this.topic = topic;

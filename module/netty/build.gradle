@@ -1,0 +1,25 @@
+apply plugin: 'maven-publish'
+
+archivesBaseName = 'module.netty'
+
+eclipse {
+  project {
+    name = 'module.netty'
+  }
+}
+
+dependencies {
+  compile project(':lib/utils')
+  compile project(':lib/yara')
+
+  compile group: 'io.netty', name: 'netty-all', version: '4.0.23.Final'
+  compile group: 'com.google.protobuf', name: 'protobuf-java', version: '2.6.0'
+  compile group: 'com.hubspot.jackson', name: 'jackson-datatype-protobuf', version: '0.4.0'
+
+
+  compile group: 'com.facebook.nifty', name: 'nifty-core', version: '0.13.1'
+  compile group: 'com.facebook.nifty', name: 'nifty-client', version: '0.13.1'
+  compile group: 'org.apache.thrift', name: 'libthrift', version: '0.9.1'
+
+  compile group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.16'
+}

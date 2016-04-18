@@ -8,12 +8,11 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 
 import com.neverwinterdp.registry.Registry;
-import com.neverwinterdp.registry.SequenceIdTracker;
+import com.neverwinterdp.vm.HadoopConfigurationUtil;
 import com.neverwinterdp.vm.HadoopProperties;
 import com.neverwinterdp.vm.VMConfig;
 import com.neverwinterdp.vm.environment.yarn.AppClient;
 import com.neverwinterdp.vm.environment.yarn.YarnVMServicePlugin;
-import com.neverwinterdp.vm.service.VMService;
 import com.neverwinterdp.vm.service.VMServiceApp;
 import com.neverwinterdp.vm.service.VMServicePlugin;
 
@@ -78,6 +77,7 @@ public class YarnVMClient extends VMClient {
   }
   
   public FileSystem getFileSystem() throws IOException {
-    return FileSystem.get(hadoopProperties.getConfiguration());
+    Configuration conf = HadoopConfigurationUtil.toConfiguration(hadoopProperties);
+    return FileSystem.get(conf);
   }
 }

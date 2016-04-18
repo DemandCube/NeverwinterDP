@@ -2,7 +2,6 @@ package com.neverwinterdp.scribengin.dataflow;
 
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.message.MessageTrackingLog;
-import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
 
 public class MTDataStreamOperatorInterceptor extends DataStreamOperatorInterceptor {
   

@@ -17,7 +17,12 @@ public class KafkaGeneratorValidatorTrackingLauncher extends TestTrackingLaunche
     GeneratorThread generatorThread = new GeneratorThread(registry, dflBuilder.getTrackingConfig());
     generatorThread.start();
     
-    shell.console().println("The validator will be launched in " + validatorLaunchDelay + "ms, you need to manually launch the dataflow now");
+    shell.console().println("\n\n");
+    shell.console().println("*****************************************************************************************");
+    shell.console().println(
+        "The validator will be launched in " + validatorLaunchDelay + "ms, you need to manually launch the dataflow now"
+    );
+    shell.console().println("*****************************************************************************************");
     Thread.sleep(validatorLaunchDelay);
     
     ValidatorThread validatorThread = new ValidatorThread(shell, dflBuilder);

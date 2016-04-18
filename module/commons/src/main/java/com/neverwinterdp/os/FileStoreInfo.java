@@ -15,6 +15,7 @@ public class FileStoreInfo implements Serializable {
   @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy HH:mm:ss")
   private Date   timestamp ;
   private String host;
+  
   private String name ;
   private long   total ;
   private long   used  ;
@@ -24,9 +25,9 @@ public class FileStoreInfo implements Serializable {
   
   public FileStoreInfo(FileStore store) throws IOException {
     timestamp = new Date();
-    name = store.name();
-    total = store.getTotalSpace();
-    used =  store.getTotalSpace() - store.getUnallocatedSpace();
+    name      = store.name();
+    total     = store.getTotalSpace();
+    used      =  store.getTotalSpace() - store.getUnallocatedSpace();
     available = store.getUsableSpace();
   } 
   

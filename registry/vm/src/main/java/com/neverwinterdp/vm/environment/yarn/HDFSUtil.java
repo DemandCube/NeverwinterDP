@@ -8,6 +8,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.RawLocalFileSystem;
 
 import com.neverwinterdp.util.io.IOUtil;
 
@@ -19,7 +20,7 @@ public class HDFSUtil {
   }
   
   static public void concat(FileSystem fs, Path dest, Path[] src) throws IOException {
-    if(fs instanceof LocalFileSystem) {
+    if(fs instanceof LocalFileSystem || fs instanceof RawLocalFileSystem) {
       FSDataOutputStream output = fs.create(dest) ;
       for(int i = 0; i < src.length; i++) {
         FSDataInputStream is = fs.open(src[i]);

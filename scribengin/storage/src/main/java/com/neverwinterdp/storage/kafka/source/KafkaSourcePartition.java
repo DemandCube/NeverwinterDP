@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.storage.PartitionStreamConfig;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.source.SourcePartition;
@@ -14,22 +14,22 @@ import kafka.javaapi.PartitionMetadata;
 import kafka.javaapi.TopicMetadata;
 
 public class KafkaSourcePartition implements SourcePartition {
-  private KafkaClient                     kafkaClient;
+  private KafkaTool                       kafkaTool;
   private StorageConfig                   storageConfig;
   private Map<Integer, KafkaSourceStream> sourceStreams = new HashMap<Integer, KafkaSourceStream>();
 
-  public KafkaSourcePartition(KafkaClient kafkaClient, StorageConfig sconfig) throws Exception {
-    this.kafkaClient = kafkaClient;
+  public KafkaSourcePartition(KafkaTool kafkaClient, StorageConfig sconfig) throws Exception {
+    this.kafkaTool = kafkaClient;
     init(sconfig);
   }
   
   void init(StorageConfig sconfig) throws Exception {
     this.storageConfig = sconfig;
-    TopicMetadata topicMetdadata = kafkaClient.findTopicMetadata(sconfig.attribute("topic"));
+    TopicMetadata topicMetdadata = kafkaTool.findTopicMetadata(sconfig.attribute("topic"));
     List<PartitionMetadata> partitionMetadatas = topicMetdadata.partitionsMetadata();
     for(int i = 0; i < partitionMetadatas.size(); i++) {
       PartitionMetadata partitionMetadata = partitionMetadatas.get(i);
-      KafkaSourceStream sourceStream = new KafkaSourceStream(kafkaClient, sconfig, partitionMetadata);
+      KafkaSourceStream sourceStream = new KafkaSourceStream(kafkaTool, sconfig, partitionMetadata);
       sourceStreams.put(sourceStream.getId(), sourceStream);
     }
   }

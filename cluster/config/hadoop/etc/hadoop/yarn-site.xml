@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<configuration>
+  <property>
+    <name>yarn.resourcemanager.hostname</name>
+    <value>hadoop-master-1</value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.hostname</name>
+    <value>0.0.0.0</value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.resource.cpu-vcores</name>
+    <value>5</value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.resource.memory-mb</name>
+    <value>3072</value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.vmem-pmem-ratio</name>
+    <value>3</value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.vmem-check-enabled</name>
+    <value>True</value>
+    <description>Whether virtual memory limits will be enforced for containers.</description>
+  </property>
+
+
+  <property>
+    <name>yarn.resourcemanager.scheduler.class</name>
+    <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
+  </property>
+
+  <property>
+    <name>yarn.scheduler.minimum-allocation-mb</name>
+    <value>614</value>
+  </property>
+
+  <property>
+    <name>yarn.scheduler.maximum-allocation-mb</name>
+    <value>614</value>
+  </property>
+
+  <property>
+    <name>yarn.scheduler.minimum-allocation-vcores</name>
+    <value>1</value>
+  </property>
+
+  <property>
+    <name>yarn.scheduler.maximum-allocation-vcores</name>
+    <value>1</value>
+  </property>
+
+</configuration>

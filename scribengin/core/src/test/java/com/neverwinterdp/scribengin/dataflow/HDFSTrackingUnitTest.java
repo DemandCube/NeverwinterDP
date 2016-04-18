@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import com.neverwinterdp.scribengin.LocalScribenginCluster;
 import com.neverwinterdp.scribengin.dataflow.tracking.TrackingDataflowBuilder;
-import com.neverwinterdp.scribengin.dataflow.tracking.TrackingMessage;
 import com.neverwinterdp.scribengin.shell.ScribenginShell;
 import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.vm.VMConfig;
@@ -49,7 +48,7 @@ public class HDFSTrackingUnitTest  {
     VMConfig vmGeneratorConfig = dflBuilder.buildVMTMGeneratorKafka();
     new VMSubmitter(vmClient, dfsAppHome, vmGeneratorConfig).submit().waitForRunning(30000);
     
-    Dataflow<TrackingMessage, TrackingMessage> dfl = dflBuilder.buildDataflow();
+    Dataflow dfl = dflBuilder.buildDataflow();
     dfl.setDefaultReplication(1);
     DataflowDescriptor dflDescriptor = dfl.buildDataflowDescriptor();
     System.out.println(JSONSerializer.INSTANCE.toString(dflDescriptor));

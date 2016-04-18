@@ -3,22 +3,22 @@ package com.neverwinterdp.storage.kafka.source;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.storage.StorageConfig;
 import com.neverwinterdp.storage.source.Source;
 import com.neverwinterdp.storage.source.SourcePartition;
 
 public class KafkaSource implements Source {
-  private KafkaClient          kafkaClient;
+  private KafkaTool            kafkaTool;
   private StorageConfig        storageConfig;
   private KafkaSourcePartition partition ;
   
-  public KafkaSource(KafkaClient kafkaClient, String name, String topic) throws Exception {
+  public KafkaSource(KafkaTool kafkaClient, String name, String topic) throws Exception {
     this(kafkaClient, createStorageConfig(name, topic, kafkaClient.getZkConnects(), null));
   }
   
-  public KafkaSource(KafkaClient kafkaClient, StorageConfig sconfig) throws Exception {
-    this.kafkaClient = kafkaClient;
+  public KafkaSource(KafkaTool kafkaClient, StorageConfig sconfig) throws Exception {
+    this.kafkaTool = kafkaClient;
     this.storageConfig = sconfig;
     this.partition = new KafkaSourcePartition(kafkaClient, storageConfig);
   }

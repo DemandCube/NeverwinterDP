@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.kafka.source.KafkaSource;
 import com.neverwinterdp.storage.kafka.source.KafkaSourcePartition;
@@ -13,7 +13,7 @@ import com.neverwinterdp.storage.source.SourcePartitionStream;
 import com.neverwinterdp.storage.source.SourcePartitionStreamReader;
 
 public class TopicReader {
-  private KafkaClient kafkaClient;
+  private KafkaTool kafkaClient;
   private String      topic;
   private String      zkConnect;
   private int         readPerReader = 1000;
@@ -23,7 +23,7 @@ public class TopicReader {
   
   private ExecutorService executorService;
   
-  public TopicReader(KafkaClient kafkaClient, String topic, TopicPerfReporter reporter) throws Exception {
+  public TopicReader(KafkaTool kafkaClient, String topic, TopicPerfReporter reporter) throws Exception {
     this.kafkaClient = kafkaClient;
     this.topic = topic ;
     this.reporter = reporter;

@@ -163,6 +163,10 @@ public class VMService {
     return registry.getChildren(ACTIVE_PATH) ;
   }
   
+  static public List<String> getActiveVMs(Registry registry) throws RegistryException {
+    return registry.getChildren(ACTIVE_PATH) ;
+  }
+  
   static public List<VMDescriptor> getActiveVMDescriptors(Registry registry) throws RegistryException {
     List<String> names = registry.getChildren(ACTIVE_PATH) ;
     List<String> paths = new ArrayList<String>() ;
@@ -170,6 +174,10 @@ public class VMService {
       paths.add(ALL_PATH + "/" + names.get(i)) ;
     }
     return registry.getDataAs(paths, VMDescriptor.class);
+  }
+  
+  static public List<String> getHistoryVMs(Registry registry) throws RegistryException {
+    return registry.getChildren(HISTORY_PATH) ;
   }
   
   static public List<VMDescriptor> getHistoryVMDescriptors(Registry registry) throws RegistryException {

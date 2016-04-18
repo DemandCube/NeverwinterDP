@@ -1,6 +1,6 @@
 package com.neverwinterdp.storage.kafka.source;
 
-import com.neverwinterdp.kafka.KafkaClient;
+import com.neverwinterdp.kafka.KafkaTool;
 import com.neverwinterdp.kafka.consumer.KafkaPartitionReader;
 import com.neverwinterdp.message.Message;
 import com.neverwinterdp.storage.PartitionStreamConfig;
@@ -14,9 +14,9 @@ public class KafkaSourceStreamReader implements SourcePartitionStreamReader {
   private KafkaPartitionReader partitionReader ;
   private CommitPoint lastCommitInfo ;
   
-  public KafkaSourceStreamReader(String readerName, KafkaClient kafkaClient, PartitionStreamConfig pConfig, PartitionMetadata pmd) throws Exception {
+  public KafkaSourceStreamReader(String readerName, KafkaTool kafkaTool, PartitionStreamConfig pConfig, PartitionMetadata pmd) throws Exception {
     this.partitionConfig = pConfig;
-    this.partitionReader = new KafkaPartitionReader(readerName, kafkaClient, pConfig.attribute("topic"), pmd);
+    this.partitionReader = new KafkaPartitionReader(readerName, kafkaTool, pConfig.attribute("topic"), pmd);
   }
   
   @Override

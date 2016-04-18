@@ -20,6 +20,7 @@ import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.client.api.YarnClientApplication;
 import org.apache.hadoop.yarn.util.Records;
 
+import com.neverwinterdp.vm.HadoopConfigurationUtil;
 import com.neverwinterdp.vm.HadoopProperties;
 import com.neverwinterdp.vm.VMConfig;
 
@@ -35,7 +36,8 @@ public class AppClient {
       if(vmConfig.getLocalAppHome() == null) {
         vmConfig.setLocalAppHome("/opt/hadoop/vm/" + vmConfig.getVmId());
       }
-      vmConfig.overrideHadoopConfiguration(conf);
+      
+      HadoopConfigurationUtil.overrideConfiguration(vmConfig.getHadoopProperties(), conf);
       System.out.println("Create Yarn Client") ;
       YarnClient yarnClient = YarnClient.createYarnClient();
       yarnClient.init(conf);
@@ -92,7 +94,7 @@ public class AppClient {
   public void uploadApp(String localAppHome, String dfsAppHome) throws Exception {
     if(dfsAppHome == null || localAppHome == null) return; 
     HdfsConfiguration hdfsConf = new HdfsConfiguration() ;
-    hadoopProperties.overrideConfiguration(hdfsConf);
+    HadoopConfigurationUtil.overrideConfiguration(hadoopProperties, hdfsConf);
     FileSystem fs = FileSystem.get(hdfsConf);
     DistributedFileSystem dfs = (DistributedFileSystem)fs;
     Path appHomePath = new Path(new File(localAppHome).getAbsolutePath()) ;

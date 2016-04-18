@@ -12,10 +12,10 @@ import com.neverwinterdp.registry.txevent.TXEvent;
 import com.neverwinterdp.registry.txevent.TXEventBroadcaster;
 import com.neverwinterdp.registry.txevent.TXEventNotification;
 import com.neverwinterdp.registry.txevent.TXEventWatcher;
+import com.neverwinterdp.scribengin.dataflow.DataStreamOperatorDescriptor;
 import com.neverwinterdp.scribengin.dataflow.DataflowEvent;
 import com.neverwinterdp.scribengin.dataflow.DataflowLifecycleStatus;
 import com.neverwinterdp.scribengin.dataflow.registry.DataflowRegistry;
-import com.neverwinterdp.scribengin.dataflow.runtime.DataStreamOperatorDescriptor;
 import com.neverwinterdp.storage.StorageService;
 import com.neverwinterdp.util.log.LoggerFactory;
 import com.neverwinterdp.vm.VMConfig;
@@ -77,8 +77,8 @@ public class MasterService {
     dflRegistry.setDataflowStatus(DataflowLifecycleStatus.INIT);
     dflRegistry.initRegistry();
     
-    taskService = new DedicatedTaskService<>(dflRegistry.getTaskRegistry(), null);
-    taskMonitor = new DataflowTaskMonitor();
+    taskService        = new DedicatedTaskService<>(dflRegistry.getTaskRegistry(), null);
+    taskMonitor        = new DataflowTaskMonitor();
     taskWatcherService = new DedicatedTaskWatcherService<>(dflRegistry.getTaskRegistry());
     taskWatcherService.addTaskMonitor(taskMonitor);
 
@@ -88,7 +88,7 @@ public class MasterService {
     
     mtMergerService  = new MTMergerService(dflRegistry);
     activityExecutor = new DataflowActivityExecutor();
-    workerMonitor = new DataflowWorkerMonitor(this);
+    workerMonitor    = new DataflowWorkerMonitor(this);
     logger.info("Finish init()");
   }
   
@@ -102,7 +102,8 @@ public class MasterService {
     
     activityExecutor.add(new DataflowAllocateMasterActivity(this));
     activityExecutor.add(new DataflowRunActivity(this));
-  
+    dflRegistry.setActive();
+    
     mtMergerService.start();
     logger.info("Finish run()");
   }
@@ -148,6 +149,7 @@ public class MasterService {
     mtMergerService.onDestroy();
     //finish
     dflRegistry.setDataflowStatus(DataflowLifecycleStatus.STOP);
+    dflRegistry.setHistory();
     System.out.println("MasterService: waitForTermination(), done!!!");
   }
   

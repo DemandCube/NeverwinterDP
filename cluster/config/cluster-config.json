@@ -1,0 +1,129 @@
+{
+  "properties": {
+    "account_dev": "dev",
+    "app_release_dir": "/Users/Tuan/Projects/Nventdata/NeverwinterDP/release/build/release",
+    "app_repository_dir":    "/Users/Tuan/Projects/AppRepo",
+    "zk_home_dir":        "/opt/zookeeper",
+    "hadoop_home":        "/opt/hadoop"
+  },
+
+  "images": {
+    "base": { "repository": "ubuntu" }
+  },
+
+  "servers": {
+    "zookeeper": { 
+      "useImage": "ubuntu:base", "instance": 1, "cpu": 1, "mem": "1GB", "priority": 1,
+      "services": { 
+        "zookeeper": {}
+      }
+    },
+
+    "kafka": { 
+      "useImage": "ubuntu:base", "instance": 1, "cpu": 1, "mem": "1GB", "priority": 1,
+      "services": { 
+        "kafka": {}
+      }
+    },
+
+    "elasticsearch": { 
+      "useImage": "ubuntu:base", "instance": 1, "cpu": 1, "mem": "1GB", "priority": 3,
+      "services": { 
+        "elasticsearch": {}
+      }
+    },
+
+    "hadoop_master": { 
+      "useImage": "ubuntu:base", "hostname": "hadoop-master",  "instance": 1, "cpu": 1, "mem": "1GB", "priority": 4,
+      "services": {
+        "hadoop": {
+          "configure" : {
+            "execute": [ "${hadoop_home}/bin/hdfs namenode -format" ]
+          },
+          "processes": [ "namenode", "secondarynamenode", "resourcemanager" ]
+        }
+      }
+    },
+
+    "hadoop_worker": { 
+      "useImage": "ubuntu:base", "hostname": "hadoop-worker", "instance": 2, "cpu": 1, "mem": "1GB", "priority": 5,
+      "services": {
+        "hadoop": {
+          "processes": ["datanode", "nodemanager"]
+        } 
+      }
+    }
+  },
+
+  "services": {
+    "zookeeper": { 
+      "install": { 
+        "source": "${app_repository_dir}/zookeeper-3.4.8.tar.gz", "destination": "${zk_home_dir}", "type": "scptgz"
+      },
+
+      "configure": {
+        "patch": {
+          "resourceDir": "${base_dir}/config/zookeeper",
+          "resources":[
+            {
+              "file": "conf/zoo.cfg",
+              "append": [ "@context.getZookeeperClusterConfig()" ]
+            }
+          ]
+        },
+
+        "execute": [
+          "mv ${zk_home_dir}/conf/zoo_sample.cfg ${zk_home_dir}/conf/zoo.cfg",
+          "mkdir ${zk_home_dir}/data",
+          "echo '@context:getServerId()' > ${zk_home_dir}/data/myid"
+        ]
+      }
+    },
+
+    "kafka": { 
+      "install": { 
+        "source": "${app_repository_dir}/kafka_2.10-0.9.0.1.tgz", "destination": "/opt/kafka", "type": "scptgz"
+      },
+      "configure": {
+        "patch": {
+          "resourceDir": "${base_dir}/config/kafka",
+          "resources":[
+            {
+              "file": "config/server.properties",
+              "properties": {
+                "broker.id":         "@context:getServerId()",
+                "zookeeper.connect": "@context:getZookeepConnect()"
+              }
+            }
+          ]
+        }
+      }
+    },
+
+    "elasticsearch": { 
+      "install": { "source": "${app_release_dir}/elasticsearch", "destination": "/opt/elasticsearch", "type": "rsync" },
+      "configure": { }
+    },
+
+    "hadoop": { 
+      "install": { 
+        "source": "${app_repository_dir}/hadoop-2.7.2.tar.gz", "destination": "${hadoop_home}", "type": "scptgz"
+      },
+      "configure": {
+        "patch": {
+          "resourceDir": "${base_dir}/config/hadoop",
+          "resources":[
+            {
+              "file": "etc/hadoop/masters",
+              "append": [ "@context.getHadoopMasterConfig()" ]
+            },
+            {
+              "file": "etc/hadoop/slaves",
+              "append": [ "@context.getHadoopSlaveConfig()" ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}
